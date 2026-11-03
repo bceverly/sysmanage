@@ -60,7 +60,7 @@ async def save_escrow_key(
     if target is None:
         raise HTTPException(status_code=404, detail=_("No backup target is set up yet"))
     try:
-        saved = escrow.save_escrow_key(db, target, body.public_key, current_user.userid)
+        saved = escrow.save_escrow_key(target, body.public_key, current_user.userid)
     except escrow.EscrowKeyRefused as refused:
         raise HTTPException(status_code=422, detail=str(refused)) from refused
     _audit(

@@ -161,14 +161,14 @@ def test_the_shared_host_state_is_what_the_posture_check_reads(session):
 def test_the_escrow_key_is_remembered_public_half_only(session):
     s = _setup(session)
     with _engine():
-        saved = escrow.save_escrow_key(session, s.target, PUBLIC, "bryan@example.lab")
+        saved = escrow.save_escrow_key(s.target, PUBLIC, "bryan@example.lab")
         state = escrow.status(session)
     assert saved["fingerprint"] == "F" * 40
     assert saved["uid"] == "Escrow <escrow@example.lab>"
     assert s.target.escrow_saved_by == "bryan@example.lab"
     assert state["escrow_key"]["fingerprint"] == "F" * 40
     with _engine(), pytest.raises(escrow.EscrowKeyRefused, match="SECRET"):
-        escrow.save_escrow_key(session, s.target, SECRET, "bryan@example.lab")
+        escrow.save_escrow_key(s.target, SECRET, "bryan@example.lab")
     assert "PRIVATE" not in (s.target.escrow_public_key or "")
 
 
@@ -180,7 +180,7 @@ def test_a_key_gpg_refuses_is_refused_with_its_reason(session):
 
     with patch.object(backup_breakglass, "inspect_recipient", refuse):
         with pytest.raises(escrow.EscrowKeyRefused, match="gpg could not read"):
-            escrow.save_escrow_key(session, s.target, PUBLIC, "x@y.lab")
+            escrow.save_escrow_key(s.target, PUBLIC, "x@y.lab")
     assert s.target.escrow_fingerprint is None
 
 

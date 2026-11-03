@@ -50,7 +50,7 @@ describe("RestoreFilesDialog", () => {
     await waitFor(() => expect(restoreFiles).toHaveBeenCalledTimes(1));
     expect(button("Restore to staging")).toBeDisabled();
     fireEvent.click(screen.getByLabelText("This snapshot is not signed. Restore it anyway."));
-    expect(button("Restore to staging")).toBeEnabled();
+    await waitFor(() => expect(button("Restore to staging")).toBeEnabled());
   });
 
   test("restores to staging by default", async () => {
@@ -59,7 +59,7 @@ describe("RestoreFilesDialog", () => {
     fireEvent.click(button("Preview"));
     await waitFor(() => expect(restoreFiles).toHaveBeenCalledTimes(1));
     expect(vi.mocked(restoreFiles).mock.calls[0][1]).toMatchObject({ dry_run: true, in_place: false });
-    expect(button("Restore to staging")).toBeEnabled();
+    await waitFor(() => expect(button("Restore to staging")).toBeEnabled());
   });
 
   test("a preview that matches nothing says so (restate 2.2 nests the counts)", async () => {
@@ -143,6 +143,6 @@ describe("RestoreFilesDialog", () => {
     expect(screen.queryByLabelText("This snapshot is not signed. Restore it anyway.")).toBeNull();
     fireEvent.click(button("Preview"));
     await waitFor(() => expect(restoreFiles).toHaveBeenCalledTimes(1));
-    expect(button("Restore to staging")).toBeEnabled();
+    await waitFor(() => expect(button("Restore to staging")).toBeEnabled());
   });
 });

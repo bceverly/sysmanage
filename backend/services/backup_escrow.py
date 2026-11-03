@@ -191,7 +191,7 @@ class EscrowKeyRefused(ValueError):
     """The pasted key cannot be the escrow key (said why)."""
 
 
-def save_escrow_key(db: Session, target, armored: str, who: str) -> Dict[str, Any]:
+def save_escrow_key(target, armored: str, who: str) -> Dict[str, Any]:
     """Remember the operator's escrow PUBLIC key on the target.  The
     open-source export reads it with gpg (one usable public key that can
     encrypt); a private key block is refused before anything else looks at

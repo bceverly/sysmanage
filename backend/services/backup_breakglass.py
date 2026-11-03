@@ -150,7 +150,8 @@ with GNUPGHOME pointing at it.
 
 def _tmp_root(isdir=os.path.isdir, access=os.access):
     """A tmpfs for the GnuPG home when the server has one."""
-    for candidate in ("/dev/shm", "/run/shm"):  # nosec B108
+    # Only ever a parent for mkdtemp's private 0700 directory, never a file.
+    for candidate in ("/dev/shm", "/run/shm"):  # nosec B108  # NOSONAR S5443
         if isdir(candidate) and access(candidate, os.W_OK | os.X_OK):
             return candidate
     return None
@@ -162,7 +163,8 @@ def _short_enough(root):
     base = root or tempfile.gettempdir()
     if len(os.path.abspath(base)) + _HOME_TAIL <= _SOCKET_PATH_MAX:
         return root
-    return "/tmp"  # nosec B108 - mkdtemp makes a private 0700 directory there
+    # mkdtemp makes a private 0700 directory there.
+    return "/tmp"  # nosec B108  # NOSONAR S5443
 
 
 def _gpg(gpg, home, args, run, stdin=None):
@@ -182,7 +184,7 @@ def _remove_home(home, run):
         run([shutil.which("gpgconf") or "gpgconf", "--homedir", home, "--kill", "all"],
             capture_output=True, timeout=30, check=False)  # nosec B603  # fmt: skip
     except (OSError, subprocess.SubprocessError):
-        pass
+        pass  # no agent running, or no gpgconf: removing the home is what matters
     shutil.rmtree(home, ignore_errors=True)
 
 
@@ -218,9 +220,8 @@ def inspect_recipient(public, gpg=None, run=subprocess.run, tmp_root=None):
         raise BreakGlassRefused(_("Paste one armored OpenPGP public key"))
     gpg = _gpg_binary(gpg)
     root = _short_enough(tmp_root or _tmp_root())
-    home = tempfile.mkdtemp(prefix="sysmanage-backup-key-", dir=root)
+    home = tempfile.mkdtemp(prefix="sysmanage-backup-key-", dir=root)  # mode 0700
     try:
-        os.chmod(home, 0o700)
         show = ["--with-colons", "--import-options", "show-only", "--import"]
         listing = _gpg(gpg, home, show, run, stdin=(text + "\n").encode("utf-8"))
     except BreakGlassError as failed:
@@ -409,9 +410,8 @@ def seal_bundle(
     """The bundle encrypted, armored, to the operator's key alone."""
     gpg = _gpg_binary(gpg)
     root = _short_enough(tmp_root or _tmp_root())
-    home = tempfile.mkdtemp(prefix="sysmanage-backup-key-", dir=root)
+    home = tempfile.mkdtemp(prefix="sysmanage-backup-key-", dir=root)  # mode 0700
     try:
-        os.chmod(home, 0o700)
         _gpg(
             gpg, home, ["--import"], run, stdin=(public.strip() + "\n").encode("utf-8")
         )

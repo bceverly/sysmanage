@@ -10,6 +10,7 @@ import io
 import json
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import uuid
@@ -124,22 +125,41 @@ def test_a_reason_must_say_something():
     assert bg.check_reason("  annual DR escrow  ") == "annual DR escrow"
 
 
+def _msys_gpg() -> bool:
+    """Git for Windows' MSYS gpg -- the first on PATH on the GitHub Windows
+    runner.  Its gpg-agent does not start under --batch there, so key
+    generation exits 2 (2026-11-03); a Windows server runs Gpg4win."""
+    found = (shutil.which("gpg") or "").lower().replace("/", "\\")
+    return sys.platform == "win32" and "\\git\\" in found
+
+
+def _gpg_ok(argv, **kwargs):
+    """Run gpg, failing with ITS message rather than a bare exit status."""
+    done = subprocess.run(argv, capture_output=True, check=False, **kwargs)
+    assert done.returncode == 0, done.stderr.decode("utf-8", "replace")
+    return done
+
+
 @pytest.mark.skipif(shutil.which("gpg") is None, reason="needs gpg")
+@pytest.mark.skipif(
+    _msys_gpg(), reason="Git for Windows' MSYS gpg cannot run its agent in CI"
+)
 def test_a_real_operator_key_seals_and_opens_the_export():
     root = tempfile.mkdtemp(prefix="bgo-", dir="/tmp")  # nosec B108
     try:
         home = tempfile.mkdtemp(prefix="op-", dir=root)
         base = ["gpg", "--homedir", home, "--batch", "--pinentry-mode", "loopback",
                 "--passphrase", ""]  # fmt: skip
-        subprocess.run(base + ["--quick-gen-key", "Op <op@lab.invalid>", "rsa3072",
-                               "encr", "1d"], check=True, capture_output=True)  # fmt: skip
-        public = subprocess.run(base + ["--armor", "--export", "op@lab.invalid"],
-                                check=True, capture_output=True).stdout.decode()  # fmt: skip
+        _gpg_ok(
+            base + ["--quick-gen-key", "Op <op@lab.invalid>", "rsa3072", "encr", "1d"]
+        )
+        public = _gpg_ok(
+            base + ["--armor", "--export", "op@lab.invalid"]
+        ).stdout.decode()
         fingerprint, uid = bg.inspect_recipient(public, tmp_root=root)
         assert len(fingerprint) == 40 and "op@lab.invalid" in uid
         sealed = bg.seal_bundle(b"bundle-bytes", public, fingerprint, tmp_root=root)
-        opened = subprocess.run(base + ["--decrypt"], input=sealed.encode(),
-                                check=True, capture_output=True).stdout  # fmt: skip
+        opened = _gpg_ok(base + ["--decrypt"], input=sealed.encode()).stdout
         assert opened == b"bundle-bytes"
         subprocess.run(["gpgconf", "--homedir", home, "--kill", "all"], check=False)
     finally:

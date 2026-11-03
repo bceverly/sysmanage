@@ -139,7 +139,7 @@
     "ip-address": "^10.7.4",
     "js-yaml": "^4.3.1",
     "lodash": "^4.17.23",
-    "minimatch": "^10.2.1",
+    "minimatch": "^11.0.1",
     "@oozcitak/dom": {
       "@oozcitak/url": "^4.0.0"
     },

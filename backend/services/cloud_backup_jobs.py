@@ -65,7 +65,7 @@ _EMAIL = re.compile(r"^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,2
 # A library name as icloudpd lists them ("PrimarySync", "SharedSync-<id>").
 _LIBRARY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_. -]{0,127}$")
 _DIR = re.compile(r"^icloud-[0-9a-f]{8}$")
-_CODE = re.compile(r"^[0-9]{6}$")
+_CODE = re.compile(r"^\d{6}$")
 
 
 class CloudBackupRefused(Exception):

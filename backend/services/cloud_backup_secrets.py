@@ -99,7 +99,9 @@ def delete_password(reference: Optional[str], vault=None) -> None:
     try:
         _vault(vault).delete_secret(reference)
     except Exception as error:  # pylint: disable=broad-exception-caught
-        logger.warning("Could not delete a cloud backup password: %s", error)
+        logger.warning(
+            "Could not delete a cloud backup account's OpenBAO entry: %s", error
+        )
 
 
 def read_password(reference: Optional[str], vault=None) -> str:
@@ -166,10 +168,10 @@ def release_password(
     except SecretRefused:
         raise
     except Exception as error:  # the vault's own message says why
-        logger.error("Cloud backup password for run %s unreadable: %s", run.id, error)
+        logger.exception("Cloud backup run %s: its OpenBAO entry is unreadable", run.id)
         raise SecretRefused(503, str(error)) from error
     run.password_released_at = now
-    logger.info("Cloud backup password released to host %s for run %s", host_id, run.id)
+    logger.info("Cloud backup sign-in released to host %s for run %s", host_id, run.id)
     return password
 
 

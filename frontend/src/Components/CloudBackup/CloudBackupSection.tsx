@@ -180,7 +180,7 @@ const CloudAccountRow: React.FC<RowProps> = ({ account, canManage, onConnect, on
                         {reasonText(t, run?.reason ?? null, account.state_message)}
                     </Typography>
                 )}
-                {!busy && run && run.status === 'ok' && run.action !== 'connect' && run.action !== 'libraries' && (
+                {!busy && run?.status === 'ok' && run.action !== 'connect' && run.action !== 'libraries' && (
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                         {t('cloudBackup.table.lastRun', 'Last run: {{downloaded}} new, {{present}} already present, {{failed}} failed',
                             { downloaded: run.downloaded ?? 0, present: run.present ?? 0, failed: run.failed ?? 0 })}

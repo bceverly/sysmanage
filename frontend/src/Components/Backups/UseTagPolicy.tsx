@@ -43,8 +43,9 @@ const settingLabel = (t: TFunction, key: string): string => {
 const shown = (t: TFunction, value: unknown): string => {
     if (value === null || value === undefined || value === '') return t('backups.useTag.none', '(none)');
     if (typeof value === 'boolean') return value ? t('common.yes', 'Yes') : t('common.no', 'No');
-    if (Array.isArray(value)) return value.length ? value.join(', ') : t('backups.useTag.none', '(none)');
-    return String(value);
+    if (Array.isArray(value)) return value.length ? value.map(v => shown(t, v)).join(', ') : t('backups.useTag.none', '(none)');
+    if (typeof value === 'object') return JSON.stringify(value);
+    return String(value as string | number | bigint);
 };
 
 interface Props {

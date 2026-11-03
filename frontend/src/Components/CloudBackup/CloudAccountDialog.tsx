@@ -108,9 +108,9 @@ const CloudAccountDialog: React.FC<Props> = ({ open, account, storageHost, onClo
                     </Alert>
                     <TextField label={t('cloudBackup.account.appleId', 'Apple ID (e-mail address)')} value={appleId}
                         onChange={e => setAppleId(e.target.value)} disabled={account !== null} required
-                        autoComplete="off" inputProps={{ 'data-testid': 'cloud-apple-id' }} />
+                        autoComplete="off" slotProps={{ htmlInput: { 'data-testid': 'cloud-apple-id' } }} />
                     <TextField label={t('cloudBackup.account.displayName', 'Name shown in SysManage')} value={name}
-                        onChange={e => setName(e.target.value)} required inputProps={{ 'data-testid': 'cloud-name' }} />
+                        onChange={e => setName(e.target.value)} required slotProps={{ htmlInput: { 'data-testid': 'cloud-name' } }} />
                     <TextField type="password" label={account
                         ? t('cloudBackup.account.newPassword', 'New Apple ID password (leave empty to keep the current one)')
                         : t('cloudBackup.account.password', 'Apple ID password')}
@@ -118,7 +118,7 @@ const CloudAccountDialog: React.FC<Props> = ({ open, account, storageHost, onClo
                         autoComplete="new-password"
                         helperText={t('cloudBackup.account.passwordHelp',
                             'Kept in OpenBAO, never in the database. It is handed to the storage host for one job at a time and never shown again.')}
-                        inputProps={{ 'data-testid': 'cloud-password' }} />
+                        slotProps={{ htmlInput: { 'data-testid': 'cloud-password' } }} />
                     {libraries.length > 0 ? (
                         <TextField select label={t('cloudBackup.account.library', 'Library')} value={library}
                             onChange={e => setLibrary(e.target.value)}>
@@ -132,13 +132,13 @@ const CloudAccountDialog: React.FC<Props> = ({ open, account, storageHost, onClo
                     )}
                     <Stack direction="row" spacing={2}>
                         <TextField type="number" label={t('cloudBackup.account.interval', 'Every (hours)')} value={intervalHours}
-                            onChange={e => setIntervalHours(e.target.value)} inputProps={{ min: 1, max: 720 }} fullWidth />
+                            onChange={e => setIntervalHours(e.target.value)} slotProps={{ htmlInput: { min: 1, max: 720 } }} fullWidth />
                         <TextField type="number" label={t('cloudBackup.account.windowStart', 'Window start (UTC hour, optional)')}
                             value={windowStart} onChange={e => setWindowStart(e.target.value)}
-                            inputProps={{ min: 0, max: 23 }} fullWidth />
+                            slotProps={{ htmlInput: { min: 0, max: 23 } }} fullWidth />
                     </Stack>
                     <TextField type="number" label={t('cloudBackup.account.untilFound', 'Stop an incremental download after this many photos already present')}
-                        value={untilFound} onChange={e => setUntilFound(e.target.value)} inputProps={{ min: 1, max: 10000 }}
+                        value={untilFound} onChange={e => setUntilFound(e.target.value)} slotProps={{ htmlInput: { min: 1, max: 10000 } }}
                         helperText={t('cloudBackup.account.untilFoundHelp',
                             'Once a week a full pass checks the whole library whatever this says.')} />
                     <FormControlLabel control={<Switch checked={enabled} onChange={e => setEnabled(e.target.checked)} />}

@@ -70,26 +70,42 @@ def _reported_space(db: Session, host_id, path: str) -> Optional[Dict[str, Any]]
         .all()
     )
     for (text,) in rows:
-        try:
-            findings = json.loads(text)
-        except (TypeError, ValueError):
-            continue
-        for finding in findings if isinstance(findings, list) else []:
-            if not isinstance(finding, dict) or finding.get("code") != "storage_space":
-                continue
-            params = finding.get("params") or {}
-            total, available = params.get("total_bytes"), params.get("available_bytes")
-            if isinstance(total, int) and isinstance(available, int) and total > 0:
-                available = max(0, min(available, total))
-                return {
-                    "mount_point": params.get("path") or path,
-                    "total_bytes": total,
-                    "available_bytes": available,
-                    "used_percent": round(100.0 * (total - available) / total, 1),
-                    "backups_bytes": params.get("backups_bytes"),
-                    "filesystem": params.get("filesystem"),
-                }
+        for finding in _space_findings(text):
+            space = _space_from(finding, path)
+            if space:
+                return space
     return None
+
+
+def _space_findings(text: Optional[str]) -> List[Dict[str, Any]]:
+    """The ``storage_space`` findings of one stored audit (JSON), if any."""
+    try:
+        findings = json.loads(text)
+    except (TypeError, ValueError):
+        return []
+    return [
+        f
+        for f in (findings if isinstance(findings, list) else [])
+        if isinstance(f, dict) and f.get("code") == "storage_space"
+    ]
+
+
+def _space_from(finding: Dict[str, Any], path: str) -> Optional[Dict[str, Any]]:
+    """One ``storage_space`` finding as a space report; None when its sizes
+    are unusable."""
+    params = finding.get("params") or {}
+    total, available = params.get("total_bytes"), params.get("available_bytes")
+    if not (isinstance(total, int) and isinstance(available, int) and total > 0):
+        return None
+    available = max(0, min(available, total))
+    return {
+        "mount_point": params.get("path") or path,
+        "total_bytes": total,
+        "available_bytes": available,
+        "used_percent": round(100.0 * (total - available) / total, 1),
+        "backups_bytes": params.get("backups_bytes"),
+        "filesystem": params.get("filesystem"),
+    }
 
 
 def storage_space(

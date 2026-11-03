@@ -742,8 +742,10 @@ def _after_du(db: Session, run: models.BackupRun, policy, result) -> None:
     total = _int(usage.get("bytes"))
     if total is not None:
         policy.repository_bytes = total
-    added = [_size_snapshot(db, policy, e) for e in _named(usage.get("snapshots"))]
-    if any(added) and jobs.storage_lists_signatures(policy):
+    added = False
+    for entry in _named(usage.get("snapshots")):  # every entry, never stop early
+        added = _size_snapshot(db, policy, entry) or added
+    if added and jobs.storage_lists_signatures(policy):
         _storage_next(db, policy, jobs.SIGNATURES)  # their signatures too
     # du lists every snapshot in the repository, so one it does not list is
     # gone.  The prune's own "pruned" list was the only other source, and a

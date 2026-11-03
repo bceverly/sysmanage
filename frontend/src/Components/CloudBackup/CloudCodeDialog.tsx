@@ -58,7 +58,7 @@ const CloudCodeDialog: React.FC<Props> = ({ runId, accountName, onClose, onSent 
                 </DialogContentText>
                 <TextField autoFocus fullWidth label={t('cloudBackup.code.label', 'Six-digit code')} value={code}
                     onChange={e => setCode(e.target.value)} autoComplete="one-time-code"
-                    inputProps={{ inputMode: 'numeric', maxLength: 7, 'data-testid': 'cloud-code' }}
+                    slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 7, 'data-testid': 'cloud-code' } }}
                     onKeyDown={e => { if (e.key === 'Enter' && ready) void send(); }} />
                 {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
             </DialogContent>
