@@ -109,6 +109,23 @@ def test_cadence_and_retry_after_a_failure(session, sent, loaded_engine):
     assert verify.maybe_verify(session, s2.policy, s2.host, NOW + timedelta(hours=23))
 
 
+def test_a_pass_over_the_old_repository_does_not_count(session, sent, loaded_engine):
+    """Production, 2026-11-03: turning on encryption starts a new ``-enc``
+    repository, and October passes over the old one still read "verified"."""
+    s = _setup(session)
+    _ready(session, s, days=30)
+    _run(session, s, "verify", "ok", NOW - timedelta(days=4))
+    assert verify.state(session, s.policy, NOW)["state"] == verify.VERIFIED
+    s.policy.encrypted_at = NOW - timedelta(days=1)
+    got = verify.state(session, s.policy, NOW)
+    assert got["state"] == verify.UNVERIFIED and got["last_good_at"] is None
+    assert verify.due(session, s.policy, NOW)
+    _run(session, s, "verify", "ok", NOW - timedelta(hours=1))
+    assert verify.state(session, s.policy, NOW)["state"] == verify.VERIFIED
+    s.policy.encrypt_rotated_at = NOW - timedelta(minutes=30)  # a new key
+    assert verify.due(session, s.policy, NOW)
+
+
 def test_a_busy_verify_is_retried_soon(session, sent, loaded_engine):
     """Refused while the storage host pruned: nothing failed (mail.archive,
     2026-10-29), so not the day-long wait of a failure."""

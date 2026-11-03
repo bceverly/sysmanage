@@ -74,9 +74,8 @@ def _healthy_state(db: Session, host, policy, now: datetime) -> Optional[str]:
 def _verified_state(db: Session, policy, now: datetime) -> Optional[str]:
     if policy is None or not policy.enabled:
         return None
-    good = jobs.latest_run(
-        db, policy.id, backup_verify.VERIFY, statuses=backup_verify.GOOD
-    )
+    # A pass over the repository as it is now: not an older, unencrypted one.
+    good = backup_verify.last_good(db, policy)
     ended = _naive((good.finished_at or good.queued_at) if good is not None else None)
     return "ok" if ended is not None and now - ended <= VERIFIED_WITHIN else "failing"
 

@@ -65,11 +65,33 @@ def _ended(run: Optional[models.BackupRun]) -> Optional[datetime]:
     return (run.finished_at or run.queued_at) if run is not None else None
 
 
+def _since(policy: models.BackupPolicy) -> Optional[datetime]:
+    """When reading the repository last changed: encryption turned on (a new
+    ``-enc`` repository) or its key rotated.  A pass before then read
+    something else -- production, 2026-11-03: mail.archive and nextcloud
+    showed "verified" from October passes over their old unencrypted
+    repositories, and would not have been read again for weeks."""
+    marks = [
+        getattr(policy, name, None) for name in ("encrypted_at", "encrypt_rotated_at")
+    ]
+    marks = [mark for mark in marks if mark is not None]
+    return max(marks) if marks else None
+
+
+def last_good(db: Session, policy: models.BackupPolicy) -> Optional[models.BackupRun]:
+    """The latest good pass over the repository as it is now, or None."""
+    good = jobs.latest_run(db, policy.id, VERIFY, statuses=GOOD)
+    since = _since(policy)
+    if good is not None and since is not None and _ended(good) < since:
+        return None
+    return good
+
+
 def state(db: Session, policy: models.BackupPolicy, now: datetime) -> Dict[str, Any]:
     """The repository's verification state for the UI and alerts."""
     days = interval(policy)
     latest = jobs.latest_run(db, policy.id, VERIFY)
-    good = jobs.latest_run(db, policy.id, VERIFY, statuses=GOOD)
+    good = last_good(db, policy)
     out: Dict[str, Any] = {
         "interval_days": days,
         "last_good_at": _iso(_ended(good)),
@@ -110,7 +132,7 @@ def due(db: Session, policy: models.BackupPolicy, now: datetime) -> bool:
         wait = BUSY_RETRY if latest.status == "busy" else FAILED_RETRY
         if _ended(latest) + wait > now:
             return False
-    good = jobs.latest_run(db, policy.id, VERIFY, statuses=GOOD)
+    good = last_good(db, policy)
     return good is None or _ended(good) + timedelta(days=days) <= now
 
 
