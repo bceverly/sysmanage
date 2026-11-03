@@ -903,6 +903,6 @@ def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
 
 # Re-export (see the note at "Automation engine dispatch").  At the bottom:
 # the moved function reads this module's helpers at call time.
-from backend.services.proplus_automation_dispatch import (  # noqa: E402,F401  pylint: disable=wrong-import-position,unused-import
+from backend.services.proplus_automation_dispatch import (  # pylint: disable=wrong-import-position,unused-import  # noqa: E402,F401
     queue_automation_execution,
 )

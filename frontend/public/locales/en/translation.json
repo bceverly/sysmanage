@@ -5762,5 +5762,108 @@
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Its settings already match the tag policy."
     }
+  },
+  "cloudBackup": {
+    "account": {
+      "saveFailed": "The account could not be saved.",
+      "editTitle": "Change iCloud account",
+      "addTitle": "Add an iCloud account",
+      "where": "Photos are downloaded by your backup storage host, {{host}}, into the backup storage. Nothing is installed on any other host.",
+      "appleId": "Apple ID (e-mail address)",
+      "displayName": "Name shown in SysManage",
+      "newPassword": "New Apple ID password (leave empty to keep the current one)",
+      "password": "Apple ID password",
+      "passwordHelp": "Kept in OpenBAO, never in the database. It is handed to the storage host for one job at a time and never shown again.",
+      "library": "Library",
+      "libraryHelp": "PrimarySync is the personal library. After the first sign-in, List libraries shows the shared ones.",
+      "interval": "Every (hours)",
+      "windowStart": "Window start (UTC hour, optional)",
+      "untilFound": "Stop an incremental download after this many photos already present",
+      "untilFoundHelp": "Once a week a full pass checks the whole library whatever this says.",
+      "enabled": "Download on schedule",
+      "autoDelete": "Delete photos from iCloud after they are downloaded",
+      "autoDeleteWarning": "Photos will be removed from iCloud, and from every device signed in to this Apple ID, once they are on the backup storage. The backup storage then holds the only copy. Leave this off unless that is what you want.",
+      "autoDeleteConfirm": "I understand: delete photos from iCloud after download",
+      "deleteFailed": "The account could not be deleted.",
+      "add": "Add iCloud account",
+      "connectFailed": "The sign-in could not be started.",
+      "runFailed": "The download could not be started.",
+      "librariesFailed": "The libraries could not be listed.",
+      "deleteTitle": "Delete this iCloud account?",
+      "deleteHelp": "SysManage forgets the password and the sign-in for {{account}}. The photos already downloaded stay on the backup storage.",
+      "enterCode": "Enter code",
+      "connect": "Connect",
+      "runNow": "Run now",
+      "libraries": "List libraries"
+    },
+    "status": {
+      "new": "Not signed in yet",
+      "ok": "Up to date",
+      "running": "Running",
+      "waitingCode": "Waiting for the two-factor code",
+      "needsSignIn": "Needs sign-in",
+      "failed": "Failed"
+    },
+    "action": {
+      "enable": "Enable",
+      "connect": "Sign-in",
+      "download": "Download",
+      "reconcile": "Full pass",
+      "libraries": "List libraries",
+      "remove": "Removal"
+    },
+    "reason": {
+      "authFailed": "Apple did not accept the sign-in for this account. Check the password, then press Connect and enter the two-factor code.",
+      "sessionExpired": "Apple wants a new sign-in for this account. Press Connect and enter the two-factor code.",
+      "codeRejected": "Apple did not accept the two-factor code. Press Connect to try again.",
+      "noCode": "No two-factor code was entered in time. Press Connect to try again.",
+      "twoStep": "This Apple ID uses Apple's older two-step verification, which is not supported. Turn on two-factor authentication for it, then press Connect.",
+      "webAccessOff": "iCloud data cannot be reached from the web for this account. With Advanced Data Protection on, turn on \"Access iCloud Data on the Web\" on the iPhone (Settings, your name, iCloud), then try again.",
+      "passwordUnavailable": "The storage host could not get the password from the server for this job.",
+      "checksumMismatch": "The downloaded icloudpd did not match its pinned checksum, so nothing was installed.",
+      "noPython": "icloudpd needs Python 3.10 to 3.13 on the storage host. Install one (for example: pkg install python311), then press Enable iCloud backup again.",
+      "wrongPlatform": "icloudpd is not offered on the storage host's operating system.",
+      "missingTool": "icloudpd is not installed on the storage host. Press Enable iCloud backup.",
+      "agentOutdated": "The storage host's agent is too old for iCloud backup. Update the agent.",
+      "prepareFailed": "The place for the photos could not be prepared on the storage.",
+      "unknown": "The job did not finish. The details below say why."
+    },
+    "dashboard": {
+      "needsSignIn": "iCloud accounts that need sign-in: {{n}}",
+      "failed": "iCloud accounts that failed: {{n}}",
+      "expiring": "iCloud sign-ins that end soon: {{n}}"
+    },
+    "title": "Cloud backup",
+    "noTarget": "iCloud Photos are downloaded by the backup storage host. Set up the backup target with a storage host first.",
+    "table": {
+      "account": "Account",
+      "status": "Status",
+      "lastGood": "Last download",
+      "stored": "Stored",
+      "signIn": "Sign-in ends",
+      "actions": "Actions",
+      "identity": "{{appleId}}, library {{library}}",
+      "autoDelete": "Deletes from iCloud after download",
+      "progress": "{{action}}: {{n}} downloaded",
+      "lastRun": "Last run: {{downloaded}} new, {{present}} already present, {{failed}} failed",
+      "storedValue": "{{n}} items, {{size}}",
+      "expiring": "Ends soon: press Connect"
+    },
+    "code": {
+      "failed": "The code could not be sent.",
+      "title": "Enter the two-factor code",
+      "help": "Apple has sent a six-digit code to the devices signed in to {{account}}. Type it here within 15 minutes.",
+      "label": "Six-digit code",
+      "send": "Send code"
+    },
+    "enable": {
+      "failedToStart": "Enable iCloud backup could not be started.",
+      "where": "Runs on your backup storage host, {{host}}. iCloud Photos are downloaded straight into the backup storage, beside the hosts' backups and never inside one.",
+      "on": "Enabled: icloudpd {{version}}",
+      "running": "Installing icloudpd and preparing the storage on {{host}}...",
+      "again": "Repair or upgrade",
+      "button": "Enable iCloud backup",
+      "root": "Photos are kept under {{path}} (prepared {{when}})."
+    }
   }
 }

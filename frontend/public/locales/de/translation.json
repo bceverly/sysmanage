@@ -5762,5 +5762,108 @@
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Seine Einstellungen entsprechen bereits der Tag-Richtlinie."
     }
+  },
+  "cloudBackup": {
+    "account": {
+      "saveFailed": "Das Konto konnte nicht gespeichert werden.",
+      "editTitle": "iCloud-Konto ändern",
+      "addTitle": "Ein iCloud-Konto hinzufügen",
+      "where": "Die Fotos lädt Ihr Sicherungs-Speicher-Host {{host}} in den Sicherungsspeicher herunter. Auf keinem anderen Host wird etwas installiert.",
+      "appleId": "Apple ID (E-Mail-Adresse)",
+      "displayName": "In SysManage angezeigter Name",
+      "newPassword": "Neues Passwort der Apple ID (leer lassen, um das aktuelle zu behalten)",
+      "password": "Passwort der Apple ID",
+      "passwordHelp": "Wird in OpenBAO aufbewahrt, nie in der Datenbank. Es wird dem Speicher-Host jeweils für einen einzigen Auftrag übergeben und nie wieder angezeigt.",
+      "library": "Mediathek",
+      "libraryHelp": "PrimarySync ist die persönliche Mediathek. Nach der ersten Anmeldung zeigt Mediatheken auflisten die geteilten an.",
+      "interval": "Alle (Stunden)",
+      "windowStart": "Fensterbeginn (UTC-Stunde, optional)",
+      "untilFound": "Einen inkrementellen Download nach so vielen bereits vorhandenen Fotos beenden",
+      "untilFoundHelp": "Einmal pro Woche prüft ein vollständiger Durchlauf die ganze Mediathek, unabhängig von diesem Wert.",
+      "enabled": "Nach Zeitplan herunterladen",
+      "autoDelete": "Fotos nach dem Herunterladen aus iCloud löschen",
+      "autoDeleteWarning": "Die Fotos werden aus iCloud und von jedem mit dieser Apple ID angemeldeten Gerät entfernt, sobald sie im Sicherungsspeicher liegen. Der Sicherungsspeicher hat dann die einzige Kopie. Lassen Sie dies aus, sofern Sie genau das nicht wollen.",
+      "autoDeleteConfirm": "Verstanden: Fotos nach dem Herunterladen aus iCloud löschen",
+      "deleteFailed": "Das Konto konnte nicht gelöscht werden.",
+      "add": "iCloud-Konto hinzufügen",
+      "connectFailed": "Die Anmeldung konnte nicht gestartet werden.",
+      "runFailed": "Der Download konnte nicht gestartet werden.",
+      "librariesFailed": "Die Mediatheken konnten nicht aufgelistet werden.",
+      "deleteTitle": "Dieses iCloud-Konto löschen?",
+      "deleteHelp": "SysManage vergisst das Passwort und die Anmeldung für {{account}}. Die bereits heruntergeladenen Fotos bleiben im Sicherungsspeicher.",
+      "enterCode": "Code eingeben",
+      "connect": "Verbinden",
+      "runNow": "Jetzt ausführen",
+      "libraries": "Mediatheken auflisten"
+    },
+    "status": {
+      "new": "Noch nicht angemeldet",
+      "ok": "Aktuell",
+      "running": "Läuft",
+      "waitingCode": "Wartet auf den Zwei-Faktor-Code",
+      "needsSignIn": "Anmeldung erforderlich",
+      "failed": "Fehlgeschlagen"
+    },
+    "action": {
+      "enable": "Aktivieren",
+      "connect": "Anmeldung",
+      "download": "Herunterladen",
+      "reconcile": "Vollständiger Durchlauf",
+      "libraries": "Mediatheken auflisten",
+      "remove": "Entfernen"
+    },
+    "reason": {
+      "authFailed": "Apple hat die Anmeldung für dieses Konto nicht akzeptiert. Prüfen Sie das Passwort, klicken Sie dann auf Verbinden und geben Sie den Zwei-Faktor-Code ein.",
+      "sessionExpired": "Apple verlangt eine neue Anmeldung für dieses Konto. Klicken Sie auf Verbinden und geben Sie den Zwei-Faktor-Code ein.",
+      "codeRejected": "Apple hat den Zwei-Faktor-Code nicht akzeptiert. Klicken Sie auf Verbinden, um es erneut zu versuchen.",
+      "noCode": "Es wurde nicht rechtzeitig ein Zwei-Faktor-Code eingegeben. Klicken Sie auf Verbinden, um es erneut zu versuchen.",
+      "twoStep": "Diese Apple ID verwendet Apples ältere zweistufige Bestätigung, die nicht unterstützt wird. Aktivieren Sie dafür die Zwei-Faktor-Authentifizierung und klicken Sie dann auf Verbinden.",
+      "webAccessOff": "Die iCloud-Daten dieses Kontos sind aus dem Web nicht erreichbar. Wenn der erweiterte Datenschutz aktiv ist, schalten Sie auf dem iPhone \"Auf iCloud-Daten im Web zugreifen\" ein (Einstellungen, Ihr Name, iCloud) und versuchen Sie es erneut.",
+      "passwordUnavailable": "Der Speicher-Host konnte das Passwort für diesen Auftrag nicht vom Server erhalten.",
+      "checksumMismatch": "Das heruntergeladene icloudpd stimmte nicht mit seiner festgelegten Prüfsumme überein, daher wurde nichts installiert.",
+      "noPython": "icloudpd benötigt Python 3.10 bis 3.13 auf dem Speicher-Host. Installieren Sie eine Version (zum Beispiel: pkg install python311) und klicken Sie dann erneut auf iCloud-Sicherung aktivieren.",
+      "wrongPlatform": "icloudpd wird für das Betriebssystem des Speicher-Hosts nicht angeboten.",
+      "missingTool": "icloudpd ist auf dem Speicher-Host nicht installiert. Klicken Sie auf iCloud-Sicherung aktivieren.",
+      "agentOutdated": "Der Agent des Speicher-Hosts ist zu alt für die iCloud-Sicherung. Aktualisieren Sie den Agenten.",
+      "prepareFailed": "Der Ablageort für die Fotos konnte im Speicher nicht vorbereitet werden.",
+      "unknown": "Der Auftrag wurde nicht abgeschlossen. Die Details unten nennen den Grund."
+    },
+    "dashboard": {
+      "needsSignIn": "iCloud-Konten, die eine Anmeldung benötigen: {{n}}",
+      "failed": "Fehlgeschlagene iCloud-Konten: {{n}}",
+      "expiring": "iCloud-Anmeldungen, die bald ablaufen: {{n}}"
+    },
+    "title": "Cloud-Sicherung",
+    "noTarget": "iCloud-Fotos lädt der Speicher-Host der Sicherung herunter. Richten Sie zuerst das Sicherungsziel mit einem Speicher-Host ein.",
+    "table": {
+      "account": "Konto",
+      "status": "Zustand",
+      "lastGood": "Letzter Download",
+      "stored": "Gespeichert",
+      "signIn": "Anmeldung endet",
+      "actions": "Aktionen",
+      "identity": "{{appleId}}, Mediathek {{library}}",
+      "autoDelete": "Löscht nach dem Herunterladen aus iCloud",
+      "progress": "{{action}}: {{n}} heruntergeladen",
+      "lastRun": "Letzter Lauf: {{downloaded}} neu, {{present}} bereits vorhanden, {{failed}} fehlgeschlagen",
+      "storedValue": "{{n}} Objekte, {{size}}",
+      "expiring": "Endet bald: klicken Sie auf Verbinden"
+    },
+    "code": {
+      "failed": "Der Code konnte nicht gesendet werden.",
+      "title": "Zwei-Faktor-Code eingeben",
+      "help": "Apple hat einen sechsstelligen Code an die Geräte gesendet, die mit {{account}} angemeldet sind. Geben Sie ihn hier innerhalb von 15 Minuten ein.",
+      "label": "Sechsstelliger Code",
+      "send": "Code senden"
+    },
+    "enable": {
+      "failedToStart": "iCloud-Sicherung aktivieren konnte nicht gestartet werden.",
+      "where": "Läuft auf Ihrem Sicherungs-Speicher-Host {{host}}. iCloud-Fotos werden direkt in den Sicherungsspeicher heruntergeladen, neben die Sicherungen der Hosts und nie in eine davon.",
+      "on": "Aktiviert: icloudpd {{version}}",
+      "running": "icloudpd wird installiert und der Speicher auf {{host}} vorbereitet...",
+      "again": "Reparieren oder aktualisieren",
+      "button": "iCloud-Sicherung aktivieren",
+      "root": "Die Fotos liegen unter {{path}} (vorbereitet {{when}})."
+    }
   }
 }

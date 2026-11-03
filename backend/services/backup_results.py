@@ -711,6 +711,25 @@ def _after_repack(db: Session, run: models.BackupRun, policy, result) -> None:
         _storage_next(db, policy, "du")
 
 
+def _size_snapshot(db: Session, policy, entry: Dict[str, Any]) -> None:
+    """One du entry's sizes onto that live snapshot of the policy, if any."""
+    snapshot = (
+        db.query(models.BackupSnapshot)
+        .filter(
+            models.BackupSnapshot.policy_id == policy.id,
+            models.BackupSnapshot.name == entry["name"],
+            models.BackupSnapshot.gone_at.is_(None),
+        )
+        .first()
+    )
+    if snapshot is None:
+        return
+    for field in ("bytes", "new_bytes", "unique_bytes"):
+        value = _int(entry.get(field))
+        if value is not None:
+            setattr(snapshot, field, value)
+
+
 def _after_du(db: Session, run: models.BackupRun, policy, result) -> None:
     """The repository's size on the storage host and, per snapshot, its
     size, what it added, and what dropping it alone would free."""
@@ -721,23 +740,8 @@ def _after_du(db: Session, run: models.BackupRun, policy, result) -> None:
     if total is not None:
         policy.repository_bytes = total
     for entry in usage.get("snapshots") or []:
-        if not isinstance(entry, dict) or not isinstance(entry.get("name"), str):
-            continue
-        snapshot = (
-            db.query(models.BackupSnapshot)
-            .filter(
-                models.BackupSnapshot.policy_id == policy.id,
-                models.BackupSnapshot.name == entry["name"],
-                models.BackupSnapshot.gone_at.is_(None),
-            )
-            .first()
-        )
-        if snapshot is None:
-            continue
-        for field in ("bytes", "new_bytes", "unique_bytes"):
-            value = _int(entry.get(field))
-            if value is not None:
-                setattr(snapshot, field, value)
+        if isinstance(entry, dict) and isinstance(entry.get("name"), str):
+            _size_snapshot(db, policy, entry)
     # du lists every snapshot in the repository, so one it does not list is
     # gone.  The prune's own "pruned" list was the only other source, and a
     # prune whose result never arrived left its snapshots "live" forever --

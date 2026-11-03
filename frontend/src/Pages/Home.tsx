@@ -20,6 +20,8 @@ import { getFleetSummary, FleetSummary } from '../Services/timeSync';
 import { getHardwareSummary, HardwareSummary, needingAttention } from '../Services/hardwareHealth';
 import { getBackupSummary, BackupSummary } from '../Services/backups';
 import { backupSummaryLevel } from '../Components/Backups/backupLabels';
+import { getCloudSummary, CloudSummary } from '../Services/cloudBackup';
+import { attentionCount, dashboardNote } from '../Components/CloudBackup/cloudBackupLabels';
 import DashboardSettingsDialog from '../Components/DashboardSettingsDialog';
 
 interface DashboardCardProps {
@@ -164,6 +166,8 @@ const Dashboard = () => {
     const [backupsTotal, setBackupsTotal] = useState<number>(0);
     const [backupsColor, setBackupsColor] = useState<string>(COLOR_GREEN);
     const [backupsEscrowStale, setBackupsEscrowStale] = useState<boolean>(false);
+    // iCloud Photos to local (24.12): counted with the backups, one note line.
+    const [cloudSummary, setCloudSummary] = useState<CloudSummary | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [cardVisibility, setCardVisibility] = useState<Record<string, boolean>>({
@@ -273,6 +277,7 @@ const Dashboard = () => {
                 getHardwareSummary(),
                 getBackupSummary(),
             ]);
+            getCloudSummary().then(setCloudSummary).catch(() => setCloudSummary(null));
 
             processHostsResponse(hostsResponse);
             processUpdatesResponse(updatesResponse);
@@ -502,14 +507,14 @@ const Dashboard = () => {
                     <Grid>
                         <DashboardCard
                             title={t('dashboard.backupsAttention', 'Backups needing attention')}
-                            value={backupsOut}
-                            maxValue={backupsTotal || 1}
+                            value={backupsOut + attentionCount(cloudSummary)}
+                            maxValue={(backupsTotal + (cloudSummary?.enabled ? cloudSummary.accounts : 0)) || 1}
                             color={backupsColor}
                             onClick={() => void navigate('/backups')}
                             loading={loading}
                             note={backupsEscrowStale
                                 ? t('dashboard.backupsEscrowStale', 'Break-glass key export out of date')
-                                : null}
+                                : dashboardNote(t, cloudSummary)}
                         />
                     </Grid>
                 )}

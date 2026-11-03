@@ -2304,7 +2304,7 @@
       "failedNoText": "실패; 오류 텍스트가 반환되지 않았습니다.",
       "inFlight": "{{label}}가 {{at}}부터 진행 중",
       "label": {
-        "restore": "_복구_",
+        "restore": "복원",
         "snapshot": "snap",
         "sync": "동기화"
       },
@@ -2902,7 +2902,7 @@
     },
     "tag": {
       "accounts": "계정",
-      "antivirus": "_ANTIVIRUS_",
+      "antivirus": "안티바이러스",
       "audit": "감사",
       "basic": "기본",
       "commercial": "상업적",
@@ -5761,6 +5761,109 @@
       "replaces": "이 호스트의 다음 설정이 바뀝니다:",
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "설정이 이미 태그 정책과 같습니다."
+    }
+  },
+  "cloudBackup": {
+    "account": {
+      "saveFailed": "계정을 저장하지 못했습니다.",
+      "editTitle": "iCloud 계정 변경",
+      "addTitle": "iCloud 계정 추가",
+      "where": "사진은 백업 스토리지 호스트 {{host}}가 백업 스토리지로 다운로드합니다. 다른 호스트에는 아무것도 설치되지 않습니다.",
+      "appleId": "Apple ID(이메일 주소)",
+      "displayName": "SysManage에 표시할 이름",
+      "newPassword": "새 Apple ID 암호(현재 암호를 유지하려면 비워 두세요)",
+      "password": "Apple ID 암호",
+      "passwordHelp": "데이터베이스가 아닌 OpenBAO에 보관됩니다. 스토리지 호스트에는 한 번에 작업 하나에만 전달되며 다시 표시되지 않습니다.",
+      "library": "보관함",
+      "libraryHelp": "PrimarySync는 개인 보관함입니다. 처음 로그인한 후 보관함 목록 보기에서 공유 보관함을 볼 수 있습니다.",
+      "interval": "간격(시간)",
+      "windowStart": "시간대 시작(UTC 시, 선택 사항)",
+      "untilFound": "이미 있는 사진이 이 수만큼 나오면 증분 다운로드 중지",
+      "untilFoundHelp": "이 값과 관계없이 일주일에 한 번 전체 검사로 보관함 전체를 확인합니다.",
+      "enabled": "일정에 따라 다운로드",
+      "autoDelete": "다운로드 후 iCloud에서 사진 삭제",
+      "autoDeleteWarning": "사진이 백업 스토리지에 저장되는 즉시 iCloud와 이 Apple ID로 로그인한 모든 기기에서 삭제됩니다. 그러면 백업 스토리지에만 사본이 남습니다. 꼭 원하는 경우가 아니면 꺼 두세요.",
+      "autoDeleteConfirm": "이해했습니다: 다운로드 후 iCloud에서 사진 삭제",
+      "deleteFailed": "계정을 삭제하지 못했습니다.",
+      "add": "iCloud 계정 추가",
+      "connectFailed": "로그인을 시작하지 못했습니다.",
+      "runFailed": "다운로드를 시작하지 못했습니다.",
+      "librariesFailed": "보관함 목록을 가져오지 못했습니다.",
+      "deleteTitle": "이 iCloud 계정을 삭제할까요?",
+      "deleteHelp": "SysManage가 {{account}}의 암호와 로그인을 삭제합니다. 이미 다운로드한 사진은 백업 스토리지에 남습니다.",
+      "enterCode": "코드 입력",
+      "connect": "연결",
+      "runNow": "지금 실행",
+      "libraries": "보관함 목록 보기"
+    },
+    "status": {
+      "new": "아직 로그인하지 않음",
+      "ok": "최신 상태",
+      "running": "실행 중",
+      "waitingCode": "이중 인증 코드 대기 중",
+      "needsSignIn": "로그인 필요",
+      "failed": "실패"
+    },
+    "action": {
+      "enable": "활성화",
+      "connect": "로그인",
+      "download": "다운로드",
+      "reconcile": "전체 검사",
+      "libraries": "보관함 목록 보기",
+      "remove": "제거"
+    },
+    "reason": {
+      "authFailed": "Apple이 이 계정의 로그인을 받아들이지 않았습니다. 암호를 확인한 다음 연결을 누르고 이중 인증 코드를 입력하세요.",
+      "sessionExpired": "Apple이 이 계정에 새 로그인을 요구합니다. 연결을 누르고 이중 인증 코드를 입력하세요.",
+      "codeRejected": "Apple이 이중 인증 코드를 받아들이지 않았습니다. 다시 시도하려면 연결을 누르세요.",
+      "noCode": "이중 인증 코드가 제시간에 입력되지 않았습니다. 다시 시도하려면 연결을 누르세요.",
+      "twoStep": "이 Apple ID는 지원되지 않는 Apple의 이전 2단계 확인을 사용합니다. 이중 인증을 켠 다음 연결을 누르세요.",
+      "webAccessOff": "이 계정의 iCloud 데이터에 웹에서 접근할 수 없습니다. 고급 데이터 보호가 켜져 있으면 iPhone에서 'iCloud 데이터에 웹으로 접근'을 켜고(설정, 사용자 이름, iCloud) 다시 시도하세요.",
+      "passwordUnavailable": "스토리지 호스트가 이 작업에 필요한 암호를 서버에서 받지 못했습니다.",
+      "checksumMismatch": "다운로드한 icloudpd가 고정된 체크섬과 일치하지 않아 아무것도 설치하지 않았습니다.",
+      "noPython": "icloudpd를 실행하려면 스토리지 호스트에 Python 3.10~3.13이 필요합니다. 하나를 설치한 다음(예: pkg install python311) iCloud 백업 활성화를 다시 누르세요.",
+      "wrongPlatform": "스토리지 호스트의 운영 체제에는 icloudpd가 제공되지 않습니다.",
+      "missingTool": "스토리지 호스트에 icloudpd가 설치되어 있지 않습니다. iCloud 백업 활성화를 누르세요.",
+      "agentOutdated": "스토리지 호스트의 에이전트가 너무 오래되어 iCloud 백업을 사용할 수 없습니다. 에이전트를 업데이트하세요.",
+      "prepareFailed": "스토리지에 사진을 둘 위치를 준비하지 못했습니다.",
+      "unknown": "작업이 완료되지 않았습니다. 아래 세부 정보에 이유가 있습니다."
+    },
+    "dashboard": {
+      "needsSignIn": "로그인이 필요한 iCloud 계정: {{n}}",
+      "failed": "실패한 iCloud 계정: {{n}}",
+      "expiring": "곧 만료되는 iCloud 로그인: {{n}}"
+    },
+    "title": "클라우드 백업",
+    "noTarget": "iCloud 사진은 백업 스토리지 호스트가 다운로드합니다. 먼저 스토리지 호스트가 있는 백업 대상을 설정하세요.",
+    "table": {
+      "account": "계정",
+      "status": "상태",
+      "lastGood": "마지막 다운로드",
+      "stored": "저장됨",
+      "signIn": "로그인 만료",
+      "actions": "작업",
+      "identity": "{{appleId}}, 보관함 {{library}}",
+      "autoDelete": "다운로드 후 iCloud에서 삭제",
+      "progress": "{{action}}: {{n}}개 다운로드됨",
+      "lastRun": "마지막 실행: 새 항목 {{downloaded}}개, 기존 항목 {{present}}개, 실패 {{failed}}개",
+      "storedValue": "항목 {{n}}개, {{size}}",
+      "expiring": "곧 만료됨: 연결을 누르세요"
+    },
+    "code": {
+      "failed": "코드를 보내지 못했습니다.",
+      "title": "이중 인증 코드 입력",
+      "help": "Apple이 {{account}}에 로그인된 기기로 6자리 코드를 보냈습니다. 15분 안에 여기에 입력하세요.",
+      "label": "6자리 코드",
+      "send": "코드 보내기"
+    },
+    "enable": {
+      "failedToStart": "iCloud 백업 활성화를 시작하지 못했습니다.",
+      "where": "백업 스토리지 호스트 {{host}}에서 실행됩니다. iCloud 사진은 백업 스토리지로 바로 다운로드되며, 호스트 백업 옆에 놓이고 그 안에는 절대 들어가지 않습니다.",
+      "on": "활성화됨: icloudpd {{version}}",
+      "running": "{{host}}에 icloudpd를 설치하고 스토리지를 준비하는 중...",
+      "again": "복구 또는 업그레이드",
+      "button": "iCloud 백업 활성화",
+      "root": "사진은 {{path}} 아래에 보관됩니다({{when}}에 준비됨)."
     }
   }
 }

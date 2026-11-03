@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-03 08:53-0500\n"
+"Report-Msgid-Bugs-To:  \n"
+"POT-Creation-Date: 2026-11-03 10:16-0500\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -74,10 +74,10 @@ msgid "You do not have access to the selected account."
 msgstr "You do not have access to the selected account."
 
 #: backend/api/asset_tags.py:59 backend/api/malware.py:118
-#: backend/api/time_sync_policy.py:54 backend/api/file_watches.py:110
-#: backend/api/time_sync_resync.py:56 backend/api/config_mgmt_drift.py:191
-#: backend/api/advisor.py:93 backend/api/query_packs.py:119
-#: backend/api/config_mgmt_inventories.py:110
+#: backend/api/cloud_backup.py:93 backend/api/time_sync_policy.py:54
+#: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:56
+#: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
+#: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
@@ -225,10 +225,9 @@ msgstr "Host is not approved"
 #: backend/api/opentelemetry/grafana_connection.py:201
 #: backend/api/cve_refresh_settings.py:66 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247
-#: backend/api/license_management.py:116 backend/api/secrets/permissions.py:39
-#: backend/api/error_constants.py:22 backend/api/child_host_utils.py:33
-#: backend/api/child_host_utils.py:67
+#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
+#: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
+#: backend/api/child_host_utils.py:33 backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "User not found"
 
@@ -263,6 +262,70 @@ msgstr "Advisory management requires a SysManage Professional license."
 #: backend/api/advisory_actions.py:114
 msgid "No applicable packages for this advisory on this host."
 msgstr "No applicable packages for this advisory on this host."
+
+#: backend/api/cloud_backup.py:85
+msgid "Not available on this server"
+msgstr "Not available on this server"
+
+#: backend/api/cloud_backup.py:129
+msgid "Cloud backup account not found"
+msgstr "Cloud backup account not found"
+
+#: backend/api/cloud_backup.py:137 backend/api/backups.py:190
+#, python-format
+msgid "%s is out of range"
+msgstr "%s is out of range"
+
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:258
+msgid "Interval (hours)"
+msgstr "Interval (hours)"
+
+#: backend/api/cloud_backup.py:143 backend/api/backups.py:259
+msgid "Window start hour"
+msgstr "Window start hour"
+
+#: backend/api/cloud_backup.py:144
+msgid "Stop after photos already present"
+msgstr "Stop after photos already present"
+
+#: backend/api/cloud_backup.py:149
+msgid ""
+"Confirm that photos will be deleted from iCloud once they are downloaded"
+msgstr ""
+"Confirm that photos will be deleted from iCloud once they are downloaded"
+
+#: backend/api/cloud_backup.py:213
+msgid "iCloud backup is already being enabled"
+msgstr "iCloud backup is already being enabled"
+
+#: backend/api/cloud_backup.py:257
+msgid "Too many cloud accounts"
+msgstr "Too many cloud accounts"
+
+#: backend/api/cloud_backup.py:263
+msgid "This Apple ID and library are already added"
+msgstr "This Apple ID and library are already added"
+
+#: backend/api/cloud_backup.py:273 backend/api/cloud_backup.py:315
+#, python-format
+msgid "OpenBAO could not store the password: %s"
+msgstr "OpenBAO could not store the password: %s"
+
+#: backend/api/cloud_backup.py:379 backend/api/cloud_backup.py:425
+msgid "Sign in to this account first (Connect)"
+msgstr "Sign in to this account first (Connect)"
+
+#: backend/api/cloud_backup.py:430 backend/services/cloud_backup_jobs.py:260
+msgid "Enable iCloud backup on the storage host first"
+msgstr "Enable iCloud backup on the storage host first"
+
+#: backend/api/cloud_backup.py:435 backend/services/cloud_backup_jobs.py:264
+msgid "A job for this account is already queued or running"
+msgstr "A job for this account is already queued or running"
+
+#: backend/api/cloud_backup.py:475
+msgid "Cloud backup run not found"
+msgstr "Cloud backup run not found"
 
 #: backend/api/repository_mirroring_snaps.py:121
 msgid "Tracked snap not found"
@@ -655,11 +718,11 @@ msgstr "Failed to queue repository disable: %s"
 
 #: backend/api/reports/endpoints.py:73
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade"
-" to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade "
+"to access this feature."
 msgstr ""
-"Report generation requires a SysManage Professional+ license. Please upgrade"
-" to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade "
+"to access this feature."
 
 #: backend/api/reports/endpoints.py:154
 msgid "Registered Hosts"
@@ -794,11 +857,11 @@ msgstr "Invalid or expired enrollment token"
 
 #: backend/api/host_registration.py:239
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token"
-" instead of registering server-scoped."
+"This host already belongs to a tenant. Re-register with its enrollment token "
+"instead of registering server-scoped."
 msgstr ""
-"This host already belongs to a tenant. Re-register with its enrollment token"
-" instead of registering server-scoped."
+"This host already belongs to a tenant. Re-register with its enrollment token "
+"instead of registering server-scoped."
 
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -1545,12 +1608,12 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded -- the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be "
+"loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
-"Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded -- the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be "
+"loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 
 #: backend/api/airgap_collector_runs.py:229
@@ -1632,11 +1695,11 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:668
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
-" the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
+"the collection to rebuild."
 msgstr ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
-" the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
+"the collection to rebuild."
 
 #: backend/api/airgap_collector_runs.py:685
 msgid "ISO file not found."
@@ -1672,11 +1735,11 @@ msgstr "Package profile not found"
 
 #: backend/api/package_compliance.py:73
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please"
-" upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please "
+"upgrade to access this feature."
 msgstr ""
-"Package compliance profiles require a SysManage Professional license. Please"
-" upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please "
+"upgrade to access this feature."
 
 #: backend/api/package_compliance.py:200
 #, python-format
@@ -1959,11 +2022,11 @@ msgstr "OIDC client secret could not be resolved."
 
 #: backend/api/external_idp.py:577 backend/api/external_idp.py:796
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to"
-" provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to "
+"provision your account first."
 msgstr ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to"
-" provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to "
+"provision your account first."
 
 #: backend/api/external_idp.py:582 backend/api/external_idp.py:801
 msgid "Account is inactive."
@@ -2138,8 +2201,8 @@ msgstr ""
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97
-#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
+#: backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "Host not found or not active"
 
@@ -2176,11 +2239,11 @@ msgstr "Grafana URL is not available"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
-" on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
+"on the server."
 msgstr ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
-" on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
+"on the server."
 
 #: backend/api/opentelemetry/deployment.py:179
 msgid "OpenTelemetry deployment queued successfully"
@@ -2193,11 +2256,11 @@ msgstr "Failed to deploy OpenTelemetry: %s"
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
-" the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
+"the server."
 msgstr ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
-" the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
+"the server."
 
 #: backend/api/opentelemetry/deployment.py:291
 msgid "OpenTelemetry removal queued successfully"
@@ -2310,11 +2373,11 @@ msgstr "Failed to disconnect OpenTelemetry from Grafana: %s"
 
 #: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
-" license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
+"license. Please upgrade to access this feature."
 msgstr ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
-" license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
+"license. Please upgrade to access this feature."
 
 #: backend/api/content_lifecycle.py:121
 msgid "Environment name is required"
@@ -2508,6 +2571,7 @@ msgstr "Failed to clear NVD API key"
 
 #: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
 #: backend/api/backups_equip.py:160 backend/api/backups.py:570
+#: backend/services/cloud_backup_jobs.py:128
 msgid "Set up the backup target first"
 msgstr "Set up the backup target first"
 
@@ -2532,8 +2596,7 @@ msgstr "Firewall restart command sent successfully"
 msgid "Firewall deploy command sent successfully"
 msgstr "Firewall deploy command sent successfully"
 
-#: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "OS name is required"
@@ -2656,8 +2719,7 @@ msgstr "Host with token is not registered. Please re-register."
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Agent authentication failed: invalid host ID"
 
-#: backend/api/message_handlers_core.py:98
-#: backend/utils/host_validation.py:104
+#: backend/api/message_handlers_core.py:98 backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "Host with ID %s is not registered. Please re-register."
@@ -2706,8 +2768,7 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "Target '%(t)s' is not valid for %(f)s"
 
 #: backend/api/logging_settings.py:134
-msgid ""
-"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 msgstr ""
 "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 
@@ -2961,6 +3022,18 @@ msgstr "%(field)s must be a whole number from 0 to %(max)d"
 msgid "A tag policy has that name"
 msgstr "A tag policy has that name"
 
+#: backend/api/backups_tag_policies.py:273
+msgid "This host has no backup policy"
+msgstr "This host has no backup policy"
+
+#: backend/api/backups_tag_policies.py:274
+msgid "This host already follows its tag policy"
+msgstr "This host already follows its tag policy"
+
+#: backend/api/backups_tag_policies.py:276
+msgid "No tag policy covers this host; there is nothing to switch to"
+msgstr "No tag policy covers this host; there is nothing to switch to"
+
 #: backend/api/image_mode_actions.py:75
 msgid ""
 "Image-mode host management requires a SysManage Enterprise license. Please "
@@ -3021,8 +3094,7 @@ msgstr "Permission denied: RESET_USER_PASSWORD role required"
 
 #: backend/api/password_reset.py:447
 msgid "Failed to send password reset email. Please check email configuration."
-msgstr ""
-"Failed to send password reset email. Please check email configuration."
+msgstr "Failed to send password reset email. Please check email configuration."
 
 #: backend/api/password_reset.py:453
 #, python-brace-format
@@ -3039,11 +3111,11 @@ msgstr "This host's agent cannot install restate yet; upgrade the agent first"
 
 #: backend/api/backups_equip.py:68
 msgid ""
-"restate has no package the agent can install on this operating system; build"
-" and install it by hand (see restate's README)"
+"restate has no package the agent can install on this operating system; build "
+"and install it by hand (see restate's README)"
 msgstr ""
-"restate has no package the agent can install on this operating system; build"
-" and install it by hand (see restate's README)"
+"restate has no package the agent can install on this operating system; build "
+"and install it by hand (see restate's README)"
 
 #: backend/api/backups_equip.py:71
 msgid "Equipping this host is already in progress"
@@ -3305,8 +3377,7 @@ msgstr ""
 "Password salt uses default value but JWT secret has been changed. Run: "
 "{command}"
 
-#: backend/api/ubuntu_pro_settings.py:76
-#: backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr "Ubuntu Pro key must start with 'C' for contract-based keys"
 
@@ -3420,8 +3491,7 @@ msgstr "Registration absorbed: host was recently deleted"
 
 #: backend/api/host.py:879
 #, python-format
-msgid ""
-"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 
@@ -3572,8 +3642,7 @@ msgstr "No packages specified for installation"
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid ""
-"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr ""
 "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 
@@ -3715,11 +3784,11 @@ msgstr "Account is locked due to too many failed login attempts"
 
 #: backend/api/auth.py:391
 msgid ""
-"Multi-factor authentication is required for this account. Please enroll from"
-" your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from "
+"your profile page before signing in."
 msgstr ""
-"Multi-factor authentication is required for this account. Please enroll from"
-" your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from "
+"your profile page before signing in."
 
 #: backend/api/auth.py:480
 msgid "Account locked due to too many failed login attempts"
@@ -3784,8 +3853,7 @@ msgstr "No OS upgrades available for this host"
 
 #: backend/api/updates/os_upgrade_routes.py:352
 #, python-format
-msgid ""
-"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr ""
 "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 
@@ -3865,11 +3933,9 @@ msgstr "Unknown kind: %(kind)s (allowed: %(allowed)s)"
 #: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
-"ttl=%(ttl)ds)"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
 msgstr ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
-"ttl=%(ttl)ds)"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
 
 #: backend/api/dynamic_secrets.py:186
 #, python-format
@@ -3936,11 +4002,9 @@ msgstr "VMM initialization requested"
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd "
-"daemon."
+"VMM initialization requested. The agent will enable and start the vmd daemon."
 msgstr ""
-"VMM initialization requested. The agent will enable and start the vmd "
-"daemon."
+"VMM initialization requested. The agent will enable and start the vmd daemon."
 
 #: backend/api/child_host_virtualization_enable.py:348
 msgid "Agent must be running with root privileges to initialize KVM"
@@ -3973,11 +4037,11 @@ msgstr "bhyve initialization requested"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the"
-" system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the "
+"system for bhyve virtual machines."
 msgstr ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the"
-" system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the "
+"system for bhyve virtual machines."
 
 #: backend/api/child_host_virtualization_enable.py:474
 msgid "Agent must be running with root privileges to disable bhyve"
@@ -4005,11 +4069,11 @@ msgstr "KVM modules enable requested"
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via"
-" modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via "
+"modprobe."
 msgstr ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via"
-" modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via "
+"modprobe."
 
 #: backend/api/child_host_virtualization_enable.py:600
 msgid "Agent must be running with root privileges to disable KVM modules"
@@ -4034,8 +4098,7 @@ msgstr "KVM networking is only supported on Linux hosts"
 
 #: backend/api/child_host_virtualization_enable.py:705
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr ""
-"Agent must be running with root privileges to configure KVM networking"
+msgstr "Agent must be running with root privileges to configure KVM networking"
 
 #: backend/api/child_host_virtualization_enable.py:714
 msgid "Bridge interface name is required for bridged networking mode"
@@ -4067,11 +4130,6 @@ msgstr "KVM network list requested. Results will be returned shortly."
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s must be an absolute path without '..'"
-
-#: backend/api/backups.py:190
-#, python-format
-msgid "%s is out of range"
-msgstr "%s is out of range"
 
 #: backend/api/backups.py:194
 msgid "Host mount point"
@@ -4140,23 +4198,15 @@ msgstr "Snapshot directory"
 #: backend/api/backups.py:246
 #, python-format
 msgid ""
-"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
-" trailing '/')"
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no "
+"trailing '/')"
 msgstr ""
-"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
-" trailing '/')"
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no "
+"trailing '/')"
 
 #: backend/api/backups.py:254
 msgid "The snapshot directory must be outside the storage path"
 msgstr "The snapshot directory must be outside the storage path"
-
-#: backend/api/backups.py:258
-msgid "Interval (hours)"
-msgstr "Interval (hours)"
-
-#: backend/api/backups.py:259
-msgid "Window start hour"
-msgstr "Window start hour"
 
 #: backend/api/backups.py:260
 msgid "Snapshots to keep"
@@ -4414,8 +4464,7 @@ msgstr ""
 "upgrade to access this feature."
 
 #: backend/api/reboot_orchestration.py:135
-msgid ""
-"No running child hosts found. Use the standard reboot endpoint instead."
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
 msgstr ""
 "No running child hosts found. Use the standard reboot endpoint instead."
 
@@ -4434,11 +4483,11 @@ msgstr "Upgrade profile not found"
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
-" upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 msgstr ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
-" upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 
 #: backend/api/upgrade_profiles.py:196
 #, python-format
@@ -4680,11 +4729,9 @@ msgstr "Antivirus deployment initiated for all %d hosts"
 #: backend/api/antivirus_status.py:346
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
-"hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
 msgstr ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
-"hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
 
 #: backend/api/antivirus_status.py:352
 msgid "Antivirus deployment failed for all hosts"
@@ -5169,8 +5216,7 @@ msgstr "Content can only be promoted forward along the lifecycle path"
 
 #: backend/api/content_lifecycle_promotion.py:282
 msgid "The source environment has no content for this content view to promote"
-msgstr ""
-"The source environment has no content for this content view to promote"
+msgstr "The source environment has no content for this content view to promote"
 
 #: backend/api/content_lifecycle_promotion.py:325
 msgid "This environment has no previous version to roll back to"
@@ -5230,11 +5276,9 @@ msgstr "Permission denied: ADD_ENABLED_PACKAGE_MANAGER role required"
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS "
-"'%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
 msgstr ""
-"Package manager '%(package_manager)s' is already enabled for OS "
-"'%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
 
 #: backend/api/enabled_package_managers.py:382
 #, python-format
@@ -5410,8 +5454,7 @@ msgstr "Failed to retrieve commercial antivirus status: %s"
 
 #: backend/api/backups_retention.py:52
 msgid "Grandfather-father-son retention needs the Professional+ backup engine"
-msgstr ""
-"Grandfather-father-son retention needs the Professional+ backup engine"
+msgstr "Grandfather-father-son retention needs the Professional+ backup engine"
 
 #: backend/api/backups_retention.py:108
 msgid "Scheduled verification needs the Professional+ backup engine"
@@ -5440,12 +5483,12 @@ msgstr "What changed compares with the current repository only"
 msgid "A check of what changed is already running"
 msgstr "A check of what changed is already running"
 
-#: backend/websocket/message_router.py:270
+#: backend/websocket/message_router.py:280
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Unknown message type in queue: %s"
 
-#: backend/websocket/message_router.py:275
+#: backend/websocket/message_router.py:285
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Error routing message type %(message_type)s: %(error)s"
@@ -5801,6 +5844,25 @@ msgstr "That name belongs to a curated rule set"
 msgid "None of these rules can run under ClamAV"
 msgstr "None of these rules can run under ClamAV"
 
+#: backend/services/cloud_backup_tick.py:235
+msgid "iCloud sign-in ends soon: sign in again"
+msgstr "iCloud sign-in ends soon: sign in again"
+
+#: backend/services/cloud_backup_tick.py:237
+#, python-format
+msgid ""
+"The iCloud sign-in for %(account)s ends around %(date)s. After that, "
+"SysManage cannot download its photos until someone signs in again.\n"
+"\n"
+"Open Backups, then Cloud backup, and press Connect on this account. You will "
+"need the Apple ID's two-factor code."
+msgstr ""
+"The iCloud sign-in for %(account)s ends around %(date)s. After that, "
+"SysManage cannot download its photos until someone signs in again.\n"
+"\n"
+"Open Backups, then Cloud backup, and press Connect on this account. You will "
+"need the Apple ID's two-factor code."
+
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
 msgid "Profile '%s' does not contain valid JSON"
@@ -5871,6 +5933,78 @@ msgstr "Choose at least one host to scan"
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "At most 500 hosts can be scanned in one request"
 
+#: backend/services/cloud_backup_secrets.py:79
+msgid "Enter the Apple ID password"
+msgstr "Enter the Apple ID password"
+
+#: backend/services/cloud_backup_secrets.py:89
+msgid "OpenBAO did not say where it stored the password"
+msgstr "OpenBAO did not say where it stored the password"
+
+#: backend/services/cloud_backup_secrets.py:107
+msgid "This account has no password in OpenBAO"
+msgstr "This account has no password in OpenBAO"
+
+#: backend/services/cloud_backup_secrets.py:111
+msgid "OpenBAO does not hold this account's password"
+msgstr "OpenBAO does not hold this account's password"
+
+#: backend/services/cloud_backup_secrets.py:127
+msgid "No such cloud backup run for this host"
+msgstr "No such cloud backup run for this host"
+
+#: backend/services/cloud_backup_secrets.py:133
+msgid "This cloud backup run does not sign in"
+msgstr "This cloud backup run does not sign in"
+
+#: backend/services/cloud_backup_secrets.py:135
+msgid "This cloud backup run has already ended"
+msgstr "This cloud backup run has already ended"
+
+#: backend/services/cloud_backup_secrets.py:140
+msgid "This cloud backup run is too old"
+msgstr "This cloud backup run is too old"
+
+#: backend/services/cloud_backup_secrets.py:150
+msgid "This cloud backup account was deleted"
+msgstr "This cloud backup account was deleted"
+
+#: backend/services/cloud_backup_secrets.py:162
+msgid "This run's password was already released"
+msgstr "This run's password was already released"
+
+#: backend/services/cloud_backup_secrets.py:184
+msgid "This sign-in is not waiting for a code"
+msgstr "This sign-in is not waiting for a code"
+
+#: backend/services/cloud_backup_secrets.py:189
+msgid "This sign-in waited too long; press Connect again"
+msgstr "This sign-in waited too long; press Connect again"
+
+#: backend/services/cloud_backup_secrets.py:202
+msgid "This cloud backup run does not take a code"
+msgstr "This cloud backup run does not take a code"
+
+#: backend/services/cloud_backup_secrets.py:207
+msgid "No two-factor code was entered in time"
+msgstr "No two-factor code was entered in time"
+
+#: backend/services/cloud_backup_jobs.py:86
+msgid "An Apple ID is an e-mail address"
+msgstr "An Apple ID is an e-mail address"
+
+#: backend/services/cloud_backup_jobs.py:93
+msgid "That is not an iCloud library name"
+msgstr "That is not an iCloud library name"
+
+#: backend/services/cloud_backup_jobs.py:100
+msgid "A two-factor code is six digits"
+msgstr "A two-factor code is six digits"
+
+#: backend/services/cloud_backup_jobs.py:132
+msgid "The backup target has no storage host to run on"
+msgstr "The backup target has no storage host to run on"
+
 #: backend/services/backup_key_release.py:89
 #: backend/services/backup_key_release.py:158
 msgid "No such backup run for this host"
@@ -5934,7 +6068,7 @@ msgid "Paste one armored OpenPGP public key"
 msgstr "Paste one armored OpenPGP public key"
 
 #: backend/services/backup_breakglass.py:215
-#: backend/services/backup_escrow.py:181
+#: backend/services/backup_escrow.py:201
 msgid "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
 msgstr "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
 
@@ -5977,24 +6111,26 @@ msgstr ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "
 "port %(port)s). Backups need a network path to it."
 
-#: backend/services/backup_escrow.py:185
-msgid "The backup engine is not available"
-msgstr "The backup engine is not available"
-
-#: backend/services/backup_escrow.py:245
+#: backend/services/backup_escrow.py:270
 msgid "Backup keys rotated: make a new break-glass export"
 msgstr "Backup keys rotated: make a new break-glass export"
 
-#: backend/services/backup_escrow.py:247
+#: backend/services/backup_escrow.py:272
 #, python-format
 msgid ""
-"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-glass export made before this rotation does not hold the new keys, and backups taken from now on need them.\n"
+"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-"
+"glass export made before this rotation does not hold the new keys, and "
+"backups taken from now on need them.\n"
 "\n"
-"Open Backups, then a host's Encryption panel, and use \"Break-glass key export\" to make a new export. Keep it offline, and destroy the old one."
+"Open Backups, then a host's Encryption panel, and use \"Break-glass key "
+"export\" to make a new export. Keep it offline, and destroy the old one."
 msgstr ""
-"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-glass export made before this rotation does not hold the new keys, and backups taken from now on need them.\n"
+"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-"
+"glass export made before this rotation does not hold the new keys, and "
+"backups taken from now on need them.\n"
 "\n"
-"Open Backups, then a host's Encryption panel, and use \"Break-glass key export\" to make a new export. Keep it offline, and destroy the old one."
+"Open Backups, then a host's Encryption panel, and use \"Break-glass key "
+"export\" to make a new export. Keep it offline, and destroy the old one."
 
 #: backend/services/config_mgmt_baseline.py:286
 #, python-format
@@ -6152,17 +6288,8 @@ msgstr "NetBSD pkgsrc package vulnerabilities (what pkg_admin audit reads)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
 
-#: backend/api/backups_tag_policies.py
-msgid "This host has no backup policy"
-msgstr "This host has no backup policy"
-
-#: backend/api/backups_tag_policies.py
-msgid "This host already follows its tag policy"
-msgstr "This host already follows its tag policy"
-
-#: backend/api/backups_tag_policies.py
-msgid "No tag policy covers this host; there is nothing to switch to"
-msgstr "No tag policy covers this host; there is nothing to switch to"
+#~ msgid "The backup engine is not available"
+#~ msgstr "The backup engine is not available"
 
 #~ msgid "Encrypted backups need the Professional+ backup engine"
 #~ msgstr "Encrypted backups need the Professional+ backup engine"
@@ -6356,11 +6483,11 @@ msgstr "No tag policy covers this host; there is nothing to switch to"
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for "
+#~ "retry (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for "
+#~ "retry (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 
 #, python-format
 #~ msgid ""
@@ -6424,7 +6551,8 @@ msgstr "No tag policy covers this host; there is nothing to switch to"
 
 #, python-format
 #~ msgid "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
-#~ msgstr "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
+#~ msgstr ""
+#~ "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
 
 #, python-format
 #~ msgid "Message %s permanently failed after %d attempts: %s"
@@ -6584,11 +6712,11 @@ msgstr "No tag policy covers this host; there is nothing to switch to"
 #~ msgstr "Confirm OS Upgrade"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system reboot. "
-#~ "Continue?"
+#~ "This action will upgrade the operating system and require a system "
+#~ "reboot. Continue?"
 #~ msgstr ""
-#~ "This action will upgrade the operating system and require a system reboot. "
-#~ "Continue?"
+#~ "This action will upgrade the operating system and require a system "
+#~ "reboot. Continue?"
 
 #~ msgid "OS upgrades are always security updates"
 #~ msgstr "OS upgrades are always security updates"
@@ -6708,11 +6836,11 @@ msgstr "No tag policy covers this host; there is nothing to switch to"
 #~ msgstr "KVM/libvirt initialized successfully"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
-#~ "to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please "
+#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
-#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
-#~ "to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please "
+#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
 
 # Pro+ redirect messages
 #~ msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"

@@ -5762,5 +5762,108 @@
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Zijn instellingen komen al overeen met het labelbeleid."
     }
+  },
+  "cloudBackup": {
+    "account": {
+      "saveFailed": "Het account kon niet worden opgeslagen.",
+      "editTitle": "iCloud-account wijzigen",
+      "addTitle": "Een iCloud-account toevoegen",
+      "where": "De foto's worden door uw back-upopslaghost, {{host}}, in de back-upopslag gedownload. Op geen enkele andere host wordt iets geïnstalleerd.",
+      "appleId": "Apple ID (e-mailadres)",
+      "displayName": "Naam die SysManage toont",
+      "newPassword": "Nieuw wachtwoord van de Apple ID (leeg laten om het huidige te houden)",
+      "password": "Wachtwoord van de Apple ID",
+      "passwordHelp": "Bewaard in OpenBAO, nooit in de database. Het wordt per taak aan de opslaghost gegeven en nooit meer getoond.",
+      "library": "Bibliotheek",
+      "libraryHelp": "PrimarySync is de persoonlijke bibliotheek. Na de eerste aanmelding toont Bibliotheken weergeven de gedeelde.",
+      "interval": "Elke (uren)",
+      "windowStart": "Begin van het venster (UTC-uur, optioneel)",
+      "untilFound": "Een incrementele download stoppen na zoveel foto's die er al zijn",
+      "untilFoundHelp": "Eens per week controleert een volledige ronde de hele bibliotheek, wat hier ook staat.",
+      "enabled": "Volgens schema downloaden",
+      "autoDelete": "Foto's uit iCloud verwijderen nadat ze zijn gedownload",
+      "autoDeleteWarning": "De foto's worden uit iCloud verwijderd, en van elk apparaat dat met deze Apple ID is aangemeld, zodra ze in de back-upopslag staan. De back-upopslag heeft dan de enige kopie. Laat dit uit, tenzij u precies dat wilt.",
+      "autoDeleteConfirm": "Ik begrijp het: foto's na de download uit iCloud verwijderen",
+      "deleteFailed": "Het account kon niet worden verwijderd.",
+      "add": "iCloud-account toevoegen",
+      "connectFailed": "De aanmelding kon niet worden gestart.",
+      "runFailed": "De download kon niet worden gestart.",
+      "librariesFailed": "De bibliotheken konden niet worden weergegeven.",
+      "deleteTitle": "Dit iCloud-account verwijderen?",
+      "deleteHelp": "SysManage vergeet het wachtwoord en de aanmelding van {{account}}. De al gedownloade foto's blijven in de back-upopslag.",
+      "enterCode": "Code invoeren",
+      "connect": "Verbinden",
+      "runNow": "Nu uitvoeren",
+      "libraries": "Bibliotheken weergeven"
+    },
+    "status": {
+      "new": "Nog niet aangemeld",
+      "ok": "Bijgewerkt",
+      "running": "Wordt uitgevoerd",
+      "waitingCode": "Wacht op de tweefactorcode",
+      "needsSignIn": "Aanmelding nodig",
+      "failed": "Mislukt"
+    },
+    "action": {
+      "enable": "Inschakelen",
+      "connect": "Aanmelding",
+      "download": "Downloaden",
+      "reconcile": "Volledige ronde",
+      "libraries": "Bibliotheken weergeven",
+      "remove": "Verwijderen"
+    },
+    "reason": {
+      "authFailed": "Apple heeft de aanmelding voor dit account niet geaccepteerd. Controleer het wachtwoord, klik dan op Verbinden en voer de tweefactorcode in.",
+      "sessionExpired": "Apple wil een nieuwe aanmelding voor dit account. Klik op Verbinden en voer de tweefactorcode in.",
+      "codeRejected": "Apple heeft de tweefactorcode niet geaccepteerd. Klik op Verbinden om het opnieuw te proberen.",
+      "noCode": "Er is niet op tijd een tweefactorcode ingevoerd. Klik op Verbinden om het opnieuw te proberen.",
+      "twoStep": "Deze Apple ID gebruikt de oudere verificatie in twee stappen van Apple, die niet wordt ondersteund. Schakel er tweefactorauthenticatie voor in en klik dan op Verbinden.",
+      "webAccessOff": "De iCloud-gegevens van dit account zijn niet via het web bereikbaar. Zet bij geavanceerde gegevensbescherming op de iPhone \"Toegang tot iCloud-gegevens via het web\" aan (Instellingen, uw naam, iCloud) en probeer het opnieuw.",
+      "passwordUnavailable": "De opslaghost kon het wachtwoord voor deze taak niet van de server krijgen.",
+      "checksumMismatch": "De gedownloade icloudpd kwam niet overeen met de vastgelegde controlesom, dus er is niets geïnstalleerd.",
+      "noPython": "icloudpd heeft Python 3.10 tot 3.13 nodig op de opslaghost. Installeer er een (bijvoorbeeld: pkg install python311) en klik dan opnieuw op iCloud-back-up inschakelen.",
+      "wrongPlatform": "icloudpd wordt niet aangeboden voor het besturingssysteem van de opslaghost.",
+      "missingTool": "icloudpd is niet geïnstalleerd op de opslaghost. Klik op iCloud-back-up inschakelen.",
+      "agentOutdated": "De agent van de opslaghost is te oud voor iCloud-back-up. Werk de agent bij.",
+      "prepareFailed": "De plek voor de foto's kon niet in de opslag worden voorbereid.",
+      "unknown": "De taak is niet voltooid. De details hieronder zeggen waarom."
+    },
+    "dashboard": {
+      "needsSignIn": "iCloud-accounts die een aanmelding nodig hebben: {{n}}",
+      "failed": "Mislukte iCloud-accounts: {{n}}",
+      "expiring": "iCloud-aanmeldingen die binnenkort verlopen: {{n}}"
+    },
+    "title": "Cloud-back-up",
+    "noTarget": "iCloud-foto's worden gedownload door de opslaghost van de back-ups. Stel eerst het back-updoel met een opslaghost in.",
+    "table": {
+      "account": "Gebruikersaccount",
+      "status": "Toestand",
+      "lastGood": "Laatste download",
+      "stored": "Opgeslagen",
+      "signIn": "Aanmelding verloopt",
+      "actions": "Acties",
+      "identity": "{{appleId}}, bibliotheek {{library}}",
+      "autoDelete": "Verwijdert na de download uit iCloud",
+      "progress": "{{action}}: {{n}} gedownload",
+      "lastRun": "Laatste run: {{downloaded}} nieuw, {{present}} al aanwezig, {{failed}} mislukt",
+      "storedValue": "{{n}} bestanden, {{size}}",
+      "expiring": "Verloopt binnenkort: klik op Verbinden"
+    },
+    "code": {
+      "failed": "De code kon niet worden verzonden.",
+      "title": "Voer de tweefactorcode in",
+      "help": "Apple heeft een code van zes cijfers gestuurd naar de apparaten die met {{account}} zijn aangemeld. Typ hem hier binnen 15 minuten.",
+      "label": "Code van zes cijfers",
+      "send": "Code verzenden"
+    },
+    "enable": {
+      "failedToStart": "iCloud-back-up inschakelen kon niet worden gestart.",
+      "where": "Draait op uw back-upopslaghost, {{host}}. iCloud-foto's worden rechtstreeks in de back-upopslag gedownload, naast de back-ups van de hosts en nooit erin.",
+      "on": "Ingeschakeld: icloudpd {{version}}",
+      "running": "icloudpd wordt geïnstalleerd en de opslag op {{host}} wordt voorbereid...",
+      "again": "Herstellen of bijwerken",
+      "button": "iCloud-back-up inschakelen",
+      "root": "De foto's staan onder {{path}} (voorbereid {{when}})."
+    }
   }
 }

@@ -65,6 +65,10 @@ class MessageType(str, Enum):
     # A storage host's audit outside any job: at agent start, daily, and on
     # Request Host Data (the agent's backup/storage_reaudit.py).
     BACKUP_STORAGE_AUDIT = "backup_storage_audit"
+    # 24.12 iCloud Photos to local: a cloud job's outcome and live progress
+    # (from the backup target's storage host).
+    CLOUD_BACKUP_RESULT = "cloud_backup_result"
+    CLOUD_BACKUP_PROGRESS = "cloud_backup_progress"
     NETWORK_DISCOVERY_REPORT = "network_discovery_report"
     HOSTNAME_CHANGED = "hostname_changed"
     # Agent reports completion of a server-initiated package install/uninstall.
@@ -164,6 +168,13 @@ class CommandType(str, Enum):
     # Can the host reach its backup storage (a TCP connection to NFS port 2049
     # of the storage host's address)?  Only that address is sent.
     CHECK_BACKUP_STORAGE = "check_backup_storage"
+    # 24.12 iCloud Photos to local, on the storage host only: enable it
+    # (install icloudpd, prepare the cloud root), and run an account's job
+    # (connect, download, reconcile, libraries), and remove an account's
+    # sign-in (and, when asked, its photos).
+    CLOUD_BACKUP_ENABLE = "cloud_backup_enable"
+    CLOUD_BACKUP_RUN = "cloud_backup_run"
+    CLOUD_BACKUP_REMOVE = "cloud_backup_remove"
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     # Ask the agent for a fresh capability report (Phase 24: after restate is

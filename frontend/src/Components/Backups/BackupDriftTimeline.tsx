@@ -31,8 +31,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import AsyncButton from '../AsyncButton';
-import { computeDrift, getDriftTimeline, setDriftIgnore } from '../../Services/backups';
-import type { DriftEntry, DriftPackage, DriftTimeline } from '../../Services/backups';
+import {
+    computeDrift, getDriftTimeline, setDriftIgnore,
+    type DriftChange, type DriftEntry, type DriftPackage, type DriftTimeline,
+} from '../../Services/backups';
 import { apiDetail } from './backupLabels';
 import { hasPermission, SecurityRoles } from '../../Services/permissions';
 
@@ -50,7 +52,13 @@ const changeWord = (t: TFunction, change: string): string => ({
 const packageLine = (t: TFunction, p: DriftPackage): string => {
     const versions = p.change === 'U' ? `${p.from ?? ''} -> ${p.to ?? ''}`
         : (p.to || p.from || '');
-    return `${changeWord(t, p.change)}: ${p.name}${p.arch ? `:${p.arch}` : ''} ${versions} (${p.manager})`;
+    const arch = p.arch ? `:${p.arch}` : '';
+    return `${changeWord(t, p.change)}: ${p.name}${arch} ${versions} (${p.manager})`;
+};
+
+const fileLine = (t: TFunction, c: DriftChange): string => {
+    const what = c.what ? ` (${c.what})` : '';
+    return `${changeWord(t, c.change)}: ${c.path}${what}`;
 };
 
 const Entry: React.FC<{ entry: DriftEntry }> = ({ entry }) => {
@@ -89,7 +97,7 @@ const Entry: React.FC<{ entry: DriftEntry }> = ({ entry }) => {
                 )}
                 {files.length > 0 ? (
                     <Box component="pre" sx={{ fontSize: 12, bgcolor: 'action.hover', p: 1, maxHeight: 320, overflow: 'auto' }}>
-                        {files.slice(0, SHOWN).map(c => `${changeWord(t, c.change)}: ${c.path}${c.what ? ` (${c.what})` : ''}`).join('\n')}
+                        {files.slice(0, SHOWN).map(c => fileLine(t, c)).join('\n')}
                         {files.length > SHOWN && `\n${t('backups.restore.more', 'Not shown: {{n}}', { n: files.length - SHOWN })}`}
                     </Box>
                 ) : (
@@ -188,7 +196,7 @@ const BackupDriftTimeline: React.FC<{ hostId: string }> = ({ hostId }) => {
                     )}
                     <Button size="small" onClick={() => void load()}>{t('common.refresh', 'Refresh')}</Button>
                 </Stack>
-                {data && data.entries.length === 0 && (
+                {data?.entries.length === 0 && (
                     <Typography variant="body2">{t('backups.drift.none', 'No backups have been compared yet.')}</Typography>
                 )}
                 {data?.entries.map(entry => <Entry key={`${entry.from}-${entry.to}`} entry={entry} />)}

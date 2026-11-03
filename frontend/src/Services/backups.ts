@@ -589,14 +589,15 @@ export const previewRetention = async (
 
 /** One file change between two snapshots (restate ``diff``). */
 export interface DriftChange {
-  change: "A" | "D" | "M" | string;
+  // Open-ended: restate may add change codes; unknown ones render as given.
+  change: "A" | "D" | "M" | (string & {});
   path: string;
   what?: string;
 }
 
 /** One package change (restate ``diff --packages``): Installed, Removed, Upgraded. */
 export interface DriftPackage {
-  change: "I" | "R" | "U" | string;
+  change: "I" | "R" | "U" | (string & {});
   manager: string;
   name: string;
   arch?: string;
@@ -608,7 +609,7 @@ export interface DriftPackage {
 export interface DriftEntry {
   from: string;
   to: string;
-  status: "ok" | "failed" | string;
+  status: "ok" | "failed" | (string & {});
   message: string | null;
   computed_at: string | null;
   added: number | null;

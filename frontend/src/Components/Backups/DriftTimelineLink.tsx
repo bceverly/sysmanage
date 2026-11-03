@@ -12,8 +12,10 @@ import { Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useModuleLicensed } from '../../hooks/useModuleLicensed';
 
-export const driftTimelineHref = (hostId: string, path?: string | null): string =>
-    `/hosts/${hostId}${path ? `?driftPath=${encodeURIComponent(path)}` : ''}#backup`;
+export const driftTimelineHref = (hostId: string, path?: string | null): string => {
+    const query = path ? `?driftPath=${encodeURIComponent(path)}` : '';
+    return `/hosts/${hostId}${query}#backup`;
+};
 
 const DriftTimelineLink: React.FC<{ hostId: string; path?: string | null }> = ({ hostId, path }) => {
     const { t } = useTranslation();

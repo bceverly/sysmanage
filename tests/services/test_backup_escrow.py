@@ -7,6 +7,7 @@ Encryption panel, the Backups banner and the dashboard read; the remembered
 escrow PUBLIC key; and the e-mail after a scheduled rotation."""
 
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -17,7 +18,7 @@ from fastapi import HTTPException
 from backend.api import backups_escrow as api
 from backend.persistence import models
 from backend.services import backup_escrow as escrow
-from backend.services import backup_tick
+from backend.services import backup_breakglass, backup_tick
 from tests.services.test_backup_results import _setup
 
 WHEN = datetime(2026, 11, 3, 12, 0)
@@ -27,11 +28,18 @@ SECRET = (
 )
 
 
+@contextmanager
 def _engine(**extra):
-    module = SimpleNamespace(
-        inspect_recipient=lambda key: ("F" * 40, "Escrow <escrow@example.lab>"), **extra
-    )
-    return patch.object(escrow, "backup_engine", return_value=module)
+    """The engine loaded, and the open-source export's recipient reading (the
+    one implementation since 2026-11-03) stubbed so no gpg runs."""
+    with patch.object(
+        escrow, "backup_engine", return_value=SimpleNamespace(**extra)
+    ), patch.object(
+        backup_breakglass,
+        "inspect_recipient",
+        lambda key: ("F" * 40, "Escrow <escrow@example.lab>"),
+    ):
+        yield
 
 
 def _encrypt(session, s, at=WHEN):
@@ -168,10 +176,9 @@ def test_a_key_gpg_refuses_is_refused_with_its_reason(session):
     s = _setup(session)
 
     def refuse(_key):
-        raise ValueError("gpg could not read that public key")
+        raise backup_breakglass.BreakGlassRefused("gpg could not read that public key")
 
-    with patch.object(escrow, "backup_engine",
-                      return_value=SimpleNamespace(inspect_recipient=refuse)):  # fmt: skip
+    with patch.object(backup_breakglass, "inspect_recipient", refuse):
         with pytest.raises(escrow.EscrowKeyRefused, match="gpg could not read"):
             escrow.save_escrow_key(session, s.target, PUBLIC, "x@y.lab")
     assert s.target.escrow_fingerprint is None

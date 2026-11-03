@@ -5762,5 +5762,108 @@
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Sus ajustes ya coinciden con la política de etiqueta."
     }
+  },
+  "cloudBackup": {
+    "account": {
+      "saveFailed": "No se pudo guardar la cuenta.",
+      "editTitle": "Cambiar la cuenta de iCloud",
+      "addTitle": "Añadir una cuenta de iCloud",
+      "where": "Las fotos las descarga su host de almacenamiento de copias de seguridad, {{host}}, en el almacenamiento de copias de seguridad. No se instala nada en ningún otro host.",
+      "appleId": "Apple ID (dirección de correo electrónico)",
+      "displayName": "Nombre que se muestra en SysManage",
+      "newPassword": "Nueva contraseña del Apple ID (déjela vacía para mantener la actual)",
+      "password": "Contraseña del Apple ID",
+      "passwordHelp": "Se guarda en OpenBAO, nunca en la base de datos. Se entrega al host de almacenamiento para un solo trabajo cada vez y nunca se vuelve a mostrar.",
+      "library": "Fototeca",
+      "libraryHelp": "PrimarySync es la fototeca personal. Tras el primer inicio de sesión, Listar fototecas muestra las compartidas.",
+      "interval": "Cada (horas)",
+      "windowStart": "Inicio de la ventana (hora UTC, opcional)",
+      "untilFound": "Detener una descarga incremental tras este número de fotos ya presentes",
+      "untilFoundHelp": "Una vez por semana, una pasada completa revisa toda la fototeca, diga lo que diga este valor.",
+      "enabled": "Descargar según la programación",
+      "autoDelete": "Eliminar las fotos de iCloud después de descargarlas",
+      "autoDeleteWarning": "Las fotos se eliminarán de iCloud, y de todos los dispositivos con sesión iniciada en este Apple ID, en cuanto estén en el almacenamiento de copias de seguridad. Ese almacenamiento tendrá entonces la única copia. Déjelo desactivado salvo que sea justo lo que quiere.",
+      "autoDeleteConfirm": "Lo entiendo: eliminar las fotos de iCloud después de descargarlas",
+      "deleteFailed": "No se pudo eliminar la cuenta.",
+      "add": "Añadir cuenta de iCloud",
+      "connectFailed": "No se pudo iniciar el inicio de sesión.",
+      "runFailed": "No se pudo iniciar la descarga.",
+      "librariesFailed": "No se pudieron listar las fototecas.",
+      "deleteTitle": "¿Eliminar esta cuenta de iCloud?",
+      "deleteHelp": "SysManage olvida la contraseña y el inicio de sesión de {{account}}. Las fotos ya descargadas permanecen en el almacenamiento de copias de seguridad.",
+      "enterCode": "Introducir código",
+      "connect": "Conectar",
+      "runNow": "Ejecutar ahora",
+      "libraries": "Listar fototecas"
+    },
+    "status": {
+      "new": "Aún sin iniciar sesión",
+      "ok": "Al día",
+      "running": "En ejecución",
+      "waitingCode": "Esperando el código de dos factores",
+      "needsSignIn": "Requiere inicio de sesión",
+      "failed": "Con errores"
+    },
+    "action": {
+      "enable": "Habilitación",
+      "connect": "Inicio de sesión",
+      "download": "Descarga",
+      "reconcile": "Pasada completa",
+      "libraries": "Listar fototecas",
+      "remove": "Eliminación"
+    },
+    "reason": {
+      "authFailed": "Apple no aceptó el inicio de sesión de esta cuenta. Compruebe la contraseña, pulse Conectar e introduzca el código de dos factores.",
+      "sessionExpired": "Apple pide un nuevo inicio de sesión para esta cuenta. Pulse Conectar e introduzca el código de dos factores.",
+      "codeRejected": "Apple no aceptó el código de dos factores. Pulse Conectar para volver a intentarlo.",
+      "noCode": "No se introdujo un código de dos factores a tiempo. Pulse Conectar para volver a intentarlo.",
+      "twoStep": "Este Apple ID usa la antigua verificación en dos pasos de Apple, que no es compatible. Active la autenticación de dos factores para él y luego pulse Conectar.",
+      "webAccessOff": "Los datos de iCloud de esta cuenta no son accesibles desde la web. Con la protección de datos avanzada activada, active \"Acceder a los datos de iCloud en la web\" en el iPhone (Ajustes, su nombre, iCloud) y vuelva a intentarlo.",
+      "passwordUnavailable": "El host de almacenamiento no pudo obtener la contraseña del servidor para este trabajo.",
+      "checksumMismatch": "El icloudpd descargado no coincidía con su suma de comprobación fijada, así que no se instaló nada.",
+      "noPython": "icloudpd necesita Python 3.10 a 3.13 en el host de almacenamiento. Instale una versión (por ejemplo: pkg install python311) y pulse de nuevo Habilitar copia de seguridad de iCloud.",
+      "wrongPlatform": "icloudpd no se ofrece para el sistema operativo del host de almacenamiento.",
+      "missingTool": "icloudpd no está instalado en el host de almacenamiento. Pulse Habilitar copia de seguridad de iCloud.",
+      "agentOutdated": "El agente del host de almacenamiento es demasiado antiguo para la copia de seguridad de iCloud. Actualice el agente.",
+      "prepareFailed": "No se pudo preparar el lugar para las fotos en el almacenamiento.",
+      "unknown": "El trabajo no terminó. Los detalles de abajo explican por qué."
+    },
+    "dashboard": {
+      "needsSignIn": "Cuentas de iCloud que requieren inicio de sesión: {{n}}",
+      "failed": "Cuentas de iCloud con errores: {{n}}",
+      "expiring": "Inicios de sesión de iCloud que vencen pronto: {{n}}"
+    },
+    "title": "Copia de seguridad en la nube",
+    "noTarget": "Las fotos de iCloud las descarga el host de almacenamiento de copias de seguridad. Configure primero el destino de copia de seguridad con un host de almacenamiento.",
+    "table": {
+      "account": "Cuenta",
+      "status": "Estado",
+      "lastGood": "Última descarga",
+      "stored": "Almacenado",
+      "signIn": "Fin del inicio de sesión",
+      "actions": "Acciones",
+      "identity": "{{appleId}}, fototeca {{library}}",
+      "autoDelete": "Elimina de iCloud tras la descarga",
+      "progress": "{{action}}: {{n}} descargadas",
+      "lastRun": "Última ejecución: {{downloaded}} nuevas, {{present}} ya presentes, {{failed}} con errores",
+      "storedValue": "{{n}} elementos, {{size}}",
+      "expiring": "Vence pronto: pulse Conectar"
+    },
+    "code": {
+      "failed": "No se pudo enviar el código.",
+      "title": "Introduzca el código de dos factores",
+      "help": "Apple ha enviado un código de seis dígitos a los dispositivos con sesión iniciada en {{account}}. Escríbalo aquí en un plazo de 15 minutos.",
+      "label": "Código de seis dígitos",
+      "send": "Enviar código"
+    },
+    "enable": {
+      "failedToStart": "No se pudo iniciar Habilitar copia de seguridad de iCloud.",
+      "where": "Se ejecuta en su host de almacenamiento de copias de seguridad, {{host}}. Las fotos de iCloud se descargan directamente en el almacenamiento de copias de seguridad, junto a las copias de los hosts y nunca dentro de una de ellas.",
+      "on": "Habilitado: icloudpd {{version}}",
+      "running": "Instalando icloudpd y preparando el almacenamiento en {{host}}...",
+      "again": "Reparar o actualizar",
+      "button": "Habilitar copia de seguridad de iCloud",
+      "root": "Las fotos se guardan en {{path}} (preparado el {{when}})."
+    }
   }
 }

@@ -5762,5 +5762,108 @@
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "設定はすでにタグポリシーと一致しています。"
     }
+  },
+  "cloudBackup": {
+    "account": {
+      "saveFailed": "アカウントを保存できませんでした。",
+      "editTitle": "iCloud アカウントを変更",
+      "addTitle": "iCloud アカウントを追加",
+      "where": "写真はバックアップのストレージホスト {{host}} がバックアップストレージにダウンロードします。他のホストには何もインストールされません。",
+      "appleId": "Apple ID (メールアドレス)",
+      "displayName": "SysManage での表示名",
+      "newPassword": "Apple ID の新しいパスワード (現在のものを使い続ける場合は空欄)",
+      "password": "Apple ID のパスワード",
+      "passwordHelp": "OpenBAO に保管され、データベースには保存されません。ストレージホストには一度に 1 つのジョブ分だけ渡され、二度と表示されません。",
+      "library": "ライブラリ",
+      "libraryHelp": "PrimarySync は個人用ライブラリです。初回のサインイン後、[ライブラリを一覧表示] で共有ライブラリが表示されます。",
+      "interval": "間隔 (時間)",
+      "windowStart": "ウィンドウの開始 (UTC の時、任意)",
+      "untilFound": "既存の写真がこの数に達したら差分ダウンロードを停止",
+      "untilFoundHelp": "この値にかかわらず、週に 1 回の完全パスでライブラリ全体を確認します。",
+      "enabled": "スケジュールに従ってダウンロード",
+      "autoDelete": "ダウンロード後に写真を iCloud から削除",
+      "autoDeleteWarning": "写真がバックアップストレージに入りしだい、iCloud とこの Apple ID でサインインしているすべてのデバイスから削除されます。その後はバックアップストレージが唯一のコピーになります。それが目的でない限りオフのままにしてください。",
+      "autoDeleteConfirm": "理解しました: ダウンロード後に写真を iCloud から削除する",
+      "deleteFailed": "アカウントを削除できませんでした。",
+      "add": "iCloud アカウントを追加",
+      "connectFailed": "サインインを開始できませんでした。",
+      "runFailed": "ダウンロードを開始できませんでした。",
+      "librariesFailed": "ライブラリを一覧表示できませんでした。",
+      "deleteTitle": "この iCloud アカウントを削除しますか?",
+      "deleteHelp": "SysManage は {{account}} のパスワードとサインインを破棄します。ダウンロード済みの写真はバックアップストレージに残ります。",
+      "enterCode": "コードを入力",
+      "connect": "接続",
+      "runNow": "今すぐ実行",
+      "libraries": "ライブラリを一覧表示"
+    },
+    "status": {
+      "new": "未サインイン",
+      "ok": "最新",
+      "running": "実行中",
+      "waitingCode": "2 ファクタ認証コードを待機中",
+      "needsSignIn": "サインインが必要",
+      "failed": "失敗"
+    },
+    "action": {
+      "enable": "有効化",
+      "connect": "サインイン",
+      "download": "ダウンロード",
+      "reconcile": "完全パス",
+      "libraries": "ライブラリを一覧表示",
+      "remove": "削除処理"
+    },
+    "reason": {
+      "authFailed": "Apple がこのアカウントのサインインを受け付けませんでした。パスワードを確認してから [接続] を押し、2 ファクタ認証コードを入力してください。",
+      "sessionExpired": "Apple がこのアカウントの新しいサインインを求めています。[接続] を押して 2 ファクタ認証コードを入力してください。",
+      "codeRejected": "Apple が 2 ファクタ認証コードを受け付けませんでした。[接続] を押してもう一度試してください。",
+      "noCode": "2 ファクタ認証コードが時間内に入力されませんでした。[接続] を押してもう一度試してください。",
+      "twoStep": "この Apple ID は Apple の旧来の 2 ステップ確認を使用しており、これはサポートされていません。2 ファクタ認証を有効にしてから [接続] を押してください。",
+      "webAccessOff": "このアカウントの iCloud データには Web からアクセスできません。高度なデータ保護がオンの場合は、iPhone で [Web で iCloud データにアクセス] をオンにして (設定、ユーザ名、iCloud) からもう一度試してください。",
+      "passwordUnavailable": "ストレージホストはこのジョブのパスワードをサーバーから取得できませんでした。",
+      "checksumMismatch": "ダウンロードした icloudpd が固定されたチェックサムと一致しなかったため、何もインストールしませんでした。",
+      "noPython": "icloudpd にはストレージホスト上に Python 3.10 から 3.13 が必要です。いずれかをインストールして (例: pkg install python311)、もう一度 [iCloud バックアップを有効にする] を押してください。",
+      "wrongPlatform": "ストレージホストのオペレーティングシステムでは icloudpd は提供されていません。",
+      "missingTool": "ストレージホストに icloudpd がインストールされていません。[iCloud バックアップを有効にする] を押してください。",
+      "agentOutdated": "ストレージホストのエージェントが古すぎて iCloud バックアップを使用できません。エージェントを更新してください。",
+      "prepareFailed": "ストレージに写真の保存場所を準備できませんでした。",
+      "unknown": "ジョブは完了しませんでした。理由は下の詳細に示されています。"
+    },
+    "dashboard": {
+      "needsSignIn": "サインインが必要な iCloud アカウント: {{n}}",
+      "failed": "失敗した iCloud アカウント: {{n}}",
+      "expiring": "まもなく期限切れになる iCloud サインイン: {{n}}"
+    },
+    "title": "クラウドバックアップ",
+    "noTarget": "iCloud 写真はバックアップのストレージホストがダウンロードします。先にストレージホスト付きでバックアップ先を設定してください。",
+    "table": {
+      "account": "アカウント",
+      "status": "状態",
+      "lastGood": "最後のダウンロード",
+      "stored": "保存済み",
+      "signIn": "サインインの期限",
+      "actions": "操作",
+      "identity": "{{appleId}}、ライブラリ {{library}}",
+      "autoDelete": "ダウンロード後に iCloud から削除",
+      "progress": "{{action}}: {{n}} 件ダウンロード済み",
+      "lastRun": "前回の実行: 新規 {{downloaded}} 件、既存 {{present}} 件、失敗 {{failed}} 件",
+      "storedValue": "{{n}} 項目、{{size}}",
+      "expiring": "まもなく期限切れ: [接続] を押してください"
+    },
+    "code": {
+      "failed": "コードを送信できませんでした。",
+      "title": "2 ファクタ認証コードを入力",
+      "help": "Apple は {{account}} でサインインしているデバイスに 6 桁のコードを送信しました。15 分以内にここに入力してください。",
+      "label": "6 桁のコード",
+      "send": "コードを送信"
+    },
+    "enable": {
+      "failedToStart": "[iCloud バックアップを有効にする] を開始できませんでした。",
+      "where": "バックアップのストレージホスト {{host}} で実行されます。iCloud 写真はバックアップストレージに直接ダウンロードされ、各ホストのバックアップの隣に置かれ、その中には決して入りません。",
+      "on": "有効: icloudpd {{version}}",
+      "running": "{{host}} に icloudpd をインストールし、ストレージを準備しています...",
+      "again": "修復またはアップグレード",
+      "button": "iCloud バックアップを有効にする",
+      "root": "写真は {{path}} に保存されます (準備日時 {{when}})。"
+    }
   }
 }

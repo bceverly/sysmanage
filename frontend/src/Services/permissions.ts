@@ -97,6 +97,8 @@ export const SecurityRoles = {
     MANAGE_HARDWARE_HEALTH: 'Manage Hardware Health',
     MANAGE_BACKUPS: 'Manage Backups',
     RESTORE_FILES: 'Restore Files',
+    // iCloud Photos to local, on the backup storage host (24.12)
+    MANAGE_CLOUD_BACKUPS: 'Manage Cloud Backups',
     RUN_MALWARE_SCANS: 'Run Malware Scans',
     QUARANTINE_MALWARE: 'Quarantine Malware',
 

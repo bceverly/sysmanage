@@ -94,6 +94,17 @@ quality = _load("i18n_quality")
         ),
         # A placeholder dropped.
         ("de", "Delete {{count}} hosts?", "Hosts löschen?", "placeholders"),
+        # Identifier slugs standing in for prose (2026-11-03): the model
+        # verifier passed these, because a slug embeds next to its source.
+        ("ar", "Failed Rules", "_failed_rules_", "an identifier slug"),
+        ("ko", "restore", "_복구_", "an identifier slug"),
+        ("pt", "username", "nome_de_usuário", "an identifier slug"),
+        (
+            "it",
+            "Forgot password?",
+            "Hai_dimenticato_la_password?",
+            "an identifier slug",
+        ),
     ],
 )
 def test_defects_are_rejected(lang, source, value, kind):
@@ -153,6 +164,11 @@ def test_a_non_string_value_is_rejected():
         ),
         # "100%ige" is German, not a %i placeholder.
         ("de", "100% coverage", "100%ige Abdeckung"),
+        # An identifier the source carries is not a slug: Chinese and Japanese
+        # write no spaces, so the sentence is one run of word characters.
+        ("zh_CN", "dest_path is required", "dest_path是必需的"),
+        # A slug msgid whose translation is the same slug is correct.
+        ("ko", "hardware_updated", "hardware_updated"),
     ],
 )
 def test_good_translations_pass(lang, source, value):

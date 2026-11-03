@@ -192,19 +192,25 @@ class EscrowKeyRefused(ValueError):
 
 
 def save_escrow_key(db: Session, target, armored: str, who: str) -> Dict[str, Any]:
-    """Remember the operator's escrow PUBLIC key on the target.  The engine
-    reads it with gpg (one usable public key that can encrypt); a private
-    key block is refused before anything else looks at it."""
+    """Remember the operator's escrow PUBLIC key on the target.  The
+    open-source export reads it with gpg (one usable public key that can
+    encrypt); a private key block is refused before anything else looks at
+    it."""
     if not isinstance(armored, str) or "PRIVATE KEY" in armored:
         raise EscrowKeyRefused(
             _("That is a SECRET key; paste the PUBLIC key (gpg --armor --export)")
         )
-    engine = backup_engine()
-    if engine is None or not hasattr(engine, "inspect_recipient"):
-        raise EscrowKeyRefused(_("The backup engine is not available"))
+    # The open-source export's own reading of a recipient key: the engine
+    # keeps no copy of it (ROADMAP 24.6, one implementation, 2026-11-03).
+    # pylint: disable=import-outside-toplevel
+    from backend.services import backup_breakglass
+
     try:
-        fingerprint, uid = engine.inspect_recipient(armored)
-    except Exception as refused:  # BreakGlassRefused / BackupKeyError
+        fingerprint, uid = backup_breakglass.inspect_recipient(armored)
+    except (
+        backup_breakglass.BreakGlassRefused,
+        backup_breakglass.BreakGlassError,
+    ) as refused:
         raise EscrowKeyRefused(str(refused)) from refused
     target.escrow_public_key = armored.strip() + "\n"
     target.escrow_fingerprint = fingerprint

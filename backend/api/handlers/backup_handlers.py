@@ -9,7 +9,10 @@ Backup results and progress from the agent (ROADMAP Phase 24).
 (``services/backup_results.py`` stores it and queues the storage-side jobs
 that follow a good capture); ``backup_progress`` -- the latest progress
 line of a run still going; ``backup_storage_audit`` -- a storage host's audit
-sent outside any job (agent start, daily, Request Host Data).  A message naming a run that belongs to another
+sent outside any job (agent start, daily, Request Host Data);
+``cloud_backup_result`` / ``cloud_backup_progress`` -- iCloud Photos jobs on
+the storage host (24.12, ``services/cloud_backup_results.py``).  A message
+naming a run that belongs to another
 host is ignored and logged.
 """
 
@@ -18,7 +21,7 @@ from typing import Any, Dict
 
 from sqlalchemy.orm import Session
 
-from backend.services import backup_results
+from backend.services import backup_results, cloud_backup_results
 
 logger = logging.getLogger(__name__)
 
@@ -88,4 +91,46 @@ async def handle_backup_progress(  # NOSONAR
         db.rollback()
         logger.exception("backup_progress from host %s could not be recorded", host_id)
         return {"message_type": "error", "error_type": "backup_progress", "data": {}}
+    return {"message_type": "success", "data": {"stored": run is not None}}
+
+
+async def handle_cloud_backup_result(  # NOSONAR
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Record one iCloud Photos job's outcome (24.12).  Never raises."""
+    host_id = getattr(connection, "host_id", None)
+    if not host_id:
+        return _error()
+    try:
+        run = cloud_backup_results.record_result(db, host_id, _payload(message_data))
+        db.commit()
+    except Exception:  # pylint: disable=broad-except
+        db.rollback()
+        logger.exception("cloud_backup_result from host %s not recorded", host_id)
+        return {
+            "message_type": "error",
+            "error_type": "cloud_backup_result",
+            "data": {},
+        }
+    return {"message_type": "success", "data": {"stored": run is not None}}
+
+
+async def handle_cloud_backup_progress(  # NOSONAR
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Keep a running iCloud Photos job's latest progress.  Never raises."""
+    host_id = getattr(connection, "host_id", None)
+    if not host_id:
+        return _error()
+    try:
+        run = cloud_backup_results.record_progress(db, host_id, _payload(message_data))
+        db.commit()
+    except Exception:  # pylint: disable=broad-except
+        db.rollback()
+        logger.exception("cloud_backup_progress from host %s not recorded", host_id)
+        return {
+            "message_type": "error",
+            "error_type": "cloud_backup_progress",
+            "data": {},
+        }
     return {"message_type": "success", "data": {"stored": run is not None}}

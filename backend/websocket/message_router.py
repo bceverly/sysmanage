@@ -25,6 +25,8 @@ from backend.api.handlers import (
     handle_backup_progress,
     handle_backup_storage_audit,
     handle_backup_result,
+    handle_cloud_backup_progress,
+    handle_cloud_backup_result,
     handle_hardware_health_update,
     handle_network_discovery_report,
     handle_fips_compliance_update,
@@ -202,6 +204,14 @@ async def route_inbound_message(  # NOSONAR
 
         elif message_type == MessageType.BACKUP_STORAGE_AUDIT:
             await handle_backup_storage_audit(db, mock_connection, message_data)
+            success = True
+
+        elif message_type == MessageType.CLOUD_BACKUP_RESULT:
+            await handle_cloud_backup_result(db, mock_connection, message_data)
+            success = True
+
+        elif message_type == MessageType.CLOUD_BACKUP_PROGRESS:
+            await handle_cloud_backup_progress(db, mock_connection, message_data)
             success = True
 
         elif message_type == MessageType.NETWORK_DISCOVERY_REPORT:

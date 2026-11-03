@@ -5762,5 +5762,108 @@
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "其设置已与标签策略一致。"
     }
+  },
+  "cloudBackup": {
+    "account": {
+      "saveFailed": "无法保存账户。",
+      "editTitle": "更改 iCloud 账户",
+      "addTitle": "添加 iCloud 账户",
+      "where": "照片由您的备份存储主机 {{host}} 下载到备份存储中。不会在其他任何主机上安装任何内容。",
+      "appleId": "Apple ID（电子邮件地址）",
+      "displayName": "在 SysManage 中显示的名称",
+      "newPassword": "新的 Apple ID 密码（留空则保留当前密码）",
+      "password": "Apple ID 密码",
+      "passwordHelp": "保存在 OpenBAO 中，从不存入数据库。每次只为一个作业交给存储主机，且不会再次显示。",
+      "library": "资料库",
+      "libraryHelp": "PrimarySync 是个人资料库。首次登录后，“列出资料库”会显示共享资料库。",
+      "interval": "间隔（小时）",
+      "windowStart": "时段开始（UTC 小时，可选）",
+      "untilFound": "增量下载遇到这么多已有照片后停止",
+      "untilFoundHelp": "无论此值如何，每周都会进行一次完整检查，核对整个资料库。",
+      "enabled": "按计划下载",
+      "autoDelete": "下载后从 iCloud 删除照片",
+      "autoDeleteWarning": "照片一旦存入备份存储，就会从 iCloud 以及登录此 Apple ID 的所有设备中删除。届时备份存储中保存的是唯一副本。除非您确实需要，否则请保持关闭。",
+      "autoDeleteConfirm": "我明白：下载后从 iCloud 删除照片",
+      "deleteFailed": "无法删除账户。",
+      "add": "添加 iCloud 账户",
+      "connectFailed": "无法开始登录。",
+      "runFailed": "无法开始下载。",
+      "librariesFailed": "无法列出资料库。",
+      "deleteTitle": "删除此 iCloud 账户？",
+      "deleteHelp": "SysManage 将忘记 {{account}} 的密码和登录。已下载的照片仍保留在备份存储中。",
+      "enterCode": "输入代码",
+      "connect": "连接",
+      "runNow": "立即运行",
+      "libraries": "列出资料库"
+    },
+    "status": {
+      "new": "尚未登录",
+      "ok": "已是最新",
+      "running": "正在运行",
+      "waitingCode": "正在等待双重认证代码",
+      "needsSignIn": "需要登录",
+      "failed": "失败"
+    },
+    "action": {
+      "enable": "启用",
+      "connect": "登录",
+      "download": "下载",
+      "reconcile": "完整检查",
+      "libraries": "列出资料库",
+      "remove": "移除"
+    },
+    "reason": {
+      "authFailed": "Apple 未接受此账户的登录。请检查密码，然后点击“连接”并输入双重认证代码。",
+      "sessionExpired": "Apple 要求此账户重新登录。请点击“连接”并输入双重认证代码。",
+      "codeRejected": "Apple 未接受双重认证代码。请点击“连接”重试。",
+      "noCode": "未及时输入双重认证代码。请点击“连接”重试。",
+      "twoStep": "此 Apple ID 使用 Apple 较旧的两步验证，不受支持。请为其开启双重认证，然后点击“连接”。",
+      "webAccessOff": "无法通过网页访问此账户的 iCloud 数据。如果开启了高级数据保护，请在 iPhone 上开启“通过网页访问 iCloud 数据”（设置、您的姓名、iCloud），然后重试。",
+      "passwordUnavailable": "存储主机无法从服务器获取此作业的密码。",
+      "checksumMismatch": "下载的 icloudpd 与其固定的校验和不符，因此未安装任何内容。",
+      "noPython": "icloudpd 需要存储主机上有 Python 3.10 至 3.13。请安装一个（例如：pkg install python311），然后再次点击“启用 iCloud 备份”。",
+      "wrongPlatform": "存储主机的操作系统不提供 icloudpd。",
+      "missingTool": "存储主机上未安装 icloudpd。请点击“启用 iCloud 备份”。",
+      "agentOutdated": "存储主机的代理版本过旧，无法使用 iCloud 备份。请更新代理。",
+      "prepareFailed": "无法在存储上准备存放照片的位置。",
+      "unknown": "作业未完成。下面的详细信息说明了原因。"
+    },
+    "dashboard": {
+      "needsSignIn": "需要登录的 iCloud 账户：{{n}}",
+      "failed": "失败的 iCloud 账户：{{n}}",
+      "expiring": "即将过期的 iCloud 登录：{{n}}"
+    },
+    "title": "云备份",
+    "noTarget": "iCloud 照片由备份存储主机下载。请先为备份目标设置存储主机。",
+    "table": {
+      "account": "账户",
+      "status": "状态",
+      "lastGood": "上次下载",
+      "stored": "已存储",
+      "signIn": "登录到期",
+      "actions": "操作",
+      "identity": "{{appleId}}，资料库 {{library}}",
+      "autoDelete": "下载后从 iCloud 删除",
+      "progress": "{{action}}：已下载 {{n}} 个",
+      "lastRun": "上次运行：新增 {{downloaded}} 个，已有 {{present}} 个，失败 {{failed}} 个",
+      "storedValue": "{{n}} 个项目，{{size}}",
+      "expiring": "即将到期：请点击“连接”"
+    },
+    "code": {
+      "failed": "无法发送代码。",
+      "title": "输入双重认证代码",
+      "help": "Apple 已向登录 {{account}} 的设备发送了六位数代码。请在 15 分钟内在此输入。",
+      "label": "六位数代码",
+      "send": "发送代码"
+    },
+    "enable": {
+      "failedToStart": "无法开始“启用 iCloud 备份”。",
+      "where": "在您的备份存储主机 {{host}} 上运行。iCloud 照片直接下载到备份存储中，放在各主机的备份旁边，绝不放入其中。",
+      "on": "已启用：icloudpd {{version}}",
+      "running": "正在 {{host}} 上安装 icloudpd 并准备存储...",
+      "again": "修复或升级",
+      "button": "启用 iCloud 备份",
+      "root": "照片保存在 {{path}} 下（准备于 {{when}}）。"
+    }
   }
 }

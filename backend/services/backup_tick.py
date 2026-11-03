@@ -21,7 +21,8 @@ approved, active host whose agent can run backups:
    ``check_interval_days``;
 4. with Pro+ backup_engine, rotate the encryption keys that are due;
 5. with Pro+ backup_engine, a full-read verification on the host every
-   ``verify_interval_days`` (``backup_verify``).
+   ``verify_interval_days`` (``backup_verify``);
+6. iCloud Photos to local on the storage host (``cloud_backup_tick``).
 
 Runs that got no result twelve hours after their command was sent are
 marked failed and logged; a run a maintenance window holds is waiting, not
@@ -45,6 +46,8 @@ from backend.services import backup_jobs as jobs
 from backend.services import backup_reach as reach
 from backend.services import backup_tag_policies as tag_policies
 from backend.services import backup_verify as verify
+from backend.services import cloud_backup_jobs as cloud_jobs
+from backend.services import cloud_backup_tick as cloud_tick
 from backend.services import queue_clock
 from backend.startup.leadership import singleton_task
 from backend.startup.tick_runner import run_periodic
@@ -199,7 +202,8 @@ def capture_due_at(db: Session, policy: models.BackupPolicy) -> Optional[datetim
 
 
 def running_captures(db: Session, target_id) -> int:
-    return (
+    """Captures, and iCloud downloads (24.12), holding the target's slots."""
+    captures = (
         db.query(models.BackupRun)
         .join(models.BackupPolicy, models.BackupPolicy.id == models.BackupRun.policy_id)
         .filter(
@@ -209,6 +213,7 @@ def running_captures(db: Session, target_id) -> int:
         )
         .count()
     )
+    return captures + cloud_jobs.running_transfers(db, target_id)
 
 
 def _configure(db, policy, target, host, storage_ready: bool) -> bool:
@@ -454,6 +459,8 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
         if storage_ready and _storage_upkeep(db, policy, target, now):
             queued += 1
         queued += int(verify.maybe_verify(db, policy, host, now))
+    # iCloud Photos to local (24.12), on the storage host: never raises.
+    queued += cloud_tick.reconcile(db, target, now)
     return queued + reach_checks(db, now)
 
 

@@ -5762,5 +5762,108 @@
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Ses paramètres correspondent déjà à la politique d'étiquette."
     }
+  },
+  "cloudBackup": {
+    "account": {
+      "saveFailed": "Le compte n'a pas pu être enregistré.",
+      "editTitle": "Modifier le compte iCloud",
+      "addTitle": "Ajouter un compte iCloud",
+      "where": "Les photos sont téléchargées par votre hôte de stockage des sauvegardes, {{host}}, dans le stockage des sauvegardes. Rien n'est installé sur un autre hôte.",
+      "appleId": "Apple ID (adresse e-mail)",
+      "displayName": "Nom affiché dans SysManage",
+      "newPassword": "Nouveau mot de passe de l'Apple ID (laisser vide pour garder l'actuel)",
+      "password": "Mot de passe de l'Apple ID",
+      "passwordHelp": "Conservé dans OpenBAO, jamais dans la base de données. Il est remis à l'hôte de stockage pour une seule tâche à la fois et n'est plus jamais affiché.",
+      "library": "Photothèque",
+      "libraryHelp": "PrimarySync est la photothèque personnelle. Après la première connexion, Lister les photothèques affiche les photothèques partagées.",
+      "interval": "Toutes les (heures)",
+      "windowStart": "Début de la plage (heure UTC, facultatif)",
+      "untilFound": "Arrêter un téléchargement incrémentiel après ce nombre de photos déjà présentes",
+      "untilFoundHelp": "Une fois par semaine, une passe complète vérifie toute la photothèque, quelle que soit cette valeur.",
+      "enabled": "Télécharger selon le planning",
+      "autoDelete": "Supprimer les photos d'iCloud après leur téléchargement",
+      "autoDeleteWarning": "Les photos seront retirées d'iCloud, et de chaque appareil connecté à cet Apple ID, dès qu'elles seront sur le stockage des sauvegardes. Le stockage des sauvegardes détiendra alors la seule copie. Laissez cette option désactivée sauf si c'est bien ce que vous voulez.",
+      "autoDeleteConfirm": "J'ai compris : supprimer les photos d'iCloud après le téléchargement",
+      "deleteFailed": "Le compte n'a pas pu être supprimé.",
+      "add": "Ajouter un compte iCloud",
+      "connectFailed": "La connexion n'a pas pu être lancée.",
+      "runFailed": "Le téléchargement n'a pas pu être lancé.",
+      "librariesFailed": "Les photothèques n'ont pas pu être listées.",
+      "deleteTitle": "Supprimer ce compte iCloud ?",
+      "deleteHelp": "SysManage oublie le mot de passe et la connexion de {{account}}. Les photos déjà téléchargées restent sur le stockage des sauvegardes.",
+      "enterCode": "Saisir le code",
+      "connect": "Connecter",
+      "runNow": "Exécuter maintenant",
+      "libraries": "Lister les photothèques"
+    },
+    "status": {
+      "new": "Pas encore connecté",
+      "ok": "À jour",
+      "running": "En cours",
+      "waitingCode": "En attente du code à deux facteurs",
+      "needsSignIn": "Connexion requise",
+      "failed": "Échec"
+    },
+    "action": {
+      "enable": "Activation",
+      "connect": "Connexion",
+      "download": "Téléchargement",
+      "reconcile": "Passe complète",
+      "libraries": "Lister les photothèques",
+      "remove": "Suppression"
+    },
+    "reason": {
+      "authFailed": "Apple n'a pas accepté la connexion pour ce compte. Vérifiez le mot de passe, puis cliquez sur Connecter et saisissez le code à deux facteurs.",
+      "sessionExpired": "Apple demande une nouvelle connexion pour ce compte. Cliquez sur Connecter et saisissez le code à deux facteurs.",
+      "codeRejected": "Apple n'a pas accepté le code à deux facteurs. Cliquez sur Connecter pour réessayer.",
+      "noCode": "Aucun code à deux facteurs n'a été saisi à temps. Cliquez sur Connecter pour réessayer.",
+      "twoStep": "Cet Apple ID utilise l'ancienne vérification en deux étapes d'Apple, qui n'est pas prise en charge. Activez l'authentification à deux facteurs pour cet identifiant, puis cliquez sur Connecter.",
+      "webAccessOff": "Les données iCloud de ce compte ne sont pas accessibles depuis le Web. Si la protection avancée des données est activée, activez \"Accéder aux données iCloud sur le Web\" sur l'iPhone (Réglages, votre nom, iCloud), puis réessayez.",
+      "passwordUnavailable": "L'hôte de stockage n'a pas pu obtenir le mot de passe auprès du serveur pour cette tâche.",
+      "checksumMismatch": "Le fichier icloudpd téléchargé ne correspondait pas à sa somme de contrôle fixée, donc rien n'a été installé.",
+      "noPython": "icloudpd nécessite Python 3.10 à 3.13 sur l'hôte de stockage. Installez-en un (par exemple : pkg install python311), puis cliquez de nouveau sur Activer la sauvegarde iCloud.",
+      "wrongPlatform": "icloudpd n'est pas proposé pour le système d'exploitation de l'hôte de stockage.",
+      "missingTool": "icloudpd n'est pas installé sur l'hôte de stockage. Cliquez sur Activer la sauvegarde iCloud.",
+      "agentOutdated": "L'agent de l'hôte de stockage est trop ancien pour la sauvegarde iCloud. Mettez l'agent à jour.",
+      "prepareFailed": "L'emplacement des photos n'a pas pu être préparé sur le stockage.",
+      "unknown": "La tâche ne s'est pas terminée. Les détails ci-dessous en donnent la raison."
+    },
+    "dashboard": {
+      "needsSignIn": "Comptes iCloud à reconnecter : {{n}}",
+      "failed": "Comptes iCloud en échec : {{n}}",
+      "expiring": "Connexions iCloud qui expirent bientôt : {{n}}"
+    },
+    "title": "Sauvegarde cloud",
+    "noTarget": "Les photos iCloud sont téléchargées par l'hôte de stockage des sauvegardes. Configurez d'abord la cible de sauvegarde avec un hôte de stockage.",
+    "table": {
+      "account": "Compte",
+      "status": "État",
+      "lastGood": "Dernier téléchargement",
+      "stored": "Stocké",
+      "signIn": "Fin de la connexion",
+      "actions": "Actions possibles",
+      "identity": "{{appleId}}, photothèque {{library}}",
+      "autoDelete": "Supprime d'iCloud après le téléchargement",
+      "progress": "{{action}} : {{n}} téléchargées",
+      "lastRun": "Dernière exécution : {{downloaded}} nouvelles, {{present}} déjà présentes, {{failed}} en échec",
+      "storedValue": "{{n}} éléments, {{size}}",
+      "expiring": "Expire bientôt : cliquez sur Connecter"
+    },
+    "code": {
+      "failed": "Le code n'a pas pu être envoyé.",
+      "title": "Saisissez le code à deux facteurs",
+      "help": "Apple a envoyé un code à six chiffres aux appareils connectés à {{account}}. Saisissez-le ici dans les 15 minutes.",
+      "label": "Code à six chiffres",
+      "send": "Envoyer le code"
+    },
+    "enable": {
+      "failedToStart": "Activer la sauvegarde iCloud n'a pas pu être lancé.",
+      "where": "S'exécute sur votre hôte de stockage des sauvegardes, {{host}}. Les photos iCloud sont téléchargées directement dans le stockage des sauvegardes, à côté des sauvegardes des hôtes et jamais à l'intérieur de l'une d'elles.",
+      "on": "Activée : icloudpd {{version}}",
+      "running": "Installation d'icloudpd et préparation du stockage sur {{host}}...",
+      "again": "Réparer ou mettre à niveau",
+      "button": "Activer la sauvegarde iCloud",
+      "root": "Les photos sont conservées sous {{path}} (préparé le {{when}})."
+    }
   }
 }

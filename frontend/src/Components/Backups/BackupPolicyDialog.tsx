@@ -23,8 +23,9 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import AsyncButton from '../AsyncButton';
-import { savePolicy } from '../../Services/backups';
-import type { BackupPolicy, PolicyInput } from '../../Services/backups';
+import {
+    savePolicy, type BackupPolicy, type PolicyInput, type PolicySource,
+} from '../../Services/backups';
 import { apiDetail } from './backupLabels';
 import RetentionFields from './RetentionFields';
 import { useModuleLicensed } from '../../hooks/useModuleLicensed';
@@ -32,7 +33,6 @@ import { VerificationField } from './VerificationStatus';
 import { NetworkMountsNote } from './NetworkMountsNote';
 import { localWindow } from './windowLocalTime';
 import { OwnPolicyNote, TagPolicyNote } from './PolicySource';
-import type { PolicySource } from '../../Services/backups';
 
 // Sane defaults for a NEW policy (Bryan, 2026-10-29).  Community has only
 // keep-last, so a month of daily backups; with the Pro+ engine,

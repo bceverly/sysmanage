@@ -54,6 +54,8 @@ from backend.api.handlers.backup_handlers import (
     handle_backup_progress,
     handle_backup_storage_audit,
     handle_backup_result,
+    handle_cloud_backup_progress,
+    handle_cloud_backup_result,
 )
 from backend.api.handlers.hardware_health_handlers import (
     handle_hardware_health_update,
@@ -158,5 +160,7 @@ __all__ = [
     "handle_backup_result",
     "handle_backup_progress",
     "handle_backup_storage_audit",
+    "handle_cloud_backup_result",
+    "handle_cloud_backup_progress",
     "handle_network_discovery_report",
 ]

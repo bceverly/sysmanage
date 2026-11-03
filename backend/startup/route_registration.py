@@ -17,6 +17,7 @@ from backend.api import (
     advisory_actions,
     agent,
     agent_backup_key,
+    agent_cloud_backup,
     agent_poll,
     airgap_agent_mirrors,
     airgap_bundles,
@@ -116,6 +117,7 @@ from backend.api import (
     backups_equip,
     backups_retention,
     backups_setup,
+    cloud_backup,
     time_sync,
     time_sync_policy,
     time_sync_resync,
@@ -366,6 +368,9 @@ def register_routes(app: FastAPI):
     app.include_router(
         agent_backup_key.router, prefix="/api", tags=["agent"]
     )  # /api/agent/backup-key
+    # iCloud Photos (24.12): the storage host fetches a run's Apple ID
+    # password and two-factor code here, never through the queue.
+    app.include_router(agent_cloud_backup.router, prefix="/api", tags=["agent"])
 
     logger.debug("Adding host public router with /api prefix")
     app.include_router(
@@ -468,6 +473,7 @@ def register_routes(app: FastAPI):
     _include_versioned(app, backups_equip.router, tags=["backups"])
     _include_versioned(app, backups_retention.router, tags=["backups"])
     _include_versioned(app, backups_setup.router, tags=["backups"])
+    _include_versioned(app, cloud_backup.router, tags=["backups"])  # 24.12
     _include_versioned(app, asset_tags.router, tags=["machines"])
     _include_versioned(app, asset_tag_csv.router, tags=["machines"])
 

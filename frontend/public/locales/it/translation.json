@@ -244,7 +244,7 @@
     "copied": "Copiato!",
     "copyError": "Impossibile copiare negli appunti.",
     "copyFingerprint": "Copia impronta digitale",
-    "fingerprint": "Impressione_digitale",
+    "fingerprint": "Impronta digitale",
     "trusted": {
       "badKey": "(chiave non leggibile)",
       "count": "{{n}} attendibili",
@@ -840,7 +840,7 @@
       "packagesRequired": "Inserisci almeno un nome del pacchetto.",
       "partial": "{{failed}} di {{total}} invii del sito sono falliti.",
       "scriptRequired": "Inserisci lo script da eseguire.",
-      "unlicensed": "La_federazione_richiede_una_licenza_Enterprise."
+      "unlicensed": "La federazione richiede una licenza Enterprise."
     },
     "hostIds": "ID host",
     "hostIdsHint": "ID host separati da virgole (dalla pagina Host)",
@@ -912,7 +912,7 @@
       "hosts": "Host",
       "site": "Sito"
     },
-    "generate": "Genera_report",
+    "generate": "Genera report",
     "sites": "Siti (tutti se nessuno selezionato)",
     "subtitle": "Aggrega rollup di host, conformità e vulnerabilità tra siti.",
     "totals": "Totale ({{n}} siti)",
@@ -921,7 +921,7 @@
   "federationRole": {
     "coordinator": {
       "description": "Il hub che aggrega l'inventario degli host, la conformità e le valutazioni della vulnerabilità da molti server subordinate e invia comandi e politiche ai server inferiori. Un coordinatore per federazione.",
-      "title": "Coordinatore_federativo"
+      "title": "Coordinatore della federazione"
     },
     "copied": "Copiato!",
     "copyError": "Impossibile copiare negli appunti.",
@@ -940,7 +940,7 @@
       "title": "Iscriviti con il coordinatore",
       "token": "Token di iscrizione"
     },
-    "heading": "Ruolo_federativo",
+    "heading": "Ruolo nella federazione",
     "identity": {
       "copyKey": "Copia Chiave Pubblica",
       "help": "Copia questa chiave pubblica e incollala nella scheda federativa del peer in modo che ogni lato possa registrare l'impronta digitale dell'identità dell'altro e verificarla fuori banda. La chiave privata non lascia mai questo server.",
@@ -969,7 +969,7 @@
     "saving": "Salvataggio...",
     "site": {
       "description": "Un server subordinato che funziona autonomamente e segnala al coordinatore. Continua a gestire i propri host anche quando il coordinatore non è raggiungibile, riproducendo i dati in coda alla ricomposizione della connessione.",
-      "title": "Sito_federativo"
+      "title": "Sito della federazione"
     }
   },
   "firewallRoles": {
@@ -1434,7 +1434,7 @@
     "expiryDate": "Data di Scadenza",
     "failedToLoadSSHKeys": "Caricamento chiavi SSH fallito",
     "filesystem": "File system",
-    "geoLocation": "Posizione_geografica",
+    "geoLocation": "Posizione geografica",
     "graylogAttached": "Collegato a Graylog",
     "graylogMechanism": "Meccanismo",
     "graylogNotConfigured": "Integrazione Graylog non configurata o non integra",
@@ -2092,7 +2092,7 @@
     "verbosity": "Verbosità"
   },
   "login": {
-    "forgotPassword": "Hai_dimenticato_la_password?",
+    "forgotPassword": "Hai dimenticato la password?",
     "loggingIn": "Accesso in corso...",
     "mfaCancel": "Annulla e accedi di nuovo",
     "mfaCode": "Codice di verifica",
@@ -2245,7 +2245,7 @@
     "errorLoadHosts": "Impossibile caricare le posizioni degli host.",
     "openHost": "Host aperto",
     "status": "Stato",
-    "subtitle": "Distribuzione_geografica_degli_agenti_che_hanno_rapporto_con_un_IP_pubblico.",
+    "subtitle": "Distribuzione geografica degli agenti che hanno segnalato un IP pubblico.",
     "title": "Mappa host"
   },
   "mfa": {
@@ -2693,7 +2693,7 @@
       "success": "Trigger di push per '{{name}}'."
     },
     "subtitle": "Politiche centralmente definite spinte ai siti subordinati.",
-    "title": "Politiche_federative"
+    "title": "Criteri della federazione"
   },
   "processes": {
     "collectedAt": "Snapshot creato",
@@ -3374,7 +3374,7 @@
       "name": "Nome del sito",
       "siteIdentityKey": "Chiave pubblica di identità del sito (PEM)",
       "siteIdentityKeyHelp": "Obbligatorio. Incolla la chiave pubblica dell'identità del sito, ottenuta fuori banda (dalla pagina Ruolo Server del sito). Il coordinatore verifica il certificato di iscrizione del sito contro questa chiave -- è ciò che sconfigge un attacco man-in-the-middle durante l'iscrizione.",
-      "submit": "Genera_token",
+      "submit": "Genera token",
       "successTitle": "Sito iscritto",
       "syncIntervalSeconds": "Intervallo di sincronizzazione (secondi)",
       "title": "Iscriviti a un sito federato",
@@ -3393,7 +3393,7 @@
     "policiesLink": "Politiche",
     "subtitle": "Server subordinate SysManage iscritti con questo coordinatore.",
     "tilesView": " bacheca",
-    "title": "Siti_federativi"
+    "title": "Siti della federazione"
   },
   "sitesMap": {
     "errorLoad": "Impossibile caricare i siti federati.",
@@ -3401,9 +3401,9 @@
     "lastSyncLabel": "Ultima sincronizzazione:",
     "openSite": "Sito aperto",
     "statusLabel": "Stato:",
-    "subtitle": "Distribuzione_geografica_dei_server_siti_subordinati.",
+    "subtitle": "Distribuzione geografica dei server dei siti subordinati.",
     "tilesView": " bacheca",
-    "title": "Mappa_siti_federativi"
+    "title": "Mappa dei siti della federazione"
   },
   "sitesTiles": {
     "coordinator": "Coordinatore",
@@ -3418,7 +3418,7 @@
     "hostsLabel": "{{n}} host",
     "lastSync": "Sincronizzato {{when}}",
     "mapView": "Vista mappa",
-    "title": "Dashboard_federativa"
+    "title": "Dashboard della federazione"
   },
   "tags": {
     "addTag": "Aggiungi tag",
@@ -5761,6 +5761,109 @@
       "replaces": "Queste impostazioni dell'host vengono sostituite:",
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Le sue impostazioni corrispondono già al criterio per tag."
+    }
+  },
+  "cloudBackup": {
+    "account": {
+      "saveFailed": "Impossibile salvare l'account.",
+      "editTitle": "Modifica account iCloud",
+      "addTitle": "Aggiungi un account iCloud",
+      "where": "Le foto vengono scaricate dal tuo host di archiviazione dei backup, {{host}}, nell'archivio dei backup. Su nessun altro host viene installato nulla.",
+      "appleId": "ID Apple (indirizzo e-mail)",
+      "displayName": "Nome mostrato in SysManage",
+      "newPassword": "Nuova password dell'ID Apple (lascia vuoto per mantenere quella attuale)",
+      "password": "Password dell'ID Apple",
+      "passwordHelp": "Conservata in OpenBAO, mai nel database. Viene consegnata all'host di archiviazione per un solo processo alla volta e non viene più mostrata.",
+      "library": "Libreria",
+      "libraryHelp": "PrimarySync è la libreria personale. Dopo il primo accesso, Elenca librerie mostra quelle condivise.",
+      "interval": "Ogni (ore)",
+      "windowStart": "Inizio finestra (ora UTC, facoltativo)",
+      "untilFound": "Interrompi un download incrementale dopo questo numero di foto già presenti",
+      "untilFoundHelp": "Una volta alla settimana un passaggio completo controlla tutta la libreria, qualunque sia questo valore.",
+      "enabled": "Scarica secondo la pianificazione",
+      "autoDelete": "Elimina le foto da iCloud dopo il download",
+      "autoDeleteWarning": "Le foto verranno rimosse da iCloud, e da ogni dispositivo connesso a questo ID Apple, appena saranno nell'archivio dei backup. L'archivio dei backup avrà allora l'unica copia. Lascia disattivata questa opzione a meno che non sia proprio ciò che vuoi.",
+      "autoDeleteConfirm": "Ho capito: elimina le foto da iCloud dopo il download",
+      "deleteFailed": "Impossibile eliminare l'account.",
+      "add": "Aggiungi account iCloud",
+      "connectFailed": "Impossibile avviare l'accesso.",
+      "runFailed": "Impossibile avviare il download.",
+      "librariesFailed": "Impossibile elencare le librerie.",
+      "deleteTitle": "Eliminare questo account iCloud?",
+      "deleteHelp": "SysManage dimentica la password e l'accesso di {{account}}. Le foto già scaricate restano nell'archivio dei backup.",
+      "enterCode": "Inserisci codice",
+      "connect": "Connetti",
+      "runNow": "Esegui ora",
+      "libraries": "Elenca librerie"
+    },
+    "status": {
+      "new": "Accesso non ancora eseguito",
+      "ok": "Aggiornato",
+      "running": "In esecuzione",
+      "waitingCode": "In attesa del codice a due fattori",
+      "needsSignIn": "Accesso richiesto",
+      "failed": "Non riuscito"
+    },
+    "action": {
+      "enable": "Abilitazione",
+      "connect": "Accesso",
+      "download": "Scaricamento",
+      "reconcile": "Passaggio completo",
+      "libraries": "Elenca librerie",
+      "remove": "Rimozione"
+    },
+    "reason": {
+      "authFailed": "Apple non ha accettato l'accesso per questo account. Controlla la password, poi premi Connetti e inserisci il codice a due fattori.",
+      "sessionExpired": "Apple richiede un nuovo accesso per questo account. Premi Connetti e inserisci il codice a due fattori.",
+      "codeRejected": "Apple non ha accettato il codice a due fattori. Premi Connetti per riprovare.",
+      "noCode": "Nessun codice a due fattori è stato inserito in tempo. Premi Connetti per riprovare.",
+      "twoStep": "Questo ID Apple usa la vecchia verifica in due passaggi di Apple, che non è supportata. Attiva l'autenticazione a due fattori per questo ID, poi premi Connetti.",
+      "webAccessOff": "I dati iCloud di questo account non sono raggiungibili dal web. Con la protezione avanzata dei dati attiva, attiva \"Accedi ai dati di iCloud sul web\" sull'iPhone (Impostazioni, il tuo nome, iCloud), poi riprova.",
+      "passwordUnavailable": "L'host di archiviazione non ha potuto ottenere la password dal server per questo processo.",
+      "checksumMismatch": "L'icloudpd scaricato non corrispondeva al suo checksum fissato, quindi non è stato installato nulla.",
+      "noPython": "icloudpd richiede Python da 3.10 a 3.13 sull'host di archiviazione. Installane uno (per esempio: pkg install python311), poi premi di nuovo Abilita backup di iCloud.",
+      "wrongPlatform": "icloudpd non è offerto per il sistema operativo dell'host di archiviazione.",
+      "missingTool": "icloudpd non è installato sull'host di archiviazione. Premi Abilita backup di iCloud.",
+      "agentOutdated": "L'agente dell'host di archiviazione è troppo vecchio per il backup di iCloud. Aggiorna l'agente.",
+      "prepareFailed": "Non è stato possibile preparare lo spazio per le foto nell'archivio.",
+      "unknown": "Il processo non è terminato. I dettagli qui sotto spiegano perché."
+    },
+    "dashboard": {
+      "needsSignIn": "Account iCloud che richiedono l'accesso: {{n}}",
+      "failed": "Account iCloud non riusciti: {{n}}",
+      "expiring": "Accessi iCloud che scadono presto: {{n}}"
+    },
+    "title": "Backup cloud",
+    "noTarget": "Le foto di iCloud vengono scaricate dall'host di archiviazione dei backup. Configura prima la destinazione di backup con un host di archiviazione.",
+    "table": {
+      "account": "Account iCloud",
+      "status": "Stato",
+      "lastGood": "Ultimo download",
+      "stored": "Archiviato",
+      "signIn": "Fine dell'accesso",
+      "actions": "Azioni",
+      "identity": "{{appleId}}, libreria {{library}}",
+      "autoDelete": "Elimina da iCloud dopo il download",
+      "progress": "{{action}}: {{n}} scaricate",
+      "lastRun": "Ultima esecuzione: {{downloaded}} nuove, {{present}} già presenti, {{failed}} non riuscite",
+      "storedValue": "{{n}} elementi, {{size}}",
+      "expiring": "Scade presto: premi Connetti"
+    },
+    "code": {
+      "failed": "Impossibile inviare il codice.",
+      "title": "Inserisci il codice a due fattori",
+      "help": "Apple ha inviato un codice di sei cifre ai dispositivi connessi a {{account}}. Digitalo qui entro 15 minuti.",
+      "label": "Codice di sei cifre",
+      "send": "Invia codice"
+    },
+    "enable": {
+      "failedToStart": "Impossibile avviare Abilita backup di iCloud.",
+      "where": "Viene eseguito sul tuo host di archiviazione dei backup, {{host}}. Le foto di iCloud vengono scaricate direttamente nell'archivio dei backup, accanto ai backup degli host e mai dentro uno di essi.",
+      "on": "Abilitato: icloudpd {{version}}",
+      "running": "Installazione di icloudpd e preparazione dell'archivio su {{host}}...",
+      "again": "Ripara o aggiorna",
+      "button": "Abilita backup di iCloud",
+      "root": "Le foto sono conservate in {{path}} (preparato il {{when}})."
     }
   }
 }

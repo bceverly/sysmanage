@@ -18,6 +18,7 @@ backups at risk, so the target says so -- worst first:
 Read-only: it uses what the storage host already reports.
 """
 
+import json
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
@@ -49,12 +50,59 @@ def _contains(mount: str, path: str) -> bool:
     return path == mount or path.startswith(mount.rstrip("/") + "/")
 
 
+def _reported_space(db: Session, host_id, path: str) -> Optional[Dict[str, Any]]:
+    """The storage host's own measurement of ``path`` -- the ``storage_space``
+    finding of its newest storage audit.  On ZFS the disk inventory sees only
+    the storage path's parent dataset, a few KB, with every repository a child
+    dataset beneath it, so a filling pool read 0% (lab) or nothing at all
+    (production nas) and never warned (2026-11-03)."""
+    rows = (
+        db.query(models.BackupPolicy.storage_audit)
+        .join(
+            models.BackupTarget, models.BackupTarget.id == models.BackupPolicy.target_id
+        )
+        .filter(
+            models.BackupTarget.storage_host_id == host_id,
+            models.BackupTarget.storage_path == path,
+            models.BackupPolicy.storage_audit.isnot(None),
+        )
+        .order_by(models.BackupPolicy.storage_audit_at.desc())
+        .all()
+    )
+    for (text,) in rows:
+        try:
+            findings = json.loads(text)
+        except (TypeError, ValueError):
+            continue
+        for finding in findings if isinstance(findings, list) else []:
+            if not isinstance(finding, dict) or finding.get("code") != "storage_space":
+                continue
+            params = finding.get("params") or {}
+            total, available = params.get("total_bytes"), params.get("available_bytes")
+            if isinstance(total, int) and isinstance(available, int) and total > 0:
+                available = max(0, min(available, total))
+                return {
+                    "mount_point": params.get("path") or path,
+                    "total_bytes": total,
+                    "available_bytes": available,
+                    "used_percent": round(100.0 * (total - available) / total, 1),
+                    "backups_bytes": params.get("backups_bytes"),
+                    "filesystem": params.get("filesystem"),
+                }
+    return None
+
+
 def storage_space(
     db: Session, host_id, path: Optional[str]
 ) -> Optional[Dict[str, Any]]:
-    """Total, free and percent used of the filesystem holding ``path``."""
+    """Total, free and percent used of the storage holding ``path``: the
+    storage host's own measurement when it reports one, else the disk
+    inventory's filesystem holding ``path``."""
     if not path:
         return None
+    reported = _reported_space(db, host_id, path)
+    if reported:
+        return reported
     best = None
     for device in (
         db.query(models.StorageDevice)

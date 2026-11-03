@@ -60,6 +60,9 @@ class SecurityRoles(str, Enum):
     #   backup now; restoring is granted apart -- it puts files back on a host.
     MANAGE_BACKUPS = "Manage Backups"
     RESTORE_FILES = "Restore Files"
+    # - Cloud storage to local: iCloud Photos (24.12): add accounts, enter
+    #   two-factor codes, run now, enable it on the storage host.
+    MANAGE_CLOUD_BACKUPS = "Manage Cloud Backups"
     # - Malware Detection (Enterprise malware_engine -- 21.3).  Two roles:
     #   moving a file off a host can break it, so quarantine is granted apart
     #   from scanning.

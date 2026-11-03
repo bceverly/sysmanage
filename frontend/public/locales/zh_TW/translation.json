@@ -5762,5 +5762,108 @@
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "其設定已與標籤原則相符。"
     }
+  },
+  "cloudBackup": {
+    "account": {
+      "saveFailed": "無法儲存帳號。",
+      "editTitle": "變更 iCloud 帳號",
+      "addTitle": "新增 iCloud 帳號",
+      "where": "照片由您的備份儲存主機 {{host}} 下載到備份儲存空間。不會在其他任何主機上安裝任何東西。",
+      "appleId": "Apple ID（電子郵件地址）",
+      "displayName": "在 SysManage 中顯示的名稱",
+      "newPassword": "新的 Apple ID 密碼（留空則保留目前的密碼）",
+      "password": "Apple ID 密碼",
+      "passwordHelp": "保存在 OpenBAO 中，絕不存入資料庫。每次只為一個工作交給儲存主機，且不會再次顯示。",
+      "library": "圖庫",
+      "libraryHelp": "PrimarySync 是個人圖庫。首次登入後，「列出圖庫」會顯示共享圖庫。",
+      "interval": "間隔（小時）",
+      "windowStart": "時段開始（UTC 小時，選填）",
+      "untilFound": "增量下載遇到這麼多已有照片後停止",
+      "untilFoundHelp": "無論此值為何，每週都會進行一次完整檢查，核對整個圖庫。",
+      "enabled": "依排程下載",
+      "autoDelete": "下載後從 iCloud 刪除照片",
+      "autoDeleteWarning": "照片一旦存入備份儲存空間，就會從 iCloud 以及登入此 Apple ID 的所有裝置中刪除。屆時備份儲存空間中保存的是唯一副本。除非您確實需要，否則請保持關閉。",
+      "autoDeleteConfirm": "我了解：下載後從 iCloud 刪除照片",
+      "deleteFailed": "無法刪除帳號。",
+      "add": "新增 iCloud 帳號",
+      "connectFailed": "無法開始登入。",
+      "runFailed": "無法開始下載。",
+      "librariesFailed": "無法列出圖庫。",
+      "deleteTitle": "刪除此 iCloud 帳號？",
+      "deleteHelp": "SysManage 將忘記 {{account}} 的密碼和登入。已下載的照片仍保留在備份儲存空間中。",
+      "enterCode": "輸入驗證碼",
+      "connect": "連線",
+      "runNow": "立即執行",
+      "libraries": "列出圖庫"
+    },
+    "status": {
+      "new": "尚未登入",
+      "ok": "已是最新",
+      "running": "執行中",
+      "waitingCode": "正在等待雙重認證碼",
+      "needsSignIn": "需要登入",
+      "failed": "失敗"
+    },
+    "action": {
+      "enable": "啟用",
+      "connect": "登入",
+      "download": "下載",
+      "reconcile": "完整檢查",
+      "libraries": "列出圖庫",
+      "remove": "移除"
+    },
+    "reason": {
+      "authFailed": "Apple 未接受此帳號的登入。請檢查密碼，然後按「連線」並輸入雙重認證碼。",
+      "sessionExpired": "Apple 要求此帳號重新登入。請按「連線」並輸入雙重認證碼。",
+      "codeRejected": "Apple 未接受雙重認證碼。請按「連線」重試。",
+      "noCode": "未及時輸入雙重認證碼。請按「連線」重試。",
+      "twoStep": "此 Apple ID 使用 Apple 較舊的雙步驟驗證，不受支援。請為其開啟雙重認證，然後按「連線」。",
+      "webAccessOff": "無法透過網頁存取此帳號的 iCloud 資料。如果開啟了進階資料保護，請在 iPhone 上開啟「在網頁上存取 iCloud 資料」（設定、您的名稱、iCloud），然後重試。",
+      "passwordUnavailable": "儲存主機無法從伺服器取得此工作的密碼。",
+      "checksumMismatch": "下載的 icloudpd 與其固定的總和檢查碼不符，因此未安裝任何東西。",
+      "noPython": "icloudpd 需要儲存主機上有 Python 3.10 至 3.13。請安裝一個（例如：pkg install python311），然後再按一次「啟用 iCloud 備份」。",
+      "wrongPlatform": "儲存主機的作業系統不提供 icloudpd。",
+      "missingTool": "儲存主機上未安裝 icloudpd。請按「啟用 iCloud 備份」。",
+      "agentOutdated": "儲存主機的代理程式版本太舊，無法使用 iCloud 備份。請更新代理程式。",
+      "prepareFailed": "無法在儲存空間上準備存放照片的位置。",
+      "unknown": "工作未完成。下方的詳細資料說明了原因。"
+    },
+    "dashboard": {
+      "needsSignIn": "需要登入的 iCloud 帳號：{{n}}",
+      "failed": "失敗的 iCloud 帳號：{{n}}",
+      "expiring": "即將到期的 iCloud 登入：{{n}}"
+    },
+    "title": "雲端備份",
+    "noTarget": "iCloud 照片由備份儲存主機下載。請先為備份目標設定儲存主機。",
+    "table": {
+      "account": "帳號",
+      "status": "狀態",
+      "lastGood": "上次下載",
+      "stored": "已儲存",
+      "signIn": "登入到期",
+      "actions": "動作",
+      "identity": "{{appleId}}，圖庫 {{library}}",
+      "autoDelete": "下載後從 iCloud 刪除",
+      "progress": "{{action}}：已下載 {{n}} 個",
+      "lastRun": "上次執行：新增 {{downloaded}} 個，已有 {{present}} 個，失敗 {{failed}} 個",
+      "storedValue": "{{n}} 個項目，{{size}}",
+      "expiring": "即將到期：請按「連線」"
+    },
+    "code": {
+      "failed": "無法傳送驗證碼。",
+      "title": "輸入雙重認證碼",
+      "help": "Apple 已向登入 {{account}} 的裝置傳送六位數驗證碼。請在 15 分鐘內於此輸入。",
+      "label": "六位數驗證碼",
+      "send": "傳送驗證碼"
+    },
+    "enable": {
+      "failedToStart": "無法開始「啟用 iCloud 備份」。",
+      "where": "在您的備份儲存主機 {{host}} 上執行。iCloud 照片直接下載到備份儲存空間，放在各主機的備份旁邊，絕不放入其中。",
+      "on": "已啟用：icloudpd {{version}}",
+      "running": "正在 {{host}} 上安裝 icloudpd 並準備儲存空間...",
+      "again": "修復或升級",
+      "button": "啟用 iCloud 備份",
+      "root": "照片保存在 {{path}} 下（準備於 {{when}}）。"
+    }
   }
 }

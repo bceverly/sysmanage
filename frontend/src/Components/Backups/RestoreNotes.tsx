@@ -40,7 +40,7 @@ const hookService = (hook: Hook): string => {
     const kind = text(hook.kind);
     const name = text(hook.name);
     if (kind) return name && name !== kind ? `${kind} ${name}` : kind;
-    const base = text(hook.dump_dir).split('/').filter(Boolean).pop() ?? '';
+    const base = text(hook.dump_dir).split('/').findLast(Boolean) ?? '';
     const half = (base.length - 1) / 2;
     // nextcloud-nextcloud: a snap's kind and name are one word.
     return base[half] === '-' && base.slice(0, half) === base.slice(half + 1) ? base.slice(0, half) : base;

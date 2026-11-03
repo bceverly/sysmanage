@@ -11,6 +11,8 @@ vi.mock("react-i18next", async () => {
   return { useTranslation: () => ({ t, i18n: { language: "en" } }) };
 });
 vi.mock("../../../hooks/useVisiblePolling", () => ({ useVisiblePolling: vi.fn() }));
+// Cloud backup (24.12) has its own tests (CloudBackupSection.test.tsx).
+vi.mock("../../../Components/CloudBackup/CloudBackupSection", () => ({ default: () => null }));
 vi.mock("../../../Services/permissions", () => ({
   hasPermission: vi.fn().mockResolvedValue(true),
   SecurityRoles: { MANAGE_BACKUPS: "Manage Backups", RESTORE_FILES: "Restore Files" },

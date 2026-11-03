@@ -102,3 +102,58 @@ def test_each_target_sets_when_space_warns():
     assert health.health_warnings(report(97, low=90, critical=97)) == [
         "storage_space_critical"
     ]
+
+
+def _audit_space(session, s, total, available, backups=None, at=NOW):
+    import json  # pylint: disable=import-outside-toplevel
+
+    s.policy.storage_audit = json.dumps([
+        {"code": "own_filesystem", "level": "ok", "params": {}},
+        {"code": "storage_space", "level": "ok", "params": {
+            "path": s.target.storage_path, "filesystem": "zfs",
+            "total_bytes": total, "available_bytes": available,
+            "backups_bytes": backups}},
+    ])  # fmt: skip
+    s.policy.storage_audit_at = at
+    session.commit()
+
+
+def test_a_zfs_target_is_measured_by_the_storage_host_not_the_inventory(session):
+    """The inventory sees the storage path's own dataset -- a few KB, every
+    repository a child beneath it -- so a 97%-full pool read 0% and never
+    warned (lab and production nas, 2026-11-03).  The storage host's own
+    measurement wins."""
+    s = _setup(session)
+    _disk(session, s.nas, s.target.storage_path, 1000, 1000)  # what statvfs said: 0%
+    _audit_space(session, s, 1000 * GB, 30 * GB, backups=850 * GB)
+    found = health.storage_health(session, s.target, s.nas)
+    assert found["space"]["used_percent"] == 97.0
+    assert found["space"]["backups_bytes"] == 850 * GB
+    assert "storage_space_critical" in health.health_warnings(found)
+
+
+def test_no_inventory_sizes_but_a_measurement_still_warns(session):
+    """nas's inventory carried no sizes for its datasets at all."""
+    s = _setup(session)
+    _audit_space(session, s, 1000 * GB, 100 * GB)
+    found = health.storage_health(session, s.target, s.nas)
+    assert found["space"]["used_percent"] == 90.0
+    assert health.health_warnings(found) == ["storage_space_low"]
+
+
+def test_without_a_measurement_the_inventory_still_counts(session):
+    """An older agent reports no storage_space finding: btrfs and plain
+    filesystems keep today's statvfs reading."""
+    s = _setup(session)
+    _disk(session, s.nas, s.target.storage_path, 1000, 100)
+    found = health.storage_health(session, s.target, s.nas)
+    assert found["space"]["used_percent"] == 90.0
+
+
+def test_a_malformed_measurement_falls_back_to_the_inventory(session):
+    s = _setup(session)
+    _disk(session, s.nas, s.target.storage_path, 1000, 500)
+    _audit_space(session, s, 0, 10)
+    assert (
+        health.storage_health(session, s.target, s.nas)["space"]["used_percent"] == 50.0
+    )

@@ -109,6 +109,12 @@ WINDOW_GATED_COMMANDS = frozenset(
         "backup_restore",
         # installs restate (a PPA plus a package, or pkg add on FreeBSD)
         "equip_backup",
+        # 24.12 iCloud Photos on the storage host: enable installs icloudpd
+        # and creates datasets; a run writes photos.  A sign-in or library
+        # listing (an operator waiting to type a code) is exempt below.
+        "cloud_backup_enable",
+        "cloud_backup_run",
+        "cloud_backup_remove",
         "attach_to_graylog",
         "fips_enable",
         "fips_disable",
@@ -145,6 +151,9 @@ WINDOW_GATED_COMMANDS = frozenset(
 # backup_run actions that only read the repository or the host.
 _READ_ONLY_BACKUP = frozenset({"snapshots", "estimate", "check"})
 
+# cloud_backup_run actions that only sign in or list (an operator is waiting).
+_INTERACTIVE_CLOUD = frozenset({"connect", "libraries"})
+
 # Message types other than "command" that are change actions.
 _GATED_MESSAGE_TYPES = frozenset({"update_request"})
 
@@ -177,4 +186,8 @@ def is_window_gated(message_type: str, message_data: Optional[str]) -> bool:
         return False  # a check-mode run reports drift and changes nothing
     if command_type == "backup_run" and params.get("action") in _READ_ONLY_BACKUP:
         return False  # lists, measures or verifies; changes nothing
+    if command_type == "cloud_backup_run" and params.get("action") in (
+        _INTERACTIVE_CLOUD
+    ):
+        return False  # a sign-in someone is typing a code for right now
     return command_type not in WINDOW_EXEMPT_COMMANDS

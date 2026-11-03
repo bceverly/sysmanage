@@ -5762,5 +5762,108 @@
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Suas configurações já correspondem à política de marcador."
     }
+  },
+  "cloudBackup": {
+    "account": {
+      "saveFailed": "Não foi possível salvar a conta.",
+      "editTitle": "Alterar conta do iCloud",
+      "addTitle": "Adicionar uma conta do iCloud",
+      "where": "As fotos são baixadas pelo seu host de armazenamento de backup, {{host}}, para o armazenamento de backup. Nada é instalado em nenhum outro host.",
+      "appleId": "Apple ID (endereço de e-mail)",
+      "displayName": "Nome exibido no SysManage",
+      "newPassword": "Nova senha do Apple ID (deixe vazio para manter a atual)",
+      "password": "Senha do Apple ID",
+      "passwordHelp": "Guardada no OpenBAO, nunca no banco de dados. É entregue ao host de armazenamento para uma tarefa de cada vez e nunca mais é exibida.",
+      "library": "Biblioteca",
+      "libraryHelp": "PrimarySync é a biblioteca pessoal. Depois do primeiro início de sessão, Listar bibliotecas mostra as compartilhadas.",
+      "interval": "A cada (horas)",
+      "windowStart": "Início da janela (hora UTC, opcional)",
+      "untilFound": "Parar um download incremental após este número de fotos já presentes",
+      "untilFoundHelp": "Uma vez por semana, uma passagem completa verifica a biblioteca inteira, seja qual for este valor.",
+      "enabled": "Baixar conforme o agendamento",
+      "autoDelete": "Excluir as fotos do iCloud depois de baixadas",
+      "autoDeleteWarning": "As fotos serão removidas do iCloud, e de todos os dispositivos conectados a este Apple ID, assim que estiverem no armazenamento de backup. O armazenamento de backup terá então a única cópia. Deixe desativado, a menos que seja exatamente isso que você quer.",
+      "autoDeleteConfirm": "Entendo: excluir as fotos do iCloud depois do download",
+      "deleteFailed": "Não foi possível excluir a conta.",
+      "add": "Adicionar conta do iCloud",
+      "connectFailed": "Não foi possível iniciar o início de sessão.",
+      "runFailed": "Não foi possível iniciar o download.",
+      "librariesFailed": "Não foi possível listar as bibliotecas.",
+      "deleteTitle": "Excluir esta conta do iCloud?",
+      "deleteHelp": "O SysManage esquece a senha e o início de sessão de {{account}}. As fotos já baixadas continuam no armazenamento de backup.",
+      "enterCode": "Digitar código",
+      "connect": "Conectar",
+      "runNow": "Executar agora",
+      "libraries": "Listar bibliotecas"
+    },
+    "status": {
+      "new": "Ainda sem início de sessão",
+      "ok": "Em dia",
+      "running": "Em execução",
+      "waitingCode": "Aguardando o código de dois fatores",
+      "needsSignIn": "Requer início de sessão",
+      "failed": "Com falha"
+    },
+    "action": {
+      "enable": "Ativação",
+      "connect": "Início de sessão",
+      "download": "Baixar fotos",
+      "reconcile": "Passagem completa",
+      "libraries": "Listar bibliotecas",
+      "remove": "Remoção"
+    },
+    "reason": {
+      "authFailed": "A Apple não aceitou o início de sessão desta conta. Verifique a senha, depois clique em Conectar e digite o código de dois fatores.",
+      "sessionExpired": "A Apple pede um novo início de sessão para esta conta. Clique em Conectar e digite o código de dois fatores.",
+      "codeRejected": "A Apple não aceitou o código de dois fatores. Clique em Conectar para tentar de novo.",
+      "noCode": "Nenhum código de dois fatores foi digitado a tempo. Clique em Conectar para tentar de novo.",
+      "twoStep": "Este Apple ID usa a antiga verificação em duas etapas da Apple, que não é suportada. Ative a autenticação de dois fatores para ele e clique em Conectar.",
+      "webAccessOff": "Os dados do iCloud desta conta não podem ser acessados pela web. Com a Proteção Avançada de Dados ativa, ative \"Acessar dados do iCloud na web\" no iPhone (Ajustes, seu nome, iCloud) e tente de novo.",
+      "passwordUnavailable": "O host de armazenamento não conseguiu obter a senha do servidor para esta tarefa.",
+      "checksumMismatch": "O icloudpd baixado não correspondeu à sua soma de verificação fixada, então nada foi instalado.",
+      "noPython": "O icloudpd precisa do Python 3.10 a 3.13 no host de armazenamento. Instale um (por exemplo: pkg install python311) e clique de novo em Ativar backup do iCloud.",
+      "wrongPlatform": "O icloudpd não é oferecido para o sistema operacional do host de armazenamento.",
+      "missingTool": "O icloudpd não está instalado no host de armazenamento. Clique em Ativar backup do iCloud.",
+      "agentOutdated": "O agente do host de armazenamento é antigo demais para o backup do iCloud. Atualize o agente.",
+      "prepareFailed": "Não foi possível preparar o local das fotos no armazenamento.",
+      "unknown": "A tarefa não terminou. Os detalhes abaixo explicam o motivo."
+    },
+    "dashboard": {
+      "needsSignIn": "Contas do iCloud que precisam de início de sessão: {{n}}",
+      "failed": "Contas do iCloud com falha: {{n}}",
+      "expiring": "Sessões do iCloud que vencem em breve: {{n}}"
+    },
+    "title": "Backup na nuvem",
+    "noTarget": "As fotos do iCloud são baixadas pelo host de armazenamento de backup. Configure primeiro o destino de backup com um host de armazenamento.",
+    "table": {
+      "account": "Conta",
+      "status": "Situação",
+      "lastGood": "Último download",
+      "stored": "Armazenado",
+      "signIn": "Fim do início de sessão",
+      "actions": "Ações",
+      "identity": "{{appleId}}, biblioteca {{library}}",
+      "autoDelete": "Exclui do iCloud após o download",
+      "progress": "{{action}}: {{n}} baixadas",
+      "lastRun": "Última execução: {{downloaded}} novas, {{present}} já presentes, {{failed}} com falha",
+      "storedValue": "{{n}} itens, {{size}}",
+      "expiring": "Vence em breve: clique em Conectar"
+    },
+    "code": {
+      "failed": "Não foi possível enviar o código.",
+      "title": "Digite o código de dois fatores",
+      "help": "A Apple enviou um código de seis dígitos aos dispositivos conectados a {{account}}. Digite-o aqui em até 15 minutos.",
+      "label": "Código de seis dígitos",
+      "send": "Enviar código"
+    },
+    "enable": {
+      "failedToStart": "Não foi possível iniciar Ativar backup do iCloud.",
+      "where": "É executado no seu host de armazenamento de backup, {{host}}. As fotos do iCloud são baixadas direto para o armazenamento de backup, ao lado dos backups dos hosts e nunca dentro de um deles.",
+      "on": "Ativado: icloudpd {{version}}",
+      "running": "Instalando o icloudpd e preparando o armazenamento em {{host}}...",
+      "again": "Reparar ou atualizar",
+      "button": "Ativar backup do iCloud",
+      "root": "As fotos ficam em {{path}} (preparado em {{when}})."
+    }
   }
 }
