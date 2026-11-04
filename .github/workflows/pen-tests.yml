@@ -70,6 +70,11 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Run Trivy filesystem scan
+        id: trivy
+        # The action downloads the Trivy binary first, and a one-off network
+        # error there fails the scan before it starts (2026-11-04: curl exit 6,
+        # host not resolved).  So a failure gets one more attempt below.
+        continue-on-error: true
         # NOTE: pin to SHA before merging.
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -82,8 +87,25 @@ jobs:
           # in the Security tab; the run itself is informational.
           exit-code: "0"
 
+      - name: Wait before the second attempt
+        if: steps.trivy.outcome == 'failure'
+        run: sleep 60
+
+      - name: Run Trivy filesystem scan (second attempt)
+        if: steps.trivy.outcome == 'failure'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+
       - name: Upload SARIF to Security tab
-        if: always()
+        # Only a scan that ran has a SARIF file; without one this step would
+        # fail too and bury the real error under "Path does not exist".
+        if: always() && hashFiles('trivy-fs.sarif') != ''
         uses: github/codeql-action/upload-sarif@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4
         with:
           sarif_file: trivy-fs.sarif
