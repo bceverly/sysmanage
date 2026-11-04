@@ -2287,7 +2287,13 @@
     "noVersion": "geen alembic_version-rij gevonden",
     "outro": "uit op de server en herstart vervolgens sysmanage.",
     "requires": "vereist",
-    "title": "Databasemigratie vereist"
+    "title": "Databasemigratie vereist",
+    "pendingIntro": "Een update voor deze Pro+ engines vereist een nieuwere versie van de SysManage server. De geïnstalleerde versie blijft in gebruik totdat de server is geüpgraded.",
+    "pendingItem": "{{version}} wacht; {{kept}} blijft in gebruik",
+    "pendingItemNoKept": "{{version}} wacht",
+    "pendingTitle": "Er wordt gewacht op een nieuwere versie van de SysManage server voor de update van deze Pro+ engines",
+    "serverTooOldIntro": "Deze Pro+ engines zijn gebouwd voor een nieuwere versie van de SysManage server en kunnen niet laden. Het uitvoeren van database-migraties zal niet helpen: upgrade eerst het pakket van de SysManage server, en start dan sysmanage opnieuw.",
+    "serverTooOldTitle": "De Pro+ engine heeft een nieuwere versie van de SysManage server nodig"
   },
   "mirror": {
     "action": {

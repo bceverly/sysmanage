@@ -2298,7 +2298,7 @@
     "regenerate": "Regenerate backup codes",
     "startError": "Could not start enrollment.",
     "statusError": "Could not load MFA status.",
-    "verifyAndEnroll": "Verify & Enrol"
+    "verifyAndEnroll": "Verify & Enroll"
   },
   "migrationCompat": {
     "currently": "currently at",
@@ -2306,7 +2306,13 @@
     "noVersion": "no alembic_version row found",
     "outro": "on the server, then restart sysmanage.",
     "requires": "requires",
-    "title": "Database migration required"
+    "title": "Database migration required",
+    "pendingIntro": "An update to these Pro+ engines needs a newer SysManage server. The installed version stays in use until the server is upgraded.",
+    "pendingItem": "{{version}} is waiting; {{kept}} stays in use",
+    "pendingItemNoKept": "{{version}} is waiting",
+    "pendingTitle": "Pro+ engine update waiting for a newer SysManage server",
+    "serverTooOldIntro": "These Pro+ engines were built for a newer SysManage server and cannot load. Running database migrations will not help: upgrade the SysManage server package, then restart sysmanage.",
+    "serverTooOldTitle": "Pro+ engine needs a newer SysManage server"
   },
   "mirror": {
     "action": {

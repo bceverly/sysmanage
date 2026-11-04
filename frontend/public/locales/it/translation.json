@@ -2287,7 +2287,13 @@
     "noVersion": "nessuna riga alembic_version trovata",
     "outro": "sul server, quindi riavvia sysmanage.",
     "requires": "richiede",
-    "title": "Migrazione del database richiesta"
+    "title": "Migrazione del database richiesta",
+    "pendingIntro": "Un aggiornamento di questi motori Pro+ richiede un server SysManage più recente. La versione installata rimane in uso fino al completamento dell'aggiornamento del server.",
+    "pendingItem": "{{version}} sta aspettando; {{kept}} rimane in uso",
+    "pendingItemNoKept": "{{version}} sta aspettando",
+    "pendingTitle": "L'aggiornamento del motore Pro+ sta aspettando un server SysManage più recente",
+    "serverTooOldIntro": "Questi motori Pro+ sono stati costruiti per un server SysManage più recente e non possono caricarsi. L'esecuzione delle migrazioni del database non aiuterà: aggiornare il pacchetto del server SysManage, quindi riavviare sysmanage.",
+    "serverTooOldTitle": "Il motore Pro+ richiede un server SysManage più recente"
   },
   "mirror": {
     "action": {

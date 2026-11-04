@@ -281,7 +281,7 @@ const MfaEnrollmentCard: React.FC = () => {
               disabled={enrolling || enrollCode.trim() === ''}
               onClick={handleCompleteEnroll}
             >
-              {enrolling ? <CircularProgress size={20} /> : t('mfa.verifyAndEnroll', 'Verify & Enrol')}
+              {enrolling ? <CircularProgress size={20} /> : t('mfa.verifyAndEnroll', 'Verify & Enroll')}
             </Button>
             <Button
               variant="text"

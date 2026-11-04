@@ -2287,7 +2287,13 @@
     "noVersion": "找不到 alembic_version 列",
     "outro": "然後重新啟動 sysmanage。",
     "requires": "需要",
-    "title": "需要資料庫遷移"
+    "title": "需要資料庫遷移",
+    "pendingIntro": "這些 Pro+ 引擎的更新需要較新版本的 SysManage 伺服器。在伺服器升級之前，已安裝的版本將繼續使用。",
+    "pendingItem": "{{version}} 正在等待；{{kept}} 仍在使用",
+    "pendingItemNoKept": "{{version}} 正在等待",
+    "pendingTitle": "Pro+ 引擎更新正在等待較新版本的 SysManage 伺服器",
+    "serverTooOldIntro": "這些 Pro+ 引擎是為較新版本的 SysManage 伺服器建置的，無法載入。執行資料庫遷移無濟於事：請升級 SysManage 伺服器套件，然後重新啟動 sysmanage。",
+    "serverTooOldTitle": "Pro+ 引擎需要較新版本的 SysManage 伺服器"
   },
   "mirror": {
     "action": {

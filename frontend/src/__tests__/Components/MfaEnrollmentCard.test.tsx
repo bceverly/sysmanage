@@ -120,7 +120,7 @@ describe("MfaEnrollmentCard", () => {
     fireEvent.change(await screen.findByLabelText(/^Code from authenticator/), {
       target: { value: "  123456  " },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Verify & Enrol" }));
+    fireEvent.click(screen.getByRole("button", { name: "Verify & Enroll" }));
     // Whitespace pasted from an authenticator app must not reach the server.
     await waitFor(() => expect(enrollComplete).toHaveBeenCalledWith("123456"));
     expect(
@@ -136,7 +136,7 @@ describe("MfaEnrollmentCard", () => {
     fireEvent.change(await screen.findByLabelText(/^Code from authenticator/), {
       target: { value: "000000" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Verify & Enrol" }));
+    fireEvent.click(screen.getByRole("button", { name: "Verify & Enroll" }));
     expect(
       await screen.findByText("Invalid code -- please try again."),
     ).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe("MfaEnrollmentCard", () => {
     fireEvent.change(await screen.findByLabelText(/^Code from authenticator/), {
       target: { value: "123456" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Verify & Enrol" }));
+    fireEvent.click(screen.getByRole("button", { name: "Verify & Enroll" }));
     await screen.findByText("Save your backup codes");
 
     // Done stays disabled until the user confirms they saved the codes --

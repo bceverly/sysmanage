@@ -2287,7 +2287,13 @@
     "noVersion": "alembic_version 행을 찾을 수 없음",
     "outro": "을(를) 실행한 후 sysmanage를 재시작하세요.",
     "requires": "필요:",
-    "title": "데이터베이스 마이그레이션 필요"
+    "title": "데이터베이스 마이그레이션 필요",
+    "pendingIntro": "이 Pro+ 엔진의 업데이트는 더 새로운 SysManage 서버가 필요합니다. 서버가 업그레이드될 때까지 설치 버전은 계속 사용됩니다.",
+    "pendingItem": "{{version}}은 기다리고 있습니다; {{kept}}은 계속 사용 중입니다.",
+    "pendingItemNoKept": "{{version}}은 기다리고 있습니다.",
+    "pendingTitle": "Pro+ 엔진 업데이트는 더 새로운 SysManage 서버를 기다리고 있습니다.",
+    "serverTooOldIntro": "이 Pro+ 엔진들은 더 새로운 SysManage 서버를 위해 만들어졌고, 로드할 수 없습니다. 데이터베이스 마이그레이션을 실행해도 도움이 되지 않습니다: SysManage 서버 패키지를 업그레이드한 후 sysmanage를 재시작하세요.",
+    "serverTooOldTitle": "Pro+ 엔진은 더 새로운 SysManage 서버를 필요로 합니다."
   },
   "mirror": {
     "action": {

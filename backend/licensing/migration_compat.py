@@ -11,6 +11,12 @@ against the current ``alembic_version`` row.  If migrations are stale, the
 module is unloaded and recorded in the registry below so the UI can
 display a banner instructing the operator to run ``alembic upgrade head``.
 
+That advice only works when the required revision is one THIS server ships.
+An engine published for a newer server release names a revision whose
+migration file is not here at all; no migration run can reach it.  Such an
+entry is recorded with ``kind=KIND_SERVER_TOO_OLD`` so the UI says "needs a
+newer SysManage server" instead (see ``backend.licensing.engine_compat``).
+
 The check is a fallback: the normal path is for the operator to run
 migrations as part of their upgrade procedure.  This catches the case where
 a Pro+ module is downloaded after an OSS upgrade but before migrations have
@@ -29,6 +35,12 @@ from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.licensing.migration_compat")
 
+# ``ModuleIncompatibility.kind``: the required revision is in this server's
+# alembic scripts but not applied yet (run the migrations) ...
+KIND_MIGRATION_PENDING = "migration_pending"
+# ... or it is not in this server's scripts at all (the engine is too new).
+KIND_SERVER_TOO_OLD = "server_too_old"
+
 
 @dataclass
 class ModuleIncompatibility:
@@ -38,6 +50,7 @@ class ModuleIncompatibility:
     required_revision: str
     required_revision_human: Optional[str]
     current_revision: Optional[str]
+    kind: str = KIND_MIGRATION_PENDING
 
 
 class _Registry:
@@ -93,6 +106,41 @@ def get_current_oss_revision(session: Session) -> Optional[str]:
     return rows[0][0]
 
 
+def _load_script_directory(alembic_cfg_path: str):
+    """This server's alembic ScriptDirectory, or None if it cannot be read."""
+    try:
+        # pylint: disable=import-outside-toplevel
+        from alembic.config import Config
+        from alembic.script import ScriptDirectory
+    except ImportError:
+        logger.warning("alembic not importable; assuming incompatibility")
+        return None
+
+    try:
+        return ScriptDirectory.from_config(Config(alembic_cfg_path))
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.warning("Could not read alembic config %s: %s", alembic_cfg_path, exc)
+        return None
+
+
+def is_known_revision(revision: str, alembic_cfg_path: str) -> Optional[bool]:
+    """Whether ``revision`` is one of THIS server's alembic migrations.
+
+    True: the migration file ships with this server (running the migrations
+    reaches it).  False: it does not -- whatever needs it was built for a
+    newer server release.  None: the scripts could not be read, so nothing
+    can be said either way.
+    """
+    script = _load_script_directory(alembic_cfg_path)
+    if script is None:
+        return None
+    try:
+        return script.get_revision(revision) is not None
+    except Exception:  # pylint: disable=broad-exception-caught
+        # alembic raises CommandError for an id it cannot locate.
+        return False
+
+
 def is_at_or_above(
     current: Optional[str],
     target: str,
@@ -114,19 +162,8 @@ def is_at_or_above(
     if current == target:
         return True
 
-    try:
-        # pylint: disable=import-outside-toplevel
-        from alembic.config import Config
-        from alembic.script import ScriptDirectory
-    except ImportError:
-        logger.warning("alembic not importable; assuming incompatibility")
-        return False
-
-    try:
-        cfg = Config(alembic_cfg_path)
-        script = ScriptDirectory.from_config(cfg)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        logger.warning("Could not read alembic config %s: %s", alembic_cfg_path, exc)
+    script = _load_script_directory(alembic_cfg_path)
+    if script is None:
         return False
 
     visited: Set[str] = set()
@@ -175,13 +212,27 @@ def check_module_compatibility(
         _registry.clear(module_code)
         return None
 
+    too_old = is_known_revision(required, alembic_cfg_path) is False
     incompat = ModuleIncompatibility(
         module_code=module_code,
         required_revision=required,
         required_revision_human=module_info.get("min_oss_alembic_revision_human"),
         current_revision=current,
+        kind=KIND_SERVER_TOO_OLD if too_old else KIND_MIGRATION_PENDING,
     )
     _registry.record(incompat)
+    if too_old:
+        logger.error(
+            "Pro+ module %s %s needs a newer SysManage server: it requires OSS "
+            "alembic revision %s, which this server does not ship (current is "
+            "%s). Running migrations cannot help; upgrade the SysManage server "
+            "package.",
+            module_code,
+            module_info.get("version", ""),
+            required,
+            current or "(none)",
+        )
+        return incompat
     logger.error(
         "Pro+ module %s requires OSS alembic revision %s (%s); "
         "current is %s. Run 'alembic upgrade head' to apply pending migrations.",

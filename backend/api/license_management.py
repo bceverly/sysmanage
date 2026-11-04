@@ -167,12 +167,25 @@ class ModuleCompatibilityEntry(BaseModel):
     required_revision: str
     required_revision_human: Optional[str] = None
     current_revision: Optional[str] = None
+    # "migration_pending": run the migrations.  "server_too_old": the required
+    # revision is not one this server ships; only a newer server helps.
+    kind: str = "migration_pending"
+
+
+class PendingEngineUpdateEntry(BaseModel):
+    """An engine update that waits for a newer SysManage server."""
+
+    module_code: str
+    version: Optional[str] = None
+    required_revision: str
+    kept_version: Optional[str] = None
 
 
 class ModuleCompatibilityResponse(BaseModel):
-    """List of Pro+ modules that need a database migration before they will load."""
+    """Pro+ modules that cannot load (or update) on this server's schema."""
 
     incompatibilities: List[ModuleCompatibilityEntry]
+    pending_updates: List[PendingEngineUpdateEntry] = Field(default_factory=list)
 
 
 @router.get("/license/module-compat", response_model=ModuleCompatibilityResponse)
@@ -184,11 +197,15 @@ async def get_module_compatibility(
     above the current ``alembic_version`` row.
 
     The UI displays a banner when this list is non-empty, instructing the
-    operator to run ``alembic upgrade head``.  This is a fallback safety
-    net -- the normal path is for migrations to be run as part of the
-    upgrade procedure.
+    operator to run ``alembic upgrade head`` -- or, for ``kind ==
+    "server_too_old"``, to upgrade the SysManage server.  This is a fallback
+    safety net -- the normal path is for migrations to be run as part of the
+    upgrade procedure.  ``pending_updates`` lists engine updates that were
+    not installed because they need a newer server; the installed version
+    of each stays in use.
     """
     # pylint: disable=import-outside-toplevel
+    from backend.licensing.engine_compat import get_pending_updates
     from backend.licensing.migration_compat import get_incompatibilities
 
     del current_user  # auth-only check; no per-user filtering
@@ -199,7 +216,19 @@ async def get_module_compatibility(
             required_revision=item.required_revision,
             required_revision_human=item.required_revision_human,
             current_revision=item.current_revision,
+            kind=item.kind,
         )
         for item in get_incompatibilities()
     ]
-    return ModuleCompatibilityResponse(incompatibilities=entries)
+    pending = [
+        PendingEngineUpdateEntry(
+            module_code=item.module_code,
+            version=item.version,
+            required_revision=item.required_revision,
+            kept_version=item.kept_version,
+        )
+        for item in get_pending_updates()
+    ]
+    return ModuleCompatibilityResponse(
+        incompatibilities=entries, pending_updates=pending
+    )

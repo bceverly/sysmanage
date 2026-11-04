@@ -25,6 +25,7 @@ import aiohttp
 from sqlalchemy.orm import sessionmaker
 
 from backend.config.config import get_config
+from backend.licensing import engine_compat
 from backend.licensing.module_loader_mixin import ModuleLoaderUpdatesMixin
 from backend.licensing.module_signature import ModuleSignatureError, verify_module_dir
 from backend.licensing.plugin_bundle_loader import PluginBundleLoader
@@ -445,14 +446,27 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
             # locales/<lang>/LC_MESSAGES/<code>.mo + metadata.json).  Extract it
             # so locales/ sits beside the .so -- the loader binds each module's
             # gettext catalog from <so_dir>/locales at load time.
-            so_path = self._extract_module_bundle(
-                temp_path,
-                modules_path,
-                module_code,
-                platform_info["python_version"],
-            )
+            try:
+                so_path = self._extract_module_bundle(
+                    temp_path,
+                    modules_path,
+                    module_code,
+                    platform_info["python_version"],
+                )
+            except engine_compat.EngineTooNewError as exc:
+                # Built for a newer server: the installed engine stays.
+                engine_compat.record_deferred(
+                    exc,
+                    actual_version,
+                    actual_hash,
+                    self._get_cached_module_version(module_code),
+                )
+                return self.is_module_loaded(
+                    module_code
+                ) or self._load_module_from_path(module_code, exc.live_path)
             if so_path is None:
                 return False
+            engine_compat.clear_pending_update(module_code)
 
             # Save to cache database (points at the extracted .so)
             self._save_module_to_cache(
@@ -656,6 +670,14 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
                     exc,
                 )
                 return None
+            # Too new for this server (a revision it does not ship)?  Raises,
+            # leaving the installed engine in place (engine_compat).
+            engine_compat.refuse_if_too_new(
+                os.path.join(staging_dir, compiled[0]),
+                module_code,
+                module_dir,
+                self._get_alembic_cfg_path(),
+            )
             # Bundle is good -- atomically swap in: move the live dir aside (rename
             # onto a non-empty POSIX dir fails), then restore on failure.
             backup_dir = f"{module_dir}.old.{os.getpid()}"

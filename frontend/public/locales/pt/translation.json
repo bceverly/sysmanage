@@ -2287,7 +2287,13 @@
     "noVersion": "nenhuma linha alembic_version encontrada",
     "outro": "no servidor e reinicie o sysmanage.",
     "requires": "requer",
-    "title": "Migração de banco de dados necessária"
+    "title": "Migração de banco de dados necessária",
+    "pendingIntro": "Uma atualização para esses motores Pro+ requer um servidor SysManage mais novo. A versão instalada continuará em uso até que o servidor seja atualizado.",
+    "pendingItem": "{{version}} está aguardando; {{kept}} continua em uso",
+    "pendingItemNoKept": "{{version}} está aguardando",
+    "pendingTitle": "A atualização do motor Pro+ está aguardando um servidor SysManage mais novo",
+    "serverTooOldIntro": "Esses motores Pro+ foram construídos para um servidor SysManage mais novo e não podem carregar. Executar migrações de banco de dados não ajudará: atualize o pacote do servidor SysManage, depois reinicie o sysmanage.",
+    "serverTooOldTitle": "O motor Pro+ precisa de um servidor SysManage mais novo"
   },
   "mirror": {
     "action": {

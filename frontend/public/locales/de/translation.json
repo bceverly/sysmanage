@@ -2287,7 +2287,13 @@
     "noVersion": "keine alembic_version-Zeile gefunden",
     "outro": "auf dem Server aus und starten Sie dann sysmanage neu.",
     "requires": "erfordert",
-    "title": "Datenbankmigration erforderlich"
+    "title": "Datenbankmigration erforderlich",
+    "pendingIntro": "Ein Update für diese Pro+ Engines erfordert einen neueren SysManage-Server. Die installierte Version bleibt bis zur Server-Aktualisierung im Einsatz.",
+    "pendingItem": "{{version}} wartet; {{kept}} bleibt im Einsatz",
+    "pendingItemNoKept": "{{version}} wartet",
+    "pendingTitle": "Warte auf einen neuen SysManage-Server für das Update der Pro+ Engine",
+    "serverTooOldIntro": "Diese Pro+ Engines wurden für einen neueren SysManage-Server gebaut und können sich nicht laden. Das Ausführen von Datenbankmigrationen hilft nicht: Aktualisieren Sie zunächst das Paket des SysManage-Servers, dann starten Sie sysmanage neu.",
+    "serverTooOldTitle": "Die Pro+ Engine benötigt einen neueren SysManage-Server"
   },
   "mirror": {
     "action": {

@@ -2287,7 +2287,13 @@
     "noVersion": "aucune ligne alembic_version trouvée",
     "outro": "sur le serveur, puis redémarrez sysmanage.",
     "requires": "nécessite",
-    "title": "Migration de base de données requise"
+    "title": "Migration de base de données requise",
+    "pendingIntro": "Une mise à jour de ces moteurs Pro+ nécessite un serveur SysManage plus récent. La version installée reste en utilisation jusqu'à ce que le serveur soit mis à niveau.",
+    "pendingItem": "{{version}} attend ; {{kept}} reste en utilisation",
+    "pendingItemNoKept": "{{version}} attend",
+    "pendingTitle": "La mise à jour du moteur Pro+ attend un serveur SysManage plus récent",
+    "serverTooOldIntro": "Ces moteurs Pro+ ont été construits pour un serveur SysManage plus récent et ne peuvent pas se charger. L'exécution des migrations de base de données n'aidera pas : mettez à niveau le paquet du serveur SysManage, puis redémarrez sysmanage.",
+    "serverTooOldTitle": "Le moteur Pro+ a besoin d'un serveur SysManage plus récent"
   },
   "mirror": {
     "action": {

@@ -20,6 +20,7 @@ from typing import Any, Dict, List
 import aiohttp
 
 from backend.config.config import get_config
+from backend.licensing import engine_compat
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.licensing.module_loader")
@@ -153,6 +154,9 @@ class ModuleLoaderUpdatesMixin:
         server_versions = server_data.get("modules", server_data)
         if not isinstance(server_versions, dict):
             return []
+        # A build already refused as too new for this server is not fetched
+        # again every cycle (engine_compat).
+        server_versions = engine_compat.drop_deferred(server_versions)
 
         updates_available = []
 
@@ -252,7 +256,14 @@ class ModuleLoaderUpdatesMixin:
                 continue
             module_code, success = item
             results[module_code] = success
-            if success:
+            deferred = engine_compat.is_deferred_module(module_code)
+            if success and deferred:
+                logger.info(
+                    "Module %s update deferred until a newer SysManage server; "
+                    "the installed version stays in use",
+                    module_code,
+                )
+            elif success:
                 logger.info("Module %s updated successfully", module_code)
             else:
                 logger.error(

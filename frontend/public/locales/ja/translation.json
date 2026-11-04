@@ -2287,7 +2287,13 @@
     "noVersion": "alembic_version 行が見つかりません",
     "outro": "を実行してから、sysmanageを再起動してください。",
     "requires": "必要",
-    "title": "データベースの移行が必要です"
+    "title": "データベースの移行が必要です",
+    "pendingIntro": "これらの Pro+ エンジンへの更新には、より新しい SysManage サーバーが必要です。サーバーがアップグレードされるまで、インストールされたバージョンが使用され続けます。",
+    "pendingItem": "{{version}} は待機中です； {{kept}} は使用され続けています",
+    "pendingItemNoKept": "{{version}} は待機中です",
+    "pendingTitle": "Pro+ エンジンの更新は、より新しい SysManage サーバーの利用を待っています",
+    "serverTooOldIntro": "これらの Pro+ エンジンは、より新しい SysManage サーバー向けに構築されており、ロードできません。データベースのマイグレーションを実行しても役立ちません：SysManage サーバーパッケージをアップグレードし、sysmanage を再起動してください。",
+    "serverTooOldTitle": "Pro+ エンジンはより新しい SysManage サーバーを必要とします"
   },
   "mirror": {
     "action": {
