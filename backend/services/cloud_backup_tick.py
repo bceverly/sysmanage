@@ -20,6 +20,12 @@ host:
    the backup target's ``max_concurrent`` with the fleet's captures;
 3. an account that needs sign-in is never started on schedule (it would
    only fail again); the Backups page says so;
+3a. when Apple refuses to serve a download (HTTP 503: it limits how fast one
+   account downloads), the download is tried again by itself -- schedule on
+   or off -- after a cooldown that doubles, 1 h, 2 h, 4 h, 8 h, then 12 h.
+   After ``APPLE_MAX_TRIES`` refusals in a row an account with its schedule
+   off stops trying (the page says so); one with a schedule keeps trying
+   every 12 hours.  Nothing is lost: the next run skips what is present;
 4. warn before Apple's two-factor sign-in runs out (about two months): once
    per session, in the log, and by e-mail to the cloud backup managers when
    e-mail is configured.
@@ -45,6 +51,13 @@ SILENT_AFTER = timedelta(hours=3)
 FAILED_RETRY = timedelta(hours=1)
 WINDOW_HOURS = 6
 SESSION_AUDIT = "iCloud sign-in expiry warning"
+APPLE_BUSY = "apple_busy"
+# What icloudpd prints when Apple answers 503 (pyicloud_ipd/utils.py); an
+# agent older than the "apple_busy" reason reports it as "tool_failed".
+APPLE_BUSY_MARKER = "Apple iCloud is temporary refusing to serve icloudpd"
+APPLE_COOLDOWNS = tuple(timedelta(hours=h) for h in (1, 2, 4, 8, 12))
+APPLE_MAX_TRIES = 10
+COOLING_DOWN = "cooling_down"
 MANAGE_CLOUD_BACKUPS_ROLE = "Manage Cloud Backups"
 
 
@@ -112,6 +125,43 @@ def _last(db: Session, account_id, statuses) -> Optional[models.CloudBackupRun]:
     )
 
 
+def _apple_busy(run: models.CloudBackupRun) -> bool:
+    return (cloud.parse_json(run.result) or {}).get("reason") == APPLE_BUSY
+
+
+def apple_refusals(db: Session, account_id) -> List[models.CloudBackupRun]:
+    """The account's latest downloads Apple refused, newest first, back to
+    the last one that ended any other way."""
+    recent = (
+        db.query(models.CloudBackupRun)
+        .filter(
+            models.CloudBackupRun.account_id == account_id,
+            models.CloudBackupRun.action.in_(cloud.TRANSFER_ACTIONS),
+            models.CloudBackupRun.status.in_(cloud.FINAL),
+        )
+        .order_by(models.CloudBackupRun.queued_at.desc())
+        .limit(APPLE_MAX_TRIES)
+        .all()
+    )
+    refused = []
+    for run in recent:
+        if not _apple_busy(run):
+            break
+        refused.append(run)
+    return refused
+
+
+def apple_retry_at(db: Session, account: models.CloudBackupAccount):
+    """When the download Apple refused is tried again, or None when it is not
+    waiting on Apple (or has stopped trying: schedule off, too many tries)."""
+    refused = apple_refusals(db, account.id)
+    if not refused or (len(refused) >= APPLE_MAX_TRIES and not account.enabled):
+        return None
+    cooldown = APPLE_COOLDOWNS[min(len(refused), len(APPLE_COOLDOWNS)) - 1]
+    last = refused[0]
+    return (last.finished_at or last.queued_at) + cooldown
+
+
 def in_window(account: models.CloudBackupAccount, now: datetime) -> bool:
     if account.window_start_hour is None:
         return True
@@ -122,11 +172,16 @@ def due(db: Session, account: models.CloudBackupAccount, now: datetime) -> bool:
     """Whether the account's scheduled download may start now."""
     if account.run_requested_at is not None:
         return True
-    if not account.enabled or account.state == cloud.STATE_NEEDS_SIGN_IN:
+    if account.state == cloud.STATE_NEEDS_SIGN_IN:
         return False
     if account.session_created_at is None:
         return False  # never signed in: "Connect" first
     if not in_window(account, now):
+        return False
+    retry = apple_retry_at(db, account)
+    if retry is not None:  # Apple refused the last one: finish it, schedule or not
+        return now >= retry
+    if not account.enabled:
         return False
     last = _last(db, account.id, cloud.FINAL)
     if last is None:

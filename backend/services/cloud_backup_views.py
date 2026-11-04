@@ -75,9 +75,10 @@ def _last_run(db: Session, account_id) -> Optional[models.CloudBackupRun]:
     )
 
 
-def status_of(account: models.CloudBackupAccount, current) -> str:
+def status_of(account: models.CloudBackupAccount, current, retry_at=None) -> str:
     """The one word the page shows: running, waiting_code, needs_sign_in,
-    failed, ok, or new (never signed in)."""
+    cooling_down (Apple refused; tried again at ``retry_at``), failed, ok, or
+    new (never signed in)."""
     if current is not None:
         return (
             cloud.WAITING_CODE
@@ -88,6 +89,8 @@ def status_of(account: models.CloudBackupAccount, current) -> str:
         return cloud.NEEDS_SIGN_IN
     if account.session_created_at is None:
         return cloud.STATE_NEW
+    if retry_at is not None:
+        return tick.COOLING_DOWN
     return account.state
 
 
@@ -95,6 +98,7 @@ def account_dict(db: Session, account: models.CloudBackupAccount) -> Dict[str, A
     now = cloud.now()
     current = _current_run(db, account.id)
     last = _last_run(db, account.id)
+    retry_at = tick.apple_retry_at(db, account) if current is None else None
     return {
         "id": str(account.id),
         "provider": account.provider,
@@ -109,7 +113,8 @@ def account_dict(db: Session, account: models.CloudBackupAccount) -> Dict[str, A
         "interval_hours": account.interval_hours,
         "window_start_hour": account.window_start_hour,
         "until_found": account.until_found,
-        "status": status_of(account, current),
+        "status": status_of(account, current, retry_at),
+        "retry_at": _iso(retry_at),
         "state_message": account.state_message,
         "session_created_at": _iso(account.session_created_at),
         "session_expires_at": _iso(tick.expires_at(account)),
@@ -216,8 +221,10 @@ def summary(db: Session) -> Dict[str, Any]:
     now = cloud.now()
     for account in accounts(db, target.id):
         counts["accounts"] += 1
-        word = status_of(account, _current_run(db, account.id))
-        if word in (cloud.RUNNING, cloud.WAITING_CODE):
+        current = _current_run(db, account.id)
+        retry_at = tick.apple_retry_at(db, account) if current is None else None
+        word = status_of(account, current, retry_at)
+        if word in (cloud.RUNNING, cloud.WAITING_CODE, tick.COOLING_DOWN):
             counts["running"] += 1
         elif word == cloud.NEEDS_SIGN_IN:
             counts["needs_sign_in"] += 1

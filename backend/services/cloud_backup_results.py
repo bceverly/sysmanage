@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from backend.persistence import models
 from backend.services import cloud_backup_jobs as cloud
+from backend.services import cloud_backup_tick as tick
 
 logger = logging.getLogger(__name__)
 
@@ -163,6 +164,16 @@ def _account_result(
         account.bytes_local = size
 
 
+def _reason(payload: Dict[str, Any], detail: Optional[str]) -> Optional[str]:
+    """The agent's reason code; Apple's refusal named even when an older agent
+    called it "tool_failed", so the cooldown retry (cloud_backup_tick) works
+    with it too."""
+    reason = _text(payload.get("reason"), 64)
+    if reason in (None, "tool_failed") and tick.APPLE_BUSY_MARKER in (detail or ""):
+        return tick.APPLE_BUSY
+    return reason
+
+
 def record_result(db: Session, host_id: Any, payload: Dict[str, Any]):
     """Store one job's outcome; the run, or None when ignored."""
     run = _run(db, host_id, payload)
@@ -187,10 +198,11 @@ def record_result(db: Session, host_id: Any, payload: Dict[str, Any]):
     run.present = _int(payload.get("present"))
     run.failed_count = _int(payload.get("failed"))
     run.bytes_downloaded = _int(payload.get("bytes"))
+    detail = _text(payload.get("detail"))
     run.result = json.dumps(
         {
-            "reason": _text(payload.get("reason"), 64),
-            "detail": _text(payload.get("detail")),
+            "reason": _reason(payload, detail),
+            "detail": detail,
             "duration": _int(payload.get("duration")),
         }
     )
