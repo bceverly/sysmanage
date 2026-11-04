@@ -5,7 +5,7 @@
 """q78cloudbackup: the three iCloud Photos tables and the Manage Cloud Backups
 role are created, a re-run is a no-op, and a downgrade removes both (SQLite;
 the PostgreSQL path differs only in the CAST of role ids).  q79cloudnodelete:
-the account's deletion setting is gone, and stays gone on a re-run."""
+every account's deletion setting is switched off, and stays off on a re-run."""
 
 import contextlib
 import os
@@ -90,19 +90,42 @@ def test_the_migration_is_idempotent_and_reversible():
             os.unlink(db_path)
 
 
+def _auto_delete_values(db_path):
+    conn = sqlite3.connect(db_path)
+    try:
+        return [
+            r[0] for r in conn.execute("SELECT auto_delete FROM cloud_backup_account")
+        ]
+    finally:
+        conn.close()
+
+
 def test_no_deletion_setting_survives_the_upgrade():
     fd, db_path = tempfile.mkstemp(suffix=".db")
     os.close(fd)
     try:
+        _alembic(["upgrade", "q78cloudbackup"], db_path)
+        conn = sqlite3.connect(db_path)
+        try:
+            for name, on in (("on", 1), ("off", 0)):
+                conn.execute(
+                    "INSERT INTO cloud_backup_account "
+                    "(id, target_id, apple_id, display_name, dir_name, auto_delete) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    (name, "t", f"{name}@example.com", name, name, on),
+                )
+            conn.commit()
+        finally:
+            conn.close()
         _alembic(["upgrade", "head"], db_path)
-        assert "auto_delete" not in _state(db_path)[3]
-        _alembic(["downgrade", "q78cloudbackup"], db_path)
+        assert _auto_delete_values(db_path) == [0, 0]
+        # Expand-contract: the column stays this release (a later one drops it).
         assert "auto_delete" in _state(db_path)[3]
-        _alembic(["upgrade", "head"], db_path)
         _alembic(["stamp", "q78cloudbackup"], db_path)
-        _alembic(["upgrade", "head"], db_path)  # already gone: a no-op
-        tables, _roles, _indexes, columns = _state(db_path)
-        assert tables == _TABLES and "auto_delete" not in columns
+        _alembic(["upgrade", "head"], db_path)  # already off: a no-op
+        assert _auto_delete_values(db_path) == [0, 0]
+        _alembic(["downgrade", "q78cloudbackup"], db_path)
+        assert _auto_delete_values(db_path) == [0, 0]
     finally:
         with contextlib.suppress(OSError):
             os.unlink(db_path)
