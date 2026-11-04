@@ -5791,9 +5791,6 @@
       "untilFound": "增量下載遇到這麼多已有照片後停止",
       "untilFoundHelp": "無論此值為何，每週都會進行一次完整檢查，核對整個圖庫。",
       "enabled": "依排程下載",
-      "autoDelete": "下載後從 iCloud 刪除照片",
-      "autoDeleteWarning": "照片一旦存入備份儲存空間，就會從 iCloud 以及登入此 Apple ID 的所有裝置中刪除。屆時備份儲存空間中保存的是唯一副本。除非您確實需要，否則請保持關閉。",
-      "autoDeleteConfirm": "我了解：下載後從 iCloud 刪除照片",
       "deleteFailed": "無法刪除帳號。",
       "add": "新增 iCloud 帳號",
       "connectFailed": "無法開始登入。",
@@ -5853,11 +5850,12 @@
       "signIn": "登入到期",
       "actions": "動作",
       "identity": "{{appleId}}，圖庫 {{library}}",
-      "autoDelete": "下載後從 iCloud 刪除",
       "progress": "{{action}}：已下載 {{n}} 個",
       "lastRun": "上次執行：新增 {{downloaded}} 個，已有 {{present}} 個，失敗 {{failed}} 個",
       "storedValue": "{{n}} 個項目，{{size}}",
-      "expiring": "即將到期：請按「連線」"
+      "expiring": "即將到期：請按「連線」",
+      "librariesFound": "找到的圖庫：{{names}}。請透過「編輯」選擇一個。",
+      "librariesOnlyPersonal": "只找到個人圖庫：沒有可選擇的共享圖庫。"
     },
     "code": {
       "failed": "無法傳送驗證碼。",

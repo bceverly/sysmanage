@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-03 10:16-0500\n"
+"POT-Creation-Date: 2026-11-04 14:32-0500\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -74,7 +74,7 @@ msgid "You do not have access to the selected account."
 msgstr "आपके पास चयनित खाते के लिए पहुंच नहीं है।"
 
 #: backend/api/asset_tags.py:59 backend/api/malware.py:118
-#: backend/api/cloud_backup.py:93 backend/api/time_sync_policy.py:54
+#: backend/api/cloud_backup.py:92 backend/api/time_sync_policy.py:54
 #: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:56
 #: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
 #: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
@@ -263,66 +263,61 @@ msgstr "सलाहकार प्रबंधन के लिए SysManage P
 msgid "No applicable packages for this advisory on this host."
 msgstr "इस होस्ट पर इस सलाहकार के लिए उपयुक्त पैकेज नहीं मिले।"
 
-#: backend/api/cloud_backup.py:85
+#: backend/api/cloud_backup.py:84
 msgid "Not available on this server"
 msgstr "इस सर्वर पर उपलब्ध नहीं है"
 
-#: backend/api/cloud_backup.py:129
+#: backend/api/cloud_backup.py:128
 msgid "Cloud backup account not found"
 msgstr "क्लाउड बैकअप खाता नहीं मिला"
 
-#: backend/api/cloud_backup.py:137 backend/api/backups.py:190
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:190
 #, python-format
 msgid "%s is out of range"
 msgstr "%s अनुमत सीमा से बाहर है"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:258
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:258
 msgid "Interval (hours)"
 msgstr "अंतराल (घंटे)"
 
-#: backend/api/cloud_backup.py:143 backend/api/backups.py:259
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:259
 msgid "Window start hour"
 msgstr "विंडो का प्रारंभ घंटा"
 
-#: backend/api/cloud_backup.py:144
+#: backend/api/cloud_backup.py:143
 msgid "Stop after photos already present"
 msgstr "इतनी पहले से मौजूद तस्वीरों के बाद रुकें"
 
-#: backend/api/cloud_backup.py:149
-msgid ""
-"Confirm that photos will be deleted from iCloud once they are downloaded"
-msgstr "पुष्टि करें कि डाउनलोड होने के बाद तस्वीरें iCloud से हटा दी जाएँगी"
-
-#: backend/api/cloud_backup.py:213
+#: backend/api/cloud_backup.py:203
 msgid "iCloud backup is already being enabled"
 msgstr "iCloud बैकअप पहले से सक्षम किया जा रहा है"
 
-#: backend/api/cloud_backup.py:257
+#: backend/api/cloud_backup.py:247
 msgid "Too many cloud accounts"
 msgstr "बहुत अधिक क्लाउड खाते"
 
-#: backend/api/cloud_backup.py:263
+#: backend/api/cloud_backup.py:253
 msgid "This Apple ID and library are already added"
 msgstr "यह Apple ID और लाइब्रेरी पहले से जोड़ी जा चुकी हैं"
 
-#: backend/api/cloud_backup.py:273 backend/api/cloud_backup.py:315
+#: backend/api/cloud_backup.py:263 backend/api/cloud_backup.py:305
 #, python-format
 msgid "OpenBAO could not store the password: %s"
 msgstr "OpenBAO पासवर्ड संग्रहीत नहीं कर सका: %s"
 
-#: backend/api/cloud_backup.py:379 backend/api/cloud_backup.py:425
+#: backend/api/cloud_backup.py:369 backend/api/cloud_backup.py:417
 msgid "Sign in to this account first (Connect)"
 msgstr "पहले इस खाते में साइन इन करें (कनेक्ट करें)"
 
-#: backend/api/cloud_backup.py:430 backend/services/cloud_backup_jobs.py:260
+#: backend/api/cloud_backup.py:422 backend/services/cloud_backup_jobs.py:258
 msgid "Enable iCloud backup on the storage host first"
 msgstr "पहले स्टोरेज होस्ट पर iCloud बैकअप सक्षम करें"
 
-#: backend/api/cloud_backup.py:435 backend/services/cloud_backup_jobs.py:264
+#: backend/api/cloud_backup.py:427 backend/services/cloud_backup_jobs.py:262
 msgid "A job for this account is already queued or running"
 msgstr "इस खाते का एक जॉब पहले से कतार में है या चल रहा है"
 
-#: backend/api/cloud_backup.py:475
+#: backend/api/cloud_backup.py:467
 msgid "Cloud backup run not found"
 msgstr "क्लाउड बैकअप रन नहीं मिला"
 
@@ -5824,11 +5819,11 @@ msgstr "यह नाम एक क्यूरेटेड नियम से�
 msgid "None of these rules can run under ClamAV"
 msgstr "इनमें से कोई भी नियम ClamAV के अंतर्गत नहीं चल सकता"
 
-#: backend/services/cloud_backup_tick.py:235
+#: backend/services/cloud_backup_tick.py:247
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "iCloud साइन-इन जल्द समाप्त होगा: फिर से साइन इन करें"
 
-#: backend/services/cloud_backup_tick.py:237
+#: backend/services/cloud_backup_tick.py:249
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, "
@@ -5921,39 +5916,39 @@ msgstr "Apple ID का पासवर्ड दर्ज करें"
 msgid "OpenBAO did not say where it stored the password"
 msgstr "OpenBAO ने नहीं बताया कि उसने पासवर्ड कहाँ संग्रहीत किया"
 
-#: backend/services/cloud_backup_secrets.py:107
+#: backend/services/cloud_backup_secrets.py:109
 msgid "This account has no password in OpenBAO"
 msgstr "इस खाते का OpenBAO में कोई पासवर्ड नहीं है"
 
-#: backend/services/cloud_backup_secrets.py:111
+#: backend/services/cloud_backup_secrets.py:113
 msgid "OpenBAO does not hold this account's password"
 msgstr "OpenBAO में इस खाते का पासवर्ड नहीं है"
 
-#: backend/services/cloud_backup_secrets.py:127
+#: backend/services/cloud_backup_secrets.py:129
 msgid "No such cloud backup run for this host"
 msgstr "इस होस्ट के लिए ऐसा कोई क्लाउड बैकअप रन नहीं है"
 
-#: backend/services/cloud_backup_secrets.py:133
+#: backend/services/cloud_backup_secrets.py:135
 msgid "This cloud backup run does not sign in"
 msgstr "यह क्लाउड बैकअप रन साइन इन नहीं करता"
 
-#: backend/services/cloud_backup_secrets.py:135
+#: backend/services/cloud_backup_secrets.py:137
 msgid "This cloud backup run has already ended"
 msgstr "यह क्लाउड बैकअप रन पहले ही समाप्त हो चुका है"
 
-#: backend/services/cloud_backup_secrets.py:140
+#: backend/services/cloud_backup_secrets.py:142
 msgid "This cloud backup run is too old"
 msgstr "यह क्लाउड बैकअप रन बहुत पुराना है"
 
-#: backend/services/cloud_backup_secrets.py:150
+#: backend/services/cloud_backup_secrets.py:152
 msgid "This cloud backup account was deleted"
 msgstr "यह क्लाउड बैकअप खाता हटा दिया गया था"
 
-#: backend/services/cloud_backup_secrets.py:162
+#: backend/services/cloud_backup_secrets.py:164
 msgid "This run's password was already released"
 msgstr "इस रन का पासवर्ड पहले ही दिया जा चुका है"
 
-#: backend/services/cloud_backup_secrets.py:184
+#: backend/services/cloud_backup_secrets.py:185
 msgid "This sign-in is not waiting for a code"
 msgstr "यह साइन-इन किसी कोड की प्रतीक्षा नहीं कर रहा है"
 
@@ -6029,49 +6024,49 @@ msgstr ""
 "कोई होस्ट के लिए फ़ाइल वॉच लिस्ट असाइन नहीं की गई है, इसलिए तुलना करने के लिए कुछ भी "
 "नहीं है"
 
-#: backend/services/backup_breakglass.py:175
+#: backend/services/backup_breakglass.py:177
 #, python-format
 msgid "gpg failed: %s"
 msgstr "gpg विफल: %s"
 
-#: backend/services/backup_breakglass.py:193
+#: backend/services/backup_breakglass.py:195
 msgid "gpg is not installed on the SysManage server; install GnuPG"
 msgstr "SysManage सर्वर पर gpg स्थापित नहीं है; GnuPG स्थापित करें"
 
-#: backend/services/backup_breakglass.py:203
-#: backend/services/backup_breakglass.py:227
+#: backend/services/backup_breakglass.py:205
+#: backend/services/backup_breakglass.py:228
 msgid "gpg could not read that public key"
 msgstr "gpg उस सार्वजनिक कुंजी को पढ़ नहीं सका"
 
-#: backend/services/backup_breakglass.py:211
-#: backend/services/backup_breakglass.py:218
+#: backend/services/backup_breakglass.py:213
+#: backend/services/backup_breakglass.py:220
 msgid "Paste one armored OpenPGP public key"
 msgstr "ASCII armor प्रारूप में एक OpenPGP सार्वजनिक कुंजी पेस्ट करें"
 
-#: backend/services/backup_breakglass.py:215
+#: backend/services/backup_breakglass.py:217
 #: backend/services/backup_escrow.py:201
 msgid "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
 msgstr "यह एक गुप्त कुंजी है; सार्वजनिक कुंजी चिपकाएँ (gpg --armor --export)"
 
-#: backend/services/backup_breakglass.py:236
+#: backend/services/backup_breakglass.py:237
 msgid "Paste exactly one public key, not several"
 msgstr "एक सार्वजनिक कुंजी को सही ढंग से पेस्ट करें, कई नहीं"
 
-#: backend/services/backup_breakglass.py:239
+#: backend/services/backup_breakglass.py:240
 msgid "That key is expired, revoked or not valid"
 msgstr "उस कुंजी समाप्त, रद्द या अमान्य है"
 
-#: backend/services/backup_breakglass.py:242
+#: backend/services/backup_breakglass.py:243
 msgid "That key cannot encrypt (it has no usable encryption key)"
 msgstr ""
 "उस कुंजी को एन्क्रिप्ट नहीं किया जा सकता (उसके पास कोई उपयोगी एन्क्रिप्शन कुंजी नहीं है)"
 
-#: backend/services/backup_breakglass.py:259
+#: backend/services/backup_breakglass.py:260
 #, python-format
 msgid "Say why the keys are exported, in %(min)d to %(max)d characters"
 msgstr "%(min)d से %(max)d वर्णों में कुंजियों के निर्यात का कारण बताएं"
 
-#: backend/services/backup_breakglass.py:317
+#: backend/services/backup_breakglass.py:318
 #, python-format
 msgid "OpenBAO does not hold every backup key of %s; nothing was exported"
 msgstr "OpenBAO %s के सभी बैकअप कुंजियों को नहीं रखता है; कुछ भी निर्यात नहीं हुआ"
@@ -6269,6 +6264,10 @@ msgstr "NetBSD pkgsrc पैकेज की भेद्यताएँ (जि
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS संस्करण के अनुसार macOS की भेद्यताएँ, NVD के प्रभावित-संस्करण डेटा से"
+
+#~ msgid ""
+#~ "Confirm that photos will be deleted from iCloud once they are downloaded"
+#~ msgstr "पुष्टि करें कि डाउनलोड होने के बाद तस्वीरें iCloud से हटा दी जाएँगी"
 
 #~ msgid "The backup engine is not available"
 #~ msgstr "बैकअप इंजन उपलब्ध नहीं है"

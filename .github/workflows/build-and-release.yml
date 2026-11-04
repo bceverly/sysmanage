@@ -1113,7 +1113,11 @@ jobs:
 
   build-macos-pkg:
     name: Build macOS Package
-    runs-on: macos-latest
+    # Pinned to macos-15, not macos-latest (2026-11-04): macos-latest (the
+    # macos-26 arm64 pool) went short of capacity and jobs sat 15 minutes
+    # then were cancelled with "not acquired by Runner of type hosted".
+    # The Pro+ engine builds already run on macos-15.
+    runs-on: macos-15
     timeout-minutes: 60
     needs: wait-for-tests
 
@@ -1855,6 +1859,17 @@ jobs:
           set -euo pipefail
           ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
           s3() { aws s3 "$@" --endpoint-url "$ENDPOINT" --region auto; }
+          # A sync that still lost files after its retries is run again; each
+          # pass copies only what the bucket (or the stage) is still missing.
+          s3sync() {
+            local pass
+            for pass in 1 2 3; do
+              s3 sync "$@" && return 0
+              echo "R2 sync pass $pass was incomplete; trying again in $((pass * 30))s"
+              sleep $((pass * 30))
+            done
+            return 1
+          }
           # R2 rejected a multipart upload from the aws-cli on Ubuntu 26.04 runners
           # (InvalidPart, agent 3.12.0.21, 2026-10-31): newer aws-cli can pick the CRT
           # transfer client, whose parts R2 does not accept.  The classic client, and
@@ -1863,8 +1878,13 @@ jobs:
           aws configure set default.s3.preferred_transfer_client classic
           aws configure set default.s3.multipart_threshold 512MB
           # The classic client moves 10 files at a time by default; the flatpak
-          # OSTree store alone is thousands of small objects.
-          aws configure set default.s3.max_concurrent_requests 64
+          # OSTree store alone is thousands of small objects.  Not 64: at 64, R2
+          # answered with 503 "Reduce your concurrent request rate" (agent
+          # 3.12.1.1, 2026-11-04).  Adaptive retries back off on a 503 and slow
+          # the client down, instead of three quick tries and a lost file.
+          aws configure set default.s3.max_concurrent_requests 16
+          aws configure set default.retry_mode adaptive
+          aws configure set default.max_attempts 10
           RF="${{ github.workspace }}/release-files"
 
           sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 && sudo apt-get install -y dpkg-dev
@@ -1874,7 +1894,7 @@ jobs:
           # Direct-download artifacts (mac/win/bsd/alpine/rpm) need no pull: we
           # only add a new version dir.
           mkdir -p repo/server/deb
-          s3 sync "s3://${R2_BUCKET}/server/deb/" repo/server/deb/ --only-show-errors
+          s3sync "s3://${R2_BUCKET}/server/deb/" repo/server/deb/ --only-show-errors
 
           mkdir -p "repo/server/deb/pool/main/$VERSION-1" \
                    repo/server/deb/dists/stable/main/binary-amd64 \
@@ -2010,15 +2030,15 @@ jobs:
           # Scoped to pool/ ON PURPOSE.  dists/** MUST stay uncached: those files
           # are rewritten every release, and a stale Release is exactly the
           # 2026-08-07 outage ("File has unexpected size").
-          s3 sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors \
+          s3sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors \
             --exclude "*" --include "*/pool/*" \
             --cache-control "public, max-age=31536000, immutable"
 
-          s3 sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors \
+          s3sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors \
             --exclude "*/dists/*/Release" \
             --exclude "*/dists/*/Release.gpg" \
             --exclude "*/dists/*/InRelease"
-          s3 sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors
+          s3sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors
 
           # PROVE the package landed.  Every step above is fail-open: the two
           # `cp` lines end in `2>/dev/null || true`, and `s3 sync` says nothing

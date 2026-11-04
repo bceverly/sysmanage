@@ -172,9 +172,6 @@ async def test_account_rules(session, sent, vault):
     _enabled(session, s)
     bad = api.AccountCreate(apple_id="not-an-email", display_name="x", password="p")
     assert await _status(api.cloud_account_create(bad, session, MANAGER)) == 422
-    risky = api.AccountCreate(apple_id="a@example.com", display_name="x",
-                              password="p", auto_delete=True)  # fmt: skip
-    assert await _status(api.cloud_account_create(risky, session, MANAGER)) == 409
     await _account(session)
     dup = api.AccountCreate(
         apple_id="FAMILY@example.com", display_name="y", password="p"
@@ -382,7 +379,7 @@ def test_the_tick_starts_due_downloads_on_the_storage_host(session, sent):
     assert sent[-1][:2] == (str(s.nas.id), "cloud_backup_run")
     assert sent[-1][2]["action"] == "download"
     assert sent[-1][2]["until_found"] == 50
-    assert sent[-1][2]["auto_delete"] is False
+    assert "auto_delete" not in sent[-1][2]  # one-way: nothing that deletes
     assert tick.reconcile(session, s.target, cloud.now()) == 0  # already running
     assert account.run_requested_at is None
 

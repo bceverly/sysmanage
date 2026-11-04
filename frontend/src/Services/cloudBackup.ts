@@ -52,7 +52,6 @@ export interface CloudAccount {
   interval_hours: number;
   window_start_hour: number | null;
   until_found: number;
-  auto_delete: boolean;
   status: CloudAccountStatus;
   state_message: string | null;
   session_created_at: string | null;
@@ -108,8 +107,6 @@ export interface CloudAccountSettings {
   interval_hours: number;
   window_start_hour: number | null;
   until_found: number;
-  auto_delete: boolean;
-  acknowledge_auto_delete: boolean;
 }
 
 export interface CloudAccountCreate extends CloudAccountSettings {

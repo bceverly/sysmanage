@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-03 10:16-0500\n"
+"POT-Creation-Date: 2026-11-04 14:32-0500\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -74,7 +74,7 @@ msgid "You do not have access to the selected account."
 msgstr "ليس لديك إذن لوصول الحساب المحدد."
 
 #: backend/api/asset_tags.py:59 backend/api/malware.py:118
-#: backend/api/cloud_backup.py:93 backend/api/time_sync_policy.py:54
+#: backend/api/cloud_backup.py:92 backend/api/time_sync_policy.py:54
 #: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:56
 #: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
 #: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
@@ -263,66 +263,61 @@ msgstr "إدارة التوصيات تتطلب ترخيص SysManage Professional
 msgid "No applicable packages for this advisory on this host."
 msgstr "لا يوجد حزم مناسبة لهذه التوصية على هذه المستضيفة."
 
-#: backend/api/cloud_backup.py:85
+#: backend/api/cloud_backup.py:84
 msgid "Not available on this server"
 msgstr "غير متاح على هذا الخادم"
 
-#: backend/api/cloud_backup.py:129
+#: backend/api/cloud_backup.py:128
 msgid "Cloud backup account not found"
 msgstr "لم يتم العثور على حساب النسخ الاحتياطي السحابي"
 
-#: backend/api/cloud_backup.py:137 backend/api/backups.py:190
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:190
 #, python-format
 msgid "%s is out of range"
 msgstr "%s خارج النطاق المسموح"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:258
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:258
 msgid "Interval (hours)"
 msgstr "الفترة (بالساعات)"
 
-#: backend/api/cloud_backup.py:143 backend/api/backups.py:259
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:259
 msgid "Window start hour"
 msgstr "ساعة بدء النافذة"
 
-#: backend/api/cloud_backup.py:144
+#: backend/api/cloud_backup.py:143
 msgid "Stop after photos already present"
 msgstr "التوقف بعد هذا العدد من الصور الموجودة مسبقًا"
 
-#: backend/api/cloud_backup.py:149
-msgid ""
-"Confirm that photos will be deleted from iCloud once they are downloaded"
-msgstr "أكّد أن الصور ستُحذف من iCloud بعد تنزيلها"
-
-#: backend/api/cloud_backup.py:213
+#: backend/api/cloud_backup.py:203
 msgid "iCloud backup is already being enabled"
 msgstr "يجري تفعيل النسخ الاحتياطي لـ iCloud بالفعل"
 
-#: backend/api/cloud_backup.py:257
+#: backend/api/cloud_backup.py:247
 msgid "Too many cloud accounts"
 msgstr "عدد كبير جدًا من الحسابات السحابية"
 
-#: backend/api/cloud_backup.py:263
+#: backend/api/cloud_backup.py:253
 msgid "This Apple ID and library are already added"
 msgstr "تمت إضافة Apple ID هذا وهذه المكتبة بالفعل"
 
-#: backend/api/cloud_backup.py:273 backend/api/cloud_backup.py:315
+#: backend/api/cloud_backup.py:263 backend/api/cloud_backup.py:305
 #, python-format
 msgid "OpenBAO could not store the password: %s"
 msgstr "تعذّر على OpenBAO تخزين كلمة المرور: %s"
 
-#: backend/api/cloud_backup.py:379 backend/api/cloud_backup.py:425
+#: backend/api/cloud_backup.py:369 backend/api/cloud_backup.py:417
 msgid "Sign in to this account first (Connect)"
 msgstr "سجّل الدخول إلى هذا الحساب أولًا (اتصال)"
 
-#: backend/api/cloud_backup.py:430 backend/services/cloud_backup_jobs.py:260
+#: backend/api/cloud_backup.py:422 backend/services/cloud_backup_jobs.py:258
 msgid "Enable iCloud backup on the storage host first"
 msgstr "فعّل النسخ الاحتياطي لـ iCloud على مضيف التخزين أولًا"
 
-#: backend/api/cloud_backup.py:435 backend/services/cloud_backup_jobs.py:264
+#: backend/api/cloud_backup.py:427 backend/services/cloud_backup_jobs.py:262
 msgid "A job for this account is already queued or running"
 msgstr "توجد مهمة لهذا الحساب في قائمة الانتظار أو قيد التشغيل بالفعل"
 
-#: backend/api/cloud_backup.py:475
+#: backend/api/cloud_backup.py:467
 msgid "Cloud backup run not found"
 msgstr "لم يتم العثور على تشغيل النسخ الاحتياطي السحابي"
 
@@ -5813,11 +5808,11 @@ msgstr "هذا الاسم يخص مجموعة قواعد منسّقة"
 msgid "None of these rules can run under ClamAV"
 msgstr "لا يمكن تشغيل أي من هذه القواعد في ClamAV"
 
-#: backend/services/cloud_backup_tick.py:235
+#: backend/services/cloud_backup_tick.py:247
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "ينتهي تسجيل الدخول إلى iCloud قريبًا: سجّل الدخول مرة أخرى"
 
-#: backend/services/cloud_backup_tick.py:237
+#: backend/services/cloud_backup_tick.py:249
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, "
@@ -5909,39 +5904,39 @@ msgstr "أدخل كلمة مرور Apple ID"
 msgid "OpenBAO did not say where it stored the password"
 msgstr "لم يحدد OpenBAO مكان تخزين كلمة المرور"
 
-#: backend/services/cloud_backup_secrets.py:107
+#: backend/services/cloud_backup_secrets.py:109
 msgid "This account has no password in OpenBAO"
 msgstr "لا توجد كلمة مرور لهذا الحساب في OpenBAO"
 
-#: backend/services/cloud_backup_secrets.py:111
+#: backend/services/cloud_backup_secrets.py:113
 msgid "OpenBAO does not hold this account's password"
 msgstr "لا يحتفظ OpenBAO بكلمة مرور هذا الحساب"
 
-#: backend/services/cloud_backup_secrets.py:127
+#: backend/services/cloud_backup_secrets.py:129
 msgid "No such cloud backup run for this host"
 msgstr "لا يوجد تشغيل نسخ احتياطي سحابي كهذا لهذا المضيف"
 
-#: backend/services/cloud_backup_secrets.py:133
+#: backend/services/cloud_backup_secrets.py:135
 msgid "This cloud backup run does not sign in"
 msgstr "تشغيل النسخ الاحتياطي السحابي هذا لا يسجّل الدخول"
 
-#: backend/services/cloud_backup_secrets.py:135
+#: backend/services/cloud_backup_secrets.py:137
 msgid "This cloud backup run has already ended"
 msgstr "انتهى تشغيل النسخ الاحتياطي السحابي هذا بالفعل"
 
-#: backend/services/cloud_backup_secrets.py:140
+#: backend/services/cloud_backup_secrets.py:142
 msgid "This cloud backup run is too old"
 msgstr "تشغيل النسخ الاحتياطي السحابي هذا قديم جدًا"
 
-#: backend/services/cloud_backup_secrets.py:150
+#: backend/services/cloud_backup_secrets.py:152
 msgid "This cloud backup account was deleted"
 msgstr "تم حذف حساب النسخ الاحتياطي السحابي هذا"
 
-#: backend/services/cloud_backup_secrets.py:162
+#: backend/services/cloud_backup_secrets.py:164
 msgid "This run's password was already released"
 msgstr "تم تسليم كلمة مرور هذا التشغيل بالفعل"
 
-#: backend/services/cloud_backup_secrets.py:184
+#: backend/services/cloud_backup_secrets.py:185
 msgid "This sign-in is not waiting for a code"
 msgstr "تسجيل الدخول هذا لا ينتظر رمزًا"
 
@@ -6016,48 +6011,48 @@ msgid ""
 msgstr ""
 "لا يوجد لدى أي من المضيفين قائمة مراقبة ملفات، لذلك لا يوجد شيء لمقارنته"
 
-#: backend/services/backup_breakglass.py:175
+#: backend/services/backup_breakglass.py:177
 #, python-format
 msgid "gpg failed: %s"
 msgstr "فشل gpg: %s"
 
-#: backend/services/backup_breakglass.py:193
+#: backend/services/backup_breakglass.py:195
 msgid "gpg is not installed on the SysManage server; install GnuPG"
 msgstr "gpg غير مثبت على خادم SysManage؛ ثبّت GnuPG"
 
-#: backend/services/backup_breakglass.py:203
-#: backend/services/backup_breakglass.py:227
+#: backend/services/backup_breakglass.py:205
+#: backend/services/backup_breakglass.py:228
 msgid "gpg could not read that public key"
 msgstr "لم يتمكن gpg من قراءة ذلك المفتاح العام"
 
-#: backend/services/backup_breakglass.py:211
-#: backend/services/backup_breakglass.py:218
+#: backend/services/backup_breakglass.py:213
+#: backend/services/backup_breakglass.py:220
 msgid "Paste one armored OpenPGP public key"
 msgstr "الصق مفتاح OpenPGP عاماً واحداً بصيغة ASCII المدرعة"
 
-#: backend/services/backup_breakglass.py:215
+#: backend/services/backup_breakglass.py:217
 #: backend/services/backup_escrow.py:201
 msgid "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
 msgstr "هذا مفتاح سري؛ الصق المفتاح العام (gpg --armor --export)"
 
-#: backend/services/backup_breakglass.py:236
+#: backend/services/backup_breakglass.py:237
 msgid "Paste exactly one public key, not several"
 msgstr "قم بلصق مفتاح عام واحد فقط، وليس عدة مفاتيح"
 
-#: backend/services/backup_breakglass.py:239
+#: backend/services/backup_breakglass.py:240
 msgid "That key is expired, revoked or not valid"
 msgstr "انتهت صلاحية هذا المفتاح أو تم إلغاؤه أو أنه غير صحيح"
 
-#: backend/services/backup_breakglass.py:242
+#: backend/services/backup_breakglass.py:243
 msgid "That key cannot encrypt (it has no usable encryption key)"
 msgstr "لا يمكن لهذا المفتاح تشفير (ليس لديه مفتاح تشفير صالح)"
 
-#: backend/services/backup_breakglass.py:259
+#: backend/services/backup_breakglass.py:260
 #, python-format
 msgid "Say why the keys are exported, in %(min)d to %(max)d characters"
 msgstr "أدخل سبب تصدير المفاتيح، في %(min)d إلى %(max)d أحرف"
 
-#: backend/services/backup_breakglass.py:317
+#: backend/services/backup_breakglass.py:318
 #, python-format
 msgid "OpenBAO does not hold every backup key of %s; nothing was exported"
 msgstr "لا يحتفظ OpenBAO بمفتاح كل نسخة احتياطية لـ %s؛ لم يتم تصدير أي شيء"
@@ -6257,6 +6252,10 @@ msgstr "ثغرات حزم pkgsrc في NetBSD (ما يقرؤه pkg_admin audit)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
+
+#~ msgid ""
+#~ "Confirm that photos will be deleted from iCloud once they are downloaded"
+#~ msgstr "أكّد أن الصور ستُحذف من iCloud بعد تنزيلها"
 
 #~ msgid "The backup engine is not available"
 #~ msgstr "محرك النسخ الاحتياطي غير متاح"

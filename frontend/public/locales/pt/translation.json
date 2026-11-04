@@ -5791,9 +5791,6 @@
       "untilFound": "Parar um download incremental após este número de fotos já presentes",
       "untilFoundHelp": "Uma vez por semana, uma passagem completa verifica a biblioteca inteira, seja qual for este valor.",
       "enabled": "Baixar conforme o agendamento",
-      "autoDelete": "Excluir as fotos do iCloud depois de baixadas",
-      "autoDeleteWarning": "As fotos serão removidas do iCloud, e de todos os dispositivos conectados a este Apple ID, assim que estiverem no armazenamento de backup. O armazenamento de backup terá então a única cópia. Deixe desativado, a menos que seja exatamente isso que você quer.",
-      "autoDeleteConfirm": "Entendo: excluir as fotos do iCloud depois do download",
       "deleteFailed": "Não foi possível excluir a conta.",
       "add": "Adicionar conta do iCloud",
       "connectFailed": "Não foi possível iniciar o início de sessão.",
@@ -5853,11 +5850,12 @@
       "signIn": "Fim do início de sessão",
       "actions": "Ações",
       "identity": "{{appleId}}, biblioteca {{library}}",
-      "autoDelete": "Exclui do iCloud após o download",
       "progress": "{{action}}: {{n}} baixadas",
       "lastRun": "Última execução: {{downloaded}} novas, {{present}} já presentes, {{failed}} com falha",
       "storedValue": "{{n}} itens, {{size}}",
-      "expiring": "Vence em breve: clique em Conectar"
+      "expiring": "Vence em breve: clique em Conectar",
+      "librariesFound": "Bibliotecas encontradas: {{names}}. Escolha uma com Editar.",
+      "librariesOnlyPersonal": "Apenas a biblioteca pessoal foi encontrada: não há nenhuma biblioteca compartilhada para escolher."
     },
     "code": {
       "failed": "Não foi possível enviar o código.",

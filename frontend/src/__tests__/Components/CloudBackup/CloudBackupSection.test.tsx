@@ -45,7 +45,7 @@ const ACCOUNT = {
   id: "a1", provider: "icloud", apple_id: "family@example.com", display_name: "Family",
   library: "PrimarySync", libraries: [], password_set: true, password_set_at: null,
   dir_name: "icloud-0000abcd", enabled: true, interval_hours: 24, window_start_hour: null,
-  until_found: 50, auto_delete: false, status: "needs_sign_in",
+  until_found: 50, status: "needs_sign_in",
   state_message: "Apple did not accept", session_created_at: null, session_expires_at: null,
   session_expiring: false, last_good_at: null, last_full_at: null, photos_local: null,
   bytes_local: null, run_requested: false, current_run: null,
@@ -89,6 +89,22 @@ describe("CloudBackupSection", () => {
     await waitFor(() => expect(sendCloudCode).toHaveBeenCalledWith("r1", "123456"));
   });
 
+  test("says what List libraries found", async () => {
+    const listed = (libraries: string[]) => ({
+      ...ACCOUNT, status: "ok", session_created_at: "2026-11-04T19:43:52Z", libraries,
+      last_run: { ...RUN, action: "libraries", status: "ok", waiting_code: false },
+    });
+    vi.mocked(getCloudOverview).mockResolvedValue(
+      { ...OVERVIEW, enabled: true, accounts: [listed(["PrimarySync"])] } as never);
+    const { unmount } = render(<CloudBackupSection onError={vi.fn()} />);
+    expect(await screen.findByText(/Only the personal library was found/)).toBeInTheDocument();
+    unmount();
+    vi.mocked(getCloudOverview).mockResolvedValue(
+      { ...OVERVIEW, enabled: true, accounts: [listed(["PrimarySync", "SharedSync-AB12"])] } as never);
+    render(<CloudBackupSection onError={vi.fn()} />);
+    expect(await screen.findByText(/Libraries found: PrimarySync, SharedSync-AB12/)).toBeInTheDocument();
+  });
+
   test("sends the password once with a new account", async () => {
     vi.mocked(getCloudOverview).mockResolvedValue({ ...OVERVIEW, enabled: true } as never);
     vi.mocked(createCloudAccount).mockResolvedValue(ACCOUNT as never);
@@ -101,7 +117,7 @@ describe("CloudBackupSection", () => {
     await waitFor(() => expect(createCloudAccount).toHaveBeenCalledTimes(1));
     const body = vi.mocked(createCloudAccount).mock.calls[0][0];
     expect(body.password).toBe("secret-pw");
-    expect(body.auto_delete).toBe(false);
+    expect(body).not.toHaveProperty("auto_delete");  // one-way: no deletion setting
   });
 
   test("renders nothing on an air-gapped server", async () => {

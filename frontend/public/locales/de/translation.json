@@ -5791,9 +5791,6 @@
       "untilFound": "Einen inkrementellen Download nach so vielen bereits vorhandenen Fotos beenden",
       "untilFoundHelp": "Einmal pro Woche prüft ein vollständiger Durchlauf die ganze Mediathek, unabhängig von diesem Wert.",
       "enabled": "Nach Zeitplan herunterladen",
-      "autoDelete": "Fotos nach dem Herunterladen aus iCloud löschen",
-      "autoDeleteWarning": "Die Fotos werden aus iCloud und von jedem mit dieser Apple ID angemeldeten Gerät entfernt, sobald sie im Sicherungsspeicher liegen. Der Sicherungsspeicher hat dann die einzige Kopie. Lassen Sie dies aus, sofern Sie genau das nicht wollen.",
-      "autoDeleteConfirm": "Verstanden: Fotos nach dem Herunterladen aus iCloud löschen",
       "deleteFailed": "Das Konto konnte nicht gelöscht werden.",
       "add": "iCloud-Konto hinzufügen",
       "connectFailed": "Die Anmeldung konnte nicht gestartet werden.",
@@ -5853,11 +5850,12 @@
       "signIn": "Anmeldung endet",
       "actions": "Aktionen",
       "identity": "{{appleId}}, Mediathek {{library}}",
-      "autoDelete": "Löscht nach dem Herunterladen aus iCloud",
       "progress": "{{action}}: {{n}} heruntergeladen",
       "lastRun": "Letzter Lauf: {{downloaded}} neu, {{present}} bereits vorhanden, {{failed}} fehlgeschlagen",
       "storedValue": "{{n}} Objekte, {{size}}",
-      "expiring": "Endet bald: klicken Sie auf Verbinden"
+      "expiring": "Endet bald: klicken Sie auf Verbinden",
+      "librariesFound": "Gefundene Mediatheken: {{names}}. Wählen Sie eine mit Bearbeiten.",
+      "librariesOnlyPersonal": "Nur die persönliche Mediathek wurde gefunden: Es gibt keine geteilte Mediathek zur Auswahl."
     },
     "code": {
       "failed": "Der Code konnte nicht gesendet werden.",

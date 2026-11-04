@@ -9,7 +9,7 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-    Alert, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle,
+    Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle,
     FormControlLabel, MenuItem, Stack, Switch, TextField,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -40,8 +40,6 @@ const CloudAccountDialog: React.FC<Props> = ({ open, account, storageHost, onClo
     const [intervalHours, setIntervalHours] = useState('24');
     const [windowStart, setWindowStart] = useState('');
     const [untilFound, setUntilFound] = useState('50');
-    const [autoDelete, setAutoDelete] = useState(false);
-    const [acknowledged, setAcknowledged] = useState(false);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
 
@@ -55,8 +53,6 @@ const CloudAccountDialog: React.FC<Props> = ({ open, account, storageHost, onClo
         setIntervalHours(String(account?.interval_hours ?? 24));
         setWindowStart(account?.window_start_hour == null ? '' : String(account.window_start_hour));
         setUntilFound(String(account?.until_found ?? 50));
-        setAutoDelete(account?.auto_delete ?? false);
-        setAcknowledged(account?.auto_delete ?? false);
         setError('');
     }, [open, account]);
 
@@ -71,8 +67,6 @@ const CloudAccountDialog: React.FC<Props> = ({ open, account, storageHost, onClo
             interval_hours: numberOr(intervalHours, 24),
             window_start_hour: windowStart === '' ? null : numberOr(windowStart, 0),
             until_found: numberOr(untilFound, 50),
-            auto_delete: autoDelete,
-            acknowledge_auto_delete: autoDelete && acknowledged,
         };
         try {
             if (account) {
@@ -89,8 +83,7 @@ const CloudAccountDialog: React.FC<Props> = ({ open, account, storageHost, onClo
         }
     };
 
-    const ready = name.trim() !== '' && (account !== null || (appleId.trim() !== '' && password !== ''))
-        && (!autoDelete || acknowledged);
+    const ready = name.trim() !== '' && (account !== null || (appleId.trim() !== '' && password !== ''));
 
     return (
         <Dialog open={open} onClose={busy ? undefined : onClose} maxWidth="sm" fullWidth>
@@ -143,17 +136,6 @@ const CloudAccountDialog: React.FC<Props> = ({ open, account, storageHost, onClo
                             'Once a week a full pass checks the whole library whatever this says.')} />
                     <FormControlLabel control={<Switch checked={enabled} onChange={e => setEnabled(e.target.checked)} />}
                         label={t('cloudBackup.account.enabled', 'Download on schedule')} />
-                    <FormControlLabel control={<Checkbox checked={autoDelete} onChange={e => setAutoDelete(e.target.checked)} />}
-                        label={t('cloudBackup.account.autoDelete', 'Delete photos from iCloud after they are downloaded')} />
-                    {autoDelete && (
-                        <Alert severity="warning">
-                            {t('cloudBackup.account.autoDeleteWarning',
-                                'Photos will be removed from iCloud, and from every device signed in to this Apple ID, once they are on the backup storage. The backup storage then holds the only copy. Leave this off unless that is what you want.')}
-                            <FormControlLabel sx={{ display: 'block', mt: 1 }}
-                                control={<Checkbox checked={acknowledged} onChange={e => setAcknowledged(e.target.checked)} />}
-                                label={t('cloudBackup.account.autoDeleteConfirm', 'I understand: delete photos from iCloud after download')} />
-                        </Alert>
-                    )}
                     {error && <Alert severity="error">{error}</Alert>}
                 </Stack>
             </DialogContent>

@@ -109,7 +109,6 @@ def account_dict(db: Session, account: models.CloudBackupAccount) -> Dict[str, A
         "interval_hours": account.interval_hours,
         "window_start_hour": account.window_start_hour,
         "until_found": account.until_found,
-        "auto_delete": bool(account.auto_delete),
         "status": status_of(account, current),
         "state_message": account.state_message,
         "session_created_at": _iso(account.session_created_at),

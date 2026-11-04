@@ -75,7 +75,6 @@ class CloudBackupAccount(Base):
     interval_hours = Column(Integer, nullable=False, default=24)
     window_start_hour = Column(Integer, nullable=True)
     until_found = Column(Integer, nullable=False, default=50)
-    auto_delete = Column(Boolean, nullable=False, default=False)
     # new / needs_sign_in / ok / failed
     state = Column(String(16), nullable=False, default="new")
     state_message = Column(Text, nullable=True)

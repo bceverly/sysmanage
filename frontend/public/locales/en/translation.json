@@ -5791,9 +5791,6 @@
       "untilFound": "Stop an incremental download after this many photos already present",
       "untilFoundHelp": "Once a week a full pass checks the whole library whatever this says.",
       "enabled": "Download on schedule",
-      "autoDelete": "Delete photos from iCloud after they are downloaded",
-      "autoDeleteWarning": "Photos will be removed from iCloud, and from every device signed in to this Apple ID, once they are on the backup storage. The backup storage then holds the only copy. Leave this off unless that is what you want.",
-      "autoDeleteConfirm": "I understand: delete photos from iCloud after download",
       "deleteFailed": "The account could not be deleted.",
       "add": "Add iCloud account",
       "connectFailed": "The sign-in could not be started.",
@@ -5853,11 +5850,12 @@
       "signIn": "Sign-in ends",
       "actions": "Actions",
       "identity": "{{appleId}}, library {{library}}",
-      "autoDelete": "Deletes from iCloud after download",
       "progress": "{{action}}: {{n}} downloaded",
       "lastRun": "Last run: {{downloaded}} new, {{present}} already present, {{failed}} failed",
       "storedValue": "{{n}} items, {{size}}",
-      "expiring": "Ends soon: press Connect"
+      "expiring": "Ends soon: press Connect",
+      "librariesFound": "Libraries found: {{names}}. Choose one with Edit.",
+      "librariesOnlyPersonal": "Only the personal library was found: there is no shared library to choose."
     },
     "code": {
       "failed": "The code could not be sent.",

@@ -5791,9 +5791,6 @@
       "untilFound": "既存の写真がこの数に達したら差分ダウンロードを停止",
       "untilFoundHelp": "この値にかかわらず、週に 1 回の完全パスでライブラリ全体を確認します。",
       "enabled": "スケジュールに従ってダウンロード",
-      "autoDelete": "ダウンロード後に写真を iCloud から削除",
-      "autoDeleteWarning": "写真がバックアップストレージに入りしだい、iCloud とこの Apple ID でサインインしているすべてのデバイスから削除されます。その後はバックアップストレージが唯一のコピーになります。それが目的でない限りオフのままにしてください。",
-      "autoDeleteConfirm": "理解しました: ダウンロード後に写真を iCloud から削除する",
       "deleteFailed": "アカウントを削除できませんでした。",
       "add": "iCloud アカウントを追加",
       "connectFailed": "サインインを開始できませんでした。",
@@ -5853,11 +5850,12 @@
       "signIn": "サインインの期限",
       "actions": "操作",
       "identity": "{{appleId}}、ライブラリ {{library}}",
-      "autoDelete": "ダウンロード後に iCloud から削除",
       "progress": "{{action}}: {{n}} 件ダウンロード済み",
       "lastRun": "前回の実行: 新規 {{downloaded}} 件、既存 {{present}} 件、失敗 {{failed}} 件",
       "storedValue": "{{n}} 項目、{{size}}",
-      "expiring": "まもなく期限切れ: [接続] を押してください"
+      "expiring": "まもなく期限切れ: [接続] を押してください",
+      "librariesFound": "見つかったライブラリ: {{names}}。編集で選択してください。",
+      "librariesOnlyPersonal": "個人用ライブラリのみが見つかりました。選択できる共有ライブラリはありません。"
     },
     "code": {
       "failed": "コードを送信できませんでした。",

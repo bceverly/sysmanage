@@ -5791,9 +5791,6 @@
       "untilFound": "Arrêter un téléchargement incrémentiel après ce nombre de photos déjà présentes",
       "untilFoundHelp": "Une fois par semaine, une passe complète vérifie toute la photothèque, quelle que soit cette valeur.",
       "enabled": "Télécharger selon le planning",
-      "autoDelete": "Supprimer les photos d'iCloud après leur téléchargement",
-      "autoDeleteWarning": "Les photos seront retirées d'iCloud, et de chaque appareil connecté à cet Apple ID, dès qu'elles seront sur le stockage des sauvegardes. Le stockage des sauvegardes détiendra alors la seule copie. Laissez cette option désactivée sauf si c'est bien ce que vous voulez.",
-      "autoDeleteConfirm": "J'ai compris : supprimer les photos d'iCloud après le téléchargement",
       "deleteFailed": "Le compte n'a pas pu être supprimé.",
       "add": "Ajouter un compte iCloud",
       "connectFailed": "La connexion n'a pas pu être lancée.",
@@ -5853,11 +5850,12 @@
       "signIn": "Fin de la connexion",
       "actions": "Actions possibles",
       "identity": "{{appleId}}, photothèque {{library}}",
-      "autoDelete": "Supprime d'iCloud après le téléchargement",
       "progress": "{{action}} : {{n}} téléchargées",
       "lastRun": "Dernière exécution : {{downloaded}} nouvelles, {{present}} déjà présentes, {{failed}} en échec",
       "storedValue": "{{n}} éléments, {{size}}",
-      "expiring": "Expire bientôt : cliquez sur Connecter"
+      "expiring": "Expire bientôt : cliquez sur Connecter",
+      "librariesFound": "Photothèques trouvées : {{names}}. Choisissez-en une avec Modifier.",
+      "librariesOnlyPersonal": "Seule la photothèque personnelle a été trouvée : il n'y a aucune photothèque partagée à choisir."
     },
     "code": {
       "failed": "Le code n'a pas pu être envoyé.",

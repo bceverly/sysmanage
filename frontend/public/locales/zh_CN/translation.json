@@ -5791,9 +5791,6 @@
       "untilFound": "增量下载遇到这么多已有照片后停止",
       "untilFoundHelp": "无论此值如何，每周都会进行一次完整检查，核对整个资料库。",
       "enabled": "按计划下载",
-      "autoDelete": "下载后从 iCloud 删除照片",
-      "autoDeleteWarning": "照片一旦存入备份存储，就会从 iCloud 以及登录此 Apple ID 的所有设备中删除。届时备份存储中保存的是唯一副本。除非您确实需要，否则请保持关闭。",
-      "autoDeleteConfirm": "我明白：下载后从 iCloud 删除照片",
       "deleteFailed": "无法删除账户。",
       "add": "添加 iCloud 账户",
       "connectFailed": "无法开始登录。",
@@ -5853,11 +5850,12 @@
       "signIn": "登录到期",
       "actions": "操作",
       "identity": "{{appleId}}，资料库 {{library}}",
-      "autoDelete": "下载后从 iCloud 删除",
       "progress": "{{action}}：已下载 {{n}} 个",
       "lastRun": "上次运行：新增 {{downloaded}} 个，已有 {{present}} 个，失败 {{failed}} 个",
       "storedValue": "{{n}} 个项目，{{size}}",
-      "expiring": "即将到期：请点击“连接”"
+      "expiring": "即将到期：请点击“连接”",
+      "librariesFound": "找到的资料库：{{names}}。请通过“编辑”选择一个。",
+      "librariesOnlyPersonal": "只找到个人资料库：没有可选择的共享资料库。"
     },
     "code": {
       "failed": "无法发送代码。",

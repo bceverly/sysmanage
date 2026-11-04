@@ -60,10 +60,9 @@ class AccountSettings(BaseModel):
     interval_hours: int = 24
     window_start_hour: Optional[int] = None
     until_found: int = cloud.DEFAULT_UNTIL_FOUND
-    # Deletes photos from iCloud once they are local: off unless asked, with
-    # an explicit acknowledgment.
-    auto_delete: bool = False
-    acknowledge_auto_delete: bool = False
+    # No deletion setting, ever: cloud backup only copies from iCloud, and
+    # deletes nothing in iCloud or on the storage (Bryan, 2026-11-04).  An
+    # older UI that still sends auto_delete has it ignored.
 
 
 class AccountCreate(AccountSettings):
@@ -142,14 +141,6 @@ def _validate(body: AccountSettings) -> str:
     _in_range(body.interval_hours, 1, 720, _("Interval (hours)"))
     _in_range(body.window_start_hour, 0, 23, _("Window start hour"))
     _in_range(body.until_found, 1, 10000, _("Stop after photos already present"))
-    if body.auto_delete and not body.acknowledge_auto_delete:
-        raise HTTPException(
-            status_code=409,
-            detail=_(
-                "Confirm that photos will be deleted from iCloud once they are "
-                "downloaded"
-            ),
-        )
     try:
         return cloud.valid_library(body.library)
     except cloud.CloudBackupRefused as refused:
@@ -163,13 +154,12 @@ def _apply(account: models.CloudBackupAccount, body: AccountSettings, library: s
     account.interval_hours = body.interval_hours
     account.window_start_hour = body.window_start_hour
     account.until_found = body.until_found
-    account.auto_delete = body.auto_delete
     account.updated_at = cloud.now()
 
 
 def _settings(body: AccountSettings) -> Dict[str, Any]:
     """What an audit records: the settings, never the password."""
-    return body.model_dump(exclude={"password", "acknowledge_auto_delete"})
+    return body.model_dump(exclude={"password"})
 
 
 # --- reading ------------------------------------------------------------------

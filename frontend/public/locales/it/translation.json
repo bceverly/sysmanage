@@ -5791,9 +5791,6 @@
       "untilFound": "Interrompi un download incrementale dopo questo numero di foto già presenti",
       "untilFoundHelp": "Una volta alla settimana un passaggio completo controlla tutta la libreria, qualunque sia questo valore.",
       "enabled": "Scarica secondo la pianificazione",
-      "autoDelete": "Elimina le foto da iCloud dopo il download",
-      "autoDeleteWarning": "Le foto verranno rimosse da iCloud, e da ogni dispositivo connesso a questo ID Apple, appena saranno nell'archivio dei backup. L'archivio dei backup avrà allora l'unica copia. Lascia disattivata questa opzione a meno che non sia proprio ciò che vuoi.",
-      "autoDeleteConfirm": "Ho capito: elimina le foto da iCloud dopo il download",
       "deleteFailed": "Impossibile eliminare l'account.",
       "add": "Aggiungi account iCloud",
       "connectFailed": "Impossibile avviare l'accesso.",
@@ -5853,11 +5850,12 @@
       "signIn": "Fine dell'accesso",
       "actions": "Azioni",
       "identity": "{{appleId}}, libreria {{library}}",
-      "autoDelete": "Elimina da iCloud dopo il download",
       "progress": "{{action}}: {{n}} scaricate",
       "lastRun": "Ultima esecuzione: {{downloaded}} nuove, {{present}} già presenti, {{failed}} non riuscite",
       "storedValue": "{{n}} elementi, {{size}}",
-      "expiring": "Scade presto: premi Connetti"
+      "expiring": "Scade presto: premi Connetti",
+      "librariesFound": "Librerie trovate: {{names}}. Scegline una con Modifica.",
+      "librariesOnlyPersonal": "È stata trovata solo la libreria personale: non c'è nessuna libreria condivisa da scegliere."
     },
     "code": {
       "failed": "Impossibile inviare il codice.",

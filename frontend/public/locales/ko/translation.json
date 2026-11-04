@@ -5791,9 +5791,6 @@
       "untilFound": "이미 있는 사진이 이 수만큼 나오면 증분 다운로드 중지",
       "untilFoundHelp": "이 값과 관계없이 일주일에 한 번 전체 검사로 보관함 전체를 확인합니다.",
       "enabled": "일정에 따라 다운로드",
-      "autoDelete": "다운로드 후 iCloud에서 사진 삭제",
-      "autoDeleteWarning": "사진이 백업 스토리지에 저장되는 즉시 iCloud와 이 Apple ID로 로그인한 모든 기기에서 삭제됩니다. 그러면 백업 스토리지에만 사본이 남습니다. 꼭 원하는 경우가 아니면 꺼 두세요.",
-      "autoDeleteConfirm": "이해했습니다: 다운로드 후 iCloud에서 사진 삭제",
       "deleteFailed": "계정을 삭제하지 못했습니다.",
       "add": "iCloud 계정 추가",
       "connectFailed": "로그인을 시작하지 못했습니다.",
@@ -5853,11 +5850,12 @@
       "signIn": "로그인 만료",
       "actions": "작업",
       "identity": "{{appleId}}, 보관함 {{library}}",
-      "autoDelete": "다운로드 후 iCloud에서 삭제",
       "progress": "{{action}}: {{n}}개 다운로드됨",
       "lastRun": "마지막 실행: 새 항목 {{downloaded}}개, 기존 항목 {{present}}개, 실패 {{failed}}개",
       "storedValue": "항목 {{n}}개, {{size}}",
-      "expiring": "곧 만료됨: 연결을 누르세요"
+      "expiring": "곧 만료됨: 연결을 누르세요",
+      "librariesFound": "찾은 보관함: {{names}}. 편집에서 하나를 선택하십시오.",
+      "librariesOnlyPersonal": "개인 보관함만 찾았습니다. 선택할 공유 보관함이 없습니다."
     },
     "code": {
       "failed": "코드를 보내지 못했습니다.",

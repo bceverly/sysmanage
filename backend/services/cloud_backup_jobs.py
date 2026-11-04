@@ -243,8 +243,6 @@ def account_parameters(
     }
     if action == DOWNLOAD:
         parameters["until_found"] = int(account.until_found or DEFAULT_UNTIL_FOUND)
-    if action in (DOWNLOAD, RECONCILE):
-        parameters["auto_delete"] = bool(account.auto_delete)
     return parameters
 
 

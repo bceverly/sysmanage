@@ -5791,9 +5791,6 @@
       "untilFound": "Een incrementele download stoppen na zoveel foto's die er al zijn",
       "untilFoundHelp": "Eens per week controleert een volledige ronde de hele bibliotheek, wat hier ook staat.",
       "enabled": "Volgens schema downloaden",
-      "autoDelete": "Foto's uit iCloud verwijderen nadat ze zijn gedownload",
-      "autoDeleteWarning": "De foto's worden uit iCloud verwijderd, en van elk apparaat dat met deze Apple ID is aangemeld, zodra ze in de back-upopslag staan. De back-upopslag heeft dan de enige kopie. Laat dit uit, tenzij u precies dat wilt.",
-      "autoDeleteConfirm": "Ik begrijp het: foto's na de download uit iCloud verwijderen",
       "deleteFailed": "Het account kon niet worden verwijderd.",
       "add": "iCloud-account toevoegen",
       "connectFailed": "De aanmelding kon niet worden gestart.",
@@ -5853,11 +5850,12 @@
       "signIn": "Aanmelding verloopt",
       "actions": "Acties",
       "identity": "{{appleId}}, bibliotheek {{library}}",
-      "autoDelete": "Verwijdert na de download uit iCloud",
       "progress": "{{action}}: {{n}} gedownload",
       "lastRun": "Laatste run: {{downloaded}} nieuw, {{present}} al aanwezig, {{failed}} mislukt",
       "storedValue": "{{n}} bestanden, {{size}}",
-      "expiring": "Verloopt binnenkort: klik op Verbinden"
+      "expiring": "Verloopt binnenkort: klik op Verbinden",
+      "librariesFound": "Gevonden bibliotheken: {{names}}. Kies er een met Bewerken.",
+      "librariesOnlyPersonal": "Alleen de persoonlijke bibliotheek is gevonden: er is geen gedeelde bibliotheek om te kiezen."
     },
     "code": {
       "failed": "De code kon niet worden verzonden.",

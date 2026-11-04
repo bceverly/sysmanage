@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-03 10:16-0500\n"
+"POT-Creation-Date: 2026-11-04 14:32-0500\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -74,7 +74,7 @@ msgid "You do not have access to the selected account."
 msgstr "선택한 계정에 액세스 권한이 없습니다."
 
 #: backend/api/asset_tags.py:59 backend/api/malware.py:118
-#: backend/api/cloud_backup.py:93 backend/api/time_sync_policy.py:54
+#: backend/api/cloud_backup.py:92 backend/api/time_sync_policy.py:54
 #: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:56
 #: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
 #: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
@@ -264,66 +264,61 @@ msgstr " Advisory 관리는 SysManage Professional 라이선스가 필요합니�
 msgid "No applicable packages for this advisory on this host."
 msgstr "이 호스트에서 이 advisory에 대한 적용 가능한 패키지가 없습니다."
 
-#: backend/api/cloud_backup.py:85
+#: backend/api/cloud_backup.py:84
 msgid "Not available on this server"
 msgstr "이 서버에서는 사용할 수 없습니다"
 
-#: backend/api/cloud_backup.py:129
+#: backend/api/cloud_backup.py:128
 msgid "Cloud backup account not found"
 msgstr "클라우드 백업 계정을 찾을 수 없습니다"
 
-#: backend/api/cloud_backup.py:137 backend/api/backups.py:190
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:190
 #, python-format
 msgid "%s is out of range"
 msgstr "%s이(가) 허용 범위를 벗어났습니다"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:258
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:258
 msgid "Interval (hours)"
 msgstr "간격 (시간)"
 
-#: backend/api/cloud_backup.py:143 backend/api/backups.py:259
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:259
 msgid "Window start hour"
 msgstr "시간대 시작 시각"
 
-#: backend/api/cloud_backup.py:144
+#: backend/api/cloud_backup.py:143
 msgid "Stop after photos already present"
 msgstr "이미 있는 사진이 이 수만큼 나오면 중지"
 
-#: backend/api/cloud_backup.py:149
-msgid ""
-"Confirm that photos will be deleted from iCloud once they are downloaded"
-msgstr "사진을 다운로드한 후 iCloud에서 삭제된다는 것을 확인하세요"
-
-#: backend/api/cloud_backup.py:213
+#: backend/api/cloud_backup.py:203
 msgid "iCloud backup is already being enabled"
 msgstr "iCloud 백업을 이미 활성화하는 중입니다"
 
-#: backend/api/cloud_backup.py:257
+#: backend/api/cloud_backup.py:247
 msgid "Too many cloud accounts"
 msgstr "클라우드 계정이 너무 많습니다"
 
-#: backend/api/cloud_backup.py:263
+#: backend/api/cloud_backup.py:253
 msgid "This Apple ID and library are already added"
 msgstr "이 Apple ID와 보관함은 이미 추가되어 있습니다"
 
-#: backend/api/cloud_backup.py:273 backend/api/cloud_backup.py:315
+#: backend/api/cloud_backup.py:263 backend/api/cloud_backup.py:305
 #, python-format
 msgid "OpenBAO could not store the password: %s"
 msgstr "OpenBAO가 암호를 저장하지 못했습니다: %s"
 
-#: backend/api/cloud_backup.py:379 backend/api/cloud_backup.py:425
+#: backend/api/cloud_backup.py:369 backend/api/cloud_backup.py:417
 msgid "Sign in to this account first (Connect)"
 msgstr "먼저 이 계정에 로그인하세요(연결)"
 
-#: backend/api/cloud_backup.py:430 backend/services/cloud_backup_jobs.py:260
+#: backend/api/cloud_backup.py:422 backend/services/cloud_backup_jobs.py:258
 msgid "Enable iCloud backup on the storage host first"
 msgstr "먼저 스토리지 호스트에서 iCloud 백업을 활성화하세요"
 
-#: backend/api/cloud_backup.py:435 backend/services/cloud_backup_jobs.py:264
+#: backend/api/cloud_backup.py:427 backend/services/cloud_backup_jobs.py:262
 msgid "A job for this account is already queued or running"
 msgstr "이 계정의 작업이 이미 대기 중이거나 실행 중입니다"
 
-#: backend/api/cloud_backup.py:475
+#: backend/api/cloud_backup.py:467
 msgid "Cloud backup run not found"
 msgstr "클라우드 백업 실행을 찾을 수 없습니다"
 
@@ -5841,11 +5836,11 @@ msgstr "해당 이름은 큐레이션된 규칙 세트에 속합니다"
 msgid "None of these rules can run under ClamAV"
 msgstr "이 규칙 중 어느 것도 ClamAV에서 실행할 수 없습니다"
 
-#: backend/services/cloud_backup_tick.py:235
+#: backend/services/cloud_backup_tick.py:247
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "iCloud 로그인이 곧 만료됩니다: 다시 로그인하세요"
 
-#: backend/services/cloud_backup_tick.py:237
+#: backend/services/cloud_backup_tick.py:249
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, "
@@ -5940,39 +5935,39 @@ msgstr "Apple ID 암호를 입력하세요"
 msgid "OpenBAO did not say where it stored the password"
 msgstr "OpenBAO가 암호를 저장한 위치를 알려 주지 않았습니다"
 
-#: backend/services/cloud_backup_secrets.py:107
+#: backend/services/cloud_backup_secrets.py:109
 msgid "This account has no password in OpenBAO"
 msgstr "이 계정에는 OpenBAO에 저장된 암호가 없습니다"
 
-#: backend/services/cloud_backup_secrets.py:111
+#: backend/services/cloud_backup_secrets.py:113
 msgid "OpenBAO does not hold this account's password"
 msgstr "OpenBAO에 이 계정의 암호가 없습니다"
 
-#: backend/services/cloud_backup_secrets.py:127
+#: backend/services/cloud_backup_secrets.py:129
 msgid "No such cloud backup run for this host"
 msgstr "이 호스트에 해당하는 클라우드 백업 실행이 없습니다"
 
-#: backend/services/cloud_backup_secrets.py:133
+#: backend/services/cloud_backup_secrets.py:135
 msgid "This cloud backup run does not sign in"
 msgstr "이 클라우드 백업 실행은 로그인하지 않습니다"
 
-#: backend/services/cloud_backup_secrets.py:135
+#: backend/services/cloud_backup_secrets.py:137
 msgid "This cloud backup run has already ended"
 msgstr "이 클라우드 백업 실행은 이미 끝났습니다"
 
-#: backend/services/cloud_backup_secrets.py:140
+#: backend/services/cloud_backup_secrets.py:142
 msgid "This cloud backup run is too old"
 msgstr "이 클라우드 백업 실행은 너무 오래되었습니다"
 
-#: backend/services/cloud_backup_secrets.py:150
+#: backend/services/cloud_backup_secrets.py:152
 msgid "This cloud backup account was deleted"
 msgstr "이 클라우드 백업 계정은 삭제되었습니다"
 
-#: backend/services/cloud_backup_secrets.py:162
+#: backend/services/cloud_backup_secrets.py:164
 msgid "This run's password was already released"
 msgstr "이 실행의 암호는 이미 전달되었습니다"
 
-#: backend/services/cloud_backup_secrets.py:184
+#: backend/services/cloud_backup_secrets.py:185
 msgid "This sign-in is not waiting for a code"
 msgstr "이 로그인은 코드를 기다리고 있지 않습니다"
 
@@ -6048,48 +6043,48 @@ msgstr ""
 "호스트 중 하나에도 파일 감시 목록이 할당되지 않았으므로 비교할 항목이 없습니"
 "다."
 
-#: backend/services/backup_breakglass.py:175
+#: backend/services/backup_breakglass.py:177
 #, python-format
 msgid "gpg failed: %s"
 msgstr "gpg 오류: %s"
 
-#: backend/services/backup_breakglass.py:193
+#: backend/services/backup_breakglass.py:195
 msgid "gpg is not installed on the SysManage server; install GnuPG"
 msgstr "SysManage 서버에 gpg가 설치되어 있지 않습니다. GnuPG를 설치하십시오"
 
-#: backend/services/backup_breakglass.py:203
-#: backend/services/backup_breakglass.py:227
+#: backend/services/backup_breakglass.py:205
+#: backend/services/backup_breakglass.py:228
 msgid "gpg could not read that public key"
 msgstr "gpg는 그 공개 키를 읽을 수 없습니다."
 
-#: backend/services/backup_breakglass.py:211
-#: backend/services/backup_breakglass.py:218
+#: backend/services/backup_breakglass.py:213
+#: backend/services/backup_breakglass.py:220
 msgid "Paste one armored OpenPGP public key"
 msgstr "ASCII armor 형식의 OpenPGP 공개 키를 하나 붙여넣으십시오"
 
-#: backend/services/backup_breakglass.py:215
+#: backend/services/backup_breakglass.py:217
 #: backend/services/backup_escrow.py:201
 msgid "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
 msgstr "이것은 비밀 키입니다. 공개 키를 붙여 넣으세요 (gpg --armor --export)"
 
-#: backend/services/backup_breakglass.py:236
+#: backend/services/backup_breakglass.py:237
 msgid "Paste exactly one public key, not several"
 msgstr "정확히 한 개의 공개 키를 붙여넣으십시오, 여러 개가 아닌."
 
-#: backend/services/backup_breakglass.py:239
+#: backend/services/backup_breakglass.py:240
 msgid "That key is expired, revoked or not valid"
 msgstr "그 키는 만료되었거나 취소되었거나 유효하지 않습니다."
 
-#: backend/services/backup_breakglass.py:242
+#: backend/services/backup_breakglass.py:243
 msgid "That key cannot encrypt (it has no usable encryption key)"
 msgstr "그 키는 암호화할 수 없습니다. (사용 가능한 암호화 키가 없습니다.)"
 
-#: backend/services/backup_breakglass.py:259
+#: backend/services/backup_breakglass.py:260
 #, python-format
 msgid "Say why the keys are exported, in %(min)d to %(max)d characters"
 msgstr "키를 내보내는 이유를 %(min)d~%(max)d자로 입력하십시오"
 
-#: backend/services/backup_breakglass.py:317
+#: backend/services/backup_breakglass.py:318
 #, python-format
 msgid "OpenBAO does not hold every backup key of %s; nothing was exported"
 msgstr ""
@@ -6290,6 +6285,10 @@ msgstr "NetBSD pkgsrc 패키지 취약점(pkg_admin audit가 읽는 데이터)"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS 버전별 macOS 취약점(NVD의 영향받는 버전 데이터 기준)"
+
+#~ msgid ""
+#~ "Confirm that photos will be deleted from iCloud once they are downloaded"
+#~ msgstr "사진을 다운로드한 후 iCloud에서 삭제된다는 것을 확인하세요"
 
 #~ msgid "The backup engine is not available"
 #~ msgstr "백업 엔진을 사용할 수 없습니다"

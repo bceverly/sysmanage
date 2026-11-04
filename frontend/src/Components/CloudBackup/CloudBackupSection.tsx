@@ -161,11 +161,6 @@ const CloudAccountRow: React.FC<RowProps> = ({ account, canManage, onConnect, on
                 <Typography variant="caption" color="text.secondary">
                     {t('cloudBackup.table.identity', '{{appleId}}, library {{library}}', { appleId: account.apple_id, library: account.library })}
                 </Typography>
-                {account.auto_delete && (
-                    <Typography variant="caption" color="warning.main" sx={{ display: 'block' }}>
-                        {t('cloudBackup.table.autoDelete', 'Deletes from iCloud after download')}
-                    </Typography>
-                )}
             </TableCell>
             <TableCell>
                 <Chip size="small" color={accountStatusColor(account.status)} label={accountStatusLabel(t, account.status)} />
@@ -178,6 +173,14 @@ const CloudAccountRow: React.FC<RowProps> = ({ account, canManage, onConnect, on
                 {problem && (
                     <Typography variant="caption" color="error" sx={{ display: 'block', maxWidth: 360 }}>
                         {reasonText(t, run?.reason ?? null, account.state_message)}
+                    </Typography>
+                )}
+                {!busy && run?.status === 'ok' && run.action === 'libraries' && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', maxWidth: 360 }}>
+                        {account.libraries.length > 1
+                            ? t('cloudBackup.table.librariesFound', 'Libraries found: {{names}}. Choose one with Edit.',
+                                { names: account.libraries.join(', ') })
+                            : t('cloudBackup.table.librariesOnlyPersonal', 'Only the personal library was found: there is no shared library to choose.')}
                     </Typography>
                 )}
                 {!busy && run?.status === 'ok' && run.action !== 'connect' && run.action !== 'libraries' && (

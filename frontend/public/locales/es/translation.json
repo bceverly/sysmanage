@@ -5791,9 +5791,6 @@
       "untilFound": "Detener una descarga incremental tras este número de fotos ya presentes",
       "untilFoundHelp": "Una vez por semana, una pasada completa revisa toda la fototeca, diga lo que diga este valor.",
       "enabled": "Descargar según la programación",
-      "autoDelete": "Eliminar las fotos de iCloud después de descargarlas",
-      "autoDeleteWarning": "Las fotos se eliminarán de iCloud, y de todos los dispositivos con sesión iniciada en este Apple ID, en cuanto estén en el almacenamiento de copias de seguridad. Ese almacenamiento tendrá entonces la única copia. Déjelo desactivado salvo que sea justo lo que quiere.",
-      "autoDeleteConfirm": "Lo entiendo: eliminar las fotos de iCloud después de descargarlas",
       "deleteFailed": "No se pudo eliminar la cuenta.",
       "add": "Añadir cuenta de iCloud",
       "connectFailed": "No se pudo iniciar el inicio de sesión.",
@@ -5853,11 +5850,12 @@
       "signIn": "Fin del inicio de sesión",
       "actions": "Acciones",
       "identity": "{{appleId}}, fototeca {{library}}",
-      "autoDelete": "Elimina de iCloud tras la descarga",
       "progress": "{{action}}: {{n}} descargadas",
       "lastRun": "Última ejecución: {{downloaded}} nuevas, {{present}} ya presentes, {{failed}} con errores",
       "storedValue": "{{n}} elementos, {{size}}",
-      "expiring": "Vence pronto: pulse Conectar"
+      "expiring": "Vence pronto: pulse Conectar",
+      "librariesFound": "Fototecas encontradas: {{names}}. Elija una con Editar.",
+      "librariesOnlyPersonal": "Solo se encontró la fototeca personal: no hay ninguna fototeca compartida para elegir."
     },
     "code": {
       "failed": "No se pudo enviar el código.",

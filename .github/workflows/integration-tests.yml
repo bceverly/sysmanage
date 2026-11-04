@@ -319,7 +319,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -331,7 +331,7 @@ jobs:
           exit 0
 
       - name: Skip macOS on linux+windows runs
-        if: ${{ (inputs.platforms || 'all') == 'linux+windows' && matrix.os == 'macos-latest' }}
+        if: ${{ (inputs.platforms || 'all') == 'linux+windows' && matrix.os == 'macos-15' }}
         run: |
           echo "Skipping ${{ matrix.os }} per platforms=linux+windows input."
           exit 0
