@@ -57,6 +57,11 @@ def _empty_registries():
     clear_incompatibility("thing")
 
 
+# A fixed platform, so tests that build thing_3.14 by hand do not depend on
+# which Python runs them.
+PLATFORM_314 = {"platform": "linux", "architecture": "x86_64", "python_version": "3.14"}
+
+
 def _live_install(modules_path, version="1.0.9", code="thing", pyver="3.14"):
     """An installed engine: a compiled module + metadata.json."""
     live = os.path.join(modules_path, f"{code}_{pyver}")
@@ -216,6 +221,13 @@ class TestTheSwapKeepsTheWorkingEngine:
             loader, "_get_modules_path", return_value=modules_path
         ), patch.object(
             loader, "_fetch_module_bytes", side_effect=_fetch
+        ), patch.object(
+            # The installed engine sits in thing_3.14; without this the loader
+            # looks in the running interpreter's directory (thing_3.12 on the
+            # Windows runner) and finds nothing to keep.
+            loader,
+            "_get_platform_info",
+            return_value=PLATFORM_314,
         ), patch.object(
             loader, "_get_cached_module_version", return_value="1.0.9"
         ), patch.object(

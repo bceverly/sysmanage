@@ -24,6 +24,11 @@ ALLOWED = {
         "loads Pro+ engines only from the local modules directory, after the "
         "bundle's signature is verified (module_signature.verify_module_dir)"
     ),
+    ("4", "backend/licensing/engine_compat.py"): (
+        "reads a staged Pro+ engine's schema requirement in a child process, "
+        "only after the bundle's signature is verified "
+        "(module_signature.verify_module_dir), the same as module_loader"
+    ),
     ("2", "backend/api/reports/endpoints.py"): (
         "report HTML comes from the reporting engine, which escapes every "
         "interpolated value (escape_html); the endpoint requires a login"
