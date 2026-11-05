@@ -226,7 +226,7 @@ class TestReenrollHost:
             requires_host_token=True,
             registration_nonce_hash="h" * 64,
         )
-        with patch("backend.api.host_approval.AuditService.log_update") as audit:
+        with patch("backend.api.host_approval.AuditService.log") as audit:
             response = client.post(
                 f"/api/v1/host/{host.id}/reenroll", headers=auth_headers
             )
@@ -238,3 +238,4 @@ class TestReenrollHost:
         assert host.registration_nonce_hash is None
         assert host.approval_status == "pending"
         audit.assert_called_once()
+        assert "Re-enrollment requested" in audit.call_args.kwargs["description"]

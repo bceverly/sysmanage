@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-05 07:56-0500\n"
+"POT-Creation-Date: 2026-11-05 10:45-0500\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1163,6 +1163,7 @@ msgid "Permission denied: ADD_USER role required"
 msgstr " رفض الوصول: يتطلب دور ADD_USER"
 
 #: backend/api/user.py:425 backend/api/user.py:566
+#: backend/api/first_admin.py:120
 msgid "User already exists"
 msgstr "المستخدم موجود بالفعل"
 
@@ -3290,11 +3291,11 @@ msgstr "فشل في إزالة العلامة من المضيف: %(error)s"
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "فشل في جلب علامات المضيف: %(error)s"
 
-#: backend/api/security.py:150
+#: backend/api/security.py:154
 msgid "Email integration must be configured before creating new users"
 msgstr "يجب تكوين تكامل البريد الإلكتروني قبل إنشاء مستخدمين جدد"
 
-#: backend/api/security.py:153
+#: backend/api/security.py:157
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
@@ -3304,11 +3305,11 @@ msgstr ""
 "تكامل البريد الإلكتروني، لن يتمكن المستخدمون الجدد من تلقي تعليمات إعداد "
 "كلمة المرور وسيكونون غير قادرين على تسجيل الدخول."
 
-#: backend/api/security.py:171
+#: backend/api/security.py:175
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "بيانات اعتماد المسؤول الافتراضية تم تكوينها في ملف YAML الخاص بك"
 
-#: backend/api/security.py:173
+#: backend/api/security.py:177
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
@@ -3316,29 +3317,29 @@ msgstr ""
 "قم بإزالة admin_userid و admin_password من ملف التكوين الخاص بك وأعد تشغيل "
 "الخادم"
 
-#: backend/api/security.py:188
+#: backend/api/security.py:192
 msgid "Default JWT secret is being used"
 msgstr "يتم استخدام سر JWT الافتراضي"
 
-#: backend/api/security.py:189 backend/api/security.py:219
+#: backend/api/security.py:193 backend/api/security.py:223
 #, python-brace-format
 msgid "Run: {command}"
 msgstr "تشغيل: {command}"
 
-#: backend/api/security.py:207 backend/api/security.py:218
+#: backend/api/security.py:211 backend/api/security.py:222
 msgid "Default password salt is being used"
 msgstr "يتم استخدام ملح كلمة المرور الافتراضي"
 
-#: backend/api/security.py:208
+#: backend/api/security.py:212
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr "تشغيل: {command} (سيتم ترحيل {count} مستخدمًا)"
 
-#: backend/api/security.py:232 backend/api/security.py:246
+#: backend/api/security.py:236 backend/api/security.py:250
 msgid "Inconsistent security configuration detected"
 msgstr "تم اكتشاف تكوين أمان غير متناسق"
 
-#: backend/api/security.py:234
+#: backend/api/security.py:238
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
@@ -3347,7 +3348,7 @@ msgstr ""
 "سر JWT يستخدم القيمة الافتراضية ولكن تم تغيير ملح كلمة المرور. تشغيل: "
 "{command}"
 
-#: backend/api/security.py:248
+#: backend/api/security.py:252
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
@@ -3447,7 +3448,7 @@ msgstr "فشل في استرداد ملخص الحزم: %s"
 msgid "Failed to count packages: %s"
 msgstr "فشل في إحصاء الحزم: %s"
 
-#: backend/api/packages_helpers.py:298
+#: backend/api/packages_helpers.py:311
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "فشل في البحث عن الحزم: %s"
@@ -3781,7 +3782,7 @@ msgstr "لم يتم تمكين متعددة المستخدمين."
 msgid "Logout successful"
 msgstr "تسجيل الخروج ناجح"
 
-#: backend/api/profile.py:156
+#: backend/api/profile.py:156 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "كلمة المرور الجديدة غير متطابقة مع تأكيدها"
 
@@ -4335,19 +4336,34 @@ msgstr "تم حذف الملف التعريفي"
 msgid "Assignment removed"
 msgstr "تم إزالة التعيين"
 
-#: backend/api/host_approval.py:54 backend/api/host_approval.py:410
+#: backend/api/host_approval.py:54 backend/api/host_approval.py:418
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr " رفض الوصول: يتطلب دور APPROVE_HOST_REGISTRATION"
 
-#: backend/api/host_approval.py:74 backend/api/host_approval.py:363
+#: backend/api/host_approval.py:74 backend/api/host_approval.py:368
 msgid "Host is not in pending status"
 msgstr "المضيف ليس في حالة انتظار"
 
-#: backend/api/host_approval.py:475
+#: backend/api/host_approval.py:292
+#, python-brace-format
+msgid "Approved host '{name}'"
+msgstr "تمت الموافقة على المضيف '{name}' "
+
+#: backend/api/host_approval.py:381
+#, python-brace-format
+msgid "Rejected host '{name}'"
+msgstr "تم رفض المضيف '{name}' "
+
+#: backend/api/host_approval.py:438
+#, python-brace-format
+msgid "Re-enrollment requested for host '{name}'"
+msgstr "تم طلب إعادة التسجيل للمضيف '{name}' "
+
+#: backend/api/host_approval.py:488
 msgid "OS version update requested"
 msgstr "تم طلب تحديث إصدار نظام التشغيل"
 
-#: backend/api/host_approval.py:520
+#: backend/api/host_approval.py:533
 msgid "Updates check requested"
 msgstr "تم طلب فحص التحديثات"
 
@@ -5101,6 +5117,23 @@ msgstr "يوجد بالفعل تكوين منصة لـ %s على هذا المض
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "التكوين الخاص بالمنصة لا يزال يمتلك %d مرآة (ات); قم بإزالتها أولاً"
+
+#: backend/api/first_admin.py:89
+msgid ""
+"Only the recovery account in sysmanage.yaml can create the first "
+"administrator"
+msgstr "يمكن حساب الاسترداد في ملف sysmanage.yaml فقط إنشاء أول مسؤول"
+
+#: backend/api/first_admin.py:95
+msgid "Use a different email address from the recovery account"
+msgstr "استخدم عنوان بريد إلكتروني مختلف عن حساب الاسترداد"
+
+#: backend/api/first_admin.py:112
+msgid ""
+"An administrator already exists. Sign in as that administrator to add more "
+"users."
+msgstr ""
+"يوجد مسؤول بالفعل. قم بتسجيل الدخول كمسؤول موجود لإضافة مستخدمين آخرين."
 
 #: backend/api/audit_log.py:42
 msgid "Permission denied: VIEW_AUDIT_LOG role required"

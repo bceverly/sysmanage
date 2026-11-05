@@ -15,6 +15,10 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	mkdir -p /var/lib/sysmanage
 	mkdir -p /var/log/sysmanage
 	mkdir -p /etc/sysmanage
+	# Where the TLS message below tells the operator to put the certificate;
+	# without it "openssl req -keyout /etc/sysmanage/tls/server.key" fails with
+	# "No such file or directory" (fresh Ubuntu 24.04 install, 2026-11-05).
+	install -d -m 0755 /etc/sysmanage/tls
 
 	# Set ownership of application directories
 	chown -R sysmanage:sysmanage /opt/sysmanage
@@ -118,6 +122,14 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 		# Enable the sysmanage site
 		if [ -f /etc/nginx/sites-available/sysmanage-nginx.conf ]; then
 			ln -sf /etc/nginx/sites-available/sysmanage-nginx.conf /etc/nginx/sites-enabled/sysmanage 2>/dev/null || true
+			# Ubuntu's stock "default" site is the default server on port 80, so
+			# http://<server>/ showed "Welcome to nginx!" instead of redirecting
+			# to SysManage over HTTPS (2026-11-05).  Disable it only while it is
+			# still the untouched stock link; the file itself stays.
+			if [ "$(readlink /etc/nginx/sites-enabled/default 2>/dev/null)" = "/etc/nginx/sites-available/default" ]; then
+				rm -f /etc/nginx/sites-enabled/default
+				echo "Disabled nginx's stock default site (it answered port 80 instead of SysManage)"
+			fi
 			# Test nginx config
 			nginx -t >/dev/null 2>&1 && systemctl reload nginx >/dev/null 2>&1 || echo "⚠ nginx configuration may need manual review"
 		fi

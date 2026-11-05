@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-05 07:55-0500\n"
+"POT-Creation-Date: 2026-11-05 10:42-0500\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -1164,6 +1164,7 @@ msgid "Permission denied: ADD_USER role required"
 msgstr "Permission denied: ADD_USER role required"
 
 #: backend/api/user.py:425 backend/api/user.py:566
+#: backend/api/first_admin.py:120
 msgid "User already exists"
 msgstr "User already exists"
 
@@ -3305,11 +3306,11 @@ msgstr "Failed to remove tag from host: %(error)s"
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Failed to fetch host tags: %(error)s"
 
-#: backend/api/security.py:150
+#: backend/api/security.py:154
 msgid "Email integration must be configured before creating new users"
 msgstr "Email integration must be configured before creating new users"
 
-#: backend/api/security.py:153
+#: backend/api/security.py:157
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
@@ -3319,11 +3320,11 @@ msgstr ""
 "Without email integration, new users cannot receive password setup "
 "instructions and will be unable to log in."
 
-#: backend/api/security.py:171
+#: backend/api/security.py:175
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "Default admin credentials are configured in your YAML file"
 
-#: backend/api/security.py:173
+#: backend/api/security.py:177
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
@@ -3331,29 +3332,29 @@ msgstr ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
 
-#: backend/api/security.py:188
+#: backend/api/security.py:192
 msgid "Default JWT secret is being used"
 msgstr "Default JWT secret is being used"
 
-#: backend/api/security.py:189 backend/api/security.py:219
+#: backend/api/security.py:193 backend/api/security.py:223
 #, python-brace-format
 msgid "Run: {command}"
 msgstr "Run: {command}"
 
-#: backend/api/security.py:207 backend/api/security.py:218
+#: backend/api/security.py:211 backend/api/security.py:222
 msgid "Default password salt is being used"
 msgstr "Default password salt is being used"
 
-#: backend/api/security.py:208
+#: backend/api/security.py:212
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr "Run: {command} ({count} users will be migrated)"
 
-#: backend/api/security.py:232 backend/api/security.py:246
+#: backend/api/security.py:236 backend/api/security.py:250
 msgid "Inconsistent security configuration detected"
 msgstr "Inconsistent security configuration detected"
 
-#: backend/api/security.py:234
+#: backend/api/security.py:238
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
@@ -3362,7 +3363,7 @@ msgstr ""
 "JWT secret uses default value but password salt has been changed. Run: "
 "{command}"
 
-#: backend/api/security.py:248
+#: backend/api/security.py:252
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
@@ -3462,7 +3463,7 @@ msgstr "Failed to retrieve package summary: %s"
 msgid "Failed to count packages: %s"
 msgstr "Failed to count packages: %s"
 
-#: backend/api/packages_helpers.py:298
+#: backend/api/packages_helpers.py:311
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "Failed to search packages: %s"
@@ -3800,7 +3801,7 @@ msgstr "Multi-tenancy is not enabled."
 msgid "Logout successful"
 msgstr "Logout successful"
 
-#: backend/api/profile.py:156
+#: backend/api/profile.py:156 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "New password and confirmation do not match"
 
@@ -4360,19 +4361,34 @@ msgstr "Profile deleted"
 msgid "Assignment removed"
 msgstr "Assignment removed"
 
-#: backend/api/host_approval.py:54 backend/api/host_approval.py:410
+#: backend/api/host_approval.py:54 backend/api/host_approval.py:418
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr "Permission denied: APPROVE_HOST_REGISTRATION role required"
 
-#: backend/api/host_approval.py:74 backend/api/host_approval.py:363
+#: backend/api/host_approval.py:74 backend/api/host_approval.py:368
 msgid "Host is not in pending status"
 msgstr "Host is not in pending status"
 
-#: backend/api/host_approval.py:475
+#: backend/api/host_approval.py:292
+#, python-brace-format
+msgid "Approved host '{name}'"
+msgstr "Approved host '{name}'"
+
+#: backend/api/host_approval.py:381
+#, python-brace-format
+msgid "Rejected host '{name}'"
+msgstr "Rejected host '{name}'"
+
+#: backend/api/host_approval.py:438
+#, python-brace-format
+msgid "Re-enrollment requested for host '{name}'"
+msgstr "Re-enrollment requested for host '{name}'"
+
+#: backend/api/host_approval.py:488
 msgid "OS version update requested"
 msgstr "OS version update requested"
 
-#: backend/api/host_approval.py:520
+#: backend/api/host_approval.py:533
 msgid "Updates check requested"
 msgstr "Updates check requested"
 
@@ -5126,6 +5142,26 @@ msgstr "A platform config for %s on this host already exists"
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "Platform config still owns %d mirror(s); delete those first"
+
+#: backend/api/first_admin.py:89
+msgid ""
+"Only the recovery account in sysmanage.yaml can create the first "
+"administrator"
+msgstr ""
+"Only the recovery account in sysmanage.yaml can create the first "
+"administrator"
+
+#: backend/api/first_admin.py:95
+msgid "Use a different email address from the recovery account"
+msgstr "Use a different email address from the recovery account"
+
+#: backend/api/first_admin.py:112
+msgid ""
+"An administrator already exists. Sign in as that administrator to add more "
+"users."
+msgstr ""
+"An administrator already exists. Sign in as that administrator to add more "
+"users."
 
 #: backend/api/audit_log.py:42
 msgid "Permission denied: VIEW_AUDIT_LOG role required"

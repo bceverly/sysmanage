@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-05 07:56-0500\n"
+"POT-Creation-Date: 2026-11-05 10:45-0500\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1163,6 +1163,7 @@ msgid "Permission denied: ADD_USER role required"
 msgstr "प्रवेश नहीं: ADD_USER भूमिका की आवश्यकता है"
 
 #: backend/api/user.py:425 backend/api/user.py:566
+#: backend/api/first_admin.py:120
 msgid "User already exists"
 msgstr "उपयोगकर्ता पहले से मौजूद है"
 
@@ -3294,11 +3295,11 @@ msgstr "होस्ट से टैग हटाने में असफल:
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "होस्ट टैग प्राप्त करने में असफल: %(error)s"
 
-#: backend/api/security.py:150
+#: backend/api/security.py:154
 msgid "Email integration must be configured before creating new users"
 msgstr "नए उपयोगकर्ताओं को बनाने से पहले ईमेल एकीकरण को कॉन्फ़िगर किया जाना चाहिए"
 
-#: backend/api/security.py:153
+#: backend/api/security.py:157
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
@@ -3308,11 +3309,11 @@ msgstr ""
 "के बिना, नए उपयोगकर्ता पासवर्ड सेटअप निर्देश प्राप्त नहीं कर सकते हैं और लॉग इन करने में "
 "असमर्थ होंगे।"
 
-#: backend/api/security.py:171
+#: backend/api/security.py:175
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "डिफ़ॉल्ट व्यवस्थापक क्रेडेंशियल आपकी YAML फ़ाइल में कॉन्फ़िगर हैं"
 
-#: backend/api/security.py:173
+#: backend/api/security.py:177
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
@@ -3320,29 +3321,29 @@ msgstr ""
 "अपनी कॉन्फ़िगरेशन फ़ाइल से admin_userid और admin_password हटाएं और सर्वर को पुनरारंभ "
 "करें"
 
-#: backend/api/security.py:188
+#: backend/api/security.py:192
 msgid "Default JWT secret is being used"
 msgstr "डिफ़ॉल्ट JWT रहस्य का उपयोग किया जा रहा है"
 
-#: backend/api/security.py:189 backend/api/security.py:219
+#: backend/api/security.py:193 backend/api/security.py:223
 #, python-brace-format
 msgid "Run: {command}"
 msgstr "चलाएँ: {command}"
 
-#: backend/api/security.py:207 backend/api/security.py:218
+#: backend/api/security.py:211 backend/api/security.py:222
 msgid "Default password salt is being used"
 msgstr "डिफ़ॉल्ट पासवर्ड सॉल्ट का उपयोग किया जा रहा है"
 
-#: backend/api/security.py:208
+#: backend/api/security.py:212
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr "चलाएँ: {command} ({count} उपयोगकर्ताओं को माइग्रेट किया जाएगा)"
 
-#: backend/api/security.py:232 backend/api/security.py:246
+#: backend/api/security.py:236 backend/api/security.py:250
 msgid "Inconsistent security configuration detected"
 msgstr "असंगत सुरक्षा कॉन्फ़िगरेशन का पता चला"
 
-#: backend/api/security.py:234
+#: backend/api/security.py:238
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
@@ -3351,7 +3352,7 @@ msgstr ""
 "JWT रहस्य डिफ़ॉल्ट मान का उपयोग करता है लेकिन पासवर्ड सॉल्ट बदल दिया गया है। चलाएँ: "
 "{command}"
 
-#: backend/api/security.py:248
+#: backend/api/security.py:252
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
@@ -3451,7 +3452,7 @@ msgstr "पैकेज सारांश प्राप्त करने �
 msgid "Failed to count packages: %s"
 msgstr "पैकेज गिने फ़ालतू हुई: %s"
 
-#: backend/api/packages_helpers.py:298
+#: backend/api/packages_helpers.py:311
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "पैकेज खोजने में विफल: %s"
@@ -3786,7 +3787,7 @@ msgstr "बहु-तनाव नहीं है।"
 msgid "Logout successful"
 msgstr "लॉगआउट सफल"
 
-#: backend/api/profile.py:156
+#: backend/api/profile.py:156 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "नए पासवर्ड और पुष्टि में मेल नहीं आता है"
 
@@ -4341,19 +4342,34 @@ msgstr "प्रोफ़ाइल हटा दी गई"
 msgid "Assignment removed"
 msgstr "असाइनमेंट हटा दिया गया"
 
-#: backend/api/host_approval.py:54 backend/api/host_approval.py:410
+#: backend/api/host_approval.py:54 backend/api/host_approval.py:418
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr "प्रवेश नहीं: APPROVE_HOST_REGISTRATION भूमिका की आवश्यकता है"
 
-#: backend/api/host_approval.py:74 backend/api/host_approval.py:363
+#: backend/api/host_approval.py:74 backend/api/host_approval.py:368
 msgid "Host is not in pending status"
 msgstr "होस्ट लंबित स्थिति में नहीं है"
 
-#: backend/api/host_approval.py:475
+#: backend/api/host_approval.py:292
+#, python-brace-format
+msgid "Approved host '{name}'"
+msgstr "अनुमोदित होस्ट '{name}'"
+
+#: backend/api/host_approval.py:381
+#, python-brace-format
+msgid "Rejected host '{name}'"
+msgstr "अस्वीकृत होस्ट '{name}'"
+
+#: backend/api/host_approval.py:438
+#, python-brace-format
+msgid "Re-enrollment requested for host '{name}'"
+msgstr "होस्ट '{name}' के लिए फिर से नामांकन की मांग की गई है"
+
+#: backend/api/host_approval.py:488
 msgid "OS version update requested"
 msgstr "ओएस संस्करण अपडेट का अनुरोध किया गया"
 
-#: backend/api/host_approval.py:520
+#: backend/api/host_approval.py:533
 msgid "Updates check requested"
 msgstr "अद्यतनों की जांच की आवश्यकता है"
 
@@ -5107,6 +5123,23 @@ msgstr "इस होस्ट पर इस प्लेटफॉर्म क�
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "प्लेटफ़ोर्म सेटिंग में %d माइरोर(स) अभी तक निर्दिष्ट; पहले उन्हें हटा दें"
+
+#: backend/api/first_admin.py:89
+msgid ""
+"Only the recovery account in sysmanage.yaml can create the first "
+"administrator"
+msgstr "sysmanage.yaml में केवल पुनर्प्राप्ति खाता पहले प्रशासक बना सकता है,"
+
+#: backend/api/first_admin.py:95
+msgid "Use a different email address from the recovery account"
+msgstr "पुनर्प्राप्ति खाते से अलग ईमेल पता का उपयोग करें"
+
+#: backend/api/first_admin.py:112
+msgid ""
+"An administrator already exists. Sign in as that administrator to add more "
+"users."
+msgstr ""
+"एक प्रशासक पहले से मौजूद है। उस प्रशासक के रूप में साइन इन करें और अधिक उपयोगकर्ता जोड़ें,"
 
 #: backend/api/audit_log.py:42
 msgid "Permission denied: VIEW_AUDIT_LOG role required"

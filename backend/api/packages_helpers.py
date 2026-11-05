@@ -10,7 +10,7 @@ Synchronous database operations to be run in thread pools.
 from typing import List, Optional
 
 from fastapi import HTTPException
-from sqlalchemy import distinct, func
+from sqlalchemy import case, distinct, func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.functions import count
 
@@ -272,11 +272,24 @@ def search_packages_sync(  # pylint: disable=too-many-arguments,too-many-positio
             # DISTINCT for the same reason as count_packages_sync: rows are
             # per-host, the question is per-OS.  Without it a fleet of ten
             # identical hosts shows every package ten times.
+            # Best match first: the exact name, then names starting with the
+            # query, then the rest -- alphabetical alone put "tree" behind
+            # "FastTree", "altree" and every other name containing it, past
+            # the 20 results a host's Install dialog shows.
+            name = func.lower(AvailablePackage.package_name)
+            needle = query.lower()
+            rank = case(
+                (name == needle, 0),
+                (name.like(f"{needle}%"), 1),
+                else_=2,
+            )
             packages = (
-                db_query.with_entities(*_PACKAGE_IDENTITY)
+                db_query.with_entities(*_PACKAGE_IDENTITY, rank.label("rank"))
                 .distinct()
                 .order_by(
-                    AvailablePackage.package_name, AvailablePackage.package_manager
+                    "rank",
+                    AvailablePackage.package_name,
+                    AvailablePackage.package_manager,
                 )
                 .offset(offset)
                 .limit(limit)

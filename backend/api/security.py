@@ -20,6 +20,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.auth.auth_bearer import get_current_user
 from backend.config import config
 from backend.i18n import _
+from backend.api.first_admin import needs_first_admin
 from backend.persistence import db, models
 
 # Known default values that should be changed in production
@@ -110,6 +111,9 @@ class SecurityStatusResponse(BaseModel):
     jwtCommand: str = ""
     saltCommand: str = ""
     restartCommand: str = ""
+    # Signed in as the recovery account with no database administrator yet:
+    # the banner offers "Create your administrator" (backend/api/first_admin.py).
+    needsFirstAdmin: bool = False
 
 
 router = APIRouter(prefix="/security", tags=["security"])
@@ -287,4 +291,5 @@ async def get_default_credentials_status(current_user=Depends(get_current_user))
         jwtCommand=_get_platform_command("--jwt-only"),
         saltCommand=_get_platform_command("--salt-only"),
         restartCommand=_get_restart_command(),
+        needsFirstAdmin=is_logged_in_as_default and needs_first_admin(current_userid),
     )

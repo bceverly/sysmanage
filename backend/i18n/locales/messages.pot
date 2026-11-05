@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-05 07:56-0500\n"
+"POT-Creation-Date: 2026-11-05 10:45-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1147,6 +1147,7 @@ msgid "Permission denied: ADD_USER role required"
 msgstr ""
 
 #: backend/api/user.py:425 backend/api/user.py:566
+#: backend/api/first_admin.py:120
 msgid "User already exists"
 msgstr ""
 
@@ -3192,57 +3193,57 @@ msgstr ""
 msgid "Failed to fetch host tags: %(error)s"
 msgstr ""
 
-#: backend/api/security.py:150
+#: backend/api/security.py:154
 msgid "Email integration must be configured before creating new users"
 msgstr ""
 
-#: backend/api/security.py:153
+#: backend/api/security.py:157
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
 "instructions and will be unable to log in."
 msgstr ""
 
-#: backend/api/security.py:171
+#: backend/api/security.py:175
 msgid "Default admin credentials are configured in your YAML file"
 msgstr ""
 
-#: backend/api/security.py:173
+#: backend/api/security.py:177
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
 msgstr ""
 
-#: backend/api/security.py:188
+#: backend/api/security.py:192
 msgid "Default JWT secret is being used"
 msgstr ""
 
-#: backend/api/security.py:189 backend/api/security.py:219
+#: backend/api/security.py:193 backend/api/security.py:223
 #, python-brace-format
 msgid "Run: {command}"
 msgstr ""
 
-#: backend/api/security.py:207 backend/api/security.py:218
+#: backend/api/security.py:211 backend/api/security.py:222
 msgid "Default password salt is being used"
 msgstr ""
 
-#: backend/api/security.py:208
+#: backend/api/security.py:212
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr ""
 
-#: backend/api/security.py:232 backend/api/security.py:246
+#: backend/api/security.py:236 backend/api/security.py:250
 msgid "Inconsistent security configuration detected"
 msgstr ""
 
-#: backend/api/security.py:234
+#: backend/api/security.py:238
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
 "{command}"
 msgstr ""
 
-#: backend/api/security.py:248
+#: backend/api/security.py:252
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
@@ -3340,7 +3341,7 @@ msgstr ""
 msgid "Failed to count packages: %s"
 msgstr ""
 
-#: backend/api/packages_helpers.py:298
+#: backend/api/packages_helpers.py:311
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr ""
@@ -3672,7 +3673,7 @@ msgstr ""
 msgid "Logout successful"
 msgstr ""
 
-#: backend/api/profile.py:156
+#: backend/api/profile.py:156 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr ""
 
@@ -4202,19 +4203,34 @@ msgstr ""
 msgid "Assignment removed"
 msgstr ""
 
-#: backend/api/host_approval.py:54 backend/api/host_approval.py:410
+#: backend/api/host_approval.py:54 backend/api/host_approval.py:418
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr ""
 
-#: backend/api/host_approval.py:74 backend/api/host_approval.py:363
+#: backend/api/host_approval.py:74 backend/api/host_approval.py:368
 msgid "Host is not in pending status"
 msgstr ""
 
-#: backend/api/host_approval.py:475
+#: backend/api/host_approval.py:292
+#, python-brace-format
+msgid "Approved host '{name}'"
+msgstr ""
+
+#: backend/api/host_approval.py:381
+#, python-brace-format
+msgid "Rejected host '{name}'"
+msgstr ""
+
+#: backend/api/host_approval.py:438
+#, python-brace-format
+msgid "Re-enrollment requested for host '{name}'"
+msgstr ""
+
+#: backend/api/host_approval.py:488
 msgid "OS version update requested"
 msgstr ""
 
-#: backend/api/host_approval.py:520
+#: backend/api/host_approval.py:533
 msgid "Updates check requested"
 msgstr ""
 
@@ -4941,6 +4957,22 @@ msgstr ""
 #: backend/api/repository_mirroring_setup.py:306
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
+msgstr ""
+
+#: backend/api/first_admin.py:89
+msgid ""
+"Only the recovery account in sysmanage.yaml can create the first "
+"administrator"
+msgstr ""
+
+#: backend/api/first_admin.py:95
+msgid "Use a different email address from the recovery account"
+msgstr ""
+
+#: backend/api/first_admin.py:112
+msgid ""
+"An administrator already exists. Sign in as that administrator to add more "
+"users."
 msgstr ""
 
 #: backend/api/audit_log.py:42

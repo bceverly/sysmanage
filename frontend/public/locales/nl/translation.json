@@ -3251,7 +3251,22 @@
     "enablingAntivirus": "Bezig met inschakelen...",
     "disablingAntivirus": "Bezig met uitschakelen...",
     "awaitingAgent": "Wachten tot de agent de wijziging meldt. Dit kan enkele minuten duren.",
-    "agentNotConfirmed": "De agent heeft de wijziging nog niet bevestigd. Mogelijk is hij nog bezig; controleer de host later opnieuw."
+    "agentNotConfirmed": "De agent heeft de wijziging nog niet bevestigd. Mogelijk is hij nog bezig; controleer de host later opnieuw.",
+    "firstAdmin": {
+      "cancel": "Annuleren",
+      "confirm": "Wordelijk wachtwoord bevestigen",
+      "create": "Beheerder aanmaken",
+      "created": "Beheerder {{userid}} aangemaakt. Log uit, en log vervolgens in als {{userid}}.",
+      "email": "E-mailadres",
+      "explain": "Dit account krijgt alle rollen en heeft geen e-mailinstellingen nodig. Log daarna in met het account, en verwijder vervolgens het herstelaccount uit sysmanage.yaml.",
+      "failed": "Kon de beheerder niet aanmaken.",
+      "firstName": "Voornaam",
+      "lastName": "Achternaam",
+      "password": "Wachtwoord",
+      "prompt": "Er bestaat nog geen beheerdersaccount, dus hosts kunnen niet worden goedgekeurd. Maak er nu een -- geen e-mailinstellingen nodig.",
+      "signOut": "Log uit",
+      "title": "Maak uw beheerder aan"
+    }
   },
   "serverDown": {
     "attempts": "Pogingen: {{count}}",

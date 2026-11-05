@@ -3251,7 +3251,22 @@
     "enablingAntivirus": "Wird aktiviert...",
     "disablingAntivirus": "Wird deaktiviert...",
     "awaitingAgent": "Warten, bis der Agent die Änderung meldet. Das kann einige Minuten dauern.",
-    "agentNotConfirmed": "Der Agent hat die Änderung noch nicht bestätigt. Möglicherweise arbeitet er noch; prüfen Sie den Host später erneut."
+    "agentNotConfirmed": "Der Agent hat die Änderung noch nicht bestätigt. Möglicherweise arbeitet er noch; prüfen Sie den Host später erneut.",
+    "firstAdmin": {
+      "cancel": "Abbrechen",
+      "confirm": "Passwort bestätigen",
+      "create": "Administrator erstellen",
+      "created": "Der Administrator {{userid}} hat erstellt. Melden Sie sich aus und melden Sie sich dann als {{userid}} an.",
+      "email": "E-Mail-Adresse",
+      "explain": "Dieses Konto erhält alle Rollen und benötigt keine E-Mail-Einrichtung. Melden Sie sich danach damit an und entfernen Sie dann das Wiederherstellungskonto aus sysmanage.yaml.",
+      "failed": "Die Erstellung des Administrators konnte nicht erfolgen.",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "password": "Passwort",
+      "prompt": "Noch kein Administratorkonto vorhanden, daher können Hosts nicht genehmigt werden. Erstellen Sie eines jetzt - keine E-Mail-Einrichtung erforderlich.",
+      "signOut": "Ausloggen",
+      "title": "Erstellen Sie Ihren Administrator"
+    }
   },
   "serverDown": {
     "attempts": "Versuche: {{count}}",

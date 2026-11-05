@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-05 07:56-0500\n"
+"POT-Creation-Date: 2026-11-05 10:45-0500\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1166,6 +1166,7 @@ msgid "Permission denied: ADD_USER role required"
 msgstr "アクセス権限がありません: ADD_USER ロールが必要です"
 
 #: backend/api/user.py:425 backend/api/user.py:566
+#: backend/api/first_admin.py:120
 msgid "User already exists"
 msgstr "ユーザーは既に存在しています"
 
@@ -3333,11 +3334,11 @@ msgstr "ホストからのタグ削除に失敗しました: %(error)s"
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "ホストタグの取得に失敗しました: %(error)s"
 
-#: backend/api/security.py:150
+#: backend/api/security.py:154
 msgid "Email integration must be configured before creating new users"
 msgstr "新しいユーザーを作成する前にメール統合を設定する必要があります"
 
-#: backend/api/security.py:153
+#: backend/api/security.py:157
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
@@ -3347,11 +3348,11 @@ msgstr ""
 "がないと、新しいユーザーはパスワード設定の指示を受け取れず、ログインできなく"
 "なります。"
 
-#: backend/api/security.py:171
+#: backend/api/security.py:175
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "デフォルトの管理者資格情報が YAML ファイルに設定されています"
 
-#: backend/api/security.py:173
+#: backend/api/security.py:177
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
@@ -3359,29 +3360,29 @@ msgstr ""
 "設定ファイルから admin_userid と admin_password を削除し、サーバーを再起動し"
 "てください"
 
-#: backend/api/security.py:188
+#: backend/api/security.py:192
 msgid "Default JWT secret is being used"
 msgstr "デフォルトの JWT シークレットが使用されています"
 
-#: backend/api/security.py:189 backend/api/security.py:219
+#: backend/api/security.py:193 backend/api/security.py:223
 #, python-brace-format
 msgid "Run: {command}"
 msgstr "実行: {command}"
 
-#: backend/api/security.py:207 backend/api/security.py:218
+#: backend/api/security.py:211 backend/api/security.py:222
 msgid "Default password salt is being used"
 msgstr "デフォルトのパスワードソルトが使用されています"
 
-#: backend/api/security.py:208
+#: backend/api/security.py:212
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr "実行: {command}（{count} 人のユーザーが移行されます）"
 
-#: backend/api/security.py:232 backend/api/security.py:246
+#: backend/api/security.py:236 backend/api/security.py:250
 msgid "Inconsistent security configuration detected"
 msgstr "一貫性のないセキュリティ設定が検出されました"
 
-#: backend/api/security.py:234
+#: backend/api/security.py:238
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
@@ -3390,7 +3391,7 @@ msgstr ""
 "JWT シークレットはデフォルト値を使用していますが、パスワードソルトは変更され"
 "ています。実行: {command}"
 
-#: backend/api/security.py:248
+#: backend/api/security.py:252
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
@@ -3493,7 +3494,7 @@ msgstr "パッケージ概要の取得に失敗しました: %s"
 msgid "Failed to count packages: %s"
 msgstr "パッケージのカウントに失敗しました: %s"
 
-#: backend/api/packages_helpers.py:298
+#: backend/api/packages_helpers.py:311
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "パッケージの検索に失敗しました: %s"
@@ -3836,7 +3837,7 @@ msgstr "マルチテナント機能は有効になっていません。"
 msgid "Logout successful"
 msgstr "ログアウト成功"
 
-#: backend/api/profile.py:156
+#: backend/api/profile.py:156 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "新しいパスワードと確認用パスワードが一致していません"
 
@@ -4424,19 +4425,34 @@ msgstr "プロファイルが削除されました"
 msgid "Assignment removed"
 msgstr "割り当てが削除されました"
 
-#: backend/api/host_approval.py:54 backend/api/host_approval.py:410
+#: backend/api/host_approval.py:54 backend/api/host_approval.py:418
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr "アクセス権限がありません: APPROVE_HOST_REGISTRATION ロールが必要です"
 
-#: backend/api/host_approval.py:74 backend/api/host_approval.py:363
+#: backend/api/host_approval.py:74 backend/api/host_approval.py:368
 msgid "Host is not in pending status"
 msgstr "ホストは保留状態ではありません"
 
-#: backend/api/host_approval.py:475
+#: backend/api/host_approval.py:292
+#, python-brace-format
+msgid "Approved host '{name}'"
+msgstr "承認されたホスト '{name}' "
+
+#: backend/api/host_approval.py:381
+#, python-brace-format
+msgid "Rejected host '{name}'"
+msgstr "ホスト '{name}' は拒否されました。"
+
+#: backend/api/host_approval.py:438
+#, python-brace-format
+msgid "Re-enrollment requested for host '{name}'"
+msgstr "ホスト '{name}' の再登録がリクエストされました。"
+
+#: backend/api/host_approval.py:488
 msgid "OS version update requested"
 msgstr "OSバージョン更新が要求されました"
 
-#: backend/api/host_approval.py:520
+#: backend/api/host_approval.py:533
 msgid "Updates check requested"
 msgstr "アップデートの確認が要求されました"
 
@@ -5215,6 +5231,25 @@ msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr ""
 "プラットフォーム設定はまだ %d のミラーを所有しています; それらから始めてくだ"
 "さい"
+
+#: backend/api/first_admin.py:89
+msgid ""
+"Only the recovery account in sysmanage.yaml can create the first "
+"administrator"
+msgstr ""
+"sysmanage.yaml 内で最初の管理者を作成できるのは、回復アカウントのみです。"
+
+#: backend/api/first_admin.py:95
+msgid "Use a different email address from the recovery account"
+msgstr "回復アカウントとは異なるメールアドレスを使用してください。"
+
+#: backend/api/first_admin.py:112
+msgid ""
+"An administrator already exists. Sign in as that administrator to add more "
+"users."
+msgstr ""
+"管理者がすでに存在します。その管理者としてサインインして、さらにユーザーを追"
+"加してください。"
 
 #: backend/api/audit_log.py:42
 msgid "Permission denied: VIEW_AUDIT_LOG role required"

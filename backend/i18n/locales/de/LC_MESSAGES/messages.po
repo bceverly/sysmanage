@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-05 07:56-0500\n"
+"POT-Creation-Date: 2026-11-05 10:45-0500\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1179,6 +1179,7 @@ msgid "Permission denied: ADD_USER role required"
 msgstr "Zugriff verweigert: ADD_USER-Rolle erforderlich"
 
 #: backend/api/user.py:425 backend/api/user.py:566
+#: backend/api/first_admin.py:120
 msgid "User already exists"
 msgstr "Benutzer existiert bereits"
 
@@ -3406,13 +3407,13 @@ msgstr "Fehler beim Entfernen des Tags vom Host: %(error)s"
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Fehler beim Abrufen der Host-Tags: %(error)s"
 
-#: backend/api/security.py:150
+#: backend/api/security.py:154
 msgid "Email integration must be configured before creating new users"
 msgstr ""
 "Die E-Mail-Integration muss vor dem Erstellen neuer Benutzer konfiguriert "
 "werden"
 
-#: backend/api/security.py:153
+#: backend/api/security.py:157
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
@@ -3422,11 +3423,11 @@ msgstr ""
 "Sie die SMTP-Einstellungen. Ohne E-Mail-Integration können neue Benutzer "
 "keine Anweisungen zur Passworteinrichtung erhalten und sich nicht anmelden."
 
-#: backend/api/security.py:171
+#: backend/api/security.py:175
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "Standard-Admin-Anmeldedaten sind in Ihrer YAML-Datei konfiguriert"
 
-#: backend/api/security.py:173
+#: backend/api/security.py:177
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
@@ -3434,29 +3435,29 @@ msgstr ""
 "Entfernen Sie admin_userid und admin_password aus Ihrer Konfigurationsdatei "
 "und starten Sie den Server neu"
 
-#: backend/api/security.py:188
+#: backend/api/security.py:192
 msgid "Default JWT secret is being used"
 msgstr "Standard-JWT-Geheimnis wird verwendet"
 
-#: backend/api/security.py:189 backend/api/security.py:219
+#: backend/api/security.py:193 backend/api/security.py:223
 #, python-brace-format
 msgid "Run: {command}"
 msgstr "Ausführen: {command}"
 
-#: backend/api/security.py:207 backend/api/security.py:218
+#: backend/api/security.py:211 backend/api/security.py:222
 msgid "Default password salt is being used"
 msgstr "Standard-Passwort-Salt wird verwendet"
 
-#: backend/api/security.py:208
+#: backend/api/security.py:212
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr "Ausführen: {command} ({count} Benutzer werden migriert)"
 
-#: backend/api/security.py:232 backend/api/security.py:246
+#: backend/api/security.py:236 backend/api/security.py:250
 msgid "Inconsistent security configuration detected"
 msgstr "Inkonsistente Sicherheitskonfiguration erkannt"
 
-#: backend/api/security.py:234
+#: backend/api/security.py:238
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
@@ -3465,7 +3466,7 @@ msgstr ""
 "JWT-Geheimnis verwendet den Standardwert, aber Passwort-Salt wurde geändert. "
 "Ausführen: {command}"
 
-#: backend/api/security.py:248
+#: backend/api/security.py:252
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
@@ -3572,7 +3573,7 @@ msgstr "Fehler beim Abrufen der Paket-Zusammenfassung: %s"
 msgid "Failed to count packages: %s"
 msgstr "Fehler beim Zählen der Pakete: %s"
 
-#: backend/api/packages_helpers.py:298
+#: backend/api/packages_helpers.py:311
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "Fehler beim Suchen von Paketen: %s"
@@ -3918,7 +3919,7 @@ msgstr "Die Mehrmietendeaktivierung ist nicht aktiviert."
 msgid "Logout successful"
 msgstr "Abmeldung erfolgreich"
 
-#: backend/api/profile.py:156
+#: backend/api/profile.py:156 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "Neue Passwort und Bestätigung stimmen nicht überein"
 
@@ -4512,19 +4513,34 @@ msgstr "Profil gelöscht"
 msgid "Assignment removed"
 msgstr "Zuweisung entfernt"
 
-#: backend/api/host_approval.py:54 backend/api/host_approval.py:410
+#: backend/api/host_approval.py:54 backend/api/host_approval.py:418
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr "Zugriff verweigert: APPROVE_HOST_REGISTRATION-Rolle erforderlich"
 
-#: backend/api/host_approval.py:74 backend/api/host_approval.py:363
+#: backend/api/host_approval.py:74 backend/api/host_approval.py:368
 msgid "Host is not in pending status"
 msgstr "Host befindet sich nicht im ausstehenden Status"
 
-#: backend/api/host_approval.py:475
+#: backend/api/host_approval.py:292
+#, python-brace-format
+msgid "Approved host '{name}'"
+msgstr "Host '{name}' genehmigt"
+
+#: backend/api/host_approval.py:381
+#, python-brace-format
+msgid "Rejected host '{name}'"
+msgstr "Abgelehnter Host '{name}'"
+
+#: backend/api/host_approval.py:438
+#, python-brace-format
+msgid "Re-enrollment requested for host '{name}'"
+msgstr "Neuanmeldung für den Host '{name}' wurde angefordert"
+
+#: backend/api/host_approval.py:488
 msgid "OS version update requested"
 msgstr "Betriebssystem-Versions-Update angefordert"
 
-#: backend/api/host_approval.py:520
+#: backend/api/host_approval.py:533
 msgid "Updates check requested"
 msgstr "Update-Prüfung angefordert"
 
@@ -5293,6 +5309,27 @@ msgstr "Eine Plattform-Konfiguration für %s auf diesem Host existiert bereits"
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr ""
 "Plattformkonfiguration besitzt noch %d Spiegel; löschen Sie diese zuerst"
+
+#: backend/api/first_admin.py:89
+msgid ""
+"Only the recovery account in sysmanage.yaml can create the first "
+"administrator"
+msgstr ""
+"Nur das Wiederherstellungskonto in sysmanage.yaml kann den ersten "
+"Administrator erstellen"
+
+#: backend/api/first_admin.py:95
+msgid "Use a different email address from the recovery account"
+msgstr ""
+"Verwenden Sie eine andere E-Mail-Adresse als das Wiederherstellungskonto"
+
+#: backend/api/first_admin.py:112
+msgid ""
+"An administrator already exists. Sign in as that administrator to add more "
+"users."
+msgstr ""
+"Ein Administrator existiert bereits. Melden Sie sich als dieser "
+"Administrator an, um weitere Benutzer hinzuzufügen."
 
 #: backend/api/audit_log.py:42
 msgid "Permission denied: VIEW_AUDIT_LOG role required"

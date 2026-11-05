@@ -3251,7 +3251,22 @@
     "enablingAntivirus": "Activation...",
     "disablingAntivirus": "Désactivation...",
     "awaitingAgent": "En attente du rapport de l'agent sur la modification. Cela peut prendre quelques minutes.",
-    "agentNotConfirmed": "L'agent n'a pas encore confirmé la modification. Il est peut-être encore en train de travailler ; vérifiez l'hôte plus tard."
+    "agentNotConfirmed": "L'agent n'a pas encore confirmé la modification. Il est peut-être encore en train de travailler ; vérifiez l'hôte plus tard.",
+    "firstAdmin": {
+      "cancel": "Annuler",
+      "confirm": "Confirmer le mot de passe",
+      "create": "Créer un administrateur",
+      "created": "Un administrateur {{userid}} a été créé. Déconnexion, puis connexion en tant que {{userid}}.",
+      "email": "Adresse e-mail",
+      "explain": "Ce compte obtient tous les rôles et n'a pas besoin de configuration e-mail. Connectez-vous avec celui-ci ensuite, puis supprimez le compte de récupération de sysmanage.yaml.",
+      "failed": "Impossible de créer l'administrateur.",
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "password": "Mot de passe",
+      "prompt": "Aucun compte d'administrateur n'existe encore, donc les hôtes ne peuvent pas être approuvés. Créez-en un maintenant, aucune configuration e-mail n'est requise.",
+      "signOut": "Déconnexion",
+      "title": "Créez votre administrateur"
+    }
   },
   "serverDown": {
     "attempts": "Essais : {{count}}",

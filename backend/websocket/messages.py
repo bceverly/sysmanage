@@ -249,10 +249,26 @@ class Message:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Message":
-        """Create message from dictionary."""
+        """Create message from dictionary.
+
+        A message with no ``data`` section carries its fields at the top
+        level; those become the data.  Agents before 3.12.1.7 sent
+        ``installation_complete`` and ``package_installation_status`` that
+        way, and taking only ``data`` dropped every field -- each install
+        from the Install dialog stayed "in progress" forever with
+        "installation_complete ... missing request_id" in the log (found on a
+        fresh install, 2026-11-05).
+        """
+        payload = data.get("data")
+        if payload is None:
+            payload = {
+                k: v
+                for k, v in data.items()
+                if k not in ("message_type", "message_id", "timestamp")
+            }
         message = cls(
             message_type=data.get("message_type"),
-            data=data.get("data", {}),
+            data=payload,
             message_id=data.get("message_id"),
         )
         if "timestamp" in data:

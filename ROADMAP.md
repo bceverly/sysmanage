@@ -14604,8 +14604,20 @@ server stays the control plane.
 - [ ] **Air-gapped installs:** the same policy against the appliance's own storage (Phase 24 invariants), and the runbook works from local media
 - [ ] Docs, screenshots and all strings in 14 locales
 
+#### 25.10 Agent-server mutual TLS and server pinning (Community / OSS) (added 2026-11-05, Bryan)
+
+**Why:** the documentation said agents and server use mutual TLS; the 2026-11-05 site audit found they do not. The pieces exist and nothing uses them: the server creates a CA and issues each approved host a certificate (`backend/security/certificate_manager.py`, `backend/api/host_approval.py:78`), and the agent stores that certificate and the server's fingerprint (`sysmanage-agent/src/security/certificate_store.py:81-147`) -- but the agent never presents its certificate, no nginx config has `ssl_verify_client`, `validate_client_certificate()` (`certificate_manager.py:368`) is never called, and the agent never compares the server's certificate with the fingerprint it saved. Agents authenticate with their per-host token (22.0) over ordinary server-authenticated TLS. The security docs were corrected to say exactly that; they say "mutual TLS" again only when this section is done.
+
+- [ ] **The agent pins its server:** on every connection the agent checks the server against what it stored at enrollment and refuses a mismatch, saying why. Pin the issuing CA or the public key (SPKI), not the leaf certificate -- a Let's Encrypt renewal changes the leaf every 60-90 days -- and give a deliberate re-pin path for a real server or certificate change (operator re-approval, or a signed re-pin from the old key), never a silent re-trust
+- [ ] **Mutual TLS on the agent paths:** the agent presents its issued certificate on its WebSocket and API connections; nginx verifies it against the SysManage CA on the agent locations only (`ssl_verify_client optional` there, so browsers are unaffected) and passes the verified identity to the backend, which requires the certificate and the host token to name the same host. A deleted or revoked host's certificate is refused (a revocation list nginx reads, kept current by the server)
+- [ ] **Certificates renew themselves:** host certificates are valid for one year with no renewal today; renew over the authenticated channel well before expiry, alert on any host near expiry, and never let an expired certificate lock a host out without saying so on the host
+- [ ] **Rollout without breaking a fleet:** off -> optional (verified when presented, token alone still accepted) -> enforced, set per tenant; older agents keep working on the token until enforcement is turned on, and the Hosts list shows which hosts are not yet presenting a certificate; air-gapped installs work unchanged
+- [ ] **Tests:** an agent with no certificate, another host's certificate or a revoked one is refused when enforced; an agent connecting through a proxy presenting a different server certificate refuses to connect; renewal and re-pin round-trip
+- [ ] **Docs:** the security, architecture and agent pages (and the agent's SECURITY.md) describe mutual TLS and pinning only once they are true, with the rollout steps; all strings in 14 locales
+
 ### Licensing summary
 
+- **Community / OSS:** agent-server mutual TLS and server pinning (25.10).
 - **Community / OSS:** the SysManage server backs itself up (25.9): the server policy, consistent PostgreSQL and OpenBAO captures, a reachable target, the recovery runbook, and the unseal keys out of the config.
 - **Pro+ (Professional):** the server's own backup encrypted to an escrow key held outside the server (25.9).
 - **Enterprise:** multi-site and recovery at scale -- many targets, per-site targets through federation, off-site replication, immutable copies, air-gap media, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes approval, legal hold and automated restore drills.
@@ -14636,6 +14648,10 @@ server stays the control plane.
 - [ ] Production's server backs itself up nightly to a target it can reach, encrypted to an escrow key (Pro+), with no unseal key in its config or in the backup
 - [ ] **Server-loss drill:** a test server rebuilt on a new VM from the backup alone, following the runbook with SysManage down; its agents reconnect without re-enrolling, every tenant's data and every OpenBAO secret are back, and the drill's times are recorded
 - [ ] Losing only OpenBAO, and only one tenant database, each restored on its own without touching the rest
+
+**Agent-server mutual TLS (25.10, Community)**
+
+- [ ] Production's agents present their certificates and nginx verifies them, with enforcement on; an agent pointed at a server with a different certificate refuses to connect; a host certificate renews before expiry without operator action
 
 **Every phase**
 

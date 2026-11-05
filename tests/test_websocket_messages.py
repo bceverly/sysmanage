@@ -173,6 +173,32 @@ class TestMessage:
         assert msg.message_id == "ping-123"
         assert msg.data == {}
 
+    def test_top_level_fields_become_the_data_when_there_is_no_data_section(self):
+        """Agents before 3.12.1.7 sent installation_complete flat; taking only
+        "data" dropped request_id, and installs never finished (2026-11-05)."""
+        msg = Message.from_dict(
+            {
+                "message_type": "installation_complete",
+                "message_id": "m-1",
+                "timestamp": "2026-11-05T15:24:56Z",
+                "request_id": "req-1",
+                "success": True,
+                "result_log": "ok",
+            }
+        )
+        assert msg.data == {"request_id": "req-1", "success": True, "result_log": "ok"}
+        assert msg.timestamp == "2026-11-05T15:24:56Z"
+
+    def test_a_data_section_still_wins(self):
+        msg = Message.from_dict(
+            {
+                "message_type": "installation_complete",
+                "data": {"request_id": "r"},
+                "x": 1,
+            }
+        )
+        assert msg.data == {"request_id": "r"}
+
 
 class TestSystemInfoMessage:
     """Test SystemInfoMessage class."""

@@ -64,6 +64,7 @@ from backend.api import (
     federation_identity,
     file_watches,
     fips_actions,
+    first_admin,
     firewall_roles,
     firewall_status,
     fleet,
@@ -650,6 +651,9 @@ def register_routes(app: FastAPI):
         app, security.router, tags=["security"]
     )  # /api/v1/security/* (+ /api alias)
     logger.debug("Security router added")
+    _include_versioned(
+        app, first_admin.router, tags=["security"]
+    )  # /api/v1/security/first-admin (+ /api alias)
 
     logger.debug("Adding password reset admin router (native /api/v1 + alias)")
     _include_versioned(

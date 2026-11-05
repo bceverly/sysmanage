@@ -70,9 +70,15 @@ server {
 }
 
 server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
-    http2 on;
+    # HTTP/2 on the listen line, not the `http2 on;` directive: that directive
+    # only exists from nginx 1.25.1, and Ubuntu 24.04 ships 1.24, Debian 12
+    # 1.22, RHEL 9 1.20 and Ubuntu 22.04 1.18 -- on every one of them
+    # `nginx -t` failed with 'unknown directive "http2"' and nginx would not
+    # start (found on a fresh Ubuntu 24.04 install, 2026-11-05).  This form
+    # works on every nginx since 1.9.5; 1.25.1 and later only warn that it is
+    # deprecated.
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
     server_name _;
 
     # TLS.  The package does NOT generate these -- a certificate a package

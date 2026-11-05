@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-05 07:56-0500\n"
+"POT-Creation-Date: 2026-11-05 10:45-0500\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1150,6 +1150,7 @@ msgid "Permission denied: ADD_USER role required"
 msgstr "缺少 ADD_USER 角色，无法执行操作"
 
 #: backend/api/user.py:425 backend/api/user.py:566
+#: backend/api/first_admin.py:120
 msgid "User already exists"
 msgstr "用户已存在"
 
@@ -3240,11 +3241,11 @@ msgstr "从主机移除标签失败: %(error)s"
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "获取主机标签失败: %(error)s"
 
-#: backend/api/security.py:150
+#: backend/api/security.py:154
 msgid "Email integration must be configured before creating new users"
 msgstr "在创建新用户之前必须配置电子邮件集成"
 
-#: backend/api/security.py:153
+#: backend/api/security.py:157
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
@@ -3253,46 +3254,46 @@ msgstr ""
 "在 YAML 配置文件中启用电子邮件并配置 SMTP 设置。如果没有电子邮件集成，新用户"
 "将无法收到密码设置说明，也无法登录。"
 
-#: backend/api/security.py:171
+#: backend/api/security.py:175
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "默认管理员凭据已在您的 YAML 文件中配置"
 
-#: backend/api/security.py:173
+#: backend/api/security.py:177
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
 msgstr "从配置文件中删除 admin_userid 和 admin_password 并重新启动服务器"
 
-#: backend/api/security.py:188
+#: backend/api/security.py:192
 msgid "Default JWT secret is being used"
 msgstr "正在使用默认 JWT 密钥"
 
-#: backend/api/security.py:189 backend/api/security.py:219
+#: backend/api/security.py:193 backend/api/security.py:223
 #, python-brace-format
 msgid "Run: {command}"
 msgstr "运行: {command}"
 
-#: backend/api/security.py:207 backend/api/security.py:218
+#: backend/api/security.py:211 backend/api/security.py:222
 msgid "Default password salt is being used"
 msgstr "正在使用默认密码盐"
 
-#: backend/api/security.py:208
+#: backend/api/security.py:212
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr "运行: {command}（将迁移 {count} 个用户）"
 
-#: backend/api/security.py:232 backend/api/security.py:246
+#: backend/api/security.py:236 backend/api/security.py:250
 msgid "Inconsistent security configuration detected"
 msgstr "检测到不一致的安全配置"
 
-#: backend/api/security.py:234
+#: backend/api/security.py:238
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
 "{command}"
 msgstr "JWT 密钥使用默认值，但密码盐已更改。运行: {command}"
 
-#: backend/api/security.py:248
+#: backend/api/security.py:252
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
@@ -3390,7 +3391,7 @@ msgstr "无法检索软件包摘要：%s"
 msgid "Failed to count packages: %s"
 msgstr "计算软件包数量失败：%s"
 
-#: backend/api/packages_helpers.py:298
+#: backend/api/packages_helpers.py:311
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "无法搜索软件包：%s"
@@ -3722,7 +3723,7 @@ msgstr "未启用多租户功能。"
 msgid "Logout successful"
 msgstr "注销成功"
 
-#: backend/api/profile.py:156
+#: backend/api/profile.py:156 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "新密码和确认密码不匹配"
 
@@ -4263,19 +4264,34 @@ msgstr "配置已删除"
 msgid "Assignment removed"
 msgstr "分配已被删除"
 
-#: backend/api/host_approval.py:54 backend/api/host_approval.py:410
+#: backend/api/host_approval.py:54 backend/api/host_approval.py:418
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr "缺少 APPROVE_HOST_REGISTRATION 角色，无法执行操作"
 
-#: backend/api/host_approval.py:74 backend/api/host_approval.py:363
+#: backend/api/host_approval.py:74 backend/api/host_approval.py:368
 msgid "Host is not in pending status"
 msgstr "主机不处于待定状态"
 
-#: backend/api/host_approval.py:475
+#: backend/api/host_approval.py:292
+#, python-brace-format
+msgid "Approved host '{name}'"
+msgstr "已批准主机 '{name}' "
+
+#: backend/api/host_approval.py:381
+#, python-brace-format
+msgid "Rejected host '{name}'"
+msgstr "拒绝主机 '{name}' "
+
+#: backend/api/host_approval.py:438
+#, python-brace-format
+msgid "Re-enrollment requested for host '{name}'"
+msgstr "请求为主机 '{name}' 重新注册"
+
+#: backend/api/host_approval.py:488
 msgid "OS version update requested"
 msgstr "已请求操作系统版本更新"
 
-#: backend/api/host_approval.py:520
+#: backend/api/host_approval.py:533
 msgid "Updates check requested"
 msgstr "检查更新请求"
 
@@ -5011,6 +5027,22 @@ msgstr "在此主机上已存在一个针对%s的平台配置"
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "平台配置仍然拥有 %d 个镜像；请先删除这些镜像"
+
+#: backend/api/first_admin.py:89
+msgid ""
+"Only the recovery account in sysmanage.yaml can create the first "
+"administrator"
+msgstr "只有 `sysmanage.yaml` 中的恢复账户才能创建第一个管理员"
+
+#: backend/api/first_admin.py:95
+msgid "Use a different email address from the recovery account"
+msgstr "使用与恢复账户不同的邮箱地址"
+
+#: backend/api/first_admin.py:112
+msgid ""
+"An administrator already exists. Sign in as that administrator to add more "
+"users."
+msgstr "已经存在一个管理员。使用该管理员的登录凭据添加更多用户。"
 
 #: backend/api/audit_log.py:42
 msgid "Permission denied: VIEW_AUDIT_LOG role required"

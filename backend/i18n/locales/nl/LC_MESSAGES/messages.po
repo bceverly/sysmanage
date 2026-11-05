@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-05 07:56-0500\n"
+"POT-Creation-Date: 2026-11-05 10:45-0500\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1165,6 +1165,7 @@ msgid "Permission denied: ADD_USER role required"
 msgstr "Toegang geweigerd: rol ADD_USER vereist"
 
 #: backend/api/user.py:425 backend/api/user.py:566
+#: backend/api/first_admin.py:120
 msgid "User already exists"
 msgstr "Gebruiker bestaat al"
 
@@ -3338,13 +3339,13 @@ msgstr "Fout bij verwijderen van tag van host: %(error)s"
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Fout bij ophalen van host tags: %(error)s"
 
-#: backend/api/security.py:150
+#: backend/api/security.py:154
 msgid "Email integration must be configured before creating new users"
 msgstr ""
 "E-mailintegratie moet worden geconfigureerd voordat u nieuwe gebruikers "
 "aanmaakt"
 
-#: backend/api/security.py:153
+#: backend/api/security.py:157
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
@@ -3354,11 +3355,11 @@ msgstr ""
 "instellingen. Zonder e-mailintegratie kunnen nieuwe gebruikers geen "
 "wachtwoordinstellingsinstructies ontvangen en niet inloggen."
 
-#: backend/api/security.py:171
+#: backend/api/security.py:175
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "Standaard beheerdersreferenties zijn geconfigureerd in uw YAML-bestand"
 
-#: backend/api/security.py:173
+#: backend/api/security.py:177
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
@@ -3366,29 +3367,29 @@ msgstr ""
 "Verwijder admin_userid en admin_password uit uw configuratiebestand en start "
 "de server opnieuw op"
 
-#: backend/api/security.py:188
+#: backend/api/security.py:192
 msgid "Default JWT secret is being used"
 msgstr "Standaard JWT-geheim wordt gebruikt"
 
-#: backend/api/security.py:189 backend/api/security.py:219
+#: backend/api/security.py:193 backend/api/security.py:223
 #, python-brace-format
 msgid "Run: {command}"
 msgstr "Uitvoeren: {command}"
 
-#: backend/api/security.py:207 backend/api/security.py:218
+#: backend/api/security.py:211 backend/api/security.py:222
 msgid "Default password salt is being used"
 msgstr "Standaard wachtwoord-salt wordt gebruikt"
 
-#: backend/api/security.py:208
+#: backend/api/security.py:212
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr "Uitvoeren: {command} ({count} gebruikers worden gemigreerd)"
 
-#: backend/api/security.py:232 backend/api/security.py:246
+#: backend/api/security.py:236 backend/api/security.py:250
 msgid "Inconsistent security configuration detected"
 msgstr "Inconsistente beveiligingsconfiguratie gedetecteerd"
 
-#: backend/api/security.py:234
+#: backend/api/security.py:238
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
@@ -3397,7 +3398,7 @@ msgstr ""
 "JWT-geheim gebruikt standaardwaarde maar wachtwoord-salt is gewijzigd. "
 "Uitvoeren: {command}"
 
-#: backend/api/security.py:248
+#: backend/api/security.py:252
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
@@ -3501,7 +3502,7 @@ msgstr "Pakket samenvatting ophalen mislukt: %s"
 msgid "Failed to count packages: %s"
 msgstr "Mislukt om het aantal pakketten te tellen: %s"
 
-#: backend/api/packages_helpers.py:298
+#: backend/api/packages_helpers.py:311
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "Pakketten zoeken mislukt: %s"
@@ -3846,7 +3847,7 @@ msgstr "Multi-tenantie is niet ingeschakeld."
 msgid "Logout successful"
 msgstr "Uitloggen succesvol"
 
-#: backend/api/profile.py:156
+#: backend/api/profile.py:156 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "Nieuwe wachtwoord en bevestiging komen niet overeen"
 
@@ -4420,19 +4421,34 @@ msgstr "Profiel verwijderd"
 msgid "Assignment removed"
 msgstr "Toewijzing verwijderd"
 
-#: backend/api/host_approval.py:54 backend/api/host_approval.py:410
+#: backend/api/host_approval.py:54 backend/api/host_approval.py:418
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr "Toegang geweigerd: rol APPROVE_HOST_REGISTRATION vereist"
 
-#: backend/api/host_approval.py:74 backend/api/host_approval.py:363
+#: backend/api/host_approval.py:74 backend/api/host_approval.py:368
 msgid "Host is not in pending status"
 msgstr "Host heeft geen wachtende status"
 
-#: backend/api/host_approval.py:475
+#: backend/api/host_approval.py:292
+#, python-brace-format
+msgid "Approved host '{name}'"
+msgstr "Goedkeuring voor host '{name}'"
+
+#: backend/api/host_approval.py:381
+#, python-brace-format
+msgid "Rejected host '{name}'"
+msgstr "Host '{name}' is afgewezen"
+
+#: backend/api/host_approval.py:438
+#, python-brace-format
+msgid "Re-enrollment requested for host '{name}'"
+msgstr "Herregistratie aangevraagd voor host '{name}'"
+
+#: backend/api/host_approval.py:488
 msgid "OS version update requested"
 msgstr "OS versie-update aangevraagd"
 
-#: backend/api/host_approval.py:520
+#: backend/api/host_approval.py:533
 msgid "Updates check requested"
 msgstr "Controle op updates verzocht"
 
@@ -5191,6 +5207,25 @@ msgstr "Een platformconfiguratie voor %s op deze host bestaat al"
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "Platform configuratie beheert nog %d spiegel(s); verwijder deze eerst"
+
+#: backend/api/first_admin.py:89
+msgid ""
+"Only the recovery account in sysmanage.yaml can create the first "
+"administrator"
+msgstr ""
+"Alleen het herstelaccount in sysmanage.yaml kan de eerste beheerder creëren"
+
+#: backend/api/first_admin.py:95
+msgid "Use a different email address from the recovery account"
+msgstr "Gebruik een ander e-mailadres dan het herstelaccount"
+
+#: backend/api/first_admin.py:112
+msgid ""
+"An administrator already exists. Sign in as that administrator to add more "
+"users."
+msgstr ""
+"Een beheerder bestaat al. Meld je aan als die beheerder om meer gebruikers "
+"toe te voegen."
 
 #: backend/api/audit_log.py:42
 msgid "Permission denied: VIEW_AUDIT_LOG role required"

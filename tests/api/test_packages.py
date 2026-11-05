@@ -184,6 +184,34 @@ class TestPackagesAPI:
         assert package["package_manager"] == "apt"
         assert "web server" in package["description"]
 
+    def test_search_ranks_the_exact_name_first(
+        self, client, auth_headers, sample_packages, session
+    ):
+        """2026-11-05: "tree" came after "FastTree" and "altree" alphabetically
+        and fell off the 20 results a host's Install dialog shows."""
+        from backend.persistence.models.software import AvailablePackage
+
+        for name in ("FastTree", "altree", "tree", "treeline"):
+            session.add(
+                AvailablePackage(
+                    package_name=name,
+                    package_version="1",
+                    package_description=name,
+                    package_manager="pkg",
+                    os_name="FreeBSD",
+                    os_version="14.5",
+                    last_updated=datetime.now(),
+                    created_at=datetime.now(),
+                )
+            )
+        session.commit()
+        response = client.get(
+            "/api/v1/packages/search?query=tree", headers=auth_headers
+        )
+        assert response.status_code == 200
+        names = [package["name"] for package in response.json()]
+        assert names == ["tree", "treeline", "FastTree", "altree"]
+
     def test_search_packages_multiple_results(
         self, client, auth_headers, sample_packages
     ):

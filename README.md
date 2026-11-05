@@ -64,60 +64,90 @@ SysManage is a comprehensive system management solution that allows you to monit
 - 🔎 Configuration drift analysis: per-profile baselines, golden-host comparison against live inventory, a drift dashboard with `config_drift` alert rules, one-click remediate-to-baseline, and remediation playbooks that repair a single divergence (optionally unattended) instead of re-applying a whole baseline
 - 🛡️ PostgreSQL high availability: runs against a Patroni / pg_auto_failover / Stolon cluster and survives a primary failover unattended -- proxy VIP or libpq multi-host DSN, with pre-ping reconnect and bounded retry through the promotion window
 
-## Prerequisites
+## Installation
+
+Run the server from a signed native package. The packages bring Python, the
+built web interface, nginx and OpenBAO, generate this installation's secrets,
+and install the service, so there is nothing to build. SysManage does not
+publish container images.
+
+**📖 Per-platform instructions (Debian, the RHEL family, openSUSE, Arch Linux,
+Alpine, Snap, macOS, Windows and the BSDs):
+[sysmanage.org/docs/server/installation.html](https://sysmanage.org/docs/server/installation.html)**
+
+### Quick Start (Ubuntu 22.04, 24.04 or 26.04 LTS)
+
+```bash
+# 1. Install the server from the signed Launchpad PPA, with a local PostgreSQL
+sudo add-apt-repository ppa:bceverly/sysmanage
+sudo apt update
+sudo apt install sysmanage postgresql
+
+# 2. Create the database
+sudo -u postgres createuser sysmanage
+sudo -u postgres createdb sysmanage -O sysmanage
+sudo -u postgres psql -c "ALTER USER sysmanage WITH PASSWORD 'choose-a-strong-password';"
+
+# 3. Set the database password and admin_userid (your email address)
+sudo vim /etc/sysmanage.yaml
+
+# 4. Create the database schema
+sudo sysmanage-migrate
+
+# 5. Install a TLS certificate at /etc/sysmanage/tls/server.crt and server.key
+#    (or point nginx at yours), then start
+sudo systemctl start sysmanage
+sudo systemctl restart nginx
+```
+
+Open `https://your-server.example.com/` and sign in as `admin_userid` with the
+recovery password the package generated (`sudo grep admin_password
+/etc/sysmanage.yaml`). Inbound 443 (and 80 for the redirect) is the only port
+the server needs.
+
+Other channels, all signed: the SysManage APT repository for Debian
+(`https://repo.sysmanage.org/server/deb`, key fingerprint
+`896E ED43 9F5E 9BB1 FCA6 69A5 E033 E691 377F 0AE3`), Fedora Copr
+`bceverly/sysmanage` for the RHEL family 9 and 10, the openSUSE Build Service,
+the Snap Store (`sudo snap install sysmanage`), winget
+(`winget install sysmanage.sysmanage`), Homebrew
+(`brew install --cask bceverly/tap/sysmanage`) and the AUR. The Alpine, BSD,
+macOS `.pkg` and Windows `.msi` downloads are not signed; check the `.sha256`
+published next to each one before installing.
+
+## Building from Source (Development)
+
+For working on SysManage itself. A source checkout runs the development
+server (Vite on port 3000, API on 8080); do not use it in production.
+
+**Prerequisites:**
 
 - **Python**: 3.10-3.14 (tested across the full range in CI)
 - **Node.js**: 20.x or higher (22.13+ recommended for Artillery performance testing)
-- **PostgreSQL**: 14 or higher
-- **OS**: Linux, macOS, Windows, FreeBSD, or OpenBSD
-
-> **🔐 Security Note**: After installation, you MUST run the `scripts/sysmanage_secure_installation` script to create the initial admin user and configure unique security tokens for your installation.
-
-**📖 For detailed platform-specific installation instructions, visit [sysmanage.org/docs/server/installation.html](https://sysmanage.org/docs/server/installation.html)**
-
-## Quick Start
-
-> **Prebuilt packages** (macOS `.pkg`, Windows `.msi`, and the apt/rpm
-> repositories) are hosted on **Cloudflare R2** at `https://repo.sysmanage.org`.
-> Ubuntu/Debian are also on the Launchpad PPA and Fedora/RHEL on COPR. To build
-> from source instead, follow the steps below.
+- **PostgreSQL**: 12 or newer
+- **OS**: Linux, macOS, Windows, FreeBSD, OpenBSD or NetBSD
 
 ```bash
-# 1. Clone and setup
+# 1. Clone and install the development tools and dependencies
 git clone https://github.com/bceverly/sysmanage.git
 cd sysmanage
-
-# 2. Create virtual environment
-python3.12 -m venv .venv  # any of Python 3.10-3.14
-source .venv/bin/activate
-# Note: On BSD systems (FreeBSD, OpenBSD, NetBSD), use: . .venv/bin/activate
-
-# 3. Setup database (see documentation for detailed instructions)
-# Install PostgreSQL and SQLite3 (required before installing Python dependencies)
-# FreeBSD users also need: sudo pkg install py311-sqlite3
-# Create PostgreSQL database and user
-# Configure /etc/sysmanage.yaml
-
-# 4. Install dependencies
+make install-dev
 # Note: Rust is required for some Python dependencies
-# Install Rust: https://rustup.rs/ or use your package manager
-# FreeBSD users also need: sudo pkg install jpeg-turbo tiff freetype2 png webp lcms2
-pip install --upgrade pip
-pip install -r requirements.txt
+# FreeBSD users also need: sudo pkg install py311-sqlite3 jpeg-turbo tiff freetype2 png webp lcms2
 
-# 5. Run migrations
-alembic upgrade head
+# 2. Create a PostgreSQL database and user, then the development config
+cp sysmanage-dev.yaml.example sysmanage-dev.yaml   # set dev_mode: true and the database
 
-# 6. Install frontend dependencies
-cd frontend && npm install && cd ..
-
-# 7. Run secure installation script (REQUIRED for new installations)
+# 3. Initialize the checkout: new secrets, admin user, OpenBAO.
+#    This DROPS every table in the configured database.
 scripts/sysmanage_secure_installation
-# This script creates the initial admin user and sets unique security tokens
 
-# 8. Start the application
+# 4. Start the application
 make start
 ```
+
+The secure-installation script is only for source checkouts; package installs
+do their own setup and must not run it.
 
 ## Development
 

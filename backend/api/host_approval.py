@@ -23,7 +23,7 @@ from backend.persistence.partitions import get_request_engine
 from backend.persistence.tenant_context import get_active_tenant
 from backend.security.certificate_manager import certificate_manager
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import AuditService, EntityType
+from backend.services.audit_service import ActionType, AuditService, EntityType
 from backend.websocket.messages import (
     create_command_message,
     create_host_approved_message,
@@ -283,13 +283,18 @@ async def approve_host(  # NOSONAR
             )
 
         # Audit log host approval
-        AuditService.log_update(
+        # Says WHAT happened: as a generic "Updated host" an approval could not
+        # be told from any other edit when reading the audit log (2026-11-05).
+        AuditService.log(
             db=session,
+            action_type=ActionType.UPDATE,
+            entity_type=EntityType.HOST,
+            description=_("Approved host '{name}'").format(name=host.fqdn),
             user_id=current_user.id,
             username=current_user.userid,
-            entity_type=EntityType.HOST,
             entity_id=host_id,
             entity_name=host.fqdn,
+            details={"approval_status": "approved"},
         )
 
         # Send host approval notification to the agent via WebSocket
@@ -369,13 +374,16 @@ async def reject_host(
         session.commit()
 
         # Audit log host rejection
-        AuditService.log_update(
+        AuditService.log(
             db=session,
+            action_type=ActionType.UPDATE,
+            entity_type=EntityType.HOST,
+            description=_("Rejected host '{name}'").format(name=host.fqdn),
             user_id=current_user.id,
             username=current_user.userid,
-            entity_type=EntityType.HOST,
             entity_id=host_id,
             entity_name=host.fqdn,
+            details={"approval_status": "rejected"},
         )
 
         ret_host = models.Host(
@@ -423,13 +431,18 @@ async def reenroll_host(host_id: str, current_user=Depends(require_authenticated
         host.registration_nonce_hash = None
         host.approval_status = "pending"
         session.commit()
-        AuditService.log_update(
+        AuditService.log(
             db=session,
+            action_type=ActionType.UPDATE,
+            entity_type=EntityType.HOST,
+            description=_("Re-enrollment requested for host '{name}'").format(
+                name=host.fqdn
+            ),
             user_id=current_user.id,
             username=current_user.userid,
-            entity_type=EntityType.HOST,
             entity_id=host_id,
             entity_name=host.fqdn,
+            details={"approval_status": "pending"},
         )
         return {"result": True, "approval_status": host.approval_status}
 

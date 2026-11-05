@@ -3251,7 +3251,22 @@
     "enablingAntivirus": "Attivazione in corso...",
     "disablingAntivirus": "Disattivazione in corso...",
     "awaitingAgent": "In attesa che l'agente segnali la modifica. Può richiedere qualche minuto.",
-    "agentNotConfirmed": "L'agente non ha ancora confermato la modifica. Potrebbe essere ancora al lavoro; ricontrolla l'host più tardi."
+    "agentNotConfirmed": "L'agente non ha ancora confermato la modifica. Potrebbe essere ancora al lavoro; ricontrolla l'host più tardi.",
+    "firstAdmin": {
+      "cancel": "Annulla",
+      "confirm": "Conferma la password",
+      "create": "Crea l'amministratore",
+      "created": "Amministratore {{userid}} creato. Esci, quindi accedi come {{userid}}.",
+      "email": "Indirizzo email",
+      "explain": "Questo account ha ogni ruolo e non richiede la configurazione dell'email. Accedi con esso in seguito, poi rimuovi l'account di recupero da sysmanage.yaml.",
+      "failed": "Impossibile creare l'amministratore.",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "password": "Password",
+      "prompt": "Non esiste ancora un account amministratore, quindi i host non possono essere approvati. Creane uno ora - non è necessaria la configurazione dell'email.",
+      "signOut": "Esci",
+      "title": "Crea il tuo amministratore"
+    }
   },
   "serverDown": {
     "attempts": "Tentativi: {{count}}",

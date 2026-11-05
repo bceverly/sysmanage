@@ -3251,7 +3251,22 @@
     "enablingAntivirus": "正在啟用...",
     "disablingAntivirus": "正在停用...",
     "awaitingAgent": "正在等待代理程式回報此變更，可能需要幾分鐘。",
-    "agentNotConfirmed": "代理程式尚未確認此變更，可能仍在處理中；請稍後再查看該主機。"
+    "agentNotConfirmed": "代理程式尚未確認此變更，可能仍在處理中；請稍後再查看該主機。",
+    "firstAdmin": {
+      "cancel": "取消",
+      "confirm": "確認密碼",
+      "create": "建立管理員",
+      "created": "管理員 {{userid}} 已建立。登出，然後以 {{userid}} 登入。",
+      "email": "電子郵件地址",
+      "explain": "這個帳戶擁有所有角色，且不需要設定電子郵件。之後使用它登入，然後從 `sysmanage.yaml` 中移除恢復帳戶。",
+      "failed": "無法建立管理員。",
+      "firstName": "名字",
+      "lastName": "姓氏",
+      "password": "密碼",
+      "prompt": "還沒有管理員帳戶，因此主機無法被批准。現在建立一個 - 不需要設定電子郵件。",
+      "signOut": "登出",
+      "title": "建立您的管理員"
+    }
   },
   "serverDown": {
     "attempts": "嘗試次數： {{count}}",

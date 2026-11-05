@@ -3,10 +3,11 @@
 // See the LICENSE file in the project root for the full terms.
 
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
-import { Alert, AlertTitle, Box } from '@mui/material';
+import { Alert, AlertTitle, Box, Button } from '@mui/material';
 import { Warning } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import api from '../Services/api';
+import FirstAdminDialog from './FirstAdminDialog';
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
 
 interface SecurityWarning {
@@ -30,11 +31,21 @@ interface SecurityStatus {
   jwtCommand?: string;
   saltCommand?: string;
   restartCommand?: string;
+  // Recovery account signed in and no database administrator yet.
+  needsFirstAdmin?: boolean;
 }
+
+const commandSx = {
+  fontFamily: 'monospace',
+  backgroundColor: 'rgba(255,255,255,0.2)',
+  padding: '2px 6px',
+  borderRadius: '3px',
+};
 
 const SecurityWarningBanner: React.FC = () => {
   const { t } = useTranslation();
   const [securityStatus, setSecurityStatus] = useState<SecurityStatus | null>(null);
+  const [firstAdminOpen, setFirstAdminOpen] = useState(false);
   const bannerRef = useRef<HTMLDivElement>(null);
 
   const checkSecurityStatus = useCallback(async () => {
@@ -175,53 +186,70 @@ const SecurityWarningBanner: React.FC = () => {
                     'You are logged in as the default admin user from the YAML configuration file. This is a critical security risk! Follow these steps in order:'
                   )}
                 </Box>
+                {securityStatus.needsFirstAdmin && (
+                  <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                    <Box sx={{ fontSize: '15px' }}>
+                      {t(
+                        'security.firstAdmin.prompt',
+                        'No administrator account exists yet, so hosts cannot be approved. Create one now -- no email setup needed.',
+                      )}
+                    </Box>
+                    <Button
+                      variant="contained"
+                      color="inherit"
+                      sx={{ color: '#b71c1c', fontWeight: 'bold' }}
+                      onClick={() => setFirstAdminOpen(true)}
+                    >
+                      {t('security.firstAdmin.title', 'Create your administrator')}
+                    </Button>
+                    <FirstAdminDialog
+                      open={firstAdminOpen}
+                      onClose={() => {
+                        setFirstAdminOpen(false);
+                        void checkSecurityStatus();
+                      }}
+                    />
+                  </Box>
+                )}
                 <Box sx={{ mt: 2, fontSize: '15px', lineHeight: 1.6 }}>
                   <Box sx={{ fontWeight: 'bold', mb: 1 }}>
                     {t('security.securityStepsTitle', 'Required Security Steps (in order):')}
                   </Box>
                   <Box sx={{ ml: 2 }}>
-                    <Box sx={{ mb: 1 }}>
-                      1. {t('security.step1JwtSecret', 'Change JWT secret: Run')}{' '}
-                      <Box component="span" sx={{
-                        fontFamily: 'monospace',
-                        backgroundColor: 'rgba(255,255,255,0.2)',
-                        padding: '2px 6px',
-                        borderRadius: '3px'
-                      }}>
-                        {securityStatus.jwtCommand}
-                      </Box>
-                    </Box>
-                    <Box sx={{ mb: 1 }}>
-                      2. {t('security.step2PasswordSalt', 'Change password salt: Run')}{' '}
-                      <Box component="span" sx={{
-                        fontFamily: 'monospace',
-                        backgroundColor: 'rgba(255,255,255,0.2)',
-                        padding: '2px 6px',
-                        borderRadius: '3px'
-                      }}>
-                        {securityStatus.saltCommand}
-                      </Box>
-                    </Box>
-                    <Box sx={{ mb: 1 }}>
-                      3. {t('security.step3CreateUser', 'Create a new admin user via the Users page in this interface')}
-                    </Box>
-                    <Box sx={{ mb: 1 }}>
-                      4. {t('security.step4LoginNewUser', 'Log out and log in with your new admin account')}
-                    </Box>
-                    <Box sx={{ mb: 1 }}>
-                      5. {t('security.step5RemoveCredentials', 'Remove admin_userid and admin_password from your YAML configuration file')}
-                    </Box>
-                    <Box>
-                      6. {t('security.step6RestartServerCmd', 'Restart the server:')}{' '}
-                      <Box component="span" sx={{
-                        fontFamily: 'monospace',
-                        backgroundColor: 'rgba(255,255,255,0.2)',
-                        padding: '2px 6px',
-                        borderRadius: '3px'
-                      }}>
-                        {securityStatus.restartCommand}
-                      </Box>
-                    </Box>
+                    {/* Only the steps this server still needs: the package
+                        installers generate jwt_secret and password_salt, so on
+                        a fresh install steps "change the JWT secret / salt"
+                        told the operator to fix what was already fixed. */}
+                    {[
+                      securityStatus.hasDefaultJwtSecret && (
+                        <>
+                          {t('security.step1JwtSecret', 'Change JWT secret: Run')}{' '}
+                          <Box component="span" sx={commandSx}>{securityStatus.jwtCommand}</Box>
+                        </>
+                      ),
+                      securityStatus.hasDefaultPasswordSalt && (
+                        <>
+                          {t('security.step2PasswordSalt', 'Change password salt: Run')}{' '}
+                          <Box component="span" sx={commandSx}>{securityStatus.saltCommand}</Box>
+                        </>
+                      ),
+                      t('security.step3CreateUser', 'Create a new admin user via the Users page in this interface'),
+                      t('security.step4LoginNewUser', 'Log out and log in with your new admin account'),
+                      t('security.step5RemoveCredentials', 'Remove admin_userid and admin_password from your YAML configuration file'),
+                      (
+                        <>
+                          {t('security.step6RestartServerCmd', 'Restart the server:')}{' '}
+                          <Box component="span" sx={commandSx}>{securityStatus.restartCommand}</Box>
+                        </>
+                      ),
+                    ]
+                      .filter(Boolean)
+                      .map((step, index, all) => (
+                        // eslint-disable-next-line react/no-array-index-key -- the list is fixed for one render
+                        <Box key={index} sx={{ mb: index < all.length - 1 ? 1 : 0 }}>
+                          {index + 1}. {step}
+                        </Box>
+                      ))}
                   </Box>
                 </Box>
               </Box>

@@ -91,8 +91,12 @@ export const useHostSoftware = ({
 
         setIsSearching(true);
         try {
-            // Get host information to determine OS for package search
-            const response = await axiosInstance.get(`/api/v1/packages/search?query=${encodeURIComponent(query)}&limit=20`);
+            // Scoped to THIS host's own catalog (host_id): unscoped, the search
+            // was a union across the whole fleet, so a FreeBSD host offered
+            // Ubuntu packages it cannot install (found 2026-11-05).
+            const response = await axiosInstance.get('/api/v1/packages/search', {
+                params: { query, host_id: hostId, limit: 20 },
+            });
 
             if (response.data && Array.isArray(response.data)) {
                 // Get list of already installed package names

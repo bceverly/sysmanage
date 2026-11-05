@@ -3251,7 +3251,22 @@
     "enablingAntivirus": "Habilitando...",
     "disablingAntivirus": "Deshabilitando...",
     "awaitingAgent": "Esperando a que el agente informe del cambio. Puede tardar unos minutos.",
-    "agentNotConfirmed": "El agente aún no ha confirmado el cambio. Puede que siga trabajando; vuelva a revisar el host más tarde."
+    "agentNotConfirmed": "El agente aún no ha confirmado el cambio. Puede que siga trabajando; vuelva a revisar el host más tarde.",
+    "firstAdmin": {
+      "cancel": "Cancelar",
+      "confirm": "Confirmar contraseña",
+      "create": "Crear administrador",
+      "created": "Administrador {{userid}} creado. Salir, luego iniciar sesión como {{userid}}.",
+      "email": "Dirección de correo electrónico",
+      "explain": "Esta cuenta obtiene cada rol y no requiere configuración de correo electrónico. Inicia sesión con ella después, luego elimina la cuenta de recuperación de sysmanage.yaml.",
+      "failed": "No se pudo crear el administrador.",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "password": "Contraseña",
+      "prompt": "Aún no existe una cuenta de administrador, por lo que los hosts no pueden ser aprobados. Crea una ahora; no se requiere configuración de correo electrónico.",
+      "signOut": "Cerrar sesión",
+      "title": "Crea tu administrador"
+    }
   },
   "serverDown": {
     "attempts": "Intentos: {{count}}",

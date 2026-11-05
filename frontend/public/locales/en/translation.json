@@ -3270,7 +3270,22 @@
     "enablingAntivirus": "Enabling...",
     "disablingAntivirus": "Disabling...",
     "awaitingAgent": "Waiting for the agent to report the change. This can take a few minutes.",
-    "agentNotConfirmed": "The agent has not confirmed the change yet. It may still be working; check the host again later."
+    "agentNotConfirmed": "The agent has not confirmed the change yet. It may still be working; check the host again later.",
+    "firstAdmin": {
+      "cancel": "Cancel",
+      "confirm": "Confirm password",
+      "create": "Create administrator",
+      "created": "Administrator {{userid}} created. Sign out, then sign in as {{userid}}.",
+      "email": "Email address",
+      "explain": "This account gets every role and needs no email setup. Sign in with it afterward, then remove the recovery account from sysmanage.yaml.",
+      "failed": "Could not create the administrator.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "password": "Password",
+      "prompt": "No administrator account exists yet, so hosts cannot be approved. Create one now -- no email setup needed.",
+      "signOut": "Sign out",
+      "title": "Create your administrator"
+    }
   },
   "serverDown": {
     "attempts": "Attempts: {{count}}",
