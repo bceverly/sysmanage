@@ -132,4 +132,27 @@ describe("drift timeline", () => {
     fireEvent.click(button("Save"));
     await waitFor(() => expect(setDriftIgnore).toHaveBeenCalledWith("h1", ["/srv/x", "/srv/y"]));
   });
+
+  test("a refresh with the same patterns keeps what is being typed", async () => {
+    render(<BackupDriftTimeline hostId="h1" />);
+    const box = await screen.findByLabelText(/Also hide on this host/);
+    fireEvent.change(box, { target: { value: "/srv/x\n/srv/y" } });
+    // A refresh fetches the timeline again: a new array with the same
+    // patterns.  The unsaved text must survive it.
+    const calls = vi.mocked(getDriftTimeline).mock.calls.length;
+    fireEvent.click(button("Refresh"));
+    await waitFor(() => expect(vi.mocked(getDriftTimeline).mock.calls.length).toBeGreaterThan(calls));
+    await waitFor(() => expect(screen.getByLabelText(/Also hide on this host/)).toHaveValue("/srv/x\n/srv/y"));
+    await new Promise(resolve => setTimeout(resolve, 20));
+    expect(screen.getByLabelText(/Also hide on this host/)).toHaveValue("/srv/x\n/srv/y");
+  });
+
+  test("patterns that changed on the server replace the box", async () => {
+    render(<BackupDriftTimeline hostId="h1" />);
+    const box = await screen.findByLabelText(/Also hide on this host/);
+    expect(box).toHaveValue("/srv/x");
+    vi.mocked(getDriftTimeline).mockResolvedValue({ ...TIMELINE, ignore: ["/srv/z"] });
+    fireEvent.click(button("Refresh"));
+    await waitFor(() => expect(screen.getByLabelText(/Also hide on this host/)).toHaveValue("/srv/z"));
+  });
 });

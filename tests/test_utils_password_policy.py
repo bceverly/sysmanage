@@ -215,12 +215,13 @@ class TestPasswordPolicy:
         mock_config.get_config.return_value = {}
 
         policy = PasswordPolicy()
-        # With no policy, but still has default min_character_types validation
-        # This should fail due to character type requirements
-        is_valid, errors = policy.validate_password("password")
-
+        # The defaults alone: at least 8 characters and 1 character type.
+        # (This once asserted that "password" FAILS -- it pinned a bug where
+        # only required types counted, so no password could pass.)
+        assert policy.validate_password("password") == (True, [])
+        is_valid, errors = policy.validate_password("short")
         assert is_valid is False
-        assert len(errors) > 0
+        assert any("at least 8 characters" in e for e in errors)
 
     @patch("backend.utils.password_policy.config")
     def test_validate_password_partial_policy(self, mock_config):

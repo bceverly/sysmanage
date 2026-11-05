@@ -505,3 +505,42 @@ class TestPasswordPolicyGlobalInstance:
         from backend.utils.password_policy import PasswordPolicy, password_policy
 
         assert isinstance(password_policy, PasswordPolicy)
+
+
+class TestCharacterTypesCountWhatIsPresent:
+    """A character type counts toward min_character_types when the password
+    has it, whether or not the policy requires it.  Counting only required
+    types rejected every password under a policy requiring none (the default
+    when the config sets no require_* keys): CI, 2026-11-05."""
+
+    @patch("backend.utils.password_policy.config")
+    def test_no_required_types_still_counts_what_the_password_has(self, mock_config):
+        mock_config.get_config.return_value = {
+            "security": {"password_policy": {"min_length": 8}}
+        }
+        from backend.utils.password_policy import PasswordPolicy
+
+        valid, errors = PasswordPolicy().validate_password("Correct-Horse-9-Battery")
+        assert valid is True, errors
+
+    @patch("backend.utils.password_policy.config")
+    def test_min_types_counts_unrequired_types(self, mock_config):
+        mock_config.get_config.return_value = {
+            "security": {"password_policy": {"min_length": 8, "min_character_types": 3}}
+        }
+        from backend.utils.password_policy import PasswordPolicy
+
+        policy = PasswordPolicy()
+        assert policy.validate_password("abcdefgh")[0] is False
+        assert policy.validate_password("abcDEF12")[0] is True
+
+    @patch("backend.utils.password_policy.config")
+    def test_a_required_type_that_is_missing_is_still_named(self, mock_config):
+        mock_config.get_config.return_value = {
+            "security": {"password_policy": {"min_length": 8, "require_numbers": True}}
+        }
+        from backend.utils.password_policy import PasswordPolicy
+
+        valid, errors = PasswordPolicy().validate_password("abcdefghij")
+        assert valid is False
+        assert "Password must contain at least one number" in errors

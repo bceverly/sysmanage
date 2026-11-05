@@ -152,36 +152,29 @@ class PasswordPolicy:
         if max_length and len(password) > max_length:
             errors.append(f"Password must be no more than {max_length} characters long")
 
-        # Character type validation
+        # Character type validation.  A type counts toward min_character_types
+        # whenever the password HAS it, required or not: counting only the
+        # required ones meant a policy requiring none (the default when the
+        # config sets no require_* keys) rejected every password with
+        # "at least 1 different character types" (CI, 2026-11-05).
+        special_chars = self.policy.get(
+            "special_chars", "!@#$%^&*()_+-=[]{}|;':\",./<>?"
+        )
+        checks = (
+            ("require_uppercase", r"[A-Z]",
+             "Password must contain at least one uppercase letter"),
+            ("require_lowercase", r"[a-z]",
+             "Password must contain at least one lowercase letter"),
+            ("require_numbers", r"\d", "Password must contain at least one number"),
+            ("require_special_chars", f"[{re.escape(special_chars)}]",
+             "Password must contain at least one special character"),
+        )  # fmt: skip
         char_types_found = 0
-
-        if self.policy.get("require_uppercase", False):
-            if not re.search(r"[A-Z]", password):
-                errors.append("Password must contain at least one uppercase letter")
-            else:
+        for setting, pattern, message in checks:
+            if re.search(pattern, password):
                 char_types_found += 1
-
-        if self.policy.get("require_lowercase", False):
-            if not re.search(r"[a-z]", password):
-                errors.append("Password must contain at least one lowercase letter")
-            else:
-                char_types_found += 1
-
-        if self.policy.get("require_numbers", False):
-            if not re.search(r"\d", password):
-                errors.append("Password must contain at least one number")
-            else:
-                char_types_found += 1
-
-        if self.policy.get("require_special_chars", False):
-            special_chars = self.policy.get(
-                "special_chars", "!@#$%^&*()_+-=[]{}|;':\",./<>?"
-            )
-            special_pattern = f"[{re.escape(special_chars)}]"
-            if not re.search(special_pattern, password):
-                errors.append("Password must contain at least one special character")
-            else:
-                char_types_found += 1
+            elif self.policy.get(setting, False):
+                errors.append(message)
 
         # Minimum character types validation
         min_types = self.policy.get("min_character_types", 1)

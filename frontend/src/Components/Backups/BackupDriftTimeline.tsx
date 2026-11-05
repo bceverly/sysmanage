@@ -10,7 +10,7 @@
 // ``?driftPath=`` in the URL (the link from configuration drift) narrows the
 // timeline to that path.
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     Accordion,
     AccordionDetails,
@@ -119,9 +119,21 @@ const IgnoreEditor: React.FC<{ hostId: string; ignore: string[]; onSaved: () => 
     hostId, ignore, onSaved,
 }) => {
     const { t } = useTranslation();
-    const [text, setText] = useState(ignore.join('\n'));
+    // Replace what is being typed only when the SAVED patterns change -- keyed
+    // on their text, not the array (a parent re-render hands down a new array
+    // with the same contents), and never on mount: a mount-time reset that
+    // React runs late can land after the first keystrokes.  Either way the box
+    // snapped back to the old patterns and Save sent those (CI, 2026-11-05).
+    const saved = ignore.join('\n');
+    const [text, setText] = useState(saved);
     const [error, setError] = useState<string | null>(null);
-    useEffect(() => setText(ignore.join('\n')), [ignore]);
+    const shown = useRef(saved);
+    useEffect(() => {
+        if (shown.current !== saved) {
+            shown.current = saved;
+            setText(saved);
+        }
+    }, [saved]);
     const save = async () => {
         setError(null);
         try {
