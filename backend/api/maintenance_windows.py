@@ -398,7 +398,8 @@ async def create_override(
                 "duration_minutes": payload.duration_minutes,
             },
         )
-        mw.release_deferred(session)  # takes effect on the next tick
+        # Only this host's: the rest of the fleet stays held, and shown held.
+        mw.release_deferred(session, override.host_id)
         session.commit()
         return override.to_dict()
 

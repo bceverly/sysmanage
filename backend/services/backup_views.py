@@ -157,6 +157,10 @@ def policy_dict(policy: models.BackupPolicy) -> Dict[str, Any]:
         "config_version": policy.config_version,
         "configured": policy.host_acked_version >= policy.config_version,
         "storage_configured": policy.storage_acked_version >= policy.config_version,
+        # Prepare storage needs only job files the storage host has confirmed
+        # once (backups._run_host), not the latest: a change held by a
+        # maintenance window must not block it.
+        "storage_ready": policy.storage_acked_version >= 1,
         # The storage host has not given this repository its own export yet.
         "needs_prepare": storage_audit.needs_prepare(policy),
         "restate_version": policy.restate_version,

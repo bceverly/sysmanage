@@ -223,6 +223,33 @@ async def test_closed_allow_window_holds_then_open_executes(session):
 
 
 @pytest.mark.asyncio
+async def test_an_override_releases_only_its_own_hosts_messages(session):
+    """Production, 2026-11-05: an emergency override for nas released every
+    host's held messages, so the whole fleet showed nothing held until the
+    drain held them again."""
+    host = _approved_host(session)
+    other = _approved_host(session)
+    other.fqdn = "other-gated-host.example.com"
+    session.commit()
+    mine = _enqueue_command(session, host.id)
+    theirs = _enqueue_command(session, other.id)
+    for each in (host, other):
+        _mk_window(session, each.id, kind="blackout", start_time="11:30",
+                   duration_minutes=60)  # fmt: skip
+    await _run(session)
+    session.flush()
+    assert mw_service.release_deferred(session, host.id) == 1
+    session.flush()
+    held = {
+        row.message_id: row.error_message
+        for row in session.query(MessageQueue).filter(
+            MessageQueue.message_id.in_([mine, theirs])
+        )
+    }
+    assert held == {mine: None, theirs: mw_service.DEFERRED_MARKER}
+
+
+@pytest.mark.asyncio
 async def test_a_held_message_is_not_rechecked_every_tick(session):
     """Phase 22.2: a held message carries a not-before time, so it stops
     occupying the outbound drain until the re-check (or an operator change)."""

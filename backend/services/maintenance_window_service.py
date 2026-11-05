@@ -398,22 +398,24 @@ def held_counts(db: Session, host_ids) -> dict:
     return {str(host_id): int(count) for host_id, count in rows}
 
 
-def release_deferred(db: Session) -> int:
-    """Make every message held by a maintenance window due again."""
+def release_deferred(db: Session, host_id=None) -> int:
+    """Make the messages held by a maintenance window due again: every host's
+    after a window change, or only ``host_id``'s after its emergency override.
+    (Releasing every host's on an override made the rest of the fleet show
+    nothing held until the drain held them again: production, 2026-11-05.)"""
     from backend.persistence.models import MessageQueue  # noqa: PLC0415
     from backend.websocket.queue_enums import (  # noqa: PLC0415
         QueueDirection,
         QueueStatus,
     )
 
-    return (
-        db.query(MessageQueue)
-        .filter(
-            MessageQueue.direction == QueueDirection.OUTBOUND,
-            MessageQueue.status == QueueStatus.PENDING,
-            MessageQueue.error_message == DEFERRED_MARKER,
-        )
-        .update(
-            {"scheduled_at": None, "error_message": None}, synchronize_session=False
-        )
+    query = db.query(MessageQueue).filter(
+        MessageQueue.direction == QueueDirection.OUTBOUND,
+        MessageQueue.status == QueueStatus.PENDING,
+        MessageQueue.error_message == DEFERRED_MARKER,
+    )
+    if host_id is not None:
+        query = query.filter(MessageQueue.host_id == host_id)
+    return query.update(
+        {"scheduled_at": None, "error_message": None}, synchronize_session=False
     )

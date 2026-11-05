@@ -206,6 +206,9 @@ export interface BackupPolicy {
   repository_bytes: number | null;
   configured: boolean;
   storage_configured: boolean;
+  /** The storage host has confirmed this policy's job files at least once:
+   *  what Prepare storage needs (the server refuses it before). */
+  storage_ready?: boolean;
   /** The storage host reports this repository has no export of its own yet:
    *  Prepare storage makes it. */
   needs_prepare?: boolean;

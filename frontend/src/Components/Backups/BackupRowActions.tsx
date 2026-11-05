@@ -83,7 +83,7 @@ export const actionBlocked = (t: TFunction, row: BackupHost, action: HostAction)
     if (row.reach && unreachable(row)) return reachMessage(t, row.reach);
     if (action === 'prepare') {
         if (row.running) return t('backups.prepare.busy', 'Wait until this host\'s running backup job finishes.');
-        if (!row.policy?.storage_configured) {
+        if (!(row.policy?.storage_ready ?? row.policy?.storage_configured)) {
             return t('backups.prepare.notConfirmed', 'Job files not confirmed by the storage host yet');
         }
         return null;

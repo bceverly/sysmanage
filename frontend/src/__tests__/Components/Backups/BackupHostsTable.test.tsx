@@ -85,11 +85,18 @@ describe("BackupHostsTable", () => {
   });
 
   test("Prepare storage waits for the storage host to confirm its job files, and says so", () => {
-    show([host({ policy: { ...policy, storage_configured: false } })]);
+    show([host({ policy: { ...policy, storage_configured: false, storage_ready: false } })]);
     fireEvent.click(screen.getByRole("button", { name: "More: web.lab" }));
     const item = within(screen.getByRole("menu")).getByRole("menuitem", { name: "Prepare storage" });
     expect(item).toHaveAttribute("aria-disabled", "true");
     expect(item).toHaveAttribute("title", "Job files not confirmed by the storage host yet");
+  });
+
+  test("a job-file change held by a maintenance window does not block Prepare storage", () => {
+    show([host({ policy: { ...policy, storage_configured: false, storage_ready: true } })]);
+    fireEvent.click(screen.getByRole("button", { name: "More: web.lab" }));
+    const item = within(screen.getByRole("menu")).getByRole("menuitem", { name: "Prepare storage" });
+    expect(item).not.toHaveAttribute("aria-disabled", "true");
   });
 
   test("the storage host is listed last, as such, offering only its own backup", () => {

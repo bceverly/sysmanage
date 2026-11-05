@@ -226,3 +226,5 @@ async def test_every_change_releases_held_messages(patched_sm, monkeypatch, chan
             current_user=admin,
         )
     released.assert_called_once()
+    if change == "override":  # only the overridden host's messages
+        assert released.call_args.args[1] is not None

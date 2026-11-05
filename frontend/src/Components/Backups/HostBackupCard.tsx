@@ -183,7 +183,9 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                         </AsyncButton>
                     )}
                     {canManage && data.policy && data.target?.storage_host_id && (
-                        <BackupPrepareButton hostId={hostId} disabled={!!data.running} onStarted={() => void load()} />
+                        <BackupPrepareButton hostId={hostId}
+                            disabled={!!data.running || !(data.policy.storage_ready ?? data.policy.storage_configured)}
+                            onStarted={() => void load()} />
                     )}
                     {canManage && data.policy && !data.policy.encryption && data.snapshot_count > 0 && (
                         <BackupRepackButton hostId={hostId} disabled={!!data.running} onStarted={() => void load()} />
