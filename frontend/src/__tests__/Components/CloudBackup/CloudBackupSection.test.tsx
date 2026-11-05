@@ -48,7 +48,7 @@ const ACCOUNT = {
   until_found: 50, status: "needs_sign_in",
   state_message: "Apple did not accept", session_created_at: null, session_expires_at: null,
   session_expiring: false, last_good_at: null, last_full_at: null, photos_local: null,
-  bytes_local: null, run_requested: false, current_run: null,
+  bytes_local: null, run_requested: false, retry_at: null, current_run: null,
   last_run: { ...RUN, action: "download", status: "needs_sign_in", reason: "auth_failed", waiting_code: false },
   created_at: null,
 };
@@ -103,6 +103,20 @@ describe("CloudBackupSection", () => {
       { ...OVERVIEW, enabled: true, accounts: [listed(["PrimarySync", "SharedSync-AB12"])] } as never);
     render(<CloudBackupSection onError={vi.fn()} />);
     expect(await screen.findByText(/Libraries found: PrimarySync, SharedSync-AB12/)).toBeInTheDocument();
+  });
+
+  test("says when it tries again after Apple refuses, not that it failed", async () => {
+    vi.mocked(getCloudOverview).mockResolvedValue({
+      ...OVERVIEW, enabled: true, accounts: [{
+        ...ACCOUNT, status: "cooling_down", session_created_at: "2026-11-04T19:43:52Z",
+        retry_at: "2026-11-04T23:08:32",
+        last_run: { ...RUN, action: "reconcile", status: "failed", reason: "apple_busy", waiting_code: false },
+      }],
+    } as never);
+    render(<CloudBackupSection onError={vi.fn()} />);
+    expect(await screen.findByText("Waiting for Apple")).toBeInTheDocument();
+    expect(screen.getByText(/Apple is limiting downloads for this account/)).toBeInTheDocument();
+    expect(screen.queryByText(/stopped trying/)).not.toBeInTheDocument();
   });
 
   test("sends the password once with a new account", async () => {

@@ -5809,7 +5809,8 @@
       "running": "실행 중",
       "waitingCode": "이중 인증 코드 대기 중",
       "needsSignIn": "로그인 필요",
-      "failed": "실패"
+      "failed": "실패",
+      "coolingDown": "Apple 대기 중"
     },
     "action": {
       "enable": "활성화",
@@ -5833,7 +5834,8 @@
       "missingTool": "스토리지 호스트에 icloudpd가 설치되어 있지 않습니다. iCloud 백업 활성화를 누르세요.",
       "agentOutdated": "스토리지 호스트의 에이전트가 너무 오래되어 iCloud 백업을 사용할 수 없습니다. 에이전트를 업데이트하세요.",
       "prepareFailed": "스토리지에 사진을 둘 위치를 준비하지 못했습니다.",
-      "unknown": "작업이 완료되지 않았습니다. 아래 세부 정보에 이유가 있습니다."
+      "unknown": "작업이 완료되지 않았습니다. 아래 세부 정보에 이유가 있습니다.",
+      "appleBusy": "Apple이 이 계정의 다운로드를 계속 거부하여 SysManage가 재시도를 중단했습니다. 잃어버린 것은 없습니다. 계속하려면 지금 실행을 누르세요."
     },
     "dashboard": {
       "needsSignIn": "로그인이 필요한 iCloud 계정: {{n}}",
@@ -5855,7 +5857,8 @@
       "storedValue": "항목 {{n}}개, {{size}}",
       "expiring": "곧 만료됨: 연결을 누르세요",
       "librariesFound": "찾은 보관함: {{names}}. 편집에서 하나를 선택하십시오.",
-      "librariesOnlyPersonal": "개인 보관함만 찾았습니다. 선택할 공유 보관함이 없습니다."
+      "librariesOnlyPersonal": "개인 보관함만 찾았습니다. 선택할 공유 보관함이 없습니다.",
+      "retryAt": "Apple이 이 계정의 다운로드를 제한하고 있습니다. 잃어버린 것은 없습니다. SysManage가 {{time}}에 다시 시도합니다."
     },
     "code": {
       "failed": "코드를 보내지 못했습니다.",

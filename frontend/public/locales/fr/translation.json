@@ -5809,7 +5809,8 @@
       "running": "En cours",
       "waitingCode": "En attente du code à deux facteurs",
       "needsSignIn": "Connexion requise",
-      "failed": "Échec"
+      "failed": "Échec",
+      "coolingDown": "En attente d'Apple"
     },
     "action": {
       "enable": "Activation",
@@ -5833,7 +5834,8 @@
       "missingTool": "icloudpd n'est pas installé sur l'hôte de stockage. Cliquez sur Activer la sauvegarde iCloud.",
       "agentOutdated": "L'agent de l'hôte de stockage est trop ancien pour la sauvegarde iCloud. Mettez l'agent à jour.",
       "prepareFailed": "L'emplacement des photos n'a pas pu être préparé sur le stockage.",
-      "unknown": "La tâche ne s'est pas terminée. Les détails ci-dessous en donnent la raison."
+      "unknown": "La tâche ne s'est pas terminée. Les détails ci-dessous en donnent la raison.",
+      "appleBusy": "Apple a refusé à plusieurs reprises les téléchargements pour ce compte, SysManage a donc cessé d'essayer. Rien n'est perdu : cliquez sur Exécuter maintenant pour continuer."
     },
     "dashboard": {
       "needsSignIn": "Comptes iCloud à reconnecter : {{n}}",
@@ -5855,7 +5857,8 @@
       "storedValue": "{{n}} éléments, {{size}}",
       "expiring": "Expire bientôt : cliquez sur Connecter",
       "librariesFound": "Photothèques trouvées : {{names}}. Choisissez-en une avec Modifier.",
-      "librariesOnlyPersonal": "Seule la photothèque personnelle a été trouvée : il n'y a aucune photothèque partagée à choisir."
+      "librariesOnlyPersonal": "Seule la photothèque personnelle a été trouvée : il n'y a aucune photothèque partagée à choisir.",
+      "retryAt": "Apple limite les téléchargements pour ce compte. Rien n'est perdu : SysManage réessaiera à {{time}}."
     },
     "code": {
       "failed": "Le code n'a pas pu être envoyé.",

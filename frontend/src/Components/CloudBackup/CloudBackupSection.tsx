@@ -170,6 +170,13 @@ const CloudAccountRow: React.FC<RowProps> = ({ account, canManage, onConnect, on
                             { action: actionLabel(t, account.current_run.action), n: progress?.downloaded ?? 0 })}
                     </Typography>
                 )}
+                {account.status === 'cooling_down' && (
+                    <Typography variant="caption" color="warning.main" sx={{ display: 'block', maxWidth: 360 }}>
+                        {t('cloudBackup.table.retryAt',
+                            'Apple is limiting downloads for this account. Nothing is lost: SysManage tries again at {{time}}.',
+                            { time: formatTime(account.retry_at) })}
+                    </Typography>
+                )}
                 {problem && (
                     <Typography variant="caption" color="error" sx={{ display: 'block', maxWidth: 360 }}>
                         {reasonText(t, run?.reason ?? null, account.state_message)}

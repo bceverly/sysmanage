@@ -5809,7 +5809,8 @@
       "running": "Läuft",
       "waitingCode": "Wartet auf den Zwei-Faktor-Code",
       "needsSignIn": "Anmeldung erforderlich",
-      "failed": "Fehlgeschlagen"
+      "failed": "Fehlgeschlagen",
+      "coolingDown": "Warten auf Apple"
     },
     "action": {
       "enable": "Aktivieren",
@@ -5833,7 +5834,8 @@
       "missingTool": "icloudpd ist auf dem Speicher-Host nicht installiert. Klicken Sie auf iCloud-Sicherung aktivieren.",
       "agentOutdated": "Der Agent des Speicher-Hosts ist zu alt für die iCloud-Sicherung. Aktualisieren Sie den Agenten.",
       "prepareFailed": "Der Ablageort für die Fotos konnte im Speicher nicht vorbereitet werden.",
-      "unknown": "Der Auftrag wurde nicht abgeschlossen. Die Details unten nennen den Grund."
+      "unknown": "Der Auftrag wurde nicht abgeschlossen. Die Details unten nennen den Grund.",
+      "appleBusy": "Apple hat Downloads für dieses Konto wiederholt abgelehnt, daher hat SysManage die Versuche eingestellt. Nichts geht verloren: Klicken Sie auf Jetzt ausführen, um fortzufahren."
     },
     "dashboard": {
       "needsSignIn": "iCloud-Konten, die eine Anmeldung benötigen: {{n}}",
@@ -5855,7 +5857,8 @@
       "storedValue": "{{n}} Objekte, {{size}}",
       "expiring": "Endet bald: klicken Sie auf Verbinden",
       "librariesFound": "Gefundene Mediatheken: {{names}}. Wählen Sie eine mit Bearbeiten.",
-      "librariesOnlyPersonal": "Nur die persönliche Mediathek wurde gefunden: Es gibt keine geteilte Mediathek zur Auswahl."
+      "librariesOnlyPersonal": "Nur die persönliche Mediathek wurde gefunden: Es gibt keine geteilte Mediathek zur Auswahl.",
+      "retryAt": "Apple begrenzt Downloads für dieses Konto. Nichts geht verloren: SysManage versucht es um {{time}} erneut."
     },
     "code": {
       "failed": "Der Code konnte nicht gesendet werden.",

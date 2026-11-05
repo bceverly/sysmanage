@@ -5809,7 +5809,8 @@
       "running": "執行中",
       "waitingCode": "正在等待雙重認證碼",
       "needsSignIn": "需要登入",
-      "failed": "失敗"
+      "failed": "失敗",
+      "coolingDown": "正在等待 Apple"
     },
     "action": {
       "enable": "啟用",
@@ -5833,7 +5834,8 @@
       "missingTool": "儲存主機上未安裝 icloudpd。請按「啟用 iCloud 備份」。",
       "agentOutdated": "儲存主機的代理程式版本太舊，無法使用 iCloud 備份。請更新代理程式。",
       "prepareFailed": "無法在儲存空間上準備存放照片的位置。",
-      "unknown": "工作未完成。下方的詳細資料說明了原因。"
+      "unknown": "工作未完成。下方的詳細資料說明了原因。",
+      "appleBusy": "Apple 一直拒絕此帳號的下載，因此 SysManage 已停止重試。沒有任何內容遺失：請按「立即執行」繼續。"
     },
     "dashboard": {
       "needsSignIn": "需要登入的 iCloud 帳號：{{n}}",
@@ -5855,7 +5857,8 @@
       "storedValue": "{{n}} 個項目，{{size}}",
       "expiring": "即將到期：請按「連線」",
       "librariesFound": "找到的圖庫：{{names}}。請透過「編輯」選擇一個。",
-      "librariesOnlyPersonal": "只找到個人圖庫：沒有可選擇的共享圖庫。"
+      "librariesOnlyPersonal": "只找到個人圖庫：沒有可選擇的共享圖庫。",
+      "retryAt": "Apple 正在限制此帳號的下載。沒有任何內容遺失：SysManage 將在 {{time}} 重試。"
     },
     "code": {
       "failed": "無法傳送驗證碼。",

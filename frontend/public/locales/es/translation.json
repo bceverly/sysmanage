@@ -5809,7 +5809,8 @@
       "running": "En ejecución",
       "waitingCode": "Esperando el código de dos factores",
       "needsSignIn": "Requiere inicio de sesión",
-      "failed": "Con errores"
+      "failed": "Con errores",
+      "coolingDown": "Esperando a Apple"
     },
     "action": {
       "enable": "Habilitación",
@@ -5833,7 +5834,8 @@
       "missingTool": "icloudpd no está instalado en el host de almacenamiento. Pulse Habilitar copia de seguridad de iCloud.",
       "agentOutdated": "El agente del host de almacenamiento es demasiado antiguo para la copia de seguridad de iCloud. Actualice el agente.",
       "prepareFailed": "No se pudo preparar el lugar para las fotos en el almacenamiento.",
-      "unknown": "El trabajo no terminó. Los detalles de abajo explican por qué."
+      "unknown": "El trabajo no terminó. Los detalles de abajo explican por qué.",
+      "appleBusy": "Apple siguió rechazando las descargas de esta cuenta, así que SysManage dejó de intentarlo. No se pierde nada: pulse Ejecutar ahora para continuar."
     },
     "dashboard": {
       "needsSignIn": "Cuentas de iCloud que requieren inicio de sesión: {{n}}",
@@ -5855,7 +5857,8 @@
       "storedValue": "{{n}} elementos, {{size}}",
       "expiring": "Vence pronto: pulse Conectar",
       "librariesFound": "Fototecas encontradas: {{names}}. Elija una con Editar.",
-      "librariesOnlyPersonal": "Solo se encontró la fototeca personal: no hay ninguna fototeca compartida para elegir."
+      "librariesOnlyPersonal": "Solo se encontró la fototeca personal: no hay ninguna fototeca compartida para elegir.",
+      "retryAt": "Apple está limitando las descargas de esta cuenta. No se pierde nada: SysManage lo intentará de nuevo a las {{time}}."
     },
     "code": {
       "failed": "No se pudo enviar el código.",

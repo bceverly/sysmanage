@@ -5809,7 +5809,8 @@
       "running": "Running",
       "waitingCode": "Waiting for the two-factor code",
       "needsSignIn": "Needs sign-in",
-      "failed": "Failed"
+      "failed": "Failed",
+      "coolingDown": "Waiting for Apple"
     },
     "action": {
       "enable": "Enable",
@@ -5833,7 +5834,8 @@
       "missingTool": "icloudpd is not installed on the storage host. Press Enable iCloud backup.",
       "agentOutdated": "The storage host's agent is too old for iCloud backup. Update the agent.",
       "prepareFailed": "The place for the photos could not be prepared on the storage.",
-      "unknown": "The job did not finish. The details below say why."
+      "unknown": "The job did not finish. The details below say why.",
+      "appleBusy": "Apple kept refusing downloads for this account, so SysManage stopped trying. Nothing is lost: press Run now to carry on."
     },
     "dashboard": {
       "needsSignIn": "iCloud accounts that need sign-in: {{n}}",
@@ -5855,7 +5857,8 @@
       "storedValue": "{{n}} items, {{size}}",
       "expiring": "Ends soon: press Connect",
       "librariesFound": "Libraries found: {{names}}. Choose one with Edit.",
-      "librariesOnlyPersonal": "Only the personal library was found: there is no shared library to choose."
+      "librariesOnlyPersonal": "Only the personal library was found: there is no shared library to choose.",
+      "retryAt": "Apple is limiting downloads for this account. Nothing is lost: SysManage tries again at {{time}}."
     },
     "code": {
       "failed": "The code could not be sent.",

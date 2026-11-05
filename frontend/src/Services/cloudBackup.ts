@@ -14,6 +14,7 @@ export type CloudAccountStatus =
   | "running"
   | "waiting_code"
   | "needs_sign_in"
+  | "cooling_down"
   | "failed";
 
 export interface CloudRun {
@@ -62,6 +63,7 @@ export interface CloudAccount {
   photos_local: number | null;
   bytes_local: number | null;
   run_requested: boolean;
+  retry_at: string | null;
   current_run: CloudRun | null;
   last_run: CloudRun | null;
   created_at: string | null;

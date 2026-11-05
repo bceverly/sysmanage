@@ -5809,7 +5809,8 @@
       "running": "Em execução",
       "waitingCode": "Aguardando o código de dois fatores",
       "needsSignIn": "Requer início de sessão",
-      "failed": "Com falha"
+      "failed": "Com falha",
+      "coolingDown": "Aguardando a Apple"
     },
     "action": {
       "enable": "Ativação",
@@ -5833,7 +5834,8 @@
       "missingTool": "O icloudpd não está instalado no host de armazenamento. Clique em Ativar backup do iCloud.",
       "agentOutdated": "O agente do host de armazenamento é antigo demais para o backup do iCloud. Atualize o agente.",
       "prepareFailed": "Não foi possível preparar o local das fotos no armazenamento.",
-      "unknown": "A tarefa não terminou. Os detalhes abaixo explicam o motivo."
+      "unknown": "A tarefa não terminou. Os detalhes abaixo explicam o motivo.",
+      "appleBusy": "A Apple continuou recusando os downloads desta conta, então o SysManage parou de tentar. Nada foi perdido: clique em Executar agora para continuar."
     },
     "dashboard": {
       "needsSignIn": "Contas do iCloud que precisam de início de sessão: {{n}}",
@@ -5855,7 +5857,8 @@
       "storedValue": "{{n}} itens, {{size}}",
       "expiring": "Vence em breve: clique em Conectar",
       "librariesFound": "Bibliotecas encontradas: {{names}}. Escolha uma com Editar.",
-      "librariesOnlyPersonal": "Apenas a biblioteca pessoal foi encontrada: não há nenhuma biblioteca compartilhada para escolher."
+      "librariesOnlyPersonal": "Apenas a biblioteca pessoal foi encontrada: não há nenhuma biblioteca compartilhada para escolher.",
+      "retryAt": "A Apple está limitando os downloads desta conta. Nada foi perdido: o SysManage tentará novamente às {{time}}."
     },
     "code": {
       "failed": "Não foi possível enviar o código.",

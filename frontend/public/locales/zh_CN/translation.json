@@ -5809,7 +5809,8 @@
       "running": "正在运行",
       "waitingCode": "正在等待双重认证代码",
       "needsSignIn": "需要登录",
-      "failed": "失败"
+      "failed": "失败",
+      "coolingDown": "正在等待 Apple"
     },
     "action": {
       "enable": "启用",
@@ -5833,7 +5834,8 @@
       "missingTool": "存储主机上未安装 icloudpd。请点击“启用 iCloud 备份”。",
       "agentOutdated": "存储主机的代理版本过旧，无法使用 iCloud 备份。请更新代理。",
       "prepareFailed": "无法在存储上准备存放照片的位置。",
-      "unknown": "作业未完成。下面的详细信息说明了原因。"
+      "unknown": "作业未完成。下面的详细信息说明了原因。",
+      "appleBusy": "Apple 一直拒绝此账户的下载，因此 SysManage 已停止重试。没有任何内容丢失：请点击“立即运行”继续。"
     },
     "dashboard": {
       "needsSignIn": "需要登录的 iCloud 账户：{{n}}",
@@ -5855,7 +5857,8 @@
       "storedValue": "{{n}} 个项目，{{size}}",
       "expiring": "即将到期：请点击“连接”",
       "librariesFound": "找到的资料库：{{names}}。请通过“编辑”选择一个。",
-      "librariesOnlyPersonal": "只找到个人资料库：没有可选择的共享资料库。"
+      "librariesOnlyPersonal": "只找到个人资料库：没有可选择的共享资料库。",
+      "retryAt": "Apple 正在限制此账户的下载。没有任何内容丢失：SysManage 将在 {{time}} 重试。"
     },
     "code": {
       "failed": "无法发送代码。",

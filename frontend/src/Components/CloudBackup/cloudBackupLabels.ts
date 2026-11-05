@@ -17,6 +17,7 @@ export const accountStatusLabel = (t: TFunction, status: CloudAccountStatus): st
         running: t('cloudBackup.status.running', 'Running'),
         waiting_code: t('cloudBackup.status.waitingCode', 'Waiting for the two-factor code'),
         needs_sign_in: t('cloudBackup.status.needsSignIn', 'Needs sign-in'),
+        cooling_down: t('cloudBackup.status.coolingDown', 'Waiting for Apple'),
         failed: t('cloudBackup.status.failed', 'Failed'),
     };
     return labels[status] ?? status;
@@ -30,6 +31,7 @@ export const accountStatusColor = (status: CloudAccountStatus): ChipColor => {
             return 'error';
         case 'needs_sign_in':
         case 'waiting_code':
+        case 'cooling_down':
             return 'warning';
         case 'running':
             return 'info';
@@ -71,6 +73,9 @@ export const reasonText = (t: TFunction, reason: string | null, fallback: string
         case 'web_access_off':
             return t('cloudBackup.reason.webAccessOff',
                 'iCloud data cannot be reached from the web for this account. With Advanced Data Protection on, turn on "Access iCloud Data on the Web" on the iPhone (Settings, your name, iCloud), then try again.');
+        case 'apple_busy':
+            return t('cloudBackup.reason.appleBusy',
+                'Apple kept refusing downloads for this account, so SysManage stopped trying. Nothing is lost: press Run now to carry on.');
         case 'password_unavailable':
             return t('cloudBackup.reason.passwordUnavailable', 'The storage host could not get the password from the server for this job.');
         case 'checksum_mismatch':

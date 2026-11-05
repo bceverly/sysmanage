@@ -5809,7 +5809,8 @@
       "running": "Wordt uitgevoerd",
       "waitingCode": "Wacht op de tweefactorcode",
       "needsSignIn": "Aanmelding nodig",
-      "failed": "Mislukt"
+      "failed": "Mislukt",
+      "coolingDown": "Wachten op Apple"
     },
     "action": {
       "enable": "Inschakelen",
@@ -5833,7 +5834,8 @@
       "missingTool": "icloudpd is niet geïnstalleerd op de opslaghost. Klik op iCloud-back-up inschakelen.",
       "agentOutdated": "De agent van de opslaghost is te oud voor iCloud-back-up. Werk de agent bij.",
       "prepareFailed": "De plek voor de foto's kon niet in de opslag worden voorbereid.",
-      "unknown": "De taak is niet voltooid. De details hieronder zeggen waarom."
+      "unknown": "De taak is niet voltooid. De details hieronder zeggen waarom.",
+      "appleBusy": "Apple bleef downloads voor dit account weigeren, dus SysManage is gestopt met proberen. Er gaat niets verloren: klik op Nu uitvoeren om verder te gaan."
     },
     "dashboard": {
       "needsSignIn": "iCloud-accounts die een aanmelding nodig hebben: {{n}}",
@@ -5855,7 +5857,8 @@
       "storedValue": "{{n}} bestanden, {{size}}",
       "expiring": "Verloopt binnenkort: klik op Verbinden",
       "librariesFound": "Gevonden bibliotheken: {{names}}. Kies er een met Bewerken.",
-      "librariesOnlyPersonal": "Alleen de persoonlijke bibliotheek is gevonden: er is geen gedeelde bibliotheek om te kiezen."
+      "librariesOnlyPersonal": "Alleen de persoonlijke bibliotheek is gevonden: er is geen gedeelde bibliotheek om te kiezen.",
+      "retryAt": "Apple beperkt downloads voor dit account. Er gaat niets verloren: SysManage probeert het om {{time}} opnieuw."
     },
     "code": {
       "failed": "De code kon niet worden verzonden.",

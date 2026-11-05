@@ -5809,7 +5809,8 @@
       "running": "実行中",
       "waitingCode": "2 ファクタ認証コードを待機中",
       "needsSignIn": "サインインが必要",
-      "failed": "失敗"
+      "failed": "失敗",
+      "coolingDown": "Apple を待機中"
     },
     "action": {
       "enable": "有効化",
@@ -5833,7 +5834,8 @@
       "missingTool": "ストレージホストに icloudpd がインストールされていません。[iCloud バックアップを有効にする] を押してください。",
       "agentOutdated": "ストレージホストのエージェントが古すぎて iCloud バックアップを使用できません。エージェントを更新してください。",
       "prepareFailed": "ストレージに写真の保存場所を準備できませんでした。",
-      "unknown": "ジョブは完了しませんでした。理由は下の詳細に示されています。"
+      "unknown": "ジョブは完了しませんでした。理由は下の詳細に示されています。",
+      "appleBusy": "Apple がこのアカウントのダウンロードを拒否し続けたため、SysManage は再試行を停止しました。失われたものはありません。続行するには [今すぐ実行] を押してください。"
     },
     "dashboard": {
       "needsSignIn": "サインインが必要な iCloud アカウント: {{n}}",
@@ -5855,7 +5857,8 @@
       "storedValue": "{{n}} 項目、{{size}}",
       "expiring": "まもなく期限切れ: [接続] を押してください",
       "librariesFound": "見つかったライブラリ: {{names}}。編集で選択してください。",
-      "librariesOnlyPersonal": "個人用ライブラリのみが見つかりました。選択できる共有ライブラリはありません。"
+      "librariesOnlyPersonal": "個人用ライブラリのみが見つかりました。選択できる共有ライブラリはありません。",
+      "retryAt": "Apple がこのアカウントのダウンロードを制限しています。失われたものはありません。SysManage は {{time}} に再試行します。"
     },
     "code": {
       "failed": "コードを送信できませんでした。",
