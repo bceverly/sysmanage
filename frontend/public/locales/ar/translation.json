@@ -2293,7 +2293,9 @@
     "pendingItemNoKept": "{{version}} في الانتظار",
     "pendingTitle": "انتظار تحديث محرك Pro+ لخادم SysManage أحدث",
     "serverTooOldIntro": "تم بناء هذه المحركات Pro+ لخادم SysManage أحدث ولا يمكنها التحميل. لن تساعد عمليات الهجرة لقاعدة البيانات: قم بترقية حزمة خادم SysManage، ثم أعد تشغيل sysmanage.",
-    "serverTooOldTitle": "يحتاج محرك Pro+ إلى خادم SysManage أحدث"
+    "serverTooOldTitle": "يحتاج محرك Pro+ إلى خادم SysManage أحدث",
+    "restartTitle": "أعد تشغيل SysManage لتحميل محركات Pro+",
+    "restartIntro": "تم ترحيل قاعدة البيانات، لكن محركات Pro+ هذه رُفضت عند بدء تشغيل الخادم وتبقى متوقفة حتى يُعاد تشغيله. أعد تشغيل sysmanage لتحميلها."
   },
   "mirror": {
     "action": {

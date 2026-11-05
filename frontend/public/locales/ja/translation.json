@@ -2293,7 +2293,9 @@
     "pendingItemNoKept": "{{version}} は待機中です",
     "pendingTitle": "Pro+ エンジンの更新は、より新しい SysManage サーバーの利用を待っています",
     "serverTooOldIntro": "これらの Pro+ エンジンは、より新しい SysManage サーバー向けに構築されており、ロードできません。データベースのマイグレーションを実行しても役立ちません：SysManage サーバーパッケージをアップグレードし、sysmanage を再起動してください。",
-    "serverTooOldTitle": "Pro+ エンジンはより新しい SysManage サーバーを必要とします"
+    "serverTooOldTitle": "Pro+ エンジンはより新しい SysManage サーバーを必要とします",
+    "restartTitle": "Pro+ エンジンを読み込むには SysManage を再起動してください",
+    "restartIntro": "データベースは移行済みですが、これらの Pro+ エンジンはサーバーの起動時に拒否されたため、再起動するまで無効のままです。読み込むには sysmanage を再起動してください。"
   },
   "mirror": {
     "action": {

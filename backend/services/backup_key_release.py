@@ -35,6 +35,7 @@ from typing import Any, List, Optional
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
+from backend.licensing.migration_compat import missing_engine_detail
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
@@ -158,7 +159,13 @@ def _release_signer(
         raise KeyRefused(404, _("No such backup run for this host"))
     engine = module_loader.get_module("backup_engine")
     if engine is None or not hasattr(engine, "signing_secret_key"):
-        raise KeyRefused(402, _("Signed backups need the Professional+ backup engine"))
+        raise KeyRefused(
+            402,
+            missing_engine_detail(
+                "backup_engine",
+                _("Signed backups need the Professional+ backup engine"),
+            ),
+        )
     try:
         key = engine.signing_secret_key(target)
     except Exception as error:  # the engine's own message says why

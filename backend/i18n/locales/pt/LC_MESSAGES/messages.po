@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-04 14:32-0500\n"
+"POT-Creation-Date: 2026-11-05 07:56-0500\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -175,7 +175,7 @@ msgstr "Falha ao obter certificado CA: %s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:424
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:425
 #: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
@@ -1392,8 +1392,8 @@ msgstr "Encerramento de processo solicitado. A lista será atualizada em breve."
 msgid "Invalid tag_id: %s"
 msgstr "tag_id inválido: %s"
 
-#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:66
-#: backend/api/backups_tag_policies.py:70 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:70
+#: backend/api/backups_tag_policies.py:74 backend/api/error_constants.py:136
 msgid "Tag not found"
 msgstr "Marcador não encontrado"
 
@@ -2073,13 +2073,13 @@ msgstr "Ausente SAMLResponse ou RelayState."
 msgid "Invalid or expired SAML RelayState."
 msgstr "SAML RelayState inválido ou expirado."
 
-#: backend/api/backups_escrow.py:57
+#: backend/api/backups_escrow.py:60
 msgid "Break-glass escrow needs the Professional+ backup engine"
 msgstr ""
 "A custódia de chaves de emergência precisa do mecanismo de backup "
 "Professional+"
 
-#: backend/api/backups_escrow.py:61
+#: backend/api/backups_escrow.py:65
 msgid "No backup target is set up yet"
 msgstr "Ainda não há um destino de backup configurado"
 
@@ -2596,7 +2596,7 @@ msgstr "Chave da API do NVD limpa com sucesso"
 msgid "Failed to clear NVD API key"
 msgstr "Falha ao limpar a chave de API NVD"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
+#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:189
 #: backend/api/backups_equip.py:160 backend/api/backups.py:570
 #: backend/services/cloud_backup_jobs.py:128
 msgid "Set up the backup target first"
@@ -3032,36 +3032,36 @@ msgstr "Nenhuma versão anterior publicada para comparar"
 msgid "No published version %s"
 msgstr "Nenhuma versão publicada %s"
 
-#: backend/api/backups_tag_policies.py:52
+#: backend/api/backups_tag_policies.py:55
 msgid "Backup policies by tag need the Professional+ backup engine"
 msgstr ""
 "Políticas de backup por marcador exigem o mecanismo de backup do "
 "Professional+"
 
-#: backend/api/backups_tag_policies.py:75
+#: backend/api/backups_tag_policies.py:79
 msgid "Tag policy not found"
 msgstr "Política de marcador não encontrada"
 
-#: backend/api/backups_tag_policies.py:91 backend/api/backups_retention.py:65
-#: backend/api/backups_retention.py:101
+#: backend/api/backups_tag_policies.py:95 backend/api/backups_retention.py:67
+#: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s deve ser um número inteiro de 0 a %(max)d"
 
-#: backend/api/backups_tag_policies.py:189
-#: backend/api/backups_tag_policies.py:223
+#: backend/api/backups_tag_policies.py:193
+#: backend/api/backups_tag_policies.py:227
 msgid "A tag policy has that name"
 msgstr "Já existe uma política de marcador com esse nome"
 
-#: backend/api/backups_tag_policies.py:273
+#: backend/api/backups_tag_policies.py:277
 msgid "This host has no backup policy"
 msgstr "Este host não tem uma política de backup"
 
-#: backend/api/backups_tag_policies.py:274
+#: backend/api/backups_tag_policies.py:278
 msgid "This host already follows its tag policy"
 msgstr "Este host já segue sua política de marcador"
 
-#: backend/api/backups_tag_policies.py:276
+#: backend/api/backups_tag_policies.py:280
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr ""
 "Nenhuma política de marcador se aplica a este host; não há nada para onde "
@@ -4302,7 +4302,7 @@ msgstr ""
 "Cada regra de caminho é uma linha de até 512 caracteres, sem espaços no "
 "início ou no fim e sem # no início"
 
-#: backend/api/backups.py:297 backend/api/backups_drift.py:93
+#: backend/api/backups.py:297 backend/api/backups_drift.py:97
 #: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "O nome do snapshot não é válido"
@@ -4391,7 +4391,7 @@ msgstr "Snapshot não encontrado"
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "Este snapshot não está assinado; confirme para restaurá-lo mesmo assim"
 
-#: backend/api/backups.py:854 backend/api/backups_drift.py:101
+#: backend/api/backups.py:854 backend/api/backups_drift.py:105
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "O restate deste host ainda não consegue fazer isso; atualize o restate"
@@ -4845,16 +4845,16 @@ msgstr "O motor do host filho não conseguiu despachar esta solicitação."
 msgid "Permission denied: {} role required"
 msgstr "Permissão negada: {} role requerida"
 
-#: backend/api/backups_drift.py:54
+#: backend/api/backups_drift.py:57
 msgid "The drift timeline needs the Professional+ backup engine"
 msgstr ""
 "A linha do tempo de desvios requer o mecanismo de backup do Professional+"
 
-#: backend/api/backups_drift.py:73 backend/api/backups_browse.py:95
+#: backend/api/backups_drift.py:77 backend/api/backups_browse.py:95
 msgid "The path must be absolute"
 msgstr "O caminho deve ser absoluto"
 
-#: backend/api/backups_drift.py:105
+#: backend/api/backups_drift.py:109
 msgid "A comparison of snapshots is already running"
 msgstr "Uma comparação de snapshots já está em andamento"
 
@@ -5031,15 +5031,15 @@ msgstr "Um motivo de substituição é obrigatório."
 msgid "Override duration must be positive."
 msgstr "O período da substituição deve ser positivo."
 
-#: backend/api/maintenance_windows.py:454
+#: backend/api/maintenance_windows.py:455
 msgid "Permission denied: Delete Queue Message role required"
 msgstr "Permissão negada: é necessária a função Delete Queue Message"
 
-#: backend/api/maintenance_windows.py:471
+#: backend/api/maintenance_windows.py:472
 msgid "Message not found"
 msgstr "Mensagem não encontrada"
 
-#: backend/api/maintenance_windows.py:479
+#: backend/api/maintenance_windows.py:480
 msgid "Only a command a maintenance window is holding can be canceled."
 msgstr ""
 "Somente um comando retido por uma janela de manutenção pode ser cancelado."
@@ -5552,15 +5552,15 @@ msgstr "Falha ao excluir script salvo"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "Falha ao recuperar o status comercial do antivírus: %s"
 
-#: backend/api/backups_retention.py:52
+#: backend/api/backups_retention.py:54
 msgid "Grandfather-father-son retention needs the Professional+ backup engine"
 msgstr "A retenção avô-pai-filho requer o mecanismo de backup do Professional+"
 
-#: backend/api/backups_retention.py:108
+#: backend/api/backups_retention.py:112
 msgid "Scheduled verification needs the Professional+ backup engine"
 msgstr "A verificação agendada requer o mecanismo de backup do Professional+"
 
-#: backend/api/backups_retention.py:131
+#: backend/api/backups_retention.py:136
 msgid ""
 "The storage host's restate cannot keep yearly snapshots yet: update restate "
 "there to 2.2.0.12 or later, then save the policy without years and set them "
@@ -5949,11 +5949,11 @@ msgstr "Esse nome pertence a um conjunto de regras curado"
 msgid "None of these rules can run under ClamAV"
 msgstr "Nenhuma dessas regras pode ser executada no ClamAV"
 
-#: backend/services/cloud_backup_tick.py:247
+#: backend/services/cloud_backup_tick.py:302
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "O início de sessão do iCloud vence em breve: entre novamente"
 
-#: backend/services/cloud_backup_tick.py:249
+#: backend/services/cloud_backup_tick.py:304
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, "
@@ -5993,21 +5993,21 @@ msgstr "Os alvos não indicam nenhum host ativo"
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "No máximo 10000 hosts podem ser verificados em um trabalho"
 
-#: backend/services/backup_package_restore.py:45
+#: backend/services/backup_package_restore.py:48
 msgid "Restoring packages needs the Professional+ backup engine"
 msgstr "Restaurar pacotes requer o mecanismo de backup do Professional+"
 
-#: backend/services/backup_package_restore.py:51
+#: backend/services/backup_package_restore.py:55
 msgid "This host's restate cannot restore packages yet; upgrade restate"
 msgstr ""
 "O restate neste host ainda não pode restaurar pacotes; atualize o restate"
 
-#: backend/services/backup_package_restore.py:59
+#: backend/services/backup_package_restore.py:63
 msgid "Packages are restored onto the host itself: choose into place"
 msgstr ""
 "Os pacotes são restaurados no próprio host: escolha colocar de volta no lugar"
 
-#: backend/services/backup_package_restore.py:65
+#: backend/services/backup_package_restore.py:69
 msgid ""
 "Confirm that packages will be installed, and packages the snapshot did not "
 "have removed, to match the snapshot"
@@ -6114,36 +6114,36 @@ msgstr "Um código de dois fatores tem seis dígitos"
 msgid "The backup target has no storage host to run on"
 msgstr "O destino de backup não tem um host de armazenamento onde executar"
 
-#: backend/services/backup_key_release.py:89
-#: backend/services/backup_key_release.py:158
+#: backend/services/backup_key_release.py:90
+#: backend/services/backup_key_release.py:159
 msgid "No such backup run for this host"
 msgstr "Não há essa tarefa de backup para este host"
 
-#: backend/services/backup_key_release.py:95
+#: backend/services/backup_key_release.py:96
 msgid "This backup run does not need a key"
 msgstr "Esta tarefa de backup não precisa de chave"
 
-#: backend/services/backup_key_release.py:97
+#: backend/services/backup_key_release.py:98
 msgid "This backup run has already ended"
 msgstr "Esta tarefa de backup já terminou"
 
-#: backend/services/backup_key_release.py:99
+#: backend/services/backup_key_release.py:100
 msgid "This backup run's key was already released"
 msgstr "A chave desta tarefa de backup já foi entregue"
 
-#: backend/services/backup_key_release.py:106
+#: backend/services/backup_key_release.py:107
 msgid "This backup run is too old to release its key"
 msgstr "Esta tarefa de backup é antiga demais para entregar sua chave"
 
-#: backend/services/backup_key_release.py:124
+#: backend/services/backup_key_release.py:125
 msgid "This host's backups are not encrypted"
 msgstr "Os backups deste host não estão criptografados"
 
-#: backend/services/backup_key_release.py:156
+#: backend/services/backup_key_release.py:157
 msgid "Snapshot signing is not turned on"
 msgstr "A assinatura de snapshots não está ativada"
 
-#: backend/services/backup_key_release.py:161
+#: backend/services/backup_key_release.py:166
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "Backups assinados exigem o mecanismo de backup do Professional+"
 
@@ -6379,6 +6379,34 @@ msgstr "Resposta do vault inválida"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "Formato de segredo inválido"
+
+#: backend/licensing/migration_compat.py:150
+msgid ""
+"This Professional+ engine is licensed but not loaded: the server started "
+"before the database was migrated. Restart the SysManage server to load it."
+msgstr ""
+"Este mecanismo Professional+ está licenciado, mas não foi carregado: o "
+"servidor foi iniciado antes da migração do banco de dados. Reinicie o "
+"servidor do SysManage para carregá-lo."
+
+#: backend/licensing/migration_compat.py:156
+msgid ""
+"This Professional+ engine is licensed but needs a newer SysManage server. "
+"Upgrade the SysManage server package, then restart it."
+msgstr ""
+"Este mecanismo Professional+ está licenciado, mas precisa de um servidor do "
+"SysManage mais recente. Atualize o pacote do servidor do SysManage e depois "
+"reinicie-o."
+
+#: backend/licensing/migration_compat.py:160
+msgid ""
+"This Professional+ engine is licensed but not loaded: the database is older "
+"than it needs. Run the database migrations, then restart the SysManage "
+"server."
+msgstr ""
+"Este mecanismo Professional+ está licenciado, mas não foi carregado: o banco "
+"de dados é mais antigo do que ele precisa. Execute as migrações do banco de "
+"dados e depois reinicie o servidor do SysManage."
 
 #: backend/vulnerability/cve_sources.py:23
 msgid "Primary CVE data source from NIST (includes Apple/macOS CVEs)"

@@ -24,6 +24,7 @@ from sqlalchemy.orm import Session
 from backend.api.backups import _audit, _require
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
+from backend.licensing.migration_compat import missing_engine_detail
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_escrow as escrow
@@ -54,7 +55,10 @@ async def save_escrow_key(
     if escrow.backup_engine() is None:
         raise HTTPException(
             status_code=402,
-            detail=_("Break-glass escrow needs the Professional+ backup engine"),
+            detail=missing_engine_detail(
+                "backup_engine",
+                _("Break-glass escrow needs the Professional+ backup engine"),
+            ),
         )
     target = jobs.the_target(db)
     if target is None:

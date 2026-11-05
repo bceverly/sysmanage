@@ -12,8 +12,9 @@ interface ModuleCompatibilityEntry {
   required_revision: string;
   required_revision_human?: string | null;
   current_revision?: string | null;
-  // 'migration_pending' (run the migrations) or 'server_too_old' (the engine
-  // needs a migration this server does not ship; only a newer server helps).
+  // 'migration_pending' (run the migrations), 'server_too_old' (the engine
+  // needs a migration this server does not ship; only a newer server helps)
+  // or 'restart_needed' (migrated since the server started; restart it).
   kind?: string;
 }
 
@@ -41,15 +42,20 @@ interface ModuleCompatibilityResponse {
  *
  * An engine built for a NEWER server names a migration this server does not
  * ship; running migrations cannot help, so those get their own message
- * ("needs a newer SysManage server").  When such an update was refused and
+ * ("needs a newer SysManage server").  An engine refused at startup is only
+ * loaded by a restart, so once the migrations have run its entry asks for a
+ * restart instead of still asking for the migrations.  When such an update was refused and
  * the installed version kept, an informational notice says so instead.
  */
 const MigrationCompatBanner: React.FC = () => {
   const { t } = useTranslation();
   const [entries, setEntries] = useState<ModuleCompatibilityEntry[]>([]);
   const [pending, setPending] = useState<PendingEngineUpdate[]>([]);
-  const migrationEntries = entries.filter((e) => e.kind !== 'server_too_old');
+  const migrationEntries = entries.filter(
+    (e) => e.kind !== 'server_too_old' && e.kind !== 'restart_needed',
+  );
   const tooNewEntries = entries.filter((e) => e.kind === 'server_too_old');
+  const restartEntries = entries.filter((e) => e.kind === 'restart_needed');
   const visible = entries.length > 0 || pending.length > 0;
   const ref = useRef<HTMLDivElement>(null);
 
@@ -150,6 +156,27 @@ const MigrationCompatBanner: React.FC = () => {
                 {e.current_revision
                   ? `; ${t('migrationCompat.currently', 'currently at')} ${e.current_revision}`
                   : `; ${t('migrationCompat.noVersion', 'no alembic_version row found')}`}
+              </li>
+            ))}
+          </Box>
+        </Alert>
+      )}
+      {restartEntries.length > 0 && (
+        <Alert severity="warning" variant="filled" sx={{ borderRadius: 0 }}>
+          <AlertTitle>
+            {t(
+              'migrationCompat.restartTitle',
+              'Restart SysManage to load Pro+ engines',
+            )}
+          </AlertTitle>
+          {t(
+            'migrationCompat.restartIntro',
+            'The database has been migrated, but these Pro+ engines were refused when the server started and stay off until it restarts. Restart sysmanage to load them.',
+          )}
+          <Box component="ul" sx={{ mt: 1, mb: 0, pl: 3 }}>
+            {restartEntries.map((e) => (
+              <li key={e.module_code}>
+                <strong>{e.module_code}</strong>
               </li>
             ))}
           </Box>

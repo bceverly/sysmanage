@@ -2312,7 +2312,9 @@
     "pendingItemNoKept": "{{version}} is waiting",
     "pendingTitle": "Pro+ engine update waiting for a newer SysManage server",
     "serverTooOldIntro": "These Pro+ engines were built for a newer SysManage server and cannot load. Running database migrations will not help: upgrade the SysManage server package, then restart sysmanage.",
-    "serverTooOldTitle": "Pro+ engine needs a newer SysManage server"
+    "serverTooOldTitle": "Pro+ engine needs a newer SysManage server",
+    "restartTitle": "Restart SysManage to load Pro+ engines",
+    "restartIntro": "The database has been migrated, but these Pro+ engines were refused when the server started and stay off until it restarts. Restart sysmanage to load them."
   },
   "mirror": {
     "action": {

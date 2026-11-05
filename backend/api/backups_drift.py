@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 from backend.api.backups import _audit, _host_or_404, _ready_policy, _require
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
+from backend.licensing.migration_compat import missing_engine_detail
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_drift as drift
@@ -51,7 +52,10 @@ def _engine_or_402():
     if module is None:
         raise HTTPException(
             status_code=402,
-            detail=_("The drift timeline needs the Professional+ backup engine"),
+            detail=missing_engine_detail(
+                "backup_engine",
+                _("The drift timeline needs the Professional+ backup engine"),
+            ),
         )
     return module
 

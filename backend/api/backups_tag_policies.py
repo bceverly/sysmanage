@@ -24,6 +24,7 @@ from backend.api import backups_retention as retention
 from backend.api.backups import PolicyBody, _host_or_404, _require, _validate_policy
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
+from backend.licensing.migration_compat import missing_engine_detail
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
@@ -49,7 +50,10 @@ def _engine_or_402() -> None:
     if not tag_policies.engine_loaded():
         raise HTTPException(
             status_code=402,
-            detail=_("Backup policies by tag need the Professional+ backup engine"),
+            detail=missing_engine_detail(
+                "backup_engine",
+                _("Backup policies by tag need the Professional+ backup engine"),
+            ),
         )
 
 

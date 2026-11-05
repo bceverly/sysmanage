@@ -9,13 +9,17 @@ from unittest.mock import MagicMock
 import pytest
 
 from backend.licensing.migration_compat import (
+    KIND_RESTART_NEEDED,
     ModuleIncompatibility,
     _Registry,
     check_module_compatibility,
     clear_incompatibility,
+    default_alembic_cfg_path,
     get_current_oss_revision,
     get_incompatibilities,
     is_at_or_above,
+    missing_engine_detail,
+    refresh_incompatibilities,
 )
 
 
@@ -183,3 +187,53 @@ class TestCheckModuleCompatibility:
         )
         assert result is None
         assert all(e.module_code != "test_mod_2" for e in get_incompatibilities())
+
+
+def _at(revision):
+    """A session whose alembic_version row is ``revision``."""
+    session = MagicMock()
+    session.execute.return_value.fetchall.return_value = [(revision,)]
+    return session
+
+
+class TestRestartNeeded:
+    """An engine refused at startup is only loaded by a restart.  2026-11-04:
+    prod was migrated after the server started, the backup engine stayed off
+    for a day, and the banner and the API both went on saying "migrate"."""
+
+    INFO = {"min_oss_alembic_revision": "q77ossbackupkeys"}
+    LICENSED = "Signed backups need the Professional+ backup engine"
+
+    def _refuse(self):
+        clear_incompatibility("backup_engine")
+        cfg = default_alembic_cfg_path()
+        assert check_module_compatibility(
+            "backup_engine", self.INFO, _at("q75backuptagpolicy"), cfg
+        )
+
+    def test_a_migration_after_startup_asks_for_a_restart(self):
+        self._refuse()
+        assert "migrations" in missing_engine_detail("backup_engine", self.LICENSED)
+        (entry,) = [
+            e
+            for e in refresh_incompatibilities(_at("q79cloudnodelete"))
+            if e.module_code == "backup_engine"
+        ]
+        assert entry.kind == KIND_RESTART_NEEDED
+        assert entry.current_revision == "q79cloudnodelete"
+        detail = missing_engine_detail("backup_engine", self.LICENSED)
+        assert "Restart the SysManage server" in detail
+        clear_incompatibility("backup_engine")
+
+    def test_still_pending_stays_pending(self):
+        self._refuse()
+        refresh_incompatibilities(_at("q76backupescrow"))
+        (entry,) = [
+            e for e in get_incompatibilities() if e.module_code == "backup_engine"
+        ]
+        assert entry.kind == "migration_pending"
+        clear_incompatibility("backup_engine")
+
+    def test_an_engine_that_is_not_refused_keeps_the_license_message(self):
+        clear_incompatibility("backup_engine")
+        assert missing_engine_detail("backup_engine", self.LICENSED) == self.LICENSED

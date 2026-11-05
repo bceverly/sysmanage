@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-04 14:32-0500\n"
+"POT-Creation-Date: 2026-11-05 07:56-0500\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -176,7 +176,7 @@ msgstr "CA 인증서 가져오기 실패: %s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:424
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:425
 #: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
@@ -1380,8 +1380,8 @@ msgstr "프로세스 종료를 요청했습니다. 목록이 곧 업데이트됩
 msgid "Invalid tag_id: %s"
 msgstr "잘못된 tag_id: %s"
 
-#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:66
-#: backend/api/backups_tag_policies.py:70 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:70
+#: backend/api/backups_tag_policies.py:74 backend/api/error_constants.py:136
 msgid "Tag not found"
 msgstr "태그를 찾을 수 없습니다"
 
@@ -2045,11 +2045,11 @@ msgstr "SAMLResponse 또는 RelayState가 누락되었습니다."
 msgid "Invalid or expired SAML RelayState."
 msgstr "유효하지 않거나 만료된 SAML RelayState."
 
-#: backend/api/backups_escrow.py:57
+#: backend/api/backups_escrow.py:60
 msgid "Break-glass escrow needs the Professional+ backup engine"
 msgstr "비상용 키 보관에는 Professional+ 백업 엔진이 필요합니다"
 
-#: backend/api/backups_escrow.py:61
+#: backend/api/backups_escrow.py:65
 msgid "No backup target is set up yet"
 msgstr "아직 백업 대상이 설정되지 않았습니다"
 
@@ -2556,7 +2556,7 @@ msgstr "NVD API 키가 성공적으로 초기화되었습니다"
 msgid "Failed to clear NVD API key"
 msgstr "NVD API 키 지우기 실패"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
+#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:189
 #: backend/api/backups_equip.py:160 backend/api/backups.py:570
 #: backend/services/cloud_backup_jobs.py:128
 msgid "Set up the backup target first"
@@ -2988,34 +2988,34 @@ msgstr "비교할 이전에 공개된 버전이 없습니다"
 msgid "No published version %s"
 msgstr "공개된 버전 %s이 없습니다"
 
-#: backend/api/backups_tag_policies.py:52
+#: backend/api/backups_tag_policies.py:55
 msgid "Backup policies by tag need the Professional+ backup engine"
 msgstr "태그별 백업 정책에는 Professional+ 백업 엔진이 필요합니다"
 
-#: backend/api/backups_tag_policies.py:75
+#: backend/api/backups_tag_policies.py:79
 msgid "Tag policy not found"
 msgstr "태그 정책을 찾을 수 없습니다"
 
-#: backend/api/backups_tag_policies.py:91 backend/api/backups_retention.py:65
-#: backend/api/backups_retention.py:101
+#: backend/api/backups_tag_policies.py:95 backend/api/backups_retention.py:67
+#: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s은(는) 0부터 %(max)d까지의 정수여야 합니다"
 
-#: backend/api/backups_tag_policies.py:189
-#: backend/api/backups_tag_policies.py:223
+#: backend/api/backups_tag_policies.py:193
+#: backend/api/backups_tag_policies.py:227
 msgid "A tag policy has that name"
 msgstr "같은 이름의 태그 정책이 이미 있습니다"
 
-#: backend/api/backups_tag_policies.py:273
+#: backend/api/backups_tag_policies.py:277
 msgid "This host has no backup policy"
 msgstr "이 호스트에는 백업 정책이 없습니다"
 
-#: backend/api/backups_tag_policies.py:274
+#: backend/api/backups_tag_policies.py:278
 msgid "This host already follows its tag policy"
 msgstr "이 호스트는 이미 태그 정책을 따르고 있습니다"
 
-#: backend/api/backups_tag_policies.py:276
+#: backend/api/backups_tag_policies.py:280
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr "이 호스트에 적용되는 태그 정책이 없어 전환할 대상이 없습니다"
 
@@ -4219,7 +4219,7 @@ msgid ""
 msgstr ""
 "각 경로 규칙은 앞뒤 공백이나 #으로 시작하지 않는 512자 이내의 한 줄입니다"
 
-#: backend/api/backups.py:297 backend/api/backups_drift.py:93
+#: backend/api/backups.py:297 backend/api/backups_drift.py:97
 #: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "스냅샷 이름이 올바르지 않습니다"
@@ -4301,7 +4301,7 @@ msgstr "스냅샷을 찾을 수 없습니다"
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "이 스냅샷은 서명되지 않았습니다. 그래도 복원하려면 확인하세요"
 
-#: backend/api/backups.py:854 backend/api/backups_drift.py:101
+#: backend/api/backups.py:854 backend/api/backups_drift.py:105
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr ""
@@ -4754,15 +4754,15 @@ msgstr "자식 호스트 엔진이 이 요청을 처리할 수 없습니다."
 msgid "Permission denied: {} role required"
 msgstr "퍼미션 denied: {} 역할 필요"
 
-#: backend/api/backups_drift.py:54
+#: backend/api/backups_drift.py:57
 msgid "The drift timeline needs the Professional+ backup engine"
 msgstr "드리프트 타임라인에는 Professional+ 백업 엔진이 필요합니다"
 
-#: backend/api/backups_drift.py:73 backend/api/backups_browse.py:95
+#: backend/api/backups_drift.py:77 backend/api/backups_browse.py:95
 msgid "The path must be absolute"
 msgstr "경로는 절대 경로여야 합니다"
 
-#: backend/api/backups_drift.py:105
+#: backend/api/backups_drift.py:109
 msgid "A comparison of snapshots is already running"
 msgstr "스냅샷 비교가 이미 진행 중입니다"
 
@@ -4937,15 +4937,15 @@ msgstr "Override 이유는 필수입니다."
 msgid "Override duration must be positive."
 msgstr "Override 기간은 양수여야 합니다."
 
-#: backend/api/maintenance_windows.py:454
+#: backend/api/maintenance_windows.py:455
 msgid "Permission denied: Delete Queue Message role required"
 msgstr "권한이 거부되었습니다: Delete Queue Message 역할이 필요합니다"
 
-#: backend/api/maintenance_windows.py:471
+#: backend/api/maintenance_windows.py:472
 msgid "Message not found"
 msgstr "메시지를 찾을 수 없습니다"
 
-#: backend/api/maintenance_windows.py:479
+#: backend/api/maintenance_windows.py:480
 msgid "Only a command a maintenance window is holding can be canceled."
 msgstr "유지 관리 기간에 의해 보류 중인 명령만 취소할 수 있습니다."
 
@@ -5448,15 +5448,15 @@ msgstr "저장된 스크립트 지우기 실패"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "상업용 ANTIVIRUS 상태를 가져오는데 실패했습니다: %s"
 
-#: backend/api/backups_retention.py:52
+#: backend/api/backups_retention.py:54
 msgid "Grandfather-father-son retention needs the Professional+ backup engine"
 msgstr "GFS(조부-부-자) 보존에는 Professional+ 백업 엔진이 필요합니다"
 
-#: backend/api/backups_retention.py:108
+#: backend/api/backups_retention.py:112
 msgid "Scheduled verification needs the Professional+ backup engine"
 msgstr "예약된 검증에는 Professional+ 백업 엔진이 필요합니다"
 
-#: backend/api/backups_retention.py:131
+#: backend/api/backups_retention.py:136
 msgid ""
 "The storage host's restate cannot keep yearly snapshots yet: update restate "
 "there to 2.2.0.12 or later, then save the policy without years and set them "
@@ -5836,11 +5836,11 @@ msgstr "해당 이름은 큐레이션된 규칙 세트에 속합니다"
 msgid "None of these rules can run under ClamAV"
 msgstr "이 규칙 중 어느 것도 ClamAV에서 실행할 수 없습니다"
 
-#: backend/services/cloud_backup_tick.py:247
+#: backend/services/cloud_backup_tick.py:302
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "iCloud 로그인이 곧 만료됩니다: 다시 로그인하세요"
 
-#: backend/services/cloud_backup_tick.py:249
+#: backend/services/cloud_backup_tick.py:304
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, "
@@ -5879,21 +5879,21 @@ msgstr "대상에 활성 호스트가 없습니다"
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "하나의 작업에서 최대 10000개 호스트를 검사할 수 있습니다"
 
-#: backend/services/backup_package_restore.py:45
+#: backend/services/backup_package_restore.py:48
 msgid "Restoring packages needs the Professional+ backup engine"
 msgstr "패키지를 복원하려면 Professional+ 백업 엔진이 필요합니다"
 
-#: backend/services/backup_package_restore.py:51
+#: backend/services/backup_package_restore.py:55
 msgid "This host's restate cannot restore packages yet; upgrade restate"
 msgstr ""
 "이 호스트의 restate는 아직 패키지를 복원할 수 없습니다. restate를 업그레이드"
 "하세요"
 
-#: backend/services/backup_package_restore.py:59
+#: backend/services/backup_package_restore.py:63
 msgid "Packages are restored onto the host itself: choose into place"
 msgstr "패키지는 호스트 자체에 복원됩니다. 원래 위치로 복원을 선택하세요"
 
-#: backend/services/backup_package_restore.py:65
+#: backend/services/backup_package_restore.py:69
 msgid ""
 "Confirm that packages will be installed, and packages the snapshot did not "
 "have removed, to match the snapshot"
@@ -5999,36 +5999,36 @@ msgstr "이중 인증 코드는 6자리입니다"
 msgid "The backup target has no storage host to run on"
 msgstr "백업 대상에 실행할 스토리지 호스트가 없습니다"
 
-#: backend/services/backup_key_release.py:89
-#: backend/services/backup_key_release.py:158
+#: backend/services/backup_key_release.py:90
+#: backend/services/backup_key_release.py:159
 msgid "No such backup run for this host"
 msgstr "이 호스트에 그런 백업 작업이 없습니다"
 
-#: backend/services/backup_key_release.py:95
+#: backend/services/backup_key_release.py:96
 msgid "This backup run does not need a key"
 msgstr "이 백업 작업에는 키가 필요하지 않습니다"
 
-#: backend/services/backup_key_release.py:97
+#: backend/services/backup_key_release.py:98
 msgid "This backup run has already ended"
 msgstr "이 백업 작업은 이미 끝났습니다"
 
-#: backend/services/backup_key_release.py:99
+#: backend/services/backup_key_release.py:100
 msgid "This backup run's key was already released"
 msgstr "이 백업 작업의 키는 이미 내주었습니다"
 
-#: backend/services/backup_key_release.py:106
+#: backend/services/backup_key_release.py:107
 msgid "This backup run is too old to release its key"
 msgstr "이 백업 작업은 너무 오래되어 키를 내줄 수 없습니다"
 
-#: backend/services/backup_key_release.py:124
+#: backend/services/backup_key_release.py:125
 msgid "This host's backups are not encrypted"
 msgstr "이 호스트의 백업은 암호화되어 있지 않습니다"
 
-#: backend/services/backup_key_release.py:156
+#: backend/services/backup_key_release.py:157
 msgid "Snapshot signing is not turned on"
 msgstr "스냅샷 서명이 켜져 있지 않습니다"
 
-#: backend/services/backup_key_release.py:161
+#: backend/services/backup_key_release.py:166
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "서명된 백업에는 Professional+ 백업 엔진이 필요합니다"
 
@@ -6253,6 +6253,33 @@ msgstr "vault에서 잘못된 응답"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "비밀 형식이 잘못되었습니다"
+
+#: backend/licensing/migration_compat.py:150
+msgid ""
+"This Professional+ engine is licensed but not loaded: the server started "
+"before the database was migrated. Restart the SysManage server to load it."
+msgstr ""
+"이 Professional+ 엔진은 라이선스가 있지만 로드되지 않았습니다. 데이터베이스"
+"가 마이그레이션되기 전에 서버가 시작되었습니다. 엔진을 로드하려면 SysManage "
+"서버를 다시 시작하십시오."
+
+#: backend/licensing/migration_compat.py:156
+msgid ""
+"This Professional+ engine is licensed but needs a newer SysManage server. "
+"Upgrade the SysManage server package, then restart it."
+msgstr ""
+"이 Professional+ 엔진은 라이선스가 있지만 더 새로운 SysManage 서버가 필요합니"
+"다. SysManage 서버 패키지를 업그레이드한 다음 서버를 다시 시작하십시오."
+
+#: backend/licensing/migration_compat.py:160
+msgid ""
+"This Professional+ engine is licensed but not loaded: the database is older "
+"than it needs. Run the database migrations, then restart the SysManage "
+"server."
+msgstr ""
+"이 Professional+ 엔진은 라이선스가 있지만 로드되지 않았습니다. 데이터베이스"
+"가 엔진에 필요한 것보다 오래되었습니다. 데이터베이스 마이그레이션을 실행한 다"
+"음 SysManage 서버를 다시 시작하십시오."
 
 #: backend/vulnerability/cve_sources.py:23
 msgid "Primary CVE data source from NIST (includes Apple/macOS CVEs)"

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-04 14:32-0500\n"
+"POT-Creation-Date: 2026-11-05 07:56-0500\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -175,7 +175,7 @@ msgstr "CA प्रमाणपत्र प्राप्त करने म
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:424
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:425
 #: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
@@ -1380,8 +1380,8 @@ msgstr "प्रक्रिया समाप्ति का अनुरो
 msgid "Invalid tag_id: %s"
 msgstr "अमान्य tag_id: %s"
 
-#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:66
-#: backend/api/backups_tag_policies.py:70 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:70
+#: backend/api/backups_tag_policies.py:74 backend/api/error_constants.py:136
 msgid "Tag not found"
 msgstr "टैग नहीं मिला"
 
@@ -2042,11 +2042,11 @@ msgstr "SAMLResponse या RelayState नहीं मिला।"
 msgid "Invalid or expired SAML RelayState."
 msgstr "वैध या समय सीमा पर होने वाला SAML RelayState।"
 
-#: backend/api/backups_escrow.py:57
+#: backend/api/backups_escrow.py:60
 msgid "Break-glass escrow needs the Professional+ backup engine"
 msgstr "आपातकालीन कुंजी एस्क्रो के लिए Professional+ बैकअप इंजन आवश्यक है"
 
-#: backend/api/backups_escrow.py:61
+#: backend/api/backups_escrow.py:65
 msgid "No backup target is set up yet"
 msgstr "अभी तक कोई बैकअप लक्ष्य सेट नहीं किया गया है"
 
@@ -2555,7 +2555,7 @@ msgstr "NVD API की कुंजी सफलतापूर्वक सा�
 msgid "Failed to clear NVD API key"
 msgstr "NVD API कुंजी खाली करने में विफल हो गया"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
+#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:189
 #: backend/api/backups_equip.py:160 backend/api/backups.py:570
 #: backend/services/cloud_backup_jobs.py:128
 msgid "Set up the backup target first"
@@ -2987,34 +2987,34 @@ msgstr "इससे पहले कोई प्रकाशित संस�
 msgid "No published version %s"
 msgstr "प्रकाशित संस्करण %s नहीं है"
 
-#: backend/api/backups_tag_policies.py:52
+#: backend/api/backups_tag_policies.py:55
 msgid "Backup policies by tag need the Professional+ backup engine"
 msgstr "टैग के अनुसार बैकअप नीतियों के लिए Professional+ बैकअप इंजन आवश्यक है"
 
-#: backend/api/backups_tag_policies.py:75
+#: backend/api/backups_tag_policies.py:79
 msgid "Tag policy not found"
 msgstr "टैग नीति नहीं मिली"
 
-#: backend/api/backups_tag_policies.py:91 backend/api/backups_retention.py:65
-#: backend/api/backups_retention.py:101
+#: backend/api/backups_tag_policies.py:95 backend/api/backups_retention.py:67
+#: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s 0 से %(max)d तक की पूर्ण संख्या होनी चाहिए"
 
-#: backend/api/backups_tag_policies.py:189
-#: backend/api/backups_tag_policies.py:223
+#: backend/api/backups_tag_policies.py:193
+#: backend/api/backups_tag_policies.py:227
 msgid "A tag policy has that name"
 msgstr "इस नाम की एक टैग नीति पहले से है"
 
-#: backend/api/backups_tag_policies.py:273
+#: backend/api/backups_tag_policies.py:277
 msgid "This host has no backup policy"
 msgstr "इस होस्ट की कोई बैकअप नीति नहीं है"
 
-#: backend/api/backups_tag_policies.py:274
+#: backend/api/backups_tag_policies.py:278
 msgid "This host already follows its tag policy"
 msgstr "यह होस्ट पहले से अपनी टैग नीति का पालन कर रहा है"
 
-#: backend/api/backups_tag_policies.py:276
+#: backend/api/backups_tag_policies.py:280
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr "इस होस्ट पर कोई टैग नीति लागू नहीं होती; बदलने के लिए कुछ नहीं है"
 
@@ -4207,7 +4207,7 @@ msgstr ""
 "हर पथ नियम अधिकतम 512 अक्षरों की एक पंक्ति है, जिसके आरंभ या अंत में स्पेस न हो और जो # "
 "से शुरू न हो"
 
-#: backend/api/backups.py:297 backend/api/backups_drift.py:93
+#: backend/api/backups.py:297 backend/api/backups_drift.py:97
 #: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "स्नैपशॉट का नाम मान्य नहीं है"
@@ -4289,7 +4289,7 @@ msgstr "स्नैपशॉट नहीं मिला"
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "यह स्नैपशॉट हस्ताक्षरित नहीं है; फिर भी पुनर्स्थापित करने के लिए पुष्टि करें"
 
-#: backend/api/backups.py:854 backend/api/backups_drift.py:101
+#: backend/api/backups.py:854 backend/api/backups_drift.py:105
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "इस होस्ट का restate अभी यह नहीं कर सकता; restate अपग्रेड करें"
@@ -4737,15 +4737,15 @@ msgstr "बच्चे मेंस इंजन नहीं है जो इ
 msgid "Permission denied: {} role required"
 msgstr "प्रवेश नहीं: {} भूमिका की आवश्यकता है"
 
-#: backend/api/backups_drift.py:54
+#: backend/api/backups_drift.py:57
 msgid "The drift timeline needs the Professional+ backup engine"
 msgstr "ड्रिफ्ट टाइमलाइन के लिए Professional+ बैकअप इंजन चाहिए"
 
-#: backend/api/backups_drift.py:73 backend/api/backups_browse.py:95
+#: backend/api/backups_drift.py:77 backend/api/backups_browse.py:95
 msgid "The path must be absolute"
 msgstr "पथ निरपेक्ष होना चाहिए"
 
-#: backend/api/backups_drift.py:105
+#: backend/api/backups_drift.py:109
 msgid "A comparison of snapshots is already running"
 msgstr "स्नैपशॉट की तुलना पहले से चल रही है"
 
@@ -4920,15 +4920,15 @@ msgstr "एक ओवर्राइड कारण आवश्यक है�
 msgid "Override duration must be positive."
 msgstr "ओवरराइड अवधि सकारात्मक होनी चाहिए।"
 
-#: backend/api/maintenance_windows.py:454
+#: backend/api/maintenance_windows.py:455
 msgid "Permission denied: Delete Queue Message role required"
 msgstr "अनुमति अस्वीकृत: Delete Queue Message भूमिका आवश्यक है"
 
-#: backend/api/maintenance_windows.py:471
+#: backend/api/maintenance_windows.py:472
 msgid "Message not found"
 msgstr "संदेश नहीं मिला"
 
-#: backend/api/maintenance_windows.py:479
+#: backend/api/maintenance_windows.py:480
 msgid "Only a command a maintenance window is holding can be canceled."
 msgstr "केवल वही कमांड रद्द की जा सकती है जिसे रखरखाव विंडो रोके हुए है।"
 
@@ -5427,15 +5427,15 @@ msgstr "सेविड एस्क्रिप्ट को हटाने �
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "कॉमर्शियल एंटीवायरस स्थिति प्राप्त करने में विफल: %s"
 
-#: backend/api/backups_retention.py:52
+#: backend/api/backups_retention.py:54
 msgid "Grandfather-father-son retention needs the Professional+ backup engine"
 msgstr "दादा-पिता-पुत्र (GFS) अवधारण के लिए Professional+ बैकअप इंजन चाहिए"
 
-#: backend/api/backups_retention.py:108
+#: backend/api/backups_retention.py:112
 msgid "Scheduled verification needs the Professional+ backup engine"
 msgstr "निर्धारित सत्यापन के लिए Professional+ बैकअप इंजन चाहिए"
 
-#: backend/api/backups_retention.py:131
+#: backend/api/backups_retention.py:136
 msgid ""
 "The storage host's restate cannot keep yearly snapshots yet: update restate "
 "there to 2.2.0.12 or later, then save the policy without years and set them "
@@ -5819,11 +5819,11 @@ msgstr "यह नाम एक क्यूरेटेड नियम से�
 msgid "None of these rules can run under ClamAV"
 msgstr "इनमें से कोई भी नियम ClamAV के अंतर्गत नहीं चल सकता"
 
-#: backend/services/cloud_backup_tick.py:247
+#: backend/services/cloud_backup_tick.py:302
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "iCloud साइन-इन जल्द समाप्त होगा: फिर से साइन इन करें"
 
-#: backend/services/cloud_backup_tick.py:249
+#: backend/services/cloud_backup_tick.py:304
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, "
@@ -5862,19 +5862,19 @@ msgstr "लक्ष्यों में कोई सक्रिय हो�
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "एक जॉब में अधिकतम 10000 होस्ट स्कैन किए जा सकते हैं"
 
-#: backend/services/backup_package_restore.py:45
+#: backend/services/backup_package_restore.py:48
 msgid "Restoring packages needs the Professional+ backup engine"
 msgstr "पैकेज पुनर्स्थापित करने के लिए Professional+ बैकअप इंजन चाहिए"
 
-#: backend/services/backup_package_restore.py:51
+#: backend/services/backup_package_restore.py:55
 msgid "This host's restate cannot restore packages yet; upgrade restate"
 msgstr "इस होस्ट का restate अभी पैकेज पुनर्स्थापित नहीं कर सकता; restate अपग्रेड करें"
 
-#: backend/services/backup_package_restore.py:59
+#: backend/services/backup_package_restore.py:63
 msgid "Packages are restored onto the host itself: choose into place"
 msgstr "पैकेज होस्ट पर ही पुनर्स्थापित होते हैं: अपनी जगह पर वापस रखना चुनें"
 
-#: backend/services/backup_package_restore.py:65
+#: backend/services/backup_package_restore.py:69
 msgid ""
 "Confirm that packages will be installed, and packages the snapshot did not "
 "have removed, to match the snapshot"
@@ -5980,36 +5980,36 @@ msgstr "टू-फ़ैक्टर कोड छह अंकों का ह
 msgid "The backup target has no storage host to run on"
 msgstr "बैकअप लक्ष्य के पास चलाने के लिए कोई स्टोरेज होस्ट नहीं है"
 
-#: backend/services/backup_key_release.py:89
-#: backend/services/backup_key_release.py:158
+#: backend/services/backup_key_release.py:90
+#: backend/services/backup_key_release.py:159
 msgid "No such backup run for this host"
 msgstr "इस होस्ट के लिए ऐसा कोई बैकअप कार्य नहीं है"
 
-#: backend/services/backup_key_release.py:95
+#: backend/services/backup_key_release.py:96
 msgid "This backup run does not need a key"
 msgstr "इस बैकअप कार्य को कुंजी की आवश्यकता नहीं है"
 
-#: backend/services/backup_key_release.py:97
+#: backend/services/backup_key_release.py:98
 msgid "This backup run has already ended"
 msgstr "यह बैकअप कार्य पहले ही समाप्त हो चुका है"
 
-#: backend/services/backup_key_release.py:99
+#: backend/services/backup_key_release.py:100
 msgid "This backup run's key was already released"
 msgstr "इस बैकअप कार्य की कुंजी पहले ही जारी की जा चुकी है"
 
-#: backend/services/backup_key_release.py:106
+#: backend/services/backup_key_release.py:107
 msgid "This backup run is too old to release its key"
 msgstr "यह बैकअप कार्य अपनी कुंजी जारी करने के लिए बहुत पुराना है"
 
-#: backend/services/backup_key_release.py:124
+#: backend/services/backup_key_release.py:125
 msgid "This host's backups are not encrypted"
 msgstr "इस होस्ट के बैकअप एन्क्रिप्टेड नहीं हैं"
 
-#: backend/services/backup_key_release.py:156
+#: backend/services/backup_key_release.py:157
 msgid "Snapshot signing is not turned on"
 msgstr "स्नैपशॉट हस्ताक्षर चालू नहीं है"
 
-#: backend/services/backup_key_release.py:161
+#: backend/services/backup_key_release.py:166
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "हस्ताक्षरित बैकअप के लिए Professional+ बैकअप इंजन चाहिए"
 
@@ -6232,6 +6232,31 @@ msgstr "वॉल्ट से अवैध प्रतिक्रिया"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "गुप्त प्रारूप गलत है"
+
+#: backend/licensing/migration_compat.py:150
+msgid ""
+"This Professional+ engine is licensed but not loaded: the server started "
+"before the database was migrated. Restart the SysManage server to load it."
+msgstr ""
+"यह Professional+ इंजन लाइसेंस प्राप्त है, लेकिन लोड नहीं हुआ है: डेटाबेस माइग्रेट होने से "
+"पहले सर्वर शुरू हो गया था। इसे लोड करने के लिए SysManage सर्वर को पुनः आरंभ करें।"
+
+#: backend/licensing/migration_compat.py:156
+msgid ""
+"This Professional+ engine is licensed but needs a newer SysManage server. "
+"Upgrade the SysManage server package, then restart it."
+msgstr ""
+"यह Professional+ इंजन लाइसेंस प्राप्त है, लेकिन इसे SysManage सर्वर का नया संस्करण "
+"चाहिए। SysManage सर्वर पैकेज को अपग्रेड करें, फिर सर्वर को पुनः आरंभ करें।"
+
+#: backend/licensing/migration_compat.py:160
+msgid ""
+"This Professional+ engine is licensed but not loaded: the database is older "
+"than it needs. Run the database migrations, then restart the SysManage "
+"server."
+msgstr ""
+"यह Professional+ इंजन लाइसेंस प्राप्त है, लेकिन लोड नहीं हुआ है: डेटाबेस उसकी आवश्यकता से "
+"पुराना है। डेटाबेस माइग्रेशन चलाएँ, फिर SysManage सर्वर को पुनः आरंभ करें।"
 
 #: backend/vulnerability/cve_sources.py:23
 msgid "Primary CVE data source from NIST (includes Apple/macOS CVEs)"

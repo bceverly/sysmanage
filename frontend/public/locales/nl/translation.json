@@ -2293,7 +2293,9 @@
     "pendingItemNoKept": "{{version}} wacht",
     "pendingTitle": "Er wordt gewacht op een nieuwere versie van de SysManage server voor de update van deze Pro+ engines",
     "serverTooOldIntro": "Deze Pro+ engines zijn gebouwd voor een nieuwere versie van de SysManage server en kunnen niet laden. Het uitvoeren van database-migraties zal niet helpen: upgrade eerst het pakket van de SysManage server, en start dan sysmanage opnieuw.",
-    "serverTooOldTitle": "De Pro+ engine heeft een nieuwere versie van de SysManage server nodig"
+    "serverTooOldTitle": "De Pro+ engine heeft een nieuwere versie van de SysManage server nodig",
+    "restartTitle": "Start SysManage opnieuw om Pro+-engines te laden",
+    "restartIntro": "De database is gemigreerd, maar deze Pro+-engines zijn bij het starten van de server geweigerd en blijven uit totdat de server opnieuw wordt gestart. Start sysmanage opnieuw om ze te laden."
   },
   "mirror": {
     "action": {

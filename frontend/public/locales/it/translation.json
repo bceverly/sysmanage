@@ -2293,7 +2293,9 @@
     "pendingItemNoKept": "{{version}} sta aspettando",
     "pendingTitle": "L'aggiornamento del motore Pro+ sta aspettando un server SysManage più recente",
     "serverTooOldIntro": "Questi motori Pro+ sono stati costruiti per un server SysManage più recente e non possono caricarsi. L'esecuzione delle migrazioni del database non aiuterà: aggiornare il pacchetto del server SysManage, quindi riavviare sysmanage.",
-    "serverTooOldTitle": "Il motore Pro+ richiede un server SysManage più recente"
+    "serverTooOldTitle": "Il motore Pro+ richiede un server SysManage più recente",
+    "restartTitle": "Riavviare SysManage per caricare i motori Pro+",
+    "restartIntro": "Il database è stato migrato, ma questi motori Pro+ sono stati rifiutati all'avvio del server e restano disattivati fino al riavvio. Riavviare sysmanage per caricarli."
   },
   "mirror": {
     "action": {

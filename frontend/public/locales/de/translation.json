@@ -2293,7 +2293,9 @@
     "pendingItemNoKept": "{{version}} wartet",
     "pendingTitle": "Warte auf einen neuen SysManage-Server für das Update der Pro+ Engine",
     "serverTooOldIntro": "Diese Pro+ Engines wurden für einen neueren SysManage-Server gebaut und können sich nicht laden. Das Ausführen von Datenbankmigrationen hilft nicht: Aktualisieren Sie zunächst das Paket des SysManage-Servers, dann starten Sie sysmanage neu.",
-    "serverTooOldTitle": "Die Pro+ Engine benötigt einen neueren SysManage-Server"
+    "serverTooOldTitle": "Die Pro+ Engine benötigt einen neueren SysManage-Server",
+    "restartTitle": "SysManage neu starten, um Pro+-Engines zu laden",
+    "restartIntro": "Die Datenbank wurde migriert, aber diese Pro+-Engines wurden beim Serverstart abgelehnt und bleiben bis zu einem Neustart deaktiviert. Starten Sie sysmanage neu, um sie zu laden."
   },
   "mirror": {
     "action": {

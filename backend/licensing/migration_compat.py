@@ -17,6 +17,15 @@ migration file is not here at all; no migration run can reach it.  Such an
 entry is recorded with ``kind=KIND_SERVER_TOO_OLD`` so the UI says "needs a
 newer SysManage server" instead (see ``backend.licensing.engine_compat``).
 
+A refused engine stays refused until the server restarts, even once the
+migrations have run.  ``refresh_incompatibilities`` re-reads the database
+so such an entry turns into ``KIND_RESTART_NEEDED`` and the banner says
+"restart" instead of still saying "migrate" (2026-11-04: prod was migrated
+after a restart, the backup engine stayed unloaded for a day, and every
+snapshot signature that night failed with "needs the Professional+ backup
+engine").  ``missing_engine_detail`` gives the API the same answer, for a
+feature refused because its licensed engine did not load.
+
 The check is a fallback: the normal path is for the operator to run
 migrations as part of their upgrade procedure.  This catches the case where
 a Pro+ module is downloaded after an OSS upgrade but before migrations have
@@ -24,6 +33,7 @@ been applied -- without it, the module would load against a stale schema
 and fail in subtle ways (missing columns, missing tables, etc.).
 """
 
+import os
 from dataclasses import dataclass
 from threading import RLock
 from typing import Any, Dict, List, Optional, Set
@@ -31,6 +41,7 @@ from typing import Any, Dict, List, Optional, Set
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from backend.i18n import _
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.licensing.migration_compat")
@@ -40,6 +51,9 @@ logger = get_logger("backend.licensing.migration_compat")
 KIND_MIGRATION_PENDING = "migration_pending"
 # ... or it is not in this server's scripts at all (the engine is too new).
 KIND_SERVER_TOO_OLD = "server_too_old"
+# ... or it was pending when the server started and has been applied since:
+# the engine is still refused until the server restarts.
+KIND_RESTART_NEEDED = "restart_needed"
 
 
 @dataclass
@@ -84,6 +98,69 @@ def get_incompatibilities() -> List[ModuleIncompatibility]:
 def clear_incompatibility(module_code: str) -> None:
     """Remove a module from the incompatibility registry (e.g. after a successful re-load)."""
     _registry.clear(module_code)
+
+
+def default_alembic_cfg_path() -> str:
+    """This server's alembic.ini (the module loader uses the same file)."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    return os.path.normpath(os.path.join(here, "..", "..", "alembic.ini"))
+
+
+def refresh_incompatibilities(
+    session: Session, alembic_cfg_path: Optional[str] = None
+) -> List[ModuleIncompatibility]:
+    """The registry, with each pending-migration entry checked again.
+
+    An engine refused at startup is not loaded by running the migrations
+    afterward; only a restart loads it.  Once the database has reached the
+    revision it needs, its entry says so (``KIND_RESTART_NEEDED``)."""
+    entries = _registry.all()
+    if not any(e.kind == KIND_MIGRATION_PENDING for e in entries):
+        return entries
+    cfg = alembic_cfg_path or default_alembic_cfg_path()
+    current = get_current_oss_revision(session)
+    for entry in entries:
+        if entry.kind != KIND_MIGRATION_PENDING:
+            continue
+        entry.current_revision = current
+        if is_at_or_above(current, entry.required_revision, cfg):
+            entry.kind = KIND_RESTART_NEEDED
+            logger.error(
+                "Pro+ module %s is still not loaded: the database is now at %s, "
+                "which it accepts, but it was refused when the server started. "
+                "Restart the SysManage server to load it.",
+                entry.module_code,
+                current,
+            )
+        _registry.record(entry)
+    return _registry.all()
+
+
+def missing_engine_detail(module_code: str, default: str) -> str:
+    """Why a feature of a licensed engine is unavailable, for an API error.
+
+    ``default`` (the feature needs the Professional+ engine) is right when
+    the engine is not licensed.  When it is licensed but was refused at
+    load, the operator needs to migrate or restart, and it says so instead."""
+    entry = next((e for e in _registry.all() if e.module_code == module_code), None)
+    if entry is None:
+        return default
+    if entry.kind == KIND_RESTART_NEEDED:
+        return _(
+            "This Professional+ engine is licensed but not loaded: the server "
+            "started before the database was migrated. Restart the SysManage "
+            "server to load it."
+        )
+    if entry.kind == KIND_SERVER_TOO_OLD:
+        return _(
+            "This Professional+ engine is licensed but needs a newer SysManage "
+            "server. Upgrade the SysManage server package, then restart it."
+        )
+    return _(
+        "This Professional+ engine is licensed but not loaded: the database is "
+        "older than it needs. Run the database migrations, then restart the "
+        "SysManage server."
+    )
 
 
 def get_current_oss_revision(session: Session) -> Optional[str]:
@@ -235,7 +312,9 @@ def check_module_compatibility(
         return incompat
     logger.error(
         "Pro+ module %s requires OSS alembic revision %s (%s); "
-        "current is %s. Run 'alembic upgrade head' to apply pending migrations.",
+        "current is %s. Run 'alembic upgrade head' to apply pending migrations, "
+        "then restart the SysManage server: a refused module is only loaded at "
+        "startup.",
         module_code,
         required,
         incompat.required_revision_human or "no human description",

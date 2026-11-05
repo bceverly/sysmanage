@@ -2293,7 +2293,9 @@
     "pendingItemNoKept": "{{version}} 正在等待",
     "pendingTitle": "Pro+ 引擎更新正在等待较新版本的 SysManage 服务器",
     "serverTooOldIntro": "这些 Pro+ 引擎是为较新版本的 SysManage 服务器构建的，无法加载。运行数据库迁移无济于事：请升级 SysManage 服务器软件包，然后重启 sysmanage。",
-    "serverTooOldTitle": "Pro+ 引擎需要较新版本的 SysManage 服务器"
+    "serverTooOldTitle": "Pro+ 引擎需要较新版本的 SysManage 服务器",
+    "restartTitle": "重新启动 SysManage 以加载 Pro+ 引擎",
+    "restartIntro": "数据库已迁移，但这些 Pro+ 引擎在服务器启动时被拒绝，在服务器重新启动之前将保持关闭。请重新启动 sysmanage 以加载它们。"
   },
   "mirror": {
     "action": {

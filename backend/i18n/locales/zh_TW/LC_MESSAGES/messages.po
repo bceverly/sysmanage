@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-04 14:32-0500\n"
+"POT-Creation-Date: 2026-11-05 07:56-0500\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -175,7 +175,7 @@ msgstr "取得 CA 憑證失敗：%s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:424
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:425
 #: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
@@ -1367,8 +1367,8 @@ msgstr "已要求終止程序。清單將很快更新。"
 msgid "Invalid tag_id: %s"
 msgstr "無效的 tag_id: %s"
 
-#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:66
-#: backend/api/backups_tag_policies.py:70 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:70
+#: backend/api/backups_tag_policies.py:74 backend/api/error_constants.py:136
 msgid "Tag not found"
 msgstr "找不到標籤"
 
@@ -2012,11 +2012,11 @@ msgstr "缺少 SAMLResponse 或 RelayState。"
 msgid "Invalid or expired SAML RelayState."
 msgstr "無效或已過期的 SAML RelayState。"
 
-#: backend/api/backups_escrow.py:57
+#: backend/api/backups_escrow.py:60
 msgid "Break-glass escrow needs the Professional+ backup engine"
 msgstr "緊急金鑰託管需要 Professional+ 備份引擎"
 
-#: backend/api/backups_escrow.py:61
+#: backend/api/backups_escrow.py:65
 msgid "No backup target is set up yet"
 msgstr "尚未設定備份目標"
 
@@ -2514,7 +2514,7 @@ msgstr "NVD API密鑰已成功清除"
 msgid "Failed to clear NVD API key"
 msgstr "無法清除 NVD API 金鑰"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
+#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:189
 #: backend/api/backups_equip.py:160 backend/api/backups.py:570
 #: backend/services/cloud_backup_jobs.py:128
 msgid "Set up the backup target first"
@@ -2941,34 +2941,34 @@ msgstr "沒有較早的已發布版本進行比較"
 msgid "No published version %s"
 msgstr "未發布版本 %s"
 
-#: backend/api/backups_tag_policies.py:52
+#: backend/api/backups_tag_policies.py:55
 msgid "Backup policies by tag need the Professional+ backup engine"
 msgstr "依標籤的備份原則需要 Professional+ 備份引擎"
 
-#: backend/api/backups_tag_policies.py:75
+#: backend/api/backups_tag_policies.py:79
 msgid "Tag policy not found"
 msgstr "找不到標籤原則"
 
-#: backend/api/backups_tag_policies.py:91 backend/api/backups_retention.py:65
-#: backend/api/backups_retention.py:101
+#: backend/api/backups_tag_policies.py:95 backend/api/backups_retention.py:67
+#: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s 必須是 0 到 %(max)d 之間的整數"
 
-#: backend/api/backups_tag_policies.py:189
-#: backend/api/backups_tag_policies.py:223
+#: backend/api/backups_tag_policies.py:193
+#: backend/api/backups_tag_policies.py:227
 msgid "A tag policy has that name"
 msgstr "已有同名的標籤原則"
 
-#: backend/api/backups_tag_policies.py:273
+#: backend/api/backups_tag_policies.py:277
 msgid "This host has no backup policy"
 msgstr "此主機沒有備份原則"
 
-#: backend/api/backups_tag_policies.py:274
+#: backend/api/backups_tag_policies.py:278
 msgid "This host already follows its tag policy"
 msgstr "此主機已在使用其標籤原則"
 
-#: backend/api/backups_tag_policies.py:276
+#: backend/api/backups_tag_policies.py:280
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr "沒有適用於此主機的標籤原則；沒有可切換的對象"
 
@@ -4130,7 +4130,7 @@ msgstr ""
 "每個路徑規則是一行，長度最多為 512 字元，且不能有開頭或結尾的空白字元或開頭"
 "的 #"
 
-#: backend/api/backups.py:297 backend/api/backups_drift.py:93
+#: backend/api/backups.py:297 backend/api/backups_drift.py:97
 #: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "快照名稱無效"
@@ -4212,7 +4212,7 @@ msgstr "找不到快照"
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "此快照未簽署；請確認以仍然還原它"
 
-#: backend/api/backups.py:854 backend/api/backups_drift.py:101
+#: backend/api/backups.py:854 backend/api/backups_drift.py:105
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "此主機的 restate 尚不支援此操作；請升級 restate"
@@ -4645,15 +4645,15 @@ msgstr "子主機引擎無法處理此請求。"
 msgid "Permission denied: {} role required"
 msgstr "權限 denied: {} 角色所需"
 
-#: backend/api/backups_drift.py:54
+#: backend/api/backups_drift.py:57
 msgid "The drift timeline needs the Professional+ backup engine"
 msgstr "漂移時間軸需要 Professional+ 備份引擎"
 
-#: backend/api/backups_drift.py:73 backend/api/backups_browse.py:95
+#: backend/api/backups_drift.py:77 backend/api/backups_browse.py:95
 msgid "The path must be absolute"
 msgstr "路徑必須是絕對路徑"
 
-#: backend/api/backups_drift.py:105
+#: backend/api/backups_drift.py:109
 msgid "A comparison of snapshots is already running"
 msgstr "快照比較已在進行中"
 
@@ -4826,15 +4826,15 @@ msgstr "需要提供覆蓋理由。"
 msgid "Override duration must be positive."
 msgstr "覆蓋持續時間必須為正數。"
 
-#: backend/api/maintenance_windows.py:454
+#: backend/api/maintenance_windows.py:455
 msgid "Permission denied: Delete Queue Message role required"
 msgstr "權限遭拒：需要 Delete Queue Message 角色"
 
-#: backend/api/maintenance_windows.py:471
+#: backend/api/maintenance_windows.py:472
 msgid "Message not found"
 msgstr "找不到訊息"
 
-#: backend/api/maintenance_windows.py:479
+#: backend/api/maintenance_windows.py:480
 msgid "Only a command a maintenance window is holding can be canceled."
 msgstr "只能取消被維護時段暫緩的命令。"
 
@@ -5323,15 +5323,15 @@ msgstr "無法刪除儲存的腳本"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "無法取得商業防毒狀態：%s"
 
-#: backend/api/backups_retention.py:52
+#: backend/api/backups_retention.py:54
 msgid "Grandfather-father-son retention needs the Professional+ backup engine"
 msgstr "祖父-父-子（GFS）保留策略需要 Professional+ 備份引擎"
 
-#: backend/api/backups_retention.py:108
+#: backend/api/backups_retention.py:112
 msgid "Scheduled verification needs the Professional+ backup engine"
 msgstr "排程驗證需要 Professional+ 備份引擎"
 
-#: backend/api/backups_retention.py:131
+#: backend/api/backups_retention.py:136
 msgid ""
 "The storage host's restate cannot keep yearly snapshots yet: update restate "
 "there to 2.2.0.12 or later, then save the policy without years and set them "
@@ -5703,11 +5703,11 @@ msgstr "該名稱屬於精選規則集"
 msgid "None of these rules can run under ClamAV"
 msgstr "這些規則都無法在 ClamAV 下執行"
 
-#: backend/services/cloud_backup_tick.py:247
+#: backend/services/cloud_backup_tick.py:302
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "iCloud 登入即將到期：請重新登入"
 
-#: backend/services/cloud_backup_tick.py:249
+#: backend/services/cloud_backup_tick.py:304
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, "
@@ -5746,19 +5746,19 @@ msgstr "目標中沒有任何使用中的主機"
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "一個工作最多可掃描 10000 台主機"
 
-#: backend/services/backup_package_restore.py:45
+#: backend/services/backup_package_restore.py:48
 msgid "Restoring packages needs the Professional+ backup engine"
 msgstr "還原套件需要 Professional+ 備份引擎"
 
-#: backend/services/backup_package_restore.py:51
+#: backend/services/backup_package_restore.py:55
 msgid "This host's restate cannot restore packages yet; upgrade restate"
 msgstr "此主機上的 restate 還不能還原套件；請升級 restate"
 
-#: backend/services/backup_package_restore.py:59
+#: backend/services/backup_package_restore.py:63
 msgid "Packages are restored onto the host itself: choose into place"
 msgstr "套件會還原到主機本身：請選擇還原到原位"
 
-#: backend/services/backup_package_restore.py:65
+#: backend/services/backup_package_restore.py:69
 msgid ""
 "Confirm that packages will be installed, and packages the snapshot did not "
 "have removed, to match the snapshot"
@@ -5862,36 +5862,36 @@ msgstr "雙重認證碼為六位數字"
 msgid "The backup target has no storage host to run on"
 msgstr "備份目標沒有可執行的儲存主機"
 
-#: backend/services/backup_key_release.py:89
-#: backend/services/backup_key_release.py:158
+#: backend/services/backup_key_release.py:90
+#: backend/services/backup_key_release.py:159
 msgid "No such backup run for this host"
 msgstr "此主機沒有這樣的備份工作"
 
-#: backend/services/backup_key_release.py:95
+#: backend/services/backup_key_release.py:96
 msgid "This backup run does not need a key"
 msgstr "此備份工作不需要金鑰"
 
-#: backend/services/backup_key_release.py:97
+#: backend/services/backup_key_release.py:98
 msgid "This backup run has already ended"
 msgstr "此備份工作已結束"
 
-#: backend/services/backup_key_release.py:99
+#: backend/services/backup_key_release.py:100
 msgid "This backup run's key was already released"
 msgstr "此備份工作的金鑰已發放"
 
-#: backend/services/backup_key_release.py:106
+#: backend/services/backup_key_release.py:107
 msgid "This backup run is too old to release its key"
 msgstr "此備份工作太舊，無法發放其金鑰"
 
-#: backend/services/backup_key_release.py:124
+#: backend/services/backup_key_release.py:125
 msgid "This host's backups are not encrypted"
 msgstr "此主機的備份未加密"
 
-#: backend/services/backup_key_release.py:156
+#: backend/services/backup_key_release.py:157
 msgid "Snapshot signing is not turned on"
 msgstr "快照簽章未啟用"
 
-#: backend/services/backup_key_release.py:161
+#: backend/services/backup_key_release.py:166
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "簽章備份需要 Professional+ 備份引擎"
 
@@ -6110,6 +6110,31 @@ msgstr "從 vault 收到的回應無效"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "密鑰格式無效"
+
+#: backend/licensing/migration_compat.py:150
+msgid ""
+"This Professional+ engine is licensed but not loaded: the server started "
+"before the database was migrated. Restart the SysManage server to load it."
+msgstr ""
+"此 Professional+ 引擎已獲授權但尚未載入：伺服器在資料庫移轉之前就已啟動。請重"
+"新啟動 SysManage 伺服器以載入它。"
+
+#: backend/licensing/migration_compat.py:156
+msgid ""
+"This Professional+ engine is licensed but needs a newer SysManage server. "
+"Upgrade the SysManage server package, then restart it."
+msgstr ""
+"此 Professional+ 引擎已獲授權，但需要較新版本的 SysManage 伺服器。請升級 "
+"SysManage 伺服器套件，然後重新啟動伺服器。"
+
+#: backend/licensing/migration_compat.py:160
+msgid ""
+"This Professional+ engine is licensed but not loaded: the database is older "
+"than it needs. Run the database migrations, then restart the SysManage "
+"server."
+msgstr ""
+"此 Professional+ 引擎已獲授權但尚未載入：資料庫版本低於其需求。請執行資料庫移"
+"轉，然後重新啟動 SysManage 伺服器。"
 
 #: backend/vulnerability/cve_sources.py:23
 msgid "Primary CVE data source from NIST (includes Apple/macOS CVEs)"

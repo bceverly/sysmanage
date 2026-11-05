@@ -169,6 +169,7 @@ class ModuleCompatibilityEntry(BaseModel):
     current_revision: Optional[str] = None
     # "migration_pending": run the migrations.  "server_too_old": the required
     # revision is not one this server ships; only a newer server helps.
+    # "restart_needed": migrated since the server started; restart it.
     kind: str = "migration_pending"
 
 
@@ -198,7 +199,8 @@ async def get_module_compatibility(
 
     The UI displays a banner when this list is non-empty, instructing the
     operator to run ``alembic upgrade head`` -- or, for ``kind ==
-    "server_too_old"``, to upgrade the SysManage server.  This is a fallback
+    "server_too_old"``, to upgrade the SysManage server, and for ``kind ==
+    "restart_needed"`` (migrated since the server started), to restart it.  This is a fallback
     safety net -- the normal path is for migrations to be run as part of the
     upgrade procedure.  ``pending_updates`` lists engine updates that were
     not installed because they need a newer server; the installed version
@@ -206,9 +208,12 @@ async def get_module_compatibility(
     """
     # pylint: disable=import-outside-toplevel
     from backend.licensing.engine_compat import get_pending_updates
-    from backend.licensing.migration_compat import get_incompatibilities
+    from backend.licensing.migration_compat import refresh_incompatibilities
 
     del current_user  # auth-only check; no per-user filtering
+
+    with sessionmaker(bind=db_module.get_engine())() as session:
+        incompatibilities = refresh_incompatibilities(session)
 
     entries = [
         ModuleCompatibilityEntry(
@@ -218,7 +223,7 @@ async def get_module_compatibility(
             current_revision=item.current_revision,
             kind=item.kind,
         )
-        for item in get_incompatibilities()
+        for item in incompatibilities
     ]
     pending = [
         PendingEngineUpdateEntry(

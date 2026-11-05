@@ -21,6 +21,7 @@ from typing import Any, Dict, Optional
 from fastapi import HTTPException
 
 from backend.i18n import _
+from backend.licensing.migration_compat import missing_engine_detail
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
@@ -42,7 +43,10 @@ def check(body: Any, policy: models.BackupPolicy) -> None:
     if engine() is None:
         raise HTTPException(
             status_code=402,
-            detail=_("Restoring packages needs the Professional+ backup engine"),
+            detail=missing_engine_detail(
+                "backup_engine",
+                _("Restoring packages needs the Professional+ backup engine"),
+            ),
         )
     if "packages" not in jobs.abilities(policy):
         raise HTTPException(

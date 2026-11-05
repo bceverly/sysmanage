@@ -2293,7 +2293,9 @@
     "pendingItemNoKept": "{{version}}은 기다리고 있습니다.",
     "pendingTitle": "Pro+ 엔진 업데이트는 더 새로운 SysManage 서버를 기다리고 있습니다.",
     "serverTooOldIntro": "이 Pro+ 엔진들은 더 새로운 SysManage 서버를 위해 만들어졌고, 로드할 수 없습니다. 데이터베이스 마이그레이션을 실행해도 도움이 되지 않습니다: SysManage 서버 패키지를 업그레이드한 후 sysmanage를 재시작하세요.",
-    "serverTooOldTitle": "Pro+ 엔진은 더 새로운 SysManage 서버를 필요로 합니다."
+    "serverTooOldTitle": "Pro+ 엔진은 더 새로운 SysManage 서버를 필요로 합니다.",
+    "restartTitle": "Pro+ 엔진을 로드하려면 SysManage를 다시 시작하십시오",
+    "restartIntro": "데이터베이스는 마이그레이션되었지만 이 Pro+ 엔진은 서버 시작 시 거부되어 다시 시작할 때까지 꺼진 상태로 남아 있습니다. 엔진을 로드하려면 sysmanage를 다시 시작하십시오."
   },
   "mirror": {
     "action": {

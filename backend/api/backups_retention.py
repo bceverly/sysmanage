@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
+from backend.licensing.migration_compat import missing_engine_detail
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
@@ -48,8 +49,9 @@ def _engine():
 def _needs_engine() -> HTTPException:
     return HTTPException(
         status_code=402,
-        detail=_(
-            "Grandfather-father-son retention needs the Professional+ backup engine"
+        detail=missing_engine_detail(
+            "backup_engine",
+            _("Grandfather-father-son retention needs the Professional+ backup engine"),
         ),
     )
 
@@ -105,7 +107,10 @@ def check_verify_change(policy: Optional[models.BackupPolicy], body: Any) -> int
     if days != stored and _engine() is None:
         raise HTTPException(
             status_code=402,
-            detail=_("Scheduled verification needs the Professional+ backup engine"),
+            detail=missing_engine_detail(
+                "backup_engine",
+                _("Scheduled verification needs the Professional+ backup engine"),
+            ),
         )
     return days
 
