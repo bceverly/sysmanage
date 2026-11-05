@@ -88,6 +88,7 @@ const PATH_CATEGORY: Record<string, CategoryId> = {
   '/host-metrics': 'insights',
   '/asset-discovery': 'insights',
   '/reports': 'insights',
+  '/reports/audit-log': 'security',
   '/audit-analytics': 'insights',
   '/secrets-analytics': 'insights',
   '/container-analytics': 'insights',
@@ -109,6 +110,7 @@ const PATH_PERMISSION = new Map<string, string>([
   ['/time-sync', 'View Host Details'],
   ['/hardware-health', 'View Host Details'],
   ['/backups', 'View Host Details'],
+  ['/reports/audit-log', 'View Audit Log'],
 ]);
 
 interface NavLeaf {
@@ -145,7 +147,7 @@ export function buildNavCategories(
   } = opts;
 
   // Paths hardcoded here -- plugins must not duplicate these.
-  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/config-jobs', '/query-packs', '/advisor', '/asset-discovery', '/malware', '/time-sync', '/hardware-health', '/backups', '/reports', '/airgap/repositories', '/airgap/collections']);
+  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/config-jobs', '/query-packs', '/advisor', '/asset-discovery', '/malware', '/time-sync', '/hardware-health', '/backups', '/reports', '/reports/audit-log', '/airgap/repositories', '/airgap/collections']);
   const hardcodedLabels = new Set([
     t('nav.secrets'),
     t('nav.scripts'),
@@ -225,6 +227,10 @@ export function buildNavCategories(
     '/reports',
     t('nav.reports'),
   );
+  // The audit log is Community: without this the only way in was the Reports
+  // page, which needs the Professional reporting engine, so a Community
+  // install had no menu entry for its own audit log (2026-11-05).
+  pushIf(true, '/reports/audit-log', t('reports.auditLog', 'Audit Log'));
   pushIf(
     serverRole === 'repository' &&
       activeLicenseModules.includes('airgap_repository_engine'),

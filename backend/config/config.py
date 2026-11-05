@@ -18,7 +18,13 @@ from backend.config.config_defaults import apply_defaults
 
 # Read/validate the configuration file
 # Check environment variable first (for snap/containers), then system config
-CONFIG_PATH = os.environ.get("SYSMANAGE_CONFIG_PATH")
+# Both names: the service units, the BSD rc scripts and sysmanage-migrate
+# export SYSMANAGE_CONFIG, but only SYSMANAGE_CONFIG_PATH was read, so every
+# config they pointed at was ignored instead of /etc/sysmanage.yaml
+# (found 2026-11-05).
+CONFIG_PATH = os.environ.get("SYSMANAGE_CONFIG_PATH") or os.environ.get(
+    "SYSMANAGE_CONFIG"
+)
 if not CONFIG_PATH:
     # Check for system config first (security), then fall back to development config
     if os.name == "nt":  # Windows

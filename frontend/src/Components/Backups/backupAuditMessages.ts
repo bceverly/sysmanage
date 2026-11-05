@@ -22,7 +22,7 @@ const hostNames = (target: BackupTarget, hosts: BackupHost[], code: string): str
 
 export const auditText = (t: TFunction, target: BackupTarget, hosts: BackupHost[], code: string): string => {
     const entry = finding(target, code);
-    const params = (entry?.params ?? {}) as Record<string, unknown>;
+    const params = entry?.params ?? {};
     const who = hostNames(target, hosts, code);
     switch (code) {
         case 'audit_nfs_server':

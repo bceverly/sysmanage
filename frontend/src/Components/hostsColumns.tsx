@@ -62,7 +62,14 @@ export function buildHostColumns({
             }
         },
         buildAssetTagColumn(t),
-        { field: 'platform', headerName: t('hosts.platform'), width: 120 },
+        {
+            field: 'platform',
+            headerName: t('hosts.platform'),
+            width: 120,
+            // macOS agents report Python's platform.system(), "Darwin"; show
+            // the name people know.  The stored value (and filtering) stays.
+            valueFormatter: (value: string | null | undefined) => (value === 'Darwin' ? 'macOS' : value),
+        },
         { field: 'ipv4', headerName: t('hosts.ipv4'), width: 150 },
         { field: 'ipv6', headerName: t('hosts.ipv6'), width: 200 },
         {

@@ -39,8 +39,8 @@ import RestoreNotes from './RestoreNotes';
 import PackageRestoreSummary from './PackageRestoreSummary';
 import type { BackupRun, BackupSnapshot } from '../../Services/backups';
 import { apiDetail, formatBytes, formatTime, runStatusLabel } from './backupLabels';
+import { FINISHED } from './pollRun';
 
-const FINISHED = new Set(['ok', 'different', 'incomplete', 'failed', 'untrusted', 'busy']);
 const PLAN_SHOWN = 50;
 
 interface RestoreResult {

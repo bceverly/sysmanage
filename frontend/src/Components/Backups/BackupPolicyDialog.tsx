@@ -196,7 +196,7 @@ const BackupPolicyDialog: React.FC<{
                         // The hooks restate found on this host (2.1+), else
                         // the built-in ones, and any name typed in.
                         <Autocomplete multiple freeSolo options={offered}
-                            value={hooks} onChange={(_e, value) => { setHooks(value as string[]); setTyped(''); }}
+                            value={hooks} onChange={(_e, value) => { setHooks(value); setTyped(''); }}
                             inputValue={typed} onInputChange={(_e, value) => setTyped(value)}
                             renderInput={params => (
                                 <TextField {...params} label={t('backups.policy.quiesceWithPick', 'Services to pause')}

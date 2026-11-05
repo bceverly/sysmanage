@@ -3119,18 +3119,11 @@ installer-freebsd: build
 	$(MAKE) sbom; \
 	echo "✓ SBOM files generated"; \
 	echo ""; \
-	echo "Copying and updating manifest..."; \
-	MANIFEST_FILE="$$BUILD_DIR/+MANIFEST"; \
-	cp "$$CURRENT_DIR/installer/freebsd/+MANIFEST" "$$MANIFEST_FILE"; \
-	sed -i.bak "s/^version:.*/version: \"$$VERSION\"/" "$$MANIFEST_FILE"; \
-	rm -f "$$MANIFEST_FILE.bak"; \
-	echo "✓ Manifest copied and updated to version $$VERSION"; \
-	echo ""; \
 	echo "Creating package directory structure..."; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/lib/sysmanage"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/sysmanage"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/rc.d"; \
-	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/nginx/conf.d"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/nginx"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/openbao"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/share/doc/sysmanage/sbom"; \
 	echo "✓ Package directories created"; \
@@ -3151,7 +3144,11 @@ installer-freebsd: build
 	echo ""; \
 	echo "Copying configuration files..."; \
 	cp installer/freebsd/sysmanage.yaml.example "$$PACKAGE_ROOT/usr/local/etc/sysmanage/"; \
-	cp installer/freebsd/sysmanage-nginx.conf "$$PACKAGE_ROOT/usr/local/etc/nginx/conf.d/"; \
+	sed -e 's|%%PREFIX%%/www/sysmanage|/usr/local/lib/sysmanage/frontend|' -e 's|%%PREFIX%%|/usr/local|g' \
+		installer/freebsd/sysmanage-nginx.conf > "$$PACKAGE_ROOT/usr/local/etc/nginx/sysmanage-nginx.conf"; \
+	if grep -q '%%' "$$PACKAGE_ROOT/usr/local/etc/nginx/sysmanage-nginx.conf"; then \
+		echo "ERROR: port tokens left in the packaged nginx config"; exit 1; \
+	fi; \
 	cp installer/freebsd/sysmanage.rc "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage"; \
 	chmod +x "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage"; \
 	cp installer/freebsd/openbao.rc "$$PACKAGE_ROOT/usr/local/etc/rc.d/openbao"; \
@@ -3162,6 +3159,7 @@ installer-freebsd: build
 	cp -R canary/sysmanage_canary "$$PACKAGE_ROOT/usr/local/lib/sysmanage-canary/"; \
 	find "$$PACKAGE_ROOT/usr/local/lib/sysmanage-canary" -name __pycache__ -prune -exec rm -rf {} +; \
 	install -m 755 canary/bin/sysmanage-canary "$$PACKAGE_ROOT/usr/local/bin/sysmanage-canary"; \
+	install -m 755 scripts/sysmanage-migrate "$$PACKAGE_ROOT/usr/local/bin/sysmanage-migrate"; \
 	install -m 755 canary/service/freebsd-sysmanage_canary.rc "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage_canary"; \
 	install -m 644 canary/sysmanage-canary.yaml.example "$$PACKAGE_ROOT/usr/local/share/sysmanage-canary/"; \
 	echo "✓ Configuration files copied"; \
@@ -3176,14 +3174,16 @@ installer-freebsd: build
 	echo "✓ SBOM files copied"; \
 	echo ""; \
 	echo "Building FreeBSD package..."; \
-	if command -v pkg >/dev/null 2>&1; then \
-		echo "Using native FreeBSD pkg create..."; \
-		cd "$$BUILD_DIR" && pkg create -M "$$MANIFEST_FILE" -r "$$PACKAGE_ROOT" -o .; \
-	else \
-		echo "Using bsdtar for cross-platform build..."; \
-		mkdir -p "$$BUILD_DIR/pkg-staging"; \
-		cp "$$MANIFEST_FILE" "$$BUILD_DIR/pkg-staging/+MANIFEST"; \
-		cd "$$BUILD_DIR/pkg-staging" && bsdtar -czf "../sysmanage-$$VERSION.pkg" --format=pax "+MANIFEST" -C "$$PACKAGE_ROOT" .; \
+	find "$$PACKAGE_ROOT" -name __pycache__ -prune -exec rm -rf {} +; \
+	python3 installer/freebsd/build_pkg_manifest.py "$$PACKAGE_ROOT" "$$VERSION" || exit 1; \
+	TAR=$$(command -v bsdtar || echo tar); \
+	(cd "$$PACKAGE_ROOT" && $$TAR --zstd -cPf "$$BUILD_DIR/sysmanage-$$VERSION.pkg" --format=pax \
+		--uid=0 --gid=0 -s ',^usr,/usr,' +COMPACT_MANIFEST +MANIFEST usr) || exit 1; \
+	LISTED=$$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["files"]))' "$$PACKAGE_ROOT/+MANIFEST"); \
+	PACKED=$$($$TAR -tf "$$BUILD_DIR/sysmanage-$$VERSION.pkg" | grep -v '/$$' | grep -c '^/usr/'); \
+	echo "manifest lists $$LISTED files; archive holds $$PACKED"; \
+	if [ "$$LISTED" -eq 0 ] || [ "$$LISTED" -ne "$$PACKED" ]; then \
+		echo "ERROR: FreeBSD package manifest and archive disagree"; exit 1; \
 	fi; \
 	if [ $$? -eq 0 ]; then \
 		PACKAGE_FILE=$$(ls -1 $$BUILD_DIR/sysmanage-$$VERSION.pkg 2>/dev/null | head -1); \
@@ -3199,7 +3199,7 @@ installer-freebsd: build
 			echo "✓ FreeBSD package created successfully: $$OUTPUT_DIR/sysmanage-$$VERSION.pkg"; \
 			echo ""; \
 			echo "Installation commands:"; \
-			echo "  sudo pkg add $$OUTPUT_DIR/sysmanage-$$VERSION.pkg"; \
+			echo "  pkg install -y $$OUTPUT_DIR/sysmanage-$$VERSION.pkg   (as root; not pkg add)"; \
 			echo "  sudo sysrc sysmanage_enable=YES"; \
 			echo "  sudo sysrc nginx_enable=YES"; \
 			echo "  sudo service sysmanage start"; \

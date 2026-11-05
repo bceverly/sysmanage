@@ -45,7 +45,9 @@ const shown = (t: TFunction, value: unknown): string => {
     if (typeof value === 'boolean') return value ? t('common.yes', 'Yes') : t('common.no', 'No');
     if (Array.isArray(value)) return value.length ? value.map(v => shown(t, v)).join(', ') : t('backups.useTag.none', '(none)');
     if (typeof value === 'object') return JSON.stringify(value);
-    return String(value as string | number | bigint);
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'bigint') return value.toString();
+    return '';
 };
 
 interface Props {

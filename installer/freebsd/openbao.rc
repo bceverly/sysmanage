@@ -19,7 +19,11 @@ load_rc_config $name
 
 : ${openbao_enable:="NO"}
 : ${openbao_config:="/usr/local/etc/openbao/openbao.hcl"}
-: ${openbao_user:="openbao"}
+# NOT openbao_user: ${name}_user is an rc.subr knob, and when it is set
+# rc.subr runs daemon(8) itself as that user, which then cannot open the
+# root-owned log and pid file ("daemon: open: Permission denied", found on
+# FreeBSD 14.5 2026-11-05).  daemon -u drops privileges for bao alone.
+: ${openbao_runas:="openbao"}
 : ${openbao_pidfile:="/var/run/openbao/openbao.pid"}
 : ${openbao_logfile:="/var/log/openbao.log"}
 : ${openbao_keyfile:="/var/lib/openbao/init.json"}
@@ -29,7 +33,7 @@ command="/usr/sbin/daemon"
 # ``-o`` alone left the supervisor holding the caller's terminal, so
 # ``service ... start`` over ssh never returned (reproduced on FreeBSD
 # 2026-10-03; with ``-f`` it returns and the log still fills).
-command_args="-f -P ${openbao_pidfile} -r -t ${name} -o ${openbao_logfile} \
+command_args="-f -u ${openbao_runas} -P ${openbao_pidfile} -r -t ${name} -o ${openbao_logfile} \
     /usr/local/bin/bao server -config=${openbao_config}"
 pidfile="${openbao_pidfile}"
 required_files="${openbao_config}"
@@ -39,7 +43,7 @@ start_postcmd="openbao_poststart"
 
 openbao_prestart()
 {
-	install -d -o ${openbao_user} -g ${openbao_user} \
+	install -d -o ${openbao_runas} -g ${openbao_runas} \
 		/var/run/openbao /var/lib/openbao /var/lib/openbao/data
 }
 
@@ -47,7 +51,7 @@ openbao_poststart()
 {
 	# Idempotent init/unseal; the helper waits for the listener.  stdlib-only,
 	# so the system python is fine.
-	/usr/local/bin/python3.11 \
+	/usr/local/bin/python3.12 \
 		/usr/local/lib/sysmanage/scripts/openbao_init_unseal.py \
 		--addr http://127.0.0.1:8200 --keyfile ${openbao_keyfile} \
 		--app-token-file /etc/sysmanage/openbao-token --app-token-owner sysmanage \

@@ -24,11 +24,11 @@ import {
     Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { browseSnapshot, getRun } from '../../Services/backups';
+import { browseSnapshot } from '../../Services/backups';
 import type { BackupRun } from '../../Services/backups';
 import { apiDetail, formatBytes } from './backupLabels';
+import { FINISHED, pollRun } from './pollRun';
 
-const FINISHED = new Set(['ok', 'different', 'incomplete', 'failed', 'untrusted', 'busy']);
 const POLL_MS = 1500;
 
 export interface SnapshotEntry {
@@ -73,19 +73,13 @@ const SnapshotBrowser: React.FC<{
 
     useEffect(() => {
         let alive = true;
-        let timer: ReturnType<typeof setTimeout> | undefined;
+        let stop: (() => void) | undefined;
         setRun(null);
         setError(null);
-        const poll = async (id: string) => {
-            const fresh = await getRun(id);
-            if (!alive) return;
-            setRun(fresh);
-            if (!FINISHED.has(fresh.status)) timer = setTimeout(() => void poll(id).catch(() => undefined), POLL_MS);
-        };
         browseSnapshot(hostId, snapshot, path)
-            .then(started => { if (alive) { setRun(started); void poll(started.id); } })
+            .then(started => { if (alive) { setRun(started); stop = pollRun(started.id, setRun, POLL_MS); } })
             .catch(err => { if (alive) setError(apiDetail(err, t('backups.browse.error', 'This folder could not be listed.'))); });
-        return () => { alive = false; if (timer) clearTimeout(timer); };
+        return () => { alive = false; stop?.(); };
     }, [hostId, snapshot, path, t]);
 
     const parts = path.split('/').filter(Boolean);

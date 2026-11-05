@@ -379,21 +379,16 @@ fi
 %service_del_postun sysmanage.service
 %service_del_postun sysmanage-openbao-init.service
 
-# Clean up on purge (erase)
+# On erase, KEEP the configuration and state.  RPM has no "purge": this
+# used to rm -rf /etc/sysmanage and /var/lib/sysmanage on every removal,
+# which destroyed the agents' CA, the server's TLS key and its OpenBAO token
+# -- a removal to reinstall or to move between packages lost the server's
+# identity, and every agent had to re-enroll (found 2026-11-05; Debian only
+# deletes on an explicit purge).  Say how to remove them on purpose instead.
 if [ $1 -eq 0 ]; then
-    # Remove log files
-    rm -rf /var/log/sysmanage || true
-
-    # Remove configuration directory
-    rm -rf /etc/sysmanage || true
-
-    # Remove database and runtime data
-    rm -rf /var/lib/sysmanage || true
-
-    # Remove user and group
-    if getent passwd sysmanage >/dev/null; then
-        userdel sysmanage >/dev/null 2>&1 || true
-    fi
+    echo "SysManage removed.  Configuration and data were kept:"
+    echo "  /etc/sysmanage (CA, TLS, OpenBAO token)  /var/lib/sysmanage  /var/log/sysmanage"
+    echo "To delete them too:  rm -rf /etc/sysmanage /var/lib/sysmanage /var/log/sysmanage && userdel sysmanage"
 fi
 
 %files -f %{_builddir}/sbom-files.list

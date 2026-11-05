@@ -23,8 +23,10 @@ if [ -z "$root" ]; then
 	exit 1
 fi
 if [ -z "$SYSMANAGE_CONFIG" ]; then
+	# The BSD packages write <prefix>/etc/sysmanage/config.yaml.
 	for config in /etc/sysmanage.yaml /usr/local/etc/sysmanage.yaml \
-		/usr/pkg/etc/sysmanage.yaml; do
+		/usr/local/etc/sysmanage/config.yaml /usr/pkg/etc/sysmanage.yaml \
+		/usr/pkg/etc/sysmanage/config.yaml; do
 		[ -f "$config" ] && SYSMANAGE_CONFIG="$config" && break
 	done
 fi
@@ -43,4 +45,10 @@ fi
 if command -v sudo >/dev/null 2>&1; then
 	exec sudo -u "$SERVICE_USER" env SYSMANAGE_CONFIG="$SYSMANAGE_CONFIG" "$@"
 fi
-exec doas -u "$SERVICE_USER" env SYSMANAGE_CONFIG="$SYSMANAGE_CONFIG" "$@"
+if command -v doas >/dev/null 2>&1; then
+	exec doas -u "$SERVICE_USER" env SYSMANAGE_CONFIG="$SYSMANAGE_CONFIG" "$@"
+fi
+# A fresh FreeBSD or NetBSD has none of the above.  ``su -m`` keeps root's
+# shell, so it works although the service account's shell is nologin.  The
+# arguments are options and paths without spaces.
+exec su -m "$SERVICE_USER" -c "env SYSMANAGE_CONFIG='$SYSMANAGE_CONFIG' $*"

@@ -27,11 +27,11 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { backupChanges, getRun } from '../../Services/backups';
+import { backupChanges } from '../../Services/backups';
 import type { BackupRun } from '../../Services/backups';
 import { apiDetail } from './backupLabels';
+import { FINISHED, pollRun } from './pollRun';
 
-const FINISHED = new Set(['ok', 'different', 'incomplete', 'failed', 'untrusted', 'busy']);
 const POLL_MS = 2000;
 const SHOWN = 200;
 
@@ -69,17 +69,11 @@ const BackupChangesDialog: React.FC<{ hostId: string; fqdn: string; onClose: () 
 
     useEffect(() => {
         let alive = true;
-        let timer: ReturnType<typeof setTimeout> | undefined;
-        const poll = async (id: string) => {
-            const fresh = await getRun(id);
-            if (!alive) return;
-            setRun(fresh);
-            if (!FINISHED.has(fresh.status)) timer = setTimeout(() => void poll(id).catch(() => undefined), POLL_MS);
-        };
+        let stop: (() => void) | undefined;
         backupChanges(hostId)
-            .then(started => { if (alive) { setRun(started); void poll(started.id); } })
+            .then(started => { if (alive) { setRun(started); stop = pollRun(started.id, setRun, POLL_MS); } })
             .catch(err => { if (alive) setError(apiDetail(err, t('backups.changes.error', 'The check could not be started.'))); });
-        return () => { alive = false; if (timer) clearTimeout(timer); };
+        return () => { alive = false; stop?.(); };
     }, [hostId, t]);
 
     const done = run && FINISHED.has(run.status);

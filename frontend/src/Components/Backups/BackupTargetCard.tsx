@@ -31,7 +31,7 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import AsyncButton from '../AsyncButton';
 import { saveTarget } from '../../Services/backups';
-import type { BackupHost, BackupTarget, SealMode, TargetInput } from '../../Services/backups';
+import type { BackupHost, BackupTarget, TargetInput } from '../../Services/backups';
 import { apiDetail, reasonLabel } from './backupLabels';
 import BackupStorageStatus from './BackupStorageStatus';
 
@@ -140,7 +140,7 @@ export const TargetDialog: React.FC<{
                     <FormControl fullWidth>
                         <InputLabel id="backup-seal-mode">{t('backups.target.sealMode', 'Seal each backup')}</InputLabel>
                         <Select labelId="backup-seal-mode" label={t('backups.target.sealMode', 'Seal each backup')}
-                            value={form.seal_mode} onChange={e => set({ seal_mode: e.target.value as SealMode })}>
+                            value={form.seal_mode} onChange={e => set({ seal_mode: e.target.value })}>
                             <MenuItem value="none">{t('backups.target.sealNone', 'Do not seal')}</MenuItem>
                             <MenuItem value="zfs_snapshot">{t('backups.target.sealZfs', 'ZFS snapshot')}</MenuItem>
                             <MenuItem value="btrfs_snapshot">

@@ -29,7 +29,7 @@ const list = (value: unknown): unknown[] => (Array.isArray(value) ? value : []);
 
 /** restate 2.2 nests a restore's fields under ``restore``. */
 const restoreOf = (run: BackupRun): Record<string, unknown> => {
-    const raw = (run.result ?? {}) as Record<string, unknown>;
+    const raw = run.result ?? {};
     const nested = raw.restore;
     return nested && typeof nested === 'object' ? (nested as Record<string, unknown>) : raw;
 };

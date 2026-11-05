@@ -52,6 +52,9 @@ describe("buildNavCategories", () => {
       "/os-upgrades",
       "/maintenance-windows",
       "/time-sync",
+      // The audit log is Community; before 2026-11-05 it was reachable only
+      // through the Pro+ Reports page.
+      "/reports/audit-log",
       "/scripts",
       "/users",
       "/settings",

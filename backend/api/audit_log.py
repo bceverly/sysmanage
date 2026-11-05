@@ -239,79 +239,10 @@ async def list_audit_logs(
         ) from e
 
 
-@router.get("/{audit_id}", response_model=AuditLogEntryResponse)
-async def get_audit_log_entry(
-    audit_id: str,
-    db_session: Session = Depends(get_tenant_db),
-    dependencies=Depends(JWTBearer()),
-    current_user: str = Depends(get_current_user),
-):
-    """
-    Get a single audit log entry by ID.
-
-    Requires VIEW_AUDIT_LOG role.
-    """
-    _authorize_view_audit_log(db_session, current_user)
-    try:
-        # Parse audit ID
-        try:
-            audit_uuid = uuid.UUID(audit_id)
-        except ValueError as exc:
-            raise HTTPException(
-                status_code=400, detail=_("Invalid audit log ID format")
-            ) from exc
-
-        # Query for the specific entry
-        entry = (
-            db_session.query(models.AuditLog)
-            .filter(models.AuditLog.id == audit_uuid)
-            .first()
-        )
-
-        if not entry:
-            raise HTTPException(status_code=404, detail=_("Audit log entry not found"))
-
-        logger.info(
-            "Audit log entry %s retrieved by user %s",
-            sanitize_log(audit_id),
-            sanitize_log(current_user),
-        )
-
-        return entry
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception(
-            "Error retrieving audit log entry %s: %s", sanitize_log(audit_id), e
-        )
-        raise HTTPException(
-            status_code=500,
-            detail=_("Failed to retrieve audit log entry: %s") % str(e),
-        ) from e
-
-
-def _route_pro_plus_export(fmt_lower: str):
-    """Pro+ formats (json/cef/leef) route to the audit_engine module
-    when licensed; otherwise return a 402.  Pulled out so the export
-    handler stays under SonarQube's complexity threshold."""
-    audit_engine = module_loader.get_module("audit_engine")
-    if audit_engine is None:
-        raise HTTPException(
-            status_code=402,
-            detail=_(
-                "%s export requires a SysManage Professional+ license. "
-                "OSS tier supports CSV export."
-            )
-            % fmt_lower.upper(),
-        )
-    raise HTTPException(
-        status_code=307,
-        detail=_("Use /api/v1/audit/export with Pro+ license"),
-        headers={"Location": "/api/v1/audit/export"},
-    )
-
-
+# /export is declared BEFORE /{audit_id}: FastAPI matches routes in order, so
+# with it after, "export" was taken for an audit id and every export --
+# including the viewer's CSV and PDF buttons -- failed with 400 "Invalid audit
+# log ID format" (found 2026-11-05).
 @router.get("/export")
 async def export_audit_logs(
     filters: AuditLogFilters = Depends(),
@@ -587,4 +518,77 @@ def _stream_audit_pdf(entries):
         content=pdf_bytes,
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/{audit_id}", response_model=AuditLogEntryResponse)
+async def get_audit_log_entry(
+    audit_id: str,
+    db_session: Session = Depends(get_tenant_db),
+    dependencies=Depends(JWTBearer()),
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Get a single audit log entry by ID.
+
+    Requires VIEW_AUDIT_LOG role.
+    """
+    _authorize_view_audit_log(db_session, current_user)
+    try:
+        # Parse audit ID
+        try:
+            audit_uuid = uuid.UUID(audit_id)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400, detail=_("Invalid audit log ID format")
+            ) from exc
+
+        # Query for the specific entry
+        entry = (
+            db_session.query(models.AuditLog)
+            .filter(models.AuditLog.id == audit_uuid)
+            .first()
+        )
+
+        if not entry:
+            raise HTTPException(status_code=404, detail=_("Audit log entry not found"))
+
+        logger.info(
+            "Audit log entry %s retrieved by user %s",
+            sanitize_log(audit_id),
+            sanitize_log(current_user),
+        )
+
+        return entry
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(
+            "Error retrieving audit log entry %s: %s", sanitize_log(audit_id), e
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=_("Failed to retrieve audit log entry: %s") % str(e),
+        ) from e
+
+
+def _route_pro_plus_export(fmt_lower: str):
+    """Pro+ formats (json/cef/leef) route to the audit_engine module
+    when licensed; otherwise return a 402.  Pulled out so the export
+    handler stays under SonarQube's complexity threshold."""
+    audit_engine = module_loader.get_module("audit_engine")
+    if audit_engine is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "%s export requires a SysManage Professional+ license. "
+                "OSS tier supports CSV export."
+            )
+            % fmt_lower.upper(),
+        )
+    raise HTTPException(
+        status_code=307,
+        detail=_("Use /api/v1/audit/export with Pro+ license"),
+        headers={"Location": "/api/v1/audit/export"},
     )

@@ -79,10 +79,13 @@ class TestAuditLogCsvExport:
         assert response.status_code in [401, 403, 404]
 
     def test_export_csv_authorized(self, client, auth_headers):
-        """Authorized CSV export must return text/csv (200) or 403 if the
-        test user lacks VIEW_AUDIT_LOG.  Either way: NEVER 500."""
+        """Authorized CSV export returns text/csv (200), or 403 where the
+        harness's role lookup (bootstrap engine) does not see the test user's
+        roles.  Never 400: /{audit_id} was declared first and took "export"
+        for an id, so every export failed with "Invalid audit log ID format"
+        (2026-11-05).  Never 500."""
         response = client.get("/api/v1/audit-log/export?fmt=csv", headers=auth_headers)
-        assert response.status_code in [200, 403]
+        assert response.status_code in [200, 403], response.text
         if response.status_code == 200:
             assert response.headers.get("content-type", "").startswith("text/csv")
             # Header row must include the canonical columns.

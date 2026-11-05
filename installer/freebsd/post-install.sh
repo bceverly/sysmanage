@@ -1,75 +1,10 @@
-name: sysmanage
-version: "0.9.0"
-arch: freebsd:*:x86_64
-origin: sysutils/sysmanage
-comment: Centralized system management server with web-based interface
-maintainer: bryan@theeverlys.com
-www: https://sysmanage.org
-prefix: /usr/local
-desc: <<EOD
-SysManage is a comprehensive centralized system management server with a
-modern web-based interface. It provides:
- * Agent management and monitoring
- * System metrics and health monitoring
- * Comprehensive reporting system with PDF generation
- * JWT-based authentication with mTLS security
- * Multi-user management system with RBAC
- * Package inventory and updates
- * Certificate management
- * Real-time WebSocket communication
- * Cross-platform support (Linux, Windows, macOS, FreeBSD, OpenBSD, NetBSD)
-
-The server runs as a system service and communicates with SysManage agents
-deployed across your infrastructure to provide centralized management.
-EOD
-deps: {
-  python311: {origin: lang/python311, version: "3.11"},
-  py311-pip: {origin: devel/py-pip},
-  py311-sqlalchemy20: {origin: databases/py-sqlalchemy20},
-  py311-alembic: {origin: databases/py-alembic},
-  py311-psycopg: {origin: databases/py-psycopg},
-  py311-psycopg-c: {origin: databases/py-psycopg-c},
-  py311-cryptography: {origin: security/py-cryptography},
-  py311-pyyaml: {origin: devel/py-yaml},
-  py311-aiohttp: {origin: www/py-aiohttp},
-  py311-fastapi: {origin: www/py-fastapi},
-  py311-uvicorn: {origin: www/py-uvicorn},
-  py311-websockets: {origin: www/py-websockets},
-  postgresql15-server: {origin: databases/postgresql15-server},
-  nginx: {origin: www/nginx}
-}
-categories: [sysutils, python, www]
-licenselogic: single
-licenses: [AGPL]
-scripts: {
-  pre-install: <<EOD
 #!/bin/sh
-echo "Installing SysManage Server..."
-echo "Note: If installation fails due to missing dependencies, install them with:"
-echo "  pkg install py311-pip py311-sqlalchemy20 py311-alembic py311-psycopg py311-psycopg-c py311-cryptography py311-pyyaml py311-aiohttp py311-fastapi py311-uvicorn py311-websockets postgresql15-server nginx"
-echo ""
-EOD
-  post-install: <<EOD
-#!/bin/sh
-# Check for required dependencies
-MISSING_DEPS=""
-REQUIRED_PACKAGES="py311-pip py311-sqlalchemy20 py311-alembic py311-psycopg py311-psycopg-c py311-cryptography py311-pyyaml py311-aiohttp py311-fastapi py311-uvicorn py311-websockets postgresql15-server nginx"
-
-for pkg in $REQUIRED_PACKAGES; do
-    if ! pkg info -q "$pkg" >/dev/null 2>&1; then
-        MISSING_DEPS="$MISSING_DEPS $pkg"
-    fi
-done
-
-if [ -n "$MISSING_DEPS" ]; then
-    echo "ERROR: Missing required dependencies:$MISSING_DEPS"
-    echo ""
-    echo "Please install them with:"
-    echo "  pkg install$MISSING_DEPS"
-    echo ""
-    echo "Then reinstall this package."
-    exit 1
-fi
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+#
+# post-install for the FreeBSD server package; build_pkg_manifest.py puts
+# it in +MANIFEST.
 
 # Create sysmanage user and group if they don't exist
 if ! pw groupshow sysmanage >/dev/null 2>&1; then
@@ -93,11 +28,15 @@ chown -R sysmanage:sysmanage /var/lib/sysmanage
 chown -R sysmanage:sysmanage /var/log/sysmanage
 chown -R sysmanage:sysmanage /etc/sysmanage
 
-# Create Python virtual environment and install dependencies
+# The server runs on FreeBSD's own Python packages (this package's py312-*
+# dependencies), as the FreeBSD port does.  .venv only gives it a stable
+# interpreter path that sees them; nothing is downloaded or compiled.  The
+# old post-install pip-installed requirements.txt here, which on FreeBSD
+# meant building pydantic-core and cryptography from source.
 cd /usr/local/lib/sysmanage
-python3.11 -m venv .venv
-.venv/bin/pip install --quiet --upgrade pip
-.venv/bin/pip install --quiet -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
+if [ ! -x .venv/bin/python ]; then
+    python3.12 -m venv --system-site-packages --without-pip .venv
+fi
 
 # Use existing config or create symlink to system config
 if [ -f /etc/sysmanage.yaml ]; then
@@ -105,6 +44,8 @@ if [ -f /etc/sysmanage.yaml ]; then
 elif [ ! -f /usr/local/etc/sysmanage/config.yaml ]; then
     cp /usr/local/etc/sysmanage/sysmanage.yaml.example \
        /usr/local/etc/sysmanage/config.yaml
+    # Readable by the service account: sysmanage-migrate runs as it.
+    chown root:sysmanage /usr/local/etc/sysmanage/config.yaml
     chmod 640 /usr/local/etc/sysmanage/config.yaml
     # Generate this install's secrets (Lucky 13 #12): jwt_secret, password_salt and
     # the recovery admin password -- only in a config just created from the example.
@@ -114,6 +55,19 @@ fi
 # commented database_pool block only if the config has none -- an
 # administrator's own values are never touched.
 ( cd /usr/local/lib/sysmanage && .venv/bin/python -m backend.persistence.pool_sizing --apply /usr/local/etc/sysmanage/config.yaml ) || true
+
+# nginx: FreeBSD's stock nginx.conf includes no conf.d, so name our config
+# once, first in the http block, where its servers become the default for
+# ports 80 and 443 ahead of the stock "localhost" server.  The certificate
+# goes in /usr/local/etc/sysmanage/tls (server.crt, server.key).
+install -d -m 0755 /usr/local/etc/sysmanage/tls
+NGINX_CONF=/usr/local/etc/nginx/nginx.conf
+if [ -f "$NGINX_CONF" ] && ! grep -q 'sysmanage-nginx.conf' "$NGINX_CONF"; then
+    cp -p "$NGINX_CONF" "$NGINX_CONF.before-sysmanage"
+    sed -i '' -e '/^[[:space:]]*http[[:space:]]*{/a\
+    include /usr/local/etc/nginx/sysmanage-nginx.conf;
+' "$NGINX_CONF"
+fi
 
 # OpenBAO secrets broker -- install binary, create user, enable + start
 # (the openbao rc.d service runs init/unseal in its start_postcmd).
@@ -141,8 +95,12 @@ if command -v bao >/dev/null 2>&1 || [ -x /usr/local/bin/bao ]; then
     fi
     mkdir -p /var/lib/openbao/data
     chown -R openbao:openbao /var/lib/openbao
+    # bao runs as openbao and must read its config (0640).
+    chown root:openbao /usr/local/etc/openbao/openbao.hcl
+    # Enabled, not started: pkg reaps every process a package script leaves
+    # running, so a daemon started here dies when this script ends (found on
+    # FreeBSD 14.5 2026-11-05).  Its first start initializes and unseals it.
     sysrc openbao_enable=YES >/dev/null 2>&1 || true
-    service openbao start >/dev/null 2>&1 || echo "[!] Start OpenBAO: service openbao start"
 else
     echo "[!] OpenBAO ('bao') not installed; install it or set vault.enabled=false."
 fi
@@ -174,14 +132,15 @@ echo "   Edit: /usr/local/etc/sysmanage/config.yaml"
 echo ""
 echo "3. Database Initialization"
 echo "   -----------------------"
-echo "   Run database migrations (control-plane chains + every tenant database):"
-echo "     cd /usr/local/lib/sysmanage"
-echo "     doas -u sysmanage .venv/bin/python scripts/sysmanage_migrate.py"
+echo "   Run database migrations (control-plane chains + every tenant database),"
+echo "   as root, now and after every upgrade:"
+echo "     sysmanage-migrate"
 echo ""
 echo "4. Start the Services"
 echo "   ------------------"
 echo "     sysrc sysmanage_enable=YES"
 echo "     sysrc nginx_enable=YES"
+echo "     service openbao start"
 echo "     service sysmanage start"
 echo "     service nginx start"
 echo ""
@@ -203,28 +162,3 @@ echo "Outside watcher: edit /usr/local/etc/sysmanage-canary.yaml, then"
 echo "     sysmanage-canary --config /usr/local/etc/sysmanage-canary.yaml --check-config"
 echo "     sysrc sysmanage_canary_enable=YES && service sysmanage_canary start"
 echo ""
-EOD
-  pre-deinstall: <<EOD
-#!/bin/sh
-# Stop service if running
-service sysmanage stop 2>/dev/null || true
-EOD
-  post-deinstall: <<EOD
-#!/bin/sh
-echo "SysManage Server removed."
-echo "Configuration files preserved in /usr/local/etc/sysmanage/"
-echo "Logs preserved in /var/log/sysmanage/"
-echo ""
-echo "To completely remove, also run:"
-echo "  sysrc -x sysmanage_enable"
-echo "  rm -rf /usr/local/etc/sysmanage"
-echo "  rm -rf /var/log/sysmanage"
-echo "  rm -rf /var/lib/sysmanage"
-echo "  rm -rf /etc/sysmanage"
-EOD
-}
-files: {
-  /usr/local/etc/rc.d/sysmanage: {uname: root, gname: wheel, perm: 0755}
-  /usr/local/etc/rc.d/openbao: {uname: root, gname: wheel, perm: 0755}
-  /usr/local/etc/openbao/openbao.hcl: {uname: root, gname: wheel, perm: 0640}
-}

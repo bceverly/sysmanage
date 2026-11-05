@@ -31,6 +31,14 @@ command_args="-f -P ${sysmanage_pidfile} -r -t ${name} -o ${sysmanage_logfile} \
 # backend.main (not uvicorn directly): binds api.host/api.port from the config
 # and sizes the workers for this machine (Phase 22.2).
 
+# The server reads the config named here; without it it read
+# /etc/sysmanage.yaml, not the file this package writes (2026-11-05).
+export SYSMANAGE_CONFIG="${sysmanage_config}"
+# Run from the install directory: ``python -m backend.main`` imports the
+# app from there and the server writes logs/ beside it.  rc.subr cd's to
+# ${name}_chdir before starting; daemon(8) alone starts in /.
+sysmanage_chdir="/usr/local/lib/sysmanage"
+
 pidfile="${sysmanage_pidfile}"
 required_files="${sysmanage_config}"
 
@@ -51,28 +59,22 @@ sysmanage_prestart()
 	fi
 
 	# Check if database is configured
-	if ! grep -q "database:" "${sysmanage_config}"; then
+	# Not commented out: a comment mentioning the word used to satisfy this.
+	if ! grep -Eq "^(registry|database):" "${sysmanage_config}"; then
 		echo "Database not configured in ${sysmanage_config}"
 		echo "Please configure the database connection before starting."
 		return 1
 	fi
 
-	# Check if virtual environment exists
-	if [ ! -d "/usr/local/lib/sysmanage/.venv" ]; then
-		echo "Python virtual environment not found. Recreating dependencies..."
-		cd /usr/local/lib/sysmanage
-		python3.11 -m venv .venv
-		.venv/bin/pip install --quiet --upgrade pip
-		.venv/bin/pip install --quiet -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
-	fi
-
-	# Run database migrations
-	echo "Running database migrations..."
-	cd /usr/local/lib/sysmanage
-	su -m ${sysmanage_user} -c ".venv/bin/python -m alembic upgrade head" || {
-		echo "Database migration failed. Please check your database configuration."
+	# The package's post-install creates .venv on FreeBSD's own py312
+	# packages; it is never rebuilt here.  Migrations are not run here
+	# either -- the operator runs scripts/sysmanage_migrate.py, as on every
+	# other platform (a bare ``alembic upgrade head`` predates the three
+	# migration chains).
+	if [ ! -x /usr/local/lib/sysmanage/.venv/bin/python ]; then
+		echo "/usr/local/lib/sysmanage/.venv is missing; reinstall the sysmanage package."
 		return 1
-	}
+	fi
 
 	echo "Starting SysManage Server..."
 }

@@ -12,6 +12,19 @@ import { useActionInFlight, useAgentCommandProgress } from '../hooks/useActionIn
 /** A handler resolves false when the server refused (nothing to wait for). */
 export type AntivirusAction = () => Promise<boolean | void> | void;
 
+/** Call ``onQueued`` once a handler's request is queued: straight away for a
+ *  synchronous handler, else when its promise resolves to anything but false
+ *  (false means the server refused). */
+const afterQueued = (result: ReturnType<AntivirusAction>, onQueued: () => void) => {
+  if (!result || typeof result.then !== 'function') {
+    onQueued();
+    return undefined;
+  }
+  return result.then((accepted) => {
+    if (accepted !== false) onQueued();
+  });
+};
+
 type ActionKey = 'deploy' | 'remove' | 'enable' | 'disable';
 
 // What the agent's next antivirus report must show for each action to be done.
@@ -66,20 +79,12 @@ const AntivirusActionButtons: React.FC<AntivirusActionButtonsProps> = ({
     return () => clearInterval(timer);
   }, [awaitingKey, onPoll]);
 
+  const waitFor = (key: ActionKey) => () => begin(key, DONE[key]);
+
   const trigger = (key: ActionKey, handler?: AntivirusAction) => () => {
     if (!handler || active) return;
-    void run(key, () => {
-      const result = handler();
-      // A synchronous handler has already queued its request: wait for the
-      // agent straight away.  A promise resolving false was refused.
-      if (!result || typeof (result as Promise<unknown>).then !== 'function') {
-        begin(key, DONE[key]);
-        return undefined;
-      }
-      return (result as Promise<boolean | void>).then((accepted) => {
-        if (accepted !== false) begin(key, DONE[key]);
-      });
-    });
+    // Once the request is queued, wait for the agent's report to show it.
+    void run(key, () => afterQueued(handler(), waitFor(key)));
   };
 
   const progressLabel: Record<ActionKey, string> = {
