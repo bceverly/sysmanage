@@ -28,6 +28,20 @@ async function navigateToFirstUserDetail(page: Page): Promise<boolean> {
   return true;
 }
 
+/**
+ * The Users page's own Add button and its Add User dialog.  A fresh install --
+ * CI's database, with no administrator yet -- also shows a "Create your
+ * administrator" button in the security banner ABOVE the page, and a loose
+ * /add|create|new/ match clicked that one first: its dialog has no Save
+ * button, so the create and validate tests timed out (run 1507, 2026-11-06).
+ */
+const addUserButton = (page: Page) =>
+  page.getByRole('main').getByRole('button', { name: /^add$/i });
+const addUserDialog = (page: Page) =>
+  page.getByRole('dialog').filter({
+    has: page.getByRole('heading', { name: /^add user$/i }),
+  });
+
 test.describe('User List Page', () => {
   test.beforeEach(async ({ page }) => {
     await ensureAuthenticated(page, '/users');
@@ -60,7 +74,7 @@ test.describe('User List Page', () => {
     // racing the React render and would flake on slow runs even when
     // the button was about to appear.  Locator.or() + expect.toBeVisible
     // actually polls for either control.
-    const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
+    const addButton = addUserButton(page);
     const fabButton = page.locator('.MuiFab-root').first();
     // 30s to match the sibling data-grid waits: the Add control renders only
     // after the grid + the 93-role permission load complete, so it's strictly
@@ -70,13 +84,13 @@ test.describe('User List Page', () => {
   });
 
   test('should open add user dialog when clicking add button', async ({ page }) => {
-    const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
+    const addButton = addUserButton(page);
     await expect(addButton).toBeVisible({ timeout: 20000 });
 
     await addButton.click();
 
     // Dialog should appear
-    const dialog = page.locator('.MuiDialog-root');
+    const dialog = addUserDialog(page);
     await expect(dialog).toBeVisible();
 
     // Dialog should have form fields - MUI TextField uses input inside the label structure
@@ -85,28 +99,27 @@ test.describe('User List Page', () => {
   });
 
   test('should validate user form fields', async ({ page }) => {
-    const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
+    const addButton = addUserButton(page);
     await expect(addButton).toBeVisible({ timeout: 20000 });
     await addButton.click();
 
     // Try to submit empty form
-    const submitButton = page.getByRole('button', { name: /save|create|add/i }).last();
-    await submitButton.click();
+    const dialog = addUserDialog(page);
+    await dialog.getByRole('button', { name: /save/i }).click();
 
     // Should show validation errors
     await page.waitForTimeout(500);
     // Form should stay open showing validation feedback
-    const dialog = page.locator('.MuiDialog-root');
     const isDialogStillOpen = await dialog.isVisible();
     expect(isDialogStillOpen).toBeTruthy();
   });
 
   test('should close dialog on cancel', async ({ page }) => {
-    const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
+    const addButton = addUserButton(page);
     await expect(addButton).toBeVisible({ timeout: 20000 });
     await addButton.click();
 
-    const dialog = page.locator('.MuiDialog-root');
+    const dialog = addUserDialog(page);
     await expect(dialog).toBeVisible();
 
     // Click cancel button
@@ -273,14 +286,14 @@ test.describe('User Create Flow', () => {
     try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     await page.waitForTimeout(2000);
 
-    const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
+    const addButton = addUserButton(page);
     // The test user is provisioned with all 93 security roles, so the
     // add-user control must be visible.  If it isn't, that's a real bug.
     await expect(addButton).toBeVisible({ timeout: 20000 });
 
     await addButton.click();
 
-    const dialog = page.locator('.MuiDialog-root');
+    const dialog = addUserDialog(page);
     await expect(dialog).toBeVisible();
 
     // Fill in user form with unique email to avoid conflicts
