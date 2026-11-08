@@ -23,6 +23,22 @@
     "title": "Accepteer je uitnodiging",
     "validatingToken": "Uitnodiging valideren..."
   },
+  "agentCertificates": {
+    "enforceAnyway": "Toch afdwingen",
+    "fleet": "{{presenting}} van {{approved}} goedgekeurde hosts bieden een geldig certificaat aan; {{expiring}} worden vernieuwd, {{expired}} verlopen.",
+    "intro": "Elke agent krijgt een clientcertificaat voor een sleutel die hij zelf genereert, vernieuwt het voordat het verloopt en biedt het bij elke verbinding aan. Agents pinnen ook deze server, zodat een proxy of een andere server die een ander certificaat aanbiedt wordt geweigerd.",
+    "loadError": "De instellingen voor agentcertificaten konden niet worden geladen.",
+    "mode": "Modus",
+    "modeEnforced": "Afgedwongen",
+    "modeEnforcedHelp": "Elke goedgekeurde host moet een geldig certificaat aanbieden. Een host zonder actueel certificaat mag er nog wel een aanvragen, en verder niets.",
+    "modeOff": "Uit",
+    "modeOffHelp": "Clientcertificaten worden genegeerd. Agents maken alleen met hun hosttoken verbinding.",
+    "modeOptional": "Optioneel",
+    "modeOptionalHelp": "Een certificaat dat een agent aanbiedt moet geldig zijn voor zijn host; een agent zonder certificaat maakt nog steeds verbinding met zijn hosttoken.",
+    "noneYet": "Nog geen enkele host biedt een certificaat aan. Agents krijgen er een wanneer ze worden bijgewerkt; nginx vraagt erom zodra het serverpakket zijn instellingen voor agentcertificaten heeft toegevoegd (een upgrade doet dit wanneer de SysManage-CA bestaat).",
+    "saveError": "De instelling voor agentcertificaten kon niet worden opgeslagen.",
+    "title": "Agentcertificaten (wederzijdse TLS)"
+  },
   "agentMirrors": {
     "add": "Toevoegen",
     "colActions": "Acties",
@@ -760,7 +776,8 @@
     "clocksOutOfBounds": "Klokken buiten de grenzen",
     "hardwareNeedsAttention": "Hardware die aandacht vereist",
     "backupsAttention": "Back-ups die aandacht nodig hebben",
-    "backupsEscrowStale": "Noodexport van sleutels verouderd"
+    "backupsEscrowStale": "Noodexport van sleutels verouderd",
+    "backupsServerUnprotected": "Deze SysManage-server heeft geen geslaagde back-up"
   },
   "dataGrid": {
     "columnVisibility": "Kolomzichtbaarheid",
@@ -1821,6 +1838,19 @@
     "capabilitiesFullTooltip": "Deze agent adverteert de volledige set van capaciteiten",
     "capabilitiesLimited": "Beperkt",
     "capabilitiesLimitedTooltip": "Deze agent meldt dat hij enkele commandoôn niet kan uitvoeren",
+    "certificate": {
+      "column": "Certificaat",
+      "expired": "Verlopen",
+      "expiredTip": "Het certificaat is verlopen. De agent vraagt een nieuw aan bij de volgende verbinding.",
+      "expiring": "Wordt vernieuwd",
+      "expiringTip": "Het certificaat verloopt binnen 30 dagen; de agent vernieuwt het zelf.",
+      "none": "Geen",
+      "noneTip": "Nog geen certificaat uitgegeven: de agent vraagt er een aan zodra hij is bijgewerkt.",
+      "notPresented": "Niet aangeboden",
+      "notPresentedTip": "Er is een certificaat uitgegeven, maar geen enkele verbinding in de afgelopen 24 uur heeft het aangeboden. Werk de agent bij en controleer of nginx om clientcertificaten vraagt.",
+      "presenting": "Aangeboden",
+      "presentingTip": "Deze host biedt een geldig clientcertificaat aan."
+    },
     "childHostFilter": "Onderliggende host filter",
     "childHostOf": "Onderliggende host van {{parent}}",
     "childHostsOnly": "Alleen onderliggende hosts",
@@ -2131,7 +2161,7 @@
     "loading": "Uitloggen..."
   },
   "maintenanceWindows": {
-    "addWindow": "Maintenance planning",
+    "addWindow": "Onderhoud plannen",
     "confirmDelete": "Weet u zeker dat u deze onderhoudsvenster wilt verwijderen?",
     "confirmOverride": "Overname",
     "created": "Onderhoudsvenster gemaakt",
@@ -4778,7 +4808,7 @@
       "column": "Asset tag",
       "paletteResult": "Asset tag: {{tag}}",
       "untagged": "Onttagd",
-      "untaggedOnly": "Alleen onttagde machines",
+      "untaggedOnly": "Alleen machines zonder tag",
       "untaggedOnlyTooltip": "Toon alleen hosts waarvan de machine geen asset-tag heeft"
     },
     "scheme": {
@@ -5410,6 +5440,7 @@
       "notPrivileged": "De agent moet als root draaien",
       "toolOutdated": "restate upgraden",
       "wrongPlatform": "Niet ondersteund op dit besturingssysteem",
+      "noNfsv4Client": "Dit besturingssysteem heeft geen NFSv4-client",
       "missingNfsClient": "NFS-client installeren",
       "storageUnreachable": "Back-upopslag niet bereikbaar"
     },
@@ -5677,7 +5708,9 @@
       "until": "{{percent}}% over ongeveer {{days}} dagen"
     },
     "reach": {
-      "unreachable": "Deze host kan de back-upopslag niet bereiken ({{storage}}, {{address}}, NFS-poort {{port}}). Back-ups hebben een netwerkpad ernaartoe nodig."
+      "unreachable": "Deze host kan de back-upopslag niet bereiken ({{storage}}, {{address}}, NFS-poort {{port}}). Back-ups hebben een netwerkpad ernaartoe nodig.",
+      "behindNat": "Deze host staat achter NAT: de back-upopslag ({{storage}}) ziet hem als {{seen}}, niet als {{address}}, en weigert daarom de koppeling. Zet de host op het netwerk van de opslaghost (een gebridged netwerk voor een virtuele machine) in plaats van achter zijn NAT.",
+      "behindNatLabel": "Achter NAT"
     },
     "network": {
       "leftOut": "Automatisch uitgesloten (netwerkkoppelingen op deze host): {{paths}}",
@@ -5788,6 +5821,27 @@
       "replaces": "Deze instellingen van deze host worden vervangen:",
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Zijn instellingen komen al overeen met het labelbeleid."
+    },
+    "server": {
+      "backUp": "Maak een back-up van deze SysManage-server",
+      "title": "Maak een back-up van deze SysManage-server",
+      "noGoodBackup": "Deze SysManage-server ({{host}}) heeft geen recente geslaagde back-up. De rij hieronder vertelt waarom.",
+      "noPolicy": "Van deze SysManage-server ({{host}}) wordt geen back-up gemaakt. Gaat hij verloren, dan moet elke agent zich opnieuw aanmelden, en zijn de OpenBAO-geheimen en de databases weg.",
+      "noPolicyMany": "Van deze SysManage-server wordt geen back-up gemaakt. Gaat hij verloren, dan moet elke agent zich opnieuw aanmelden, en zijn de OpenBAO-geheimen en de databases weg.",
+      "unknown": "SysManage kan niet bepalen welke host deze server is, en dus ook niet of er een back-up van de server wordt gemaakt. Kies de host om er een back-up van te maken.",
+      "saveError": "De back-up van de SysManage-server kon niet worden opgeslagen.",
+      "host": "De host waarop deze SysManage-server draait",
+      "hostHelp": "Geen enkele host heeft de naam van deze server. Kies de host waarop de agent ervan draait.",
+      "kept": "In de back-up",
+      "keptHelp": "De certificeringsinstantie van de agents en de serveridentiteit (gaan die verloren, dan moet elke agent zich opnieuw aanmelden), OpenBAO, PostgreSQL, de configuratie, de TLS-certificaten en de licentie, samen met de rest van de host.",
+      "skipped": "Weggelaten",
+      "skippedHelp": "Wordt zo nodig opnieuw gedownload: engine-bundels, de GeoIP-database, pakketmirrors en logboeken.",
+      "never": "Nooit in de back-up",
+      "neverHelp": "Deze bevatten de ontzegelings- of herstelsleutel van OpenBAO en het OpenBAO-token van de server. Bewaar er een kopie van op een veilige plek, los van de server, zoals een wachtwoordbeheerder, zodat een gestolen back-up de OpenBAO-kopie erin niet kan ontzegelen.",
+      "pauseNote": "PostgreSQL wordt gestopt terwijl de eigen bestanden worden gekopieerd, dus SysManage kan in die tijd fouten tonen. Kies een rustig startuur.",
+      "unencrypted": "Deze back-up is niet versleuteld en bevat het databasewachtwoord uit de configuratie. Beveilig de back-upopslag net zo goed als de server zelf.",
+      "needsEscrow": "Sla eerst een noodsleutel voor bewaring op in het paneel Versleuteling van een host. De back-up van de SysManage-server zelf wordt daarmee versleuteld, zodat het herstellen van OpenBAO nooit een sleutel nodig heeft die in OpenBAO bewaard wordt.",
+      "escrowEncrypted": "Versleuteld met uw noodsleutel voor bewaring ({{fingerprint}}). SysManage heeft nooit het geheime deel ervan, dus deze back-up wordt met de hand met die sleutel hersteld, zoals het herstelplan van de server beschrijft."
     }
   },
   "cloudBackup": {

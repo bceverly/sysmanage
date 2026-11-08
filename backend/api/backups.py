@@ -394,6 +394,7 @@ async def backups_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any
         "target_problem": views.target_problem(data),
         "total": sum(1 for row in data["hosts"] if row["policy"]),
         "escrow_stale": backup_escrow.status(db)["stale"],  # Pro+ break-glass
+        "server_unprotected": bool(data["server"]["warn"]),  # 25.9
     }
 
 
@@ -563,7 +564,12 @@ async def put_policy(
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
-    host = _host_or_404(db, host_id)
+    return save_policy(db, current_user, _host_or_404(db, host_id), body)
+
+
+def save_policy(db, current_user, host, body: PolicyBody, mark=None) -> Dict[str, Any]:
+    """Create or change ``host``'s policy; ``mark(policy)`` runs before the
+    configure job goes out (the server's own policy, 25.9)."""
     _validate_policy(body)
     target = jobs.the_target(db)
     if target is None:
@@ -589,6 +595,8 @@ async def put_policy(
     _apply_policy(policy, body)
     retention.apply_gfs(policy, gfs)
     policy.tag_policy_id = None  # Configure makes it this host's own (24.6)
+    if mark is not None:
+        mark(policy)
     _audit(
         db,
         current_user,
@@ -840,6 +848,14 @@ async def backup_restore(
     return out
 
 
+# The server's own backup (25.9): SysManage never holds its key.
+ESCROW_ONLY = _(
+    "This backup is encrypted to your break-glass escrow key, which SysManage "
+    "never holds. Restore it by hand with restate and that key, as the server "
+    "recovery runbook describes."
+)
+
+
 def key_needed(where: str, policy: models.BackupPolicy) -> bool:
     """Does reading this repository need the policy's secret key on the host
     (24.6 S4)?  Then the run says ``needs_key`` and the agent fetches the key
@@ -848,6 +864,8 @@ def key_needed(where: str, policy: models.BackupPolicy) -> bool:
     HTTP 409 when the host's restate cannot take the key (``decrypt_with``)."""
     if not jobs.needs_secret_key(where, policy):
         return False
+    if jobs.escrow_keyed(policy):
+        raise HTTPException(status_code=409, detail=ESCROW_ONLY)
     if "decrypt" not in jobs.abilities(policy):
         raise HTTPException(
             status_code=409,

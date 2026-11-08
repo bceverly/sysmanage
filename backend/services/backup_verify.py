@@ -152,6 +152,10 @@ def maybe_verify(
         )
         return False
     needs_key = jobs.needs_secret_key(jobs.CURRENT, policy)
+    if needs_key and jobs.escrow_keyed(policy):
+        # Only the operator holds the key (the server's own backup, 25.9):
+        # the weekly metadata check still runs; a full read cannot.
+        return False
     if needs_key and "decrypt" not in abilities:
         logger.debug(
             "Backup policy %s: verification due, but host %s's restate cannot "

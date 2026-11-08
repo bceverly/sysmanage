@@ -31,3 +31,21 @@ listener "tcp" {
 api_addr      = "http://127.0.0.1:8200"
 disable_mlock = true
 ui            = false
+
+# Optional auto-unseal.  By default OpenBAO is unsealed at boot from the
+# root-only key file /var/lib/openbao/init.json (never from sysmanage.yaml).
+# Where you run a key service, uncomment ONE seal stanza instead and OpenBAO
+# unseals itself; the init/unseal one-shot then keeps only a recovery key and
+# the root token in init.json.  Set it up before OpenBAO is first initialized:
+# moving an existing install to a seal needs `bao operator unseal -migrate`
+# (see the OpenBAO seal migration docs).  The token below belongs in the
+# environment of the openbao service (VAULT_TOKEN), never in this file.
+#
+# Transit against another OpenBAO or Vault:
+# seal "transit" {
+#   address    = "https://keys.example.com:8200"
+#   key_name   = "sysmanage-autounseal"
+#   mount_path = "transit/"
+# }
+#
+# A cloud key service works the same way, e.g. seal "awskms" { kms_key_id = "..." }.

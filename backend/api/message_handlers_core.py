@@ -17,11 +17,11 @@ from sqlalchemy.orm import Session, sessionmaker
 from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
 from backend.persistence.models import Host, HostChild
-from backend.security import agent_identity
+from backend.security import agent_identity, agent_mtls
 from backend.services import clock_tracking
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
-from backend.websocket import heartbeat_batch, report_window
+from backend.websocket import delivery_confirmation, heartbeat_batch, report_window
 
 # Use standard logger that respects /etc/sysmanage.yaml configuration
 logger = logging.getLogger(__name__)
@@ -169,6 +169,42 @@ def _refuse_claim(db, connection, claim, message_data):
     }
 
 
+def _certificate_refusal(db, connection, claim):
+    """Agent mutual TLS (25.10): the reply refusing this session, or None.
+
+    Checked once the session has proven its host, for approved hosts only --
+    a host waiting for approval has no certificate to present.  The
+    certificate is the one nginx forwarded on the WebSocket upgrade."""
+    host = claim.host
+    if host is None or host.approval_status != "approved":
+        return None
+    decision = agent_mtls.check_host(
+        host, getattr(connection, "client_cert_header", None)
+    )
+    if decision.noted:
+        db.commit()
+    if decision.allowed or agent_mtls.allow_bootstrap(decision, host):
+        return None
+    AuditService.log(
+        db=db,
+        action_type=ActionType.AGENT_MESSAGE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=host.fqdn,
+        description=_("Agent session refused: client certificate %s")
+        % decision.verdict,
+        result=Result.FAILURE,
+        details={"reason": decision.code, "source_address": _peer_address(connection)},
+    )
+    db.commit()
+    return {
+        "message_type": "error",
+        "error_type": decision.code,
+        "message": decision.message,
+        "data": {},
+    }
+
+
 async def _handle_system_info_impl(db: Session, connection, message_data: dict):
     """Handle system info message from agent."""
     from backend.api.host_utils import update_or_create_host
@@ -194,6 +230,9 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
     claim = agent_identity.check_claim(db, message_data)
     if not claim.accepted:
         return _refuse_claim(db, connection, claim, message_data)
+    refusal = _certificate_refusal(db, connection, claim)
+    if refusal is not None:
+        return refusal
     ipv4 = message_data.get("ipv4")
     ipv6 = message_data.get("ipv6")
     platform = message_data.get("platform")
@@ -567,6 +606,8 @@ def _process_approved_system_info(
         "host_id": str(host.id),  # Send as UUID string
         # Phase 22.2: spread the first reports when the server is busy.
         "initial_report_window_seconds": report_window.suggest(db),
+        # The agent may wait for message_stored before forgetting a message.
+        "delivery_confirmation": delivery_confirmation.SUPPORTED,
     }
 
 

@@ -1,0 +1,188 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
+"""The SysManage server backs itself up (ROADMAP 25.9, Community).
+
+Production's server had no backup at all on 2026-11-02.  Its policy is the
+server host's own, marked: preset to the CA, the config, OpenBAO and
+PostgreSQL; the databases always paused; OpenBAO's init material and token
+never in the backup, whatever the path rules say.
+"""
+
+# pylint: disable=redefined-outer-name
+
+import json
+import uuid
+from unittest.mock import patch
+
+import pytest
+
+from backend.api import backups as api
+from backend.api import backups_server as server_api
+from backend.persistence import models
+from backend.services import backup_jobs as jobs
+from backend.services import backup_server
+from backend.services import backup_server_paths as paths
+from backend.services import backup_views as views
+from tests.services.test_backup_results import _host, _setup
+from tests.test_backups_api import (
+    MANAGER,
+    NOBODY,
+    _status,
+    sent,
+)  # noqa: F401  # pylint: disable=unused-import
+
+SERVER = "sysmanage.example.com"
+
+
+@pytest.fixture
+def named():
+    """This machine is called SERVER."""
+    with patch.object(backup_server.socket, "getfqdn", return_value=SERVER), patch.object(
+        backup_server.socket, "gethostname", return_value="sysmanage"
+    ):  # fmt: skip
+        yield
+
+
+def _server(session):
+    s = _setup(session)
+    s.server = _host(session, fqdn=SERVER)
+    return s
+
+
+def _body(host, **extra):
+    return server_api.ServerPolicyBody(host_id=str(host.id), **extra)
+
+
+def test_the_preset_keeps_what_is_lost_with_the_server_and_never_the_unseal_key():
+    found = paths.preset(["/var/mirror"])
+    assert found["quiesce"] is True
+    for kept in ("/etc/sysmanage/certs", "/var/lib/openbao", "/var/lib/postgresql",
+                 "/var/lib/sysmanage", "/etc/letsencrypt", "/etc/sysmanage/tls"):  # fmt: skip
+        assert kept in found["keep_paths"]
+    for left_out in ("/var/lib/sysmanage/modules", "/var/log/sysmanage", "/var/mirror"):
+        assert left_out in found["skip_paths"]
+    assert {"/var/lib/openbao/init.json", "/etc/sysmanage/openbao-token"} <= set(
+        found["never_paths"]
+    )
+
+
+def test_a_path_is_matched_literally():
+    with patch.object(
+        paths.config, "get_vault_config", return_value={"token_file": "/etc/a*b?"}
+    ):
+        assert "/etc/a\\*b\\?" in paths.never_paths()
+
+
+def test_the_server_policy_always_leaves_the_secrets_out_and_pauses(session):
+    s = _setup(session)
+    s.policy.server_preset = True
+    s.policy.quiesce = False
+    s.policy.keep_paths = json.dumps(["/var/lib/openbao/init.json"])
+    s.policy.skip_paths = json.dumps(["/etc/sysmanage/openbao-token", "/tmp/x"])
+    capture = jobs.host_configuration(s.policy, s.target, s.host)["jobs"]["capture"]
+    assert capture["quiesce"] is True
+    never = paths.never_paths()
+    # Last, once each: restate's last matching rule wins over the keep rule.
+    assert capture["skip_paths"] == ["/tmp/x"] + never
+    assert capture["quiesce_with"] == []
+    s.policy.available_hooks = json.dumps(["postgresql", "openbao"])
+    capture = jobs.host_configuration(s.policy, s.target, s.host)["jobs"]["capture"]
+    assert capture["quiesce_with"] == ["openbao"]
+
+
+def test_an_ordinary_policy_is_left_as_it_is(session):
+    s = _setup(session)
+    s.policy.available_hooks = json.dumps(["openbao"])
+    capture = jobs.host_configuration(s.policy, s.target, s.host)["jobs"]["capture"]
+    assert capture["quiesce"] is False and capture["quiesce_with"] == []
+    assert "skip_paths" not in capture
+
+
+def test_the_server_host_is_found_by_name_and_warned_on_until_backed_up(session, named):
+    s = _server(session)
+    found = backup_server.status(session, views.overview(session)["hosts"])
+    assert found["status"] == "no_policy" and found["warn"]
+    assert found["host_id"] == str(s.server.id)
+    data = views.overview(session)
+    assert views.attention_count(data) == 1  # the server, counted once
+
+
+def test_a_short_name_matches_when_no_full_name_does(session):
+    _setup(session)
+    host = _host(session, fqdn="sysmanage.other.lan")
+    with patch.object(backup_server.socket, "getfqdn", return_value="sysmanage"), \
+            patch.object(backup_server.socket, "gethostname", return_value="sysmanage"):  # fmt: skip
+        assert [h.id for h in backup_server.candidates(session)] == [host.id]
+
+
+def test_no_match_warns_only_without_multitenancy(session, named):
+    _setup(session)
+    rows = views.overview(session)["hosts"]
+    assert backup_server.status(session, rows)["warn"] is True
+    with patch.object(backup_server.config, "get_multitenancy_config",
+                      return_value={"enabled": True}):  # fmt: skip
+        assert backup_server.status(session, rows)["warn"] is False
+
+
+@pytest.mark.asyncio
+async def test_the_server_policy_needs_the_role_and_is_marked_and_paused(
+    session, named, sent
+):
+    s = _server(session)
+    assert (
+        await _status(server_api.put_server_policy(_body(s.server), session, NOBODY))
+        == 403
+    )
+    saved = await server_api.put_server_policy(
+        _body(s.server, quiesce=False), session, MANAGER
+    )
+    assert saved["server_preset"] is True and saved["quiesce"] is True
+    found = await server_api.server_backup(None, session)
+    assert found["status"] == "no_good_backup" and found["warn"]
+    # An ordinary Configure keeps the mark: it is still the server's policy.
+    await api.put_policy(str(s.server.id), api.PolicyBody(), session, MANAGER)
+    assert backup_server.marked(session).host_id == s.server.id
+
+
+@pytest.mark.asyncio
+async def test_a_good_capture_clears_the_warning(session, named, sent):
+    s = _server(session)
+    await server_api.put_server_policy(_body(s.server), session, MANAGER)
+    policy = backup_server.marked(session)
+    session.add(models.BackupRun(id=uuid.uuid4(), policy_id=policy.id, host_id=s.server.id,
+                                 action="capture", status="ok", queued_at=jobs.now(),
+                                 finished_at=jobs.now()))  # fmt: skip
+    session.commit()
+    found = await server_api.server_backup(None, session)
+    assert found["status"] == "ok" and not found["warn"]
+    assert views.attention_count(views.overview(session)) == 0
+
+
+@pytest.mark.asyncio
+async def test_marking_another_host_moves_the_mark_and_says_so(session, named, sent):
+    s = _server(session)
+    await server_api.put_server_policy(_body(s.host), session, MANAGER)
+    await server_api.put_server_policy(_body(s.server), session, MANAGER)
+    marked = session.query(models.BackupPolicy).filter_by(server_preset=True).all()
+    assert [p.host_id for p in marked] == [s.server.id]
+    audit = session.query(models.AuditLog).all()
+    assert any("moved to this host" in a.description for a in audit)
+
+
+@pytest.mark.asyncio
+async def test_the_summary_says_the_server_is_unprotected(session, named):
+    _server(session)
+    assert (await api.backups_summary(session))["server_unprotected"] is True
+
+
+@pytest.mark.asyncio
+async def test_the_preset_for_a_picked_host_leaves_its_mirror_out(session):
+    s = _setup(session)
+    session.add(models.MirrorPlatformConfig(id=uuid.uuid4(), platform="linux",
+                                            host_id=s.host.id, mirror_root_path="/srv/mirror"))  # fmt: skip
+    session.commit()
+    found = await server_api.server_backup(str(s.host.id), session)
+    assert "/srv/mirror" in found["preset"]["skip_paths"]
+    assert await _status(server_api.server_backup(str(uuid.uuid4()), session)) == 404

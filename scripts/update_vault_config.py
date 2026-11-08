@@ -8,11 +8,14 @@ Update vault configuration in /etc/sysmanage.yaml with production settings
 
 SECURITY NOTE: This script requires environment variables to be set:
 - VAULT_TOKEN: HashiCorp Vault service token
-- VAULT_UNSEAL_KEY: Vault unseal key
+
+The unseal key is never written to the config: OpenBAO is unsealed from its
+own root-only key file (/var/lib/openbao/init.json), because a copy of the
+config would otherwise carry the key (ROADMAP 25.9).  Any unseal key an older
+version wrote there is removed.
 
 Example usage:
     export VAULT_TOKEN="s.your-vault-token-here"
-    export VAULT_UNSEAL_KEY="your-base64-unseal-key-here"
     python update_vault_config.py
 """
 import os
@@ -30,14 +33,9 @@ def main():
 
     # Check for required environment variables
     vault_token = os.environ.get('VAULT_TOKEN')
-    unseal_key = os.environ.get('VAULT_UNSEAL_KEY')
 
     if not vault_token:
         print("Error: VAULT_TOKEN environment variable is required")
-        sys.exit(1)
-
-    if not unseal_key:
-        print("Error: VAULT_UNSEAL_KEY environment variable is required")
         sys.exit(1)
 
     # Read current config
@@ -60,7 +58,6 @@ def main():
             'enabled': True,
             'config_file': './openbao.hcl',
             'data_path': './data/openbao',
-            'unseal_keys': [unseal_key],
             'initialized': True
         }
     })

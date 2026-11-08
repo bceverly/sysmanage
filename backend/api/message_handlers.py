@@ -251,6 +251,26 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
             )
         return None
 
+    # Who the storage host sees on its NFS port (25.8, hosts behind NAT).
+    if (
+        command_type_of(message_data) == "list_nfs_peers"
+        or command_type_from_queue(db, message_data) == "list_nfs_peers"
+    ):
+        from backend.services import backup_reach  # noqa: PLC0415
+
+        try:
+            if backup_reach.record_peers(
+                db, getattr(connection, "host_id", None), message_data
+            ):
+                db.commit()
+        except Exception:  # pylint: disable=broad-except
+            db.rollback()
+            logger.exception(
+                "NFS peers result could not be recorded for %s",
+                getattr(connection, "hostname", "unknown"),
+            )
+        return None
+
     # A fresh capability report the server asked for (after restate was
     # installed, or Check again on the Backups page).
     if (

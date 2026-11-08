@@ -23,6 +23,22 @@
     "title": "Accetta la tua invito",
     "validatingToken": "Verifica invito..."
   },
+  "agentCertificates": {
+    "enforceAnyway": "Rendi comunque obbligatorio",
+    "fleet": "{{presenting}} host approvati su {{approved}} presentano un certificato valido; {{expiring}} in rinnovo, {{expired}} scaduti.",
+    "intro": "Ogni agente riceve un certificato client per una chiave che genera autonomamente, lo rinnova prima della scadenza e lo presenta a ogni connessione. Gli agenti eseguono inoltre il pinning di questo server, quindi un proxy o un altro server che presenta un certificato diverso viene rifiutato.",
+    "loadError": "Impossibile caricare le impostazioni dei certificati degli agenti.",
+    "mode": "Modalità",
+    "modeEnforced": "Obbligatorio",
+    "modeEnforcedHelp": "Ogni host approvato deve presentare un certificato valido. Un host senza un certificato in corso di validità può ancora richiederne uno, e nient'altro.",
+    "modeOff": "Disattivato",
+    "modeOffHelp": "I certificati client vengono ignorati. Gli agenti si connettono solo con il proprio token dell'host.",
+    "modeOptional": "Facoltativo",
+    "modeOptionalHelp": "Un certificato presentato da un agente deve essere valido per il suo host; un agente senza certificato si connette comunque con il token dell'host.",
+    "noneYet": "Nessun host presenta ancora un certificato. Gli agenti ne ricevono uno quando vengono aggiornati; nginx lo richiede dopo che il pacchetto del server ha aggiunto le impostazioni dei certificati degli agenti (un aggiornamento lo fa quando esiste la CA di SysManage).",
+    "saveError": "Impossibile salvare l'impostazione dei certificati degli agenti.",
+    "title": "Certificati degli agenti (TLS reciproco)"
+  },
   "agentMirrors": {
     "add": "Aggiungi",
     "colActions": "Azioni",
@@ -760,7 +776,8 @@
     "clocksOutOfBounds": "Orologi fuori dai limiti",
     "hardwareNeedsAttention": "Hardware che richiede attenzione",
     "backupsAttention": "Backup che richiedono attenzione",
-    "backupsEscrowStale": "Esportazione delle chiavi di emergenza non aggiornata"
+    "backupsEscrowStale": "Esportazione delle chiavi di emergenza non aggiornata",
+    "backupsServerUnprotected": "Questo server SysManage non ha un backup riuscito"
   },
   "dataGrid": {
     "columnVisibility": "Visibilità colonne",
@@ -1821,6 +1838,19 @@
     "capabilitiesFullTooltip": "Questo agente annuncia l'intero set di capacità",
     "capabilitiesLimited": "Limitato",
     "capabilitiesLimitedTooltip": "Questo agente segnala che non può eseguire alcuni comandi",
+    "certificate": {
+      "column": "Certificato",
+      "expired": "Scaduto",
+      "expiredTip": "Il certificato è scaduto. L'agente ne richiede uno nuovo alla prossima connessione.",
+      "expiring": "In rinnovo",
+      "expiringTip": "Il certificato scade entro 30 giorni; l'agente lo rinnova autonomamente.",
+      "none": "Nessuno",
+      "noneTip": "Nessun certificato ancora emesso: l'agente ne richiede uno appena viene aggiornato.",
+      "notPresented": "Non presentato",
+      "notPresentedTip": "È stato emesso un certificato, ma nessuna connessione nelle ultime 24 ore lo ha presentato. Aggiornare l'agente e verificare che nginx richieda i certificati client.",
+      "presenting": "Presentato",
+      "presentingTip": "Questo host presenta un certificato client valido."
+    },
     "childHostFilter": "Filtro host figlio",
     "childHostOf": "Host figlio di {{parent}}",
     "childHostsOnly": "Solo host figlio",
@@ -2501,7 +2531,7 @@
     "toggleMenu": "Attiva/disattiva menu",
     "updates": "Aggiornamenti",
     "users": "Utenti",
-    "vulnerabilities": "Vulnerebilità",
+    "vulnerabilities": "Vulnerabilità",
     "advisor": "Consulente",
     "hostMetrics": "Metriche degli host",
     "assetDiscovery": "Rilevamento di rete",
@@ -5410,6 +5440,7 @@
       "notPrivileged": "L'agente deve essere eseguito come root",
       "toolOutdated": "Aggiorna restate",
       "wrongPlatform": "Non supportato su questo sistema operativo",
+      "noNfsv4Client": "Questo sistema operativo non ha un client NFSv4",
       "missingNfsClient": "Installa il client NFS",
       "storageUnreachable": "Spazio di backup non raggiungibile"
     },
@@ -5677,7 +5708,9 @@
       "until": "{{percent}}% tra circa {{days}} giorni"
     },
     "reach": {
-      "unreachable": "Questo host non riesce a raggiungere lo spazio di backup ({{storage}}, {{address}}, porta NFS {{port}}). I backup richiedono un percorso di rete fino a esso."
+      "unreachable": "Questo host non riesce a raggiungere lo spazio di backup ({{storage}}, {{address}}, porta NFS {{port}}). I backup richiedono un percorso di rete fino a esso.",
+      "behindNat": "Questo host è dietro NAT: l'archiviazione dei backup ({{storage}}) lo vede come {{seen}}, non come {{address}}, quindi rifiuta il montaggio. Metti l'host sulla rete dell'host di archiviazione (una rete con bridge per una macchina virtuale) invece che dietro il suo NAT.",
+      "behindNatLabel": "Dietro NAT"
     },
     "network": {
       "leftOut": "Esclusi automaticamente (mount di rete su questo host): {{paths}}",
@@ -5788,6 +5821,27 @@
       "replaces": "Queste impostazioni dell'host vengono sostituite:",
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Le sue impostazioni corrispondono già al criterio per tag."
+    },
+    "server": {
+      "backUp": "Esegui il backup di questo server SysManage",
+      "title": "Esegui il backup di questo server SysManage",
+      "noGoodBackup": "Questo server SysManage ({{host}}) non ha un backup riuscito recente. La sua riga qui sotto spiega perché.",
+      "noPolicy": "Questo server SysManage ({{host}}) non ha un backup. Se va perso, ogni agente dovrà registrarsi di nuovo e i segreti di OpenBAO e i database andranno perduti.",
+      "noPolicyMany": "Questo server SysManage non ha un backup. Se va perso, ogni agente dovrà registrarsi di nuovo e i segreti di OpenBAO e i database andranno perduti.",
+      "unknown": "SysManage non riesce a capire quale host sia questo server, quindi non può dire se il server ha un backup. Scegli il suo host per eseguirne il backup.",
+      "saveError": "Impossibile salvare il backup del server SysManage.",
+      "host": "L'host su cui è in esecuzione questo server SysManage",
+      "hostHelp": "Nessun host ha il nome di questo server. Scegli quello su cui è in esecuzione il suo agente.",
+      "kept": "Incluso nel backup",
+      "keptHelp": "L'autorità di certificazione degli agenti e l'identità del server (se vanno perse, ogni agente deve registrarsi di nuovo), OpenBAO, PostgreSQL, la configurazione, i certificati TLS e la licenza, insieme al resto dell'host.",
+      "skipped": "Escluso",
+      "skippedHelp": "Scaricato di nuovo quando serve: pacchetti dei motori, il database GeoIP, mirror dei pacchetti e log.",
+      "never": "Mai incluso nel backup",
+      "neverHelp": "Contengono la chiave di unseal o di ripristino di OpenBAO e il token OpenBAO del server. Conservane una copia in un luogo sicuro, lontano dal server, ad esempio in un gestore di password, così che un backup rubato non possa effettuare l'unseal della copia di OpenBAO che contiene.",
+      "pauseNote": "PostgreSQL viene arrestato mentre si copiano i suoi file, quindi in quel periodo SysManage potrebbe mostrare errori. Scegli un'ora di inizio tranquilla.",
+      "unencrypted": "Questo backup non è cifrato e contiene la password del database presa dalla configurazione. Proteggi lo spazio dei backup quanto il server stesso.",
+      "needsEscrow": "Salva prima una chiave di deposito di emergenza nel pannello Cifratura di un host. Il backup del server SysManage stesso è cifrato con essa, così il ripristino di OpenBAO non richiede mai una chiave conservata in OpenBAO.",
+      "escrowEncrypted": "Cifrato con la tua chiave di deposito di emergenza ({{fingerprint}}). SysManage non ne possiede mai la parte segreta, quindi questo backup si ripristina a mano con quella chiave, come descrive la procedura di ripristino del server."
     }
   },
   "cloudBackup": {

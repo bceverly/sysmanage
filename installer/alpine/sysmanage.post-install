@@ -116,6 +116,24 @@ echo 'only developing, set `dev_mode: true` in the server configuration instead:
 echo 'that skips nginx entirely and serves the UI and API directly.'
 # END GENERATED TLS MESSAGE
 # BEGIN GENERATED TLS PREFLIGHT - edit scripts/render_nginx_configs.py
+if [ -f '/etc/sysmanage/certs/ca.crt' ] && [ ! -f '/etc/sysmanage/nginx/agent-mtls.conf' ] && command -v nginx >/dev/null 2>&1; then
+    # Agent mutual TLS: ask agents for their client certificate, advertising
+    # only the SysManage CA (browsers are never prompted).  Kept only if nginx
+    # accepts it, so a bad CA file can never stop nginx from starting.
+    mkdir -p "$(dirname '/etc/sysmanage/nginx/agent-mtls.conf')"
+    printf '%s\n' '# Written by the SysManage package: agent mutual TLS.' \
+        'ssl_verify_client optional_no_ca;' \
+        'ssl_client_certificate /etc/sysmanage/certs/ca.crt;' > '/etc/sysmanage/nginx/agent-mtls.conf'
+    if ! nginx -t >/dev/null 2>&1; then
+        # Rejected -- or nginx cannot pass its test yet (no TLS certificate on
+        # a fresh install).  Either way leave nginx as it was; the next
+        # upgrade tries again.
+        rm -f '/etc/sysmanage/nginx/agent-mtls.conf'
+        echo '[!] Agent certificate settings left out of nginx for now.'
+    else
+        echo '[OK] nginx will ask agents for their client certificates.'
+    fi
+fi
 if [ ! -f '/etc/sysmanage/tls/server.crt' ] || [ ! -f '/etc/sysmanage/tls/server.key' ]; then
     echo ''
     echo '[!] TLS certificate NOT FOUND - nginx will refuse to start.'

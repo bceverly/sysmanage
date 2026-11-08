@@ -23,6 +23,22 @@
     "title": "초대 수락하기",
     "validatingToken": "초대 확인 중..."
   },
+  "agentCertificates": {
+    "enforceAnyway": "그래도 필수로 설정",
+    "fleet": "승인된 호스트 {{approved}}개 중 {{presenting}}개가 유효한 인증서를 제시합니다. 갱신 중 {{expiring}}개, 만료됨 {{expired}}개.",
+    "intro": "각 에이전트는 스스로 생성한 키에 대한 클라이언트 인증서를 받고, 만료되기 전에 갱신하며, 모든 연결에서 이를 제시합니다. 에이전트는 이 서버의 인증서도 고정하므로 다른 인증서를 제시하는 프록시나 다른 서버는 거부됩니다.",
+    "loadError": "에이전트 인증서 설정을 불러올 수 없습니다.",
+    "mode": "모드",
+    "modeEnforced": "필수",
+    "modeEnforcedHelp": "승인된 모든 호스트는 유효한 인증서를 제시해야 합니다. 현재 유효한 인증서가 없는 호스트는 인증서 요청만 할 수 있으며 그 외에는 아무것도 할 수 없습니다.",
+    "modeOff": "꺼짐",
+    "modeOffHelp": "클라이언트 인증서를 무시합니다. 에이전트는 호스트 토큰만으로 연결합니다.",
+    "modeOptional": "선택",
+    "modeOptionalHelp": "에이전트가 제시하는 인증서는 해당 호스트에 유효해야 합니다. 인증서가 없는 에이전트도 호스트 토큰으로 계속 연결됩니다.",
+    "noneYet": "아직 인증서를 제시하는 호스트가 없습니다. 에이전트는 업데이트될 때 인증서를 받습니다. 서버 패키지가 에이전트 인증서 설정을 추가하면 nginx가 인증서를 요청합니다(SysManage CA가 있으면 업그레이드 시 이 작업이 수행됩니다).",
+    "saveError": "에이전트 인증서 설정을 저장할 수 없습니다.",
+    "title": "에이전트 인증서(상호 TLS)"
+  },
   "agentMirrors": {
     "add": "추가",
     "colActions": "액션",
@@ -760,7 +776,8 @@
     "clocksOutOfBounds": "허용 범위를 벗어난 시계",
     "hardwareNeedsAttention": "조치가 필요한 하드웨어",
     "backupsAttention": "주의가 필요한 백업",
-    "backupsEscrowStale": "비상용 키 내보내기가 오래됨"
+    "backupsEscrowStale": "비상용 키 내보내기가 오래됨",
+    "backupsServerUnprotected": "이 SysManage 서버에는 정상 백업이 없습니다"
   },
   "dataGrid": {
     "columnVisibility": "열 표시",
@@ -1821,6 +1838,19 @@
     "capabilitiesFullTooltip": "이 에이전트는 전체 기능 세트를 광고합니다",
     "capabilitiesLimited": "제한된",
     "capabilitiesLimitedTooltip": "이 에이전트는 일부 명령을 실행할 수 없다고 보고함",
+    "certificate": {
+      "column": "인증서",
+      "expired": "만료됨",
+      "expiredTip": "인증서가 만료되었습니다. 에이전트는 다음 연결 시 새 인증서를 요청합니다.",
+      "expiring": "갱신 중",
+      "expiringTip": "인증서가 30일 이내에 만료됩니다. 에이전트가 자체적으로 갱신합니다.",
+      "none": "없음",
+      "noneTip": "아직 발급된 인증서가 없습니다. 에이전트는 업데이트되면 인증서를 요청합니다.",
+      "notPresented": "제시되지 않음",
+      "notPresentedTip": "인증서가 발급되었지만 지난 24시간 동안 이를 제시한 연결이 없습니다. 에이전트를 업데이트하고 nginx가 클라이언트 인증서를 요청하는지 확인하십시오.",
+      "presenting": "제시됨",
+      "presentingTip": "이 호스트는 유효한 클라이언트 인증서를 제시합니다."
+    },
     "childHostFilter": "자식 호스트 필터",
     "childHostOf": "{{parent}}의 자식 호스트",
     "childHostsOnly": "자식 호스트만",
@@ -5410,6 +5440,7 @@
       "notPrivileged": "에이전트는 root로 실행되어야 합니다",
       "toolOutdated": "restate를 업그레이드하세요",
       "wrongPlatform": "이 운영 체제에서는 지원되지 않음",
+      "noNfsv4Client": "이 OS에는 NFSv4 클라이언트가 없습니다",
       "missingNfsClient": "NFS 클라이언트 설치",
       "storageUnreachable": "백업 스토리지에 연결할 수 없음"
     },
@@ -5677,7 +5708,9 @@
       "until": "약 {{days}}일 후 {{percent}}%"
     },
     "reach": {
-      "unreachable": "이 호스트는 백업 스토리지({{storage}}, {{address}}, NFS 포트 {{port}})에 연결할 수 없습니다. 백업하려면 그곳까지의 네트워크 경로가 필요합니다."
+      "unreachable": "이 호스트는 백업 스토리지({{storage}}, {{address}}, NFS 포트 {{port}})에 연결할 수 없습니다. 백업하려면 그곳까지의 네트워크 경로가 필요합니다.",
+      "behindNat": "이 호스트는 NAT 뒤에 있습니다. 백업 스토리지({{storage}})에서 이 호스트가 {{address}}가 아니라 {{seen}}(으)로 보이므로 마운트를 거부합니다. 호스트를 NAT 뒤에 두지 말고 스토리지 호스트의 네트워크(가상 머신의 경우 브리지 네트워크)에 연결하세요.",
+      "behindNatLabel": "NAT 뒤"
     },
     "network": {
       "leftOut": "자동으로 제외됨(이 호스트의 네트워크 마운트): {{paths}}",
@@ -5788,6 +5821,27 @@
       "replaces": "이 호스트의 다음 설정이 바뀝니다:",
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "설정이 이미 태그 정책과 같습니다."
+    },
+    "server": {
+      "backUp": "이 SysManage 서버 백업",
+      "title": "이 SysManage 서버 백업",
+      "noGoodBackup": "이 SysManage 서버({{host}})에는 최근의 정상 백업이 없습니다. 아래 해당 행에 이유가 표시됩니다.",
+      "noPolicy": "이 SysManage 서버({{host}})는 백업되지 않습니다. 서버를 잃으면 모든 에이전트가 다시 등록해야 하며 OpenBAO 비밀과 데이터베이스도 사라집니다.",
+      "noPolicyMany": "이 SysManage 서버는 백업되지 않습니다. 서버를 잃으면 모든 에이전트가 다시 등록해야 하며 OpenBAO 비밀과 데이터베이스도 사라집니다.",
+      "unknown": "SysManage가 어느 호스트가 이 서버인지 알 수 없어 서버가 백업되는지 알 수 없습니다. 백업하려면 해당 호스트를 선택하세요.",
+      "saveError": "SysManage 서버 백업을 저장할 수 없습니다.",
+      "host": "이 SysManage 서버가 실행되는 호스트",
+      "hostHelp": "이 서버와 이름이 같은 호스트가 없습니다. 서버의 에이전트가 실행되는 호스트를 선택하세요.",
+      "kept": "백업됨",
+      "keptHelp": "에이전트의 인증 기관과 서버 ID(잃으면 모든 에이전트가 다시 등록해야 함), OpenBAO, PostgreSQL, 구성, TLS 인증서, 라이선스와 호스트의 나머지 부분.",
+      "skipped": "제외됨",
+      "skippedHelp": "필요할 때 다시 다운로드됨: 엔진 번들, GeoIP 데이터베이스, 패키지 미러, 로그.",
+      "never": "백업하지 않음",
+      "neverHelp": "이 파일에는 OpenBAO의 봉인 해제 키 또는 복구 키와 서버의 OpenBAO 토큰이 들어 있습니다. 도난당한 백업으로 그 안의 OpenBAO 사본을 봉인 해제할 수 없도록 비밀번호 관리자처럼 서버와 떨어진 안전한 곳에 사본을 보관하세요.",
+      "pauseNote": "PostgreSQL은 자체 파일을 복사하는 동안 중지되므로 그동안 SysManage에 오류가 표시될 수 있습니다. 한가한 시작 시간을 선택하세요.",
+      "unencrypted": "이 백업은 암호화되지 않으며 구성의 데이터베이스 비밀번호를 포함합니다. 백업 저장소를 서버 자체만큼 안전하게 보호하세요.",
+      "needsEscrow": "먼저 호스트의 암호화 패널에서 비상용 에스크로 키를 저장하세요. SysManage 서버 자체의 백업은 이 키로 암호화되므로 OpenBAO를 복원할 때 OpenBAO 안에 보관된 키가 필요하지 않습니다.",
+      "escrowEncrypted": "비상용 에스크로 키({{fingerprint}})로 암호화되었습니다. SysManage는 비밀 키 부분을 보관하지 않으므로, 이 백업은 서버 복구 런북에 설명된 대로 그 키로 직접 복원합니다."
     }
   },
   "cloudBackup": {

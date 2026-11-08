@@ -23,6 +23,22 @@
     "title": "Aceptar tu Invitación",
     "validatingToken": "Validando invitación..."
   },
+  "agentCertificates": {
+    "enforceAnyway": "Hacer obligatorio de todos modos",
+    "fleet": "{{presenting}} de {{approved}} hosts aprobados presentan un certificado válido; {{expiring}} en renovación, {{expired}} caducados.",
+    "intro": "Cada agente obtiene un certificado de cliente para una clave que genera él mismo, lo renueva antes de que caduque y lo presenta en cada conexión. Los agentes también fijan este servidor, de modo que se rechaza un proxy u otro servidor que presente un certificado distinto.",
+    "loadError": "No se pudo cargar la configuración de certificados de agente.",
+    "mode": "Modo",
+    "modeEnforced": "Obligatorio",
+    "modeEnforcedHelp": "Cada host aprobado debe presentar un certificado válido. Un host sin uno vigente aún puede solicitarlo, y nada más.",
+    "modeOff": "Desactivado",
+    "modeOffHelp": "Los certificados de cliente se ignoran. Los agentes se conectan solo con su token de host.",
+    "modeOptional": "Opcional",
+    "modeOptionalHelp": "Un certificado que presente un agente debe ser válido para su host; un agente sin certificado sigue conectándose con su token de host.",
+    "noneYet": "Ningún host presenta todavía un certificado. Los agentes obtienen uno cuando se actualizan; nginx lo solicita una vez que el paquete del servidor ha añadido su configuración de certificados de agente (una actualización lo hace cuando existe la CA de SysManage).",
+    "saveError": "No se pudo guardar la configuración de certificados de agente.",
+    "title": "Certificados de agente (TLS mutuo)"
+  },
   "agentMirrors": {
     "add": "Agregar",
     "colActions": "Acciones",
@@ -189,7 +205,7 @@
     },
     "downloadError": "No se pudo descargar ISO.",
     "empty": "Aún no hay ejecuciones de colección. Haga clic en “Nueva Ejecución de Colección” para iniciar una.",
-    "licenseRequired": "Motor de recolección en aire seco no cargado; se requiere licencia Pro+",
+    "licenseRequired": "Motor de recolección air-gap no cargado; se requiere licencia Pro+",
     "loadError": "No se pudieron cargar las ejecuciones.",
     "multiDiscInfo": "Esta ejecución produjo {{count}} discos. Elija cuáles descargar.",
     "newRun": "Nuevo Ejecución de Colección",
@@ -760,7 +776,8 @@
     "clocksOutOfBounds": "Relojes fuera de límites",
     "hardwareNeedsAttention": "Hardware que requiere atención",
     "backupsAttention": "Copias de seguridad que requieren atención",
-    "backupsEscrowStale": "Exportación de claves de emergencia desactualizada"
+    "backupsEscrowStale": "Exportación de claves de emergencia desactualizada",
+    "backupsServerUnprotected": "Este servidor SysManage no tiene una copia de seguridad correcta"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidad de columnas",
@@ -1821,6 +1838,19 @@
     "capabilitiesFullTooltip": "Este agente anuncia el conjunto completo de habilidades",
     "capabilitiesLimited": "Limitado",
     "capabilitiesLimitedTooltip": "Este agente informa que no puede ejecutar algunos comandos",
+    "certificate": {
+      "column": "Certificado",
+      "expired": "Caducado",
+      "expiredTip": "El certificado caducó. El agente solicita uno nuevo en su próxima conexión.",
+      "expiring": "En renovación",
+      "expiringTip": "El certificado caduca dentro de 30 días; el agente lo renueva por sí solo.",
+      "none": "Ninguno",
+      "noneTip": "Aún no se ha emitido ningún certificado: el agente solicita uno cuando se actualiza.",
+      "notPresented": "No presentado",
+      "notPresentedTip": "Se emitió un certificado, pero ninguna conexión de las últimas 24 horas lo presentó. Actualice el agente y compruebe que nginx solicita certificados de cliente.",
+      "presenting": "Presentado",
+      "presentingTip": "Este host presenta un certificado de cliente válido."
+    },
     "childHostFilter": "Filtro de host hijo",
     "childHostOf": "Host hijo de {{parent}}",
     "childHostsOnly": "Solo hosts hijos",
@@ -3286,7 +3316,7 @@
   },
   "serverRole": {
     "collector": {
-      "description": "La mitad conectada a internet de un par con brecha año. Refleja los repositorios de paquetes upstream, recopila feeds de CVE y cumplimiento, y los empaqueta en imágenes ISO firmadas que lleva físicamente a través de la brecha año. Elija esto en el servidor con acceso a internet y construcción de medios.",
+      "description": "La mitad conectada a internet de un par air-gap. Refleja los repositorios de paquetes upstream, recopila feeds de CVE y cumplimiento, y los empaqueta en imágenes ISO firmadas que lleva físicamente a través del air gap. Elija esto en el servidor con acceso a internet y construcción de medios.",
       "title": "Recopilador aislado (lado en línea)"
     },
     "currentTag": "(actual)",
@@ -3295,7 +3325,7 @@
     "loadError": "No se pudo cargar el rol actual del servidor.",
     "menuTitle": "Rol del servidor",
     "repository": {
-      "description": "La mitad aislada de un par con brecha año, sin acceso a internet. Ingesta los medios ISO producidos por el Recolector, verifica su firma y sirve los paquetes a hosts gestionados en la red privada para que puedan actualizar normalmente. Elija esto en el servidor dentro del enclave con brecha año.",
+      "description": "La mitad aislada de un par air-gap, sin acceso a internet. Ingesta los medios ISO producidos por el Recolector, verifica su firma y sirve los paquetes a hosts gestionados en la red privada para que puedan actualizar normalmente. Elija esto en el servidor dentro del enclave aislado (air-gapped).",
       "title": "Repositorio aislado (lado desconectado)"
     },
     "restartHint": "Reinicie el servidor SysManage después de guardar para que el nuevo rol tenga efecto completo.",
@@ -3304,8 +3334,8 @@
     "saved": "Rol del servidor guardado. Reinicie el servidor para que tenga efecto completo.",
     "saving": "Guardando...",
     "standard": {
-      "description": "Por defecto. Este servidor gestiona hosts directamente a través de la red sin separación por brechas año. Elija esto para cualquier despliegue ordinario -- es lo que cada servidor ejecuta como predeterminado a menos que necesite explícitamente la mitad de un par con brecha año.",
-      "title": "Estándar (sin brecha año)"
+      "description": "Por defecto. Este servidor gestiona hosts directamente a través de la red sin separación air-gap. Elija esto para cualquier despliegue ordinario -- es lo que cada servidor ejecuta como predeterminado a menos que necesite explícitamente la mitad de un par air-gap.",
+      "title": "Estándar (sin air gap)"
     }
   },
   "settings": {
@@ -5410,6 +5440,7 @@
       "notPrivileged": "El agente debe ejecutarse como root",
       "toolOutdated": "Actualice restate",
       "wrongPlatform": "No compatible con este sistema operativo",
+      "noNfsv4Client": "Este sistema operativo no tiene cliente NFSv4",
       "missingNfsClient": "Instalar el cliente NFS",
       "storageUnreachable": "No llega al almacenamiento de copias de seguridad"
     },
@@ -5677,7 +5708,9 @@
       "until": "{{percent}}% en unos {{days}} días"
     },
     "reach": {
-      "unreachable": "Este host no puede llegar al almacenamiento de copias de seguridad ({{storage}}, {{address}}, puerto NFS {{port}}). Las copias de seguridad necesitan una ruta de red hasta él."
+      "unreachable": "Este host no puede llegar al almacenamiento de copias de seguridad ({{storage}}, {{address}}, puerto NFS {{port}}). Las copias de seguridad necesitan una ruta de red hasta él.",
+      "behindNat": "Este host está detrás de NAT: el almacenamiento de copias de seguridad ({{storage}}) lo ve como {{seen}}, no como {{address}}, por lo que rechaza el montaje. Ponga el host en la red del host de almacenamiento (una red en puente para una máquina virtual) en lugar de detrás de su NAT.",
+      "behindNatLabel": "Detrás de NAT"
     },
     "network": {
       "leftOut": "Excluidos automáticamente (montajes de red en este host): {{paths}}",
@@ -5788,6 +5821,27 @@
       "replaces": "Se reemplazan estos ajustes de este host:",
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Sus ajustes ya coinciden con la política de etiqueta."
+    },
+    "server": {
+      "backUp": "Hacer copia de seguridad de este servidor SysManage",
+      "title": "Hacer copia de seguridad de este servidor SysManage",
+      "noGoodBackup": "Este servidor SysManage ({{host}}) no tiene una copia de seguridad correcta reciente. Su fila de abajo indica el motivo.",
+      "noPolicy": "Este servidor SysManage ({{host}}) no tiene copia de seguridad. Si se pierde, todos los agentes deberán inscribirse de nuevo, y se perderán los secretos de OpenBAO y las bases de datos.",
+      "noPolicyMany": "Este servidor SysManage no tiene copia de seguridad. Si se pierde, todos los agentes deberán inscribirse de nuevo, y se perderán los secretos de OpenBAO y las bases de datos.",
+      "unknown": "SysManage no puede saber qué host es este servidor, así que no puede saber si el servidor tiene copia de seguridad. Elija su host para hacer la copia.",
+      "saveError": "No se pudo guardar la copia de seguridad del servidor SysManage.",
+      "host": "El host en el que se ejecuta este servidor SysManage",
+      "hostHelp": "Ningún host tiene el nombre de este servidor. Elija aquel en el que se ejecuta su agente.",
+      "kept": "Incluido en la copia",
+      "keptHelp": "La autoridad de certificación de los agentes y la identidad del servidor (si se pierden, todos los agentes deben inscribirse de nuevo), OpenBAO, PostgreSQL, la configuración, los certificados TLS y la licencia, junto con el resto del host.",
+      "skipped": "Excluido",
+      "skippedHelp": "Se descarga de nuevo cuando hace falta: paquetes de motores, la base de datos GeoIP, réplicas de paquetes y registros.",
+      "never": "Nunca se incluye en la copia",
+      "neverHelp": "Contienen la clave de desellado o de recuperación de OpenBAO y el token de OpenBAO del servidor. Guarde una copia en un lugar seguro, lejos del servidor, como un gestor de contraseñas, para que una copia de seguridad robada no pueda desellar la copia de OpenBAO que contiene.",
+      "pauseNote": "PostgreSQL se detiene mientras se copian sus propios archivos, por lo que SysManage puede mostrar errores durante ese tiempo. Elija una hora de inicio tranquila.",
+      "unencrypted": "Esta copia de seguridad no está cifrada y contiene la contraseña de la base de datos de la configuración. Proteja el almacenamiento de copias tanto como el propio servidor.",
+      "needsEscrow": "Guarde primero una clave de custodia de emergencia en el panel Cifrado de un host. La copia de seguridad del propio servidor SysManage se cifra con ella, de modo que restaurar OpenBAO nunca necesita una clave guardada dentro de OpenBAO.",
+      "escrowEncrypted": "Cifrada con su clave de custodia de emergencia ({{fingerprint}}). SysManage nunca guarda su parte secreta, así que esta copia se restaura a mano con esa clave, como describe el manual de recuperación del servidor."
     }
   },
   "cloudBackup": {

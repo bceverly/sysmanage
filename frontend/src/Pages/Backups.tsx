@@ -18,6 +18,7 @@ import BackupRunsList from '../Components/Backups/BackupRunsList';
 import BackupTagPolicies from '../Components/Backups/BackupTagPolicies';
 import BackupEscrowBanner from '../Components/Backups/BackupEscrowBanner';
 import BackupKeyExportCard from '../Components/Backups/BackupKeyExportCard';
+import BackupServerCard from '../Components/Backups/BackupServerCard';
 import CloudBackupSection from '../Components/CloudBackup/CloudBackupSection';
 import { statusColor, statusLabel } from '../Components/Backups/backupLabels';
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
@@ -74,6 +75,7 @@ const Backups: React.FC = () => {
     return (
         <Box>
             <Typography variant="h5" sx={{ mb: 2 }}>{t('backups.title', 'Backups')}</Typography>
+            <BackupServerCard server={data.server} hosts={data.hosts} canManage={canManage} onChanged={changed} />
             <BackupEscrowBanner refreshKey={refreshKey} />
             {canManage && <BackupKeyExportCard refreshKey={refreshKey} />}
             <BackupTargetCard target={data.target} hosts={data.hosts} versions={data.restate_versions}

@@ -70,8 +70,8 @@ vault:
     enabled: true
     config_file: ./openbao.hcl
     data_path: ./data/openbao
-    unseal_keys:
-    - w6aIlwzcDBzYIR6jRKxCdbJg0O/iRoCOlX5j3D3DXtQ=
+    # The unseal key is never kept here: start-openbao unseals from the 0600
+    # .vault_credentials file (packages: /var/lib/openbao/init.json).
     initialized: true
 email:
   enabled: false

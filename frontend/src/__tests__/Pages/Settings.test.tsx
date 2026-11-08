@@ -22,6 +22,7 @@ vi.mock("@mui/x-data-grid", () => ({
 vi.mock("../../Components/SearchBox", () => ({ default: () => <div data-testid="stub-SearchBox" /> }));
 vi.mock("../../Components/ColumnVisibilityButton", () => ({ default: () => <div data-testid="stub-ColumnVisibilityButton" /> }));
 vi.mock("../../Components/ConfigurationSettings", () => ({ default: () => <div data-testid="stub-ConfigurationSettings" /> }));
+vi.mock("../../Components/AgentCertificatesCard", () => ({ default: () => <div data-testid="stub-AgentCertificatesCard" /> }));
 vi.mock("../../Components/AntivirusDefaultsSettings", () => ({ default: () => <div data-testid="stub-AntivirusDefaultsSettings" /> }));
 vi.mock("../../Components/HostDefaultsSettings", () => ({ default: () => <div data-testid="stub-HostDefaultsSettings" /> }));
 vi.mock("../../Components/FirewallRolesSettings", () => ({ default: () => <div data-testid="stub-FirewallRolesSettings" /> }));

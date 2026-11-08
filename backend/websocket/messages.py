@@ -168,6 +168,9 @@ class CommandType(str, Enum):
     # Can the host reach its backup storage (a TCP connection to NFS port 2049
     # of the storage host's address)?  Only that address is sent.
     CHECK_BACKUP_STORAGE = "check_backup_storage"
+    # 25.8: who the storage host sees on its NFS port (a host behind NAT is
+    # found by its held reach-check connection).  Reads, changes nothing.
+    LIST_NFS_PEERS = "list_nfs_peers"
     # 24.12 iCloud Photos to local, on the storage host only: enable it
     # (install icloudpd, prepare the cloud root), and run an account's job
     # (connect, download, reconcile, libraries), and remove an account's
@@ -593,10 +596,21 @@ class DiagnosticCollectionResultMessage(Message):
 
 
 # Message factory for creating messages from raw data
-def create_message(  # NOSONAR
+def create_message(raw_data: Dict[str, Any]) -> Message:
+    """Create appropriate message object from raw dictionary data, keeping
+    the sender's ``message_id``: the server confirms and de-duplicates an
+    agent's message by it (websocket/delivery_confirmation.py).  The typed
+    constructors below each minted a new one."""
+    message = _typed_message(raw_data)
+    sent_id = raw_data.get("message_id")
+    if isinstance(sent_id, str) and sent_id:
+        message.message_id = sent_id
+    return message
+
+
+def _typed_message(  # NOSONAR
     raw_data: Dict[str, Any],
 ) -> Message:
-    """Create appropriate message object from raw dictionary data."""
     message_type = raw_data.get("message_type")
 
     if message_type == MessageType.SYSTEM_INFO:

@@ -15,6 +15,33 @@ import { SysManageHost } from '../Services/hosts';
 import { appLocale } from '../utils/locale';
 import { buildAssetTagColumn } from './hostAssetTag';
 
+type ChipColor = 'success' | 'warning' | 'error' | 'default';
+
+/** certificate_status from GET /hosts -> label, tooltip and color.  Literal
+ *  t() calls, so the i18n checks can see every key. */
+export function certificateStatus(t: TFunction, status: string):
+    { label: string; tip: string; color: ChipColor } | null {
+    switch (status) {
+        case 'presenting':
+            return { label: t('hosts.certificate.presenting', 'Presented'),
+                tip: t('hosts.certificate.presentingTip', 'This host presents a valid client certificate.'), color: 'success' };
+        case 'expiring':
+            return { label: t('hosts.certificate.expiring', 'Renewing'),
+                tip: t('hosts.certificate.expiringTip', 'The certificate expires within 30 days; the agent renews it on its own.'), color: 'warning' };
+        case 'not_presented':
+            return { label: t('hosts.certificate.notPresented', 'Not presented'),
+                tip: t('hosts.certificate.notPresentedTip', 'A certificate was issued but no connection in the last 24 hours presented it. Update the agent, and check that nginx asks for client certificates.'), color: 'warning' };
+        case 'expired':
+            return { label: t('hosts.certificate.expired', 'Expired'),
+                tip: t('hosts.certificate.expiredTip', 'The certificate expired. The agent requests a new one when it next connects.'), color: 'error' };
+        case 'none':
+            return { label: t('hosts.certificate.none', 'None'),
+                tip: t('hosts.certificate.noneTip', 'No certificate issued yet: the agent requests one once it is updated.'), color: 'default' };
+        default:
+            return null;
+    }
+}
+
 interface BuildHostColumnsArgs {
     t: TFunction;
     navigate: (path: string) => void;
@@ -218,6 +245,23 @@ export function buildHostColumns({
             field: 'agent_version',
             headerName: t('hosts.agentVersion', 'Agent Version'),
             width: 130,
+        },
+        {
+            // Agent mutual TLS (25.10): where the host stands, so an operator
+            // can see who is not ready before enforcing certificates.
+            field: 'certificate_status',
+            headerName: t('hosts.certificate.column', 'Certificate'),
+            width: 130,
+            renderCell: (params) => {
+                const status = certificateStatus(t, params.value as string);
+                if (!status || params.row.approval_status !== 'approved') {
+                    return null;
+                }
+                return (
+                    <Chip label={status.label} title={status.tip} color={status.color}
+                        size="small" variant="outlined" />
+                );
+            }
         },
         {
             field: 'script_execution_enabled',

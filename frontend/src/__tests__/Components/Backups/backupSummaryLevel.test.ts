@@ -19,6 +19,11 @@ describe("backupSummaryLevel", () => {
   ])("counts %o, storage problem %s -> %s", (counts, problem, level) => {
     expect(backupSummaryLevel({ counts, target_problem: problem })).toBe(level);
   });
+
+  test("the SysManage server with no good backup of its own is a warning (25.9)", () => {
+    expect(backupSummaryLevel({ counts: { ok: 3 }, target_problem: false, server_unprotected: true }))
+      .toBe("warning");
+  });
 });
 
 describe("reasonLabel", () => {

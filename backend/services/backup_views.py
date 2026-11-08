@@ -26,6 +26,8 @@ from sqlalchemy.orm import Session
 from backend.persistence import models
 from backend.services import backup_equip
 from backend.services import backup_reach
+from backend.services import backup_server
+from backend.services import backup_server_paths as server_paths
 from backend.services import backup_tag_policies
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_forecast
@@ -141,8 +143,10 @@ def policy_dict(policy: models.BackupPolicy) -> Dict[str, Any]:
         # The storage host's restate honors a yearly count (2.2.0.12+).
         "yearly_supported": "keep_yearly" in jobs.storage_abilities(policy),
         "check_interval_days": policy.check_interval_days,
-        "quiesce": bool(policy.quiesce),
+        "quiesce": server_paths.quiesce(policy),
         "quiesce_with": jobs.quiesce_names(policy),
+        # The SysManage server's own backup (25.9).
+        "server_preset": server_paths.server_policy(policy),
         "abilities": jobs.abilities(policy),
         # None: not reported yet (older agent or restate) -- names are typed.
         "available_hooks": (
@@ -391,6 +395,8 @@ def overview(db: Session) -> Dict[str, Any]:
         "hosts": rows,
         "counts": counts,
         "restate_versions": versions,
+        # The SysManage server's own backup (25.9): warned on while it has none.
+        "server": backup_server.status(db, rows),
     }
 
 
@@ -419,4 +425,14 @@ def attention_count(data: Dict[str, Any]) -> int:
         and row.get("first_fit")
         and not row["first_fit"]["fits"]
     )
-    return hosts + held + int(target_problem(data))
+    return hosts + held + int(target_problem(data)) + int(server_unprotected(data))
+
+
+def server_unprotected(data: Dict[str, Any]) -> bool:
+    """The server's host is known, has no good backup, and its host row is not
+    already counted (an unidentified server is warned on, not counted)."""
+    server = data.get("server") or {}
+    return (
+        server.get("status") in ("no_policy", "no_good_backup")
+        and server.get("host_status") not in ATTENTION_STATUSES
+    )

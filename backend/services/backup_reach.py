@@ -13,6 +13,18 @@ now, the bulk actions and the scheduler all pass it by -- with a message
 saying so, rather than failing every night (production, 2026-10-30: the
 server's own cloud droplet and the home NAS).
 
+Behind NAT (25.8): a host on a private network behind another reaches the
+port, but the storage host sees its traffic come from the gateway, so the
+export made for the host's own address refuses the mount.  When the storage
+host's agent can list who it sees on port 2049 (``list_nfs_peers``), the
+check holds its connection open (HOLD_SECONDS) and reports its source port;
+the storage host is asked at once, the connection is found by that port, and
+an address other than the one the export names is kept (``seen_as``).  Such
+a host is not offered backups either, with what to do instead.  Never is an
+export widened to the gateway's address: every host behind it could mount
+the repository.  NAT that rewrites the source port is not recognized, and
+then nothing is said.
+
 Never-checked, still-checking, or checked against another address (the
 storage host moved) is unknown, and unknown never blocks.  Checks are asked
 for when a host has none for the current address, once a day after that,
@@ -34,6 +46,10 @@ logger = logging.getLogger(__name__)
 
 GROUP = "backup_reach"
 COMMAND = "check_backup_storage"
+PEERS_GROUP = "backup_peers"
+PEERS_COMMAND = "list_nfs_peers"
+# How long the host holds its connection open for the storage host to look.
+HOLD_SECONDS = 60
 PORT = 2049
 UNREACHABLE = "storage_unreachable"
 RECHECK_AFTER = timedelta(days=1)
@@ -75,6 +91,8 @@ def state(db: Session, host: models.Host) -> Optional[Dict[str, Any]]:
         return None
     return {
         "reachable": bool(row.reachable),
+        "seen_as": row.seen_as,
+        "host_address": jobs.host_address(host),
         "address": row.address,
         "port": row.port,
         "storage_fqdn": storage["fqdn"],
@@ -84,14 +102,25 @@ def state(db: Session, host: models.Host) -> Optional[Dict[str, Any]]:
 
 
 def blocked(db: Session, host: models.Host) -> bool:
-    """Known not to reach the storage (unknown never blocks)."""
+    """Known not to reach the storage, or behind NAT (unknown never blocks)."""
     found = state(db, host)
-    return found is not None and not found["reachable"]
+    return found is not None and (not found["reachable"] or bool(found["seen_as"]))
 
 
 def message(db: Session, host: models.Host) -> str:
     """Why backups are not offered to this host."""
     found = state(db, host) or {}
+    if found.get("reachable") and found.get("seen_as"):
+        return _(
+            "This host is behind NAT: the backup storage (%(storage)s) sees "
+            "it as %(seen)s, not %(address)s, so it refuses the mount. Put the "
+            "host on the storage host's network (a bridged network for a "
+            "virtual machine) instead of behind its NAT."
+        ) % {
+            "storage": found.get("storage_fqdn") or "",
+            "seen": found["seen_as"],
+            "address": jobs.host_address(host) or "",
+        }
     return _(
         "This host cannot reach the backup storage (%(storage)s, %(address)s, "
         "NFS port %(port)s). Backups need a network path to it."
@@ -129,14 +158,19 @@ def start(db: Session, host: models.Host, force: bool = False) -> Optional[str]:
         return None
     if str(storage["host_id"]) == str(host.id):
         return None
+    parameters: Dict[str, Any] = {"address": storage["address"]}
+    if _storage_lists_peers(db, storage["host_id"]):
+        parameters["hold_seconds"] = HOLD_SECONDS
     command_id = queue_command(
-        db, host.id, CommandType.CHECK_BACKUP_STORAGE, {"address": storage["address"]}
+        db, host.id, CommandType.CHECK_BACKUP_STORAGE, parameters
     )
     row = _row(db, host.id) or models.BackupReach(host_id=host.id)
     if row.address != storage["address"]:
         row.reachable, row.error, row.checked_at = None, None, None
+        row.seen_as, row.nat_checked_at = None, None
     row.address, row.port = storage["address"], PORT
     row.command_id, row.requested_at = command_id, jobs.now()
+    row.local_port, row.peers_command_id = None, None
     db.add(row)
     db.flush()  # its answer finds it by command id
     return command_id
@@ -173,6 +207,10 @@ def record_result(db: Session, host_id: Any, message_data: Dict[str, Any]) -> bo
     row.reachable = outcome["reachable"]
     row.error = str(outcome.get("error") or "")[:255] or None
     row.checked_at = jobs.now()
+    port = outcome.get("local_port")
+    if row.reachable and isinstance(port, int) and not isinstance(port, bool):
+        row.local_port = port
+        _ask_storage_for_peers(db, row)
     if not row.reachable:
         logger.info(
             "Host %s cannot reach its backup storage at %s:%s (%s)",
@@ -180,6 +218,92 @@ def record_result(db: Session, host_id: Any, message_data: Dict[str, Any]) -> bo
             row.address,
             row.port,
             row.error,
+        )
+    return True
+
+
+def _storage_host(db: Session, host_id: Any) -> Optional[models.Host]:
+    return db.query(models.Host).filter(models.Host.id == host_id).first()
+
+
+def _storage_lists_peers(db: Session, storage_id: Any) -> bool:
+    storage = _storage_host(db, storage_id)
+    report = (capabilities.get_capability_report(storage) or {}) if storage else {}
+    return PEERS_GROUP in (report.get("capabilities") or [])
+
+
+def _ask_storage_for_peers(db: Session, row: models.BackupReach) -> None:
+    """While the host holds its connection open: who does the storage host
+    see on port 2049?  Asked only of a storage agent that can answer."""
+    # pylint: disable=import-outside-toplevel
+    from backend.services.config_mgmt_dispatch import queue_command  # noqa: PLC0415
+    from backend.websocket.messages import CommandType  # noqa: PLC0415
+
+    storage = storage_address(db)
+    if storage is None or storage["address"] != row.address:
+        return
+    if not _storage_lists_peers(db, storage["host_id"]):
+        return
+    row.peers_command_id = queue_command(
+        db, storage["host_id"], CommandType.LIST_NFS_PEERS, {}
+    )
+
+
+def _peers(outcome: Dict[str, Any]) -> Optional[list]:
+    peers = outcome.get("peers")
+    if not isinstance(peers, list):
+        return None
+    found = []
+    for peer in peers[:500]:
+        if not isinstance(peer, dict):
+            continue
+        address, port = peer.get("address"), peer.get("port")
+        if isinstance(address, str) and isinstance(port, int):
+            found.append((address[:255], port))
+    return found
+
+
+def record_peers(db: Session, storage_id: Any, message_data: Dict[str, Any]) -> bool:
+    """The storage host's answer to ``list_nfs_peers``: the host's held
+    connection, found by its source port, and the address it came from.
+    False when it answers none of ours.  The caller commits."""
+    command_id = message_data.get("command_id")
+    row = (
+        db.query(models.BackupReach)
+        .filter(models.BackupReach.peers_command_id == str(command_id))
+        .first()
+        if command_id
+        else None
+    )
+    storage = storage_address(db)
+    if row is None or storage is None or str(storage["host_id"]) != str(storage_id):
+        logger.warning(
+            "list_nfs_peers result from host %s for unknown command %s ignored",
+            storage_id,
+            command_id,
+        )
+        return False
+    outcome = message_data.get("result") or {}
+    if isinstance(outcome.get("result"), dict):
+        outcome = outcome["result"]  # the agent wraps its handler's answer
+    peers = _peers(outcome)
+    host = _storage_host(db, row.host_id)
+    if peers is None or host is None:
+        return False
+    seen = sorted({address for address, port in peers if port == row.local_port})
+    exported = jobs.host_address(host)
+    # Only one address on that port is an answer; none, or several (two
+    # hosts happen to share the port), is unknown, and unknown never blocks.
+    row.seen_as = (
+        seen[0] if len(seen) == 1 and exported and seen[0] != exported else None
+    )
+    row.nat_checked_at = jobs.now()
+    if row.seen_as:
+        logger.info(
+            "Host %s is behind NAT: the storage host sees it as %s, not %s",
+            row.host_id,
+            row.seen_as,
+            exported,
         )
     return True
 

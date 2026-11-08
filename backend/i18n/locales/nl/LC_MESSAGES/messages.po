@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-05 10:45-0500\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-06 12:11-0500\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -48,6 +48,54 @@ msgstr "Te veel mislukte pogingen voor deze gebruiker"
 #: backend/security/login_security.py:65
 msgid "Login attempt allowed"
 msgstr "Inlogpoging toegestaan"
+
+#: backend/security/agent_mtls.py:196
+msgid ""
+"This server requires a client certificate from this host, and none was "
+"presented. The agent requests one automatically; if this persists, check "
+"that the agent is up to date."
+msgstr ""
+"Deze server vereist een clientcertificaat van deze host, en er is er geen "
+"aangeboden. De agent vraagt er automatisch een aan; als dit aanhoudt, "
+"controleer dan of de agent is bijgewerkt."
+
+#: backend/security/agent_mtls.py:201
+msgid ""
+"The client certificate this host presented is not valid for it (not issued "
+"by this server, issued to another host, or replaced or revoked). The "
+"connection was refused."
+msgstr ""
+"Het clientcertificaat dat deze host aanbood is er niet geldig voor (niet "
+"uitgegeven door deze server, uitgegeven aan een andere host, of vervangen of"
+" ingetrokken). De verbinding is geweigerd."
+
+#: backend/security/agent_mtls.py:206
+msgid ""
+"This host's client certificate has expired. The agent requests a new one "
+"automatically."
+msgstr ""
+"Het clientcertificaat van deze host is verlopen. De agent vraagt automatisch"
+" een nieuw aan."
+
+#: backend/security/agent_mtls.py:317
+msgid "Unsupported elliptic curve in the request"
+msgstr "Niet-ondersteunde elliptische curve in de aanvraag"
+
+#: backend/security/agent_mtls.py:321
+msgid "RSA keys must be at least 2048 bits"
+msgstr "RSA-sleutels moeten minstens 2048 bits lang zijn"
+
+#: backend/security/agent_mtls.py:323
+msgid "Unsupported key type in the request"
+msgstr "Niet-ondersteund sleuteltype in de aanvraag"
+
+#: backend/security/agent_mtls.py:336
+msgid "The certificate request could not be read"
+msgstr "De certificaataanvraag kon niet worden gelezen"
+
+#: backend/security/agent_mtls.py:338
+msgid "The certificate request's signature is not valid"
+msgstr "De handtekening van de certificaataanvraag is ongeldig"
 
 #: backend/auth/auth_bearer.py:49
 msgid "Invalid authentication scheme."
@@ -225,9 +273,10 @@ msgstr "Host is niet goedgekeurd"
 #: backend/api/opentelemetry/grafana_connection.py:201
 #: backend/api/cve_refresh_settings.py:66 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
-#: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
-#: backend/api/child_host_utils.py:33 backend/api/child_host_utils.py:67
+#: backend/api/packages_operations.py:247
+#: backend/api/license_management.py:116 backend/api/secrets/permissions.py:39
+#: backend/api/error_constants.py:22 backend/api/child_host_utils.py:33
+#: backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "Gebruiker niet gevonden"
 
@@ -395,7 +444,7 @@ msgstr "Verwerken van processtatusupdate mislukt: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:735 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:755 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host niet geregistreerd"
@@ -519,7 +568,8 @@ msgstr "Fout bij verwerken van antivirus-statusupdate: %s"
 #: backend/api/handlers/software_package_handlers.py:719
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
-msgstr "Fout bij verwerken van statusupdate commercieel antivirusprogramma: %s"
+msgstr ""
+"Fout bij verwerken van statusupdate commercieel antivirusprogramma: %s"
 
 #: backend/api/handlers/software_package_handlers.py:821
 #, python-format
@@ -536,7 +586,7 @@ msgid "Missing request_id in installation_complete"
 msgstr "Ontbrekende request_id in installatievoltooid"
 
 #: backend/api/handlers/software_package_handlers.py:956
-#: backend/api/agent.py:913 backend/api/packages.py:486
+#: backend/api/agent.py:933 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Installatiedeelverzoek niet gevonden: %s"
@@ -613,8 +663,8 @@ msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
 msgstr ""
-"Indien uw account MFA (Multi-Factor Authentication) heeft geconfigureerd, is "
-"er een e-mail verzonden met een verificatiecode."
+"Indien uw account MFA (Multi-Factor Authentication) heeft geconfigureerd, is"
+" er een e-mail verzonden met een verificatiecode."
 
 #: backend/api/auth_mfa.py:434
 msgid "Invalid password."
@@ -639,6 +689,21 @@ msgstr "Beheer van FIPS-modus vereist een SysManage Enterprise-licentie."
 #: backend/api/fips_actions.py:72
 msgid "The compliance module is not currently available."
 msgstr "De compatibiliteitsmodule is op dit moment niet beschikbaar."
+
+#: backend/api/agent_mtls_settings.py:150
+msgid "The mode must be off, optional or enforced"
+msgstr "De modus moet \"off\", \"optional\" of \"enforced\" zijn"
+
+#: backend/api/agent_mtls_settings.py:162
+#, python-format
+msgid ""
+"%d approved host(s) have not presented a valid client certificate in the "
+"last 24 hours; enforcing now would refuse them. Update their agents, or "
+"confirm to enforce anyway."
+msgstr ""
+"%d goedgekeurde host(s) hebben in de afgelopen 24 uur geen geldig "
+"clientcertificaat aangeboden; nu afdwingen zou ze weigeren. Werk hun agents "
+"bij, of bevestig om toch af te dwingen."
 
 #: backend/api/third_party_repos.py:223
 #, python-format
@@ -711,8 +776,8 @@ msgstr "Mislukt om de repository uit te schakelen in de wachtrij: %s"
 
 #: backend/api/reports/endpoints.py:73
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade "
-"to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
 msgstr ""
 "Rapportgeneratie vereist een SysManage Professional+-licentie. Upgrade om "
 "toegang te krijgen tot deze functie."
@@ -745,7 +810,7 @@ msgstr "Commerciële Antivirus Status"
 msgid "User Security Roles (RBAC)"
 msgstr "Gebruikersbeveiligingsrollen (RBAC)"
 
-#: backend/api/reports/endpoints.py:205 backend/api/audit_log.py:546
+#: backend/api/reports/endpoints.py:205 backend/api/audit_log.py:477
 msgid "Audit Log"
 msgstr "Auditlogboek"
 
@@ -850,11 +915,11 @@ msgstr "Ongeldig of verlopen inschrijftoken"
 
 #: backend/api/host_registration.py:239
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token "
-"instead of registering server-scoped."
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
 msgstr ""
-"Deze host behoort al tot een tenant. Registreer jezelf in plaats daarvan met "
-"de inschrijftoken, niet met een serverscopelijke registratie."
+"Deze host behoort al tot een tenant. Registreer jezelf in plaats daarvan met"
+" de inschrijftoken, niet met een serverscopelijke registratie."
 
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -1131,8 +1196,8 @@ msgid ""
 "No collector signing key found. Set this server's role to 'Air-Gap "
 "Collector' to generate one."
 msgstr ""
-"Geen collector-onderhandelings-sleutel gevonden. Stel de rol van deze server "
-"in op 'Air-Gap Collector' om er een te genereren."
+"Geen collector-onderhandelings-sleutel gevonden. Stel de rol van deze server"
+" in op 'Air-Gap Collector' om er een te genereren."
 
 #: backend/api/airgap_keys.py:96 backend/api/federation_identity.py:169
 #, python-format
@@ -1375,7 +1440,8 @@ msgstr "Toegang geweigerd: rol Hostproces beëindigen vereist"
 
 #: backend/api/processes.py:175
 msgid "Agent must be running in privileged mode to terminate processes"
-msgstr "De agent moet in bevoorrechte modus draaien om processen te beëindigen"
+msgstr ""
+"De agent moet in bevoorrechte modus draaien om processen te beëindigen"
 
 #: backend/api/processes.py:224
 msgid "Process termination requested. The list will update shortly."
@@ -1602,13 +1668,13 @@ msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
 msgstr ""
-"Air-gap-collectie uitvoeringen vereisen een SysManage Professional+ licentie "
-"met de air-gap collector engine. Upgrade voor toegang tot deze functie."
+"Air-gap-collectie uitvoeringen vereisen een SysManage Professional+ licentie"
+" met de air-gap collector engine. Upgrade voor toegang tot deze functie."
 
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded -- the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be"
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Air-gap-collectie uitvoeringen vereisen dat het repository_mirroring_engine-"
@@ -1683,8 +1749,8 @@ msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
 msgstr ""
-"Eénmalige air-gap-collectie-run '%(iso_label)s' gemaakt met %(mirror_count)d "
-"doel-mirror(s); snapshots verzonden."
+"Eénmalige air-gap-collectie-run '%(iso_label)s' gemaakt met %(mirror_count)d"
+" doel-mirror(s); snapshots verzonden."
 
 #: backend/api/airgap_collector_runs.py:658
 #, python-format
@@ -1697,8 +1763,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:668
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
-"the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
+" the collection to rebuild."
 msgstr ""
 "ISO-bestand is niet langer op schijf; de staging volume kan zijn "
 "schoongemaakt. Voer de verzameling opnieuw uit om te herbouwen."
@@ -1739,8 +1805,8 @@ msgstr "Pakketprofiel niet gevonden"
 
 #: backend/api/package_compliance.py:73
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 msgstr ""
 "Pakket compatibiliteitsprofielen vereisen een SysManage Professional "
 "licentie. Upgrade voor toegang tot deze functie."
@@ -2028,11 +2094,11 @@ msgstr "Het OIDC-clientgeheim kon niet worden opgelost."
 
 #: backend/api/external_idp.py:577 backend/api/external_idp.py:796
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to "
-"provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to"
+" provision your account first."
 msgstr ""
-"Er is geen SysManage-account gekoppeld aan deze IdP-identiteit. Neem contact "
-"op met een beheerder om uw account eerst in te richten."
+"Er is geen SysManage-account gekoppeld aan deze IdP-identiteit. Neem contact"
+" op met een beheerder om uw account eerst in te richten."
 
 #: backend/api/external_idp.py:582 backend/api/external_idp.py:801
 msgid "Account is inactive."
@@ -2064,12 +2130,12 @@ msgstr "Ontbreekt SAMLResponse of RelayState."
 msgid "Invalid or expired SAML RelayState."
 msgstr "Ongeldig of verlopen SAML RelayState."
 
-#: backend/api/backups_escrow.py:60
+#: backend/api/backups_escrow.py:61
 msgid "Break-glass escrow needs the Professional+ backup engine"
 msgstr ""
 "Sleutelbewaring voor noodgevallen vereist de Professional+-back-upengine"
 
-#: backend/api/backups_escrow.py:65
+#: backend/api/backups_escrow.py:66
 msgid "No backup target is set up yet"
 msgstr "Er is nog geen back-updoel ingesteld"
 
@@ -2212,8 +2278,8 @@ msgstr ""
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
-#: backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97
+#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "Host niet gevonden of niet actief"
 
@@ -2250,8 +2316,8 @@ msgstr "Grafana URL is niet beschikbaar"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
-"on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
+" on the server."
 msgstr ""
 "Een OpenTelemetry-deployement vereist het laden van de Pro+ "
 "observability_engine op de server."
@@ -2267,8 +2333,8 @@ msgstr "Mislukt om OpenTelemetry te implementeren: %s"
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
-"the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
+" the server."
 msgstr ""
 "De verwijdering van OpenTelemetry vereist dat de Pro+ observability_engine "
 "op de server geladen wordt."
@@ -2384,11 +2450,11 @@ msgstr "Mislukt om OpenTelemetry van Grafana los te koppelen: %s"
 
 #: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
-"license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
+" license. Please upgrade to access this feature."
 msgstr ""
-"Beheer van inhoudscycli vereist een SysManage Professional+ (Enterprise)-"
-"licentie. Upgrade voor toegang tot deze functie."
+"Beheer van inhoudscycli vereist een SysManage Professional+ "
+"(Enterprise)-licentie. Upgrade voor toegang tot deze functie."
 
 #: backend/api/content_lifecycle.py:121
 msgid "Environment name is required"
@@ -2585,7 +2651,7 @@ msgid "Failed to clear NVD API key"
 msgstr "Mislukt om de NVD API-sleutel te wissen"
 
 #: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:189
-#: backend/api/backups_equip.py:160 backend/api/backups.py:570
+#: backend/api/backups_equip.py:160 backend/api/backups.py:576
 #: backend/services/cloud_backup_jobs.py:128
 msgid "Set up the backup target first"
 msgstr "Stel eerst het back-updoel in"
@@ -2611,7 +2677,8 @@ msgstr "Firewall-restart-commando succesvol verzonden"
 msgid "Firewall deploy command sent successfully"
 msgstr "Firewall-deploy-commando succesvol verzonden"
 
-#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273
+#: backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "Naam van het besturingssysteem vereist"
@@ -2695,8 +2762,8 @@ msgid ""
 "Container/VM management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"Container/VM-beheer vereist een SysManage Professional+-licentie. Upgrade om "
-"toegang te krijgen tot deze functie."
+"Container/VM-beheer vereist een SysManage Professional+-licentie. Upgrade om"
+" toegang te krijgen tot deze functie."
 
 #: backend/api/child_host_crud.py:425
 #, python-format
@@ -2734,7 +2801,8 @@ msgstr "Host met token is niet geregistreerd. Registreer opnieuw."
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Agentverificatie mislukt: ongeldige host-ID"
 
-#: backend/api/message_handlers_core.py:98 backend/utils/host_validation.py:104
+#: backend/api/message_handlers_core.py:98
+#: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "Host met ID %s is niet geregistreerd. Registreer opnieuw."
@@ -2749,22 +2817,27 @@ msgid ""
 "remove it from SysManage and approve its new registration."
 msgstr ""
 "Deze agent heeft niet bewezen dat het deze host is. Als de host opnieuw is "
-"geïnstalleerd, verwijder hem dan uit SysManage en keur de nieuwe registratie "
-"goed."
+"geïnstalleerd, verwijder hem dan uit SysManage en keur de nieuwe registratie"
+" goed."
 
-#: backend/api/message_handlers_core.py:299 backend/api/agent.py:809
+#: backend/api/message_handlers_core.py:194
+#, python-format
+msgid "Agent session refused: client certificate %s"
+msgstr "Agentsessie geweigerd: clientcertificaat %s"
+
+#: backend/api/message_handlers_core.py:338 backend/api/agent.py:829
 msgid "Host registration pending approval"
 msgstr "Hostregistratie in afwachting van goedkeuring"
 
-#: backend/api/message_handlers_core.py:413
+#: backend/api/message_handlers_core.py:452
 msgid "Host auto-approved via child host creation"
 msgstr "Host automatisch goedgekeurd via het aanmaken van een kind-host"
 
-#: backend/api/message_handlers_core.py:537
+#: backend/api/message_handlers_core.py:576
 msgid "Agent registered and connected successfully"
 msgstr "Agent geregistreerd en verbinding tot stand gebracht"
 
-#: backend/api/message_handlers_core.py:904
+#: backend/api/message_handlers_core.py:945
 msgid "Failed to process heartbeat"
 msgstr "Fout bij verwerken van hartslag"
 
@@ -2784,7 +2857,8 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "Bestemming '%(t)s' is niet geldig voor %(f)s"
 
 #: backend/api/logging_settings.py:134
-msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgid ""
+"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 msgstr "Verwijzing syslog vereist een Professional-licentie (LOG_ROUTING)."
 
 #: backend/api/logging_settings.py:141
@@ -2835,7 +2909,8 @@ msgstr "VM-naam is vereist voor bhyve virtuele machines"
 #: backend/api/child_host_virtualization.py:527
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
-msgstr "De agent moet met administratorrechten draaien om kindhosts te creëren"
+msgstr ""
+"De agent moet met administratorrechten draaien om kindhosts te creëren"
 
 #: backend/api/child_host_virtualization.py:549
 #, python-format
@@ -3000,7 +3075,8 @@ msgstr "Geen correctieregel overeenkomt met deze bevinding"
 
 #: backend/api/config_mgmt_remediation.py:426
 msgid "The profile this rule repairs with is missing or not active"
-msgstr "Het profiel waarmee deze regel repareert, is ontbrekend of niet actief"
+msgstr ""
+"Het profiel waarmee deze regel repareert, is ontbrekend of niet actief"
 
 #: backend/api/config_mgmt_remediation.py:460
 msgid "The repair was queued for this host"
@@ -3050,16 +3126,16 @@ msgstr "Deze host volgt al zijn labelbeleid"
 #: backend/api/backups_tag_policies.py:280
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr ""
-"Geen labelbeleid is van toepassing op deze host; er is niets om naar over te "
-"schakelen"
+"Geen labelbeleid is van toepassing op deze host; er is niets om naar over te"
+" schakelen"
 
 #: backend/api/image_mode_actions.py:75
 msgid ""
 "Image-mode host management requires a SysManage Enterprise license. Please "
 "upgrade to access this feature."
 msgstr ""
-"Beheer in afbeeldingmodus vereist een SysManage Enterprise-licentie. Upgrade "
-"voor toegang tot deze functie."
+"Beheer in afbeeldingmodus vereist een SysManage Enterprise-licentie. Upgrade"
+" voor toegang tot deze functie."
 
 #: backend/api/image_mode_actions.py:90
 msgid "This host is not an image-mode (bootc / rpm-ostree) host."
@@ -3088,8 +3164,8 @@ msgstr "Graylog-attach-commando succesvol gequeue'd"
 msgid ""
 "If an account with that email exists, a password reset link has been sent."
 msgstr ""
-"Als een account met die e-mailadres bestaat, is er een link verzonden om het "
-"wachtwoord te herstellen."
+"Als een account met die e-mailadres bestaat, is er een link verzonden om het"
+" wachtwoord te herstellen."
 
 #: backend/api/password_reset.py:352 backend/api/password_reset.py:393
 msgid "Invalid or expired password reset token"
@@ -3114,8 +3190,8 @@ msgstr "Toegang geweigerd: RESET_USER_PASSWORD rol vereist"
 #: backend/api/password_reset.py:447
 msgid "Failed to send password reset email. Please check email configuration."
 msgstr ""
-"Mislukt om wachtwoordherstel-e-mail te versturen. Controleer de e-"
-"mailconfiguratie."
+"Mislukt om wachtwoordherstel-e-mail te versturen. Controleer de "
+"e-mailconfiguratie."
 
 #: backend/api/password_reset.py:453
 #, python-brace-format
@@ -3129,13 +3205,13 @@ msgstr "Deze host kan al back-ups uitvoeren"
 #: backend/api/backups_equip.py:65
 msgid "This host's agent cannot install restate yet; upgrade the agent first"
 msgstr ""
-"De agent van deze host kan restate nog niet installeren; werk eerst de agent "
-"bij"
+"De agent van deze host kan restate nog niet installeren; werk eerst de agent"
+" bij"
 
 #: backend/api/backups_equip.py:68
 msgid ""
-"restate has no package the agent can install on this operating system; build "
-"and install it by hand (see restate's README)"
+"restate has no package the agent can install on this operating system; build"
+" and install it by hand (see restate's README)"
 msgstr ""
 "restate heeft geen pakket dat de agent op dit besturingssysteem kan "
 "installeren; bouw en installeer het met de hand (zie de README van restate)"
@@ -3282,6 +3358,27 @@ msgstr "Pakketbestand is niet langer op de schijf aanwezig"
 msgid "Invalid or expired download token"
 msgstr "Ongeldig of verlopen downloadtoken"
 
+#: backend/api/agent_certificate.py:84
+msgid "This host is not approved yet"
+msgstr "Deze host is nog niet goedgekeurd"
+
+#: backend/api/agent_certificate.py:90
+msgid ""
+"This host already has a valid certificate; present it to renew, or wait "
+"until it is close to expiry"
+msgstr ""
+"Deze host heeft al een geldig certificaat; bied het aan om het te "
+"vernieuwen, of wacht tot het bijna verloopt"
+
+#: backend/api/agent_certificate.py:138
+msgid ""
+"This server could not read the TLS certificate it serves to agents. Set "
+"agent_tls_spki in Settings, or check that nginx answers on this host."
+msgstr ""
+"Deze server kon het TLS-certificaat dat hij aan agents aanbiedt niet lezen. "
+"Stel agent_tls_spki in bij Instellingen, of controleer of nginx op deze host"
+" antwoordt."
+
 # Tag management messages
 #: backend/api/tag.py:133
 #, python-format
@@ -3357,15 +3454,16 @@ msgstr ""
 
 #: backend/api/security.py:175
 msgid "Default admin credentials are configured in your YAML file"
-msgstr "Standaard beheerdersreferenties zijn geconfigureerd in uw YAML-bestand"
+msgstr ""
+"Standaard beheerdersreferenties zijn geconfigureerd in uw YAML-bestand"
 
 #: backend/api/security.py:177
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
 msgstr ""
-"Verwijder admin_userid en admin_password uit uw configuratiebestand en start "
-"de server opnieuw op"
+"Verwijder admin_userid en admin_password uit uw configuratiebestand en start"
+" de server opnieuw op"
 
 #: backend/api/security.py:192
 msgid "Default JWT secret is being used"
@@ -3407,7 +3505,8 @@ msgstr ""
 "Wachtwoord-salt gebruikt standaardwaarde maar JWT-geheim is gewijzigd. "
 "Uitvoeren: {command}"
 
-#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76
+#: backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr ""
 "Ubuntu Pro sleutel moet met 'C' beginnen voor contractgebaseerde sleutels"
@@ -3515,33 +3614,34 @@ msgstr "Toegang geweigerd: rol DELETE_HOST vereist"
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Toegang geweigerd: VIEW_HOST_DETAILS rol vereist"
 
-#: backend/api/host.py:687
+#: backend/api/host.py:688
 msgid "Host already exists"
 msgstr "Host bestaat al"
 
-#: backend/api/host.py:799
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registratie opgepakt: host was recent verwijderd"
 
-#: backend/api/host.py:879
+#: backend/api/host.py:880
 #, python-format
-msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid ""
+"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 "Host '%(fqdn)s' is aangemeld bij tenant %(tenant_id)s via aanmeldings-token"
 
-#: backend/api/agent_poll.py:119
+#: backend/api/agent_poll.py:120
 msgid "Missing agent connection token"
 msgstr "Ontbrekend agentenconnectie-token"
 
-#: backend/api/agent_poll.py:140
+#: backend/api/agent_poll.py:141
 msgid "Invalid or expired connection token"
 msgstr "Ongeldig of verlopen connectie-token"
 
-#: backend/api/agent_poll.py:166
+#: backend/api/agent_poll.py:174
 msgid "Host authentication failed for this poll"
 msgstr "Hostverificatie mislukt voor deze poll"
 
-#: backend/api/agent_poll.py:179
+#: backend/api/agent_poll.py:212
 msgid "Tenant routing is temporarily unavailable"
 msgstr "Tenantroutering is tijdelijk niet beschikbaar"
 
@@ -3614,34 +3714,34 @@ msgstr "Deze taak is al afgerond"
 msgid "Cancelled by an operator"
 msgstr "Annuleren door een operator"
 
-#: backend/api/message_handlers.py:588
+#: backend/api/message_handlers.py:608
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "Fout bij verwerken van diagnostiekresultaat: %s"
 
-#: backend/api/message_handlers.py:622
+#: backend/api/message_handlers.py:642
 msgid "Missing message_id in command acknowledgment"
 msgstr "Ontbrekende message_id in commando-ontvangstbevestiging"
 
-#: backend/api/message_handlers.py:689
+#: backend/api/message_handlers.py:709
 msgid "This session cannot acknowledge another host's message"
 msgstr "Deze sessie kan het bericht van een andere host niet bevestigen"
 
-#: backend/api/message_handlers.py:759
+#: backend/api/message_handlers.py:779
 msgid "Missing installation_id in package installation status"
 msgstr "Ontbrekende installation_id in pakketinstallaties-status"
 
-#: backend/api/message_handlers.py:779
+#: backend/api/message_handlers.py:799
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "Installatielog-entry niet gevonden voor ID: %s"
 
-#: backend/api/message_handlers.py:825
+#: backend/api/message_handlers.py:845
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Installatiestatus van pakket {status} op agent {hostname}"
 
-#: backend/api/message_handlers.py:854
+#: backend/api/message_handlers.py:874
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Mislukt om de pakketinstallatietoestand bij te werken: %s"
@@ -3679,7 +3779,8 @@ msgstr "Geen pakketten opgegeven voor installatie"
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgid ""
+"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr ""
 "%(package_count)d pakketten geïnstalleerd op host %(host_fqdn)s in de "
 "wachtrij gesteld"
@@ -3707,8 +3808,8 @@ msgstr "Geen pakketten opgegeven voor deinstallatie"
 msgid ""
 "Queued uninstallation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr ""
-"%(package_count)d pakketten verwijderd van host %(host_fqdn)s in de wachtrij "
-"gesteld"
+"%(package_count)d pakketten verwijderd van host %(host_fqdn)s in de wachtrij"
+" gesteld"
 
 #: backend/api/packages_operations.py:378
 #, python-format
@@ -3825,8 +3926,8 @@ msgstr "Account is vergrendeld vanwege te veel mislukte inlogpogingen"
 
 #: backend/api/auth.py:391
 msgid ""
-"Multi-factor authentication is required for this account. Please enroll from "
-"your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from"
+" your profile page before signing in."
 msgstr ""
 "Meervoudige authenticatie is vereist voor dit account. Meld u alstublieft "
 "aan via uw profielpagina voordat u zich aanmeldt."
@@ -3896,7 +3997,8 @@ msgstr "Geen OS-upgrades beschikbaar voor deze host"
 
 #: backend/api/updates/os_upgrade_routes.py:352
 #, python-format
-msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgid ""
+"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr "OS-upgrade gestart op host %(fqdn)s met %(upgrade_count)d upgrade(s)"
 
 #: backend/api/updates/os_upgrade_routes.py:383
@@ -3975,7 +4077,8 @@ msgstr "Onbekend type: %(kind)s (mogelijk: %(allowed)s)"
 #: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
+"ttl=%(ttl)ds)"
 msgstr ""
 "Dynamische geheim '%(name)s' is uitgegeven (type=%(kind)s, rol=%(role)s, "
 "ttl=%(ttl)ds)"
@@ -4045,7 +4148,8 @@ msgstr "VMM-initialisatie aangevraagd"
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd daemon."
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
 msgstr ""
 "VMM-initialisatie aangevraagd. De agent zal de vmd-daemon inschakelen en "
 "starten."
@@ -4082,8 +4186,8 @@ msgstr "bhyve initialisatie verzocht"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the "
-"system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the"
+" system for bhyve virtual machines."
 msgstr ""
 "bhyve initialisatie verzocht. De agent zal vmm.ko laden en het systeem voor "
 "bhyve virtuele machines configureren."
@@ -4115,8 +4219,8 @@ msgstr "KVM-modules inschakelen is vereist"
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via "
-"modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via"
+" modprobe."
 msgstr ""
 "KVM-modules inschakelen is vereist. De agent zal de KVM-kernmodules via "
 "modprobe laden."
@@ -4150,7 +4254,8 @@ msgstr ""
 
 #: backend/api/child_host_virtualization_enable.py:714
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "De naam van de bridge-interface is vereist voor de bridge-netwerkmodus"
+msgstr ""
+"De naam van de bridge-interface is vereist voor de bridge-netwerkmodus"
 
 #: backend/api/child_host_virtualization_enable.py:736
 #, python-format
@@ -4248,8 +4353,8 @@ msgstr "Snapshotmap"
 #: backend/api/backups.py:246
 #, python-format
 msgid ""
-"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no "
-"trailing '/')"
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
+" trailing '/')"
 msgstr ""
 "%s moet een eenvoudig absoluut pad zijn (letters, cijfers, '_', '.', '-' en "
 "'/'; geen '/' aan het eind)"
@@ -4323,62 +4428,73 @@ msgstr "Bevestig dat de bestanden van de host op deze paden worden vervangen"
 msgid "Backup target not found"
 msgstr "Back-updoel niet gevonden"
 
-#: backend/api/backups.py:413
+#: backend/api/backups.py:414
 msgid "This edition supports one backup target; edit the existing one"
 msgstr "Deze editie ondersteunt één back-updoel; bewerk het bestaande"
 
-#: backend/api/backups.py:490
+#: backend/api/backups.py:491
 msgid "Remove the hosts' backup policies before the target"
 msgstr "Verwijder eerst het back-upbeleid van de hosts, daarna het doel"
 
-#: backend/api/backups.py:618
+#: backend/api/backups.py:626
 msgid "No backup policy"
 msgstr "Geen back-upbeleid"
 
-#: backend/api/backups.py:642
+#: backend/api/backups.py:650
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Deze host kan nog geen back-ups uitvoeren (%s)"
 
-#: backend/api/backups.py:648
+#: backend/api/backups.py:656
 msgid "This host's backup is not configured yet"
 msgstr "De back-up van deze host is nog niet geconfigureerd"
 
-#: backend/api/backups.py:665
+#: backend/api/backups.py:673
 msgid "The backup storage host is not ready"
 msgstr "De opslaghost voor back-ups is niet gereed"
 
-#: backend/api/backups.py:680
+#: backend/api/backups.py:688
 msgid "Unknown backup action"
 msgstr "Onbekende back-upactie"
 
-#: backend/api/backups.py:693
+#: backend/api/backups.py:701
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr ""
-"Een versleutelde repository kan niet opnieuw worden ingepakt op de opslaghost"
+"Een versleutelde repository kan niet opnieuw worden ingepakt op de "
+"opslaghost"
 
-#: backend/api/backups.py:697
+#: backend/api/backups.py:705
 msgid "That backup job is already queued or running"
 msgstr "Die back-uptaak staat al in de wachtrij of wordt uitgevoerd"
 
-#: backend/api/backups.py:794 backend/api/backups_browse.py:78
+#: backend/api/backups.py:802 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr "Snapshot niet gevonden"
 
-#: backend/api/backups.py:801
+#: backend/api/backups.py:809
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "Deze snapshot is niet ondertekend; bevestig om hem toch te herstellen"
 
-#: backend/api/backups.py:854 backend/api/backups_drift.py:105
+#: backend/api/backups.py:853
+msgid ""
+"This backup is encrypted to your break-glass escrow key, which SysManage "
+"never holds. Restore it by hand with restate and that key, as the server "
+"recovery runbook describes."
+msgstr ""
+"Deze back-up is versleuteld met uw noodsleutel voor bewaring, die SysManage "
+"nooit heeft. Herstel hem met de hand met restate en die sleutel, zoals het "
+"herstelplan van de server beschrijft."
+
+#: backend/api/backups.py:872 backend/api/backups_drift.py:105
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "De restate van deze host kan dit nog niet; werk restate bij"
 
-#: backend/api/backups.py:866
+#: backend/api/backups.py:884
 msgid "This snapshot's repository is no longer kept"
 msgstr "De repository van deze snapshot wordt niet meer bewaard"
 
-#: backend/api/backups.py:951 backend/api/backups.py:954
+#: backend/api/backups.py:969 backend/api/backups.py:972
 msgid "Backup run not found"
 msgstr "Back-uptaak niet gevonden"
 
@@ -4534,7 +4650,8 @@ msgstr ""
 "Upgrade om toegang te krijgen tot deze functie."
 
 #: backend/api/reboot_orchestration.py:135
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
 msgstr ""
 "Geen draaiende kind-hosts gevonden. Gebruik in plaats daarvan het standaard "
 "herstart-eindpunt."
@@ -4554,8 +4671,8 @@ msgstr "Upgrade-profiel niet gevonden"
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
-"upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
 msgstr ""
 "Geplande upgradeprofielen vereisen een SysManage Professional+ licentie. "
 "Voer een upgrade uit om toegang te krijgen tot deze functie."
@@ -4587,80 +4704,80 @@ msgstr ""
 "Upgrade-profiel '%(profile_name)s' geactiveerd tegenover %(host_count)d "
 "host(s)"
 
-#: backend/api/agent.py:100
+#: backend/api/agent.py:101
 msgid "Rate limit exceeded"
 msgstr "Snelheidslimiet overschreden"
 
-#: backend/api/agent.py:163
+#: backend/api/agent.py:164
 #, python-format
 msgid "Agent WebSocket authentication failed from %s"
 msgstr "WebSocket-verificatie van agent mislukt vanaf %s"
 
-#: backend/api/agent.py:173
+#: backend/api/agent.py:174
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "Authenticatie mislukt: %s"
 
-#: backend/api/agent.py:189
+#: backend/api/agent.py:190
 #, python-format
 msgid "Agent WebSocket connection attempted without token from %s"
 msgstr "WebSocket-verbinding geprobeerd zonder token vanaf %s"
 
-#: backend/api/agent.py:198
+#: backend/api/agent.py:199
 msgid "Authentication token required"
 msgstr "Authenticatie token vereist"
 
-#: backend/api/agent.py:342
+#: backend/api/agent.py:344
 msgid "Message failed security validation"
 msgstr "Bericht heeft beveiligingsvalidatie gefaald"
 
-#: backend/api/agent.py:374
+#: backend/api/agent.py:388
 msgid "Message must be valid JSON"
 msgstr "Bericht moet geldige JSON zijn"
 
-#: backend/api/agent.py:683
+#: backend/api/agent.py:703
 msgid "Agent message validation failed: missing hostname and host_id"
 msgstr "Validatie van agentbericht mislukt: ontbrekende hostname en host_id"
 
-#: backend/api/agent.py:702
+#: backend/api/agent.py:722
 #, python-brace-format
 msgid "Agent message from unregistered host: {hostname}"
 msgstr "Bericht van niet geregistreerde host ontvangen: {hostname}"
 
-#: backend/api/agent.py:719
+#: backend/api/agent.py:739
 #, python-brace-format
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "Bericht van ongeautoriseerde host ontvangen: {hostname}"
 
-#: backend/api/agent.py:751
+#: backend/api/agent.py:771
 msgid "Message must include hostname or host_id for host validation"
 msgstr "Bericht moet een hostname of host_id bevatten voor hostvalidatie"
 
-#: backend/api/agent.py:769
+#: backend/api/agent.py:789
 msgid "Host ID no longer valid - please re-register"
 msgstr "Host ID is niet meer geldig - registreer opnieuw"
 
-#: backend/api/agent.py:781
+#: backend/api/agent.py:801
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr "Host ID en hostname komen niet overeen - registreer opnieuw"
 
-#: backend/api/agent.py:798
+#: backend/api/agent.py:818
 msgid "Host must register before sending inventory data"
 msgstr "Host moet zich aanmelden voordat inventory-data wordt verzonden"
 
-#: backend/api/agent.py:875
+#: backend/api/agent.py:895
 msgid "Missing or invalid authorization header"
 msgstr "Ontbrekende of ongeldige autorisatie-header"
 
-#: backend/api/agent.py:900
+#: backend/api/agent.py:920
 msgid "Invalid host authentication"
 msgstr "Ongeldige hostverificatie"
 
-#: backend/api/agent.py:941 backend/api/packages.py:498
+#: backend/api/agent.py:961 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "Installatie voltooid geregistreerd"
 
-#: backend/api/agent.py:947 backend/api/error_constants.py:193
+#: backend/api/agent.py:967 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "Interne serverfout"
 
@@ -4801,7 +4918,8 @@ msgstr "Antivirus-deploy gestart voor alle %d hosts"
 #: backend/api/antivirus_status.py:346
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
+"hosts"
 msgstr ""
 "Antivirus-deployering gestart voor %(success_count)d van de %(total_count)d "
 "hosts"
@@ -4837,7 +4955,8 @@ msgstr "Toegang geweigerd: {} rol vereist"
 
 #: backend/api/backups_drift.py:57
 msgid "The drift timeline needs the Professional+ backup engine"
-msgstr "De tijdlijn van afwijkingen vereist de back-upengine van Professional+"
+msgstr ""
+"De tijdlijn van afwijkingen vereist de back-upengine van Professional+"
 
 #: backend/api/backups_drift.py:77 backend/api/backups_browse.py:95
 msgid "The path must be absolute"
@@ -5189,8 +5308,8 @@ msgid ""
 "Container image registry proxy requires a SysManage Professional+ license. "
 "Please upgrade to access this feature."
 msgstr ""
-"Container image registry proxy vereist een SysManage Professional+-licentie. "
-"Upgrade voor toegang tot deze functie."
+"Container image registry proxy vereist een SysManage Professional+-licentie."
+" Upgrade voor toegang tot deze functie."
 
 #: backend/api/repository_mirroring_setup.py:197
 #: backend/api/repository_mirroring_setup.py:259
@@ -5248,20 +5367,42 @@ msgstr "Aantal te overslaan vermeldingen"
 msgid "Failed to retrieve audit logs: %s"
 msgstr "Audit-logs ophalen mislukt: %s"
 
-#: backend/api/audit_log.py:261
+#: backend/api/audit_log.py:250
+msgid "Export format: csv, pdf (OSS); json/cef/leef (Pro+)"
+msgstr "Exporteerformat: csv, pdf (OSS); json/cef/leef (Pro+)"
+
+#: backend/api/audit_log.py:273
+#, python-format
+msgid "Unsupported export format: %s"
+msgstr "Niet-ondersteund exportformaat: %s"
+
+# Reports-related strings
+#: backend/api/audit_log.py:479
+msgid "Generated"
+msgstr "Gegenereerd"
+
+#: backend/api/audit_log.py:481
+msgid "Total Entries"
+msgstr "Totaal aantal vermeldingen"
+
+#: backend/api/audit_log.py:488
+msgid "No audit log entries found."
+msgstr "Geen auditlogboekvermeldingen gevonden."
+
+#: backend/api/audit_log.py:543
 msgid "Invalid audit log ID format"
 msgstr "Ongeldig audit-log-ID-formaat"
 
-#: backend/api/audit_log.py:272
+#: backend/api/audit_log.py:554
 msgid "Audit log entry not found"
 msgstr "Audit-logvermelding niet gevonden"
 
-#: backend/api/audit_log.py:290
+#: backend/api/audit_log.py:572
 #, python-format
 msgid "Failed to retrieve audit log entry: %s"
 msgstr "Audit-logvermelding ophalen mislukt: %s"
 
-#: backend/api/audit_log.py:303
+#: backend/api/audit_log.py:585
 #, python-format
 msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
@@ -5270,31 +5411,9 @@ msgstr ""
 "De export in %s vereist een SysManage Professional+ licentie. De OSS-laag "
 "ondersteunt CSV-export."
 
-#: backend/api/audit_log.py:310
+#: backend/api/audit_log.py:592
 msgid "Use /api/v1/audit/export with Pro+ license"
 msgstr "Gebruik /api/v1/audit/export met Pro+-licentie"
-
-#: backend/api/audit_log.py:319
-msgid "Export format: csv, pdf (OSS); json/cef/leef (Pro+)"
-msgstr "Exporteerformat: csv, pdf (OSS); json/cef/leef (Pro+)"
-
-#: backend/api/audit_log.py:342
-#, python-format
-msgid "Unsupported export format: %s"
-msgstr "Niet-ondersteund exportformaat: %s"
-
-# Reports-related strings
-#: backend/api/audit_log.py:548
-msgid "Generated"
-msgstr "Gegenereerd"
-
-#: backend/api/audit_log.py:550
-msgid "Total Entries"
-msgstr "Totaal aantal vermeldingen"
-
-#: backend/api/audit_log.py:557
-msgid "No audit log entries found."
-msgstr "Geen auditlogboekvermeldingen gevonden."
 
 #: backend/api/content_lifecycle_promotion.py:133
 msgid "Only a published content-view version can be promoted"
@@ -5374,7 +5493,8 @@ msgstr "Toegang geweigerd: rol ADD_ENABLED_PACKAGE_MANAGER vereist"
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS "
+"'%(os_name)s'"
 msgstr ""
 "Pakketbeheerder '%(package_manager)s' is al ingeschakeld voor OS "
 "'%(os_name)s'"
@@ -5564,8 +5684,8 @@ msgid ""
 "there to 2.2.0.12 or later, then save the policy without years and set them "
 "once it has reported in"
 msgstr ""
-"restate op de opslaghost kan nog geen jaarlijkse momentopnamen bewaren: werk "
-"restate daar bij naar 2.2.0.12 of nieuwer, sla het beleid dan op zonder "
+"restate op de opslaghost kan nog geen jaarlijkse momentopnamen bewaren: werk"
+" restate daar bij naar 2.2.0.12 of nieuwer, sla het beleid dan op zonder "
 "jaren en stel ze in zodra de host zich heeft gemeld"
 
 #: backend/api/machines.py:170
@@ -5643,7 +5763,8 @@ msgstr "Mockverbinding: zou bericht %s verzenden"
 #, python-format
 msgid "Host %(hostname)s not found for message %(message_id)s, deleting"
 msgstr ""
-"Host %(hostname)s niet gevonden voor bericht %(message_id)s, wordt verwijderd"
+"Host %(hostname)s niet gevonden voor bericht %(message_id)s, wordt "
+"verwijderd"
 
 #: backend/websocket/inbound_processor.py:141
 #, python-format
@@ -5842,8 +5963,8 @@ msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
 "scheduled for retry in %(backoff)d seconds"
 msgstr ""
-"Bericht %(message_id)s mislukt (poging %(attempt)d/%(max_retries)d), opnieuw "
-"proberen over %(backoff)d seconden"
+"Bericht %(message_id)s mislukt (poging %(attempt)d/%(max_retries)d), opnieuw"
+" proberen over %(backoff)d seconden"
 
 #: backend/websocket/queue_operations.py:898
 #, python-format
@@ -5946,25 +6067,29 @@ msgstr "Die naam hoort bij een samengestelde regelset"
 msgid "None of these rules can run under ClamAV"
 msgstr "Geen van deze regels kan onder ClamAV worden uitgevoerd"
 
-#: backend/services/cloud_backup_tick.py:302
+#: backend/services/backup_server.py:137
+msgid ""
+"Save a break-glass escrow key first: the SysManage server's own backup is "
+"encrypted to it, so restoring OpenBAO never needs a key kept inside OpenBAO"
+msgstr ""
+"Sla eerst een noodsleutel voor bewaring op: de back-up van de SysManage-"
+"server zelf wordt daarmee versleuteld, zodat het herstellen van OpenBAO "
+"nooit een sleutel nodig heeft die in OpenBAO bewaard wordt"
+
+#: backend/services/cloud_backup_tick.py:315
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "De iCloud-aanmelding verloopt binnenkort: meld u opnieuw aan"
 
-#: backend/services/cloud_backup_tick.py:304
+#: backend/services/cloud_backup_tick.py:317
 #, python-format
 msgid ""
-"The iCloud sign-in for %(account)s ends around %(date)s. After that, "
-"SysManage cannot download its photos until someone signs in again.\n"
+"The iCloud sign-in for %(account)s ends around %(date)s. After that, SysManage cannot download its photos until someone signs in again.\n"
 "\n"
-"Open Backups, then Cloud backup, and press Connect on this account. You will "
-"need the Apple ID's two-factor code."
+"Open Backups, then Cloud backup, and press Connect on this account. You will need the Apple ID's two-factor code."
 msgstr ""
-"De iCloud-aanmelding voor %(account)s verloopt rond %(date)s. Daarna kan "
-"SysManage de foto's niet meer downloaden totdat iemand zich opnieuw "
-"aanmeldt.\n"
+"De iCloud-aanmelding voor %(account)s verloopt rond %(date)s. Daarna kan SysManage de foto's niet meer downloaden totdat iemand zich opnieuw aanmeldt.\n"
 "\n"
-"Open Back-ups, dan Cloud-back-up, en klik bij dit account op Verbinden. U "
-"hebt de tweefactorcode van de Apple ID nodig."
+"Open Back-ups, dan Cloud-back-up, en klik bij dit account op Verbinden. U hebt de tweefactorcode van de Apple ID nodig."
 
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
@@ -6156,67 +6281,80 @@ msgstr ""
 "Geen van de hosts heeft een bestandwaarschuwingslijst toegewezen, dus er is "
 "niets te vergelijken."
 
-#: backend/services/backup_breakglass.py:177
+#: backend/services/backup_breakglass.py:178
 #, python-format
 msgid "gpg failed: %s"
 msgstr "gpg mislukt: %s"
 
-#: backend/services/backup_breakglass.py:195
+#: backend/services/backup_breakglass.py:196
 msgid "gpg is not installed on the SysManage server; install GnuPG"
 msgstr "gpg is niet geïnstalleerd op de SysManage-server; installeer GnuPG"
 
-#: backend/services/backup_breakglass.py:205
-#: backend/services/backup_breakglass.py:228
+#: backend/services/backup_breakglass.py:206
+#: backend/services/backup_breakglass.py:229
 msgid "gpg could not read that public key"
 msgstr "gpg kon die openbare sleutel niet lezen."
 
-#: backend/services/backup_breakglass.py:213
-#: backend/services/backup_breakglass.py:220
+#: backend/services/backup_breakglass.py:214
+#: backend/services/backup_breakglass.py:221
 msgid "Paste one armored OpenPGP public key"
 msgstr "Plak één openbare OpenPGP-sleutel in ASCII-armor-formaat"
 
-#: backend/services/backup_breakglass.py:217
-#: backend/services/backup_escrow.py:201
+#: backend/services/backup_breakglass.py:218
+#: backend/services/backup_escrow.py:214
 msgid "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
 msgstr ""
 "Dat is een GEHEIME sleutel; plak de PUBLIEKE sleutel (gpg --armor --export)"
 
-#: backend/services/backup_breakglass.py:237
+#: backend/services/backup_breakglass.py:238
 msgid "Paste exactly one public key, not several"
 msgstr "Plak precies één openbare sleutel, niet meerdere."
 
-#: backend/services/backup_breakglass.py:240
+#: backend/services/backup_breakglass.py:241
 msgid "That key is expired, revoked or not valid"
 msgstr "Die sleutel is verlopen, ingetrokken of ongeldig."
 
-#: backend/services/backup_breakglass.py:243
+#: backend/services/backup_breakglass.py:244
 msgid "That key cannot encrypt (it has no usable encryption key)"
 msgstr ""
 "Die sleutel kan niet versleutelen (het heeft geen bruikbare "
 "versleutelingssleutel)."
 
-#: backend/services/backup_breakglass.py:260
+#: backend/services/backup_breakglass.py:261
 #, python-format
 msgid "Say why the keys are exported, in %(min)d to %(max)d characters"
 msgstr ""
 "Geef een reden waarom de sleutels worden geëxporteerd, in %(min)d tot "
 "%(max)d tekens."
 
-#: backend/services/backup_breakglass.py:318
+#: backend/services/backup_breakglass.py:323
 #, python-format
 msgid "OpenBAO does not hold every backup key of %s; nothing was exported"
 msgstr ""
 "OpenBAO bewaart niet alle back-upsleutels van %s; niets is geëxporteerd."
 
-#: backend/services/backup_breakglass.py:423
+#: backend/services/backup_breakglass.py:428
 msgid "gpg did not seal the key export"
 msgstr "gpg verzegelde de sleutelexport niet."
 
-#: backend/services/backup_breakglass.py:434
+#: backend/services/backup_breakglass.py:439
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "Geen van de geselecteerde hosts heeft versleutelde back-ups."
 
-#: backend/services/backup_reach.py:96
+#: backend/services/backup_reach.py:115
+#, python-format
+msgid ""
+"This host is behind NAT: the backup storage (%(storage)s) sees it as "
+"%(seen)s, not %(address)s, so it refuses the mount. Put the host on the "
+"storage host's network (a bridged network for a virtual machine) instead of "
+"behind its NAT."
+msgstr ""
+"Deze host staat achter NAT: de back-upopslag (%(storage)s) ziet hem als "
+"%(seen)s, niet als %(address)s, en weigert daarom de koppeling. Zet de host "
+"op het netwerk van de opslaghost (een gebridged netwerk voor een virtuele "
+"machine) in plaats van achter zijn NAT."
+
+#: backend/services/backup_reach.py:125
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "
@@ -6225,28 +6363,20 @@ msgstr ""
 "Deze host kan de back-upopslag niet bereiken (%(storage)s, %(address)s, NFS-"
 "poort %(port)s). Back-ups hebben een netwerkpad ernaartoe nodig."
 
-#: backend/services/backup_escrow.py:270
+#: backend/services/backup_escrow.py:283
 msgid "Backup keys rotated: make a new break-glass export"
 msgstr "Back-upsleutels geroteerd: maak een nieuwe noodexport van sleutels"
 
-#: backend/services/backup_escrow.py:272
+#: backend/services/backup_escrow.py:285
 #, python-format
 msgid ""
-"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-"
-"glass export made before this rotation does not hold the new keys, and "
-"backups taken from now on need them.\n"
+"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-glass export made before this rotation does not hold the new keys, and backups taken from now on need them.\n"
 "\n"
-"Open Backups, then a host's Encryption panel, and use \"Break-glass key "
-"export\" to make a new export. Keep it offline, and destroy the old one."
+"Open Backups, then a host's Encryption panel, and use \"Break-glass key export\" to make a new export. Keep it offline, and destroy the old one."
 msgstr ""
-"SysManage heeft volgens schema %(count)d sleutel(s) voor back-"
-"upversleuteling geroteerd. Een noodexport van sleutels van vóór deze rotatie "
-"bevat de nieuwe sleutels niet, en back-ups die vanaf nu worden gemaakt "
-"hebben ze nodig.\n"
+"SysManage heeft volgens schema %(count)d sleutel(s) voor back-upversleuteling geroteerd. Een noodexport van sleutels van vóór deze rotatie bevat de nieuwe sleutels niet, en back-ups die vanaf nu worden gemaakt hebben ze nodig.\n"
 "\n"
-"Open Back-ups, daarna het paneel \"Versleuteling\" van een host, en gebruik "
-"\"Noodexport van sleutels\" om een nieuwe export te maken. Bewaar die "
-"offline en vernietig de oude."
+"Open Back-ups, daarna het paneel \"Versleuteling\" van een host, en gebruik \"Noodexport van sleutels\" om een nieuwe export te maken. Bewaar die offline en vernietig de oude."
 
 #: backend/services/config_mgmt_baseline.py:286
 #, python-format
@@ -6394,9 +6524,9 @@ msgid ""
 "This Professional+ engine is licensed but needs a newer SysManage server. "
 "Upgrade the SysManage server package, then restart it."
 msgstr ""
-"Deze Professional+-engine is gelicentieerd maar heeft een nieuwere SysManage-"
-"server nodig. Werk het SysManage-serverpakket bij en start de server daarna "
-"opnieuw."
+"Deze Professional+-engine is gelicentieerd maar heeft een nieuwere "
+"SysManage-server nodig. Werk het SysManage-serverpakket bij en start de "
+"server daarna opnieuw."
 
 #: backend/licensing/migration_compat.py:160
 msgid ""
@@ -6404,8 +6534,8 @@ msgid ""
 "than it needs. Run the database migrations, then restart the SysManage "
 "server."
 msgstr ""
-"Deze Professional+-engine is gelicentieerd maar niet geladen: de database is "
-"ouder dan de engine nodig heeft. Voer de databasemigraties uit en start "
+"Deze Professional+-engine is gelicentieerd maar niet geladen: de database is"
+" ouder dan de engine nodig heeft. Voer de databasemigraties uit en start "
 "daarna de SysManage-server opnieuw."
 
 #: backend/vulnerability/cve_sources.py:23
@@ -6458,9 +6588,9 @@ msgstr ""
 #~ "This snapshot is encrypted; restoring or browsing it needs a restate that "
 #~ "can take the key for one job, which is not released yet"
 #~ msgstr ""
-#~ "Deze snapshot is versleuteld; om hem te herstellen of te doorbladeren is "
-#~ "een restate nodig die de sleutel voor één taak kan aannemen, en die is "
-#~ "nog niet uitgebracht"
+#~ "Deze snapshot is versleuteld; om hem te herstellen of te doorbladeren is een"
+#~ " restate nodig die de sleutel voor één taak kan aannemen, en die is nog niet"
+#~ " uitgebracht"
 
 #~ msgid "Days to keep seals"
 #~ msgstr "Dagen dat verzegelde snapshots bewaard blijven"
@@ -6479,20 +6609,18 @@ msgstr ""
 
 #, python-format
 #~ msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
-#~ msgstr ""
-#~ "Verwerk berichten voor goedgekeurde host %(host_id)s (FQDN: %(fqdn)s)"
+#~ msgstr "Verwerk berichten voor goedgekeurde host %(host_id)s (FQDN: %(fqdn)s)"
 
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr ""
-#~ "E-mailservice is uitgeschakeld. Schakel deze in het configuratiebestand "
-#~ "in."
+#~ "E-mailservice is uitgeschakeld. Schakel deze in het configuratiebestand in."
 
 #~ msgid ""
-#~ "Multi-factor authentication is required for this account. Please enrol "
-#~ "from your profile page before signing in."
+#~ "Multi-factor authentication is required for this account. Please enrol from "
+#~ "your profile page before signing in."
 #~ msgstr ""
-#~ "Meervoudige verificatie is vereist voor deze account. Meld je aan vanaf "
-#~ "jouw profielpagina om dit in te stellen."
+#~ "Meervoudige verificatie is vereist voor deze account. Meld je aan vanaf jouw"
+#~ " profielpagina om dit in te stellen."
 
 #, python-format
 #~ msgid "Package collection requested from host %s"
@@ -6575,8 +6703,7 @@ msgstr ""
 
 #, python-format
 #~ msgid "Host '%s' enrolled via registration key '%s' (auto_approve=%s)"
-#~ msgstr ""
-#~ "Host '%s' is aangemeld via registratie sleutel '%s' (auto_approve=%s)"
+#~ msgstr "Host '%s' is aangemeld via registratie sleutel '%s' (auto_approve=%s)"
 
 #, python-format
 #~ msgid "Queued installation of %d packages on host %s"
@@ -6658,20 +6785,20 @@ msgstr ""
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for "
-#~ "retry (NOT deleting) -- may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "Host %s niet gevonden in deze database; %d wachtrijberichten worden "
-#~ "uitgesteld (worden NIET verwijderd) -- kan een aanmelding zijn die nog "
-#~ "bezig is of een verwijderde host"
+#~ "uitgesteld (worden NIET verwijderd) -- kan een aanmelding zijn die nog bezig"
+#~ " is of een verwijderde host"
 
 #, python-format
 #~ msgid ""
 #~ "Host %s (FQDN: %s) no longer approved (status: %s), deleting all its "
 #~ "messages from queue"
 #~ msgstr ""
-#~ "Host %s (FQDN: %s) is niet goedgekeurd (status: %s), alle berichten "
-#~ "worden verwijderd uit de wachtrij"
+#~ "Host %s (FQDN: %s) is niet goedgekeurd (status: %s), alle berichten worden "
+#~ "verwijderd uit de wachtrij"
 
 #, python-format
 #~ msgid "Deleted %d messages for unapproved host %s"
@@ -6719,8 +6846,7 @@ msgstr ""
 
 #, python-format
 #~ msgid "Message %s not in SENT status (is %s), skipping ack"
-#~ msgstr ""
-#~ "Bericht %s niet in VERZONDEN status (is %s), bevestiging overgeslagen"
+#~ msgstr "Bericht %s niet in VERZONDEN status (is %s), bevestiging overgeslagen"
 
 #, python-format
 #~ msgid "Failed to mark message %s as acknowledged: %s"
@@ -6897,8 +7023,8 @@ msgstr ""
 #~ msgstr "OS-upgrade Bevestigen"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system "
-#~ "reboot. Continue?"
+#~ "This action will upgrade the operating system and require a system reboot. "
+#~ "Continue?"
 #~ msgstr ""
 #~ "Deze actie zal het besturingssysteem upgraden en een systeemherstart "
 #~ "vereisen. Doorgaan?"
@@ -7015,12 +7141,12 @@ msgstr ""
 #~ msgstr "KVM/libvirt succesvol geïnitialiseerd"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please "
-#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
+#~ "to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
-#~ "Het exporteren van het auditlogboek vereist een SysManage Professional+-"
-#~ "licentie. Upgrade om toegang te krijgen tot de exportformaten CSV, JSON, "
-#~ "CEF en LEEF."
+#~ "Het exporteren van het auditlogboek vereist een SysManage "
+#~ "Professional+-licentie. Upgrade om toegang te krijgen tot de exportformaten "
+#~ "CSV, JSON, CEF en LEEF."
 
 # Pro+ redirect messages
 #~ msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"

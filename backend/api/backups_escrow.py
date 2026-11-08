@@ -28,6 +28,7 @@ from backend.licensing.migration_compat import missing_engine_detail
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_escrow as escrow
+from backend.services import backup_server
 from backend.services import backup_jobs as jobs
 from backend.services.audit_service import EntityType
 
@@ -72,5 +73,16 @@ async def save_escrow_key(
         "Backup break-glass escrow key saved",
         {"fingerprint": saved["fingerprint"], "uid": saved["uid"]},
     )  # fmt: skip
+    # The SysManage server's own backup (25.9) moves to the new key.
+    try:
+        rekeyed = backup_server.rekey_to_escrow(db, target)
+    except Exception as refused:  # pylint: disable=broad-exception-caught
+        raise backup_server.refusal(refused) from refused
+    if rekeyed is not None:
+        _audit(
+            db, current_user, EntityType.HOST, rekeyed.host_id, None,
+            "SysManage server backup encrypted to the escrow key",
+            {"fingerprint": saved["fingerprint"]},
+        )  # fmt: skip
     db.commit()
     return saved

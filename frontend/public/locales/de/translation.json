@@ -23,6 +23,22 @@
     "title": "Akzeptiere Ihre Einladung",
     "validatingToken": "Einladung wird geprüft..."
   },
+  "agentCertificates": {
+    "enforceAnyway": "Trotzdem erzwingen",
+    "fleet": "{{presenting}} von {{approved}} genehmigten Hosts legen ein gültiges Zertifikat vor; {{expiring}} werden erneuert, {{expired}} abgelaufen.",
+    "intro": "Jeder Agent erhält ein Client-Zertifikat für einen Schlüssel, den er selbst erzeugt, erneuert es vor dem Ablauf und legt es bei jeder Verbindung vor. Agenten pinnen außerdem diesen Server, sodass ein Proxy oder ein anderer Server, der ein anderes Zertifikat vorlegt, abgewiesen wird.",
+    "loadError": "Die Einstellungen für Agentenzertifikate konnten nicht geladen werden.",
+    "mode": "Modus",
+    "modeEnforced": "Erzwungen",
+    "modeEnforcedHelp": "Jeder genehmigte Host muss ein gültiges Zertifikat vorlegen. Ein Host ohne aktuelles Zertifikat darf weiterhin eines anfordern, sonst nichts.",
+    "modeOff": "Aus",
+    "modeOffHelp": "Client-Zertifikate werden ignoriert. Agenten verbinden sich allein mit ihrem Host-Token.",
+    "modeOptional": "Wahlweise",
+    "modeOptionalHelp": "Ein von einem Agenten vorgelegtes Zertifikat muss für seinen Host gültig sein; ein Agent ohne Zertifikat verbindet sich weiterhin über sein Host-Token.",
+    "noneYet": "Noch kein Host legt ein Zertifikat vor. Agenten erhalten eines, sobald sie aktualisiert werden; nginx fordert es an, sobald das Serverpaket seine Einstellungen für Agentenzertifikate hinzugefügt hat (ein Upgrade erledigt das, wenn die SysManage-CA vorhanden ist).",
+    "saveError": "Die Einstellung für Agentenzertifikate konnte nicht gespeichert werden.",
+    "title": "Agentenzertifikate (gegenseitiges TLS)"
+  },
   "agentMirrors": {
     "add": "Hinzufügung",
     "colActions": "Aktionen",
@@ -760,7 +776,8 @@
     "clocksOutOfBounds": "Uhren außerhalb der Grenzwerte",
     "hardwareNeedsAttention": "Hardware mit Handlungsbedarf",
     "backupsAttention": "Sicherungen, die Aufmerksamkeit erfordern",
-    "backupsEscrowStale": "Notfall-Schlüsselexport veraltet"
+    "backupsEscrowStale": "Notfall-Schlüsselexport veraltet",
+    "backupsServerUnprotected": "Dieser SysManage-Server hat keine erfolgreiche Sicherung"
   },
   "dataGrid": {
     "columnVisibility": "Spaltensichtbarkeit",
@@ -1821,6 +1838,19 @@
     "capabilitiesFullTooltip": "Dieser Agent meldet die vollständige Funktionsausstattung",
     "capabilitiesLimited": "Eingeschränkt",
     "capabilitiesLimitedTooltip": "Dieser Agent meldet, dass einige Befehle nicht ausgeführt werden können",
+    "certificate": {
+      "column": "Zertifikat",
+      "expired": "Abgelaufen",
+      "expiredTip": "Das Zertifikat ist abgelaufen. Der Agent fordert bei der nächsten Verbindung ein neues an.",
+      "expiring": "Wird erneuert",
+      "expiringTip": "Das Zertifikat läuft innerhalb von 30 Tagen ab; der Agent erneuert es selbstständig.",
+      "none": "Keines",
+      "noneTip": "Noch kein Zertifikat ausgestellt: Der Agent fordert eines an, sobald er aktualisiert ist.",
+      "notPresented": "Nicht vorgelegt",
+      "notPresentedTip": "Ein Zertifikat wurde ausgestellt, aber keine Verbindung in den letzten 24 Stunden hat es vorgelegt. Aktualisieren Sie den Agenten und prüfen Sie, ob nginx Client-Zertifikate anfordert.",
+      "presenting": "Vorgelegt",
+      "presentingTip": "Dieser Host legt ein gültiges Client-Zertifikat vor."
+    },
     "childHostFilter": "Unterhost-Filter",
     "childHostOf": "Unterhost von {{parent}}",
     "childHostsOnly": "Nur Unterhosts",
@@ -5410,6 +5440,7 @@
       "notPrivileged": "Der Agent muss als root laufen",
       "toolOutdated": "restate aktualisieren",
       "wrongPlatform": "Auf diesem Betriebssystem nicht unterstützt",
+      "noNfsv4Client": "Dieses Betriebssystem hat keinen NFSv4-Client",
       "missingNfsClient": "NFS-Client installieren",
       "storageUnreachable": "Sicherungsspeicher nicht erreichbar"
     },
@@ -5677,7 +5708,9 @@
       "until": "{{percent}}% in etwa {{days}} Tagen"
     },
     "reach": {
-      "unreachable": "Dieser Host erreicht den Sicherungsspeicher nicht ({{storage}}, {{address}}, NFS-Port {{port}}). Sicherungen brauchen einen Netzwerkpfad dorthin."
+      "unreachable": "Dieser Host erreicht den Sicherungsspeicher nicht ({{storage}}, {{address}}, NFS-Port {{port}}). Sicherungen brauchen einen Netzwerkpfad dorthin.",
+      "behindNat": "Dieser Host befindet sich hinter NAT: Der Sicherungsspeicher ({{storage}}) sieht ihn als {{seen}}, nicht als {{address}}, und verweigert daher das Einhängen. Bringen Sie den Host in das Netzwerk des Speicherhosts (bei einer virtuellen Maschine ein Bridge-Netzwerk), statt ihn hinter dessen NAT zu betreiben.",
+      "behindNatLabel": "Hinter NAT"
     },
     "network": {
       "leftOut": "Automatisch ausgeschlossen (Netzwerk-Mounts auf diesem Host): {{paths}}",
@@ -5788,6 +5821,27 @@
       "replaces": "Diese Einstellungen dieses Hosts werden ersetzt:",
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Seine Einstellungen entsprechen bereits der Tag-Richtlinie."
+    },
+    "server": {
+      "backUp": "Diesen SysManage-Server sichern",
+      "title": "Diesen SysManage-Server sichern",
+      "noGoodBackup": "Dieser SysManage-Server ({{host}}) hat keine aktuelle erfolgreiche Sicherung. Seine Zeile unten nennt den Grund.",
+      "noPolicy": "Dieser SysManage-Server ({{host}}) wird nicht gesichert. Geht er verloren, muss sich jeder Agent erneut registrieren, und die OpenBAO-Geheimnisse und die Datenbanken sind verloren.",
+      "noPolicyMany": "Dieser SysManage-Server wird nicht gesichert. Geht er verloren, muss sich jeder Agent erneut registrieren, und die OpenBAO-Geheimnisse und die Datenbanken sind verloren.",
+      "unknown": "SysManage kann nicht erkennen, welcher Host dieser Server ist, und daher nicht sagen, ob der Server gesichert wird. Wählen Sie seinen Host, um ihn zu sichern.",
+      "saveError": "Die Sicherung des SysManage-Servers konnte nicht gespeichert werden.",
+      "host": "Der Host, auf dem dieser SysManage-Server läuft",
+      "hostHelp": "Kein Host trägt den Namen dieses Servers. Wählen Sie den Host, auf dem sein Agent läuft.",
+      "kept": "Gesichert",
+      "keptHelp": "Die Zertifizierungsstelle der Agenten und die Serveridentität (gehen sie verloren, muss sich jeder Agent erneut registrieren), OpenBAO, PostgreSQL, die Konfiguration, die TLS-Zertifikate und die Lizenz, zusammen mit dem Rest des Hosts.",
+      "skipped": "Ausgelassen",
+      "skippedHelp": "Wird bei Bedarf erneut heruntergeladen: Engine-Pakete, die GeoIP-Datenbank, Paketspiegel und Protokolle.",
+      "never": "Nie gesichert",
+      "neverHelp": "Diese Dateien enthalten den Entsiegelungs- oder Wiederherstellungsschlüssel von OpenBAO und das OpenBAO-Token des Servers. Bewahren Sie eine Kopie davon sicher und getrennt vom Server auf, etwa in einem Passwort-Manager, damit eine gestohlene Sicherung die darin enthaltene OpenBAO-Kopie nicht entsiegeln kann.",
+      "pauseNote": "PostgreSQL wird angehalten, während seine eigenen Dateien kopiert werden, daher kann SysManage in dieser Zeit Fehler anzeigen. Wählen Sie eine ruhige Startstunde.",
+      "unencrypted": "Diese Sicherung ist nicht verschlüsselt und enthält das Datenbankpasswort aus der Konfiguration. Schützen Sie den Sicherungsspeicher so gut wie den Server selbst.",
+      "needsEscrow": "Speichern Sie zuerst einen Notfall-Treuhandschlüssel im Verschlüsselungsbereich eines Hosts. Die eigene Sicherung des SysManage-Servers wird damit verschlüsselt, sodass die Wiederherstellung von OpenBAO nie einen in OpenBAO verwahrten Schlüssel braucht.",
+      "escrowEncrypted": "Mit Ihrem Notfall-Treuhandschlüssel verschlüsselt ({{fingerprint}}). SysManage besitzt nie dessen geheimen Teil, daher wird diese Sicherung von Hand mit diesem Schlüssel wiederhergestellt, wie es das Wiederherstellungshandbuch des Servers beschreibt."
     }
   },
   "cloudBackup": {

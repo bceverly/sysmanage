@@ -34,6 +34,7 @@ from sqlalchemy.orm import Session
 from backend.i18n import _
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
+from backend.services.backup_keys_read import key_references
 
 logger = logging.getLogger(__name__)
 
@@ -62,15 +63,22 @@ def backup_engine():
 
 
 def newest_key_at(db: Session, policy) -> Optional[datetime]:
-    """When the policy's newest encryption key was made."""
+    """When the policy's newest encryption key held in OpenBAO was made (the
+    operator's own escrow key, 25.9, is never exported: it is theirs)."""
     made = (
         db.query(func.max(models.BackupPolicyKey.created_at))
-        .filter(models.BackupPolicyKey.policy_id == policy.id)
+        .filter(
+            models.BackupPolicyKey.policy_id == policy.id,
+            models.BackupPolicyKey.key_ref.isnot(None),
+        )
         .scalar()
     )
-    candidates = [
-        _naive(t) for t in (made, policy.encrypted_at, policy.encrypt_rotated_at) if t
-    ]
+    own = (
+        ()
+        if jobs.escrow_keyed(policy)
+        else (policy.encrypted_at, policy.encrypt_rotated_at)
+    )
+    candidates = [_naive(t) for t in (made, *own) if t]
     return max(candidates) if candidates else None
 
 
@@ -155,12 +163,17 @@ def status(db: Session) -> Dict[str, Any]:
     nothing encrypted and signing off -- then nothing needs escrow."""
     target = jobs.the_target(db)
     signing_at = _naive(getattr(target, "signing_enabled_at", None))
-    rows = (
-        db.query(models.BackupPolicy, models.Host)
-        .join(models.Host, models.Host.id == models.BackupPolicy.host_id)
-        .filter(models.BackupPolicy.encrypt_fingerprint.isnot(None))
-        .all()
-    )
+    rows = [
+        (policy, host)
+        for policy, host in (
+            db.query(models.BackupPolicy, models.Host)
+            .join(models.Host, models.Host.id == models.BackupPolicy.host_id)
+            .filter(models.BackupPolicy.encrypt_fingerprint.isnot(None))
+            .all()
+        )
+        # Encrypted only to the operator's escrow key (25.9): nothing to export.
+        if not jobs.escrow_keyed(policy) or key_references(db, policy)
+    ]
     applies = backup_engine() is not None and (bool(rows) or signing_at is not None)
     stale_hosts: List[str] = []
     export_host_id: Optional[str] = None  # where the banner's link goes

@@ -56,7 +56,7 @@ import unicodedata
 from collections import Counter
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import httpx
 from fastapi import FastAPI, HTTPException
@@ -641,6 +641,7 @@ async def _raw_chunk(
     lang_code: str,
     sources: List[str],
     correction: Optional[str] = None,
+    mask: bool = True,
 ) -> List[str]:
     """One Ollama call for a chunk -> length-aligned translations.
 
@@ -650,12 +651,15 @@ async def _raw_chunk(
     falls back to the English source, so the result is always complete and
     aligned (never a crash mid-pass).  Placeholder integrity is enforced by
     ``_ollama_translate_chunk`` on top of this.
+
+    ``mask=False`` sends the markup as written, for the strings whose markers
+    the model drops (see :func:`_unmasked_attempt`).
     """
     language = LANGUAGES[lang_code]
     masked_sources: List[str] = []
     masks: List[List[str]] = []
     for src in sources:
-        masked, originals = _mask_markup(src)
+        masked, originals = _mask_markup(src) if mask else (src, [])
         masked_sources.append(masked)
         masks.append(originals)
     payload = {
@@ -747,10 +751,40 @@ async def _raw_chunk(
     if len(sources) > 1:
         results: List[str] = []
         for s in sources:
-            single = await _raw_chunk(client, lang_code, [s])
+            single = await _raw_chunk(client, lang_code, [s], correction, mask)
             results.append(single[0])
         return results
     return list(sources)  # give back the English source as a last resort
+
+
+async def _unmasked_attempt(
+    client: httpx.AsyncClient,
+    lang_code: str,
+    src: str,
+    why_bad: Callable[[str, str], Optional[str]],
+) -> Tuple[str, Optional[str]]:
+    """Translate ``src`` with its markup left in place: ``(text, reason)``.
+
+    Masking is what lets the model carry long, tag-dense paragraphs, but it
+    has its own failure: aya drops the markers around an inline phrase it
+    reorders (``A ⟦0⟧Red Hat Satellite alternative⟦1⟧ ...`` came back with
+    no markers at all), even in a one-line sentence, and the corrections
+    cannot fix that -- measured 2026-11-06, when ~6,000 docs strings sat at
+    "fallback:placeholders" run after run.  Shown the real tags, the same
+    model keeps them, because ``<strong>`` means something and ``⟦0⟧`` does
+    not.  One correction follows a failed first try.  ``reason`` is None
+    when the text passed every guard.
+    """
+    note: Optional[str] = None
+    cand, reason = src, "placeholders"
+    for _ in range(2):
+        out = await _raw_chunk(client, lang_code, [src], correction=note, mask=False)
+        cand = out[0] if out else src
+        reason = why_bad(src, cand)
+        if reason is None:
+            break
+        note = _correction_note(reason, src, lang_code)
+    return cand, reason
 
 
 async def _ollama_translate_chunk(
@@ -779,6 +813,11 @@ async def _ollama_translate_chunk(
             return "markers"
         if not _placeholders_ok(src, txt):
             return "placeholders"
+        if txt.count("`") > src.count("`"):
+            # Markdown code quotes the model added around a tag (`<code>x</code>`,
+            # seen 2026-11-06 once real tags were shown): every guard passes them
+            # and the page renders the backticks.
+            return "shape"
         if not _language_ok(lang_code, txt):
             return "language"
         why = i18n_quality.problem(lang_code, src, txt) if i18n_quality else None
@@ -832,6 +871,8 @@ async def _ollama_translate_chunk(
             reason = why_bad(src, cand)
             if reason is None:
                 break
+        if reason in ("placeholders", "markers") and _PLACEHOLDER_RE.search(src):
+            cand, reason = await _unmasked_attempt(client, lang_code, src, why_bad)
         if reason is None:
             repaired.append((cand, "ok"))
             continue

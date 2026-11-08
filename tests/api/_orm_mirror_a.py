@@ -54,6 +54,9 @@ class Host(TestBase):
         String, nullable=True
     )  # Using String instead of Text for SQLite
     certificate_serial = Column(String(64), nullable=True)
+    certificate_expires_at = Column(DateTime, nullable=True)
+    certificate_last_presented_at = Column(DateTime, nullable=True)
+    previous_certificate_serial = Column(String(64), nullable=True)
     certificate_issued_at = Column(
         DateTime, nullable=True
     )  # Timezone not supported in SQLite

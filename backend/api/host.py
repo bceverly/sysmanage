@@ -48,7 +48,7 @@ from backend.api.host_registration import (  # pylint: disable=unused-import
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
-from backend.security import agent_identity
+from backend.security import agent_identity, agent_mtls
 from backend.security.roles import SecurityRoles
 from backend.services import maintenance_window_service
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -507,6 +507,7 @@ def _get_all_hosts_sync(tenant_id=None):
                 ),
                 "status": host.status,
                 "approval_status": host.approval_status,
+                "certificate_status": agent_mtls.certificate_status(host),
                 "held_commands": held.get(str(host.id), 0),
                 "platform": host.platform,
                 "platform_release": host.platform_release,

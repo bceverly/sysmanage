@@ -35,6 +35,7 @@ target has one) and only then ``prune`` -- never a prune on the host itself.
 
 import json
 import logging
+import posixpath
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -44,6 +45,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
+from backend.services import backup_server_paths as server_paths
 from backend.services import config_mgmt_dispatch
 from backend.services.agent_capability_service import get_capability_report
 from backend.websocket.messages import CommandType
@@ -128,6 +130,18 @@ def encrypted(policy: models.BackupPolicy) -> bool:
     encrypted repository refuses a capture without it, so a lapsed license
     must not stop backups."""
     return bool(policy.encrypt_public_key)
+
+
+def escrow_keyed(policy: models.BackupPolicy) -> bool:
+    """The CURRENT repository is encrypted to the operator's escrow PUBLIC
+    key, whose secret half never touches the server (the SysManage server's
+    own backup, 25.9): nothing in OpenBAO can read it, so SysManage cannot
+    restore, browse or verify it -- the recovery runbook does, by hand."""
+    return (
+        encrypted(policy)
+        and bool(getattr(policy, "server_preset", False))
+        and not getattr(policy, "encrypt_key_ref", None)
+    )
 
 
 def _previous(policy: models.BackupPolicy, storage) -> Dict[str, Any]:
@@ -219,16 +233,33 @@ def _json_strings(text: Optional[str]) -> List[str]:
 
 
 def quiesce_names(policy: models.BackupPolicy) -> List[str]:
-    return _json_strings(policy.quiesce_with)
+    available = _json_strings(policy.available_hooks)
+    return server_paths.hooks(policy, _json_strings(policy.quiesce_with), available)
 
 
 def path_rules(policy: models.BackupPolicy) -> Dict[str, List[str]]:
     """The operator's ``keep_paths`` / ``skip_paths``, only those set."""
     rules = {
         "keep_paths": _json_strings(policy.keep_paths),
-        "skip_paths": _json_strings(policy.skip_paths),
+        # The server's own policy (25.9) always leaves its OpenBAO secrets out.
+        "skip_paths": server_paths.skip_rules(policy, _json_strings(policy.skip_paths)),
     }
     return {key: value for key, value in rules.items() if value}
+
+
+# A Mac mounts its storage under /Volumes (25.8): its system volume is read-only,
+# so no /mnt or /srv can be made there, and /Volumes is where macOS mounts go.
+DARWIN_MOUNT_ROOT = "/Volumes"
+DARWIN_PLATFORMS = ("macOS", "Darwin")
+
+
+def host_mount_point(target: models.BackupTarget, host: models.Host) -> str:
+    """Where ``host`` mounts its repository's export: the target's mount point,
+    or on a Mac the same name under /Volumes."""
+    if (host.platform or "") in DARWIN_PLATFORMS:
+        name = posixpath.basename(target.host_mount_point.rstrip("/"))
+        return posixpath.join(DARWIN_MOUNT_ROOT, name or "sysmanage-backups")
+    return target.host_mount_point
 
 
 def host_configuration(
@@ -241,7 +272,7 @@ def host_configuration(
         "policy_id": str(policy.id),
         "role": "host",
         "target": {
-            "mount_point": target.host_mount_point,
+            "mount_point": host_mount_point(target, host),
             "repo_dir": policy_repo_dir(policy, host),
             **nfs_source(policy, storage),
             **_previous(policy, storage),
@@ -250,7 +281,7 @@ def host_configuration(
             "capture": {
                 "all": False,
                 "baseline_content": False,
-                "quiesce": bool(policy.quiesce),
+                "quiesce": server_paths.quiesce(policy),
                 "quiesce_with": quiesce_names(policy),
                 **path_rules(policy),
             },

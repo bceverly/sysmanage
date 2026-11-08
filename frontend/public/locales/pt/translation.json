@@ -23,6 +23,22 @@
     "title": "Aceitar Sua Invitção",
     "validatingToken": "Validando convite..."
   },
+  "agentCertificates": {
+    "enforceAnyway": "Tornar obrigatório mesmo assim",
+    "fleet": "{{presenting}} de {{approved}} hosts aprovados apresentam um certificado válido; {{expiring}} em renovação, {{expired}} expirados.",
+    "intro": "Cada agente recebe um certificado de cliente para uma chave que ele mesmo gera, renova-o antes que expire e o apresenta em cada conexão. Os agentes também fixam este servidor, de modo que um proxy ou outro servidor que apresente um certificado diferente é recusado.",
+    "loadError": "Não foi possível carregar as configurações de certificados de agente.",
+    "mode": "Modo",
+    "modeEnforced": "Obrigatório",
+    "modeEnforcedHelp": "Todo host aprovado deve apresentar um certificado válido. Um host sem um certificado vigente ainda pode solicitar um, e nada mais.",
+    "modeOff": "Desativado",
+    "modeOffHelp": "Os certificados de cliente são ignorados. Os agentes se conectam apenas com o token do host.",
+    "modeOptional": "Opcional",
+    "modeOptionalHelp": "Um certificado apresentado por um agente deve ser válido para o seu host; um agente sem certificado continua se conectando com o token do host.",
+    "noneYet": "Nenhum host apresenta um certificado ainda. Os agentes recebem um quando são atualizados; o nginx o solicita assim que o pacote do servidor tiver adicionado as configurações de certificados de agente (uma atualização faz isso quando a CA do SysManage existe).",
+    "saveError": "Não foi possível salvar a configuração de certificados de agente.",
+    "title": "Certificados de agente (TLS mútuo)"
+  },
   "agentMirrors": {
     "add": "Adicionar",
     "colActions": "Ações",
@@ -760,7 +776,8 @@
     "clocksOutOfBounds": "Relógios fora dos limites",
     "hardwareNeedsAttention": "Hardware que requer atenção",
     "backupsAttention": "Backups que precisam de atenção",
-    "backupsEscrowStale": "Exportação de chaves de emergência desatualizada"
+    "backupsEscrowStale": "Exportação de chaves de emergência desatualizada",
+    "backupsServerUnprotected": "Este servidor SysManage não tem um backup bem-sucedido"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidade das colunas",
@@ -1129,7 +1146,7 @@
     "addUser": "Adicionar conta de utilizador",
     "confirmDelete": "Tem certeza de que deseja excluir a conta do usuário \"{{username}}\"? Esta ação não pode ser desfeita.",
     "confirmDeleteTitle": "Excluir conta de usuário",
-    "confirmPassword": "Confirmar palavra-passe",
+    "confirmPassword": "Confirmar senha",
     "create": "Criar utilizador",
     "createFailed": "Falha ao criar a conta de utilizador",
     "createHomeDir": "Criar diretório pessoal",
@@ -1145,9 +1162,9 @@
     "password": "Palavra-passe",
     "passwordHelp": "Mínimo de 8 caracteres requeridos",
     "passwordMismatch": "As palavras-passe não coincidem",
-    "passwordNeverExpires": "A palavra-passe nunca expira",
-    "passwordRequired": "A palavra-passe é obrigatória para contas Windows",
-    "passwordTooShort": "A palavra-passe deve ter pelo menos 8 caracteres",
+    "passwordNeverExpires": "A senha nunca expira",
+    "passwordRequired": "A senha é obrigatória para contas Windows",
+    "passwordTooShort": "A senha deve ter pelo menos 8 caracteres",
     "primaryGroup": "Grupo primário",
     "primaryGroupHelp": "Deixar vazio para criar um grupo com o mesmo nome do utilizador",
     "shell": "Shell",
@@ -1163,7 +1180,7 @@
     "uid": "ID de utilizador (UID)",
     "uidHelpPlatform": "Deixe vazio para atribuir automaticamente. Deve ser >= {{minUid}} se especificado.",
     "unixDescription": "Criar uma nova conta de utilizador neste host.",
-    "userMustChangePassword": "O utilizador deve alterar a palavra-passe no próximo início de sessão",
+    "userMustChangePassword": "O usuário deve alterar a senha no próximo logon",
     "username": "Nome de utilizador",
     "usernameHelp": "São permitidos letras, números, sublinhados e hífens",
     "usernameRequired": "O nome de utilizador é obrigatório",
@@ -1821,6 +1838,19 @@
     "capabilitiesFullTooltip": "Este agente anuncia o conjunto completo de habilidades",
     "capabilitiesLimited": "Limitado",
     "capabilitiesLimitedTooltip": "Este agente relata que não pode executar alguns comandos",
+    "certificate": {
+      "column": "Certificado",
+      "expired": "Expirado",
+      "expiredTip": "O certificado expirou. O agente solicita um novo na próxima conexão.",
+      "expiring": "Em renovação",
+      "expiringTip": "O certificado expira em até 30 dias; o agente o renova por conta própria.",
+      "none": "Nenhum",
+      "noneTip": "Nenhum certificado emitido ainda: o agente solicita um assim que for atualizado.",
+      "notPresented": "Não apresentado",
+      "notPresentedTip": "Um certificado foi emitido, mas nenhuma conexão nas últimas 24 horas o apresentou. Atualize o agente e verifique se o nginx solicita certificados de cliente.",
+      "presenting": "Apresentado",
+      "presentingTip": "Este host apresenta um certificado de cliente válido."
+    },
     "childHostFilter": "Filtro de host filho",
     "childHostOf": "Host filho de {{parent}}",
     "childHostsOnly": "Apenas hosts filhos",
@@ -2147,16 +2177,16 @@
     },
     "daysOfWeek": "Dias da semana",
     "deleteError": "Falha ao excluir janela de manutenÇão",
-    "deleteWindow": "Excluir Janela de ManutenÇão",
+    "deleteWindow": "Excluir janela de manutenção",
     "deleted": "Janela de manutenÇão excluída",
     "description": "Descrição",
     "durationMinutes": "Duração (minutos)",
-    "editWindow": "Editar Janela de ManutenÇão",
-    "emergencyOverride": "Contornar emergencial",
+    "editWindow": "Editar janela de manutenção",
+    "emergencyOverride": "Substituição de emergência",
     "enabled": "Habilitado",
     "endsAt": "Termina em (UTC)",
     "everyDay": "Todos os dias",
-    "hostCardTitle": "Janela de ManutenÇão",
+    "hostCardTitle": "Janela de manutenção",
     "inBlackout": "Em bloqueio: {{name}}",
     "intro": "Defina quando as atualizaões e comandos remotos podem ser executados. Hosts dentro de uma janela permitida (e fora de qualquer bloqueio) recebem alterações; outras alterações são mantidas e liberadas quando a próxima janela abrir. Hosts sem janela nenhuma estáo sem restrições.",
     "kind": "Tipo",
@@ -2193,7 +2223,7 @@
       "unrestricted": "Ilimitado"
     },
     "timezone": "Fuso Horário",
-    "title": "Janelas de ManutenÇão",
+    "title": "Janelas de manutenção",
     "unrestrictedHint": "Nenhuma janela de manutenÇão se aplica -- alterações são executadas imediatamente.",
     "updated": "Janela de manutenÇão atualizada",
     "overrideFailed": "Não foi possível criar a substituição.",
@@ -5410,6 +5440,7 @@
       "notPrivileged": "O agente deve ser executado como root",
       "toolOutdated": "Atualize o restate",
       "wrongPlatform": "Não compatível com este sistema operacional",
+      "noNfsv4Client": "Este sistema operacional não tem cliente NFSv4",
       "missingNfsClient": "Instalar o cliente NFS",
       "storageUnreachable": "Não alcança o armazenamento de backup"
     },
@@ -5677,7 +5708,9 @@
       "until": "{{percent}}% em cerca de {{days}} dias"
     },
     "reach": {
-      "unreachable": "Este host não consegue alcançar o armazenamento de backup ({{storage}}, {{address}}, porta NFS {{port}}). Os backups precisam de um caminho de rede até ele."
+      "unreachable": "Este host não consegue alcançar o armazenamento de backup ({{storage}}, {{address}}, porta NFS {{port}}). Os backups precisam de um caminho de rede até ele.",
+      "behindNat": "Este host está atrás de NAT: o armazenamento de backups ({{storage}}) o vê como {{seen}}, não como {{address}}, e por isso recusa a montagem. Coloque o host na rede do host de armazenamento (uma rede em ponte para uma máquina virtual) em vez de atrás do NAT dele.",
+      "behindNatLabel": "Atrás de NAT"
     },
     "network": {
       "leftOut": "Excluídos automaticamente (montagens de rede neste host): {{paths}}",
@@ -5788,6 +5821,27 @@
       "replaces": "Estas configurações deste host serão substituídas:",
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Suas configurações já correspondem à política de marcador."
+    },
+    "server": {
+      "backUp": "Fazer backup deste servidor SysManage",
+      "title": "Fazer backup deste servidor SysManage",
+      "noGoodBackup": "Este servidor SysManage ({{host}}) não tem um backup bem-sucedido recente. A linha dele abaixo indica o motivo.",
+      "noPolicy": "Este servidor SysManage ({{host}}) não tem backup. Se for perdido, todos os agentes terão de se inscrever novamente, e os segredos do OpenBAO e os bancos de dados serão perdidos.",
+      "noPolicyMany": "Este servidor SysManage não tem backup. Se for perdido, todos os agentes terão de se inscrever novamente, e os segredos do OpenBAO e os bancos de dados serão perdidos.",
+      "unknown": "O SysManage não consegue saber qual host é este servidor, por isso não consegue saber se o servidor tem backup. Escolha o host dele para fazer o backup.",
+      "saveError": "Não foi possível salvar o backup do servidor SysManage.",
+      "host": "O host em que este servidor SysManage é executado",
+      "hostHelp": "Nenhum host tem o nome deste servidor. Escolha aquele em que o agente dele é executado.",
+      "kept": "Incluído no backup",
+      "keptHelp": "A autoridade de certificação dos agentes e a identidade do servidor (se forem perdidas, todos os agentes terão de se inscrever novamente), o OpenBAO, o PostgreSQL, a configuração, os certificados TLS e a licença, junto com o restante do host.",
+      "skipped": "Deixado de fora",
+      "skippedHelp": "Baixado novamente quando necessário: pacotes de mecanismos, o banco de dados GeoIP, espelhos de pacotes e logs.",
+      "never": "Nunca incluído no backup",
+      "neverHelp": "Estes arquivos contêm a chave de desselagem ou de recuperação do OpenBAO e o token do OpenBAO do servidor. Guarde uma cópia deles em um local seguro, longe do servidor, como um gerenciador de senhas, para que um backup roubado não possa desselar a cópia do OpenBAO que contém.",
+      "pauseNote": "O PostgreSQL é parado enquanto seus próprios arquivos são copiados, então o SysManage pode mostrar erros durante esse tempo. Escolha uma hora de início tranquila.",
+      "unencrypted": "Este backup não é criptografado e contém a senha do banco de dados da configuração. Proteja o armazenamento de backup tanto quanto o próprio servidor.",
+      "needsEscrow": "Salve primeiro uma chave de custódia de emergência no painel Criptografia de um host. O backup do próprio servidor SysManage é criptografado com ela, para que restaurar o OpenBAO nunca precise de uma chave guardada dentro do OpenBAO.",
+      "escrowEncrypted": "Criptografado com sua chave de custódia de emergência ({{fingerprint}}). O SysManage nunca guarda a parte secreta dela, então este backup é restaurado manualmente com essa chave, como descreve o procedimento de recuperação do servidor."
     }
   },
   "cloudBackup": {

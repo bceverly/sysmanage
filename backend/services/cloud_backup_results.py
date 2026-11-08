@@ -169,9 +169,33 @@ def _reason(payload: Dict[str, Any], detail: Optional[str]) -> Optional[str]:
     called it "tool_failed", so the cooldown retry (cloud_backup_tick) works
     with it too."""
     reason = _text(payload.get("reason"), 64)
-    if reason in (None, "tool_failed") and tick.APPLE_BUSY_MARKER in (detail or ""):
+    if reason in (None, "tool_failed") and tick.apple_stopped(detail):
         return tick.APPLE_BUSY
     return reason
+
+
+# The agent's own words for Apple's refusal: run messages are the agent's text.
+APPLE_BUSY_MESSAGE = (
+    "Apple is limiting downloads for this account. Nothing is lost: "
+    "the download is tried again after a cooldown."
+)
+
+
+def _stopped_by_apple(run, status: str, detail: Optional[str]) -> bool:
+    """A download reported good although Apple cut it off.
+
+    icloudpd 1.32.3 can log Apple's refusal and still exit 0, and an agent
+    that judged on the exit called that run a success: on 2026-11-06 nas's
+    first full pass stopped at 16,445 of about 32,000 photos and was
+    recorded as the week's full pass, so the daily downloads (which stop at
+    the newest photos already present) would never reach the rest.  Read as
+    Apple's refusal, it carries on after the cooldown instead.
+    """
+    return (
+        status == cloud.OK
+        and run.action in cloud.TRANSFER_ACTIONS
+        and tick.apple_stopped(detail)
+    )
 
 
 def record_result(db: Session, host_id: Any, payload: Dict[str, Any]):
@@ -185,6 +209,14 @@ def record_result(db: Session, host_id: Any, payload: Dict[str, Any]):
     status = payload.get("status")
     if status not in _STATUSES:
         status = cloud.FAILED
+    detail = _text(payload.get("detail"))
+    if _stopped_by_apple(run, status, detail):
+        status = cloud.FAILED
+        payload = {
+            **payload,
+            "reason": tick.APPLE_BUSY,
+            "message": APPLE_BUSY_MESSAGE,
+        }
     now = cloud.now()
     run.status = status
     run.finished_at = now
@@ -198,7 +230,6 @@ def record_result(db: Session, host_id: Any, payload: Dict[str, Any]):
     run.present = _int(payload.get("present"))
     run.failed_count = _int(payload.get("failed"))
     run.bytes_downloaded = _int(payload.get("bytes"))
-    detail = _text(payload.get("detail"))
     run.result = json.dumps(
         {
             "reason": _reason(payload, detail),

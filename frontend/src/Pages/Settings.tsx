@@ -27,6 +27,7 @@ import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import ConfigurationSettings from '../Components/ConfigurationSettings';
+import AgentCertificatesCard from '../Components/AgentCertificatesCard';
 import AntivirusDefaultsSettings from '../Components/AntivirusDefaultsSettings';
 import HostDefaultsSettings from '../Components/HostDefaultsSettings';
 import FirewallRolesSettings from '../Components/FirewallRolesSettings';
@@ -782,7 +783,7 @@ const Settings: React.FC = () => {
         {/* Content -- keyed off the tab ID at the active index so the mapping is
             stable when a Pro+-gated tab is filtered out for unlicensed users. */}
         <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
-        {tabNames[activeTab] === 'configuration' && <ConfigurationSettings />}
+        {tabNames[activeTab] === 'configuration' && (<><ConfigurationSettings /><AgentCertificatesCard /></>)}
         {tabNames[activeTab] === 'tags' && renderTagsTab()}
         {tabNames[activeTab] === 'asset-tags' && (
           <>

@@ -1581,7 +1581,13 @@ ui = true
 
 
 def update_config_with_vault(config_path, unseal_key=None, root_token=None):
-    """Update configuration file with vault settings."""
+    """Update configuration file with vault settings.
+
+    The unseal key is NOT written here: it stays in the 0600
+    .vault_credentials file that start-openbao reads.  The config is read by
+    the service and copied around (backups included), so a key in it would
+    open OpenBAO for anyone holding a copy (ROADMAP 25.9).
+    """
     if not unseal_key or not root_token:
         return
 
@@ -1606,11 +1612,12 @@ def update_config_with_vault(config_path, unseal_key=None, root_token=None):
                     "enabled": True,
                     "config_file": "./openbao.hcl",
                     "data_path": "./data/openbao",
-                    "unseal_keys": [unseal_key],
                     "initialized": True,
                 },
             }
         )
+        # An older run wrote the key into the config; take it out.
+        config["vault"]["server"].pop("unseal_keys", None)
 
         # Write updated config
         with open(config_path, "w") as f:
@@ -1658,6 +1665,50 @@ def update_config_with_deployment_mode(
 
     except Exception as e:
         print(f"  Warning: Could not update config with deployment mode: {e}")
+
+
+def move_unseal_keys_out_of_config(config_path):
+    """Take OpenBAO unseal keys out of the config (ROADMAP 25.9).
+
+    Older runs wrote ``vault.server.unseal_keys`` into the config.  Nothing
+    reads them there -- start-openbao unseals from .vault_credentials -- but a
+    copy of the config (a backup, a support bundle) would carry the key.
+    Keep the key in .vault_credentials (0600) first, then drop it from the
+    config.
+    """
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f) or {}
+    except OSError as e:
+        print(f"  Warning: could not read {config_path}: {e}")
+        return False
+    server = (config.get("vault") or {}).get("server") or {}
+    keys = server.get("unseal_keys")
+    if not keys:
+        return False
+
+    print("\n--- Moving the OpenBAO unseal key out of the config ---")
+    vault_creds_file = project_root / ".vault_credentials"
+    existing = (
+        vault_creds_file.read_text(encoding="utf-8")
+        if vault_creds_file.exists()
+        else ""
+    )
+    if "UNSEAL_KEY=" not in existing:
+        fd = os.open(vault_creds_file, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+        with os.fdopen(fd, "a", encoding="utf-8") as f:
+            if not existing:
+                f.write("# OpenBAO Vault Credentials - KEEP SECURE\n")
+            f.write(f"UNSEAL_KEY={keys[0]}\n")
+        os.chmod(vault_creds_file, 0o600)
+        fix_file_ownership(vault_creds_file)
+        print(f"  Unseal key kept in {vault_creds_file} (0600)")
+
+    server.pop("unseal_keys", None)
+    with open(config_path, "w", encoding="utf-8") as f:
+        yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+    print(f"  Removed vault.server.unseal_keys from {config_path}")
+    return True
 
 
 def fix_existing_vault_config(config_path):
@@ -1844,6 +1895,7 @@ def main():
         # Fix existing vault configuration if present (updates dev_mode and token)
         config_path = get_config_file_path()
         if config_path:
+            move_unseal_keys_out_of_config(config_path)
             fix_existing_vault_config(config_path)
             # Phase 13.1.G: persist the chosen deployment mode (multi-tenancy block).
             update_config_with_deployment_mode(

@@ -166,6 +166,7 @@ const Dashboard = () => {
     const [backupsTotal, setBackupsTotal] = useState<number>(0);
     const [backupsColor, setBackupsColor] = useState<string>(COLOR_GREEN);
     const [backupsEscrowStale, setBackupsEscrowStale] = useState<boolean>(false);
+    const [serverUnprotected, setServerUnprotected] = useState<boolean>(false);
     // iCloud Photos to local (24.12): counted with the backups, one note line.
     const [cloudSummary, setCloudSummary] = useState<CloudSummary | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -260,6 +261,7 @@ const Dashboard = () => {
         setBackupsTotal(summary.total);
         setBackupsColor(getBackupColor(summary));
         setBackupsEscrowStale(Boolean(summary.escrow_stale));
+        setServerUnprotected(Boolean(summary.server_unprotected));
     };
 
     const fetchData = useCallback(async (isInitialLoad = false) => {
@@ -512,7 +514,9 @@ const Dashboard = () => {
                             color={backupsColor}
                             onClick={() => void navigate('/backups')}
                             loading={loading}
-                            note={backupsEscrowStale
+                            note={serverUnprotected
+                                ? t('dashboard.backupsServerUnprotected', 'This SysManage server has no good backup')
+                                : backupsEscrowStale
                                 ? t('dashboard.backupsEscrowStale', 'Break-glass key export out of date')
                                 : dashboardNote(t, cloudSummary)}
                         />

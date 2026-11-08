@@ -23,6 +23,22 @@
     "title": "Accept Your Invitation",
     "validatingToken": "Validating invitation..."
   },
+  "agentCertificates": {
+    "enforceAnyway": "Enforce anyway",
+    "fleet": "{{presenting}} of {{approved}} approved hosts present a valid certificate; {{expiring}} renewing, {{expired}} expired.",
+    "intro": "Each agent gets a client certificate for a key it generates itself, renews it before it expires, and presents it on every connection. Agents also pin this server, so a proxy or another server presenting a different certificate is refused.",
+    "loadError": "Could not load the agent certificate settings.",
+    "mode": "Mode",
+    "modeEnforced": "Enforced",
+    "modeEnforcedHelp": "Every approved host must present a valid certificate. A host without a current one may still request one, and nothing else.",
+    "modeOff": "Off",
+    "modeOffHelp": "Client certificates are ignored. Agents connect with their host token alone.",
+    "modeOptional": "Optional",
+    "modeOptionalHelp": "A certificate an agent presents must be valid for its host; an agent with none still connects on its host token.",
+    "noneYet": "No host presents a certificate yet. Agents get one when they are updated; nginx asks for it once the server package has added its agent certificate settings (an upgrade does this when the SysManage CA exists).",
+    "saveError": "Could not save the agent certificate setting.",
+    "title": "Agent certificates (mutual TLS)"
+  },
   "agentMirrors": {
     "add": "Add",
     "colActions": "Actions",
@@ -760,7 +776,8 @@
     "clocksOutOfBounds": "Clocks out of bounds",
     "hardwareNeedsAttention": "Hardware needing attention",
     "backupsAttention": "Backups needing attention",
-    "backupsEscrowStale": "Break-glass key export out of date"
+    "backupsEscrowStale": "Break-glass key export out of date",
+    "backupsServerUnprotected": "This SysManage server has no good backup"
   },
   "dataGrid": {
     "columnVisibility": "Column Visibility",
@@ -1840,6 +1857,19 @@
     "capabilitiesFullTooltip": "This agent advertises the full capability set",
     "capabilitiesLimited": "Limited",
     "capabilitiesLimitedTooltip": "This agent reports it cannot run some commands",
+    "certificate": {
+      "column": "Certificate",
+      "expired": "Expired",
+      "expiredTip": "The certificate expired. The agent requests a new one when it next connects.",
+      "expiring": "Renewing",
+      "expiringTip": "The certificate expires within 30 days; the agent renews it on its own.",
+      "none": "None",
+      "noneTip": "No certificate issued yet: the agent requests one once it is updated.",
+      "notPresented": "Not presented",
+      "notPresentedTip": "A certificate was issued but no connection in the last 24 hours presented it. Update the agent, and check that nginx asks for client certificates.",
+      "presenting": "Presented",
+      "presentingTip": "This host presents a valid client certificate."
+    },
     "childHostFilter": "Child host filter",
     "childHostOf": "Child host of {{parent}}",
     "childHostsOnly": "Child hosts only",
@@ -5410,6 +5440,7 @@
       "notPrivileged": "The agent must run as root",
       "toolOutdated": "Upgrade restate",
       "wrongPlatform": "Not supported on this OS",
+      "noNfsv4Client": "This OS has no NFSv4 client",
       "missingNfsClient": "Install the NFS client",
       "storageUnreachable": "Cannot reach the backup storage"
     },
@@ -5677,7 +5708,9 @@
       "until": "{{percent}}% in about {{days}} days"
     },
     "reach": {
-      "unreachable": "This host cannot reach the backup storage ({{storage}}, {{address}}, NFS port {{port}}). Backups need a network path to it."
+      "unreachable": "This host cannot reach the backup storage ({{storage}}, {{address}}, NFS port {{port}}). Backups need a network path to it.",
+      "behindNat": "This host is behind NAT: the backup storage ({{storage}}) sees it as {{seen}}, not {{address}}, so it refuses the mount. Put the host on the storage host's network (a bridged network for a virtual machine) instead of behind its NAT.",
+      "behindNatLabel": "Behind NAT"
     },
     "network": {
       "leftOut": "Left out automatically (network mounts on this host): {{paths}}",
@@ -5788,6 +5821,27 @@
       "replaces": "These settings of this host are replaced:",
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Its settings already match the tag policy."
+    },
+    "server": {
+      "backUp": "Back up this SysManage server",
+      "title": "Back up this SysManage server",
+      "noGoodBackup": "This SysManage server ({{host}}) has no recent good backup. Its row below says why.",
+      "noPolicy": "This SysManage server ({{host}}) is not backed up. If it is lost, every agent must enroll again, and the OpenBAO secrets and the databases are gone.",
+      "noPolicyMany": "This SysManage server is not backed up. If it is lost, every agent must enroll again, and the OpenBAO secrets and the databases are gone.",
+      "unknown": "SysManage cannot tell which host is this server, so it cannot tell whether the server is backed up. Pick its host to back it up.",
+      "saveError": "The SysManage server backup could not be saved.",
+      "host": "The host this SysManage server runs on",
+      "hostHelp": "No host is named as this server is. Pick the one its agent runs on.",
+      "kept": "Backed up",
+      "keptHelp": "The agents' certificate authority and the server identity (lose them and every agent must enroll again), OpenBAO, PostgreSQL, the configuration, the TLS certificates and the license, with the rest of the host.",
+      "skipped": "Left out",
+      "skippedHelp": "Downloaded again when needed: engine bundles, the GeoIP database, package mirrors and logs.",
+      "never": "Never backed up",
+      "neverHelp": "These hold OpenBAO's unseal or recovery key and the server's OpenBAO token. Keep a copy of them somewhere safe away from the server, such as a password manager, so a stolen backup cannot unseal the OpenBAO copy inside it.",
+      "pauseNote": "PostgreSQL is stopped while its own files are copied, so SysManage may show errors for that time. Pick a quiet start hour.",
+      "unencrypted": "This backup is not encrypted, and it holds the database password from the configuration. Keep the backup storage as safe as the server itself.",
+      "needsEscrow": "Save a break-glass escrow key first, in a host's Encryption panel. The SysManage server's own backup is encrypted to it, so restoring OpenBAO never needs a key kept inside OpenBAO.",
+      "escrowEncrypted": "Encrypted to your break-glass escrow key ({{fingerprint}}). SysManage never holds its secret half, so this backup is restored by hand with that key, as the server recovery runbook describes."
     }
   },
   "cloudBackup": {

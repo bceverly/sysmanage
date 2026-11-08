@@ -44,6 +44,7 @@ from backend.services import clock_tracking
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import get_logger, sanitize_log
 from backend.websocket import admission
+from backend.websocket import delivery_confirmation as delivery
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import ErrorMessage, MessageType, create_message
 
@@ -201,6 +202,7 @@ async def agent_connect(websocket: WebSocket):
     # Accept connection and register with connection manager
     logger.info("About to accept WebSocket connection...")
     connection = await connection_manager.connect(websocket)
+    connection.client_cert_header = websocket.headers.get("x-ssl-client-cert")
     logger.info(
         "WebSocket connection established, connection ID: %s", connection.agent_id
     )
@@ -342,7 +344,13 @@ async def _process_websocket_message(
                 validation_error or _("Message failed security validation"),
             )
             await connection.send_message(error_msg.to_dict())
+            # Sent again it fails again: the agent must not keep resending it.
+            if isinstance(raw_message, dict):
+                await delivery.confirm(
+                    connection, raw_message.get("message_id"), delivery.REJECTED
+                )
             return
+        delivery.note_system_info(connection, raw_message)
 
         message = create_message(raw_message)
         message_size = len(data)
@@ -362,12 +370,18 @@ async def _process_websocket_message(
             MessageType.COMMAND_ACKNOWLEDGMENT,
         ]:
             await _handle_time_sensitive_message(message, connection, db)
+            outcome = delivery.STORED
         else:
             # Queue all other messages for background processing -- in a
             # worker thread (Phase 22.2: the insert + commit on the event loop
             # was 41% of its time at 2,000 agents).  Awaited, so one agent's
             # messages still queue in order.
-            await asyncio.to_thread(_enqueue_inbound_message, message, connection, db)
+            outcome = await asyncio.to_thread(
+                _enqueue_inbound_message, message, connection, db
+            )
+        # Only now is it safe for the agent to forget it; a failure above
+        # raised, so nothing is confirmed and the agent sends it again.
+        await delivery.confirm(connection, message.message_id, outcome)
 
     except json.JSONDecodeError:
         # Invalid JSON - send error
@@ -453,9 +467,9 @@ def _enqueue_inbound_message(message, connection, db):
     """
     if not connection.hostname and message.message_type != MessageType.SYSTEM_INFO:
         _buffer_until_registered(message, connection)
-        return
+        return delivery.BUFFERED
     if _claims_another_host(message, connection):
-        return
+        return delivery.REJECTED
 
     from backend.websocket.queue_enums import Priority, QueueDirection
     from backend.websocket.queue_operations import QueueOperations
@@ -483,6 +497,11 @@ def _enqueue_inbound_message(message, connection, db):
     host_id = getattr(connection, "host_id", None)
     target_db, own_session = _host_queue_session(host_id, db)
     try:
+        if delivery.already_queued(
+            target_db if target_db is not None else db, message.message_id
+        ):
+            # A resend whose first copy did arrive (its confirmation was lost).
+            return delivery.STORED
         queue_ops.enqueue_message(
             message_type=message.message_type,
             message_data=message_data,
@@ -514,6 +533,7 @@ def _enqueue_inbound_message(message, connection, db):
         message.message_type,
         connection.agent_id,
     )
+    return delivery.STORED
 
 
 def _host_queue_session(host_id, db):

@@ -174,6 +174,8 @@ export interface NetworkMounts {
 export interface BackupPolicy {
   id: string;
   host_id: string;
+  /** The SysManage server's own backup (25.9). */
+  server_preset?: boolean;
   enabled: boolean;
   interval_hours: number;
   window_start_hour: number | null;
@@ -350,6 +352,11 @@ export interface TagPolicyHandover {
 
 export interface BackupReach {
   reachable: boolean;
+  /** 25.8: the address the storage host sees this host as, when its export
+   *  names another (behind NAT); null when not, or not known. */
+  seen_as?: string | null;
+  /** The address the host's export names (its own). */
+  host_address?: string | null;
   address: string;
   port: number;
   storage_fqdn: string | null;
@@ -383,6 +390,41 @@ export interface BackupOverview {
   hosts: BackupHost[];
   counts: Partial<Record<BackupStatus, number>>;
   restate_versions: string[];
+  /** The SysManage server's own backup (25.9). */
+  server?: ServerBackupStatus;
+}
+
+/** ok, no_good_backup (its policy has no good capture in time), no_policy
+ * (its host found, no server policy) or unknown (no host named as it is). */
+export type ServerBackupState = 'ok' | 'no_good_backup' | 'no_policy' | 'unknown';
+
+export interface ServerBackupStatus {
+  status: ServerBackupState;
+  host_id: string | null;
+  fqdn: string | null;
+  host_status: BackupStatus | null;
+  warn: boolean;
+}
+
+export interface ServerBackupPreset {
+  quiesce: boolean;
+  keep_paths: string[];
+  skip_paths: string[];
+  /** Never backed up, whatever the rules say: escrowed instead. */
+  never_paths: string[];
+}
+
+/** Pro+: the server's own backup is encrypted to the break-glass escrow key. */
+export interface ServerBackupEncryption {
+  available: boolean;
+  escrow_fingerprint?: string | null;
+  encrypted?: boolean;
+}
+
+export interface ServerBackup extends ServerBackupStatus {
+  candidates: { host_id: string; fqdn: string }[];
+  preset: ServerBackupPreset | null;
+  encryption?: ServerBackupEncryption;
 }
 
 export interface BackupSummary {
@@ -393,6 +435,8 @@ export interface BackupSummary {
   total: number;
   /** Pro+: the break-glass key export is missing or older than a key. */
   escrow_stale?: boolean;
+  /** The SysManage server has no good backup of its own (25.9). */
+  server_unprotected?: boolean;
 }
 
 /** Break-glass escrow (Pro+ backup_engine, 24.6, 2026-11-03). */
@@ -473,6 +517,13 @@ export const handOverToTagPolicy = async (hostId: string): Promise<TagPolicyHand
 
 export const savePolicy = async (hostId: string, input: PolicyInput): Promise<BackupPolicy> =>
   (await axiosInstance.put<BackupPolicy>(`${base}/host/${hostId}/backup-policy`, input)).data;
+
+export const getServerBackup = async (hostId?: string): Promise<ServerBackup> =>
+  (await axiosInstance.get<ServerBackup>(`${base}/backups/server`,
+    { params: hostId ? { host_id: hostId } : {} })).data;
+
+export const saveServerPolicy = async (hostId: string, input: PolicyInput): Promise<BackupPolicy> =>
+  (await axiosInstance.put<BackupPolicy>(`${base}/backups/server-policy`, { ...input, host_id: hostId })).data;
 
 export const deletePolicy = async (hostId: string): Promise<void> => {
   await axiosInstance.delete(`${base}/host/${hostId}/backup-policy`);

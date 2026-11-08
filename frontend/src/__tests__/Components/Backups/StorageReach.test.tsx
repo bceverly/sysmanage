@@ -23,7 +23,7 @@ import { checkBackupReach } from "../../../Services/backups";
 import type { BackupHost, BackupReach } from "../../../Services/backups";
 import StorageReachNote from "../../../Components/Backups/StorageReachNote";
 import { canBackUp, canEquip, canSetUp, pickBlocked } from "../../../Components/Backups/BackupHostsTable";
-import { reasonLabel } from "../../../Components/Backups/backupLabels";
+import { reachLabel, reasonLabel } from "../../../Components/Backups/backupLabels";
 
 const NO_PATH: BackupReach = {
   reachable: false, address: "192.168.4.10", port: 2049, storage_fqdn: "nas",
@@ -50,6 +50,18 @@ describe("storage reach", () => {
       .toBe(false);
     expect(canEquip(row({ equipped: false, equip_blocker: null, reach: NO_PATH }))).toBe(false);
     expect(pickBlocked(t as unknown as TFunction, blocked)).toBe(MESSAGE);
+  });
+
+  test("a host behind NAT is not offered backups, and says what the storage sees (25.8)", () => {
+    const nat = row({ reach: { ...NO_PATH, reachable: true, error: null,
+      seen_as: "192.168.4.11", host_address: "192.168.122.133" } });
+    expect(canSetUp(nat)).toBe(false);
+    expect(pickBlocked(t as unknown as TFunction, nat)).toBe(
+      "This host is behind NAT: the backup storage (nas) sees it as 192.168.4.11, not "
+      + "192.168.122.133, so it refuses the mount. Put the host on the storage host's network "
+      + "(a bridged network for a virtual machine) instead of behind its NAT.");
+    expect(reachLabel(t as unknown as TFunction, nat.reach as BackupReach)).toBe("Behind NAT");
+    expect(canSetUp(row({ reach: { ...NO_PATH, reachable: true, seen_as: null } }))).toBe(true);
   });
 
   test("unknown or reachable never blocks", () => {

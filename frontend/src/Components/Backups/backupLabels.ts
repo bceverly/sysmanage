@@ -67,6 +67,8 @@ export const reasonLabel = (t: TFunction, reason: string | null): string => {
             return t('backups.reason.notPrivileged', 'The agent must run as root');
         case 'wrong_platform':
             return t('backups.reason.wrongPlatform', 'Not supported on this OS');
+        case 'no_nfsv4_client':
+            return t('backups.reason.noNfsv4Client', 'This OS has no NFSv4 client');
         case 'no_host':
         case 'no_storage_host':
             return t('backups.reason.noStorageHost', 'No storage host is set');
@@ -216,17 +218,36 @@ export const pausedServicesOf = (run: BackupRun): PausedService[] => {
  *  backup storage is broken (or critically full), a warning when one is
  *  only overdue or incomplete. */
 export const backupSummaryLevel = (
-    summary: Pick<BackupSummary, 'counts' | 'target_problem'>,
+    summary: Pick<BackupSummary, 'counts' | 'target_problem' | 'server_unprotected'>,
 ): 'error' | 'warning' | 'ok' => {
     if (summary.counts.failed || summary.target_problem) return 'error';
-    return summary.counts.overdue || summary.counts.incomplete ? 'warning' : 'ok';
+    // The SysManage server with no good backup of its own (25.9).
+    return summary.counts.overdue || summary.counts.incomplete || summary.server_unprotected
+        ? 'warning' : 'ok';
 };
 
-/** A host known not to reach the backup storage (unknown never blocks). */
-export const unreachable = (row: { reach?: BackupReach | null }): boolean => row.reach?.reachable === false;
+/** Reaches the storage, but from behind NAT: the storage host sees it as
+ * another address, so its export refuses the mount (25.8). */
+export const behindNat = (reach?: BackupReach | null): boolean =>
+    reach?.reachable === true && Boolean(reach.seen_as);
+
+/** A host known not to reach the backup storage, or behind NAT (unknown
+ * never blocks). */
+export const unreachable = (row: { reach?: BackupReach | null }): boolean =>
+    row.reach?.reachable === false || behindNat(row.reach);
 
 /** Why backups are not offered to a host that cannot reach the storage. */
 export const reachMessage = (t: TFunction, reach: BackupReach): string =>
-    t('backups.reach.unreachable',
-        'This host cannot reach the backup storage ({{storage}}, {{address}}, NFS port {{port}}). Backups need a network path to it.',
-        { storage: reach.storage_fqdn ?? '', address: reach.address, port: reach.port });
+    behindNat(reach)
+        ? t('backups.reach.behindNat',
+            'This host is behind NAT: the backup storage ({{storage}}) sees it as {{seen}}, not {{address}}, so it refuses the mount. Put the host on the storage host\'s network (a bridged network for a virtual machine) instead of behind its NAT.',
+            { storage: reach.storage_fqdn ?? '', seen: reach.seen_as ?? '', address: reach.host_address ?? '' })
+        : t('backups.reach.unreachable',
+            'This host cannot reach the backup storage ({{storage}}, {{address}}, NFS port {{port}}). Backups need a network path to it.',
+            { storage: reach.storage_fqdn ?? '', address: reach.address, port: reach.port });
+
+/** The short line for a host that is not offered backups for its network. */
+export const reachLabel = (t: TFunction, reach: BackupReach): string =>
+    behindNat(reach)
+        ? t('backups.reach.behindNatLabel', 'Behind NAT')
+        : t('backups.reason.storageUnreachable', 'Cannot reach the backup storage');

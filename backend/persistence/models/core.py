@@ -129,6 +129,12 @@ class Host(Base):
     client_certificate = Column(Text, nullable=True)
     certificate_serial = Column(String(64), nullable=True)
     certificate_issued_at = Column(DateTime, nullable=True)
+    # Agent mutual TLS (25.10): expiry for the Hosts list, the last time a
+    # connection presented a valid certificate, and the serial a renewal
+    # replaced (accepted for a day).
+    certificate_expires_at = Column(DateTime, nullable=True)
+    certificate_last_presented_at = Column(DateTime, nullable=True)
+    previous_certificate_serial = Column(String(64), nullable=True)
 
     # OS Version fields
     platform = Column(String(50), nullable=True)

@@ -65,7 +65,7 @@ async def agent_cloud_backup_secret(
     host_id = _authenticated_host_id(request, payload, authorization)
     host_db = _host_session(host_id, db)
     try:
-        _verify_host(host_db, host_id, x_host_token)
+        _verify_host(host_db, host_id, x_host_token, request)
         try:
             password = secrets.release_password(host_db, host_id, payload.run_id)
         except secrets.SecretRefused as refused:
@@ -93,7 +93,7 @@ async def agent_cloud_backup_code(
     host_id = _authenticated_host_id(request, payload, authorization)
     host_db = _host_session(host_id, db)
     try:
-        _verify_host(host_db, host_id, x_host_token)
+        _verify_host(host_db, host_id, x_host_token, request)
         try:
             code = secrets.release_code(host_db, host_id, payload.run_id)
         except secrets.SecretRefused as refused:

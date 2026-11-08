@@ -54,7 +54,20 @@ SESSION_AUDIT = "iCloud sign-in expiry warning"
 APPLE_BUSY = "apple_busy"
 # What icloudpd prints when Apple answers 503 (pyicloud_ipd/utils.py); an
 # agent older than the "apple_busy" reason reports it as "tool_failed".
-APPLE_BUSY_MARKER = "Apple iCloud is temporary refusing to serve icloudpd"
+# What icloudpd logs when Apple cuts a download off: a refusal (503), or the
+# connection to iCloud lost partway (2026-11-06, 13:52 UTC: production's
+# reconcile stopped in June 2015 and exited 0).  Either way the rest of the
+# library is fetched after the cooldown.
+APPLE_BUSY_MARKERS = (
+    "Apple iCloud is temporary refusing to serve icloudpd",
+    "Cannot connect to Apple iCloud service",
+)
+
+
+def apple_stopped(detail) -> bool:
+    return any(marker in (detail or "") for marker in APPLE_BUSY_MARKERS)
+
+
 APPLE_COOLDOWNS = tuple(timedelta(hours=h) for h in (1, 2, 4, 8, 12))
 APPLE_MAX_TRIES = 10
 COOLING_DOWN = "cooling_down"

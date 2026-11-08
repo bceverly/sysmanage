@@ -222,6 +222,8 @@ def test_a_verified_sessions_messages_are_queued_with_their_host():
         "backend.websocket.queue_operations.QueueOperations.enqueue_message"
     ) as enqueue, patch(
         "backend.persistence.partitions.tenant_engine_for_host", return_value=None
+    ), patch.object(
+        agent_api.delivery, "already_queued", return_value=False
     ):
         agent_api._enqueue_inbound_message(message, connection, db)
     assert enqueue.call_args.kwargs["host_id"] == host_id

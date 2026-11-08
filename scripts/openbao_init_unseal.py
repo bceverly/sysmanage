@@ -24,9 +24,19 @@ during package post-install, before the SysManage venv exists.
 Seal-key handling rationale: storing the unseal material locally (locked-down
 perms) is the documented shipping mechanism -- it is what makes air-gapped
 deployments (where cloud-KMS auto-unseal is unreachable) come up cleanly, and
-an air-gapped network is hardened by design.  KMS/transit auto-unseal for
-internet-connected hardened deployments is a future enhancement.  See
+an air-gapped network is hardened by design.  See
 docs/planning/openbao-deployment-and-airgap.md §6.
+
+The key file is never ``sysmanage.yaml``: the config is read by the service
+user and travels with every copy of the config, so the unseal key there would
+open OpenBAO for anyone holding a copy (ROADMAP 25.9).
+
+Auto-unseal (optional): when ``openbao.hcl`` carries a ``seal`` stanza
+(``transit`` against another OpenBAO / Vault, or a cloud KMS), OpenBAO
+unseals itself on start.  This script then initializes with *recovery* keys
+instead of unseal keys, never submits a key, and waits for the seal to unseal
+it -- saying plainly if the key service cannot be reached.  The recovery key
+and root token still go to the same root-only key file.
 """
 
 import argparse
@@ -42,6 +52,8 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_ADDR = "http://127.0.0.1:8200"
 DEFAULT_KEYFILE = "/var/lib/openbao/init.json"
+# How long an auto-unseal seal gets to reach its key service and unseal.
+AUTO_UNSEAL_WAIT_SECONDS = 60
 
 
 def _api(
@@ -190,6 +202,59 @@ def _ensure_kv_mount(addr: str, token: str, mount: str) -> bool:
     return True
 
 
+def _auto_unseal(seal: dict) -> bool:
+    """True when OpenBAO unseals itself (a transit or KMS ``seal`` stanza)."""
+    return bool(seal.get("recovery_seal")) or seal.get("type", "shamir") != "shamir"
+
+
+def _wait_unsealed(addr: str, seconds: float, delay: float = 1.0) -> bool:
+    """Poll seal-status until OpenBAO reports unsealed, for up to ``seconds``."""
+    deadline = time.monotonic() + seconds
+    while True:
+        _, body = _api(addr, "/v1/sys/seal-status")
+        if body is not None and not body.get("sealed", True):
+            return True
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(delay)
+
+
+def _initialize(addr: str, keyfile: str, auto: bool) -> int:
+    """Initialize OpenBAO once and write its material to ``keyfile``."""
+    if auto:
+        print("Initializing OpenBAO (auto-unseal seal, 1 recovery key share)...")
+        payload = {"recovery_shares": 1, "recovery_threshold": 1}
+    else:
+        print("Initializing OpenBAO (single-node appliance, 1 key share)...")
+        payload = {"secret_shares": 1, "secret_threshold": 1}
+    status, init = _api(addr, "/v1/sys/init", "PUT", payload)
+    if status != 200 or init is None:
+        print(f"ERROR: init failed: {status}", file=sys.stderr)
+        return 1
+    material = {"root_token": init.get("root_token")}
+    if auto:
+        material["recovery_keys"] = (
+            init.get("recovery_keys_base64") or init.get("recovery_keys") or []
+        )
+    else:
+        material["unseal_keys"] = init.get("keys_base64") or init.get("keys") or []
+    _write_keyfile(keyfile, material)
+    print(f"OpenBAO initialized; material written to {keyfile} (0600).")
+    return 0
+
+
+def _seal_unreachable(seal_type: str) -> int:
+    print(
+        f"ERROR: OpenBAO uses an auto-unseal seal ({seal_type}) and is still sealed "
+        f"after {AUTO_UNSEAL_WAIT_SECONDS}s.\n"
+        "  The seal could not reach its key service.  Check the seal stanza in\n"
+        "  openbao.hcl (address, key name, credentials) and that the key service\n"
+        "  is up and reachable from this host, then restart OpenBAO.",
+        file=sys.stderr,
+    )
+    return 1
+
+
 def _ensure_unsealed(addr: str, keyfile: str) -> int:
     """Initialize (once) + unseal OpenBAO.  Returns 0 on success."""
     status, seal = _api(addr, "/v1/sys/seal-status")
@@ -201,24 +266,18 @@ def _ensure_unsealed(addr: str, keyfile: str) -> int:
         print("OpenBAO already initialized and unsealed.")
         return 0
 
+    auto = _auto_unseal(seal)
     if not seal.get("initialized"):
-        print("Initializing OpenBAO (single-node appliance, 1 key share)...")
-        status, init = _api(
-            addr, "/v1/sys/init", "PUT", {"secret_shares": 1, "secret_threshold": 1}
-        )
-        if status != 200 or init is None:
-            print(f"ERROR: init failed: {status}", file=sys.stderr)
-            return 1
-        keys = init.get("keys_base64") or init.get("keys") or []
-        _write_keyfile(
-            keyfile, {"root_token": init.get("root_token"), "unseal_keys": keys}
-        )
-        print(f"OpenBAO initialized; material written to {keyfile} (0600).")
-        if _unseal(addr, keys):
-            print("OpenBAO unsealed.")
+        rc = _initialize(addr, keyfile, auto)
+        if rc != 0:
+            return rc
+
+    if auto:
+        # The seal unseals OpenBAO by itself; never submit a key.
+        if _wait_unsealed(addr, AUTO_UNSEAL_WAIT_SECONDS):
+            print(f"OpenBAO unsealed by its {seal.get('type')} seal.")
             return 0
-        print("ERROR: unseal after init failed", file=sys.stderr)
-        return 1
+        return _seal_unreachable(seal.get("type", "auto-unseal"))
 
     if not os.path.exists(keyfile):
         print(

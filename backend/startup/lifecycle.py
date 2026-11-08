@@ -527,9 +527,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                         # Never fatal: a failed scheduler must not kill the server.
                         logger.warning("File watch tick did not start: %s", tick_e)
 
-                # Licensed ticks (21.2 advisor, 21.6 discovery); gated + never fatal.
-                start_licensed_ticks()
-
                 # Start the config-profile assignment tick if the config
                 # management engine is loaded.  Same gate as the air-gap tick
                 # below and for the same reason: assignments cannot exist
@@ -695,6 +692,12 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         except Exception as lic_e:
             logger.warning("License service initialization failed: %s", lic_e)
             logger.info("Continuing as Community Edition")
+
+        # Background ticks, each gating itself on its own license -- in EVERY
+        # edition: the backup scheduler is Community, and inside the Pro+
+        # branch it never ran without a license (found 2026-11-06, the
+        # server-loss drill: no scheduled capture, no export re-prepare).
+        start_licensed_ticks()
 
         # Always ensure Pro+ stub routes are mounted for plugin API compatibility.
         # When Pro+ is active, mount_proplus_routes was already called above and

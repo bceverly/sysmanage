@@ -15,6 +15,7 @@ import type { BackupHost } from '../../Services/backups';
 import {
     formatBytes,
     heldNote,
+    reachLabel,
     reachMessage,
     reasonLabel,
     statusColor,
@@ -87,7 +88,7 @@ const equipLine = (t: TFunction, row: BackupHost): React.ReactElement | null => 
 const detailLine = (t: TFunction, row: BackupHost): React.ReactElement | null => {
     if (row.running) return <Progress row={row} />;
     if (row.reach && unreachable(row)) {
-        return <Line text={reasonLabel(t, 'storage_unreachable')} tip={reachMessage(t, row.reach)} color="warning.main" />;
+        return <Line text={reachLabel(t, row.reach)} tip={reachMessage(t, row.reach)} color="warning.main" />;
     }
     if (!row.equipped) return equipLine(t, row);
     if (row.capture_requested) return <Line text={t('backups.hosts.waiting', 'Waiting for a free slot')} color="text.secondary" />;

@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 from cryptography import x509
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
@@ -164,9 +165,29 @@ class CertificateManager:
         _secure_chmod(self.ca_key_path, 0o600)
         _secure_chmod(self.ca_cert_path, 0o644)
 
+    # Renew the server's identity certificate this long before it expires:
+    # agents verify the server's signed TLS statement against it (25.10).
+    SERVER_CERT_RENEW_DAYS = 30
+
+    def _server_certificate_current(self) -> bool:
+        if not (self.server_cert_path.exists() and self.server_key_path.exists()):
+            return False
+        try:
+            with open(self.server_cert_path, "rb") as cert_file:
+                cert = x509.load_pem_x509_certificate(cert_file.read())
+        except (OSError, ValueError):
+            return False
+        left = cert.not_valid_after_utc - datetime.now(timezone.utc)
+        return left > timedelta(days=self.SERVER_CERT_RENEW_DAYS)
+
     def ensure_server_certificate(self) -> None:
-        """Ensure server certificate exists, create if not."""
-        if self.server_cert_path.exists() and self.server_key_path.exists():
+        """Ensure a server certificate exists and is not near expiry.
+
+        It was created once and never renewed, so a year after install it
+        expired; agents now check the server's signed statements against it,
+        so it is renewed (new key, same CA) 30 days before it runs out.
+        """
+        if self._server_certificate_current():
             return
 
         self.ensure_ca_certificate()
@@ -263,23 +284,28 @@ class CertificateManager:
         _secure_chmod(self.server_key_path, 0o600)
         _secure_chmod(self.server_cert_path, 0o644)
 
-    def generate_client_certificate(
-        self, hostname: str, host_id: str
-    ) -> Tuple[bytes, bytes]:
-        """Generate client certificate for agent authentication."""
-        self.ensure_ca_certificate()
+    # Agent certificates last a year; agents renew 30 days before expiry
+    # (ROADMAP 25.10).
+    CLIENT_CERT_DAYS = 365
 
-        # Load CA certificate and key
+    def _load_ca(self):
+        """The CA certificate and its private key."""
+        self.ensure_ca_certificate()
         with open(self.ca_cert_path, "rb") as cert_file:
             ca_cert = x509.load_pem_x509_certificate(cert_file.read())
-
         with open(self.ca_key_path, "rb") as key_file:
             ca_key = serialization.load_pem_private_key(key_file.read(), password=None)
+        return ca_cert, ca_key
 
-        # Generate client private key
-        client_key = self.generate_private_key()
+    def issue_client_certificate(
+        self, public_key, hostname: str, host_id: str
+    ) -> x509.Certificate:
+        """Sign a client certificate for ``public_key``, naming the host.
 
-        # Create client certificate
+        The subject is set here -- CN = the host's name, OU = its id -- never
+        taken from the requester, so a host cannot ask for another's identity.
+        """
+        ca_cert, ca_key = self._load_ca()
         subject = x509.Name(
             [
                 x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
@@ -290,21 +316,17 @@ class CertificateManager:
                 x509.NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, str(host_id)),
             ]
         )
-
-        client_cert = (
+        now = datetime.now(timezone.utc)
+        return (
             x509.CertificateBuilder()
             .subject_name(subject)
             .issuer_name(ca_cert.subject)
-            .public_key(client_key.public_key())
+            .public_key(public_key)
             .serial_number(x509.random_serial_number())
-            .not_valid_before(datetime.now(timezone.utc))
-            .not_valid_after(datetime.now(timezone.utc) + timedelta(days=365))
+            .not_valid_before(now)
+            .not_valid_after(now + timedelta(days=self.CLIENT_CERT_DAYS))
             .add_extension(
-                x509.SubjectAlternativeName(
-                    [
-                        x509.DNSName(hostname),
-                    ]
-                ),
+                x509.SubjectAlternativeName([x509.DNSName(hostname)]),
                 critical=False,
             )
             .add_extension(
@@ -326,24 +348,31 @@ class CertificateManager:
                 critical=True,
             )
             .add_extension(
-                x509.ExtendedKeyUsage(
-                    [
-                        x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH,
-                    ]
-                ),
+                x509.ExtendedKeyUsage([x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH]),
                 critical=True,
             )
             .sign(ca_key, hashes.SHA256())
         )
 
-        # Return certificate and private key as PEM bytes
+    def generate_client_certificate(
+        self, hostname: str, host_id: str
+    ) -> Tuple[bytes, bytes]:
+        """Generate a key and client certificate for a host (key made here).
+
+        Kept for the approval paths that record a certificate on the host
+        row.  Agents get theirs from a certificate request instead, so their
+        private key never leaves the host (``issue_client_certificate``).
+        """
+        client_key = self.generate_private_key()
+        client_cert = self.issue_client_certificate(
+            client_key.public_key(), hostname, host_id
+        )
         cert_pem = client_cert.public_bytes(serialization.Encoding.PEM)
         key_pem = client_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.PKCS8,
             encryption_algorithm=serialization.NoEncryption(),
         )
-
         return cert_pem, key_pem
 
     def get_server_certificate_fingerprint(self) -> str:  # pylint: disable=invalid-name
@@ -377,8 +406,11 @@ class CertificateManager:
             with open(self.ca_cert_path, "rb") as cert_file:
                 ca_cert = x509.load_pem_x509_certificate(cert_file.read())
 
-            # Verify certificate was signed by our CA (simplified check - issuer matches CA subject)
-            if cert.issuer != ca_cert.subject:
+            # Signed by our CA -- the signature, not just a matching issuer
+            # name, which anyone can write into a certificate.
+            try:
+                cert.verify_directly_issued_by(ca_cert)
+            except (ValueError, TypeError, InvalidSignature):
                 return None
 
             # Check if certificate is still valid

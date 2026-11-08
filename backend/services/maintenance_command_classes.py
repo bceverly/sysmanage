@@ -54,6 +54,8 @@ WINDOW_EXEMPT_COMMANDS = frozenset(
         "evaluate_package_compliance",  # checks packages against a profile
         # a TCP connect to the backup storage's NFS port; changes nothing
         "check_backup_storage",
+        # the storage host's established connections on its NFS port; reads
+        "list_nfs_peers",
         # changes only what the agent itself observes and reports (passive
         # listening on the host's own segments), not the host
         "configure_network_discovery",

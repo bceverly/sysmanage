@@ -225,7 +225,9 @@ class TestEnqueueInboundMessage:
 
         with patch(
             "backend.websocket.queue_operations.QueueOperations"
-        ) as queue_ops_cls:
+        ) as queue_ops_cls, patch.object(
+            agent_module.delivery, "already_queued", return_value=False
+        ):
             qops = queue_ops_cls.return_value
             agent_module._enqueue_inbound_message(msg, conn, db)
         qops.enqueue_message.assert_called_once()
@@ -246,7 +248,9 @@ class TestEnqueueInboundMessage:
 
         with patch(
             "backend.websocket.queue_operations.QueueOperations"
-        ) as queue_ops_cls:
+        ) as queue_ops_cls, patch.object(
+            agent_module.delivery, "already_queued", return_value=False
+        ):
             qops = queue_ops_cls.return_value
             agent_module._enqueue_inbound_message(msg, _connection(), MagicMock())
         kwargs = qops.enqueue_message.call_args.kwargs

@@ -118,6 +118,9 @@ class AgentConnection:
         self.connected_at = datetime.now(timezone.utc).replace(tzinfo=None)
         self.last_seen = datetime.now(timezone.utc).replace(tzinfo=None)
         self.pending_commands = []
+        # The client certificate nginx forwarded on the upgrade request
+        # (X-SSL-Client-Cert), checked at SYSTEM_INFO (agent mutual TLS, 25.10).
+        self.client_cert_header = None
 
     async def send_message(self, message: dict):
         """Send a message to this agent."""

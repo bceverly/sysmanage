@@ -38,6 +38,7 @@ from datetime import datetime, timezone
 
 from backend.i18n import _
 from backend.persistence import models
+from backend.services.backup_keys_read import key_references
 
 
 class BreakGlassRefused(Exception):
@@ -296,6 +297,8 @@ def encrypted_pairs(db, host_ids=None):
         query = query.filter(models.BackupPolicy.host_id.in_(wanted))
     pairs = []
     for policy in query.all():
+        if not key_references(db, policy):
+            continue  # encrypted only to the operator's escrow key (25.9)
         host = db.query(models.Host).filter(models.Host.id == policy.host_id).first()
         if host is not None:
             pairs.append((host, policy))
@@ -311,6 +314,8 @@ def _held_keys(db, policy, host, vault, keys):
             replaced_at=None)]  # fmt: skip
     held = []
     for row in rows:
+        if not row.key_ref:
+            continue  # the operator's own escrow key (25.9): nothing to export
         stored = vault.retrieve_secret(row.key_ref)
         content = stored.get("content") if isinstance(stored, dict) else None
         if not isinstance(content, str) or PRIVATE_KEY_MARKER not in content:

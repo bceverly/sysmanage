@@ -64,6 +64,9 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "AIRGAP_ROOT": "/var/lib/sysmanage/airgap-repo/",
         "TLS_CERT": "/etc/sysmanage/tls/server.crt",
         "TLS_KEY": "/etc/sysmanage/tls/server.key",
+        "MTLS_INCLUDE": "/etc/sysmanage/nginx/agent-mtls*.conf",
+        "MTLS_SNIPPET": "/etc/sysmanage/nginx/agent-mtls.conf",
+        "CA_CERT": "/etc/sysmanage/certs/ca.crt",
     },
     "centos": {
         "RELOAD_CMD": "systemctl reload nginx",
@@ -72,6 +75,9 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "AIRGAP_ROOT": "/var/lib/sysmanage/airgap-repo/",
         "TLS_CERT": "/etc/sysmanage/tls/server.crt",
         "TLS_KEY": "/etc/sysmanage/tls/server.key",
+        "MTLS_INCLUDE": "/etc/sysmanage/nginx/agent-mtls*.conf",
+        "MTLS_SNIPPET": "/etc/sysmanage/nginx/agent-mtls.conf",
+        "CA_CERT": "/etc/sysmanage/certs/ca.crt",
     },
     "freebsd": {
         "RELOAD_CMD": "service nginx reload",
@@ -80,6 +86,7 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "AIRGAP_ROOT": "/var/db/sysmanage/airgap-repo/",
         "TLS_CERT": "%%PREFIX%%/etc/sysmanage/tls/server.crt",
         "TLS_KEY": "%%PREFIX%%/etc/sysmanage/tls/server.key",
+        "MTLS_INCLUDE": "%%PREFIX%%/etc/sysmanage/nginx/agent-mtls*.conf",
     },
     "macos": {
         # FRONTEND_ROOT tracks where the .pkg ACTUALLY puts the frontend --
@@ -94,6 +101,9 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "AIRGAP_ROOT": "/var/lib/sysmanage/airgap-repo/",
         "TLS_CERT": "/usr/local/etc/sysmanage/tls/server.crt",
         "TLS_KEY": "/usr/local/etc/sysmanage/tls/server.key",
+        "MTLS_INCLUDE": "/usr/local/etc/sysmanage/nginx/agent-mtls*.conf",
+        "MTLS_SNIPPET": "/usr/local/etc/sysmanage/nginx/agent-mtls.conf",
+        "CA_CERT": "/etc/sysmanage/certs/ca.crt",
     },
     "netbsd": {
         "RELOAD_CMD": "/etc/rc.d/nginx reload",
@@ -102,6 +112,9 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "AIRGAP_ROOT": "/var/lib/sysmanage/airgap-repo/",
         "TLS_CERT": "/usr/pkg/etc/sysmanage/tls/server.crt",
         "TLS_KEY": "/usr/pkg/etc/sysmanage/tls/server.key",
+        "MTLS_INCLUDE": "/usr/pkg/etc/sysmanage/nginx/agent-mtls*.conf",
+        "MTLS_SNIPPET": "/usr/pkg/etc/sysmanage/nginx/agent-mtls.conf",
+        "CA_CERT": "/etc/sysmanage/certs/ca.crt",
     },
     "openbsd": {
         "RELOAD_CMD": "rcctl reload nginx",
@@ -110,6 +123,7 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "AIRGAP_ROOT": "/var/db/sysmanage/airgap-repo/",
         "TLS_CERT": "/etc/sysmanage/tls/server.crt",
         "TLS_KEY": "/etc/sysmanage/tls/server.key",
+        "MTLS_INCLUDE": "/etc/sysmanage/nginx/agent-mtls*.conf",
     },
     "opensuse": {
         "RELOAD_CMD": "systemctl reload nginx",
@@ -118,6 +132,9 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "AIRGAP_ROOT": "/var/lib/sysmanage/airgap-repo/",
         "TLS_CERT": "/etc/sysmanage/tls/server.crt",
         "TLS_KEY": "/etc/sysmanage/tls/server.key",
+        "MTLS_INCLUDE": "/etc/sysmanage/nginx/agent-mtls*.conf",
+        "MTLS_SNIPPET": "/etc/sysmanage/nginx/agent-mtls.conf",
+        "CA_CERT": "/etc/sysmanage/certs/ca.crt",
     },
     "ubuntu": {
         "RELOAD_CMD": "systemctl reload nginx",
@@ -126,6 +143,9 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "AIRGAP_ROOT": "/var/lib/sysmanage/airgap-repo/",
         "TLS_CERT": "/etc/sysmanage/tls/server.crt",
         "TLS_KEY": "/etc/sysmanage/tls/server.key",
+        "MTLS_INCLUDE": "/etc/sysmanage/nginx/agent-mtls*.conf",
+        "MTLS_SNIPPET": "/etc/sysmanage/nginx/agent-mtls.conf",
+        "CA_CERT": "/etc/sysmanage/certs/ca.crt",
     },
     # The snap bundles its OWN nginx (nginx-light stage-package), because strict
     # confinement means it cannot use the host's.  That is correct.  What was not
@@ -149,6 +169,7 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "AIRGAP_ROOT": "%%SNAP_DATA%%/airgap-repo/",
         "TLS_CERT": "%%SNAP_DATA%%/tls/server.crt",
         "TLS_KEY": "%%SNAP_DATA%%/tls/server.key",
+        "MTLS_INCLUDE": "%%SNAP_DATA%%/nginx/agent-mtls*.conf",
     },
     # Windows renders from the SAME template as everything else, deliberately.
     # It was the one platform with no nginx at all: the MSI laid down the built
@@ -168,6 +189,7 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "AIRGAP_ROOT": '"C:/ProgramData/SysManage/airgap-repo/"',
         "TLS_CERT": '"C:/ProgramData/SysManage/tls/server.crt"',
         "TLS_KEY": '"C:/ProgramData/SysManage/tls/server.key"',
+        "MTLS_INCLUDE": "C:/ProgramData/SysManage/nginx/agent-mtls*.conf",
     },
 }
 
@@ -297,7 +319,25 @@ def shell_block(platform: str, indent: str = "\t") -> str:
     return "\n".join(lines) + "\n"
 
 
-PREFLIGHT = """if [ ! -f '@TLS_CERT@' ] || [ ! -f '@TLS_KEY@' ]; then
+PREFLIGHT = """if [ -f '@CA_CERT@' ] && [ ! -f '@MTLS_SNIPPET@' ] && command -v nginx >/dev/null 2>&1; then
+    # Agent mutual TLS: ask agents for their client certificate, advertising
+    # only the SysManage CA (browsers are never prompted).  Kept only if nginx
+    # accepts it, so a bad CA file can never stop nginx from starting.
+    mkdir -p "$(dirname '@MTLS_SNIPPET@')"
+    printf '%s\\n' '# Written by the SysManage package: agent mutual TLS.' \\
+        'ssl_verify_client optional_no_ca;' \\
+        'ssl_client_certificate @CA_CERT@;' > '@MTLS_SNIPPET@'
+    if ! nginx -t >/dev/null 2>&1; then
+        # Rejected -- or nginx cannot pass its test yet (no TLS certificate on
+        # a fresh install).  Either way leave nginx as it was; the next
+        # upgrade tries again.
+        rm -f '@MTLS_SNIPPET@'
+        echo '[!] Agent certificate settings left out of nginx for now.'
+    else
+        echo '[OK] nginx will ask agents for their client certificates.'
+    fi
+fi
+if [ ! -f '@TLS_CERT@' ] || [ ! -f '@TLS_KEY@' ]; then
     echo ''
     echo '[!] TLS certificate NOT FOUND - nginx will refuse to start.'
     echo '    expected: @TLS_CERT@'

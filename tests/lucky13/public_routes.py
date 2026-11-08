@@ -82,6 +82,14 @@ PUBLIC_ROUTES = {
     # the asking storage host's own running job's password or two-factor code.
     ("POST", "/api/agent/cloud-backup-secret"): _AGENT,
     ("POST", "/api/agent/cloud-backup-code"): _AGENT,
+    # Agent mutual TLS (25.10): the poll's credentials; signs a certificate
+    # for the asking host only, from a request for a key the host made.
+    ("POST", "/api/agent/certificate"): _AGENT,
+    (
+        "GET",
+        "/api/agent/server-identity",
+    ): "public: the server's CA and a statement signed by its identity key -- "
+    "agents verify the signature, so serving it to anyone discloses nothing secret",
     (
         "POST",
         "/api/host/register",

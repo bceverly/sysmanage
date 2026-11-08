@@ -17,6 +17,8 @@ from backend.api import (
     advisory_actions,
     agent,
     agent_backup_key,
+    agent_certificate,
+    agent_mtls_settings,
     agent_cloud_backup,
     agent_poll,
     airgap_agent_mirrors,
@@ -117,6 +119,7 @@ from backend.api import (
     backups_tag_policies,
     backups_equip,
     backups_retention,
+    backups_server,
     backups_setup,
     cloud_backup,
     time_sync,
@@ -262,6 +265,7 @@ def register_routes(app: FastAPI):
     # Phase 13.1.H -- server-scoped configuration settings (Settings →
     # Configuration UI).  Phase 13.2.1: native /api/v1/settings + /api alias.
     _include_versioned(app, server_settings.router, tags=["settings"])
+    _include_versioned(app, agent_mtls_settings.router, tags=["settings"])
     logger.debug("Server-settings router added")
 
     # Phase 11 B2 -- air-gap collection schedules.  Routes are
@@ -372,6 +376,11 @@ def register_routes(app: FastAPI):
     # iCloud Photos (24.12): the storage host fetches a run's Apple ID
     # password and two-factor code here, never through the queue.
     app.include_router(agent_cloud_backup.router, prefix="/api", tags=["agent"])
+    # Agent mutual TLS (25.10): a host's certificate from its own request,
+    # and the server's signed statement of the TLS keys it serves.
+    app.include_router(
+        agent_certificate.router, prefix="/api", tags=["agent"]
+    )  # /api/agent/certificate, /api/agent/server-identity
 
     logger.debug("Adding host public router with /api prefix")
     app.include_router(
@@ -474,6 +483,7 @@ def register_routes(app: FastAPI):
     _include_versioned(app, backups_equip.router, tags=["backups"])
     _include_versioned(app, backups_retention.router, tags=["backups"])
     _include_versioned(app, backups_setup.router, tags=["backups"])
+    _include_versioned(app, backups_server.router, tags=["backups"])  # 25.9
     _include_versioned(app, cloud_backup.router, tags=["backups"])  # 24.12
     _include_versioned(app, asset_tags.router, tags=["machines"])
     _include_versioned(app, asset_tag_csv.router, tags=["machines"])

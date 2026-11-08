@@ -71,6 +71,29 @@ def check_deployment_invariants(
     return violations
 
 
+def unseal_key_warning(config_dict: dict) -> str:
+    """The warning to log when the config carries OpenBAO unseal keys, else "".
+
+    Pure function.  Nothing reads ``vault.server.unseal_keys`` -- OpenBAO is
+    unsealed from its own root-only key file -- but the config is readable by
+    the service and copied into backups, so a key left there opens OpenBAO for
+    anyone holding a copy (ROADMAP 25.9).  Older source installs wrote it.
+    """
+    server = ((config_dict or {}).get("vault") or {}).get("server") or {}
+    if not server.get("unseal_keys"):
+        return ""
+    return (
+        "The SysManage config holds an OpenBAO unseal key "
+        "(vault.server.unseal_keys). Anyone with a copy of the config, or of a "
+        "backup of it, could unseal OpenBAO. Nothing reads the key there: "
+        "OpenBAO is unsealed from /var/lib/openbao/init.json (packages) or "
+        ".vault_credentials (source installs). To fix: 1) check that file "
+        "holds the key; 2) delete the unseal_keys entry from the config; "
+        "3) restart SysManage. On a source install, re-running "
+        "scripts/sysmanage_secure_installation does steps 1 and 2 for you."
+    )
+
+
 def enforce_deployment_invariants() -> None:
     """Fetch live deployment state and abort startup on any violation.
 
@@ -90,6 +113,9 @@ def enforce_deployment_invariants() -> None:
         server_role = server_config_service.get_server_role()
         federation_role = server_config_service.get_federation_role()
         multitenancy_enabled = config.is_multitenancy_enabled()
+        warning = unseal_key_warning(config.get_config())
+        if warning:
+            logger.warning(warning)
     except Exception as exc:  # noqa: BLE001
         logger.warning(
             "Could not resolve deployment state for invariant check "

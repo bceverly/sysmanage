@@ -56,10 +56,11 @@ from backend.i18n import _
 from backend.persistence.db import get_db
 from backend.persistence.models import Host
 from backend.persistence.partitions import tenant_engine_for_host
+from backend.security import agent_mtls
 from backend.security.communication_security import websocket_security
 from backend.utils.log_sanitize import scrub
 from backend.utils.verbosity_logger import get_logger
-from backend.websocket import poll_presence
+from backend.websocket import delivery_confirmation, poll_presence
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_manager import server_queue_manager
 
@@ -142,7 +143,14 @@ def _authenticated_host_id(
     return host_id
 
 
-def _verify_host(db: Session, host_id: str, host_secret: Optional[str]) -> None:
+def _verify_host(
+    db: Session,
+    host_id: str,
+    host_secret: Optional[str],
+    request: Optional[Request] = None,
+    *,
+    certificate_bootstrap: bool = False,
+) -> Host:
     """The caller must hold THIS host's own secret, not just any agent's.
 
     A connection token only proves "some agent authenticated" -- ``/agent/auth``
@@ -165,6 +173,31 @@ def _verify_host(db: Session, host_id: str, host_secret: Optional[str]) -> None:
         raise HTTPException(
             status_code=401, detail=_("Host authentication failed for this poll")
         )
+    if request is not None:
+        _check_certificate(db, host, request, certificate_bootstrap)
+    return host
+
+
+def _check_certificate(
+    db: Session, host: Host, request: Request, certificate_bootstrap: bool
+) -> None:
+    """Agent mutual TLS (25.10): what this request presented, under the host's
+    tenant's mode.  ``certificate_bootstrap`` lets the certificate endpoint
+    serve a host that holds no unexpired certificate on its token alone, even
+    when certificates are enforced -- otherwise a new or expired host could
+    never get one."""
+    decision = agent_mtls.check_host(
+        host, request.headers.get(agent_mtls.CLIENT_CERT_HEADER)
+    )
+    if decision.noted:
+        db.commit()
+    if decision.allowed:
+        return
+    if certificate_bootstrap and agent_mtls.allow_bootstrap(decision, host):
+        return
+    raise HTTPException(
+        status_code=403, detail={"code": decision.code, "message": decision.message}
+    )
 
 
 def _host_session(host_id: str, db: Session) -> Session:
@@ -202,7 +235,7 @@ async def agent_poll(
     host_id = _authenticated_host_id(request, payload, authorization)
     host_db = _host_session(host_id, db)
     try:
-        _verify_host(host_db, host_id, x_host_token)
+        _verify_host(host_db, host_id, x_host_token, request)
         response = _exchange(host_db, host_id, payload)
         host_db.commit()
     finally:
@@ -218,6 +251,9 @@ def _exchange(host_db: Session, host_id: str, payload: PollRequest) -> PollRespo
     accepted = 0
     for message in payload.messages:
         try:
+            if delivery_confirmation.already_queued(host_db, message.message_id):
+                accepted += 1  # a resend whose first poll's answer was lost
+                continue
             server_queue_manager.enqueue_message(
                 message_type=message.message_type,
                 message_data=message.data,

@@ -190,6 +190,18 @@ async def test_a_policy_needs_a_target_and_bumps_its_version(session):
     assert await _status(api.put_policy(str(host.id), body, session, NOBODY)) == 403
 
 
+def test_a_mac_mounts_its_storage_under_volumes(session, sent):
+    """25.8: a Mac's system volume is read-only, so /mnt cannot be made."""
+    s = _setup(session)
+    s.target.host_mount_point = "/mnt/backups/"
+    s.host.platform = "macOS"
+    config = jobs.host_configuration(s.policy, s.target, s.host)
+    assert config["target"]["mount_point"] == "/Volumes/backups"
+    s.host.platform = "Linux"
+    config = jobs.host_configuration(s.policy, s.target, s.host)
+    assert config["target"]["mount_point"] == "/mnt/backups/"
+
+
 @pytest.mark.asyncio
 async def test_path_rules_reach_the_hosts_capture_and_estimate(session, sent):
     s = _setup(session)

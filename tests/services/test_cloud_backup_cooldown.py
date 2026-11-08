@@ -107,3 +107,43 @@ def test_another_failure_is_not_taken_for_a_refusal(session, sent):
     assert cloud.parse_json(run.result)["reason"] == "tool_failed"
     assert views.account_dict(session, account)["status"] == "failed"
     assert not tick.due(session, account, cloud.now() + timedelta(days=1))
+
+
+def test_a_good_exit_cut_off_by_apple_is_a_refusal(session, sent):
+    """icloudpd logged Apple's refusal and exited 0 (nas, 2026-11-06): the
+    full pass must carry on after the cooldown, not count as the week's."""
+    s, account = _account(session, enabled=True)
+    ended = cloud.now() - timedelta(minutes=10)
+    run = _finish(session, s, account, ended, status="ok", exit_code=0,
+                  reason="some_failed", detail=REFUSED, downloaded=16445,
+                  message="148 file(s) could not be downloaded")  # fmt: skip
+    assert run.status == cloud.FAILED
+    assert cloud.parse_json(run.result)["reason"] == tick.APPLE_BUSY
+    assert run.downloaded == 16445
+    assert account.last_full_at is None
+    assert tick.apple_retry_at(session, account) == ended + timedelta(hours=1)
+    assert tick.transfer_action(account, cloud.now()) == cloud.RECONCILE
+
+
+def test_the_refusal_text_in_a_connect_is_left_alone(session, sent):
+    s, account = _account(session, enabled=True)
+    run = cloud.queue_account_run(session, account, cloud.CONNECT, "ops")
+    results.record_result(session, s.nas.id, {
+        "run_id": str(run.id), "status": "ok", "exit_code": 0, "detail": REFUSED,
+    })  # fmt: skip
+    assert run.status == cloud.OK
+
+
+def test_a_lost_connection_to_icloud_carries_on_after_the_cooldown(session, sent):
+    """Production, 2026-11-06 13:52 UTC: the reconcile reached June 2015, logged
+    "Cannot connect to Apple iCloud service" and exited 0 -- recorded as the
+    full pass at 17,567 of about 32,000 photos."""
+    s, account = _account(session, enabled=True)
+    ended = cloud.now() - timedelta(minutes=10)
+    lost = "2026-11-06 13:52:01 INFO     Cannot connect to Apple iCloud service"
+    run = _finish(session, s, account, ended, status="ok", exit_code=0,
+                  detail=lost, downloaded=1122)  # fmt: skip
+    assert run.status == cloud.FAILED
+    assert cloud.parse_json(run.result)["reason"] == tick.APPLE_BUSY
+    assert account.last_full_at is None
+    assert tick.transfer_action(account, cloud.now()) == cloud.RECONCILE

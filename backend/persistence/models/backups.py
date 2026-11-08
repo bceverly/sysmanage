@@ -191,6 +191,10 @@ class BackupPolicy(Base):
     # The tag policy this host's settings come from (q75, Pro+ 24.6); NULL =
     # the host's own policy, which always beats any tag policy.
     tag_policy_id = Column(GUID(), nullable=True)
+    # This host is the SysManage server and this is its own backup (q82,
+    # 25.9): the databases are always paused for the capture, and OpenBAO's
+    # init material and token are always left out (services/backup_server_paths).
+    server_preset = Column(Boolean, nullable=False, default=False)
     config_version = Column(Integer, nullable=False, default=1)
     host_acked_version = Column(Integer, nullable=False, default=0)
     storage_acked_version = Column(Integer, nullable=False, default=0)
@@ -399,3 +403,10 @@ class BackupReach(Base):
     command_id = Column(String(36), nullable=True, index=True)
     requested_at = Column(DateTime, nullable=False)
     checked_at = Column(DateTime, nullable=True)
+    # 25.8, behind NAT: the held connection's source port, the storage host's
+    # list_nfs_peers answering it, and the address it saw it come from when
+    # that is not the one the export names (None: not behind NAT, or unknown).
+    local_port = Column(Integer, nullable=True)
+    peers_command_id = Column(String(36), nullable=True, index=True)
+    seen_as = Column(String(255), nullable=True)
+    nat_checked_at = Column(DateTime, nullable=True)

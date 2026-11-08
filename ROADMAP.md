@@ -35,32 +35,32 @@ This document provides a detailed roadmap for realizing all features in both ope
 24. [Phase 10: Pro+ Enterprise Tier - Part 3](#phase-10-pro-enterprise-tier---part-3)
 25. [Phase 11: Air-Gapped Environment Support (Enterprise)](#phase-11-air-gapped-environment-support-enterprise)
 26. [Phase 12: Multi-Site Federation (Enterprise)](#phase-12-multi-site-federation-enterprise)
-27. [Phase 12.5: Windows Server Child Hosts (Enterprise)](#phase-125-windows-server-child-hosts-enterprise)
-28. [Phase 13: Enterprise GA (v3.0.0.0)](#phase-13-enterprise-ga-v3000)
-29. [Phase 14: Patch & Maintenance Lifecycle (Pro+ / Enterprise)](#phase-14-patch--maintenance-lifecycle-pro--enterprise)
-30. [Phase 15: Stabilization](#phase-15-stabilization)
-31. [Phase 16: Content Lifecycle Management (Enterprise)](#phase-16-content-lifecycle-management-enterprise)
-32. [Phase 17: Content Distribution & Image-Mode Hosts (Enterprise)](#phase-17-content-distribution--image-mode-hosts-enterprise)
-33. [Phase 18: Provisioning & Discovery](#phase-18-provisioning--discovery)
-34. [Phase 19: Stabilization](#phase-19-stabilization)
-35. [Phase 20: Configuration Management & Drift (Enterprise)](#phase-20-configuration-management--drift-enterprise)
-36. [Phase 21: Endpoint Facts & Proactive Advisor (Enterprise)](#phase-21-endpoint-facts--proactive-advisor-enterprise)
-37. [Phase 22: Scale Hardening -- Thundering-Herd Remediation (Community / OSS; Pro+ / Enterprise)](#phase-22-scale-hardening----thundering-herd-remediation-community--oss-pro--enterprise)
-38. [Phase 23: Hardware, Time & Asset Visibility (Community / OSS; Pro+)](#phase-23-hardware-time--asset-visibility-community--oss-pro)
-39. [Phase 24: Fleet Backup & Recovery with restate (Community / Pro+)](#phase-24-fleet-backup--recovery-with-restate-community--pro)
-40. [Phase 25: Fleet Backup at Scale -- Multi-Site, Recovery, Multi-Tenancy & Server Self-Backup (Community / Pro+ / Enterprise / MULTITENANT_SAAS)](#phase-25-fleet-backup-at-scale----multi-site-recovery-multi-tenancy--server-self-backup-community--pro--enterprise--multitenant_saas)
-41. [Phase 26: Automatic Update Application (Community / OSS; Pro+; Enterprise)](#phase-26-automatic-update-application-community--oss-pro-enterprise)
-42. [Phase 27: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)](#phase-27-mobile-fleet-visibility--uem-ingestion-community--pro--enterprise)
-43. [Phase 28: Mobile Companion App & Compliance (Pro+ / Enterprise)](#phase-28-mobile-companion-app--compliance-pro--enterprise)
-44. [Phase 29: Stabilization & v5.0 GA](#phase-29-stabilization--v50-ga)
-45. [Phase 30: Expanded Agent Architecture & Packaging (Community / OSS)](#phase-30-expanded-agent-architecture--packaging-community--oss)
-46. [Phase 31: Security Tooling Coexistence (Enterprise)](#phase-31-security-tooling-coexistence-enterprise)
-47. [Phase 32: Apple Native MDM (Enterprise)](#phase-32-apple-native-mdm-enterprise)
-48. [Phase 33: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)](#phase-33-android-native-mdm--zero-touch-enrollment-pro--enterprise)
-49. [Phase 34: High Availability & Disaster Recovery (Enterprise)](#phase-34-high-availability--disaster-recovery-enterprise)
-50. [Phase 35: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)](#phase-35-browser-remote-terminal-community--oss-recording-pro-approval-enterprise)
-51. [Phase 36: Fleet Targeting by Site & Network Segment (Enterprise)](#phase-36-fleet-targeting-by-site--network-segment-enterprise)
-52. [Phase 37: Dashboard Insight Cards (Community / OSS; Pro+; Enterprise)](#phase-37-dashboard-insight-cards-community--oss-pro-enterprise)
+27. [Phase 13: Enterprise GA (v3.0.0.0)](#phase-13-enterprise-ga-v3000)
+28. [Phase 14: Patch & Maintenance Lifecycle (Pro+ / Enterprise)](#phase-14-patch--maintenance-lifecycle-pro--enterprise)
+29. [Phase 15: Stabilization](#phase-15-stabilization)
+30. [Phase 16: Content Lifecycle Management (Enterprise)](#phase-16-content-lifecycle-management-enterprise)
+31. [Phase 17: Content Distribution & Image-Mode Hosts (Enterprise)](#phase-17-content-distribution--image-mode-hosts-enterprise)
+32. [Phase 18: Provisioning & Discovery](#phase-18-provisioning--discovery)
+33. [Phase 19: Stabilization](#phase-19-stabilization)
+34. [Phase 20: Configuration Management & Drift (Enterprise)](#phase-20-configuration-management--drift-enterprise)
+35. [Phase 21: Endpoint Facts & Proactive Advisor (Enterprise)](#phase-21-endpoint-facts--proactive-advisor-enterprise)
+36. [Phase 22: Scale Hardening -- Thundering-Herd Remediation (Community / OSS; Pro+ / Enterprise)](#phase-22-scale-hardening----thundering-herd-remediation-community--oss-pro--enterprise)
+37. [Phase 23: Hardware, Time & Asset Visibility (Community / OSS; Pro+)](#phase-23-hardware-time--asset-visibility-community--oss-pro)
+38. [Phase 24: Fleet Backup & Recovery with restate (Community / Pro+)](#phase-24-fleet-backup--recovery-with-restate-community--pro)
+39. [Phase 25: Fleet Backup Completion -- restate-proxy, Platforms, Server Self-Backup & Agent mTLS (Community / Pro+)](#phase-25-fleet-backup-completion----restate-proxy-platforms-server-self-backup--agent-mtls-community--pro)
+40. [Phase 26: Automatic Update Application (Community / OSS; Pro+; Enterprise)](#phase-26-automatic-update-application-community--oss-pro-enterprise)
+41. [Phase 27: Fleet Backup at Scale -- Multi-Site, Recovery & Multi-Tenancy (Enterprise / MULTITENANT_SAAS)](#phase-27-fleet-backup-at-scale----multi-site-recovery--multi-tenancy-enterprise--multitenant_saas)
+42. [Phase 28: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)](#phase-28-mobile-fleet-visibility--uem-ingestion-community--pro--enterprise)
+43. [Phase 29: Mobile Companion App & Compliance (Pro+ / Enterprise)](#phase-29-mobile-companion-app--compliance-pro--enterprise)
+44. [Phase 30: Stabilization & v5.0 GA](#phase-30-stabilization--v50-ga)
+45. [Phase 31: Expanded Agent Architecture & Packaging (Community / OSS)](#phase-31-expanded-agent-architecture--packaging-community--oss)
+46. [Phase 32: Security Tooling Coexistence (Enterprise)](#phase-32-security-tooling-coexistence-enterprise)
+47. [Phase 33: Apple Native MDM (Enterprise)](#phase-33-apple-native-mdm-enterprise)
+48. [Phase 34: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)](#phase-34-android-native-mdm--zero-touch-enrollment-pro--enterprise)
+49. [Phase 35: High Availability & Disaster Recovery (Enterprise)](#phase-35-high-availability--disaster-recovery-enterprise)
+50. [Phase 36: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)](#phase-36-browser-remote-terminal-community--oss-recording-pro-approval-enterprise)
+51. [Phase 37: Fleet Targeting by Site & Network Segment (Enterprise)](#phase-37-fleet-targeting-by-site--network-segment-enterprise)
+52. [Phase 38: Dashboard Insight Cards (Community / OSS; Pro+; Enterprise)](#phase-38-dashboard-insight-cards-community--oss-pro-enterprise)
 53. [Release Schedule Summary](#release-schedule-summary)
 54. [Module Migration Plan](#module-migration-plan)
 
@@ -344,7 +344,7 @@ This section documents the development history of SysManage from initial commit 
 ### Professional Tier Modules
 
 - [x] **proplus_core** - License management UI
-- [x] **compliance_engine** - CIS/DISA STIG auditing (host evidence collected on Linux since 2026-10-18, scheduled scans; other OSes still "not collected" -- see 27.4)
+- [x] **compliance_engine** - CIS/DISA STIG auditing (host evidence collected on Linux since 2026-10-18, scheduled scans; other OSes still "not collected" -- see 28.4)
 - [x] **compliance_engine** - CIS/DISA STIG auditing
 
 ### Enterprise Tier Modules
@@ -501,7 +501,7 @@ the ladder front-loads gains then tapers:
 | **Phase 13 (Enterprise GA)** -- install the ratchet | ≥12% floor ✅ | ≥25% target → **~50% achieved, floor ≥48** ✅ | ≥25% target → **~54% achieved, floor ≥53** ✅ |
 | **Phase 15 (Stabilization)** | 30% ✅ (measured ~34%) | 40% ✅ (already met) | 30% ✅ (already met) |
 | **Phase 19 (Stabilization)** | 50% | 55% | 50% ✅ (already met) |
-| **Phase 29 (Stabilization & v5.0 GA)** | **70%** | **70%** | **70%** |
+| **Phase 30 (Stabilization & v5.0 GA)** | **70%** | **70%** | **70%** |
 
 **OSS frontend line-coverage ramp to Python parity (revised):** rather than
 the coarse table rungs above, the OSS frontend now climbs its enforced **line**
@@ -775,44 +775,47 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │  Phase 24: Fleet Backup & Recovery (restate)                         v3.12.0.0  │
 │     └── Per-host backups to the NAS, encryption + keys, GFS, restore            │
 │                                                                                 │
-│  Phase 25: Fleet Backup at Scale                                     v3.13.0.0  │
-│     └── Multi-site, rebuild/clone, drills, off-site + cloud, tenants            │
+│  Phase 25: Fleet Backup Completion                                   v3.13.0.0  │
+│     └── restate-proxy, runner without systemd, server self-backup, mTLS         │
 │                                                                                 │
 │  Phase 26: Automatic Update Application                              v3.14.0.0  │
 │     └── Policies apply updates; windows + CVE waits (Pro+); fleet by fleet      │
 │                                                                                 │
-│  Phase 27: Mobile Fleet Visibility & UEM Ingestion                   v4.0.0.0   │
+│  Phase 27: Fleet Backup at Scale                                     v3.15.0.0  │
+│     └── Multi-site, rebuild/clone, drills, off-site + cloud, tenants            │
+│                                                                                 │
+│  Phase 28: Mobile Fleet Visibility & UEM Ingestion                   v4.0.0.0   │
 │     └── MAJOR - a new device class. Model, registration, ingest-from-UEM        │
 │                                                                                 │
-│  Phase 28: Mobile Companion App & Compliance                         v4.1.0.0   │
+│  Phase 29: Mobile Companion App & Compliance                         v4.1.0.0   │
 │     └── BYOD self-report app; mobile EOL/patch compliance + enforcement         │
 │                                                                                 │
-│  Phase 29: Market-Parity GA                                          v5.0.0.0   │
+│  Phase 30: Market-Parity GA                                          v5.0.0.0   │
 │     └── MAJOR - market parity reached. All gap features hardened; v5.0 GA       │
 │                                                                                 │
-│  Phase 30: Expanded Agent Architecture                               v5.1.0.0   │
+│  Phase 31: Expanded Agent Architecture                               v5.1.0.0   │
 │     └── ppc64le + s390x + riscv64 agent packaging/CI (Community/OSS)            │
 │                                                                                 │
-│  Phase 31: Security Tooling Coexistence                              v5.2.0.0   │
+│  Phase 32: Security Tooling Coexistence                              v5.2.0.0   │
 │     └── Velociraptor IR/hunting + Wazuh ingestion                               │
 │                                                                                 │
-│  Phase 32: Apple Native MDM                                          v6.0.0.0   │
+│  Phase 33: Apple Native MDM                                          v6.0.0.0   │
 │     └── MAJOR - device authority: Apple MDM protocol, APNs, remote wipe         │
 │                                                                                 │
-│  Phase 33: Android Native MDM & Zero-Touch                           v6.1.0.0   │
+│  Phase 34: Android Native MDM & Zero-Touch                           v6.1.0.0   │
 │     └── Android Management API policy + bulk/zero-touch enrollment              │
 │                                                                                 │
-│  Phase 34: High Availability & Disaster Recovery                     v6.2.0.0   │
+│  Phase 35: High Availability & Disaster Recovery                     v6.2.0.0   │
 │     └── Server pool behind a LB, leader-elected workers, Postgres failover      │
 │                Agent multi-endpoint failover to a DR site                       │
 │                                                                                 │
-│  Phase 35: Browser Remote Terminal                                   v6.3.0.0   │
+│  Phase 36: Browser Remote Terminal                                   v6.3.0.0   │
 │     └── Agent-tunneled PTY: no sshd, no inbound port, no keys (OSS)             │
 │                                                                                 │
-│  Phase 36: Fleet Targeting by Site & Network Segment                 v6.4.0.0   │
+│  Phase 37: Fleet Targeting by Site & Network Segment                 v6.4.0.0   │
 │     └── Target work by site, and by CIDR segment within a site                  │
 │                                                                                 │
-│  Phase 37: Dashboard Insight Cards                                   v6.5.0.0   │
+│  Phase 38: Dashboard Insight Cards                                   v6.5.0.0   │
 │     └── Home-screen cards for what needs attention, across every tier           │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -1257,11 +1260,11 @@ shipped, the generic handlers should be implemented early as a Phase 3 prerequis
 
 2. **Container Engine Testing**
    - [x] LXD container lifecycle testing on Ubuntu -- `sysmanage-agent/tests/integration/test_lxd_lifecycle.py` (7 tests) drives `LxdOperations` through stop → start → restart → delete against a real Alpine container created via `lxc launch` as test setup; observable state verified via `lxc list` between transitions; auto-skips when LXD daemon isn't available
-   - *(WSL instance lifecycle testing on Windows -- **moved to Phase 30 on 2026-08-04.**
+   - *(WSL instance lifecycle testing on Windows -- **moved to Phase 31 on 2026-08-04.**
      Blocked on GitHub rather than on us: `actions/runner-images` [#10563](https://github.com/actions/runner-images/issues/10563)
      asking for WSL2 on hosted Windows runners was closed as *not planned*, and a
      job cannot switch WSL versions in-build because that needs a reboot. Re-check
-     at Phase 30.)*
+     at Phase 31.)*
    - [x] Verify read-only mode for unlicensed users
 
 3. **Security Engine Testing**
@@ -1628,7 +1631,7 @@ VM definitions, OTEL configs, etc.).
 
 3. **i18n Verification**
    - [x] All 14 languages complete -- frontend `src/i18n/locales/` has full translation catalogs for en, es, fr, de, it, pt, nl, ja, zh-CN, zh-TW, ko, ru, ar, hi (Phase 8 added the Phase 8.7 reporting / branding strings to all locales).
-   - Professional review of translations: deferred (budget item). -- OPEN (audit 2026-11-03): blocked on a business decision -- the professional / native-speaker review waits for paying customers (as the 12.x footer disclosure says); moved to Phase 29 as an optional business item
+   - Professional review of translations: deferred (budget item). -- OPEN (audit 2026-11-03): blocked on a business decision -- the professional / native-speaker review waits for paying customers (as the 12.x footer disclosure says); moved to Phase 30 as an optional business item
    - [x] UI screenshot verification -- Playwright e2e suite runs every page in all locales via `frontend/e2e/i18n.spec.ts`.
 
 4. **UI/UX Polish**
@@ -2164,7 +2167,7 @@ Already-correctly-gated: **Orchestrated Reboot** falls back to plain reboot when
 **Testing:**
 
 - [x] Unit tests for `isFeatureLicensed` / `isModuleLicensed` (cache hit/miss, license absent, license present-but-unrelated). *(`__tests__/Services/license.test.tsx` -- 8 passing tests covering empty cache, refresh population, feature/module presence checks, refresh-failure → cache cleared, license-without-modules-array, subscribe/unsubscribe, clear-cache reset)*
-- [x] Playwright tests: triple-tier license-matrix smoke test landed at `frontend/e2e/license-matrix.spec.ts` (2026-05-13).  Parametrised over `community` / `professional` / `enterprise` fixtures; uses `page.route('**/api/license', …)` to inject a tier-specific response rather than seeding signed licenses on the backend (faster, deterministic, and exercises the same frontend gating logic as production).  Asserts 7 Settings tabs visible/hidden correctly per tier (Integrations, Antivirus, Firewall Roles, Update Profiles, Compliance Profiles, Report Branding, Report Templates) + the `/secrets` and `/reports` nav links toggle correctly between community ↔ enterprise.  HostDetail per-tab and per-action-button gating is a follow-up -- those require a seeded host record and aren't covered by this spec yet. -- OPEN (audit 2026-11-03): real work -- the host page's per-tab and per-action gating still has no Playwright coverage (`license-matrix.spec.ts` covers the Settings tabs and the nav links only; unit tests cover some tabs); moved to Phase 29
+- [x] Playwright tests: triple-tier license-matrix smoke test landed at `frontend/e2e/license-matrix.spec.ts` (2026-05-13).  Parametrised over `community` / `professional` / `enterprise` fixtures; uses `page.route('**/api/license', …)` to inject a tier-specific response rather than seeding signed licenses on the backend (faster, deterministic, and exercises the same frontend gating logic as production).  Asserts 7 Settings tabs visible/hidden correctly per tier (Integrations, Antivirus, Firewall Roles, Update Profiles, Compliance Profiles, Report Branding, Report Templates) + the `/secrets` and `/reports` nav links toggle correctly between community ↔ enterprise.  HostDetail per-tab and per-action-button gating is a follow-up -- those require a seeded host record and aren't covered by this spec yet. -- OPEN (audit 2026-11-03): real work -- the host page's per-tab and per-action gating still has no Playwright coverage (`license-matrix.spec.ts` covers the Settings tabs and the nav links only; unit tests cover some tabs); moved to Phase 30
 
 **Estimated Size:** ~150 lines of frontend gating logic + ~60 entry-shape conversions + ~80 lines of test fixtures.  No backend changes -- the 402-on-unlicensed pattern already exists; this just stops surfacing the call sites that would hit it.
 
@@ -3547,7 +3550,7 @@ above for cost/sovereignty; retained as the fallback option):**
       CI); flagged drift becomes a review item.  The deterministic
       placeholder-integrity portion *is* a CI gate
       (``i18n_check_translations.py --placeholders``).
-- [x] Footer disclosure -- shipped 2026-08-04 in the shared footer (`assets/js/components.js`), worded as machine-generated WITHOUT any native-review claim, since that review is deliberately deferred until there are paying customers. Key `footer.translation_disclosure` seeded across all 15 locales. -- OPEN (audit 2026-11-03): the deferred native review is now the Phase 29 optional business item (see Phase 9)
+- [x] Footer disclosure -- shipped 2026-08-04 in the shared footer (`assets/js/components.js`), worded as machine-generated WITHOUT any native-review claim, since that review is deliberately deferred until there are paying customers. Key `footer.translation_disclosure` seeded across all 15 locales. -- OPEN (audit 2026-11-03): the deferred native review is now the Phase 30 optional business item (see Phase 9)
 
 **Acceptance criteria:**
 
@@ -3636,8 +3639,8 @@ deliberately stopped at the docs body paragraphs.
 | OpenBSD ports (workflow builds; not yet upstream-submitted) | OpenBSD | ⚠️ tarball-published only |
 | **winget** | Windows | ✅ merged 2026-06-08 -- `sysmanage.sysmanage` (#376004) + `sysmanage.sysmanage-agent` (#376005) are in `microsoft:master`; `komac update` runs on tag.  (Earlier sandbox-validation stall on PR #375773 is resolved.) |
 | **Homebrew tap (``bceverly/tap/sysmanage-agent``)** | macOS, Linux via Linuxbrew | ✅ auto-published on every release tag |
-| **Microsoft Store (MSIX)** | Windows | 🔜 in scope -- needs `runFullTrust`/privileged-helper identity (deferred to Phase 29 -- see “Consumer app-store distribution”) |
-| **Mac App Store** | macOS (sandboxed) | 🔜 in scope -- needs sandboxed-UI + privileged-helper split (deferred to Phase 29 -- see “Consumer app-store distribution”) |
+| **Microsoft Store (MSIX)** | Windows | 🔜 in scope -- needs `runFullTrust`/privileged-helper identity (deferred to Phase 30 -- see “Consumer app-store distribution”) |
+| **Mac App Store** | macOS (sandboxed) | 🔜 in scope -- needs sandboxed-UI + privileged-helper split (deferred to Phase 30 -- see “Consumer app-store distribution”) |
 | FreeBSD ports | FreeBSD | ❌ not published, not consumed (direct .pkg today) |
 | NetBSD pkgsrc | NetBSD | ❌ not published, not consumed |
 | AUR (``sysmanage-agent``) | Arch | ✅ auto-published on every release tag |
@@ -3689,7 +3692,7 @@ direct GitHub-release URLs cannot easily be mirrored).
        2026-05-12 (manual TTY step); future releases auto-update
        via ``komac update`` in the build-and-release workflow.
        Microsoft Store submission for the "official" channel
-       is deferred to Phase 29 (see "Consumer app-store
+       is deferred to Phase 30 (see "Consumer app-store
        distribution") -- it is gated on a Partner Center account,
        not on code.
      * **Homebrew tap** -- ``bceverly/homebrew-tap`` repo exists and
@@ -4660,7 +4663,7 @@ plan-builder + UI integration.
       up/idempotent/down on sqlite; black + `backend/` pylint + `tsc` + eslint +
       offline i18n gate all green. *Follow-ups (non-blocking; Phase 21 audit 2026-10-01: the strings and the
       `.so` rebuild are done, but this browser landing was NEVER wired -- for
-      OIDC either -- and is carried to Phase 29):* the ACS browser
+      OIDC either -- and is carried to Phase 30):* the ACS browser
       landing (cookie+redirect) is wired in the frontend like OIDC; SAML UI/API
       strings are inline-English defaults pending a `make translate` GPU backfill;
       and the engine `.so` needs a release rebuild for the other Python versions
@@ -4683,7 +4686,7 @@ plan-builder + UI integration.
       the other Python versions (only cp314 built here).
       **13.1.E is complete** -- per-tenant LDAP/OIDC/SAML IdP + JIT + SCIM
       provisioning + enforced/expiry-checked grants + OpenBAO-lease-bound
-      vendor-support/break-glass, all licensed-engine-gated.)* -- DONE (audit 2026-11-03): the browser landing that note carried to Phase 29 shipped 2026-10-01 (`frontend/src/Pages/SsoCallback.tsx` at `/login/sso`, OIDC and SAML), as the Phase 21 audit recorded; the carry note is stale
+      vendor-support/break-glass, all licensed-engine-gated.)* -- DONE (audit 2026-11-03): the browser landing that note carried to Phase 30 shipped 2026-10-01 (`frontend/src/Pages/SsoCallback.tsx` at `/login/sso`, OIDC and SAML), as the Phase 21 audit recorded; the carry note is stale
 - [x] **13.1.F** Backup orchestration & **data isolation verification** --
       per-tenant backup/RPO tracking + automated restore tests, two-tenant
       cross-leak test harness, per-account settings/limits enforcement
@@ -4717,7 +4720,7 @@ plan-builder + UI integration.
       `PATCH /tenants/{id}/backup-config`, and a fleet `GET /backups/status`; the
       `/tenants` UI gained a Backups & RPO panel (status chip, RPO target,
       back-up-now, run history). All limits/backup strings i18n'd (OSS gettext +
-      plugin catalogs).)* -- OPEN (audit 2026-11-03): the pool+RLS SMB tier is an undecided product option tracked nowhere -- moved to Phase 29 as build-or-drop
+      plugin catalogs).)* -- OPEN (audit 2026-11-03): the pool+RLS SMB tier is an undecided product option tracked nowhere -- moved to Phase 30 as build-or-drop
 - [x] **13.1.G** Config builder & deployment docs -- update the installer config
       builder (`scripts/_sysmanage_secure_installation.py`) to emit the new
       `registry:` / `multitenancy:` / `secrets:` config shape with a deployment-mode
@@ -4899,7 +4902,7 @@ plan-builder + UI integration.
       certs-public/password-reset) and added the new api-keys CRUD.  Remaining
       CRUD gaps are deferred *by design* (they need new persistence/agent work,
       not API plumbing): broadcast history, dynamic-secret rotation, queue
-      retry/bulk-clear, telemetry-target config.  Listed here so they aren't lost. -- OPEN (audit 2026-11-03): queue bulk-clear shipped (`DELETE /api/v1/queue/failed`); broadcast history, dynamic-secret lease renewal (`dynamic_secrets` has issue / list / revoke / reconcile only), retrying one failed queue message, and telemetry-target configuration (`telemetry.py` is status-only) are still missing -- real work, moved to Phase 29
+      retry/bulk-clear, telemetry-target config.  Listed here so they aren't lost. -- OPEN (audit 2026-11-03): queue bulk-clear shipped (`DELETE /api/v1/queue/failed`); broadcast history, dynamic-secret lease renewal (`dynamic_secrets` has issue / list / revoke / reconcile only), retrying one failed queue message, and telemetry-target configuration (`telemetry.py` is status-only) are still missing -- real work, moved to Phase 30
 - [x] **API versioning (/api/v1/, /api/v2/)** -- `ApiVersionMiddleware`
       (pure-ASGI, covers HTTP + WebSocket) makes the unversioned `/api/...`
       surface the canonical **v1** and serves `/api/v1/...` as an exact alias, so
@@ -5640,7 +5643,7 @@ Deliberately scoped as *survive failover*, not *orchestrate it*: leader election
 - [x] **OpenBAO DB secrets backend points at the cluster endpoint** (proxy/VIP), with the leased role present on all nodes via replication; verify a connection opened *after* failover leases fresh creds cleanly. Verified live on the `buildMultiTenantTestNetwork.sh` rig: `bao_tenant()` configures the OpenBAO database secrets backend against the multi-host registry/tenant DSN, and during the `failover tenant-a` run OpenBAO minted fresh leased creds cleanly *after* the standby was promoted (agent-a kept serving with the owner-role ownership pattern intact). (Deployment/verification only -- see docs/administration/postgresql-ha.html; multi-tenant / Pro+ only.)
 - [x] **Lease-acquisition retry (second path)** -- OpenBAO surfaces a mint failure during the promotion gap as a 5xx `VaultError`, NOT a driver `OperationalError`, so the app's DB retry does not cover it. `VaultError` now carries `status_code` + `transient` (5xx / connection / timeout = transient; 403 / 4xx = permanent), and the Pro+ `multitenancy_engine._acquire` wraps `lease_credentials` in `run_with_vault_retry` (transient-only, bounded backoff; mint-timeout can leak a TTL-bounded orphan lease). OSS + Pro+ (Cython rebuilt); tested in `test_vault_retry.py`.
 - [x] **`/api/health` reports DB connectivity** so an external LB / orchestrator can route around a server that has lost its database.
-- [x] **Failover test** -- verified live on the `buildPostgresHATestNetwork.sh` four-VM cluster (server + streaming primary/standby + agent): stop the primary, promote the standby, and the app reconnects through `pool_pre_ping` + the libpq multi-host DSN (`target_session_attrs=read-write`) to the new primary with the agent/host rows intact. Client-visible behavior documented in `docs/administration/postgresql-ha.html`. (CI-automating this kill-the-primary loop remains a nice-to-have follow-up; the behavior itself is confirmed.) -- OPEN (audit 2026-11-03): the CI-automated kill-the-primary loop is real work that belongs with HA -- moved to Phase 34.2
+- [x] **Failover test** -- verified live on the `buildPostgresHATestNetwork.sh` four-VM cluster (server + streaming primary/standby + agent): stop the primary, promote the standby, and the app reconnects through `pool_pre_ping` + the libpq multi-host DSN (`target_session_attrs=read-write`) to the new primary with the agent/host rows intact. Client-visible behavior documented in `docs/administration/postgresql-ha.html`. (CI-automating this kill-the-primary loop remains a nice-to-have follow-up; the behavior itself is confirmed.) -- OPEN (audit 2026-11-03): the CI-automated kill-the-primary loop is real work that belongs with HA -- moved to Phase 35.2
 - [x] Docs: reference HA topology (cluster manager + router), and state explicitly that the server does **not** do leader election. (Note: the federation coordinator already name-checks "HA via standard replication + a load balancer" -- this makes the single-server case match.)
 
 **Estimated Size:** ~1,200 lines (mostly the retry wrapper, engine-factory wiring, and failover tests).
@@ -6489,7 +6492,7 @@ close the gap between our output and the parsers that consume it.
       Whatever lands should also make "the MSI succeeded but the service is
       absent" a loud, detectable state rather than a silent one.
 - [x] **FreeBSD port made submission-ready, and statically gated.** *(Pulled
-      forward from Phase 30 on 2026-08-07, at Bryan's request, while assessing
+      forward from Phase 31 on 2026-08-07, at Bryan's request, while assessing
       whether the BSD ports could be submitted upstream.)*
 
       Reviewing the skeleton found three defects a ports committer would have
@@ -6539,7 +6542,7 @@ close the gap between our output and the parsers that consume it.
       Do FreeBSD alone first and treat it as the pilot -- three simultaneous
       submissions to three communities with three conventions, none ever built,
       invites three reviewers finding the same class of problem. OpenBSD
-      (`ports@`, strictest) and NetBSD (`pkgsrc-wip` first) stay in Phase 30.
+      (`ports@`, strictest) and NetBSD (`pkgsrc-wip` first) stay in Phase 31.
 
 - [x] **Child hosts enroll with NO TENANT -- they need an enrollment token.**
       *(DONE 2026-08-12 -- `_build_agent_config_yaml` now emits `security.enrollment_token`, minted against the PARENT's tenant via `tenant_for_host` + the existing provisioning mint, threaded through all three creation paths (KVM/WSL/LXD) with a test that counts the call sites so a new path cannot silently regress. Declines rather than guessing when the parent's tenant cannot be resolved -- a token naming the wrong tenant would put the child in someone else's data plane.)*
@@ -6580,7 +6583,7 @@ close the gap between our output and the parsers that consume it.
 Not architecture work: it is about agent HETEROGENEITY, and it is needed
 now.  alpine/freebsd/openbsd/netbsd already run reduced-capability agents,
 and the server will happily dispatch a command they cannot run.  It also
-underpins the mobile companion app (Phase 28), where a device reports
+underpins the mobile companion app (Phase 29), where a device reports
 inventory but executes nothing -- the limiting case of a limited agent.
 
 Some platforms this phase reaches can't run the *full* agent: a native library may have no build for a given arch, or a very old target OS may lack a prerequisite. Rather than silently degrade, the agent should **declare what it can do**, and the server should make any shortfall visible so operators aren't surprised when a feature is unavailable on a host. Baseline agents report everything; the value shows up later when a trimmed agent has to be shipped for a constrained target.
@@ -8387,7 +8390,7 @@ nearly free and makes the dashboard actionable rather than merely informative.
       · **Version** -- v3.8.0.0; engine bumped to 1.0.4. The phase was
         originally targeted at v3.7.0.0 and shipped one minor higher, so
         Phase 21 moved from v3.8.0.0 to v3.9.0.0 rather than collide with
-        it. The v4.0.0.0 anchor at Phase 27 is unchanged.
+        it. The v4.0.0.0 anchor at Phase 28 is unchanged.
 
       · **Screenshots** -- `make screenshots` captures all 50 Enterprise
         shots and `make test-links` passes (1608 OK, 0 errors), so the four
@@ -11129,11 +11132,11 @@ CIDRs, rate-limited, and audited** -- never a fleet-wide default.
       last-seen, which agents observed it, and the evidence for the guess
       (OUI vendor, mDNS service names, open-port fingerprint). A device class
       distinct from `host`: no shell, no package manager, no privileged
-      execution -- the same distinction Phase 27.1 draws for `mobile_device`
+      execution -- the same distinction Phase 28.1 draws for `mobile_device`
       DONE 2026-09-29 (21.6 S1, migration `q13assetdisc`). OUI vendor
       evidence arrived with S5.  **Correction 2026-10-16:** open-port
       fingerprint evidence did NOT arrive -- S4 is the address sweep only,
-      and nothing probes ports.  Moved to Phase 36 ("Standard-port probe of
+      and nothing probes ports.  Moved to Phase 37 ("Standard-port probe of
       unmanaged devices").
 - [x] Agent-side passive neighbor reporting (ARP/NDP cache, mDNS/SSDP) behind
       a `network_discovery` capability, per-platform, defaulting to passive
@@ -11165,7 +11168,7 @@ CIDRs, rate-limited, and audited** -- never a fleet-wide default.
       DONE 21.6 S1-S5: managed hosts by MAC (every spelling), enrolled child
       hosts via their own interfaces, hypervisor tap ports, VIPs / load
       balancers by static-address registration + VRRP/HSRP/CARP recognition.
-      `mobile_device` does not exist yet -- tracked as a 27.1 item.
+      `mobile_device` does not exist yet -- tracked as a 28.1 item.
 - [x] Review page: unenrolled assets with evidence, bulk triage, and a
       **permanent allow-list exclusion** ("this is an IoT sensor / printer /
       switch / appliance -- never show it again") carrying a reason and an
@@ -11555,9 +11558,9 @@ are the bulk; the review UI is small).
       federation 1M-host run + strings, federation Slice 3, the pool/** CDN
       cache, the vuln-engine shared-CVE fix, the GPG remove-on-confirm, the
       external_idp abi3 rebuild, agent dead-code cleanup, the bundle
-      builders), 2 were already tracked (WSL lifecycle -> Phase 30, app-store
-      distribution -> Phase 29). Seven were neither, and are now open items
-      in Phase 29 "Carried forward by the Phase 21 audit" -- most important:
+      builders), 2 were already tracked (WSL lifecycle -> Phase 31, app-store
+      distribution -> Phase 30). Seven were neither, and are now open items
+      in Phase 30 "Carried forward by the Phase 21 audit" -- most important:
       **browser SSO (OIDC + SAML) has no landing page** (fixed 2026-10-01), behind a ticked
       Phase 13 box; also EC2/Azure/GCE/vSphere compute providers, physical
       bare-metal PXE validation, air-gap bundle smoke tests, the federation
@@ -11584,7 +11587,7 @@ were re-verified by hand. Findings are cited as `repo:file:line` at audit time.
 
 **SEQUENCING (2026-10-01, Bryan).** Pulled forward to come right after
 Phase 21 -- every later phase moved out by one. It is a prerequisite for real
-enterprise scale and for Phase 34 (HA/DR, which runs multiple server workers
+enterprise scale and for Phase 35 (HA/DR, which runs multiple server workers
 and therefore NEEDS 22.2's leader election and atomic queue claiming). A
 minor release (v3.10) rather than a major: it changes how the product
 behaves under load, not what it does.
@@ -11971,7 +11974,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       reconnect 90 s, 0 expired, 0 hosts marked down, 24 DB connections.
       Still open: tenants spread across workers (one leader runs every
       tenant's ticks), and shared presence for HA (`poll_presence` and the
-      fleet status endpoints read this worker's connections only).* -- OPEN (audit 2026-11-03): shared presence is Phase 34.1's connection registry; spreading tenants' ticks across workers was tracked nowhere -- real work, moved to Phase 34.1
+      fleet status endpoints read this worker's connections only).* -- OPEN (audit 2026-11-03): shared presence is Phase 35.1's connection registry; spreading tenants' ticks across workers was tracked nowhere -- real work, moved to Phase 35.1
 - [x] **Reconnect admission control** -- each SYSTEM_INFO does host upsert,
       full package ingestion, an audit commit and a logging-config push inline;
       each WebSocket holds a DB session for its life on a default 5+10 pool.
@@ -12412,7 +12415,7 @@ misconfigured or bypassed IdP policy that skips MFA is invisible to us.
       walkthrough (app registration, redirect URI = `webui.public_url`,
       group object IDs in role mappings, security defaults vs Conditional
       Access) -- verified against a real Entra tenant, which also closes the
-      "SSO never exercised against a real IdP" note on the Phase 29 item.
+      "SSO never exercised against a real IdP" note on the Phase 30 item.
       *Setting documented 2026-10-06 (`external-idp.html`, "Requiring
       Multi-Factor Sign-In", 14 languages). STILL OPEN: the Microsoft 365
       walkthrough -- it must be verified against a real Entra tenant.*
@@ -12423,7 +12426,7 @@ misconfigured or bypassed IdP policy that skips MFA is invisible to us.
       ID"), 14 languages. Key finding written into it: Entra's v2.0 ID tokens
       carry no `amr`, so MFA requires the v1.0 issuer
       (`https://sts.windows.net/<tenant>/`) and v1.0 discovery URL. This also
-      closes the "SSO never exercised against a real IdP" note on Phase 29.*
+      closes the "SSO never exercised against a real IdP" note on Phase 30.*
 
 - [x] **Found in the first real Entra ID sign-in (2026-10-07)** -- the walkthrough
       run turned up a chain of defects no test had reached; all fixed:
@@ -12803,7 +12806,7 @@ unforgivable.
       tree. FOUND on the way: the pkgsrc port
       (`packaging/netbsd-pkgsrc`) DEPENDS on `databases/py-psycopg`, which
       pkgsrc does not have (only py-psycopg2) -- it cannot build in a real
-      pkgsrc tree; the shipped NetBSD .tgz is unaffected.* -- OPEN (audit 2026-11-03): real work -- the pkgsrc port still `DEPENDS` on `databases/py-psycopg` (`packaging/netbsd-pkgsrc/sysutils/sysmanage/Makefile:41`), which pkgsrc does not have, so it cannot build in a real pkgsrc tree; moved to Phase 30
+      pkgsrc tree; the shipped NetBSD .tgz is unaffected.* -- OPEN (audit 2026-11-03): real work -- the pkgsrc port still `DEPENDS` on `databases/py-psycopg` (`packaging/netbsd-pkgsrc/sysutils/sysmanage/Makefile:41`), which pkgsrc does not have, so it cannot build in a real pkgsrc tree; moved to Phase 31
 
 #### Exit criteria
 
@@ -12979,7 +12982,7 @@ unforgivable.
       `api.workers` in sysmanage.yaml (SYSMANAGE_UVICORN_WORKERS still wins);
       main.py exports the count so pool sizing and leader election agree.
       Service files across the installers now start `backend.main` instead of
-      uvicorn (see Phase 29 "Production serving topology"). 10k storm, auto =
+      uvicorn (see Phase 30 "Production serving topology"). 10k storm, auto =
       6 workers on the 8-core laptop: connected 10,000 / 10,000, reconnect
       211 s, heartbeat p95 3.3 s, processing 50/s (best minute 124), backlog
       136,607 at the end. Profile at that load: the laptop is SATURATED --
@@ -13112,7 +13115,7 @@ unforgivable.
       be dropped.
       *Done 2026-10-07: no unticked boxes in Phases 0-21; 29 "still pending"
       notes checked against the code -- 20 stale, 3 correctly carried, the
-      rest untracked: six are now in Phase 29 ("Carried forward by the Phase
+      rest untracked: six are now in Phase 30 ("Carried forward by the Phase
       22 audit") and two were live defects, fixed here: (1) the multitenancy plugin shipped
       91 strings as "[TODO] ..." in all 13 locales (users saw "[TODO]
       Tenants") -- `plugin_i18n_lib.looks_untranslated` treated a placeholder
@@ -13154,10 +13157,10 @@ built on 22's agent identity (an asset tag needs to know which host is which)
 and send-on-change collection, and its real-time alerts follow 22.3's rule
 that a site-wide event must not become ten thousand emails.
 
-#### 23.0 Scale proof at 50k agents -- moved to Phase 29
+#### 23.0 Scale proof at 50k agents -- moved to Phase 30
 
 *Moved 2026-10-15 (Bryan): the 50k proof and the rest of what was carried
-here from Phase 22 now live in Phase 29, "Carried forward from Phase 23.0".
+here from Phase 22 now live in Phase 30, "Carried forward from Phase 23.0".
 Most of it waits on the 32-core machine.*
 
 #### 23.1 Hardware health: failing drives, degraded arrays, overheating (OSS + Pro+)
@@ -13575,7 +13578,7 @@ of its three OSes once).
       because it reported `t480` and Windows `T480` -- registration matches
       names case-insensitively and refuses a credential-less claim; Ubuntu
       was renamed `t480-ubuntu` for the proof, and the real fix (multi-boot
-      machines keep ONE hostname) is now Phase 29 "Multi-boot machines that
+      machines keep ONE hostname) is now Phase 30 "Multi-boot machines that
       keep one hostname"; (2) the agent sent its registration once per
       connection, so after a credential refusal it never registered again
       even once the stale host was removed -- now it re-asks, backing off
@@ -13914,7 +13917,7 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       defect -- a French value with half its sentence missing, now fixed.
       Short headings are still the judge's weak spot (72-76/78).  Takes
       effect when the beast service is restarted on this code.*
-- **A stronger model for Hindi** -- *moved to Phase 29 (Bryan
+- **A stronger model for Hindi** -- *moved to Phase 30 (Bryan
       2026-10-15: needs the 32-core box, "isn't happening any time soon").*
 - [x] **Redo every reject**: `python3 scripts/i18n_verify.py --requeue`, then
       `make translate` (which re-verifies); `--accept` only for a genuine false
@@ -14004,10 +14007,10 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
       *DONE 2026-10-15.* Phases 0-22 have NO unticked boxes (the Phase 21
-      and 22 audits moved everything open into Phase 29), so this audit, like
+      and 22 audits moved everything open into Phase 30), so this audit, like
       theirs, went after deferrals and hedges written into TICKED items since
       2026-10-07, and re-checked every item those audits carried into Phase
-      27 against the code. Four ticked items still said "pending" though the
+      30 against the code. Four ticked items still said "pending" though the
       work was done -- notes corrected, nothing reopened: 14.1's advisory
       i18n "pending run" (every locale translated and verified), 21.1's BSD
       and Windows/macOS vulnerability feeds "live check pending deploy"
@@ -14015,9 +14018,9 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       "pending Bryan's real BSD/macOS host run" (done 2026-09-29, `arp_listen:
       ok` on all four). Phase 22's own hedges ("not yet published", "pending
       Bryan's OK", "not yet measured") were all closed by later notes in the
-      same items, except the canary MSI's first CI build -- now Phase 29
+      same items, except the canary MSI's first CI build -- now Phase 30
       "Carried forward by the Phase 23 audit". The Phase 21/22 carry-overs in
-      Phase 29, checked against the code, are all still genuinely open:
+      Phase 30, checked against the code, are all still genuinely open:
       advisor `metric_history` still `available: False`, the MSI service
       removal still has no rollback action, `build-msi.ps1` still trusts a
       stale ARM64 wheel set, the docs still carry placeholder API paths
@@ -14026,8 +14029,8 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       smoke tests and the pen test -- blocked on hardware / accounts /
       business; the BSD process resolvers and now the canary MSI -- blocked on
       CI history only Bryan can read. Moved out of Phase 23 itself: 23.0 and
-      23.4's Hindi model (Phase 29, waiting on the 32-core box) and the
-      same-hostname multi-boot work found by the T480 proof (Phase 29).
+      23.4's Hindi model (Phase 30, waiting on the 32-core box) and the
+      same-hostname multi-boot work found by the T480 proof (Phase 30).
 - [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
       *PASSED 2026-10-15 (Bryan's v3.11.0.0 tag builds in all four repos).
       What the tag runs found, all fixed: the agent's Windows CI leg (a
@@ -14042,18 +14045,18 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       -> MUI's flex-parent layout, redundant assertions and aliases).
       Phase 23 is complete: 23.1 hardware health, 23.2 asset tags, 23.3
       time sync and 23.4 translation verification; 23.0 and 23.4's Hindi
-      model moved to Phase 29.*
+      model moved to Phase 30.*
 
 ---
 
 ## Phase 24: Fleet Backup & Recovery with restate (Community / Pro+)
 
 **Target Release:** **v3.12.0.0**
-**Focus:** Scheduled, verified, per-host backups of the managed fleet -- and the recovery paths that make them worth having (a file back, a whole host rebuilt, a clone) -- built on **restate**, so the hosts SysManage already manages are also the hosts it can put back. Every edition can back up and restore a host; Pro+ adds what running backups across a fleet takes. Every edition can also bring cloud-held data home: 24.12 downloads iCloud Photos for one or more Apple IDs onto the backup storage (added 2026-11-01). **Split 2026-10-28 (Bryan):** this phase is Community + Pro+; multi-site, recovery at scale and multi-tenancy (Enterprise / MULTITENANT_SAAS) are **Phase 25 (v3.13.0.0)**.
+**Focus:** Scheduled, verified, per-host backups of the managed fleet -- and the recovery paths that make them worth having (a file back, a whole host rebuilt, a clone) -- built on **restate**, so the hosts SysManage already manages are also the hosts it can put back. Every edition can back up and restore a host; Pro+ adds what running backups across a fleet takes. Every edition can also bring cloud-held data home: 24.12 downloads iCloud Photos for one or more Apple IDs onto the backup storage (added 2026-11-01). **Split 2026-10-28 (Bryan):** this phase is Community + Pro+; multi-site, recovery at scale and multi-tenancy (Enterprise / MULTITENANT_SAAS) are **Phase 27 (v3.15.0.0)**.
 
 **Market gap addressed:** Veeam Agent / Acronis Cyber Protect / Datto / Bacula / UrBackup / restic + borg wrappers -- fleet backup is the obvious missing pillar next to patching, compliance and hardware health: SysManage tells you a drive is failing (ubiquiti, 706 reallocated sectors, 2026-10-19) but cannot yet save what is on it.
 
-**Why here (and why it is v3.12, not v4.0):** Bryan, 2026-10-19: "let's hold off ticking over to v4.0.0.0 yet and call this 3.12.0.0." It deepens management of the hosts we already have rather than admitting a new device class, so it is a minor release; mobile (Phase 27) keeps the v4.0.0.0 major bump. It lands now because the substrate exists: restate is mature (v1.5.0.1, 4,538 unit + 507 end-to-end checks, 92% line coverage), the agent's optional-tool capability model, privileged sudo-install path and background command execution are in place, and the scheduler, alerting, reporting, federation, provisioning, virtualization and dashboard-card machinery it reports into already ship.
+**Why here (and why it is v3.12, not v4.0):** Bryan, 2026-10-19: "let's hold off ticking over to v4.0.0.0 yet and call this 3.12.0.0." It deepens management of the hosts we already have rather than admitting a new device class, so it is a minor release; mobile (Phase 28) keeps the v4.0.0.0 major bump. It lands now because the substrate exists: restate is mature (v1.5.0.1, 4,538 unit + 507 end-to-end checks, 92% line coverage), the agent's optional-tool capability model, privileged sudo-install path and background command execution are in place, and the scheduler, alerting, reporting, federation, provisioning, virtualization and dashboard-card machinery it reports into already ship.
 
 **Foundation -- what restate is.** Bryan's own C11 tool (`~/dev/restate`, `ppa:bceverly/restate`, BSD-2-Clause, links only libc) records what makes a machine differ from a fresh install of its OS:
 
@@ -14071,17 +14074,17 @@ the old word-substitution scripts. Measured design (calibrated on beast against
 - **Signing needs a passphrase, and `restate sign` signs images only** -- not repository snapshots. Captures run unsigned; snapshot signing is a restate-side request.
 - **restate runs as root.** The agent never passes server-chosen flags to it through sudo (24.2).
 - **A host that can prune can delete its own history.** So hosts only ever append; deletion runs on the storage side (24.5).
-- **Backup data is heavy and local; backup status is light and global.** Data stays at its site (25.1); only status travels to the server, the federation controller or the operator.
+- **Backup data is heavy and local; backup status is light and global.** Data stays at its site (27.1); only status travels to the server, the federation controller or the operator.
 
 **restate-side changes** this phase depends on are tracked as items 1-21 in `~/dev/restate/sysmanage-todo.md`: a `--result` JSON outcome and `--progress=json`; a job file + `restate run` and a `restate-job@.service` unit; NFS locking, staging and squashed-ownership handling; `--quiesce-with` plus Nextcloud and UniFi hooks; `restore --include`; `restate features --json`; an append-only writer mode and storage-side maintenance (18, 19); snapshot signing; restore key handling; `restate copy`; `--estimate`; a repository usage report (20); clone identity; man page fixes; rpm/BSD package awareness; an autoinstall contract; and a shared store scoped so it can never cross a tenant (17, 21). Each sub-phase below names the items it needs.
 
-> **Editions in one paragraph.** Data protection is table stakes, and restate itself is BSD-2-Clause, so **every edition can back up a host and put a file back**: Community gets the agent integration, one storage target, per-host schedules, keep-last-N retention, basic checks, the Backups page and plan-first file restore. **Pro+** (a new `backup_engine`) is "a fleet you can trust": policies by tag or group, maintenance-window-aware schedules, grandfather-father-son retention, scheduled full-read verification, quiesce-hook distribution, OpenBAO-held keys and signing, alerting, SLA reporting, compliance evidence, drift timelines, capacity forecasting and package-level restore. **Enterprise** (Phase 25) is multi-site and recovery at scale: many targets, per-site targets through federation, off-site replication, immutable copies, air-gap media, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes restore approval, legal hold and automated restore drills. **MULTITENANT_SAAS** (Phase 25) adds per-tenant storage, keys, quotas and metering. Details: 24.11 and 25.7.
+> **Editions in one paragraph.** Data protection is table stakes, and restate itself is BSD-2-Clause, so **every edition can back up a host and put a file back**: Community gets the agent integration, one storage target, per-host schedules, keep-last-N retention, basic checks, the Backups page and plan-first file restore. **Pro+** (a new `backup_engine`) is "a fleet you can trust": policies by tag or group, maintenance-window-aware schedules, grandfather-father-son retention, scheduled full-read verification, quiesce-hook distribution, OpenBAO-held keys and signing, alerting, SLA reporting, compliance evidence, drift timelines, capacity forecasting and package-level restore. **Enterprise** (Phase 27) is multi-site and recovery at scale: many targets, per-site targets through federation, off-site replication, immutable copies, air-gap media, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes restore approval, legal hold and automated restore drills. **MULTITENANT_SAAS** (Phase 27) adds per-tenant storage, keys, quotas and metering. Details: 24.11 and 25.7.
 
 > **Warning: Hosts must never be able to destroy their own backups (ransomware).** A compromised host with delete rights on its repository deletes its history along with everything else. The design rule for every sub-phase: **hosts append only.** A host's mount can add snapshots but never remove or rewrite one; prune, check and replication run as storage-side jobs on the target (24.5); and the target keeps immutable snapshots of the backup tree, or replicates to storage hosts cannot reach at all. A backup a host can delete is not counted as a backup by any exit criterion below.
 
-> **Warning: Multi-tenancy storage (same rule as 14.1/14.3/21.1).** Backup targets, policies, snapshot records and restore jobs are **per-tenant data** -> the `tenant` partition (unprefixed tables), like hosts. Operator capacity -- the storage pools a SaaS operator offers -- is the **registry** partition (`registry_*`). No cross-partition foreign keys: a tenant target soft-references a registry pool by id. Repositories, encryption keys and deduplication are **never shared across tenants** (25.4).
+> **Warning: Multi-tenancy storage (same rule as 14.1/14.3/21.1).** Backup targets, policies, snapshot records and restore jobs are **per-tenant data** -> the `tenant` partition (unprefixed tables), like hosts. Operator capacity -- the storage pools a SaaS operator offers -- is the **registry** partition (`registry_*`). No cross-partition foreign keys: a tenant target soft-references a registry pool by id. Repositories, encryption keys and deduplication are **never shared across tenants** (27.4).
 
-> **Self-hosted / air-gap caveat.** Nothing in this phase needs the public internet: restate opens no connection, targets are local mounts, keys live in the local OpenBAO. An air-gapped site backs up to a local target only; off-site copies leave on media through the air-gap content workflow (25.3). Cloud targets (S3 and friends) are deliberately out of scope until restate has a storage-agnostic repository format (its own roadmap); a site that wants one mounts it. The one exception is **24.12 (cloud storage to local)**, which needs the internet by its nature and is hidden on air-gapped installs.
+> **Self-hosted / air-gap caveat.** Nothing in this phase needs the public internet: restate opens no connection, targets are local mounts, keys live in the local OpenBAO. An air-gapped site backs up to a local target only; off-site copies leave on media through the air-gap content workflow (27.3). Cloud targets (S3 and friends) are deliberately out of scope until restate has a storage-agnostic repository format (its own roadmap); a site that wants one mounts it. The one exception is **24.12 (cloud storage to local)**, which needs the internet by its nature and is hidden on air-gapped installs.
 
 #### 24.0 Spike: back up ubiquiti by hand (first)
 
@@ -14098,14 +14101,14 @@ ubiquiti's drive reports 706 reallocated sectors (2026-10-19): it gets a backup 
 
 A **storage target** is a place repositories live, reached by hosts as a mount: a NAS NFS export to start with, an SMB share or a SAN-backed filesystem later.
 
-- [x] **Target model:** name, kind (NFSv4 first), server + export path, mount options, site (25.1), the host that serves it when it is a managed host (the NAS is), capacity thresholds, and the per-host directory scheme below; tenant-partition data (25.4) -- 2026-10-23: name, storage host + path, mount point, seal (+ retention), concurrency, backup account and the storage-space warning / critical thresholds (q60) are done; site is 25.1 / Enterprise; mount options are fixed (hard, nosuid, nodev, NFSv4 over TCP) -- audit 2026-10-25: ticked for the one Community target; the backup tables are in the tenant chain (q5x migrations), so it is tenant-partition data already; `site` is a multi-target / per-site field and lives with 25.3 Enterprise ("Multiple targets ... each with its site"); kind is NFSv4 only by design and mount options stay fixed (no operator-chosen flag reaches mount as root)
+- [x] **Target model:** name, kind (NFSv4 first), server + export path, mount options, site (27.1), the host that serves it when it is a managed host (the NAS is), capacity thresholds, and the per-host directory scheme below; tenant-partition data (27.4) -- 2026-10-23: name, storage host + path, mount point, seal (+ retention), concurrency, backup account and the storage-space warning / critical thresholds (q60) are done; site is 27.1 / Enterprise; mount options are fixed (hard, nosuid, nodev, NFSv4 over TCP) -- audit 2026-10-25: ticked for the one Community target; the backup tables are in the tenant chain (q5x migrations), so it is tenant-partition data already; `site` is a multi-target / per-site field and lives with 27.3 Enterprise ("Multiple targets ... each with its site"); kind is NFSv4 only by design and mount options stay fixed (no operator-chosen flag reaches mount as root)
 - [x] **One repository per host**, named by **host id with a readable label**: `<target>/<fqdn>-<short host id>/` (e.g. `/srv/backups/restate/nas.example-1f3a9c2e/`). The host is its token, never its name (agent identity, 22.0): two hosts may share an fqdn across tenants or sites, a reinstalled host may come back under the same name, and a renamed host must keep its history. The server records the mapping; the Backups page shows the friendly name -- server side done 2026-10-20: `backup_jobs.repo_dir()` = `<sanitized fqdn>-<first 8 hex of the host id>`, sent to the host and the storage host in `backup_configure`
 - [x] **Per-host exports:** NFSv4, one export per host restricted to that host's IP, `all_squash` + `anonuid` mapped to a dedicated `restate` user on the target (root on the client must not be root on the target); a host can reach only its own directory -- DONE (audit 2026-10-23): Prepare storage (24.5 part 3): own ZFS dataset / btrfs subvolume, export limited to the host's address and mapped to the backup account (FreeBSD sharenfs, Linux /etc/exports.d); a host can reach only its own repository (proven from t14: other paths under the NFSv4 root read EIO)
 - [x] **Append-only writes:** the host's access can create new packs and snapshots but cannot delete or rewrite existing ones -- through restate's append-only writer mode (sysmanage-todo.md item 18) plus target-side enforcement (directory permissions, NAS-side immutable snapshots of the tree, 24.5). Proven in 24.0 -- PROVEN 2026-10-23 with restate 2.1.0.3 (freebsd storage, ZFS; t14 host): capture ok in 52 s, then protect (12 files, 1 snapshot), seal, prune, du -- the chain end to end; from t14 as root, mounting its own export by hand: deleting, renaming, overwriting or chmod'ing a pack, deleting or renaming a snapshot, adding or removing files inside one, and renaming packs/ were all refused, while adding new files still works; the storage audit is ok on every check, append_only_layout included
 - [x] **On-demand mount:** the agent mounts `<target>/<dir>` when a job starts and unmounts after; the server verifies the mount before the first capture (writable, locking holds, append-only holds, free space) and on every run -- DONE 2026-10-22/23: the agent mounts the host's own export per job and unmounts after (24.5 part 4); before a capture writes anything a pre-flight checks the repository takes a new file, NFS locking works on it, and >= 1 GiB and 1% are free, off the event loop with a 30 s timeout, refusing the run with the reason otherwise; append-only is the storage check's (24.5)
 - [x] **Encryption (Pro+, 24.6 -- not Community):** every repository initialized with `--encrypt-to <public key>`; hosts hold only the public key, the private key never lives on a backed-up host (24.6 / 24.8 key handling) -- 2026-10-20: not sent by the Community server; the agent accepts the armored public key as a top-level `encrypt_key` in `backup_configure`, to be filled from OpenBAO by the Pro+ `backup_engine` -- 2026-11-03 A LAPSE NEVER LOCKS ANYONE OUT OF THEIR OWN BACKUPS (Bryan: "please don't hold someone's safety hostage"): reading an encrypted policy's keys for a restore, browse, what-changed, diff or verification is open-source and works with no engine (`backend/services/backup_keys_read.py`, called by `backup_key_release`; the engine's `secret_keys` delegates to it), and the break-glass export is open-source too (`backend/services/backup_breakglass.py`, `GET/POST /api/v1/backups/break-glass`, a Community card on the Backups page shown when encrypted backups exist and the Pro+ panel is not loaded; the engine's route calls the same module, so the README and manifest are identical). Encrypted hosts keep backing up encrypted and restores keep checking signatures (`trusted_key`) after a lapse; making, rotating and turning on encryption, signing new snapshots (which now stops quietly instead of failing a sign job nightly) and verification stay Pro+. Tests: tests/test_backup_community_unlicensed.py, tests/services/test_backup_breakglass_oss.py. PROVEN 2026-11-03 on the lab with backup_engine hidden in the requesting process: a restore preview and a real staging restore of /etc/sysmanage-proof from t14's ENCRYPTED snapshot 20261103T140008Z both asked for the key (needs_key) and got it released (14:06:53, 14:07:16 UTC); the restored file matched the live one (root:adm 0640, same SHA-256) and t14 held no key file afterwards
 - [x] **Local write cache:** restate keeps a plaintext write cache under `/var/cache/restate/repositories/` on each host even for encrypted repositories -- its size is reported per host, budgeted, and alerted on; the cache directory is mode 0700 and excluded from the host's own backup -- 2026-10-23: waits on restate reporting the cache's path and size in the capture result (asked 2026-10-23); then shown and budgeted per host -- 2026-10-23: coded: the capture result's cache size is stored per run and the host's Backup card shows "Write cache on this host" against the target's new "Write cache budget per host (GB)" (default 20, migration q60sealkeep) (gated on `restate features` listing it, so an older restate is never asked; not yet proven on the lab, waits on the restate 2.1.0.4 release); the alert is the Alerts item below (Pro+); 2026-10-24 on restate 2.2.0.0: only an ENCRYPTED repository has a write cache (restate(8): the capture's plain-text copy of what it wrote, so it needs no secret key), so t14's unencrypted capture reports `cache: null` and the card shows no line; restate(8) documents the directory as root's alone, and `/var/cache` is in restate's built-in expendable rules, so it is left out of the host's own backup; proving the size line waits on an encrypted repository (Pro+ encryption) -- audit 2026-10-25: ticked for what SysManage reports (size per run, the card line, the per-target budget); the cache exists only for an encrypted repository, so proving the line and its alert moved to 24.6 (new box there)
-- [x] **Community limit:** exactly one target; a second target is an Enterprise feature (25.3) and shows as such -- done 2026-10-20: a second `POST /backups/targets` is 409 with "This edition supports one backup target"
+- [x] **Community limit:** exactly one target; a second target is an Enterprise feature (27.3) and shows as such -- done 2026-10-20: a second `POST /backups/targets` is 409 with "This edition supports one backup target"
 
 #### 24.2 Agent: restate as a backup executor (Community / OSS)
 
@@ -14139,7 +14142,7 @@ The Community feature set, complete on its own:
 - [x] **Scheduler tick** that starts captures and the storage-side jobs (24.5) -- a `singleton_task()`, iterating tenants with the active tenant set explicitly, spreading start times per host (24.8) -- done 2026-10-20: `services/backup_tick.py` (5 min, `singleton_task`, `iter_host_databases`, `host_offset` spread, per-target `max_concurrent` cap, busy/failed backoff, 12 h stuck runs failed loudly)
 - [x] **Basic check:** a regular `restate check` (metadata only) per repository, as a storage-side job -- done 2026-10-20: storage-side `check` every `check_interval_days`; a keyless (metadata-only) check shows "Metadata check passed", never "verified"
 - [x] **Backups page:** per host -- last good snapshot and its age, size and new bytes, unreadable count, overdue / incomplete / failed / never status, next run, repository size on the target, restate coverage (24.8); filters and sorting; the snapshot list per host -- 2026-10-20: status, last backup, next due, repository size (capture `repository_bytes`), coverage, progress, runs, snapshots and restore are done; filters, unreadable count and per-snapshot sizes (a storage-side `du`, agent follow-up) still open -- DONE 2026-10-23: the status chips filter the hosts table (click again, or Show all hosts); "Files not read: N" under a host's status with the first paths and reasons in a tooltip; per-snapshot sizes from the storage-side du
-- [x] **Overdue status** on the host page and the Home dashboard (card contract: Phase 37.1); an "overdue" threshold per host (default: two missed schedules) -- done 2026-10-20: overdue = no good capture for 2 x the host's interval + 1 h; on the Backups page, the host Info-tab card and a Home dashboard card ("Backups overdue or failed")
+- [x] **Overdue status** on the host page and the Home dashboard (card contract: Phase 38.1); an "overdue" threshold per host (default: two missed schedules) -- done 2026-10-20: overdue = no good capture for 2 x the host's interval + 1 h; on the Backups page, the host Info-tab card and a Home dashboard card ("Backups overdue or failed")
 - [x] Every endpoint behind a new **Manage Backups** role (and a narrower **Restore Files** role), granted to existing admins by the q44 role-grant rule; every change audited -- done 2026-10-20: q48backups seeds both roles via `grant_new_role_to_full_holders`; every mutation audited
 - [x] **Storage side never quiet:** the target card and `GET /backups/overview` show the storage host's state -- job files confirmed (`storage_acked_version` vs `config_version`), last seal / prune / check, and warnings worst first: no storage host ("backups are never sealed, pruned or checked, and the repositories keep growing"), a storage host that cannot run restate (with the hosts-table reason), a seal the filesystem cannot take, a capture with no seal after it, no prune for 2 x the capture interval, no check for 2 x the check interval, not sealed, a filesystem that cannot snapshot, filesystem not checked yet; a target with a storage-side problem counts once on the dashboard's "Backups overdue or failed" card -- done 2026-10-20 (`services/backup_storage_status.py`)
 - [x] **Setting up many hosts at once** (2026-10-29): "Set up backups for selected" (`POST /backups/setup`) gives every ticked, equipped host without a policy the defaults -- daily from 06:00 UTC, spread across the window; with Pro+ GFS newest 7 + 14 daily / 8 weekly / 12 monthly / 3 yearly, else newest 30; pause services off (set per host once its hooks are reported) -- and skips the rest with the reason; a checkbox that cannot be ticked says why on hover. Policy dialog: Years to keep always shown (refused only where the storage host has REPORTED it cannot keep them, judged across every policy on the target); the services-to-pause list offers restate's built-in hooks until the host reports its own, and a name typed without Enter is saved
@@ -14149,7 +14152,7 @@ The Community feature set, complete on its own:
 
 Ransomware resistance (see the warning box): hosts append; the storage side deletes.
 
-- [x] **Storage-side runner:** `prune`, `check` (and `check --read-all` on its cadence) and `copy` (25.3) run on the **target's** managed host -- the NAS's own agent -- against the repository directory locally, never from the backed-up host (sysmanage-todo.md item 19). The storage host is always a managed host running the agent -- a storage target that cannot run the agent (a NAS appliance) is out of scope (Bryan 2026-10-23: not realistic) -- 2026-10-20: server + agent done for `seal` / `prune` / `check` on the target's own agent; `copy` is 25.3; storage-side `du` added 2026-10-20: after every good prune the storage host runs `restate du` (pack lists only, no key) and the server records the repository's size on the target (`backup_policy.repository_bytes`, no longer only the host's own capture report) and, per snapshot, its bytes, new bytes and unique bytes (what removing it alone would free -- the input for 24.8 capacity forecasting); migration q51backupdu bumps every policy's `config_version` so existing storage hosts are re-sent job files with `du`; the FreeBSD sudoers regex admits `du`; FreeBSD storage hosts added 2026-10-20 (a ZFS NAS without systemd): the agent's `backup/job_runner.py` starts `restate run /etc/restate/jobs.d/<policy>.<action>.conf` under daemon(8) (`daemon -f -p <pidfile> -o <log>`, only restate elevated), "running" = the pidfile is still locked (a reused pid cannot fake it), SIGTERM forwarded, and a run with no result file reports the end of restate's output; FreeBSD takes the storage role only (the host role is refused as `wrong_platform`); the FreeBSD sudoers rule is a regular expression admitting exactly `restate run` of a `<uuid>.<prune|check|copy>.conf` (a wildcard would also admit `--result PATH`, a root write anywhere), proven on FreeBSD 14.4 / sudo 1.9.17 to refuse extra options, traversal and other actions, with a test keeping the rule and the agent's job paths in step; daemon pidfile/SIGTERM behavior proven on the lab FreeBSD box; a real restate prune/check there waits on the 24.0 lab proof -- audit 2026-10-25: ticked: prune, check, `check --read-all` on its cadence, du, repack, protect and seal run on the target's own agent, proven on the lab FreeBSD ZFS host 2026-10-21..23 (prune / du / repack 10-21, protect + audit 10-23); `copy` is the 24.10 off-site replication box
+- [x] **Storage-side runner:** `prune`, `check` (and `check --read-all` on its cadence) and `copy` (27.3) run on the **target's** managed host -- the NAS's own agent -- against the repository directory locally, never from the backed-up host (sysmanage-todo.md item 19). The storage host is always a managed host running the agent -- a storage target that cannot run the agent (a NAS appliance) is out of scope (Bryan 2026-10-23: not realistic) -- 2026-10-20: server + agent done for `seal` / `prune` / `check` on the target's own agent; `copy` is 27.3; storage-side `du` added 2026-10-20: after every good prune the storage host runs `restate du` (pack lists only, no key) and the server records the repository's size on the target (`backup_policy.repository_bytes`, no longer only the host's own capture report) and, per snapshot, its bytes, new bytes and unique bytes (what removing it alone would free -- the input for 24.8 capacity forecasting); migration q51backupdu bumps every policy's `config_version` so existing storage hosts are re-sent job files with `du`; the FreeBSD sudoers regex admits `du`; FreeBSD storage hosts added 2026-10-20 (a ZFS NAS without systemd): the agent's `backup/job_runner.py` starts `restate run /etc/restate/jobs.d/<policy>.<action>.conf` under daemon(8) (`daemon -f -p <pidfile> -o <log>`, only restate elevated), "running" = the pidfile is still locked (a reused pid cannot fake it), SIGTERM forwarded, and a run with no result file reports the end of restate's output; FreeBSD takes the storage role only (the host role is refused as `wrong_platform`); the FreeBSD sudoers rule is a regular expression admitting exactly `restate run` of a `<uuid>.<prune|check|copy>.conf` (a wildcard would also admit `--result PATH`, a root write anywhere), proven on FreeBSD 14.4 / sudo 1.9.17 to refuse extra options, traversal and other actions, with a test keeping the rule and the agent's job paths in step; daemon pidfile/SIGTERM behavior proven on the lab FreeBSD box; a real restate prune/check there waits on the 24.0 lab proof -- audit 2026-10-25: ticked: prune, check, `check --read-all` on its cadence, du, repack, protect and seal run on the target's own agent, proven on the lab FreeBSD ZFS host 2026-10-21..23 (prune / du / repack 10-21, protect + audit 10-23); `copy` is the 24.10 off-site replication box
 - [x] **Encrypted repositories:** the storage-side runner prunes and checks without the private key (packs are opaque to it); `check --read-all` on an encrypted repository runs where the key may be used (24.8 key handling) or is reported as "metadata-only" -- DONE: the storage side prunes, seals and checks metadata without any key (lab and production, nightly since 2026-11-02 on the three encrypted production repositories); `check --read-all` runs on the backed-up host with its keys released for that job only (24.6 S4 / scheduled verification), proven on the lab 2026-11-02/03 with restate 2.2.0.17
 - [x] **Immutable snapshots on the target** (ZFS / btrfs snapshots of the backup tree, taken after each prune), retained independently of restate's retention, so even a compromised target agent cannot remove the last N days; configured and reported per target -- 2026-10-20: target `seal_mode` (`none` | `zfs_snapshot` + dataset) queues a storage-side `seal` after every good capture and BEFORE any prune (a failed seal holds the prune); the page warns "Not sealed (no immutable copies)"; ZFS snapshot retention is the operator's for now; waits on the 24.0 lab proof; btrfs added 2026-10-20: `seal_mode` `btrfs_snapshot` (migration q49backupfs, `backup_target.btrfs_snapshot_dir`) sends the seal job `{"mode": "btrfs_snapshot", "subvolume": <storage_path>, "snapshot_dir": <dir>}` and the agent runs `sudo -n btrfs subvolume snapshot -r <subvolume> <snapshot_dir>/sysmanage-<run_id>` (both paths validated plain, absolute, normalized, no option-looking parts, snapshot directory outside the subvolume, on the server and again on the agent; sudoers on ubuntu / centos / opensuse); btrfs snapshot retention is also the operator's for now; the storage host reports the filesystem under the storage path (type, mount, btrfs subvolume root) in its `backup_configure` reply and the target warns when it cannot snapshot (ext4, xfs, NFS ...) and errors when the seal mode cannot work there (ZFS seal off ZFS, btrfs seal off btrfs or on a plain directory, with the `btrfs subvolume create` fix) -- DONE 2026-10-23: seal retention -- the target's "Keep sealed snapshots for (days)" (migration q60sealkeep, default 14) goes with the seal job; after each seal the storage host removes its own older seals (ZFS `<dataset>@sysmanage-<run id>` by ZFS creation time, `zfs destroy -r`; btrfs seals from its own ledger), never the newest; a failed removal is reported but never fails the seal; narrow sudo rules (FreeBSD regex for exactly that destroy form)
 - [x] **Storage audit, then protection, then UI-initiated preparation** (Bryan 2026-10-22: commercial software, so the storage set-up is either documented and audited with warnings / errors, or an admin starts it from the UI; nothing hand-built on one lab) -- five parts in order: (1) a read-only audit, (2) restate `protect` plus a recursive ZFS seal, (3) a "Prepare storage for this host" action (own dataset / subvolume, per-host export restricted to the host's address and mapped to the service account, append-only ownership), (4) agent-managed on-demand mounts (24.1), (5) docs plus the lab proof. Part 1 done 2026-10-22: the storage host's agent runs `backup/storage_audit.py` on every configure and every storage-side job and reports findings (`error` | `warning` | `ok`): baseline (NFS server enabled and running, NFSv4 served, NFSv4 only, FreeBSD `vfs.nfsd.enable_locallocks=1`, the `V4:` root line, the service account exists) and per repository (own filesystem, own export, no wider export reaching it, export limited to the host's address, every client mapped to the service account with an explicit group, append-only layout: root-owned 1770 directories, root-owned read-only finished packs). The server keeps the latest audit per policy (migration q55backupaudit: `backup_target.service_account`, `backup_policy.storage_audit` / `storage_audit_at`), never from the backed-up host; the target card shows each problem with its fix and the hosts it touches, and an audit error marks the target as a problem. The service account is a target setting (default `restate`). The seal is now `zfs snapshot -r` so per-host child datasets are sealed too. First lab audit (freebsd, t14's repository): baseline ok; `export_shared` error (one export reaches every repository), `own_filesystem`, `export_own` and `append_only_layout` warnings -- exactly the gaps parts 2-3 close. Part 3 coded 2026-10-22, PROVEN on the lab the same day: "Prepare storage" on a host's Backups card queues a storage-side `prepare` run; the storage host's agent acts only on the policy it already validated (repository, the host's address, the service account) -- ZFS: a child dataset of the one mounted at the storage path (FreeBSD: `zfs create -o sharenfs="-mapall=ACCOUNT:ACCOUNT ADDRESS"`, re-run = `zfs set sharenfs`; Linux: plain `zfs create`); btrfs: `btrfs subvolume create`; other Linux filesystems: a directory; Linux exports through `/etc/exports.d/sysmanage-<policy>.exports` + `exportfs -ra`; FreeBSD without ZFS refused (`zfs_required`); then `root:ACCOUNT` mode 1770. It never moves data: a repository already holding files on the parent filesystem is refused (`not_empty`) with the steps to move it. Narrow sudo rules (FreeBSD regexes accepting exactly the planned `zfs create/set sharenfs` shapes, checked by a test; Ubuntu `zfs create *`, `btrfs subvolume create *`, `exportfs -ra`). The audit now knows an export never crosses into another filesystem (unless Linux `crossmnt` / `nohide`), so a parent export stops counting as `export_shared` once the repository is its own dataset. Address changes done 2026-10-22 (migration q56backupaddr: `backup_policy.storage_client_address`, plus a `config_version` bump -- q55 had not re-sent acknowledged job files, so the lab's storage host never got the host's address or the service account): a host whose address moves gets its storage job files re-sent, and when the storage host acknowledges the new address a repository that was prepared (its last ok `prepare` was for another address) is prepared again; one never prepared is left to the administrator. Part 4 coded 2026-10-22, PROVEN on the lab the same day: managed mounts -- the storage host's configure reply carries `nfs_path` (the repository's NFSv4 path: FreeBSD relative to the `V4:` root, Linux to an `fsid=0` export or the path itself), stored as `backup_policy.storage_nfs_path` (migration q57backupnfspath, which also re-sends); the host's job files then name `nfs: {server: <storage host address>, path}` and the host's agent mounts it at `<mount point>/<repo dir>` (`mount -t nfs4 -o vers=4,proto=tcp,hard,nosuid,nodev`) before a capture / estimate / listing / restore starts, refuses the run as `mount_failed` with the reason if it cannot, counts the runs using it, and unmounts after the last ends -- between jobs no repository is reachable from the host. A mount the operator made (fstab, autofs, of the share or the host's own export) is used as it is and never unmounted. Still open: pre-flight checks beyond "it mounted" (writable, locking, free space). Lab proof 2026-10-22 (freebsd storage, t14 host): t14's fstab automount removed; the agent mounted `192.168.4.212:/restate/t14-419718a7` (`nosuid,nodev,hard`, NFS 4.2) at 13:23:17, the capture ran ok in 53 s, it unmounted at 13:24:15, the seal followed. Then Prepare: the 18 GB repository moved aside, Prepare created `zroot/sysmanage-backups/restate/t14-419718a7` with `sharenfs=-mapall=restate:restate 192.168.4.196`, root:restate 1770; the contents copied back as root (`cp -Rp`), Prepare re-run; the shared `/srv/backups/restate` line removed from /etc/exports (only `V4:` left). The next capture mounted the new dataset (the parent needs no export for NFSv4 to reach it), ran ok in 57 s reusing 41.6 GB of existing packs, unmounted, and the recursive seal snapshotted both the parent and the child dataset. Audit after: every baseline and per-host check ok -- only `append_only_layout` warns (2,776 finished files the host could still delete; restate `protect`, part 2). Isolation: from t14, mounting `/restate`, `/` or another path under the NFSv4 root succeeds as a pseudo-filesystem, but every read of it is EIO -- nothing outside its own dataset is readable. Part 2 coded 2026-10-22 against restate 2.1.0.1 (not yet run on the lab): `protect` is a gated storage-side job (installed only where `restate features` lists the command; job key `group` = the target's service account); the storage configure reply's `installed` list sets `backup_policy.storage_protects` (migration q59backupprotect, which also re-sends job files), and the chain is capture -> protect -> seal-or-prune where it is set -- a failed protect is logged loudly but does not hold the seal back (an immutable copy is still worth taking). restate 2.1.0.1's full `check` of t14's moved repository: 695 packs, 0 damaged, "the repository is whole" (2.1.0.0 had flagged 5 seekable packs as damaged; a check bug, fixed). Part 2 lab, 2026-10-23: protect (2.1.0.1) locked the repository down -- 2,832 files, 9 snapshots; from t14 as root every delete/rename/overwrite/chmod of a pack or snapshot refused -- but FreeBSD's NFS server refuses a file made in a STICKY directory (after making it), so captures could not write. restate 2.1.0.2 protects with an NFSv4 ACL on ZFS instead (0770, `group@:D::deny`, `owner@:d:f/d:allow`); creates then work, but capture's own chmod of its temp pack drops the inherited delete entry (`aclmode=discard`), so renaming it into place fails (EPERM) -- reported to restate with a reproduction (create-then-rename works, create-chmod-rename does not). sysmanage side done: the audit accepts the ACL form, Prepare uses it on FreeBSD (narrow `setfacl` sudo rule), and new storage job files trigger a stand-alone protect (a restate upgrade can change how protect protects; a capture cannot run against the old form). Part 2 DONE 2026-10-23: restate 2.1.0.3 creates new packs without a chmod that drops the inherited delete entry; PROVEN 2026-10-23 with restate 2.1.0.3 (freebsd storage, ZFS; t14 host): capture ok in 52 s, then protect (12 files, 1 snapshot), seal, prune, du -- the chain end to end; from t14 as root, mounting its own export by hand: deleting, renaming, overwriting or chmod'ing a pack, deleting or renaming a snapshot, adding or removing files inside one, and renaming packs/ were all refused, while adding new files still works; the storage audit is ok on every check, append_only_layout included. Part 5 (docs) 2026-10-23: sysmanage-docs fleet-backup-storage.html rewritten around who does what -- the operator's one-time setup per platform (FreeBSD+ZFS, Linux), audited; Prepare storage; managed mounts; protect; the storage check's findings with their fixes; moving an existing repository onto its own filesystem -- and fleet-backups.html updated (protect, managed mounts, backup account, storage check, Services to pause, Prepare storage, new job kinds); 69 strings in 13 locales, all verified; screenshot seed now a ZFS target mid-migration with audits, hooks and protect/prepare runs (needs `make screenshots`). Still open: the parent export's removal is the operator's (documented) -- DONE (audit 2026-10-23): all five parts done and proven on the lab 2026-10-23
@@ -14174,7 +14177,7 @@ A new Pro+ engine, `backup_engine`. Follow the new-engine checklist: registered 
 - **S6 break-glass (DONE in code 2026-10-27; drill not yet run):** "Break-glass key export" in a host's Encryption panel -- one host, or every encrypted host -- seals each host's secret keys (every key it has held and not retired, read from OpenBAO) to an armored OpenPGP public key the operator pastes (exactly one usable encrypting key; a secret key, an expired or revoked key are refused), with a reason (10-500 characters).  The download is a tar sealed with gpg (`sysmanage-backup-keys-<time>.tar.asc`): README.txt with the restore-with-the-server-down procedure (`restate restore --plan`, then `--check-first --root ...` with every `--decrypt-with` of the host), manifest.json (hosts, repositories, storage paths, key fingerprints and subkey ids, made / replaced dates -- no secrets) and keys/<host>/N-<fingerprint>.asc.  Built in memory, never stored on the server; refused whole if OpenBAO lacks any key; needs Manage Backups AND Restore Files; audited per host with the recipient fingerprint and reason, and logged at warning level.  The README is English only (an operator document full of commands).  To tick: the drill -- an export opened on a machine with the server stopped, and a file restored from an encrypted repository with its keys -- once per phase exit (24.8).
 - **S7 UI, docs, i18n, screenshots:** the policy's encryption toggle, key fingerprint and rotation in the plugin; docs tier page; 14 locales; `make screenshots`.
 
-- [x] **Backup policies** by tag or host group: hosts, schedule, retention, rules, quiesce hooks, encryption key, verification cadence, RPO / RTO (25.1); a host covered by several policies resolves to one, with the rule shown -- 2026-11-03 DONE in code, not yet proven on the lab: a tag policy (Backups page, "Backup policies by tag"; Pro+ `backup_engine`, 402 without it) is a template of the per-host policy's settings (schedule, window, keep-last and grandfather-father-son retention, verification and check cadence, quiesce and its hooks, keep and skip paths) resolved onto each tagged host's own `backup_policy` row, which the scheduler already runs (`services/backup_tag_policies.py`, every scheduler pass and on every change); several covering one host resolve to the lowest priority (then oldest, then name); a host's own policy (Configure) always beats them; a paused tag policy leaves its hosts' settings as they are; a host no longer covered loses the tag-given policy and its repository is left alone; the host card and the Configure dialog name the rule ("From tag policy X (priority N)" or "This host's own policy"); every change audited, per tenant (tenant partition, migration q75backuptagpolicy); strings in 14 locales, docs in Fleet backups (Pro+). Tests: tests/services/test_backup_tag_policies.py (10), test_backup_tag_policy_migration.py, frontend BackupTagPolicies.test.tsx (5). Encryption key and RPO / RTO stay per target and with 25.1. Proof waits on the lab DB migrated to q75 and the dev server restarted -- PROVEN 2026-11-03 on the lab through the server's own endpoints (dev server, backup_engine 1.0.9, tenant e74f31a8): a proof tag on t14 and tag policy A (priority 10; window 05:00 UTC, keep 14 newest / 7 daily / 4 weekly / 6 monthly). While t14 kept its own policy, applying A changed nothing and the card said "own" (Configure always wins). With t14's policy marked as tag-managed, apply set A's settings on it (window 5, 14/7/4/6, config_version 43 -> 44) and the card read "Proof A (priority 10)"; tag policy B (priority 20, window 09:00, keep 30) on the same tag lost ("unchanged", t14 still on A). Saving t14 with Configure made it its own again (tag_policy_id NULL), the next apply left it alone, and its settings were back exactly as recorded before. With backup_engine treated as absent the list and apply endpoints answered 402 ("Backup policies by tag need the Professional+ backup engine"). Proof tag, both tag policies and the tag-managed mark removed. Gap found: there is no action to hand a host that has its own policy back to the tag policies -- deleting its policy is the only route, and that orphans an encrypted host's keys; add a "Use the tag policy" action -- 2026-11-03 "Use the tag policy" (the gap the lab proof found -- the only way back to the tag policies was deleting the host's own policy, which orphans an encrypted host's keys and repository): `POST /api/v1/backups/host/{id}/use-tag-policy` (preview: GET) hands a host on its own policy to the tag policy that covers it WITHOUT removing its policy row -- only the settings a tag policy controls change; repository, encryption keys and key rows, the repository before an encrypted one, snapshots, history and the storage side stay. Pro+ (402 without the engine), Manage Backups, audited ("Backup policy handed to its tag policy", with the replaced settings); refused 409 when no tag policy covers the host or it already follows one. The host card offers the button whenever a tag policy covers a host on its own policy, and the confirmation names the rule and lists every replaced setting; Configure makes it the host's own again. PROVEN 2026-11-03 on the lab through the server code: t14 (encrypted, own policy, 3 key rows) tagged and covered by "Proof handover" (priority 10) stayed on its own policy and its card offered the tag policy; the preview listed window_start_hour, keep_last, keep_daily and keep_weekly; after the handover the same policy row followed the tag policy (config_version bumped, card "From tag policy Proof handover (priority 10)"), its repository t14-419718a7-enc, previous repository, fingerprint, OpenBAO key reference and all 3 key rows unchanged, the audit naming the four replaced settings; Configure with the recorded settings made it its own again, identical to before; the proof tag and tag policy were removed
+- [x] **Backup policies** by tag or host group: hosts, schedule, retention, rules, quiesce hooks, encryption key, verification cadence, RPO / RTO (27.1); a host covered by several policies resolves to one, with the rule shown -- 2026-11-03 DONE in code, not yet proven on the lab: a tag policy (Backups page, "Backup policies by tag"; Pro+ `backup_engine`, 402 without it) is a template of the per-host policy's settings (schedule, window, keep-last and grandfather-father-son retention, verification and check cadence, quiesce and its hooks, keep and skip paths) resolved onto each tagged host's own `backup_policy` row, which the scheduler already runs (`services/backup_tag_policies.py`, every scheduler pass and on every change); several covering one host resolve to the lowest priority (then oldest, then name); a host's own policy (Configure) always beats them; a paused tag policy leaves its hosts' settings as they are; a host no longer covered loses the tag-given policy and its repository is left alone; the host card and the Configure dialog name the rule ("From tag policy X (priority N)" or "This host's own policy"); every change audited, per tenant (tenant partition, migration q75backuptagpolicy); strings in 14 locales, docs in Fleet backups (Pro+). Tests: tests/services/test_backup_tag_policies.py (10), test_backup_tag_policy_migration.py, frontend BackupTagPolicies.test.tsx (5). Encryption key and RPO / RTO stay per target and with 27.1. Proof waits on the lab DB migrated to q75 and the dev server restarted -- PROVEN 2026-11-03 on the lab through the server's own endpoints (dev server, backup_engine 1.0.9, tenant e74f31a8): a proof tag on t14 and tag policy A (priority 10; window 05:00 UTC, keep 14 newest / 7 daily / 4 weekly / 6 monthly). While t14 kept its own policy, applying A changed nothing and the card said "own" (Configure always wins). With t14's policy marked as tag-managed, apply set A's settings on it (window 5, 14/7/4/6, config_version 43 -> 44) and the card read "Proof A (priority 10)"; tag policy B (priority 20, window 09:00, keep 30) on the same tag lost ("unchanged", t14 still on A). Saving t14 with Configure made it its own again (tag_policy_id NULL), the next apply left it alone, and its settings were back exactly as recorded before. With backup_engine treated as absent the list and apply endpoints answered 402 ("Backup policies by tag need the Professional+ backup engine"). Proof tag, both tag policies and the tag-managed mark removed. Gap found: there is no action to hand a host that has its own policy back to the tag policies -- deleting its policy is the only route, and that orphans an encrypted host's keys; add a "Use the tag policy" action -- 2026-11-03 "Use the tag policy" (the gap the lab proof found -- the only way back to the tag policies was deleting the host's own policy, which orphans an encrypted host's keys and repository): `POST /api/v1/backups/host/{id}/use-tag-policy` (preview: GET) hands a host on its own policy to the tag policy that covers it WITHOUT removing its policy row -- only the settings a tag policy controls change; repository, encryption keys and key rows, the repository before an encrypted one, snapshots, history and the storage side stay. Pro+ (402 without the engine), Manage Backups, audited ("Backup policy handed to its tag policy", with the replaced settings); refused 409 when no tag policy covers the host or it already follows one. The host card offers the button whenever a tag policy covers a host on its own policy, and the confirmation names the rule and lists every replaced setting; Configure makes it the host's own again. PROVEN 2026-11-03 on the lab through the server code: t14 (encrypted, own policy, 3 key rows) tagged and covered by "Proof handover" (priority 10) stayed on its own policy and its card offered the tag policy; the preview listed window_start_hour, keep_last, keep_daily and keep_weekly; after the handover the same policy row followed the tag policy (config_version bumped, card "From tag policy Proof handover (priority 10)"), its repository t14-419718a7-enc, previous repository, fingerprint, OpenBAO key reference and all 3 key rows unchanged, the audit naming the four replaced settings; Configure with the recorded settings made it its own again, identical to before; the proof tag and tag policy were removed
 - [x] **Maintenance-window-aware schedules:** captures run inside a host's window (14.2) when it has one, outside blackout periods, and are held (not dropped) when a window closes -- 2026-10-27 done in code: backup runs are change commands, so the 14.2 dispatch gate already held them (blackouts included) and read-only runs (snapshots, estimate, check) go through; fixed on the way: the 12-hour stuck sweep timed a run from when it was QUEUED, so a run held past 12 hours was marked failed and queued again, and the host got both when the window opened -- it now counts from the send (`services/queue_clock.py`, shared with Equip for backup), and a run still waiting to be sent is never stuck; a held capture reads "Waiting for window" (`waiting_window`), except that an overdue or failed host keeps that status with a note, so a window that never opens cannot hide it; to tick: a capture on a lab host with a closed window, held, then run when the window opens, with exactly one run -- PROVEN 2026-11-02 on the lab (dev server, t14 -> freebsd, restate 2.2.0.16, agent 3.12.0.28): an allow window on t14 opening at 16:16 UTC; a capture requested at 16:04 was queued with its queue row pending and marked `deferred: maintenance window`, the Backups page status was `waiting_window`; it was sent at 16:16:28 as the window opened, ran once (snapshot 20261102T161655Z, the only new one on the storage host) and the storage chain followed (protect, seal, prune, du)
 - [x] **Grandfather-father-son retention:** `--keep-daily` / `--keep-weekly` / `--keep-monthly` (and yearly), applied by the storage-side runner (24.5), with a preview of what the next prune will remove -- 2026-10-27 done in code (daily / weekly / monthly): policy columns (q67), the storage-side prune sends restate's `keep_daily` / `keep_weekly` / `keep_monthly` (the agent already passed them); setting them needs the Pro+ backup engine (402 otherwise) but once set they are ALWAYS sent, so a lapsed license never makes a prune delete chosen history; "Preview the next prune" (Pro+) is an exact port of restate's `rs_repo_choose()` (UTC dates from snapshot names, ISO weeks, undated names always kept), cross-checked against Python's isocalendar for 1999-2031; still open: yearly -- asked restate-31 for `--keep-yearly` (2026-10-27), to be sent only where the storage host's restate advertises it -- 2026-10-28: yearly coded: restate 2.2.0.12 added `keep_yearly`; the storage host's agent reports it (`storage_abilities`, migration q68backupyearly), "Years to keep" shows once it has (or when a policy already keeps years), a new or changed yearly count is refused with HTTP 409 until then, an older restate is refused the key (`tool_outdated`) rather than given a prune without it, and the preview takes it; docs `fleet-backups-pro.html` `gfs.yearly`, 14 locales; to tick: the lab policy's prune preview matching what prune removes (exit criterion) -- PROVEN 2026-11-02 on the lab: keep_last 3, keep_daily 5, keep_weekly 2 on t14's repository of 15 snapshots; the server's preview, taken after the new capture and before the storage host's prune, listed 8 to remove and 7 to keep, and the prune removed exactly those 8 and kept exactly those 7 (the storage host's snapshot directory holds the same 7). Found on the way: two snapshots pruned long ago still read as live in the server (the prune's own `pruned` list was the only thing that retired them), which would have put them in the preview -- fixed: du, which lists the whole repository after every prune, now retires what it no longer lists (backup_results._after_du, tests)
 - [x] **Scheduled verification:** `check --read-all` on its own cadence as a periodic test restore; a repository that has not passed one within its window shows "unverified" -- 2026-10-28 coded: Pro+ cadence `verify_interval_days` (migration q69backupverify; 402 to change without the engine; dialog field), `backup_verify.py` schedules restate `check --read-all` ON THE HOST (keys released for that run only, so the storage host never holds one), never beside a capture, held by maintenance windows like a capture (the key release now measures its window from the SEND, not the queueing), retried a day after a failure; states verified / unverified / failed / running on the host card and the Backups page; agent `verify` read-only job (needs restate's `check` job command, reported as the host's `verify` ability). Found on the way: the server dropped the agent's `decrypt` ability, so encrypted restore / browse / what-changed were all refused 409 -- fixed and regression-tested. To tick: a lab pass on an encrypted repository (it reads the whole repository over NFS each time); 2026-10-30: a pass refused as busy (the storage host pruning or checking) retries after 30 minutes, not the day a failure waits (production mail.archive's first verify collided with its first prune) -- PROVEN 2026-11-02 on the lab on an ENCRYPTED repository: verify_interval_days 1 on t14; the scheduler queued the host-side full-read check at 18:26:32 with the key released for that job only, and it passed at 20:22:44. It took 1 h 56 min for an 18.7 GB repository over Wi-Fi because restate re-decrypts whole encrypted packs per file (157 GB read, 108 GB written on t14) -- reported to restate as a performance bug; practical cadences on encrypted repositories wait on that fix
@@ -14198,7 +14201,7 @@ A new Pro+ engine, `backup_engine`. Follow the new-engine checklist: registered 
 
 #### 24.8 Fleet operations: sites, load, health, readiness
 
-How backups behave once they cover a real fleet (Community behavior; the multi-site items and restore readiness moved to 25.1 on 2026-10-28).
+How backups behave once they cover a real fleet (Community behavior; the multi-site items and restore readiness moved to 27.1 on 2026-10-28).
 
 - [x] **Load management:** start times spread per host (`host_offset`, as the smartmontools auto-install does); maintenance windows respected (Pro+); captures at low CPU and IO priority; a **per-target concurrency cap** (at most N captures writing to one target at once, default from the target's measured throughput); a capture never overlaps a prune / check on the same repository (exit 5 = retry later, with backoff) -- audit 2026-10-25: ticked: start times spread per host (`backup_tick.spread` via `host_offset`), restate's job unit runs captures at `Nice=10`, `CPUSchedulingPolicy=batch`, `IOSchedulingClass=idle`, a per-target concurrency cap (`max_concurrent`, default 2, 1..50 on the target card), and a capture that finds the repository busy (exit 5) is retried later with backoff (`BUSY_RETRY`), shown as "Busy, will retry"; maintenance windows are the 24.6 Pro+ box; the cap's default is a fixed 2, not derived from measured throughput -- that belongs with 24.6 capacity forecasting
 - [x] **Target health:** when the target is a managed host, its hardware-health warnings (drives, temperature) and capacity mark every host that uses it "backups at risk" on the Backups page and the dashboard; per-target usage, growth rate and threshold alerts; first-capture estimates (`--estimate`, item 12) checked against free space before a new host's first backup, with suggested exclusions -- 2026-10-20: the storage side's own health is on the target card (24.4 "Storage side never quiet": storage host present and equipped, job files confirmed, seal / prune / check freshness, filesystem able to snapshot); done 2026-10-21: the target card also shows the storage host's own health (`backup_storage_health.py`) -- a failed drive, array or pool from hardware health is an error naming it and a warning one a caution (sensors and memory excluded), and the filesystem holding the storage path (most specific mount from the host's disk inventory) shows its use, warning at 85% and an error at 95%; errors count the target on the dashboard's backups card; per-target growth rate and threshold alerts remain with 24.6 capacity forecasting (Pro+) -- audit 2026-10-25: ticked for the storage host's own health and space on the target card and the dashboard; growth rate and threshold alerts are 24.6 (capacity forecasting, alerts); the first-capture estimate check is split into its own box below
@@ -14208,9 +14211,9 @@ How backups behave once they cover a real fleet (Community behavior; the multi-s
 - [x] **Equip on every platform restate is packaged for, with the NFS client** (2026-10-29/30): Ubuntu PPA + `nfs-common`; Fedora COPR + `nfs-utils`; RHEL / Alma / Rocky / CentOS Stream / Oracle 9-10, openSUSE Leap 16 / SLE 16 / Tumbleweed (`nfs-client`) and Alpine 3.21-3.24 (`nfs-utils`) from restate's checksum-verified release packages; FreeBSD / OpenBSD / NetBSD release packages (NFS in base); macOS via Homebrew as its owner. Install steps run in the host's mount namespace (production milsurpmonitor 2026-10-30: `add-apt-repository` hit a read-only `/root` under ProtectHome). A Linux host without an NFS mount helper reports `missing_nfs_client` ("Install the NFS client", Equip fixes it) and a mount is refused with a plain message instead of systemd's "Job failed" (production nextcloud 2026-10-29). Debian and Windows: not packaged
 - [x] **Storage reachability** (2026-10-30): the server asks each host to open TCP to the storage host's NFS port 2049 (`check_backup_storage`, `backup_reach`, migration q70backupreach) before Equip, on policy save, daily and on "Check again"; an unreachable host has Equip, Configure, Back up now, scheduled captures and the bulk actions held with "This host cannot reach the backup storage (...)"; never-checked hosts are never held. Prompted by the production server (a DigitalOcean droplet) being a managed host that cannot reach the home NAS -- confirmed 2026-10-30: 2049 and 111 unreachable from it
 
-#### 24.9 Restore and recovery (Community file restore; Pro+ packages; Enterprise recovery at scale is 25.2)
+#### 24.9 Restore and recovery (Community file restore; Pro+ packages; Enterprise recovery at scale is 27.2)
 
-- [x] **File / directory restore (Community):** pick a snapshot, browse it (from the snapshot index, no data read), pick paths; restored into a staging root on the host with restate's `restore --include` (item 7); plan-first (`--dry-run`, then `--check-first`); then copied into place by an explicit second step, or left in staging; every restore audited with who, what and which snapshot -- 2026-10-20: plan-first (`dry_run` preview, then restore) into `/var/lib/sysmanage-agent/restore/<run_id>`, include/exclude paths, audited, Restore Files role, explicit "this snapshot is not signed" acknowledgment -> `allow_unverified`; browsing a snapshot's index and the copy-into-place step are still open -- 2026-10-21 proven from the Restore files dialog on t14 (restate 2.0.0.7, over Wi-Fi NFS): the preview is restate's index-only `plan` (agent sends `plan = true` when restate lists it, else `dry_run`; the dialog says "planned from the snapshot index" when `content_read` is false) -- 10 s for a whole 491k-path snapshot, 8 s for ~/.config; the real restore of ~/.config into staging took 7 min 19 s for 1,315 files / 4.56 GB, owners and modes intact, 21 of 21 sampled files byte-identical to the live ones; a scattered small-directory restore still decompresses every pack up to its last wanted member (140 of 688 packs, ~11.6 GB) -- restate 2.0.0.8 writes seekable packs (gzip restarted every ~2 MiB plus a `.seek`; encrypted repositories excepted) and adds `restate repack`; SysManage has a gated storage-side `repack` job (installed only where `restate features` lists the command; shares the prune/check record; `du` after it), started from the host's backup card with a confirmation, since it reads and rewrites the whole repository and holds it meanwhile; lab 2026-10-21 (t14 over Wi-Fi NFS, 688 packs): the repack took 20 min 39 s on freebsd's own disk; a scattered selection (`**/*.conf`, 228 files, 0.4 MB) read 233 MB over NFS in 88 s without `.seek` and 71 MB in 59 s with it, cold, twice each (3.3x fewer bytes); a dense one (~/.config, 4.56 GB wanted) is bound by its own size; restate 2.0.0.8's repack left rewritten packs root-owned, locking NFS hosts out of their own repository -- fixed in restate 2.0.0.9 (new files take the directory's owner, via fchown); proven on 2.0.0.10 2026-10-22: a root init + capture + repack in a restate-owned directory left all 16 entries restate-owned, and after a t14 capture plus storage-side prune, du and repack none of 2,790 repository entries was root-owned, with all 691 packs seekable (new captures write seekable packs directly); fixed on the way: snapshot names were stored as `<repository>::<name>` so every restore was refused (migration q54backupsnapname), and the staging path shown is now restate's own `restore.root` -- 2026-10-23: browsing a snapshot's tree waits on a restate `list` command (children of one directory from the index, no data read; asked 2026-10-23); restore by typed paths + plan-first preview works now -- 2026-10-23: browsing coded: "Browse the snapshot's folders" in the Restore files dialog runs a read-only `list` job per folder (index only, no data read; Restore Files role; `POST /host/{id}/backup-browse`; listing runs are kept out of Recent jobs and pruned after a day) and Add puts the path on the restore list (gated on `restate features` listing it, so an older restate is never asked; not yet proven on the lab, waits on the restate 2.1.0.4 release); the copy-into-place step is still open -- 2026-10-25: restore into place coded: the Restore files dialog chooses "Into a staging directory on the host" (default) or "Into place, replacing the host's files"; into place is restate's own restore with root `/` (the agent picks it, never the server), `check_first` always, each file written beside its destination and renamed over the old one only when its digest matches, no symlink followed; specific paths only (no `/`, `/*`, `**/x` -- a whole host is the Enterprise rebuild), the agent's own state directory always excluded (so an old agent database and host token can never come back), a preview compares with the live tree, and the real run needs `acknowledge_in_place` (HTTP 409 without) and is audited as "Backup restore into place requested"; Enterprise four-eyes approval (25.2) will gate it; to tick: a file restored into place on t14 -- 2026-11-02 into place PROVEN on t14 (lab, restate 2.2.0.16): /etc/sysmanage-proof/restore-test.conf (root:adm 0640) backed up (snapshot 20261102T155920Z), then overwritten and re-owned; the preview planned 1 file / 65 bytes into `/` with content_read false; the server refused the real run without acknowledge_in_place (409), without acknowledge_unsigned for the unsigned snapshot (409), and for `/` (422); the real run restored it with owner root:adm, mode 0640 and the original SHA-256 (e6a561d2...), no temporary file left; both the preview and the restore are in the audit log
+- [x] **File / directory restore (Community):** pick a snapshot, browse it (from the snapshot index, no data read), pick paths; restored into a staging root on the host with restate's `restore --include` (item 7); plan-first (`--dry-run`, then `--check-first`); then copied into place by an explicit second step, or left in staging; every restore audited with who, what and which snapshot -- 2026-10-20: plan-first (`dry_run` preview, then restore) into `/var/lib/sysmanage-agent/restore/<run_id>`, include/exclude paths, audited, Restore Files role, explicit "this snapshot is not signed" acknowledgment -> `allow_unverified`; browsing a snapshot's index and the copy-into-place step are still open -- 2026-10-21 proven from the Restore files dialog on t14 (restate 2.0.0.7, over Wi-Fi NFS): the preview is restate's index-only `plan` (agent sends `plan = true` when restate lists it, else `dry_run`; the dialog says "planned from the snapshot index" when `content_read` is false) -- 10 s for a whole 491k-path snapshot, 8 s for ~/.config; the real restore of ~/.config into staging took 7 min 19 s for 1,315 files / 4.56 GB, owners and modes intact, 21 of 21 sampled files byte-identical to the live ones; a scattered small-directory restore still decompresses every pack up to its last wanted member (140 of 688 packs, ~11.6 GB) -- restate 2.0.0.8 writes seekable packs (gzip restarted every ~2 MiB plus a `.seek`; encrypted repositories excepted) and adds `restate repack`; SysManage has a gated storage-side `repack` job (installed only where `restate features` lists the command; shares the prune/check record; `du` after it), started from the host's backup card with a confirmation, since it reads and rewrites the whole repository and holds it meanwhile; lab 2026-10-21 (t14 over Wi-Fi NFS, 688 packs): the repack took 20 min 39 s on freebsd's own disk; a scattered selection (`**/*.conf`, 228 files, 0.4 MB) read 233 MB over NFS in 88 s without `.seek` and 71 MB in 59 s with it, cold, twice each (3.3x fewer bytes); a dense one (~/.config, 4.56 GB wanted) is bound by its own size; restate 2.0.0.8's repack left rewritten packs root-owned, locking NFS hosts out of their own repository -- fixed in restate 2.0.0.9 (new files take the directory's owner, via fchown); proven on 2.0.0.10 2026-10-22: a root init + capture + repack in a restate-owned directory left all 16 entries restate-owned, and after a t14 capture plus storage-side prune, du and repack none of 2,790 repository entries was root-owned, with all 691 packs seekable (new captures write seekable packs directly); fixed on the way: snapshot names were stored as `<repository>::<name>` so every restore was refused (migration q54backupsnapname), and the staging path shown is now restate's own `restore.root` -- 2026-10-23: browsing a snapshot's tree waits on a restate `list` command (children of one directory from the index, no data read; asked 2026-10-23); restore by typed paths + plan-first preview works now -- 2026-10-23: browsing coded: "Browse the snapshot's folders" in the Restore files dialog runs a read-only `list` job per folder (index only, no data read; Restore Files role; `POST /host/{id}/backup-browse`; listing runs are kept out of Recent jobs and pruned after a day) and Add puts the path on the restore list (gated on `restate features` listing it, so an older restate is never asked; not yet proven on the lab, waits on the restate 2.1.0.4 release); the copy-into-place step is still open -- 2026-10-25: restore into place coded: the Restore files dialog chooses "Into a staging directory on the host" (default) or "Into place, replacing the host's files"; into place is restate's own restore with root `/` (the agent picks it, never the server), `check_first` always, each file written beside its destination and renamed over the old one only when its digest matches, no symlink followed; specific paths only (no `/`, `/*`, `**/x` -- a whole host is the Enterprise rebuild), the agent's own state directory always excluded (so an old agent database and host token can never come back), a preview compares with the live tree, and the real run needs `acknowledge_in_place` (HTTP 409 without) and is audited as "Backup restore into place requested"; Enterprise four-eyes approval (27.2) will gate it; to tick: a file restored into place on t14 -- 2026-11-02 into place PROVEN on t14 (lab, restate 2.2.0.16): /etc/sysmanage-proof/restore-test.conf (root:adm 0640) backed up (snapshot 20261102T155920Z), then overwritten and re-owned; the preview planned 1 file / 65 bytes into `/` with content_read false; the server refused the real run without acknowledge_in_place (409), without acknowledge_unsigned for the unsigned snapshot (409), and for `/` (422); the real run restored it with owner root:adm, mode 0640 and the original SHA-256 (e6a561d2...), no temporary file left; both the preview and the restore are in the audit log
 - [x] **Package-level restore (Pro+):** 24.6 -- DONE 2026-11-02, see 24.6
 
 #### 24.10 Docs, screenshots, i18n
@@ -14241,7 +14244,7 @@ How backups behave once they cover a real fleet (Community behavior; the multi-s
   - the drift timeline from `restate diff`, including `--packages` (24.7)
   - capacity forecasting; `restore --packages` onto a running host
   - 2026-11-03 edition audit: corrected -- maintenance-window-held backups are 14.2 OSS for every edition (removed from this list), quiesce-hook distribution was closed as covered by restate's shipped hooks + file deployment; every remaining item is built and gated on backup_engine
-- [x] Every tier gate in **both** repos, and every Pro+ feature 402-clean when unlicensed, with Community still able to back up and restore (Enterprise and MULTITENANT_SAAS: Phase 25) -- AUDITED 2026-11-03: OSS endpoints refuse 402 without backup_engine (GFS set/change + preview, verify cadence, package restore, drift timeline / compute / ignore, tag policies list/create/update/delete/apply, escrow); engine routes are 402-stubbed when the engine is absent -- found and FIXED: only `GET/POST /v1/backup-encryption/host/{id}` were stubbed, so rotate, rotation settings, signing and break-glass answered 404 unlicensed; now every engine route is stubbed, and a test reads the engine's own source so a new route without a stub fails (`tests/test_backup_encryption_stub.py`); reports 402 without reporting_engine; alerts / compliance / advisor checks live in their engines. Community's full flow with NO engine loaded (Back up now -> capture result -> prune -> du -> restore preview + real restore -> browse -> what changed) and every Pro+ refusal are tested (`tests/test_backup_community_unlicensed.py`); the UI's Community view hides the drift timeline, its links and the package-restore option (`CommunityView.test.tsx`). After a lapse: GFS counts and the public encryption key keep being sent (tested), tag-given host policies keep running (resolve is a no-op unlicensed). OPEN QUESTION for Bryan: after a lapse an ENCRYPTED snapshot cannot be restored through SysManage (409 "Encrypted backups need the Professional+ backup engine" -- the secret key is read from OpenBAO by the engine) and the break-glass export is Pro+ too, so only an export made while licensed gets that data back; scheduled verification and signing also stop (unsigned snapshots then need the acknowledgment) -- 2026-11-03 amended: encrypted RESTORE, browse, what-changed and the break-glass export are deliberately NOT gated (a lapse never locks anyone out of their own backups); the old 409 'Encrypted backups need the Professional+ backup engine' is gone and the tests now assert they work unlicensed
+- [x] Every tier gate in **both** repos, and every Pro+ feature 402-clean when unlicensed, with Community still able to back up and restore (Enterprise and MULTITENANT_SAAS: Phase 27) -- AUDITED 2026-11-03: OSS endpoints refuse 402 without backup_engine (GFS set/change + preview, verify cadence, package restore, drift timeline / compute / ignore, tag policies list/create/update/delete/apply, escrow); engine routes are 402-stubbed when the engine is absent -- found and FIXED: only `GET/POST /v1/backup-encryption/host/{id}` were stubbed, so rotate, rotation settings, signing and break-glass answered 404 unlicensed; now every engine route is stubbed, and a test reads the engine's own source so a new route without a stub fails (`tests/test_backup_encryption_stub.py`); reports 402 without reporting_engine; alerts / compliance / advisor checks live in their engines. Community's full flow with NO engine loaded (Back up now -> capture result -> prune -> du -> restore preview + real restore -> browse -> what changed) and every Pro+ refusal are tested (`tests/test_backup_community_unlicensed.py`); the UI's Community view hides the drift timeline, its links and the package-restore option (`CommunityView.test.tsx`). After a lapse: GFS counts and the public encryption key keep being sent (tested), tag-given host policies keep running (resolve is a no-op unlicensed). OPEN QUESTION for Bryan: after a lapse an ENCRYPTED snapshot cannot be restored through SysManage (409 "Encrypted backups need the Professional+ backup engine" -- the secret key is read from OpenBAO by the engine) and the break-glass export is Pro+ too, so only an export made while licensed gets that data back; scheduled verification and signing also stop (unsigned snapshots then need the acknowledgment) -- 2026-11-03 amended: encrypted RESTORE, browse, what-changed and the break-glass export are deliberately NOT gated (a lapse never locks anyone out of their own backups); the old 409 'Encrypted backups need the Professional+ backup engine' is gone and the tests now assert they work unlicensed
 
 #### 24.12 Cloud storage to local: iCloud Photos (Community / OSS) (added 2026-11-01, Bryan)
 
@@ -14277,7 +14280,7 @@ The storage host keeps everyone else's backups, but today the Backups page shows
 - [x] **Self-backup mode:** the storage host gets a policy like any host ("Configure self-backup" on its row), but its capture runs locally: the repository is a path on its own storage (`<storage path>/<fqdn>-<short id>`, its own ZFS dataset or btrfs subvolume, prepared as for any host), written directly with no NFS mount and no export -- DONE 2026-11-03: the storage host's own policy goes out as ONE `self` configure carrying both sides (host jobs + storage jobs) on a local target; one acknowledgment counts for both (server `backup_jobs.self_configuration`, `backup_results._configured_self`; agent `self` role in job_validation / job_runner incl. FreeBSD's daemon runner and sudoers; prepare makes the dataset with no sharenfs and no export file, no client address); "Configure self-backup" on the storage host's row opens the policy dialog. PROVEN (2026-11-03 lab proof on freebsd, root-on-ZFS, restate 2.2.0.17, with the job and rules files the new agent code builds for the `self` role, run by hand: the lab agents run the old code until Bryan updates and restarts them): `zfs create zroot/sysmanage-backups/restate/freebsd-selfproof` + owner/mode/ACL, `sharenfs=off`, no export; a first capture 09:25-10:04 UTC wrote 976,177 paths (30.9 GiB new, 0 errors, 0 unreadable) directly into it. Tests: server tests/services/test_backup_self.py (5), agent tests/test_backup_self.py (11). The UI button and the server->agent round trip on the lab wait on the q75 migration, a dev server restart and the agents updated -- PROVEN 2026-11-03 THROUGH THE SERVER on the lab: freebsd's policy saved with the same PUT /host/{id}/backup-policy the "Configure self-backup" button opens; one configure acknowledged both sides (1/1/1); "Prepare storage" made zroot/sysmanage-backups/restate/freebsd.theeverlys.com-2c756673 with sharenfs=off (no export); the scheduled-path capture wrote locally to /srv/backups/restate/freebsd.theeverlys.com-2c756673 (snapshot 20261103T131023Z, 976,246 paths, 33.2 GB new, 38 min 44 s, no errors), then protect, seal, prune and du ran on it and a metadata check passed (976 packs, 0 bad, 81 s); /etc/rc.conf restored through the server to staging byte-identical (SHA-256, root:wheel 0644, size and mtime)
 - [x] **Never the pool or the backups:** the capture records the OS and never descends into the backups or the pool's other data (case data, archives); network mounts and automounts are left out as for any host (24.8 / network mounts); caches that rebuild themselves are excluded by default (e.g. an L2ARC backing file such as nas's `/var/lib/zfs-l2arc/cache0.img`, 120 GB) -- DONE 2026-11-03, not with `one_file_system`: on a root-on-ZFS system (FreeBSD's default) that would drop the OS's own datasets (/home, /usr/ports, /var/mail). Instead the agent writes `/etc/restate/rules.d/<policy>.self.rules` at every configure and before every capture (`self_backup.leave_out`): `ephemeral` for the storage path and everything under it, every ZFS dataset of a pool other than the one / is on (all of them when / is not on ZFS, as on nas), and present rebuildable caches (`/var/lib/zfs-l2arc`); it comes LAST in the capture's rules, so no "Also back up" pattern can bring the backups back. PROVEN (2026-11-03 lab proof on freebsd, root-on-ZFS, restate 2.2.0.17, with the job and rules files the new agent code builds for the `self` role, run by hand: the lab agents run the old code until Bryan updates and restarts them): the snapshot's /srv/backups is empty (restate list), /home/bceverly (zroot/home/bceverly), /usr/ports and /var/mail (their own datasets on the root pool) are in it; restate's built-in rules drop /var/log as expendable on every host. The other-pool and nas (OS on ext4, data on a ZFS pool) cases are unit-tested from nas's real mount table (agent tests/test_backup_self.py); freebsd has one pool -- 2026-11-03 through the server: a plan of `/srv/backups/**` from snapshot 20261103T131023Z matched nothing, while /etc/rc.conf was there
 - [x] **Never in the way of other hosts' backups:** its repository has its own lock, so other hosts keep capturing while it runs; it counts toward the target's concurrency cap and has its own schedule window, and storage-side jobs (seal, prune, check) treat it like any repository; protect and seal apply to it too -- PROVEN (2026-11-03 lab proof on freebsd, root-on-ZFS, restate 2.2.0.17, with the job and rules files the new agent code builds for the `self` role, run by hand: the lab agents run the old code until Bryan updates and restarts them): its repository has its own `lock`; a self capture 10:58:07-10:59:31 UTC (ok) enclosed t14's capture through the dev server's scheduler (10:58:06-10:58:46, ok, snapshot 20261103T105812Z) and t14's whole storage chain on freebsd (protect, seal, prune, du 10:58:48-10:59:07, all ok), nothing busy; an earlier full self capture (39 min) ran beside t14's encrypted verify on the same pool; protect then protected its 3 newer snapshots (3,912 files already); t14's seal (a recursive ZFS snapshot of the storage tree) sealed it with the rest. A capture counts toward the cap (`test_a_self_capture_counts_toward_the_targets_cap`); its storage chain is queued on the same machine (`test_a_self_capture_is_protected_sealed_and_pruned_on_the_same_machine`); prune and check of a self repository not run on the lab -- 2026-11-03 through the server: freebsd's self capture ran 13:10:23-13:49:07 UTC; t14's capture (13:11:15-13:11:55) and all of t14's storage jobs on freebsd (protect, seal, prune, du, to 13:12:18) ran inside it, all ok, none refused busy (target cap 2)
-- [x] **Recovery runbook (docs, tested once):** the OS disk dies -> reinstall, `zpool import` the pool, restore the storage host's own repository from it (restate `buildsheet` gives the disk and package layout), reconnect the agent; the pool dies -> restore the pool from the off-site copy first -- 2026-11-03: written (Administration, Backup storage, section 9, "Recovering the storage host", five steps, 14 locales); its restore step tested for one file (2026-11-03 lab proof on freebsd, root-on-ZFS, restate 2.2.0.17, with the job and rules files the new agent code builds for the `self` role, run by hand: the lab agents run the old code until Bryan updates and restarts them): plan first, then /etc/rc.conf restored from 20261103T092521Z into a staging root, SHA-256 038cc5a2... identical with owner, mode and time. 2026-11-03 drill, the OS-disk case end to end: a throwaway libvirt VM on gdr-t14 (`sm-recovery-drill`, Ubuntu 26.04, OS on one disk, ZFS pool `tank` on a second; restate 2.2.0.17 and agent 3.12.0.32 from the published PPAs; enrolled in the lab tenant) captured its own repository (`20261103T202500Z`, 556 files), was hard-killed so the pool was never exported, and its OS disk deleted. The runbook as then written FAILED on a fresh disk (no ZFS tools installed, `zpool import` needs `-f`, `buildsheet` refused a repository snapshot in 2.2.0.17, packages never reinstalled so `nfs-server` and `sysmanage-agent` were "Unit not found"); rewritten as seven steps (14 locales) and run again on another fresh disk: restate + `zfsutils-linux`, `zpool import -f`, export + build sheet, the sheet's "Install the packages again" (every package back at its recorded version), restore with the agent stopped and `--exclude /etc/fstab --exclude /etc/crypttab` (554 files), initramfs + boot loader + reboot, one more `zpool import -f` (the restored hostid no longer matched the pool's). Four checked files identical on SHA-256, owner, mode and size and `agent.db` identical to its capture-time hash; the agent came back as the same host record (`836cdedb-...`, approved, no duplicate) and a capture after recovery worked (`20261103T203602Z`). Deviation: the lab tenant's one target is freebsd, so the VM's `self` configure was built by the server's code in memory and applied by the VM's agent rather than stored as a policy. The drill also found that restate's build sheet printed `wipefs`/`sfdisk` for the pool's disks: the runbook warns against them and restate 2.2.0.18 leaves them alone. The VM is gone and its host record deleted (2026-11-04). The pool-dies case cannot be drilled until the off-site copy exists: moved to 25.3 (Bryan, 2026-11-04)
+- [x] **Recovery runbook (docs, tested once):** the OS disk dies -> reinstall, `zpool import` the pool, restore the storage host's own repository from it (restate `buildsheet` gives the disk and package layout), reconnect the agent; the pool dies -> restore the pool from the off-site copy first -- 2026-11-03: written (Administration, Backup storage, section 9, "Recovering the storage host", five steps, 14 locales); its restore step tested for one file (2026-11-03 lab proof on freebsd, root-on-ZFS, restate 2.2.0.17, with the job and rules files the new agent code builds for the `self` role, run by hand: the lab agents run the old code until Bryan updates and restarts them): plan first, then /etc/rc.conf restored from 20261103T092521Z into a staging root, SHA-256 038cc5a2... identical with owner, mode and time. 2026-11-03 drill, the OS-disk case end to end: a throwaway libvirt VM on gdr-t14 (`sm-recovery-drill`, Ubuntu 26.04, OS on one disk, ZFS pool `tank` on a second; restate 2.2.0.17 and agent 3.12.0.32 from the published PPAs; enrolled in the lab tenant) captured its own repository (`20261103T202500Z`, 556 files), was hard-killed so the pool was never exported, and its OS disk deleted. The runbook as then written FAILED on a fresh disk (no ZFS tools installed, `zpool import` needs `-f`, `buildsheet` refused a repository snapshot in 2.2.0.17, packages never reinstalled so `nfs-server` and `sysmanage-agent` were "Unit not found"); rewritten as seven steps (14 locales) and run again on another fresh disk: restate + `zfsutils-linux`, `zpool import -f`, export + build sheet, the sheet's "Install the packages again" (every package back at its recorded version), restore with the agent stopped and `--exclude /etc/fstab --exclude /etc/crypttab` (554 files), initramfs + boot loader + reboot, one more `zpool import -f` (the restored hostid no longer matched the pool's). Four checked files identical on SHA-256, owner, mode and size and `agent.db` identical to its capture-time hash; the agent came back as the same host record (`836cdedb-...`, approved, no duplicate) and a capture after recovery worked (`20261103T203602Z`). Deviation: the lab tenant's one target is freebsd, so the VM's `self` configure was built by the server's code in memory and applied by the VM's agent rather than stored as a policy. The drill also found that restate's build sheet printed `wipefs`/`sfdisk` for the pool's disks: the runbook warns against them and restate 2.2.0.18 leaves them alone. The VM is gone and its host record deleted (2026-11-04). The pool-dies case cannot be drilled until the off-site copy exists: moved to 27.3 (Bryan, 2026-11-04)
 - [x] Docs, screenshots and strings in 14 locales -- 2026-11-03: docs (section 9 of Backup storage) and strings in 14 locales done, hand-translated and verified; screenshots wait on the lab running the new code -- DONE 2026-11-03: the storage host's "Configure self-backup" row is in `backups-hosts.png`, used in section 9
 
 ### Licensing summary
@@ -14285,7 +14288,7 @@ The storage host keeps everyone else's backups, but today the Backups page shows
 - **A lapse never locks a customer out of their own backups** (Bryan, 2026-11-03: "please don't hold someone's safety hostage"): encrypted backups keep being made, restored, browsed and compared, and their keys can always be exported (break-glass), whatever the license; what a lapse stops is new keys, rotation, signing, verification and the other Pro+ features.
 - **Community / OSS:** every host can be backed up to one target and a file put back: the agent integration, per-host schedules and "Back up now", keep-last-N retention, basic checks, append-only enforcement with storage-side pruning, the Backups page with overdue status, and plan-first file restore; and local backup of cloud storage, starting with iCloud Photos for one or more Apple IDs (24.12).
 - **Pro+ (Professional):** a fleet you can trust -- the `backup_engine`: policies by tag or group, maintenance-window-aware schedules, grandfather-father-son retention, scheduled full-read verification, quiesce-hook distribution, OpenBAO-held keys and snapshot signing, alerting, the SLA report, compliance and advisor evidence, the drift timeline, capacity forecasting and package-level restore.
-- **Enterprise and MULTITENANT_SAAS:** Phase 25 (multi-site, recovery at scale, multi-tenancy).
+- **Enterprise and MULTITENANT_SAAS:** Phase 27 (multi-site, recovery at scale, multi-tenancy).
 
 ### Exit Criteria
 
@@ -14298,7 +14301,7 @@ The storage host keeps everyone else's backups, but today the Backups page shows
 - [x] An overdue, incomplete or failed backup is visible on the Backups page, the host page and the dashboard; the Backups page shows every host's last good snapshot and coverage level -- 2026-10-25: Backups page (status chips + per-host status and last good snapshot + coverage) and the host's Backup tab show all three; the dashboard counted only overdue and failed until today, now incomplete too (tests: `test_the_dashboard_flags_incomplete_and_failed_backups`); seen on the lab dashboard by Bryan 2026-10-25
 - [x] Load management proven: a scheduled night for the fleet stays under the per-target concurrency cap, and a capture colliding with a prune retries rather than fails -- 2026-11-02 the collision half PROVEN on the lab: a repack of t14's repository started on freebsd at 16:19:50; a capture requested during it ended `busy` (exit 5, the NFS lock refused), not failed, at 16:20:16; the scheduler retried it at 16:50:31 (BUSY_RETRY, 30 min) and it succeeded at 16:51:28 with the storage chain after it. Still to show: a fleet night under the cap (production, all five hosts in the 05:00 UTC window, cap 2) -- 2026-11-03 the cap half PROVEN in production: cap 2 (`max_concurrent`); the night's captures started beast 05:08:54-05:11:45 alone, then ubiquiti 08:10:03-08:12:51 and milsurpmonitor 08:11:05-08:12:20 (2 running), then mail 08:14:42-09:47:05 and nextcloud 08:14:43-08:50:34 (2 running) -- never more than 2 at once, the last two waiting until the first pair's slots freed; mail and nextcloud were 183 GB and 67 GB first encrypted captures
 - [x] **iCloud Photos to local (24.12):** an Apple ID downloaded to its own directory on nas -- originals and XMP sidecars, dates correct -- with its password only in OpenBAO; a two-factor sign-in done from the UI (a second Apple ID, Live Photo videos, the incremental second run and the "Needs sign-in" case **moved to 25.8 on 2026-11-05**, Bryan) -- PROVEN 2026-11-05 in production (server 3.12.1.5, nas storage host): account "Bryan's Photos" (PrimarySync) enabled 17:34, connected 17:36 with the two-factor code typed into the UI (the job got the password at 17:36 and the code at 17:36; the run row keeps no code afterwards); the database holds only `password_ref` (an OpenBAO path under the tenant), never the password; downloads go to `/srv/backups/restate/cloud-photos/icloud-e3af582e/<yyyy>/<mm>/<dd>/` (435 files by 17:44, 0 failed): HEIC, JPG and PNG originals and videos, each with its `.xmp` sidecar, every file's mtime matching its taken-date folder (e.g. 2026/10/22/IMG_0060.HEIC 2026-10-22 16:29). 2026-11-03: a wrong password shown as needs_sign_in on freebsd (credential-free).
-- [ ] **Storage host self-backup (24.13):** nas backs up its OS disk nightly into its own repository on the pool, with no ZFS dataset and no backup data in the snapshot, while another host's capture runs at the same time; a restore of one file from it proven -- 2026-11-03 lab: proven on freebsd as storage host (see 24.13: own dataset, no export, no backup data in the snapshot, a self capture enclosing t14's capture and storage chain, a one-file restore byte-identical); nas itself waits on a release with the self role. 2026-11-05 PRODUCTION (nas, agent 3.12.0.37, server 3.12.1.5): self-backup policy created 11:13 (24 h, 05:00 UTC window); captures ok at 11:18 (first: 183,905 paths, 3.5 GB new, 0 unreadable), 17:39:09 and 17:39:47-17:39:57, the last one while milsurpmonitor's capture ran (17:39:27 onward; cap raised to 3 for that minute and set back to 2, since the iCloud download held a slot); its repository is its own ZFS dataset `zfs-pool/backups/restate/nas-04aec467`, and a plan of `/srv/backups` from snapshot 20261105T173949Z matches 0 files (no backup data in the snapshot); one-file restore proven: plan first (1 file, 4 bytes, nothing refused), then /etc/hostname into staging, SHA-256 99e4331c... identical with owner root:adm, mode 644 and mtime; storage chain (protect, seal, sign, prune, du), check and verify all ok. Open only: the first scheduled night (2026-11-06 05:00 UTC)
+- [x] **Storage host self-backup (24.13):** nas backs up its OS disk nightly into its own repository on the pool, with no ZFS dataset and no backup data in the snapshot, while another host's capture runs at the same time; a restore of one file from it proven -- 2026-11-03 lab: proven on freebsd as storage host (see 24.13: own dataset, no export, no backup data in the snapshot, a self capture enclosing t14's capture and storage chain, a one-file restore byte-identical); nas itself waits on a release with the self role. 2026-11-05 PRODUCTION (nas, agent 3.12.0.37, server 3.12.1.5): self-backup policy created 11:13 (24 h, 05:00 UTC window); captures ok at 11:18 (first: 183,905 paths, 3.5 GB new, 0 unreadable), 17:39:09 and 17:39:47-17:39:57, the last one while milsurpmonitor's capture ran (17:39:27 onward; cap raised to 3 for that minute and set back to 2, since the iCloud download held a slot); its repository is its own ZFS dataset `zfs-pool/backups/restate/nas-04aec467`, and a plan of `/srv/backups` from snapshot 20261105T173949Z matches 0 files (no backup data in the snapshot); one-file restore proven: plan first (1 file, 4 bytes, nothing refused), then /etc/hostname into staging, SHA-256 99e4331c... identical with owner root:adm, mode 644 and mtime; storage chain (protect, seal, sign, prune, du), check and verify all ok. First scheduled night PROVEN 2026-11-06: the 05:00 UTC window's self capture ran 05:21:21-05:21:33 UTC on its own schedule (snapshot `nas-04aec467::20261106T052123Z`, 93.5 MiB new from 71 files, 149,837 unchanged files not read), then its storage chain (sign, protect, prune, du) ok; the drift job's exit 1 is restate's "differences were found" (restate(8) EXIT STATUS), which systemd lists as a failed unit
 
 **Pro+**
 
@@ -14314,8 +14317,8 @@ The storage host keeps everyone else's backups, but today the Backups page shows
 
 - [x] Every tier 402-clean when unlicensed, in both repos, with Community still able to back up and restore -- 2026-11-03, see 24.11 (one gap fixed; the encrypted-restore-after-lapse question is Bryan's)
 - [x] Docs + 14-language i18n complete (24.10), including the break-glass key procedure, tested once -- DONE 2026-11-03: Community, Pro+ and storage pages complete with 20 backup screenshots and every string in 14 locales (all docs i18n gates and the GPU verifier pass); the break-glass procedure was tested once in the lab drill (export sealed to an operator key, restore with the SysManage server down)
-- [x] Home-screen card: **Backups** -- hosts with no good backup in N hours, incomplete or failed runs, unproven restore readiness and target space; links to the Backups page (card contract: Phase 37.1) -- 2026-10-25: the card exists since 2026-10-20 (24.4 overdue box); now titled "Backups needing attention", it counts hosts overdue, incomplete or failed plus the target once when its storage side has a problem (no storage host, stale seal / prune / check, a failed drive, critically full storage), red for a failure or a storage problem and yellow for overdue or incomplete (`backupSummaryLevel`), and opens the Backups page; "unproven restore readiness" joins it with the 25.1 restore-readiness box (Pro+ / Enterprise evidence); seen on the lab dashboard by Bryan 2026-10-25
-- [x] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real. *DONE 2026-11-03.* Phases 0-23 had NO unticked boxes, so the audit read the ticked items whose own note still said "pending", "still open", "deferred", "remains", "follow-up", "blocked on" or "to tick" (34 items, plus the 2 won't-do items) against the code in all four repos: 15 already resolved within their own entry, 6 correctly carried and tracked elsewhere, 5 stale notes for finished work now marked DONE (BSD service control, the SSO browser landing, the secrets and reports API namespaces, the glossary reload), 5 real leftovers tracked nowhere and moved (host-page license gating in Playwright and the missing management endpoints to Phase 29; tenant ticks across workers to 34.1; the CI failover test to 34.2; the pkgsrc port's missing py-psycopg to 30.6), 1 open decision moved (the pool + RLS tenancy tier, build or drop, Phase 29) and 1 business item moved (native-speaker translation review, Phase 29). Nothing claimed done was found undone. See Phase 29, "Carried forward by the Phase 24 audit".
+- [x] Home-screen card: **Backups** -- hosts with no good backup in N hours, incomplete or failed runs, unproven restore readiness and target space; links to the Backups page (card contract: Phase 38.1) -- 2026-10-25: the card exists since 2026-10-20 (24.4 overdue box); now titled "Backups needing attention", it counts hosts overdue, incomplete or failed plus the target once when its storage side has a problem (no storage host, stale seal / prune / check, a failed drive, critically full storage), red for a failure or a storage problem and yellow for overdue or incomplete (`backupSummaryLevel`), and opens the Backups page; "unproven restore readiness" joins it with the 27.1 restore-readiness box (Pro+ / Enterprise evidence); seen on the lab dashboard by Bryan 2026-10-25
+- [x] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real. *DONE 2026-11-03.* Phases 0-23 had NO unticked boxes, so the audit read the ticked items whose own note still said "pending", "still open", "deferred", "remains", "follow-up", "blocked on" or "to tick" (34 items, plus the 2 won't-do items) against the code in all four repos: 15 already resolved within their own entry, 6 correctly carried and tracked elsewhere, 5 stale notes for finished work now marked DONE (BSD service control, the SSO browser landing, the secrets and reports API namespaces, the glossary reload), 5 real leftovers tracked nowhere and moved (host-page license gating in Playwright and the missing management endpoints to Phase 30; tenant ticks across workers to 35.1; the CI failover test to 35.2; the pkgsrc port's missing py-psycopg to 31.6), 1 open decision moved (the pool + RLS tenancy tier, build or drop, Phase 30) and 1 business item moved (native-speaker translation review, Phase 30). Nothing claimed done was found undone. See Phase 30, "Carried forward by the Phase 24 audit".
 - [x] **Pro+ engines built for every OS + architecture and verified in R2** -- 2026-11-04: every one of the 35 engines' newest version is in R2 for all ten targets (linux x86_64 / aarch64 / riscv64, darwin arm64 / x86_64, windows x86_64 / aarch64, freebsd, openbsd, netbsd). riscv64 had been missing from the six engines bumped after the one hand-run `make build-all-architectures` (2026-10-18) -- advisor 1.0.13, alerting 1.0.32, automation 1.2.16, backup 1.0.10 (never built for it), compliance 1.0.25, reporting 1.1.15 -- because `build-modules.yml` had no riscv64 job. Added `build-linux-riscv64` (ubuntu:jammy under QEMU, after aarch64 on beast); the first tag run carrying it was blocked by the module smoke tests (SQLAlchemy's pure-Python fallback crashing beside Cython; ci.yml now insists on the binary wheel and checks for its compiled modules). All six landed 2026-11-04 11:46-11:47 EST; the published riscv64 backup_engine bundle is a RISC-V ELF shared object with its signed MANIFEST.json and MANIFEST.sig
       (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
       Bryan builds and publishes all nine targets (`make build-all-architectures`
@@ -14328,35 +14331,503 @@ The storage host keeps everyone else's backups, but today the Backups page shows
 
 ---
 
-## Phase 25: Fleet Backup at Scale -- Multi-Site, Recovery, Multi-Tenancy & Server Self-Backup (Community / Pro+ / Enterprise / MULTITENANT_SAAS)
+## Phase 25: Fleet Backup Completion -- restate-proxy, Platforms, Server Self-Backup & Agent mTLS (Community / Pro+)
 
 **Target Release:** **v3.13.0.0**
-**Focus:** The backup work that only matters once there are several sites, a dead host to rebuild, or many tenants: per-site storage through federation, restore readiness, bare-metal recovery, clones, fleet-wide restore jobs, four-eyes approval, legal hold, restore drills, off-site and cloud copies, a storage-side backup gateway so hosts never mount the storage, and backup multi-tenancy -- on top of Phase 24's Community and Pro+ backups.
+**Focus:** The Community and Pro+ backup work production needs next, on top of Phase 24: restate-proxy so hosts can back up over HTTPS instead of mounting the storage, with NFS measured against it (25.5); a backup runner without systemd and the other platform and restore items (25.8); the SysManage server backing itself up (25.9); and agent-server mutual TLS with server pinning (25.10).
 
-**Why here (and why still v3.x):** split out of Phase 24 on 2026-10-28 so 24 can ship and close as Community + Pro+. Bryan: "don't let it tick over to 4.0 until we have backup fully in our rear-view mirror" -- so this is **v3.13.0.0**, and mobile (Phase 27) keeps the **v4.0.0.0** major bump and starts after it.
+**Why here (and why still v3.x):** split out of Phase 24 on 2026-10-28 so 24 can ship and close as Community + Pro+. On 2026-11-05 (Bryan) its Enterprise / MULTITENANT_SAAS half -- multi-site, recovery at scale, off-site and Glacier copies, multi-tenancy (117 open items against Phase 26's 49, half of them work no customer needs yet) -- moved to **Phase 27 (v3.15.0.0)**, after automatic updates. Bryan: "don't let it tick over to 4.0 until we have backup fully in our rear-view mirror" -- so this is **v3.13.0.0**, and mobile (Phase 28) keeps the **v4.0.0.0** major bump and starts after Phase 27.
 
 **Builds on Phase 24:** the target model, per-host exports, the storage-side runner and append-only enforcement (24.1, 24.5); the Pro+ `backup_engine` -- policies, OpenBAO-held keys, rotation and break-glass export (24.6); and file restore (24.9).  The design rules and warnings in Phase 24's introduction (hosts append only; tenant data in the tenant partition; nothing needs the public internet) apply here unchanged.
 
-#### 25.1 Fleet operations across sites (Enterprise)
+*25.1-25.4 -- fleet operations across sites, recovery at scale, multi-site and resilience (with the S3 Glacier Deep Archive copy) and backup multi-tenancy -- moved to **Phase 27 (v3.15.0.0)** as 27.1-27.4 on 2026-11-05 (Bryan), to balance the phases. 25.5-25.10 keep their numbers.*
+
+#### 25.5 restate-proxy: backups over HTTPS, NFS still supported (added 2026-10-28, Bryan; redesigned 2026-11-05)
+
+Today every backed-up host mounts its own NFSv4 export of the storage host.
+That works, but it means every host can reach the storage network, the
+append-only guarantee rests on NFS permissions, ownership squashing and
+directory ACLs (with per-OS quirks: FreeBSD refuses creates in sticky
+directories, Linux `protected_regular` breaks them), every host runs an NFS
+client (the 2026-10-28 production bug -- systemd's private mount namespace
+hiding the mount from restate's unit, so a capture wrote to local disk --
+exists only because hosts mount), an export allows a client address, which
+fails behind NAT (25.8), and a host outside the site -- such as the
+production SysManage server in the cloud (25.9) -- cannot mount at all.
+`restate-proxy` adds a second way in: one authenticated, append-only HTTPS
+service on the storage host that every host uses, on the LAN or remote.
+
+**Design rule (Bryan, 2026-10-28): the proxy is on the storage side, never
+the SysManage server.**  Routing backup data through the server was weighed
+and rejected: it doubles every byte's trip (host -> server -> storage),
+makes the server the bandwidth bottleneck and a single point of failure for
+backups, pulls each site's data across the WAN, and -- for unencrypted
+Community repositories -- puts plaintext on the server.  Backup data stays at
+its site (the Phase 24 rule "heavy and local; status light and global"); the
+server stays the control plane.
+
+**Design decisions (Bryan, 2026-11-05):**
+
+- **Part of the restate project, as a separate optional binary.**  This
+  replaces the 2026-10-28 plan for a standalone SysManage-branded project.
+  That plan kept the proxy out of restate because "without SysManage it
+  could not tell who may write where"; an allow list in a config file
+  answers that without SysManage, so restate users without SysManage can
+  run it too.  Being in restate's project also removes the hardest open
+  question of the old plan -- how a host presents a remote repository to a
+  restate that only speaks local paths (a FUSE filesystem or a staging
+  directory) -- because restate itself gains a remote repository backend.
+  `restate-proxy` is its own binary and package, never started by default;
+  someone using restate locally or over NFS never installs or configures it.
+- **NFS stays fully supported through Phase 25.**  No NFS code is removed
+  during this phase: per-host exports, the reach check and the storage audit
+  keep working exactly as today.  Each target chooses "hosts mount NFS" or
+  "hosts use restate-proxy", and can switch either way; existing
+  repositories stay where they are on disk, because only the transport
+  changes.  restate itself keeps working over NFS for anyone who uses it that
+  way (to restate an NFS mount is just a local path); the NFS machinery --
+  exports, mounts, the reach check, the export audit, the sudoers rules --
+  is all SysManage's.
+- **Then, if the measurements say so, SysManage drops NFS (Bryan,
+  2026-11-05).**  Phase 25 measures restate-proxy against NFS on real
+  targets (below); if the proxy holds up, Phase 26.8 removes the NFS
+  transport from sysmanage and sysmanage-agent and every mention of NFS from
+  sysmanage-docs, leaving restate-proxy as SysManage's one transport.  If it
+  does not, NFS stays and 26.8 is dropped with the reason recorded.
+- **HTTPS only, and restores go through it too.**  Capture, browse, plan,
+  compare and restore all work through the proxy.
+- **Written in C, sharing restate's library code.**  The proxy links the same
+  repository, index and hash code the `restate` binary uses, so there is one
+  implementation of the repository format and the proxy can check uploads
+  against it.  TLS comes from a library, never hand-written (libtls on
+  OpenBSD, OpenSSL 3 elsewhere), and only `restate-proxy` links it; the
+  `restate` binary stays free of linked libraries.
+- **One service for local and remote hosts.**  LAN hosts and remote hosts
+  use the same name, client code and protocol.
+- **Agreed with restate (Bryan and the restate session, 2026-11-05):** the
+  restate side is restate's ROADMAP section "Next -- restate-proxy", ahead
+  of everything else there, in this order, each its own restate release:
+  `restate ingest`; a repository-backend refactor (local backend only,
+  nothing on disk changes, released before any networking); `restate-proxy`;
+  the remote backend; per-client limits and the quota hook; packages; docs.
+  **SysManage's 25.5 work waits for the remote-backend release.**  The items
+  below record what SysManage relies on from those releases, then what
+  SysManage itself builds.
+
+**What restate provides (tracked in restate's ROADMAP; ticked here when the
+release carrying it ships):**
+
+- [ ] **The proxy:** `restate-proxy` on the storage host, HTTPS only, its own
+      binary and package, never started by default; TLS through a small
+      wrapper (libtls on OpenBSD, OpenSSL 3 elsewhere), only this binary
+      links it.  Its certificate: Let's Encrypt for a public name, or the
+      SysManage CA for an internal one
+- [ ] **Allow list, one file per client:** `/etc/restate/proxy.d/<client>.conf`
+      in restate's own `key = value` format (Bryan: not YAML) -- the
+      repository, the operations, up to two SHA-256 token hashes (rotation:
+      add the new one before removing the old) and an optional expiry (so
+      per-job read-only restore grants can come later with no protocol
+      change).  Re-read on change or SIGHUP.  Clients are identified by
+      token, never by address -- an address breaks behind NAT (25.8) and for
+      a remote host
+- [ ] **Tokens:** 32 random bytes, base64url, `rsp_` prefix; compared in
+      constant time and checked before any byte of a request body is read.
+      On the host, a token file named by the job key `repository_token_file`
+      and held to `passphrase_file`'s rules; curl gets it through a netrc
+      file, never on its command line
+- [ ] **A host only ever touches its own repository:** the repository URL is
+      `https://<proxy>/v1/<client>`, and the client in the path must match
+      the token's.  No per-host exports, no client-address rules, no mounts
+      and no NFS client on a host that uses the proxy
+- [ ] **Operations:** `append` = list, read metadata (every pack's `.idx`,
+      which an incremental capture needs to skip chunks already stored, and
+      the snapshot indexes, to skip unchanged files) and upload; `read` =
+      also the packs' content, for restores
+- [ ] **Append-only by protocol, and checked against the format:** there is no
+      DELETE method and no rename or overwrite at all.  Every upload goes
+      through `restate ingest`'s checks: a pack (`packs/<time>-<pid>-<seq>
+      .tar.gz` with its `.idx`, `.sum` and `.seek`; the name is not a content
+      hash) must match its `.sum`, and its `.idx` must match its content where
+      the repository is not encrypted; a snapshot (a directory of several
+      files) may only refer to packs the repository holds.  Prune, check,
+      seal, protect and copy stay local jobs on the storage host (24.5),
+      unchanged
+- [ ] **`restate ingest REPO PATH...` (first, a local command; agreed with
+      restate 2026-11-05):** each PATH is a pack's `NAME.tar.gz` with its
+      `.sum`, `.idx` and `.seek` beside it, or a snapshot directory.  It
+      copies each one in atomically, checked once inside -- copied under a
+      hidden name, checked there (so what is checked is exactly what goes in),
+      then renamed into place, the pack's `.idx` last -- and the files given
+      are left as they are (a move would let `restate ingest B A/packs/*` take
+      packs out of repository A).  The same pack or snapshot already there is
+      a no-op, so a retried upload is harmless; a different one under the same
+      name is refused; the first refusal stops the run with exit 2; it takes
+      the repository's write lock, so a concurrent capture or prune means exit
+      5.  The proxy runs every upload through the same code and deletes its own
+      staging files after each one
+- [ ] **Signing only at capture:** `capture --sign-with` works through the
+      proxy; `restate sign` on a snapshot already stored would modify it, so
+      the proxy refuses it (as it already fails after `protect`)
+- [ ] **Sessions and locks, restores included:** opening a session takes the
+      repository's real locks in the proxy -- `lock` for a capture, `readers`
+      for a restore, so a prune cannot remove packs under a restore -- the
+      same flock and open-file-description locks a storage-side prune takes.
+      The client renews a lease; a client that dies loses it within minutes.
+      Busy is HTTP 423, which the client turns into exit 5, so the existing
+      retry with backoff applies and a capture colliding with a prune still
+      resolves to "busy, retry".  A session ends with a request of its own,
+      and the proxy removes dead sessions' staging itself
+- [ ] **Remote repository backend in restate:** capture, list, diff, plan and
+      restore work against `https://<proxy>/v1/<client>` as against a local
+      path.  HTTPS by running curl, as `restate installer fetch` does, with
+      many files batched into one curl process and connection, and the
+      `.idx` cache kept on the host; a library is linked only if measurements
+      say so
+- [ ] **Hardened for an internet-facing route:** runs as an unprivileged user
+      that owns the repositories, never as root; a process per connection
+      that, once the token is checked, confines itself to that client's
+      repository (`unveil` on OpenBSD, Capsicum on FreeBSD, Landlock plus
+      seccomp on Linux); request line and headers at most 8 KiB, each upload
+      no bigger than restate writes that file (a pack 64 MiB, a snapshot index
+      under 2 GiB; restate's proxy-protocol.md has the table, 2026-11-06); the request parser and the upload
+      checks fuzzed in restate's CI from the first release
+- [ ] **Per-client limits:** concurrency (the target's cap, 24.8), optional
+      bandwidth caps by hour of day (shared with 27.3's uploader), and a quota
+      hook for 27.4 multi-tenancy
+- [ ] **Encryption unchanged:** with Pro+ encryption the proxy and the storage
+      host only ever see ciphertext packs; Community repositories are
+      plaintext at rest exactly as they are on NFS today, and travel only
+      inside TLS
+
+**Protocol reviewed (2026-11-06, with the restate session):** restate's
+`docs/proxy-protocol.md` (v1 draft) was checked against this section and
+amended for what SysManage needs: a free-text `label` key in a grant (the
+agent marks its own files with a fixed prefix and never touches an
+operator's); only `CLIENT.conf` is a grant, dotfiles and other names are
+skipped (write `.NAME.conf.tmp`, then rename); `restate-proxy --check-grants
+[DIR] --json` for the storage audit (each file ok or its error, exit 2 if any
+is not); a lease that counts down only while the session is idle, and renews
+allowed on a second connection (a 2 GiB index over a slow remote route
+cannot outlive it); the client ends its session on SIGTERM; 503 is exit 5
+like 423; a fixed reason on every error (`Restate-Reason`, `proxy_reason` in
+the result: unauthorized, forbidden, not-found, repository-version-1,
+name-taken, invalid, too-large, busy, sessions-full, storage-full,
+bad-request, proxy-failed) for the agent's messages; job keys
+`repository_ca_file` and `repository_pin_sha256` (twice, for rollover) so a
+proxy certificate from the SysManage CA is trusted and pinned as in 25.10;
+and a `session-end` log line (client, kind, seconds, bytes in/out, packs,
+snapshot, result) for the measurements below. SysManage's client names are
+host UUIDs, plus `<uuid>.previous` for a read-only grant on the repository
+before Pro+ encryption.
+
+**What SysManage builds (after restate's remote-backend release):**
+
+- [ ] **The target's setting:** "How hosts reach the storage" -- NFS (today,
+      unchanged) or restate-proxy -- switchable either way per target, with
+      the repositories left where they are
+- [ ] **Equip:** installs and upgrades `restate-proxy` on the storage host like
+      restate today, and its certificate
+- [ ] **The allow list from the target's hosts:** the agent on the storage host
+      writes one `/etc/restate/proxy.d/<client>.conf` per host and removes it
+      when the host leaves the target or is deleted; tokens are generated per
+      host, only their hashes go in the file, and the token is delivered to
+      the host over the agent channel and written as its
+      `repository_token_file`; rotation adds the new hash before removing the
+      old one
+- [ ] **Job files:** each host's capture, restore, browse and compare jobs name
+      `https://<proxy>/v1/<client>` and `repository_token_file` instead of a
+      mount; the job validation (24.0) accepts exactly those keys and nothing
+      else new
+- [ ] **Restores:** the server's Restore Files role and audit gate the restore
+      job as now; the host reads its own repository with its own token, as
+      its NFS export allows today.  Per-job read-only restore grants (the
+      allow list's expiry field) are a possible later step
+- [ ] **Storage audit (24.5) for the proxy:** proxy running, certificate valid
+      and not near expiry, the `proxy.d` files matching the target's hosts
+- [ ] **Measure the unknowns, NFS against restate-proxy (Bryan, 2026-11-05):**
+      on the same storage host and the same hosts, both transports: a first
+      full capture of a large host (nextcloud-sized), a nightly incremental
+      run, a file restore and a whole-host restore -- wall time, throughput,
+      CPU and memory on the storage host and the backed-up host -- plus a
+      night of the whole fleet within the target's concurrency cap, a
+      capture across the remote route (production's server), a restore
+      while a prune waits, and a month of nightly runs on production with no
+      failed night the proxy caused.  Recorded in this section with the
+      numbers, for the 26.8 decision
+- [ ] **Remote route, documented:** for hosts outside the site, the firewall
+      forwards the public name to the proxy as plain TCP (for pfSense, HAProxy
+      in TCP mode routing by SNI), so TLS ends on the storage host and nothing
+      crosses the LAN unencrypted; LAN hosts resolve the same name to the
+      storage host directly (a DNS host override), so nightly backups do not
+      loop through the router.  Optionally, a source-address rule on the
+      public route as an extra layer
+- [x] **Tier -- DECIDED 2026-11-05 (Bryan):** `restate-proxy` itself is
+      restate's (BSD-2-Clause), free for anyone to run by hand; the tiers
+      decide only what SysManage manages for you:
+  - **Community / OSS:** the proxy as a transport -- the per-target NFS or
+    restate-proxy setting, Equip installing it, the agent keeping `proxy.d`
+    and the tokens current, job files, restores through it, the storage
+    audit, the concurrency cap and the remote-route docs.  Append-only
+    safety has been Community from the start (Phase 24: "safety is not a
+    paid feature"), and for hosts behind NAT, remote hosts and (until 25.8)
+    hosts without a good NFS client the proxy is the only way to be backed
+    up at all; 25.9's Community server backup depends on it too
+  - **Pro+:** bandwidth caps by hour of day (fleet tuning, like
+    maintenance-window-aware schedules)
+  - **Enterprise:** per-site proxies through federation (27.1, 27.3)
+  - **MULTITENANT_SAAS:** the quota hook (27.4 quotas and metering)
+
+#### 25.6 Docs, screenshots, i18n
+
+- [ ] sysmanage-docs, Community / Pro+: backing up the SysManage server itself, and the server recovery runbook (25.9)
+- [ ] sysmanage-docs, restate-proxy (25.5): choosing NFS or the proxy per target, the allow list, and the remote route through a firewall (pfSense HAProxy in TCP mode as the worked example)
+- [ ] **No ROADMAP phases in the public docs (Bryan, 2026-11-05):** "Phase" and phase numbers are an internal planning term and must not appear in sysmanage-docs. Found 2026-11-05 on ten pages (`roadmap/index.html`, `architecture/` load-balancing, communication-protocols, performance-and-scale, websocket-protocol and system-architecture, `server/` deployment and troubleshooting, `deployment/production-checklist.html`, `getting-started/first-deployment.html`) -- "Phase 34" for high availability, "Phase 29", "ROADMAP 27.3" and others, already wrong after the renumbers. Rewrite each to name the feature or say "planned" without a number, and update the strings in 14 locales; then add a docs lint check that fails on "Phase <number>" or "ROADMAP <number>" in published pages so it cannot creep back
+- [ ] All new strings in 14 locales, verified
+
+#### 25.7 Editions
+
+- [ ] **restate-proxy (25.5):** Community manages the proxy as a transport (setting, Equip, `proxy.d` and tokens, job files, restores, audit, concurrency cap); bandwidth caps by hour gated to **Pro+**, per-site proxies to **Enterprise**, the quota hook to **MULTITENANT_SAAS** -- each gate in both repos and 402-clean when unlicensed, with Community proxy backups unaffected
+- [ ] Every tier gate in **both** repos, and every Pro+ feature 402-clean when unlicensed, with Community backups unaffected
+
+#### 25.8 Platforms, restore feedback and Windows signing (added 2026-10-30)
+
+- [ ] **A backup job runner without systemd:** captures, estimates, restores and the storage-side jobs run through restate's `restate-job@` systemd unit today, so hosts Equip can now install restate on -- Alpine (OpenRC), FreeBSD / OpenBSD / NetBSD (rc.d) and macOS (launchd) -- cannot back up (FreeBSD only serves as a storage host). Give the agent a runner for each that keeps the same guarantees: a root-owned job file the agent validated, restate started detached, results collected the same way -- BUILT 2026-11-06 (agent + server, uncommitted): a portable runner, `backup/detach.py` (standard library only, run as `python3 -I`), does what `daemon -f -p` does -- the pidfile locked before anything starts and held by the supervisor until restate exits, detached (setsid, output to the run's log), SIGTERM/SIGINT/SIGHUP passed on, a second start refused while one runs -- so the agent watches it exactly as daemon(8) on FreeBSD (`job_runner.pidfile_locked`); Linux uses it when systemd is not PID 1 (Alpine), macOS always; FreeBSD keeps daemon(8). The elevated command is still only `sudo -n restate run <validated job file>` (Alpine sudoers gets the same regular expression as FreeBSD's, checked with Alpine 3.20's sudo 1.9.15; the macOS agent runs as root). The host role now runs on FreeBSD and macOS too: the mount table is `mount -p` / `mount` instead of mountinfo (for the mount checks, the operator-mount check and the network-mount rules), the export is mounted with each platform's NFSv4 options (FreeBSD `nfsv4,tcp,hard,nosuid`; macOS `vers=4,tcp,hard,nosuid,nodev,resvport`, since Linux nfsd wants a reserved port), and a Mac mounts under `/Volumes/<name>` (its system volume is read-only: the server sends that, `backup_jobs.host_mount_point`, and the agent accepts /Volumes on macOS only); Homebrew's `/opt/homebrew/sbin/restate` is found. A Mac is a backed-up host only, never a storage host. OpenBSD and NetBSD are NOT driven: their NFS clients speak v2/v3 and the repository is an NFSv4 export, so they report the new inapplicable reason `no_nfsv4_client` ("This OS has no NFSv4 client") and back up once restate-proxy (25.5) carries backups over HTTPS. Tests: agent `tests/test_backup_detach_runner.py` (12: detach.py for real -- returns at once, lock held while running, pid recorded, second start refused, SIGTERM reaches restate; the driver starting and watching a run; each platform's mount command and mount table; /Volumes only on macOS; a Mac's shares and automounts left out) plus the updated daemon-runner, probe and capability tests; the agent suite 6,404 passed (the two capability failures found were fixed); the changed tests also pass on Python 3.9. Server: `tests/test_backups_api.py::test_a_mac_mounts_its_storage_under_volumes`. Not yet proven on a real host: FreeBSD (freebsd -> nas), macOS (macbookair -> nas) and Alpine (a throwaway VM) each need a capture and a one-file restore through the server; strings in 14 locales written by hand, not yet run through the verifier
+- [ ] **Hosts behind NAT, said plainly (found 2026-11-03):** a host on a private network behind another (netbsd, a libvirt VM on beast's NAT, 192.168.122.133) reports its private address, the storage host makes its per-host export for that address, but sees the traffic come from the NAT gateway (192.168.4.11) and refuses the mount -- while the reach check, which only opens a connection to port 2049, reports the host as able to reach its storage. Detect it (the storage side compares the connecting address with the host's reported one, or the agent learns its outward address) and say "this host is behind NAT; the storage host sees it as <address>" with what to do (bridge it, or switch the target to restate-proxy, 25.5, which knows hosts by token, not address); never widen an export to the gateway's address, which would let every host behind it mount the repository -- BUILT 2026-11-06 (agent + server, uncommitted), by connection rather than by log (no new permission, and FreeBSD's nfsd logs nothing for NFSv4): the reach check reports its own end of the connection (`local_address`/`local_port`) and, when the server asks (`hold_seconds`, 60, bounded to 120 by the agent), holds it open; the server then asks the storage host's agent `list_nfs_peers` (new `backup_peers` capability, express lane, read-only maintenance class), which lists established connections to its port 2049 from `/proc/net/tcp`/`tcp6` on Linux and `netstat -an -p tcp` on FreeBSD, unprivileged (checked against nas's and freebsd's real tables); the server finds the host's connection by its source port, and an address other than the one the export names is kept (`backup_reach.seen_as`, migration q81reachnat). Such a host is not offered backups (like an unreachable one), its status reads "Behind NAT" and the message says what the storage host sees it as and to put it on the storage host's network (a bridged network for a VM); nothing is ever exported to the gateway. NAT that rewrites the source port is not recognized (no port match, or two matches, is unknown and never blocks); libvirt's NAT keeps the port. An older storage agent is not asked and nothing is held. Tests: server `tests/test_backup_reach_nat.py` (6) + the migration test; agent `tests/test_backup_nfs_peers.py` (7); frontend `StorageReach.test.tsx`. Not yet proven on the netbsd VM behind beast; strings hand-written in 14 locales, not yet verified
+- [x] **Say plainly what Alpine is missing:** until that runner exists an equipped Alpine host reads "Upgrade restate" (the systemd unit is missing), which Equip cannot fix; report that backups need systemd on Linux for now instead -- SUPERSEDED 2026-11-06: the runner exists (above), so an Alpine host is driven like any other and no longer needs the systemd unit (the probe checks the unit only where systemd is PID 1)
+- [x] **Restore dialog shows unmatched and resolved paths:** restate (queued 2026-10-30) resolves a requested path through symlinks recorded in the snapshot and reports `restore.resolved` and `restore.unmatched`, ending incomplete (exit 4) when any requested path matched nothing; the dialog lists them in Preview and the result and stops calling such a restore "Succeeded" (key off `restore_resolves_links` / `restore_unmatched`) -- FOUND DONE 2026-11-06 (built during Phase 24, never ticked): `RestoreNotes.tsx` lists the paths that matched nothing and the paths followed through the snapshot's symlinks, in the preview and the result; an unmatched path leaves the run Incomplete (restate's exit 3, not 4, per restate(8)) and never Succeeded, and the restore stays disabled after such a preview; tests `RestoreNotes.test.tsx`, `RestoreFilesDialog.test.tsx` ("a preview naming a path the snapshot lacks is Incomplete and says which"); restate 2.3.0.0 reports both
+- [ ] **Windows installers signed, and winget's Defender validation passing:** agent winget PRs since 3.11 fail "Validation-Defender-Error" (latest #465661 for 3.12.0.17) though both MSIs and their extracted contents scan clean locally and a silent install on a machine with Python raised nothing (2026-10-30); a clean-VM install (no Python: the VC++ / Python download and the SYSTEM bootstrap task) and Microsoft's answer to the false-positive submission come next. Sign both MSIs and the bundle .exe in the release workflow (Azure Trusted Signing proposed, Bryan's decision), then close the stale agent PRs
+- [ ] **A second iCloud Photos account (moved from the Phase 24 exit criteria, 2026-11-05):** a second Apple ID on the same storage host downloads to its own directory beside the first, with its own password in OpenBAO, its own two-factor sign-in and its own schedule, while the first account's runs carry on unaffected.
+- [ ] **iCloud Live Photo videos (moved from the Phase 24 exit criteria, 2026-11-05):** a Live Photo downloads as its still and its video side by side (the `_HEVC.MOV` beside the HEIC, named by the `--live-photo-mov-filename-policy` the agent sets), both with correct dates, and a second run skips both. The first production account's early downloads held no Live Photo, so this was not yet seen.
+- [ ] **iCloud incremental runs and "Needs sign-in" (moved from the Phase 24 exit criteria, 2026-11-05):** a second run of an account downloads only what is new (a small fraction of the first run, the rest counted as already present), and an expired or wrong session shows "Needs sign-in", never success. A wrong password already read as needs_sign_in on the lab freebsd host (2026-11-03); prove both in production.
+- [ ] **A tag policy covering the lab fleet (moved from the Phase 24 exit criteria, 2026-11-05):** a tag-based policy with grandfather-father-son retention and a maintenance window covers at least two backed-up lab hosts, and the prune preview matches what prune removes on each. Needs the runner without systemd above (or a second Linux lab host); the mechanics were proven on t14 alone in Phase 24.
+
+#### 25.9 The SysManage server backs itself up (Community / OSS; Pro+) (added 2026-11-02, Bryan)
+
+**Why:** production's server had no backup at all on 2026-11-02 -- no cron job, no backup command, no policy -- and could not use the Phase 24 target either: it runs in the cloud, the NAS is on the home network. The pieces that come closest cover something else: restate's `postgresql` hook quiesces a database on a backed-up host, and 13.1.F (`backend/services/tenant_backup.py`, multitenancy_engine) only runs an operator-supplied external command per tenant. Nothing protects the agents' CA, OpenBAO or the server's own files. What is lost with the server, worst first: the **agents' mTLS CA and the server identity** (lose them and every agent must re-enroll); **OpenBAO** (tenant database credentials, backup encryption keys, SSH keys); the **PostgreSQL** registry and tenant databases; `/etc/sysmanage.yaml`, TLS certificates and the license. Re-creatable and left out by default: downloaded Pro+ engine bundles, package mirrors, logs.
+
+- [x] **Prerequisite -- unseal keys out of the config (security, all editions):** DONE 2026-11-05 (Bryan chose option 1, a root-only key file, with auto-unseal as an option). **Finding:** packaged installs never had the keys in the config -- production (checked read-only 2026-11-05) has no `unseal_keys` and no vault token in `/etc/sysmanage.yaml`; the unseal key and root token are in root-only 0600 `/var/lib/openbao/init.json`, the server's token in `/etc/sysmanage/openbao-token`, and the `sysmanage-openbao-init` one-shot unseals before the server starts. Only source installs wrote `vault.server.unseal_keys` (nothing ever read it there; `start-openbao` unseals from the 0600 `.vault_credentials`). **Done:** `scripts/_sysmanage_secure_installation.py` no longer writes the key and moves an existing one out (kept in `.vault_credentials` first, `move_unseal_keys_out_of_config`); `scripts/update_vault_config.py` and `sysmanage-dev.yaml.example` no longer carry one; the server logs a warning at start while a config still holds one, naming the fix (`backend/startup/deployment_guards.py` `unseal_key_warning`); **auto-unseal as an option:** `scripts/openbao_init_unseal.py` recognizes a `seal` stanza (transit / cloud KMS) -- initializes with a recovery key instead of unseal keys, never submits a key, waits for the seal and says plainly when the key service is unreachable -- and `installer/openbao/openbao.hcl` documents the stanza (tests/test_unseal_keys_out_of_config.py). **What stays:** `init.json` is inside OpenBAO's data directory, so the server policy below must leave it (and `openbao-token`) out of every backup and escrow them instead; the database password and, on source installs, the vault token are still in the config, so the backup itself must be protected (Pro+ encryption below; Community: say so on the policy)
+- [ ] **A "server" backup policy (Community):** the server is already a managed host; its policy is offered on the Backups page as **Back up this SysManage server**, preset to the CA and server identity, `/etc/sysmanage.yaml`, TLS certificates, the license, OpenBAO and PostgreSQL, with engine bundles, mirrors and logs left out -- and OpenBAO's init material (`/var/lib/openbao/init.json`, holding the unseal or recovery key and the root token) and `/etc/sysmanage/openbao-token` never in the backup: they go to the operator's escrow (the break-glass pattern, 24.6), so a stolen backup cannot unseal the OpenBAO snapshot inside it. A warning on the Backups page and the dashboard card while the server itself has no good backup -- BUILT 2026-11-06: the server's policy is its host's own `backup_policy` row marked `server_preset` (q82serverbackup), so it is configured, scheduled, reach-checked and restored like any host. The server finds its own host by name (`socket.getfqdn()` / `gethostname()`, the short name when no full name matches) as a suggestion only; the operator confirms it in **Back up this SysManage server** (Backups page warning, `GET /backups/server`, `PUT /backups/server-policy`), and marking another host moves the mark (audited: the server moved). The preset (`backend/services/backup_server_paths.py`, read from the server's own config) keeps the cert directory (`certificates.path`, the agents' CA and server identity), `/etc/sysmanage.yaml`, `api.certFile`/`keyFile`, `/etc/letsencrypt`, `/var/lib/sysmanage` (license, air-gap and federation keys), `/var/lib/openbao` and `/var/lib/postgresql`; it leaves out the engine bundles (`license.modules_path`), the GeoIP directory, `/var/log/sysmanage` and the host's package mirror roots. Enforced at job build, whatever the rules say: quiesce on, and `init.json`, the vault `token_file` and a source install's `.vault_credentials` written as the LAST expendable rules (restate's last matching rule wins, so a kept `/var/lib/openbao` still leaves `init.json` out); the `openbao` hook added once the host's restate reports it. Status `ok` / `no_good_backup` / `no_policy` / `unknown`: warned on the Backups page and the dashboard card note (`server_unprotected`), and counted once in the card's attention number when the host is known and its row is not already counted. An unidentified server is warned on without multi-tenancy and silent with it (the server's host is in one tenant only). Community dialog says the backup is unencrypted and holds the database password, and that PostgreSQL stops while its files are copied (tests/test_backup_server.py 12, the q82 migration test, BackupServerCard.test.tsx 4; strings hand-translated in 14 locales, waiting for the verifier). Prove on production
+- [ ] **Consistent databases:** PostgreSQL through restate's `postgresql` hook (stopped-file copy for big clusters, a compressed dump for small ones -- `dump = auto`), every database on the server's cluster, registry and tenants alike
+- [ ] **An `openbao` hook (restate, Community):** before the capture, `bao operator raft snapshot save` into the hook's dump directory with a token limited to `sys/storage/raft/snapshot`; with the file backend, a stopped copy of the data directory instead; the snapshot lives in the backup, and its restore is `bao operator raft snapshot restore` (ask restate-31; hook named in its `hooks.d` contract) -- ASKED 2026-11-06 (restate session): raft snapshot with a snapshot-only token; for the file backend (production) a stopped copy whose resume must also UNSEAL (a conf key naming the unseal unit, `sysmanage-openbao-init` on packaged installs), failing the capture if still sealed; SysManage adds `--quiesce-with openbao` once the host reports the hook
+- [ ] **A target the server can reach:** a cloud server cannot mount a home or office NAS. Supported, in order: restate-proxy on the storage host (25.5), reached over HTTPS through the site's firewall like any remote host, with the server's own token in the allow list (Bryan, 2026-11-05: the simplest route, so the first); a VPN to the storage host (WireGuard / Tailscale -- the agent's reach check already proves or refuses the path, 24.4); a repository on the server's own disk with the off-site copy (27.3) carrying it away. The policy dialog says which applies and refuses a target the reach check cannot see
+- [ ] **Encrypted with a key that is not in the server (Pro+):** the server's own backup cannot be keyed from its own OpenBAO -- restoring OpenBAO would need a key held inside OpenBAO. It is encrypted to an **escrow public key** the operator provides (the break-glass operator key, 24.6), whose private half never touches the server; restore takes that key by hand. Refused, with the reason, if no escrow key is set -- BUILT 2026-11-06: backup_engine `escrow_encryption` points the server's policy at the target's escrow PUBLIC key with nothing in OpenBAO (`encrypt_key_ref` empty, a key row with no reference): a new policy writes a new `-enc` repository, a plain one keeps its old repository restorable, one already encrypted moves to the escrow key in the same repository as a rotation does; saving a new escrow key moves it again (audited). The server never rotates it (`rotation_due_at` None, `rotate_key` refused) and never gives it an OpenBAO key (`enable_encryption` refused for the server policy). With the engine loaded, `PUT /backups/server-policy` is refused (409) until an escrow key is saved; Community stays unencrypted with the dialog's warning. SysManage never holds the key, so restores, browsing and What changed of that repository are refused with the by-hand path (`ESCROW_ONLY`), scheduled full-read verification is skipped (the metadata check still runs), and the break-glass export and its staleness ignore it (an earlier OpenBAO key of it is still exported). Tests: engine test_backup_escrow_key.py (6), OSS tests/test_backup_server_escrow.py (7), BackupServerCard.test.tsx (+2); strings in 14 locales (frontend, backend .po, engine .po)
+- [ ] **Recovery runbook, tested once per phase exit (docs, Community):** with SysManage down and only restate and the backup: install the server package; restore the files with restate by hand (`restore --plan`, then `--check-first --root`); restore the OpenBAO snapshot and unseal it from escrow; restore the databases (registry first, then tenants) and confirm `alembic` is at the expected heads; start the server -- agents reconnect **without re-enrolling** because the CA and identity came back. Includes moving to a new machine (new IP / DNS) and the order of operations when only one piece is lost (OpenBAO alone, one tenant database alone) -- DRAFTED 2026-11-06 (scratchpad, unproven): install and stop; reach the repository; `restore --plan`, then `--check-first --root /`; escrowed init.json + token back; OpenBAO started and unsealed (file storage) or `raft snapshot restore`; PostgreSQL started from its stopped copy, `sysmanage-migrate --status`, the dump as the fallback; start; keep the host name and move DNS; OpenBAO alone and one tenant database alone (side restore + throwaway server on another port). Becomes a docs page after the drill and the translation run. DRILL RUN 2026-11-06 (Community, lab VMs drill-server / drill-storage / drill-rebuild on beast's br0, packaged 3.12.1.10 + the 25.9 working tree, restate 2.2.0.20): first server capture 43 s (PostgreSQL paused 8 s), snapshot holds the CA + identity, config, TLS, OpenBAO data and the stopped cluster, and no init.json or token; server shut down 17:44:44, rebuilt on a fresh VM from the backup alone and serving 17:50:29 (package install 4 min 18 s; restore 4 s; OpenBAO unsealed from escrowed init.json, marker secret back; cluster started as restored, at q82; marker user back); both agents reconnected by 17:53:42 with the same host ids and certificate serials, nothing pending approval, CA fingerprint identical; the name moved to the new address (.122 -> .124) and the rebuilt server backed itself up again (15 s, 26 MB new). FOUND AND FIXED: (1) Community never ran the backup scheduler -- `start_licensed_ticks()` was inside startup's Pro+ branch (backend/startup/lifecycle.py; tests/test_background_ticks_every_edition.py); (2) a storage agent could not re-prepare a plain repository it cannot read, so an export never followed a host to a new address (agent backup/storage_prepare.py `_exists`; test in test_backup_storage_prepare.py). RUNBOOK CORRECTIONS: `--allow-unverified` (or `--trusted-key`); a temporary read-only export for the new machine, removed afterwards; copy the repository locally (restore takes a reader lock in the repository; restate 3.0.0.0 adds `--no-lock` (job key `no_lock`) for restore, list, snapshots, diff and status (approved 2026-11-06)); set the host name after the restore; the capture that took the backup shows failed on the restored server. OPEN: an agent restart mid-command drops the command (inbound queue StaleDataError) and its run stays queued, blocking that job type; restate printed the postgresql hook usage line during restore (explained by restate 2026-11-06: restore runs `HOOK restored NAME`, the database hooks have no `restored` case and exit 2 = nothing to do; harmless, quiet exit coming in restate's next change); OpenBAO-alone, one-tenant-alone, multi-tenancy and the Pro+ escrow round not drilled yet
+- [ ] **Air-gapped installs:** the same policy against the appliance's own storage (Phase 24 invariants), and the runbook works from local media
+- [ ] Docs, screenshots and all strings in 14 locales
+
+#### 25.10 Agent-server mutual TLS and server pinning (Community / OSS) (added 2026-11-05, Bryan)
+
+**Why:** the documentation said agents and server use mutual TLS; the 2026-11-05 site audit found they do not. The pieces exist and nothing uses them: the server creates a CA and issues each approved host a certificate (`backend/security/certificate_manager.py`, `backend/api/host_approval.py:78`), and the agent stores that certificate and the server's fingerprint (`sysmanage-agent/src/security/certificate_store.py:81-147`) -- but the agent never presents its certificate, no nginx config has `ssl_verify_client`, `validate_client_certificate()` (`certificate_manager.py:368`) is never called, and the agent never compares the server's certificate with the fingerprint it saved. Agents authenticate with their per-host token (22.0) over ordinary server-authenticated TLS. The security docs were corrected to say exactly that; they say "mutual TLS" again only when this section is done.
+
+- [ ] **The agent pins its server:** on every connection the agent checks the server against what it stored at enrollment and refuses a mismatch, saying why. Pin the issuing CA or the public key (SPKI), not the leaf certificate -- a Let's Encrypt renewal changes the leaf every 60-90 days -- and give a deliberate re-pin path for a real server or certificate change (operator re-approval, or a signed re-pin from the old key), never a silent re-trust -- BUILT 2026-11-05: the agent pins the SysManage CA at enrollment plus the SPKI of the TLS certificate it was served (`server_pins.json`, newest 3); every connection checks the SPKI right after the handshake (SSLObject / SSLSocket subclasses, so aiohttp, websockets and blocking calls alike). Because production serves a Let's Encrypt certificate that changes every renewal, the server publishes `GET /api/agent/server-identity`: a statement naming the TLS public keys it serves now (read from its own nginx on loopback, or `agent_tls_spki` in Settings), signed by its CA-issued identity key; an agent accepts a new SPKI only when such a statement, chained to its pinned CA, names exactly the key it observed on that connection -- a proxy can neither forge nor usefully replay it. A different CA is never re-pinned automatically; the deliberate path is `python -m src.security.pin_reset` (with `--certificate` to start over). `server.tls_inspection: true` turns pinning off for estates that inspect TLS (logged). The server's identity certificate now renews itself 30 days before expiry. Agent: `src/security/server_pinning.py`, `server_identity.py`, `client_tls.py`, `pin_reset.py`; server: `backend/security/agent_mtls.py`, `backend/api/agent_certificate.py`. Prove on production
+- [ ] **Mutual TLS on the agent paths:** the agent presents its issued certificate on its WebSocket and API connections; nginx verifies it against the SysManage CA on the agent locations only (`ssl_verify_client optional` there, so browsers are unaffected) and passes the verified identity to the backend, which requires the certificate and the host token to name the same host. A deleted or revoked host's certificate is refused (a revocation list nginx reads, kept current by the server) -- BUILT 2026-11-05: agents present their certificate on every connection (REST and WebSocket); nginx asks with `ssl_verify_client optional_no_ca` advertising only the SysManage CA (browsers are not prompted), proves key possession, and forwards the PEM as `X-SSL-Client-Cert` from its own variable (a client-sent header is discarded -- shown end to end against nginx:stable). The backend checks signature by the CA (it used to compare issuer names only), validity, that it names the host the token proves, and its serial. Deviation: no revocation list -- the backend accepts only the host's current serial (and the previous one for a day after a renewal), so a revoked or deleted host is refused at once with nothing for nginx to reload. nginx: the template includes `<sysconf>/sysmanage/nginx/agent-mtls*.conf` (matches nothing until written) and the generated post-install step writes it when the SysManage CA exists, keeping it only if `nginx -t` passes (Alpine, RHEL, openSUSE, Ubuntu/Debian, macOS, NetBSD; FreeBSD, OpenBSD, the snap and Windows: the two lines by hand). Production keeps its edited nginx config on upgrade, so it needs the include line and the two `X-SSL-Client-Cert` lines added by hand
+- [ ] **Certificates renew themselves:** host certificates are valid for one year with no renewal today; renew over the authenticated channel well before expiry, alert on any host near expiry, and never let an expired certificate lock a host out without saying so on the host -- BUILT 2026-11-05: the agent generates its own P-256 key (it never leaves the host) and sends a certificate request to `POST /api/agent/certificate` with its poll credentials -- at startup, every 24 h, on approval, and after a refusal -- renewing 30 days before expiry; the key is written 0600 from creation, files swapped atomically. This also replaces the old path that was never used (`/api/certificates/client/{id}` made the key on the server and needed a user login, so no agent ever had a certificate). The Hosts list shows each approved host's certificate state (Presented / Renewing / Not presented / Expired / None) and the Settings card counts them; an expired certificate is not presented and the host renews on its token. Not built: an alert rule for hosts near expiry (renewal is automatic; the Hosts list shows it)
+- [ ] **Rollout without breaking a fleet:** off -> optional (verified when presented, token alone still accepted) -> enforced, set per tenant; older agents keep working on the token until enforcement is turned on, and the Hosts list shows which hosts are not yet presenting a certificate; air-gapped installs work unchanged -- BUILT 2026-11-05: `agent_mtls_mode` off / optional (default) / enforced, per tenant when multi-tenancy is on, set on Settings -> Configuration (Agent certificates card, `GET/PUT /api/v1/agent-certificates`). Enforcing while approved hosts are not presenting is refused with their count until confirmed. A host with no current certificate may still connect and request one on its token (logged); a presented wrong certificate is refused in every mode but off. Older agents keep working on the token until enforced
+- [x] **Tests:** an agent with no certificate, another host's certificate or a revoked one is refused when enforced; an agent connecting through a proxy presenting a different server certificate refuses to connect; renewal and re-pin round-trip -- DONE 2026-11-05: server tests/test_agent_mtls.py (31: issuance names the host not the request, renewal keeps the previous serial, refused requests, every verdict incl. a forged certificate carrying the CA's name, the mode matrix, REST and WebSocket enforcement and bootstrap, the Hosts status, the signed statement, the enforce guard) and the lucky13 route review; agent (73, also on Python 3.9): pin match, mismatch refused on a real loopback TLS server, re-pin accepting only a correctly signed statement naming the observed key (rejects another key, another CA, a different pinned CA, an expired statement, an unlisted key), the client certificate presented and an expired one not, enrollment and renewal timing, refusal handling; and a cross-repo contract check (the agent's request signed by the server and accepted under enforcement; the server's statement verified by the agent). Windows only reviewed, not run
+- [ ] **Docs:** the security, architecture and agent pages (and the agent's SECURITY.md) describe mutual TLS and pinning only once they are true, with the rollout steps; all strings in 14 locales -- the agent's SECURITY.md is updated (2026-11-05); the sysmanage-docs security, architecture and agent pages wait until the docs translation run finishes, then describe this with the rollout steps and the production nginx lines
+
+### Licensing summary
+
+- **Community / OSS:** agent-server mutual TLS and server pinning (25.10).
+- **Community / OSS:** backups over HTTPS through restate-proxy, managed by SysManage (25.5); NFS stays supported. Bandwidth caps by hour of day are **Pro+**, per-site proxies through federation **Enterprise**, and the proxy's quota hook **MULTITENANT_SAAS**.
+- **Community / OSS:** the SysManage server backs itself up (25.9): the server policy, consistent PostgreSQL and OpenBAO captures, a reachable target, the recovery runbook, and the unseal keys out of the config.
+- **Pro+ (Professional):** the server's own backup encrypted to an escrow key held outside the server (25.9).
+
+### Exit Criteria
+
+**restate-proxy (25.5, Community; caps Pro+)**
+
+- [ ] A LAN host and a remote host (production's SysManage server, through the site's firewall) each back up and restore through restate-proxy with no mount; from either, deleting, renaming or overwriting any pack or snapshot, or naming another host's repository, is refused, and a pack that does not match its `.sum` (or, unencrypted, whose `.idx` does not match its content) is rejected; a concurrent capture and storage-side prune still resolve to "busy, retry"
+- [ ] A target still using NFS backs up and restores exactly as before, and a target switched from NFS to restate-proxy and back keeps its repositories and snapshots
+- [ ] **NFS or restate-proxy, decided on numbers:** the 25.5 measurements recorded (first full capture, incremental, file and whole-host restore, fleet night, remote route, a month of production nights), and Bryan's go / no-go for removing NFS from SysManage in 26.8 written here with the reason
+- [ ] A storage-side prune started during a restore through the proxy waits as busy and removes nothing the restore reads; a host whose `proxy.d` file the agent removed (left the target, or deleted) is refused on its next request; a token rotated by the agent (new hash added, then the old removed) keeps the host backing up with no failed night; a capture with `--sign-with` through the proxy restores as signed, and `restate sign` on a stored snapshot through the proxy is refused
+
+**The server backs itself up (25.9, Community / Pro+)**
+
+- [ ] Production's server backs itself up nightly to a target it can reach, encrypted to an escrow key (Pro+), with no unseal key in its config or in the backup
+- [ ] **Server-loss drill:** a test server rebuilt on a new VM from the backup alone, following the runbook with SysManage down; its agents reconnect without re-enrolling, every tenant's data and every OpenBAO secret are back, and the drill's times are recorded
+- [ ] Losing only OpenBAO, and only one tenant database, each restored on its own without touching the rest
+
+**Agent-server mutual TLS (25.10, Community)**
+
+- [ ] Production's agents present their certificates and nginx verifies them, with enforcement on; an agent pointed at a server with a different certificate refuses to connect; a host certificate renews before expiry without operator action
+
+**Every phase**
+
+- [ ] Every tier 402-clean when unlicensed, in both repos
+- [ ] Docs + 14-language i18n complete (25.6)
+- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase))
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 26: Automatic Update Application (Community / OSS; Pro+; Enterprise)
+
+**Target Release:** **v3.14.0.0**
+**Focus:** Updates that apply themselves, safely: a policy says which hosts take which updates, when, and whether they may reboot; Pro+ keeps that inside each host's maintenance windows and holds a patch for a set number of days (one count for regular patches, a shorter one for patches fixing a critical CVE); Enterprise rolls a change out one fleet at a time, stopping when a fleet comes back unhealthy, so the whole estate is never patched at once.
+
+**Why here (and why still v3.x):** added 2026-11-02 (Bryan), placed right after Phase 25 so every host it patches already has a tested Community / Pro+ backup to fall back on; the Enterprise / MULTITENANT_SAAS backup-at-scale work follows it as Phase 27 (moved there 2026-11-05), and the mobile work that takes the v4.0.0.0 major bump (now Phase 28) comes after that. It is a new capability on existing machinery, not a new device class, so it is a minor release.
+
+**Builds on (check the existing machinery first -- most of the pieces exist):**
+- **Phase 8.2 scheduled update profiles** (`backend/api/upgrade_profiles.py`, `models/upgrade_profiles.py`): a named profile with a cron schedule, `security_only`, a package-manager allowlist, a tag scope and `staggered_window_min`, plus a `trigger` endpoint and a `tick` endpoint that runs due profiles. Nothing calls `tick` on its own today (its docstring expects "an external scheduler"), so the server never applies anything unattended yet. This phase turns profiles into the policy object rather than adding a second one.
+- **The update path itself:** the agent's update checker (`update_checker` / `perform_periodic_check`, which fills `package_update` with `update_type` security / bugfix / enhancement, `priority` up to critical, `requires_reboot` and `discovered_at`) and its `apply_updates` command (`operations/update_operations.py`: package names and managers in, per-package results and `reboot_required` out), dispatched through `backend/api/updates/execution_routes.py` and the outbound queue; the host's `reboot_required` flag; the reboot command (`system_control`, `shutdown -r +1`).
+- **Phase 14.2 maintenance windows (OSS):** `MaintenanceWindow` (once / daily / weekly, IANA time zone, host or tag scope), blackout windows and audited emergency overrides, already gating change commands at dispatch in `outbound_processor` (`maintenance_command_classes.py` says which commands are change commands). A held command waits for its window and is never dropped; the 12-hour stuck sweep times from the send (`services/queue_clock.py`).
+- **Phase 14.1 advisories and the vulnerability engine (Pro+):** `advisory_engine` (vendor errata with severity and CVE ids) and `vuln_engine` (`HostVulnerabilityFinding`, severity mapped to CRITICAL / HIGH / ...), which say which pending update fixes which CVE, and how bad it is.
+- **Phase 5.2 / Phase 20 fleet machinery (Enterprise `fleet_engine`):** `HostGroup` (a hierarchy with criteria for dynamic membership) is what a "fleet" is here; rolling deployments (`request_rolling_deployment`, `next_rolling_batch` / `advance_rolling_batch`, a failure-threshold gate that halts on excess failures, pause / resume / cancel); fleet jobs dispatched through `queue_apply` with one uuid for envelope and queue row, and the job status semantics (some hosts failing is not a failed job; skipped is not failed).
+- **Phase 20 configuration-management auto-apply:** the "fires once per episode, not once per check" rule and its refusal of fleet-wide wildcards are the precedent for how unattended changes are kept from repeating or spreading.
+- **Server-wide ticks run once:** a new scheduler tick uses the multi-worker leadership singleton (Phase 22.2) and runs each tenant's pass in its tenant scope (as the backup tick does since 2026-11-02).
+
+#### 26.1 Automatic update policies (Community / OSS)
+
+- [ ] **The policy:** an upgrade profile gains "apply automatically": on / off, scope (all hosts, a tag, or listed hosts), what to apply (everything, security only, or a package-manager allowlist -- the existing profile fields), a schedule (the profile's cron), and reboot handling (below). A host covered by several policies resolves to one, with the rule shown on the host
+- [ ] **A server-side driver:** a leader-elected tick runs due policies (replacing "an external scheduler calls `tick`"), queues `apply_updates` per host through the normal outbound queue with the profile's stagger, and records a run per host; idempotent across restarts and workers, and never queues a second run for a host whose last one is still pending
+- [ ] **What a run applies:** the host's currently pending updates that match the policy at the moment the run is queued (from `package_update`), named explicitly in the command, so a run never applies something nobody could see beforehand; a run with nothing to apply is recorded as "nothing to do", not as a success or a failure
+- [ ] **Reboots:** never automatic unless the policy says so. Options: never (the host shows "reboot required" as today), reboot when the run needs it (`reboot_required`), or reboot only inside a maintenance window (Pro+, 26.2); a reboot is a separate, audited command, and a host whose reboot does not come back within a set time is flagged
+- [ ] **Safety:** a per-host opt-out ("never apply automatically" on the host, beating every policy); a hold (pause one policy, or every policy, at once, with a reason, audited); pinned / held packages respected (apt-mark hold, dnf versionlock, pkg lock, zypper locks -- what the host already reports, never overridden); excluded packages per policy (kernels and databases are the usual ones); a host with a failed previous run is not retried until someone looks, or until a set number of hours has passed
+- [ ] **Results and reporting:** per run and per host: packages applied, failed, skipped, whether a reboot was needed or done, and the agent's output tail on failure; the host's update history shows automatic runs alongside manual ones; failures count on the dashboard
+- [ ] **Audit:** every policy change, hold, opt-out, run and automatic reboot audited, with the policy and the packages named
+- [ ] **Backups first (link to Phase 24):** optionally, "apply only after a good backup in the last N hours" -- a host whose backup is overdue or failed is skipped and says why
+
+#### 26.2 Inside maintenance windows (Pro+ -- a professional feature)
+
+- [ ] **Window-aligned application:** for a host with maintenance windows, automatic runs start only when a window opens and only if the run is expected to finish inside it; the 14.2 dispatch gate still holds anything that misses, so a run is never dropped and never runs outside the window. A host with no window behaves exactly as Community (26.1). Bryan: Pro+ gets this as a professional feature, even though the windows themselves are OSS
+- [ ] **Blackouts win:** a blackout period never sees an automatic run or reboot, even with a run already queued; the emergency override (14.2) does not apply to automatic runs -- only a person can override for a person's change
+- [ ] **Reboot inside the window:** with "reboot only inside a maintenance window", a run that needs a reboot reboots before the window closes, or leaves the host "reboot required" for the next window and says so
+- [ ] **402-clean:** without the license, window alignment is off and policies behave as 26.1; the UI says why the option is unavailable
+
+#### 26.3 Waiting periods: regular patches vs critical CVEs (Pro+ and Enterprise)
+
+- [ ] **Two day counts per policy:** wait N days before applying a regular patch, and M days before applying a patch that fixes a critical CVE (Bryan: separate numbers; the critical one is usually much shorter, often 0); counted from when the update was first seen for that host (`package_update.discovered_at`), or from the vendor's release date where the advisory gives one -- whichever is earlier, so a host that came online late does not wait twice
+- [ ] **What "critical CVE" means:** the update fixes at least one CVE that the vulnerability engine rates CRITICAL for that host (`HostVulnerabilityFinding`), or that the vendor advisory (`advisory_engine`) marks critical; the policy names the source it trusts, and the threshold (critical only, or high and critical) is a setting; without the Pro+ engines' data the critical count never applies and everything waits the regular count (and the UI says so)
+- [ ] **Shown, not guessed:** each pending update on a host shows when it becomes eligible and why ("critical CVE-2026-1234: eligible now"; "regular: eligible on Nov 9"); a run applies only eligible updates and leaves the rest pending
+- [ ] **402-clean:** without Pro+ / Enterprise, waiting periods are hidden and Community applies on schedule (26.1)
+
+#### 26.4 Fleet-by-fleet rollout (Enterprise)
+
+- [ ] **One fleet at a time:** a policy can roll out across fleets (`fleet_engine` host groups) in an order the administrator sets, never more than one fleet at a time, so the whole estate is never patched at once; inside a fleet, the existing stagger and the target's concurrency still apply
+- [ ] **Health gating between fleets:** the next fleet starts only after the current one finishes and comes back healthy -- run failures under the threshold, every rebooted host back and reporting, no new critical alerts on that fleet's hosts within a soak period -- using the rolling-deployment failure-threshold gate; a failed gate stops the rollout and alerts, and the remaining fleets wait for a person (resume, skip a fleet, or cancel)
+- [ ] **Canary first:** the first fleet is the canary by convention (a small group the administrator picks); a soak time per fleet (hours) before the next one is eligible
+- [ ] **Hosts in several fleets:** a host is patched with the first fleet that contains it, and only once per rollout
+- [ ] **With 26.2 and 26.3:** each fleet's hosts still apply only inside their own windows and only eligible updates, so "the fleet is done" means every host that could apply did, and the rest say why not
+- [ ] **402-clean:** without Enterprise, the rollout option is hidden and a policy applies per host as 26.1 / 26.2
+
+#### 26.5 Alerts, reports and dashboard (Pro+ / Enterprise; Community counts)
+
+- [ ] **Alerts** through the alerting engine: an automatic run failed, a host did not come back after an automatic reboot, a rollout halted at a fleet's health gate, a critical-CVE patch still unapplied past its waiting period, a policy on hold longer than N days
+- [ ] **Report** (reporting engine): per policy and fleet over a period -- runs, hosts patched, failures, reboots, median time from a critical CVE's patch appearing to its being applied
+- [ ] **Dashboard card** (card contract: Phase 38.1): automatic-update failures, hosts waiting on a reboot, rollouts in progress or halted; Community gets the counts
+
+#### 26.6 Docs, screenshots, i18n
+
+- [ ] sysmanage-docs: automatic updates (Community), maintenance-window alignment and waiting periods (Pro+), fleet-by-fleet rollout (Enterprise); how "critical CVE" is decided; safety (opt-out, holds, pinned packages, reboots); every screenshot reproducible with `make screenshots`
+- [ ] Every new string in 14 locales, hand-checked (the verifier passes wrong translations of short UI strings)
+
+#### 26.7 Editions
+
+- [ ] **Community / OSS:** automatic update policies, the server-side driver, reboot handling, safety controls, results and audit (26.1)
+- [ ] **Pro+ (Professional):** maintenance-window-aligned application and reboots (26.2); waiting periods for regular and critical-CVE patches (26.3); alerts and the report (26.5)
+- [ ] **Enterprise:** everything in Pro+, plus fleet-by-fleet rollout with health gates and canaries (26.4)
+- [ ] Every tier gate in **both** repos, and every licensed feature 402-clean when unlicensed, with Community still able to apply updates automatically
+
+#### 26.8 Retire SysManage's NFS backup transport (Community / OSS) (added 2026-11-05, Bryan; only on a "go" from Phase 25)
+
+**Only if** Phase 25's measurements of restate-proxy against NFS (25.5) came
+out well and Bryan's go is recorded in Phase 25's exit criteria; on a no-go
+this sub-phase is dropped with the reason.  restate is untouched: it keeps
+working over NFS for anyone who mounts a repository by hand.
+
+- [ ] **Every target on restate-proxy first:** production and the lab
+      switched and proven for a full retention cycle before any code goes;
+      the server refuses to remove NFS support while any target still uses
+      it, and says which
+- [ ] **sysmanage:** the target's NFS / restate-proxy setting removed (the
+      proxy is the only transport); per-host export generation, the port
+      2049 reach check, the export and NFS-server parts of the storage audit,
+      and the NFS jobs removed; a migration drops the NFS-only columns
+      (expand-contract: unread for a release first); the audit messages and
+      their strings in 14 locales removed
+- [ ] **sysmanage-agent:** NFS mounting, the export handling on storage hosts,
+      the NFS sudoers rules and the per-OS NFS client code removed; Equip no
+      longer installs NFS packages; an old job file naming a mount is refused
+      with a plain reason
+- [ ] **sysmanage-docs:** every mention of NFS removed or rewritten for the
+      proxy (Fleet Backups, Backup storage, the storage-host setup, the
+      recovery runbooks, the supported-platforms notes), screenshots retaken
+      through `make screenshots`, and the changed strings in 14 locales
+- [ ] **Release notes:** say that NFS was removed, why (the Phase 25
+      numbers), and what an installation still on NFS must do before
+      upgrading
+
+### Licensing summary
+
+- **Community / OSS:** automatic update application by policy -- scope, what to apply, a schedule, reboot handling, per-host opt-out, holds, pinned packages, results and audit.
+- **Pro+:** automatic runs and reboots aligned to each host's maintenance windows (Community behavior without windows); separate waiting periods for regular patches and for patches fixing a critical CVE; alerts and reports.
+- **Enterprise:** fleet-by-fleet rollout, one fleet at a time, with canaries, soak times and health gates between fleets.
+
+### Exit Criteria
+
+**Community / OSS**
+
+- [ ] A policy applies security updates to a lab host on schedule with no one clicking anything; the host's history shows the run, the packages and the result; a pinned package is left alone; an opted-out host is skipped and says why
+- [ ] Reboots: "never" leaves the host "reboot required"; "when needed" reboots it and it comes back; a host that does not come back is flagged
+- [ ] A hold stops every automatic run at once and is audited; two server workers never apply one policy twice
+
+**Pro+**
+
+- [ ] A host with a maintenance window gets its automatic run only inside the window, and a blackout holds it; a host with no window is patched on the Community schedule
+- [ ] Waiting periods: with regular = 7 days and critical = 0, a critical-CVE fix applies on the next run while a regular update waits, and each shows when it becomes eligible
+- [ ] Unlicensed: window alignment and waiting periods are off and the policy behaves as Community
+
+**Enterprise**
+
+- [ ] A rollout across three lab fleets patches one fleet at a time; a fleet with a forced failure stops the rollout at its health gate with an alert, and the next fleet does not start until someone resumes it
+
+**NFS retired (26.8, only on a "go" from Phase 25)**
+
+- [ ] No target uses NFS; sysmanage, sysmanage-agent and sysmanage-docs carry no NFS transport code or NFS instructions (a search of all three for NFS finds only the release note); production and the lab back up and restore through restate-proxy alone
+
+**Every phase**
+
+- [ ] Every tier 402-clean when unlicensed, in both repos
+- [ ] Docs + 14-language i18n complete (26.6)
+- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase))
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 27: Fleet Backup at Scale -- Multi-Site, Recovery & Multi-Tenancy (Enterprise / MULTITENANT_SAAS)
+
+**Target Release:** **v3.15.0.0**
+**Focus:** The backup work that only matters once there are several sites, a dead host to rebuild, or many tenants: per-site storage through federation, restore readiness, bare-metal recovery, clones, fleet-wide restore jobs, four-eyes approval, legal hold, restore drills, off-site, immutable, air-gap and cloud copies (S3 Glacier Deep Archive), and backup multi-tenancy -- on top of Phase 24's and Phase 25's Community and Pro+ backups.
+
+**Why here (and why still v3.x):** split out of Phase 25 on 2026-11-05 (Bryan) to balance the phases: Phase 25 had 117 open items against Phase 26's 49, and half of them were this Enterprise / MULTITENANT_SAAS work, which no customer needs yet. Phase 25 keeps what production needs now, automatic updates (Phase 26) reach Community users next, and this phase follows. It stays v3.x -- Bryan: "don't let it tick over to 4.0 until we have backup fully in our rear-view mirror" -- so mobile (Phase 28) keeps the **v4.0.0.0** major bump and starts after it.
+
+**Builds on Phases 24 and 25:** the target model, per-host repositories and the storage-side runner with append-only enforcement (24.1, 24.5); restate-proxy, whose per-site proxies and quota hook are this phase's (25.5); the Pro+ `backup_engine` -- policies, OpenBAO-held keys, rotation and break-glass export (24.6); and file restore (24.9).  The design rules and warnings in Phase 24's introduction (hosts append only; tenant data in the tenant partition; nothing needs the public internet) apply here unchanged.
+
+#### 27.1 Fleet operations across sites (Enterprise)
 
 - [ ] **Storage per site, not a central SAN.** Backup data is heavy: a first capture moves everything a host keeps, and pulling every site's first backups across the WAN to one SAN is slow, costly, and ties every site's recoverability to one link. Each site has its own target; a host uses **its site's default target** unless a policy overrides it. Disaster recovery is a **second copy** from site to site (later: cloud) run off-hours -- never the primary path
 - [ ] **Federation:** each site server owns its site's targets and data; the federation controller aggregates **status only** -- last good backup, sizes, failures, verification state -- and **backup data never travels to the controller**
-- [ ] **Air-gapped sites:** the target is always local; off-site copies leave on media through the air-gap content workflow (25.3)
-- [ ] **Restore readiness:** per-policy **RPO** (maximum age of the last good snapshot) and **RTO** (expected restore time, from measured throughput); evidence is a passing full-read check (Pro+) or an Enterprise sandbox restore drill (25.2); a host whose evidence is stale shows "unproven"
+- [ ] **Air-gapped sites:** the target is always local; off-site copies leave on media through the air-gap content workflow (27.3)
+- [ ] **Restore readiness:** per-policy **RPO** (maximum age of the last good snapshot) and **RTO** (expected restore time, from measured throughput); evidence is a passing full-read check (Pro+) or an Enterprise sandbox restore drill (27.2); a host whose evidence is stale shows "unproven"
 
-#### 25.2 Recovery at scale (Enterprise)
+#### 27.2 Recovery at scale (Enterprise)
 
 - [ ] **Whole-host rebuild / bare-metal recovery (Enterprise):** `buildsheet` / `autoinstall --image-at` (item 16) + the provisioning engine's PXE / autoinstall path (Phase 18): a dead host's last good snapshot rebuilt onto new or repaired hardware -- restate's own roadmap item "bare-metal recovery from a boot image"
 - [ ] **Clone / migrate (Enterprise):** to a VM (virtualization engine) or new metal with a fresh identity (`--as NAME`); the clone never keeps the source's SysManage agent database or host token (item 13) and enrolls as a new host
 - [ ] **Fleet-wide restore and rebuild jobs (Enterprise):** many hosts restored or rebuilt as a fleet job in waves (20.4), with per-host results and the usual concurrency clamps
 - [ ] **Four-eyes approval (Enterprise):** a restore over existing data, a rebuild or a clone needs a second approver with the restore role; a file restore into staging does not
 - [ ] **Legal hold (Enterprise):** snapshots under hold are excluded from prune (24.5) until released, with the hold, its owner and reason audited
-- [ ] **Automated restore drills (Enterprise):** on a schedule, restore a host's latest snapshot into a sandbox VM (virtualization engine), run a per-policy probe (boots, a service answers, a file hash matches) and record pass / fail as the host's restore evidence (25.1); the VM is destroyed afterwards
+- [ ] **Automated restore drills (Enterprise):** on a schedule, restore a host's latest snapshot into a sandbox VM (virtualization engine), run a per-policy probe (boots, a service answers, a file hash matches) and record pass / fail as the host's restore evidence (27.1); the VM is destroyed afterwards
 
-#### 25.3 Multi-site and resilience (Enterprise)
+#### 27.3 Multi-site and resilience (Enterprise)
 
 - [ ] **Multiple targets** per installation, each with its site, capacity and health
-- [ ] **Per-site targets through federation:** a site's hosts default to the site's target (25.1); the controller can set fleet-wide policies whose target resolves per site
+- [ ] **Per-site targets through federation:** a site's hosts default to the site's target (27.1); the controller can set fleet-wide policies whose target resolves per site
 - [ ] **Off-site replication:** `restate copy` (item 11) of each snapshot to a second repository at another site, run by the storage-side runner (24.5) off-hours, encrypted packs copied as they are; replication lag shown per host
 - [ ] **Immutable copies:** the off-site copy lands on storage the source site cannot delete (a different target with its own append-only enforcement and NAS-side snapshots)
 - [ ] **Air-gap media:** for isolated sites, snapshots exported to removable media through the air-gap content workflow, with a manifest and signature, and imported at the receiving site
@@ -14476,7 +14947,7 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
       restored from the Deep Archive copy alone (an exit criterion when this
       ships)
 
-#### 25.4 Multi-tenancy (MULTITENANT_SAAS)
+#### 27.4 Multi-tenancy (MULTITENANT_SAAS)
 
 - [ ] **Tenant-partition data:** targets, policies, snapshot records, restore jobs and backup audit live in the tenant partition, like hosts and policies
 - [ ] **Never shared across tenants:** no repository, and no future machine-shared deduplicating store (sysmanage-todo.md items 17, 21), is shared between tenants -- shared chunks would let one tenant learn whether another holds a given file
@@ -14488,142 +14959,23 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
 - [ ] **Lifecycle:** tenant provisioning (self-service provisioning) creates the tenant's storage namespace and keys, or prompts for a bring-your-own target; tenant removal has a **retention and export step** (the tenant takes its backups or has them deleted, both audited) before its storage is destroyed
 - [ ] **Isolation tests:** two tenants on one pool; neither can list, read, mount or deduplicate against the other's data, and neither's keys open the other's repositories
 
-#### 25.5 Storage-side backup gateway: hosts never reach the storage (added 2026-10-28, Bryan)
+#### 27.5 Docs, screenshots, i18n
 
-Today every backed-up host mounts its own NFSv4 export of the storage host.
-That works, but it means every host can reach the storage network, the
-append-only guarantee rests on NFS permissions, ownership squashing and
-directory ACLs (with per-OS quirks: FreeBSD refuses creates in sticky
-directories, Linux `protected_regular` breaks them), and every host runs an
-NFS client (the 2026-10-28 production bug -- systemd's private mount
-namespace hiding the mount from restate's unit, so a capture wrote to local
-disk -- exists only because hosts mount).  The gateway replaces the mount
-with an authenticated, append-only HTTPS service on the storage side.
-
-**Design rule (Bryan, 2026-10-28): the proxy is on the storage side, never
-the SysManage server.**  Routing backup data through the server was weighed
-and rejected: it doubles every byte's trip (host -> server -> storage),
-makes the server the bandwidth bottleneck and a single point of failure for
-backups, pulls each site's data across the WAN, and -- for unencrypted
-Community repositories -- puts plaintext on the server.  Backup data stays at
-its site (the Phase 24 rule "heavy and local; status light and global"); the
-server stays the control plane.
-
-- [ ] **The gateway:** a small HTTPS service on the storage host (or on a
-      per-site relay host where the storage host cannot run one), installed
-      and kept current by SysManage like restate is today,
-      listening only where the site's hosts can reach it; TLS with the
-      server-issued certificate chain the agent already trusts
-- [ ] **Host authentication by credential, not address:** a host presents its
-      host token (or a short-lived grant the server issues for one job); the
-      gateway maps it to that host's repository, so a host cannot even name
-      another host's repository -- no per-host exports, no client-address
-      allow-lists, no NAS credentials or mounts on any backed-up host
-- [ ] **Append-only by protocol:** the API can list and read what an
-      incremental capture needs (index, record, the host's own snapshots) and
-      add new packs and snapshots -- there is no delete, rename or overwrite
-      operation at all.  Prune, check, seal, protect and copy stay local jobs
-      on the storage host (24.5), unchanged
-- [ ] **Restores through the gateway** with a one-time grant the server issues
-      under the Restore Files role (audited); browse and plan read the index
-      only, as today
-- [ ] **Locking at the gateway:** a capture holds its repository's lock in the
-      gateway, replacing `flock` over NFS (which some network filesystems do
-      not honor); a busy repository still answers "busy" (exit 5 semantics) so
-      the existing retry with backoff applies
-- [ ] **Per-host limits at the gateway:** concurrency (the target's cap, 24.8),
-      optional bandwidth caps by hour of day (shared with 25.3's uploader),
-      and a quota hook for 25.4 multi-tenancy
-- [ ] **Encryption unchanged:** with Pro+ encryption the gateway and the
-      storage host only ever see ciphertext packs; Community repositories are
-      plaintext at rest exactly as they are on NFS today (the gateway adds no
-      new place where data is readable)
-- [ ] **Coexists with NFS:** per target, "hosts mount NFS" (today) or "hosts
-      use the gateway"; a target can switch, and the storage audit (24.5)
-      checks whichever is in use.  Hosts that cannot mount NFS well (Windows,
-      macOS, the BSDs' clients) are the first users
-- [ ] **A standalone project, not a restate feature (Bryan, 2026-10-28):**
-      the gateway is its own piece of code, installed on the NAS / storage
-      host (a new GitHub repository is fine), with its own packaging and
-      release, branded SysManage (e.g. `sysmanage-backup-gateway`; name to
-      settle): its trust model is SysManage's -- host tokens, server-issued
-      grants, installed and updated by SysManage -- so without SysManage it
-      could not tell who may write where.  restate stays as it is, "do one
-      thing and do it well": local paths only, no network code.
-      So the host side needs a matching piece that presents the repository
-      to restate as a local path while the data goes to the gateway: the
-      choice between a FUSE filesystem shipped by the gateway project, a
-      staging directory the agent uploads from (the write cache shows restate
-      already tolerates a local copy), or another approach is the first
-      design spike of this sub-phase.  restic's rest-server in
-      `--append-only` mode is prior art for the server side
-- [ ] **Smaller first step to consider:** where a site's hosts cannot reach the
-      storage at all, the federation site server can act as the relay -- data
-      stays within the site, at the cost of one hop and that server's
-      bandwidth
-- [ ] **Tier: to decide (Bryan).** Append-only safety has been Community from
-      the start (Phase 24: "safety is not a paid feature"), which argues for
-      Community; per-site relays and multi-tenant quotas at the gateway are
-      Enterprise / MULTITENANT_SAAS
-
-#### 25.6 Docs, screenshots, i18n
-
-- [ ] sysmanage-docs, Enterprise / MULTITENANT_SAAS: fleet operations across sites and restore readiness; rebuild, clone and fleet restore jobs; four-eyes approval, legal hold and restore drills; off-site, immutable, air-gap and cloud copies; the storage-side gateway; multi-tenancy -- each on its tier page, with screenshots through `make screenshots`
-- [ ] sysmanage-docs, Community / Pro+: backing up the SysManage server itself, and the server recovery runbook (25.9)
+- [ ] sysmanage-docs, Enterprise / MULTITENANT_SAAS: fleet operations across sites and restore readiness; rebuild, clone and fleet restore jobs; four-eyes approval, legal hold and restore drills; off-site, immutable, air-gap and cloud copies; multi-tenancy -- each on its tier page, with screenshots through `make screenshots`
 - [ ] All new strings in 14 locales, verified
 
-#### 25.7 Editions
+#### 27.6 Editions
 
 - [ ] **Enterprise -- multi-site and recovery at scale:**
-  - multiple targets; per-site targets through federation; off-site replication (`restate copy`) to a second site; immutable copies; air-gap media for isolated sites (25.3)
-  - bare-metal recovery through the provisioning engine (PXE + autoinstall); clone / migrate to a VM or metal (`--as`) (25.2)
+  - multiple targets; per-site targets through federation; off-site replication (`restate copy`) to a second site; immutable copies; air-gap media for isolated sites (27.3)
+  - bare-metal recovery through the provisioning engine (PXE + autoinstall); clone / migrate to a VM or metal (`--as`) (27.2)
   - fleet-wide restore and rebuild jobs in waves (fleet-job machinery); four-eyes restore approval; legal hold
   - automated restore drills into a sandbox VM through the virtualization engine, with pass / fail
-- [ ] **MULTITENANT_SAAS:** per-tenant storage, keys, quotas and usage metering (25.4)
+- [ ] **MULTITENANT_SAAS:** per-tenant storage, keys, quotas and usage metering (27.4)
 - [ ] Every tier gate in **both** repos, and every Enterprise / MULTITENANT_SAAS feature 402-clean when unlicensed, with Community and Pro+ backups unaffected
-
-#### 25.8 Platforms, restore feedback and Windows signing (added 2026-10-30)
-
-- [ ] **A backup job runner without systemd:** captures, estimates, restores and the storage-side jobs run through restate's `restate-job@` systemd unit today, so hosts Equip can now install restate on -- Alpine (OpenRC), FreeBSD / OpenBSD / NetBSD (rc.d) and macOS (launchd) -- cannot back up (FreeBSD only serves as a storage host). Give the agent a runner for each that keeps the same guarantees: a root-owned job file the agent validated, restate started detached, results collected the same way
-- [ ] **Hosts behind NAT, said plainly (found 2026-11-03):** a host on a private network behind another (netbsd, a libvirt VM on beast's NAT, 192.168.122.133) reports its private address, the storage host makes its per-host export for that address, but sees the traffic come from the NAT gateway (192.168.4.11) and refuses the mount -- while the reach check, which only opens a connection to port 2049, reports the host as able to reach its storage. Detect it (the storage side compares the connecting address with the host's reported one, or the agent learns its outward address) and say "this host is behind NAT; the storage host sees it as <address>" with what to do (bridge it, or the storage-side gateway, 25.5); never widen an export to the gateway's address, which would let every host behind it mount the repository
-- [ ] **Say plainly what Alpine is missing:** until that runner exists an equipped Alpine host reads "Upgrade restate" (the systemd unit is missing), which Equip cannot fix; report that backups need systemd on Linux for now instead
-- [ ] **Restore dialog shows unmatched and resolved paths:** restate (queued 2026-10-30) resolves a requested path through symlinks recorded in the snapshot and reports `restore.resolved` and `restore.unmatched`, ending incomplete (exit 4) when any requested path matched nothing; the dialog lists them in Preview and the result and stops calling such a restore "Succeeded" (key off `restore_resolves_links` / `restore_unmatched`)
-- [ ] **Windows installers signed, and winget's Defender validation passing:** agent winget PRs since 3.11 fail "Validation-Defender-Error" (latest #465661 for 3.12.0.17) though both MSIs and their extracted contents scan clean locally and a silent install on a machine with Python raised nothing (2026-10-30); a clean-VM install (no Python: the VC++ / Python download and the SYSTEM bootstrap task) and Microsoft's answer to the false-positive submission come next. Sign both MSIs and the bundle .exe in the release workflow (Azure Trusted Signing proposed, Bryan's decision), then close the stale agent PRs
-- [ ] **A second iCloud Photos account (moved from the Phase 24 exit criteria, 2026-11-05):** a second Apple ID on the same storage host downloads to its own directory beside the first, with its own password in OpenBAO, its own two-factor sign-in and its own schedule, while the first account's runs carry on unaffected.
-- [ ] **iCloud Live Photo videos (moved from the Phase 24 exit criteria, 2026-11-05):** a Live Photo downloads as its still and its video side by side (the `_HEVC.MOV` beside the HEIC, named by the `--live-photo-mov-filename-policy` the agent sets), both with correct dates, and a second run skips both. The first production account's early downloads held no Live Photo, so this was not yet seen.
-- [ ] **iCloud incremental runs and "Needs sign-in" (moved from the Phase 24 exit criteria, 2026-11-05):** a second run of an account downloads only what is new (a small fraction of the first run, the rest counted as already present), and an expired or wrong session shows "Needs sign-in", never success. A wrong password already read as needs_sign_in on the lab freebsd host (2026-11-03); prove both in production.
-- [ ] **A tag policy covering the lab fleet (moved from the Phase 24 exit criteria, 2026-11-05):** a tag-based policy with grandfather-father-son retention and a maintenance window covers at least two backed-up lab hosts, and the prune preview matches what prune removes on each. Needs the runner without systemd above (or a second Linux lab host); the mechanics were proven on t14 alone in Phase 24.
-
-#### 25.9 The SysManage server backs itself up (Community / OSS; Pro+) (added 2026-11-02, Bryan)
-
-**Why:** production's server had no backup at all on 2026-11-02 -- no cron job, no backup command, no policy -- and could not use the Phase 24 target either: it runs in the cloud, the NAS is on the home network. The pieces that come closest cover something else: restate's `postgresql` hook quiesces a database on a backed-up host, and 13.1.F (`backend/services/tenant_backup.py`, multitenancy_engine) only runs an operator-supplied external command per tenant. Nothing protects the agents' CA, OpenBAO or the server's own files. What is lost with the server, worst first: the **agents' mTLS CA and the server identity** (lose them and every agent must re-enroll); **OpenBAO** (tenant database credentials, backup encryption keys, SSH keys); the **PostgreSQL** registry and tenant databases; `/etc/sysmanage.yaml`, TLS certificates and the license. Re-creatable and left out by default: downloaded Pro+ engine bundles, package mirrors, logs.
-
-- [ ] **Prerequisite -- unseal keys out of the config (security, all editions):** `/etc/sysmanage.yaml` holds the OpenBAO unseal key(s) (`vault.server.unseal_keys`) beside the vault token and the database password, so anyone who can read that file -- or any backup of it -- holds everything. Move the unseal keys out: a sealed escrow copy (the break-glass pattern, 24.6) for manual unseal, or an auto-unseal (transit / KMS) where the operator has one; the server warns at start while keys remain in the config; the backup carries the config without them. The vault token and database password stay, so the backup itself must be protected (Pro+ encryption below; Community: say so on the policy)
-- [ ] **A "server" backup policy (Community):** the server is already a managed host; its policy is offered on the Backups page as **Back up this SysManage server**, preset to the CA and server identity, `/etc/sysmanage.yaml`, TLS certificates, the license, OpenBAO and PostgreSQL, with engine bundles, mirrors and logs left out. A warning on the Backups page and the dashboard card while the server itself has no good backup
-- [ ] **Consistent databases:** PostgreSQL through restate's `postgresql` hook (stopped-file copy for big clusters, a compressed dump for small ones -- `dump = auto`), every database on the server's cluster, registry and tenants alike
-- [ ] **An `openbao` hook (restate, Community):** before the capture, `bao operator raft snapshot save` into the hook's dump directory with a token limited to `sys/storage/raft/snapshot`; with the file backend, a stopped copy of the data directory instead; the snapshot lives in the backup, and its restore is `bao operator raft snapshot restore` (ask restate-31; hook named in its `hooks.d` contract)
-- [ ] **A target the server can reach:** a cloud server cannot mount a home or office NAS. Supported, in order: a VPN to the storage host (WireGuard / Tailscale -- the agent's reach check already proves or refuses the path, 24.4); a repository on the server's own disk with the off-site copy (25.3) carrying it away; the storage-side gateway (25.5) where the server has no route at all. The policy dialog says which applies and refuses a target the reach check cannot see
-- [ ] **Encrypted with a key that is not in the server (Pro+):** the server's own backup cannot be keyed from its own OpenBAO -- restoring OpenBAO would need a key held inside OpenBAO. It is encrypted to an **escrow public key** the operator provides (the break-glass operator key, 24.6), whose private half never touches the server; restore takes that key by hand. Refused, with the reason, if no escrow key is set
-- [ ] **Recovery runbook, tested once per phase exit (docs, Community):** with SysManage down and only restate and the backup: install the server package; restore the files with restate by hand (`restore --plan`, then `--check-first --root`); restore the OpenBAO snapshot and unseal it from escrow; restore the databases (registry first, then tenants) and confirm `alembic` is at the expected heads; start the server -- agents reconnect **without re-enrolling** because the CA and identity came back. Includes moving to a new machine (new IP / DNS) and the order of operations when only one piece is lost (OpenBAO alone, one tenant database alone)
-- [ ] **Air-gapped installs:** the same policy against the appliance's own storage (Phase 24 invariants), and the runbook works from local media
-- [ ] Docs, screenshots and all strings in 14 locales
-
-#### 25.10 Agent-server mutual TLS and server pinning (Community / OSS) (added 2026-11-05, Bryan)
-
-**Why:** the documentation said agents and server use mutual TLS; the 2026-11-05 site audit found they do not. The pieces exist and nothing uses them: the server creates a CA and issues each approved host a certificate (`backend/security/certificate_manager.py`, `backend/api/host_approval.py:78`), and the agent stores that certificate and the server's fingerprint (`sysmanage-agent/src/security/certificate_store.py:81-147`) -- but the agent never presents its certificate, no nginx config has `ssl_verify_client`, `validate_client_certificate()` (`certificate_manager.py:368`) is never called, and the agent never compares the server's certificate with the fingerprint it saved. Agents authenticate with their per-host token (22.0) over ordinary server-authenticated TLS. The security docs were corrected to say exactly that; they say "mutual TLS" again only when this section is done.
-
-- [ ] **The agent pins its server:** on every connection the agent checks the server against what it stored at enrollment and refuses a mismatch, saying why. Pin the issuing CA or the public key (SPKI), not the leaf certificate -- a Let's Encrypt renewal changes the leaf every 60-90 days -- and give a deliberate re-pin path for a real server or certificate change (operator re-approval, or a signed re-pin from the old key), never a silent re-trust
-- [ ] **Mutual TLS on the agent paths:** the agent presents its issued certificate on its WebSocket and API connections; nginx verifies it against the SysManage CA on the agent locations only (`ssl_verify_client optional` there, so browsers are unaffected) and passes the verified identity to the backend, which requires the certificate and the host token to name the same host. A deleted or revoked host's certificate is refused (a revocation list nginx reads, kept current by the server)
-- [ ] **Certificates renew themselves:** host certificates are valid for one year with no renewal today; renew over the authenticated channel well before expiry, alert on any host near expiry, and never let an expired certificate lock a host out without saying so on the host
-- [ ] **Rollout without breaking a fleet:** off -> optional (verified when presented, token alone still accepted) -> enforced, set per tenant; older agents keep working on the token until enforcement is turned on, and the Hosts list shows which hosts are not yet presenting a certificate; air-gapped installs work unchanged
-- [ ] **Tests:** an agent with no certificate, another host's certificate or a revoked one is refused when enforced; an agent connecting through a proxy presenting a different server certificate refuses to connect; renewal and re-pin round-trip
-- [ ] **Docs:** the security, architecture and agent pages (and the agent's SECURITY.md) describe mutual TLS and pinning only once they are true, with the rollout steps; all strings in 14 locales
 
 ### Licensing summary
 
-- **Community / OSS:** agent-server mutual TLS and server pinning (25.10).
-- **Community / OSS:** the SysManage server backs itself up (25.9): the server policy, consistent PostgreSQL and OpenBAO captures, a reachable target, the recovery runbook, and the unseal keys out of the config.
-- **Pro+ (Professional):** the server's own backup encrypted to an escrow key held outside the server (25.9).
 - **Enterprise:** multi-site and recovery at scale -- many targets, per-site targets through federation, off-site replication, immutable copies, air-gap media, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes approval, legal hold and automated restore drills.
 - **MULTITENANT_SAAS:** per-tenant storage namespaces and keys, operator storage pools, quotas and usage metering, bring-your-own storage, and tenant lifecycle handling for backup data.
 
@@ -14637,30 +14989,16 @@ server stays the control plane.
 - [ ] A fleet-wide restore job runs in waves with per-host results; four-eyes approval blocks a single operator; legal hold survives a prune
 - [ ] **Restore drill passes:** a scheduled sandbox-VM drill restores, probes and records pass / fail for at least three hosts
 
-**Storage-side gateway (tier to decide)**
-
-- [ ] A host with no route to the storage network backs up and restores through the gateway; from that host, deleting, renaming or overwriting any pack or snapshot, or naming another host's repository, is refused; a concurrent capture and storage-side prune still resolve to "busy, retry"
-
 **MULTITENANT_SAAS**
 
 - [ ] **Tenant isolation proven:** two tenants on one pool -- no cross-tenant listing, reading, mounting or deduplication, and neither tenant's keys open the other's repositories
 - [ ] **Quota enforcement proven:** a tenant over quota has new captures blocked with an alert, cannot prune below its plan's minimum retention, and recovers when space is freed
 - [ ] Bring-your-own storage works with the operator holding no credentials; tenant removal runs its retention / export step before storage is destroyed
 
-**The server backs itself up (25.9, Community / Pro+)**
-
-- [ ] Production's server backs itself up nightly to a target it can reach, encrypted to an escrow key (Pro+), with no unseal key in its config or in the backup
-- [ ] **Server-loss drill:** a test server rebuilt on a new VM from the backup alone, following the runbook with SysManage down; its agents reconnect without re-enrolling, every tenant's data and every OpenBAO secret are back, and the drill's times are recorded
-- [ ] Losing only OpenBAO, and only one tenant database, each restored on its own without touching the rest
-
-**Agent-server mutual TLS (25.10, Community)**
-
-- [ ] Production's agents present their certificates and nginx verifies them, with enforcement on; an agent pointed at a server with a different certificate refuses to connect; a host certificate renews before expiry without operator action
-
 **Every phase**
 
 - [ ] Every tier 402-clean when unlicensed, in both repos
-- [ ] Docs + 14-language i18n complete (25.6)
+- [ ] Docs + 14-language i18n complete (27.5)
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped.
 - [ ] **Pro+ engines built for every OS + architecture and verified in R2**
       (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase))
@@ -14668,110 +15006,7 @@ server stays the control plane.
 
 ---
 
-## Phase 26: Automatic Update Application (Community / OSS; Pro+; Enterprise)
-
-**Target Release:** **v3.14.0.0**
-**Focus:** Updates that apply themselves, safely: a policy says which hosts take which updates, when, and whether they may reboot; Pro+ keeps that inside each host's maintenance windows and holds a patch for a set number of days (one count for regular patches, a shorter one for patches fixing a critical CVE); Enterprise rolls a change out one fleet at a time, stopping when a fleet comes back unhealthy, so the whole estate is never patched at once.
-
-**Why here (and why still v3.x):** added 2026-11-02 (Bryan), placed right after the backup phases so every host it patches already has a tested backup to fall back on, and before the mobile work that takes the v4.0.0.0 major bump (now Phase 27). It is a new capability on existing machinery, not a new device class, so it is a minor release.
-
-**Builds on (check the existing machinery first -- most of the pieces exist):**
-- **Phase 8.2 scheduled update profiles** (`backend/api/upgrade_profiles.py`, `models/upgrade_profiles.py`): a named profile with a cron schedule, `security_only`, a package-manager allowlist, a tag scope and `staggered_window_min`, plus a `trigger` endpoint and a `tick` endpoint that runs due profiles. Nothing calls `tick` on its own today (its docstring expects "an external scheduler"), so the server never applies anything unattended yet. This phase turns profiles into the policy object rather than adding a second one.
-- **The update path itself:** the agent's update checker (`update_checker` / `perform_periodic_check`, which fills `package_update` with `update_type` security / bugfix / enhancement, `priority` up to critical, `requires_reboot` and `discovered_at`) and its `apply_updates` command (`operations/update_operations.py`: package names and managers in, per-package results and `reboot_required` out), dispatched through `backend/api/updates/execution_routes.py` and the outbound queue; the host's `reboot_required` flag; the reboot command (`system_control`, `shutdown -r +1`).
-- **Phase 14.2 maintenance windows (OSS):** `MaintenanceWindow` (once / daily / weekly, IANA time zone, host or tag scope), blackout windows and audited emergency overrides, already gating change commands at dispatch in `outbound_processor` (`maintenance_command_classes.py` says which commands are change commands). A held command waits for its window and is never dropped; the 12-hour stuck sweep times from the send (`services/queue_clock.py`).
-- **Phase 14.1 advisories and the vulnerability engine (Pro+):** `advisory_engine` (vendor errata with severity and CVE ids) and `vuln_engine` (`HostVulnerabilityFinding`, severity mapped to CRITICAL / HIGH / ...), which say which pending update fixes which CVE, and how bad it is.
-- **Phase 5.2 / Phase 20 fleet machinery (Enterprise `fleet_engine`):** `HostGroup` (a hierarchy with criteria for dynamic membership) is what a "fleet" is here; rolling deployments (`request_rolling_deployment`, `next_rolling_batch` / `advance_rolling_batch`, a failure-threshold gate that halts on excess failures, pause / resume / cancel); fleet jobs dispatched through `queue_apply` with one uuid for envelope and queue row, and the job status semantics (some hosts failing is not a failed job; skipped is not failed).
-- **Phase 20 configuration-management auto-apply:** the "fires once per episode, not once per check" rule and its refusal of fleet-wide wildcards are the precedent for how unattended changes are kept from repeating or spreading.
-- **Server-wide ticks run once:** a new scheduler tick uses the multi-worker leadership singleton (Phase 22.2) and runs each tenant's pass in its tenant scope (as the backup tick does since 2026-11-02).
-
-#### 26.1 Automatic update policies (Community / OSS)
-
-- [ ] **The policy:** an upgrade profile gains "apply automatically": on / off, scope (all hosts, a tag, or listed hosts), what to apply (everything, security only, or a package-manager allowlist -- the existing profile fields), a schedule (the profile's cron), and reboot handling (below). A host covered by several policies resolves to one, with the rule shown on the host
-- [ ] **A server-side driver:** a leader-elected tick runs due policies (replacing "an external scheduler calls `tick`"), queues `apply_updates` per host through the normal outbound queue with the profile's stagger, and records a run per host; idempotent across restarts and workers, and never queues a second run for a host whose last one is still pending
-- [ ] **What a run applies:** the host's currently pending updates that match the policy at the moment the run is queued (from `package_update`), named explicitly in the command, so a run never applies something nobody could see beforehand; a run with nothing to apply is recorded as "nothing to do", not as a success or a failure
-- [ ] **Reboots:** never automatic unless the policy says so. Options: never (the host shows "reboot required" as today), reboot when the run needs it (`reboot_required`), or reboot only inside a maintenance window (Pro+, 26.2); a reboot is a separate, audited command, and a host whose reboot does not come back within a set time is flagged
-- [ ] **Safety:** a per-host opt-out ("never apply automatically" on the host, beating every policy); a hold (pause one policy, or every policy, at once, with a reason, audited); pinned / held packages respected (apt-mark hold, dnf versionlock, pkg lock, zypper locks -- what the host already reports, never overridden); excluded packages per policy (kernels and databases are the usual ones); a host with a failed previous run is not retried until someone looks, or until a set number of hours has passed
-- [ ] **Results and reporting:** per run and per host: packages applied, failed, skipped, whether a reboot was needed or done, and the agent's output tail on failure; the host's update history shows automatic runs alongside manual ones; failures count on the dashboard
-- [ ] **Audit:** every policy change, hold, opt-out, run and automatic reboot audited, with the policy and the packages named
-- [ ] **Backups first (link to Phase 24):** optionally, "apply only after a good backup in the last N hours" -- a host whose backup is overdue or failed is skipped and says why
-
-#### 26.2 Inside maintenance windows (Pro+ -- a professional feature)
-
-- [ ] **Window-aligned application:** for a host with maintenance windows, automatic runs start only when a window opens and only if the run is expected to finish inside it; the 14.2 dispatch gate still holds anything that misses, so a run is never dropped and never runs outside the window. A host with no window behaves exactly as Community (26.1). Bryan: Pro+ gets this as a professional feature, even though the windows themselves are OSS
-- [ ] **Blackouts win:** a blackout period never sees an automatic run or reboot, even with a run already queued; the emergency override (14.2) does not apply to automatic runs -- only a person can override for a person's change
-- [ ] **Reboot inside the window:** with "reboot only inside a maintenance window", a run that needs a reboot reboots before the window closes, or leaves the host "reboot required" for the next window and says so
-- [ ] **402-clean:** without the license, window alignment is off and policies behave as 26.1; the UI says why the option is unavailable
-
-#### 26.3 Waiting periods: regular patches vs critical CVEs (Pro+ and Enterprise)
-
-- [ ] **Two day counts per policy:** wait N days before applying a regular patch, and M days before applying a patch that fixes a critical CVE (Bryan: separate numbers; the critical one is usually much shorter, often 0); counted from when the update was first seen for that host (`package_update.discovered_at`), or from the vendor's release date where the advisory gives one -- whichever is earlier, so a host that came online late does not wait twice
-- [ ] **What "critical CVE" means:** the update fixes at least one CVE that the vulnerability engine rates CRITICAL for that host (`HostVulnerabilityFinding`), or that the vendor advisory (`advisory_engine`) marks critical; the policy names the source it trusts, and the threshold (critical only, or high and critical) is a setting; without the Pro+ engines' data the critical count never applies and everything waits the regular count (and the UI says so)
-- [ ] **Shown, not guessed:** each pending update on a host shows when it becomes eligible and why ("critical CVE-2026-1234: eligible now"; "regular: eligible on Nov 9"); a run applies only eligible updates and leaves the rest pending
-- [ ] **402-clean:** without Pro+ / Enterprise, waiting periods are hidden and Community applies on schedule (26.1)
-
-#### 26.4 Fleet-by-fleet rollout (Enterprise)
-
-- [ ] **One fleet at a time:** a policy can roll out across fleets (`fleet_engine` host groups) in an order the administrator sets, never more than one fleet at a time, so the whole estate is never patched at once; inside a fleet, the existing stagger and the target's concurrency still apply
-- [ ] **Health gating between fleets:** the next fleet starts only after the current one finishes and comes back healthy -- run failures under the threshold, every rebooted host back and reporting, no new critical alerts on that fleet's hosts within a soak period -- using the rolling-deployment failure-threshold gate; a failed gate stops the rollout and alerts, and the remaining fleets wait for a person (resume, skip a fleet, or cancel)
-- [ ] **Canary first:** the first fleet is the canary by convention (a small group the administrator picks); a soak time per fleet (hours) before the next one is eligible
-- [ ] **Hosts in several fleets:** a host is patched with the first fleet that contains it, and only once per rollout
-- [ ] **With 26.2 and 26.3:** each fleet's hosts still apply only inside their own windows and only eligible updates, so "the fleet is done" means every host that could apply did, and the rest say why not
-- [ ] **402-clean:** without Enterprise, the rollout option is hidden and a policy applies per host as 26.1 / 26.2
-
-#### 26.5 Alerts, reports and dashboard (Pro+ / Enterprise; Community counts)
-
-- [ ] **Alerts** through the alerting engine: an automatic run failed, a host did not come back after an automatic reboot, a rollout halted at a fleet's health gate, a critical-CVE patch still unapplied past its waiting period, a policy on hold longer than N days
-- [ ] **Report** (reporting engine): per policy and fleet over a period -- runs, hosts patched, failures, reboots, median time from a critical CVE's patch appearing to its being applied
-- [ ] **Dashboard card** (card contract: Phase 37.1): automatic-update failures, hosts waiting on a reboot, rollouts in progress or halted; Community gets the counts
-
-#### 26.6 Docs, screenshots, i18n
-
-- [ ] sysmanage-docs: automatic updates (Community), maintenance-window alignment and waiting periods (Pro+), fleet-by-fleet rollout (Enterprise); how "critical CVE" is decided; safety (opt-out, holds, pinned packages, reboots); every screenshot reproducible with `make screenshots`
-- [ ] Every new string in 14 locales, hand-checked (the verifier passes wrong translations of short UI strings)
-
-#### 26.7 Editions
-
-- [ ] **Community / OSS:** automatic update policies, the server-side driver, reboot handling, safety controls, results and audit (26.1)
-- [ ] **Pro+ (Professional):** maintenance-window-aligned application and reboots (26.2); waiting periods for regular and critical-CVE patches (26.3); alerts and the report (26.5)
-- [ ] **Enterprise:** everything in Pro+, plus fleet-by-fleet rollout with health gates and canaries (26.4)
-- [ ] Every tier gate in **both** repos, and every licensed feature 402-clean when unlicensed, with Community still able to apply updates automatically
-
-### Licensing summary
-
-- **Community / OSS:** automatic update application by policy -- scope, what to apply, a schedule, reboot handling, per-host opt-out, holds, pinned packages, results and audit.
-- **Pro+:** automatic runs and reboots aligned to each host's maintenance windows (Community behavior without windows); separate waiting periods for regular patches and for patches fixing a critical CVE; alerts and reports.
-- **Enterprise:** fleet-by-fleet rollout, one fleet at a time, with canaries, soak times and health gates between fleets.
-
-### Exit Criteria
-
-**Community / OSS**
-
-- [ ] A policy applies security updates to a lab host on schedule with no one clicking anything; the host's history shows the run, the packages and the result; a pinned package is left alone; an opted-out host is skipped and says why
-- [ ] Reboots: "never" leaves the host "reboot required"; "when needed" reboots it and it comes back; a host that does not come back is flagged
-- [ ] A hold stops every automatic run at once and is audited; two server workers never apply one policy twice
-
-**Pro+**
-
-- [ ] A host with a maintenance window gets its automatic run only inside the window, and a blackout holds it; a host with no window is patched on the Community schedule
-- [ ] Waiting periods: with regular = 7 days and critical = 0, a critical-CVE fix applies on the next run while a regular update waits, and each shows when it becomes eligible
-- [ ] Unlicensed: window alignment and waiting periods are off and the policy behaves as Community
-
-**Enterprise**
-
-- [ ] A rollout across three lab fleets patches one fleet at a time; a fleet with a forced failure stops the rollout at its health gate with an alert, and the next fleet does not start until someone resumes it
-
-**Every phase**
-
-- [ ] Every tier 402-clean when unlicensed, in both repos
-- [ ] Docs + 14-language i18n complete (26.6)
-- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped.
-- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
-      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase))
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
-
----
-
-## Phase 27: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)
+## Phase 28: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)
 
 **Target Release:** **v4.0.0.0**
 **Focus:** Extend the managed fleet beyond servers and desktops to enterprise phones & tablets -- inventory + OS/patch compliance across tiers, up to full native MDM control at Enterprise -- so the v4.0 "manage everything" promise covers every endpoint class.
@@ -14782,11 +15017,11 @@ server stays the control plane.
 
 **Design note -- this is NOT a ported agent.** iOS and Android forbid a persistent privileged daemon (sandboxing + background-execution limits), so there is no `sysmanage-agent` port. Management runs over vendor MDM/UEM channels and is mostly *server-side*; the only device-side pieces are an optional small companion app and/or an OS-native enrollment profile -- separate codebases (Swift/Apple MDM, Android Enterprise) from the agent.
 
-> **⚠️ Self-hosted / air-gap caveat.** Native mobile management needs outbound cloud reachability the rest of SysManage does not: **Apple MDM requires Apple's APNs** and the **Android Management API is Google-cloud-hosted**, so the native-MDM tiers are **not air-gappable**. The air-gap-friendly options are ingest-from-an-existing-UEM (27.2) and the self-hosted companion app (28.1), both of which reach only the customer's own infra. The native-MDM tiers themselves are Phases 32 (Apple) and 33 (Android). Called out per sub-phase.
+> **⚠️ Self-hosted / air-gap caveat.** Native mobile management needs outbound cloud reachability the rest of SysManage does not: **Apple MDM requires Apple's APNs** and the **Android Management API is Google-cloud-hosted**, so the native-MDM tiers are **not air-gappable**. The air-gap-friendly options are ingest-from-an-existing-UEM (28.2) and the self-hosted companion app (29.1), both of which reach only the customer's own infra. The native-MDM tiers themselves are Phases 33 (Apple) and 34 (Android). Called out per sub-phase.
 
 > **⚠️ Multi-tenancy storage (same rule as 14.1/14.3/21.1).** Mobile **device inventory + compliance findings are per-host/tenant data** → `tenant` partition, soft-referencing shared ids (no cross-partition FK). The **mobile OS release / EOL reference feed is global** → reuse the `shared` partition from 14.3 (one copy, offline-updatable), never per tenant.
 
-#### 27.0 Getting-started wizard (Community / OSS; licensed steps appear when licensed)
+#### 28.0 Getting-started wizard (Community / OSS; licensed steps appear when licensed)
 
 **Added 2026-10-16 (Bryan).** "A 'getting started wizard' that helps people
 set things up from a new install and we can walk them through it."  Standing
@@ -14840,12 +15075,12 @@ Referrer-Policy, telemetry exporting to a collector that did not exist.
       schedules that start empty: vulnerability, compliance profile, malware
 - [ ] **Reference data** (licensed) -- CVE feed, advisories and the OS
       end-of-life registry loaded, with their refresh schedules
-- [ ] **Home screen** -- choose the dashboard cards (Phase 37 framework)
+- [ ] **Home screen** -- choose the dashboard cards (Phase 38 framework)
 - [ ] **Observability** (optional) -- OpenTelemetry / Prometheus only if
       the operator has a collector (off by default since 2026-10-15)
 - [ ] Docs page + screenshots via `make screenshots` + 14-language i18n
 
-#### 27.1 Mobile device model + fleet visibility (Community / OSS)
+#### 28.1 Mobile device model + fleet visibility (Community / OSS)
 
 The OSS floor: mobile is a first-class, *visible* endpoint class -- no automated management, but you can see what you know about.
 
@@ -14861,7 +15096,7 @@ The OSS floor: mobile is a first-class, *visible* endpoint class -- no automated
 
 **Estimated Size:** ~2,500 lines
 
-#### 27.2 UEM/MDM ingestion -- single pane of glass (Pro+) ⭐
+#### 28.2 UEM/MDM ingestion -- single pane of glass (Pro+) ⭐
 
 Highest value, lowest effort: don't *be* the MDM -- **ingest from the one they already run.** Makes SysManage the single pane of glass across servers + desktops + mobile.
 
@@ -14873,7 +15108,7 @@ Highest value, lowest effort: don't *be* the MDM -- **ingest from the one they a
 
 **Estimated Size:** ~5,000 lines
 
-#### 27.3 Memory footprint -- agent and server: measure, minimize, load only what is used (all editions / OSS)
+#### 28.3 Memory footprint -- agent and server: measure, minimize, load only what is used (all editions / OSS)
 
 **Added 2026-10-13 (Bryan):** "measure the memory footprint of
 sysmanage-agent on all of our supported operating systems and see what we can
@@ -15003,7 +15238,7 @@ flat; anything that grows faster than the fleet is a bug.
       the lab before and after, so the docs' numbers are from real servers as
       well as the harness.
 - [ ] Docs: server memory by fleet size (a table from the curve) on the
-      server requirements page, feeding the minimum configurations (Phase 29
+      server requirements page, feeding the minimum configurations (Phase 30
       documentation overhaul).
 
 **Estimated Size:** ~1,500 lines for the agent harness and reductions; ~2,500
@@ -15011,7 +15246,7 @@ for server and agent static modules (registration point, config, UI gating,
 capability reporting, tests); ~800 for the server scaling study and its
 budget check; config builders and docs ~600 plus 14-locale strings
 
-#### 27.4 Fix it: compliance failures (Pro+; fleet-wide Enterprise)
+#### 28.4 Fix it: compliance failures (Pro+; fleet-wide Enterprise)
 
 **Added 2026-10-16 (Bryan).** "Simple instructions or (ideally) automated
 one-click things that resolve compliance surfaced issues."  Today a failed
@@ -15084,7 +15319,7 @@ real fix is the collection:
 - [ ] **Fleet-wide (Enterprise)** -- "fix this check on every failing host"
       as a fleet job in waves (20.4), with per-host results
 
-#### 27.5 Server packages built per architecture, like the agent (all editions / OSS)
+#### 28.5 Server packages built per architecture, like the agent (all editions / OSS)
 
 **Added 2026-10-19 (Bryan).** The server and the agent install their Python
 dependencies differently.  The agent vendors every wheel into its source
@@ -15122,22 +15357,22 @@ install still needs PyPI at install time.
 
 ### Licensing summary
 
-- **Community / OSS:** the getting-started wizard (27.0, with licensed steps appearing only when licensed); the device model, fleet visibility and manual / self-report registration (27.1); the memory-footprint and static-module work (27.3) and per-architecture server packages (27.5), which are in every edition. You can *see* the devices you, or a companion app, report; no automated management, and no curated EOL or compliance.
-- **Pro+ (Professional):** **visibility and compliance over the mobile you already manage**: ingestion from an existing UEM / MDM (27.2 ⭐) and Fix-it for compliance failures host by host (27.4). The companion inventory app (28.1), mobile EOL and patch compliance with alerting (28.2) and Android device inventory through the Android Management API (33.1, read only) follow in later phases. No device control.
-- **Enterprise:** Fix-it applied fleet-wide (27.4). Compliance *enforcement* (quarantine, force-update) and **being** the MDM -- native Apple MDM (Phase 32), Android policy and remote actions (33.1) and zero-touch enrollment (33.2) -- are later phases, not this one.
+- **Community / OSS:** the getting-started wizard (28.0, with licensed steps appearing only when licensed); the device model, fleet visibility and manual / self-report registration (28.1); the memory-footprint and static-module work (28.3) and per-architecture server packages (28.5), which are in every edition. You can *see* the devices you, or a companion app, report; no automated management, and no curated EOL or compliance.
+- **Pro+ (Professional):** **visibility and compliance over the mobile you already manage**: ingestion from an existing UEM / MDM (28.2 ⭐) and Fix-it for compliance failures host by host (28.4). The companion inventory app (29.1), mobile EOL and patch compliance with alerting (29.2) and Android device inventory through the Android Management API (34.1, read only) follow in later phases. No device control.
+- **Enterprise:** Fix-it applied fleet-wide (28.4). Compliance *enforcement* (quarantine, force-update) and **being** the MDM -- native Apple MDM (Phase 33), Android policy and remote actions (34.1) and zero-touch enrollment (34.2) -- are later phases, not this one.
 
 ### Exit Criteria
 
 - [ ] Mobile device inventory validated end-to-end via ≥1 ingestion connector
-      (27.2) -- the native Android/Apple paths moved to Phase 32 (Apple) and Phase 33 (Android) with the split,
+      (28.2) -- the native Android/Apple paths moved to Phase 33 (Apple) and Phase 34 (Android) with the split,
       so this phase is validated on ingestion alone
 - [ ] Mobile OS EOL + security-patch compliance surfaces + alerts, reusing the 14.3 / advisory / alerting substrate
 - [ ] Every tier 402-clean when unlicensed; Community shows devices but gates ingestion / native-MDM / enforcement
 - [ ] Air-gap caveat documented; ingestion + companion-app paths verified reachable-only-to-customer-infra
-- [ ] Agent memory footprint (27.3) measured on every supported OS, reduced
+- [ ] Agent memory footprint (28.3) measured on every supported OS, reduced
       where the measurements showed it pays, and held by an enforced per-OS
       budget
-- [ ] Static modules (27.3) on the server and the agent: `modules: all` by
+- [ ] Static modules (28.3) on the server and the agent: `modules: all` by
       default, a trimmed list proven on the lab (unloaded modules never
       imported, their UI hidden, the agent's actions greyed with the reason),
       measured savings published, the config builders writing the setting
@@ -15145,12 +15380,12 @@ install still needs PyPI at install time.
       load-harness slope check; production and the lab confirm going from
       ~9 to ~20 hosts adds only the per-host budget
 - [ ] Server packages built per architecture with vendored dependencies
-      (27.5): the Launchpad-only `Architecture: any` switch is gone and a
+      (28.5): the Launchpad-only `Architecture: any` switch is gone and a
       server `.deb` installs with PyPI unreachable
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Mobile devices** -- devices by platform,
       non-compliant OS/patch level, and not seen in N days; links to the
-      filtered device list (card contract: Phase 37.1)
+      filtered device list (card contract: Phase 38.1)
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Pro+ engines built for every OS + architecture and verified in R2**
       (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
@@ -15164,21 +15399,21 @@ install still needs PyPI at install time.
 
 ---
 
-## Phase 28: Mobile Companion App & Compliance (Pro+ / Enterprise)
+## Phase 29: Mobile Companion App & Compliance (Pro+ / Enterprise)
 
 **Target Release:** v4.1.0.0
 **Focus:** Our own inventory path for devices no UEM covers, and the assessment
 layer that turns mobile inventory into findings -- EOL/patch compliance, alerts
 and enforcement.
 
-**Why split from Phase 27 (2026-08-07):** the mobile work totalled ~14,000
+**Why split from Phase 28 (2026-08-07):** the mobile work totalled ~14,000
 estimated lines, second-largest in the roadmap. The seam is *where the data comes
-from and what you do with it*: Phase 27 populates the fleet from systems the
+from and what you do with it*: Phase 28 populates the fleet from systems the
 customer already runs (ingestion), while this phase adds a first-party reporting
-path and the compliance/alerting layer on top. Phase 27 must land first -- this
+path and the compliance/alerting layer on top. Phase 28 must land first -- this
 phase assesses devices it cannot itself enroll.
 
-#### 28.1 Companion inventory app -- BYOD self-report (Pro+)
+#### 29.1 Companion inventory app -- BYOD self-report (Pro+)
 
 A thin, customer-deployable iOS/Android app for visibility where full MDM is overkill (BYOD). Honest about its limits: uninstallable, sandbox-limited, best-effort background check-in -- **visibility only, never enforcement.**
 
@@ -15186,11 +15421,11 @@ A thin, customer-deployable iOS/Android app for visibility where full MDM is ove
 - [ ] Token/QR enrollment against a tenant; check-ins land in `mobile_device` (tenant partition)
 - [ ] Air-gap-friendly (talks only to the customer's SysManage server)
 - [ ] i18n/l10n
-- **Tier note:** the app + richer reporting/compliance is Pro+; the raw self-report endpoint it uses is the OSS 27.1 one.
+- **Tier note:** the app + richer reporting/compliance is Pro+; the raw self-report endpoint it uses is the OSS 28.1 one.
 
 **Estimated Size:** ~3,500 lines (app + server)
 
-#### 28.2 Mobile compliance, lifecycle & alerting (Pro+ / Enterprise)
+#### 29.2 Mobile compliance, lifecycle & alerting (Pro+ / Enterprise)
 
 Make the inventory *actionable* -- reuse existing engines rather than rebuild.
 
@@ -15202,7 +15437,7 @@ Make the inventory *actionable* -- reuse existing engines rather than rebuild.
 
 **Estimated Size:** ~3,000 lines
 
-#### 28.3 Fix it: advisor findings (Enterprise)
+#### 29.3 Fix it: advisor findings (Enterprise)
 
 **Added 2026-10-16 (Bryan).** "Same story with the insights -> Advisor."  The
 Advisor already proposes fixes for some findings (21.2 S5: generated
@@ -15214,7 +15449,7 @@ plain explanation of what to do.
       tenant-authored rules get an optional field)
 - [ ] **A one-click fix for every rule that can have one** -- extend the S5
       proposal generator beyond its current rules; the same preview ->
-      backup -> apply -> re-evaluate loop as 27.4, and the same
+      backup -> apply -> re-evaluate loop as 28.4, and the same
       instructions-only fallback where automation would be unsafe
 - [ ] **Fix from where the finding is shown** -- the host's Advisor tab, the
       rule view and the fleet feed all carry the Fix button, not only the
@@ -15236,7 +15471,7 @@ plain explanation of what to do.
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Mobile compliance** -- BYOD devices out of
       compliance and enforcement actions waiting on the user (card contract:
-      Phase 37.1)
+      Phase 38.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -15254,7 +15489,7 @@ plain explanation of what to do.
 
 ---
 
-## Phase 29: Stabilization & v5.0 GA
+## Phase 30: Stabilization & v5.0 GA
 
 **Target Release:** **v5.0.0.0**
 **Focus:** Full market-parity GA -- content lifecycle + provisioning + config management + advisor hardened together; performance, security, docs, i18n.
@@ -15521,7 +15756,7 @@ releases, so the supported pair is now **7.9 and 8.0** and 7.8 is EOL.
 Phases 0-20 had no unticked boxes, so the Phase 21 audit checked every place
 an earlier phase closed by DEFERRING or noting a follow-up, against the code.
 Most were done (and the stale notes are now marked so); these were neither
-done nor tracked anywhere. Re-home any of them if Phase 29 is the wrong fit.
+done nor tracked anywhere. Re-home any of them if Phase 30 is the wrong fit.
 
 - [x] **SSO browser landing (OIDC + SAML) -- a user-facing gap behind a ticked
       Phase 13 box.** *Fixed 2026-10-01 (pulled forward into Phase 21):* the
@@ -15592,7 +15827,7 @@ correctly carried and are tracked as items of their own: the EC2 / Azure / GCE
 / vSphere compute providers ("Compute providers for EC2, Azure, GCE and
 VMware/vSphere", above in this phase), the 12.3 host-cluster overlay
 ("Federation maps: build or drop", above in this phase), and the Alpine and
-BSD package repositories (Phase 30, "Native agent channels for the last four
+BSD package repositories (Phase 31, "Native agent channels for the last four
 platforms" and "Alpine: publish a real apk repository"). Two were defects and were
 fixed in Phase 22 (multitenancy `[TODO]` strings, leaked test keys -- see the
 Phase 22 audit item). These were neither done nor tracked:
@@ -15652,7 +15887,7 @@ Phase 22 audit item). These were neither done nor tracked:
 
 ### Carried forward by the Phase 24 audit (2026-11-03)
 
-Phases 0-23 again had no unticked boxes, so, like the Phase 21-23 audits, this one read every ticked item whose own note still said "pending", "still open", "deferred", "remains", "follow-up", "blocked on" or "to tick" -- 34 items plus the 2 won't-do items -- against the code in all four repositories. 15 were notes already resolved inside their own item (a later "DONE" or "moved to" in the same entry). 5 were stale notes for finished work, now marked DONE: the BSD service-control follow-up (`bsd_service_control`), the SSO browser landing a Phase 13 note still carried here (`SsoCallback.tsx`, shipped 2026-10-01), the OSS `secrets` and `reports` namespace decisions (`/api/v1/stored-secrets`, `/api/v1/reporting`), and the translation-glossary reload. 6 were correctly carried and already tracked: the advisor `metric_history` domain, the NetBSD canary, the shared CDN vulnerability feed and the 12.3 host-cluster overlay here, and WSL testing and the Alpine / BSD package repositories in Phase 30. The 2 won't-do items stay as decided. These were neither done nor tracked, and move here (or to the phase named):
+Phases 0-23 again had no unticked boxes, so, like the Phase 21-23 audits, this one read every ticked item whose own note still said "pending", "still open", "deferred", "remains", "follow-up", "blocked on" or "to tick" -- 34 items plus the 2 won't-do items -- against the code in all four repositories. 15 were notes already resolved inside their own item (a later "DONE" or "moved to" in the same entry). 5 were stale notes for finished work, now marked DONE: the BSD service-control follow-up (`bsd_service_control`), the SSO browser landing a Phase 13 note still carried here (`SsoCallback.tsx`, shipped 2026-10-01), the OSS `secrets` and `reports` namespace decisions (`/api/v1/stored-secrets`, `/api/v1/reporting`), and the translation-glossary reload. 6 were correctly carried and already tracked: the advisor `metric_history` domain, the NetBSD canary, the shared CDN vulnerability feed and the 12.3 host-cluster overlay here, and WSL testing and the Alpine / BSD package repositories in Phase 31. The 2 won't-do items stay as decided. These were neither done nor tracked, and move here (or to the phase named):
 
 - [ ] **Host-page license gating in Playwright** (moved from 10.x by the
       2026-11-03 audit). `license-matrix.spec.ts` checks the Settings tabs
@@ -15679,7 +15914,7 @@ Phases 0-23 again had no unticked boxes, so, like the Phase 21-23 audits, this o
       machine-generated without claiming a review. Listed only so the revisit
       has a place to land, like the pen test above
 
-Also moved by this audit: spreading tenants' scheduled ticks across workers (Phase 34.1), automating the PostgreSQL failover test in CI (Phase 34.2), and the pkgsrc port's missing `py-psycopg` dependency (Phase 30).
+Also moved by this audit: spreading tenants' scheduled ticks across workers (Phase 35.1), automating the PostgreSQL failover test in CI (Phase 35.2), and the pkgsrc port's missing `py-psycopg` dependency (Phase 31).
 
 ### Multi-boot machines that keep one hostname (from the 23.2 T480 proof, 2026-10-15)
 
@@ -15964,11 +16199,11 @@ Done at the GA because by then the feature set is the one users get.
       page in the reader's language, with results showing the page and the
       matching section
 - [ ] **Recommended minimum configurations:** disk, CPU and RAM for the
-      server by fleet size (from the 27.3 server-scaling curve: e.g. up to
+      server by fleet size (from the 28.3 server-scaling curve: e.g. up to
       25, 100, 500, 1,000+ hosts; with PostgreSQL and OpenBAO on the same
-      machine or apart) and for the agent per OS (from the 27.3 agent
+      machine or apart) and for the agent per OS (from the 28.3 agent
       baseline), plus backup storage sizing (from the 24 forecast) -- stated
-      as "minimum" and "recommended", with the static-module trims (27.3)
+      as "minimum" and "recommended", with the static-module trims (28.3)
       shown as a way to go lower
 - [ ] **Consistency pass:** one name per thing (UI labels, docs and API
       agree), American spelling, ASCII hyphens, every screenshot current via
@@ -16005,20 +16240,20 @@ Done at the GA because by then the feature set is the one users get.
 
 ---
 
-## Phase 30: Expanded Agent Architecture & Packaging (Community / OSS)
+## Phase 31: Expanded Agent Architecture & Packaging (Community / OSS)
 
 **Target Release:** v5.1.0.0
 **Focus:** Run the `sysmanage-agent` on CPU architectures beyond x86-64 and arm64 -- **IBM Power (ppc64le)**, **IBM Z (s390x)**, and **RISC-V (riscv64)** -- so SysManage manages the enterprise iron and emerging silicon our competitors reach but we currently don't. The agent is AGPL, so this lands entirely in Community/OSS; no new Pro+ engine -- it's portability, packaging, and build-matrix work.
 
 **Market gap addressed:** Red Hat Satellite / Canonical Landscape / IBM BigFix manage ppc64le + s390x fleets (RHEL, SLES, Ubuntu on Power/Z) -- mainframe & Power shops are exactly the regulated enterprises we target. RISC-V is the forward bet on emerging server/edge silicon.
 
-**Why post-GA (Phase 30):** the parity arc (14-25) is about *features*; this is a *reach* expansion of an existing capability -- the same agent on more silicon, not a new capability class, so it is a minor (**v5.1.0.0**) rather than a major. It follows the v5.0 GA and builds directly on the arm64/QEMU cross-arch work already in place.
+**Why post-GA (Phase 31):** the parity arc (14-30) is about *features*; this is a *reach* expansion of an existing capability -- the same agent on more silicon, not a new capability class, so it is a minor (**v5.1.0.0**) rather than a major. It follows the v5.0 GA and builds directly on the arm64/QEMU cross-arch work already in place.
 
 > **⚠️ Endianness -- s390x is big-endian.** x86-64, arm64, ppc64le, and riscv64 are all little-endian; **s390x is big-endian** -- the one place latent byte-order bugs surface. Every `struct.pack`/`ctypes`/binary-protocol/hash-of-packed-bytes assumption in the agent (and the store-and-forward queue serialization) must be endian-audited, not assumed. JSON/text paths are safe; raw-binary paths are the risk. It gets its own slice so it isn't hand-waved.
 
 > **⚠️ Native-dependency wheels.** The agent's compiled deps (notably `cryptography`'s Rust core, `psutil`) don't always ship manylinux wheels for ppc64le/s390x/riscv64 -- so these arches may need a source-build toolchain (Rust + dev headers) in the package build, or vendored/pinned floors. That's the real effort, not the Python. Must preserve the Py3.9-floor and no-eager-asyncio agent constraints.
 
-#### 30.1 Portability foundation -- endian audit + CI matrix (OSS)
+#### 31.1 Portability foundation -- endian audit + CI matrix (OSS)
 
 - [ ] Endianness/portability audit of the agent + store-and-forward serialization; make any binary byte order explicit (no implicit native order); add a big-endian regression test leg
 - [ ] Extend `make build-all-architectures` QEMU cross-arch matrix to ppc64le / s390x / riscv64 (binfmt/QEMU already used for arm64)
@@ -16027,7 +16262,7 @@ Done at the GA because by then the feature set is the one users get.
 
 **Estimated Size:** ~2,500 lines (build/CI + audit fixes)
 
-#### 30.2 IBM Power -- ppc64le packaging (OSS)
+#### 31.2 IBM Power -- ppc64le packaging (OSS)
 
 - [ ] deb (Debian/Ubuntu ppc64el) + rpm (RHEL/Fedora el9 ppc64le, SLES) + Alpine (ppc64le) agent packages; `control`/spec arch toggles like the arm64 work
 - [ ] Launchpad PPA + COPR ppc64le arch enablement
@@ -16035,15 +16270,15 @@ Done at the GA because by then the feature set is the one users get.
 
 **Estimated Size:** ~1,500 lines
 
-#### 30.3 IBM Z -- s390x packaging + big-endian correctness (OSS)
+#### 31.3 IBM Z -- s390x packaging + big-endian correctness (OSS)
 
 - [ ] deb (Debian/Ubuntu s390x) + rpm (RHEL/SLES s390x) agent packages
-- [ ] Big-endian correctness (30.1 audit) validated green on an emulated s390x guest: enroll → inventory → command dispatch, plus a store-and-forward round-trip across a simulated outage
+- [ ] Big-endian correctness (31.1 audit) validated green on an emulated s390x guest: enroll → inventory → command dispatch, plus a store-and-forward round-trip across a simulated outage
 - [ ] Confirm TLS + message signing produce identical results big- vs little-endian
 
 **Estimated Size:** ~1,500 lines
 
-#### 30.4 RISC-V -- riscv64 packaging (OSS)
+#### 31.4 RISC-V -- riscv64 packaging (OSS)
 
 - [ ] deb (Debian/Ubuntu riscv64) + Alpine (riscv64) + Fedora riscv64 (as available) agent packages
 - [ ] Handle the still-maturing wheel/toolchain story (source-build `cryptography` where no wheel exists)
@@ -16051,7 +16286,7 @@ Done at the GA because by then the feature set is the one users get.
 
 **Estimated Size:** ~1,500 lines
 
-#### 30.5 Server-side arch awareness + docs (OSS)
+#### 31.5 Server-side arch awareness + docs (OSS)
 
 - [ ] Server recognizes / normalizes / displays the new `machine_architecture` values (fleet, host detail, reports); package/repo + OS-lifecycle/EOL selection keyed by arch where relevant
 - [ ] Install docs + a supported-architecture matrix updated; agent download / repo pages list the new arches
@@ -16059,7 +16294,7 @@ Done at the GA because by then the feature set is the one users get.
 
 **Estimated Size:** ~1,000 lines
 
-#### 30.6 Native agent channels for the remaining platforms (OSS)
+#### 31.6 Native agent channels for the remaining platforms (OSS)
 
 *Scope note (2026-08-07): the FreeBSD port cleanup + its static gate were
 pulled forward into Phase 19; the upstream SUBMISSION of the FreeBSD port is
@@ -16139,7 +16374,7 @@ first-submission gates.*
       `is_agent_install_legacy()` into the dispatch path or delete it -- an
       unused predicate reads as protection that isn't there.
 
-#### 30.7 Firewall appliances -- pfSense / OPNsense (OSS)
+#### 31.7 Firewall appliances -- pfSense / OPNsense (OSS)
 
 **Added 2026-10-17 (Bryan).** Wanted the agent on his pfSense router: 8 GB RAM,
 6.8 GB free, so memory was never the problem (the agent idles at ~75-115 MiB
@@ -16166,7 +16401,7 @@ at its next upgrade).
       firewall status and Network Discovery stay on.  The server shows the
       host as an appliance and hides the actions it will refuse
 - [ ] **Low footprint verified** on the smallest supported appliance hardware
-      (Phase 27.3 harness): idle and peak RSS within budget
+      (Phase 28.3 harness): idle and peak RSS within budget
 - [ ] **Docs** -- install / remove per appliance, what appliance mode does and
       why, 14-language i18n
 
@@ -16201,7 +16436,7 @@ at its next upgrade).
 
 ---
 
-## Phase 31: Security Tooling Coexistence (Enterprise)
+## Phase 32: Security Tooling Coexistence (Enterprise)
 
 **Target Release:** v5.2.0.0
 **Focus:** Integrate with the security tooling customers already run, rather than
@@ -16216,7 +16451,7 @@ different failure surface. Splitting lets the advisor ship on its own schedule
 and keeps integration risk (someone else's API, someone else's release cadence)
 out of a phase that gates GA.
 
-#### 31.1 Incident Response & Threat Hunting -- Velociraptor integration (Enterprise)
+#### 32.1 Incident Response & Threat Hunting -- Velociraptor integration (Enterprise)
 
 The **response/triage arm** for advisor (21.1), malware (21.2), `vuln_engine`, and
 `alerting_engine` findings. SysManage stays the management/orchestration plane;
@@ -16233,7 +16468,7 @@ being ours).
 
 **Estimated Size:** ~2,500 lines
 
-#### 31.2 Security Tooling Coexistence -- Wazuh ingestion (Enterprise)
+#### 32.2 Security Tooling Coexistence -- Wazuh ingestion (Enterprise)
 
 Meet customers who already run Wazuh where they are: **ingest, don't rebuild.** Wazuh
 alerts / FIM / SCA become additional inputs to `advisor_engine` (21.1) and the alert
@@ -16261,7 +16496,7 @@ one-way ingestion connector only.
       reachable-only-to-the-customer's-own-server for air-gap
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Security tooling** -- open Wazuh alerts and running
-      Velociraptor hunts, by severity (card contract: Phase 37.1)
+      Velociraptor hunts, by severity (card contract: Phase 38.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -16279,7 +16514,7 @@ one-way ingestion connector only.
 
 ---
 
-## Phase 32: Apple Native MDM (Enterprise)
+## Phase 33: Apple Native MDM (Enterprise)
 
 **Target Release:** v6.0.0.0
 **Focus:** Be the MDM authority for iOS/iPadOS -- the Apple MDM protocol itself:
@@ -16287,15 +16522,15 @@ APNs push, signed enrollment profiles, device queries, restriction/configuration
 profiles, and remote lock/wipe.
 
 **Why its own phase (split 2026-08-07):** at ~10,000 estimated lines this single
-slice was larger than all of Phase 31, and it dominated a combined native-MDM
+slice was larger than all of Phase 32, and it dominated a combined native-MDM
 phase of ~18,500 lines -- the largest in the roadmap. It is also the most
 self-contained: a protocol implementation against Apple's spec, gated on an Apple
 push certificate and APNs reachability, sharing little with the Android path.
 
-**Not air-gappable.** APNs reachability is mandatory; Phase 27 remains the
+**Not air-gappable.** APNs reachability is mandatory; Phase 28 remains the
 air-gap-compatible mobile story.
 
-#### 32.1 iOS/iPadOS native MDM -- Apple MDM protocol (Enterprise)
+#### 33.1 iOS/iPadOS native MDM -- Apple MDM protocol (Enterprise)
 
 Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment), Enterprise-only.
 
@@ -16318,7 +16553,7 @@ Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment),
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Apple MDM** -- enrolled, pending enrollment, and
       lock/wipe commands not yet acknowledged; APNs certificate expiry (card
-      contract: Phase 37.1)
+      contract: Phase 38.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -16336,7 +16571,7 @@ Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment),
 
 ---
 
-## Phase 33: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)
+## Phase 34: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)
 
 **Target Release:** v6.1.0.0
 **Focus:** Android Management API enrollment and policy, plus bulk/zero-touch
@@ -16344,11 +16579,11 @@ enrollment orchestration across BOTH platforms.
 
 **Why enrollment orchestration sits here:** Apple ADE/ABM and Android zero-touch
 are one feature with two back ends, and it needs both MDM implementations to
-exist -- so it follows Phase 32 rather than shipping half-built alongside it.
+exist -- so it follows Phase 33 rather than shipping half-built alongside it.
 
 **Not air-gappable.** Google cloud reachability is mandatory.
 
-#### 33.1 Android native MDM -- Android Management API (Pro+ inventory → Enterprise policy)
+#### 34.1 Android native MDM -- Android Management API (Pro+ inventory → Enterprise policy)
 
 Google hosts the heavy lifting; we integrate the API. Split by tier: **read = Pro+, control = Enterprise.**
 
@@ -16359,7 +16594,7 @@ Google hosts the heavy lifting; we integrate the API. Split by tier: **read = Pr
 
 **Estimated Size:** ~4,500 lines
 
-#### 33.2 Enrollment orchestration & zero-touch (Enterprise)
+#### 34.2 Enrollment orchestration & zero-touch (Enterprise)
 
 The operational product: getting devices enrolled at scale.
 
@@ -16380,7 +16615,7 @@ The operational product: getting devices enrolled at scale.
 - [ ] **Air-gap limitation documented prominently**
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Android MDM** -- enrolled, pending zero-touch
-      enrollment, and policy non-compliance (card contract: Phase 37.1)
+      enrollment, and policy non-compliance (card contract: Phase 38.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -16398,7 +16633,7 @@ The operational product: getting devices enrolled at scale.
 
 ---
 
-## Phase 34: High Availability & Disaster Recovery (Enterprise)
+## Phase 35: High Availability & Disaster Recovery (Enterprise)
 
 **Target Release:** v6.2.0.0
 **Focus:** Survive losing a server, and survive losing a site. Multiple
@@ -16411,7 +16646,7 @@ deliberately built on top of it rather than beside it.
 
 **SEQUENCING NOTE -- worth revisiting.** This is placed last because it does not
 block anything else, but it is the phase most likely to be pulled forward:
-enterprise procurement asks about HA at evaluation time, and Phase 29 claims
+enterprise procurement asks about HA at evaluation time, and Phase 30 claims
 "market parity" at v5.0 while a single server outage still takes the whole
 control plane down. If a deal needs it, moving this ahead of the mobile arc
 (22/23/27/28) costs nothing structurally -- nothing in those phases depends on
@@ -16437,7 +16672,7 @@ quietly assumes it is the only one:
   * **Migrations race on startup.** N servers starting together will all try
     to run Alembic.
 
-#### 34.1 Make the server horizontally runnable (Enterprise)
+#### 35.1 Make the server horizontally runnable (Enterprise)
 
 - [ ] **Connection registry + inter-server dispatch** -- a shared record of
       which instance holds which agent's socket, and a path to hand a command
@@ -16476,7 +16711,7 @@ quietly assumes it is the only one:
 
 **Estimated Size:** ~5,000 lines
 
-#### 34.2 Database high availability (Enterprise -- integrate, don't build)
+#### 35.2 Database high availability (Enterprise -- integrate, don't build)
 
 **We do not write a Postgres failover system.** Patroni, repmgr and
 pg_auto_failover exist and customers already run them; building a fifth would
@@ -16511,27 +16746,27 @@ client of one.
       archive, watches its lag and RPO, and alerts on a gap
 - [ ] **Per-tenant point-in-time restore (MULTITENANT_SAAS)** -- one tenant's
       database rolled back to a chosen time without touching any other tenant,
-      run as an audited, approved operation (four-eyes, as for 25.2), with a
+      run as an audited, approved operation (four-eyes, as for 27.2), with a
       dry run into a scratch database first
 - [ ] **Restore drills for the server itself** -- the scheduled restore-verify
       of 13.1.F extended to the registry database and OpenBAO: restore into a
       scratch instance, check migrations are at the expected heads and secrets
       decrypt, record pass / fail, alert on failure
 - [ ] OpenBAO under HA -- its own raft cluster across the server instances
-      (34.1 shared identity), snapshots on the same schedule as the databases,
+      (35.1 shared identity), snapshots on the same schedule as the databases,
       and the unseal path for a node that restarts (auto-unseal or escrow,
       25.9) -- documented and tested
 
 **Estimated Size:** ~2,000 lines
 
-#### 34.3 Cross-site failover / DR (Enterprise)
+#### 35.3 Cross-site failover / DR (Enterprise)
 
 - [ ] **Agent-side multi-endpoint failover** -- the agent takes an ORDERED list
       of server endpoints rather than one, health-checks, fails over with
       backoff and fails back deliberately. Without this the whole feature is
       theatre: a VIP that is unreachable because the *network* is gone cannot
       be fixed by anything on the server side. This is the single most
-      important item in 34.3 and it lands in the OSS agent
+      important item in 35.3 and it lands in the OSS agent
 - [ ] Warm secondary: streaming replication to the DR site plus artifact
       replication, with a measured and documented RPO
 - [ ] **Promotion is explicit and fenced, and the secondary is READ-ONLY until
@@ -16548,7 +16783,7 @@ client of one.
 
 **Estimated Size:** ~4,500 lines
 
-#### 34.4 Operating it (Enterprise)
+#### 35.4 Operating it (Enterprise)
 
 - [ ] Server Cluster page -- instances and their health, which holds the leader
       lock, how agents are distributed across instances, replication lag, and
@@ -16561,7 +16796,7 @@ client of one.
 
 **Estimated Size:** ~1,500 lines
 
-#### 34.5 Power resilience -- UPS health, configuration and orderly shutdown (Community / OSS monitoring; Pro+ / Enterprise orchestration)
+#### 35.5 Power resilience -- UPS health, configuration and orderly shutdown (Community / OSS monitoring; Pro+ / Enterprise orchestration)
 
 **Added 2026-10-17 (Bryan).** Track UPS health and support configuring it.
 Servers survive power loss only if the UPS is healthy AND each machine shuts
@@ -16590,7 +16825,7 @@ because an orderly power-loss shutdown is part of surviving a site outage.
 
 **Health and alerting (Community / OSS)**
 - [ ] UPS card on the host page and a fleet Power view; a dashboard card
-      (Phase 37) for UPSes on battery, needing a battery, or overloaded
+      (Phase 38) for UPSes on battery, needing a battery, or overloaded
 - [ ] Alerts through the existing alerting path: on battery, low runtime
       (below the configured shutdown margin), replace battery, failed
       self-test, overload, communication lost; on-battery events grouped
@@ -16603,7 +16838,7 @@ because an orderly power-loss shutdown is part of surviving a site outage.
 - [ ] Install and configure NUT / apcupsd through a deployment plan
       (driver, `upsd`, `upsmon` server or client role, shutdown thresholds,
       notify commands) -- previewed, backed up, audited, rollback (the
-      27.4 fix-it pattern)
+      28.4 fix-it pattern)
 - [ ] Shutdown policy per host: shut down at N% charge or M minutes runtime,
       ordered by role (VMs and child hosts first, then their hypervisor,
       storage last), with a "this host keeps power on X% longer" warning
@@ -16616,7 +16851,7 @@ because an orderly power-loss shutdown is part of surviving a site outage.
       dependency order across the fleet (child hosts, then hypervisors,
       then NAS / databases), honoring each host's policy; dry-run mode that
       shows the order; audit of every step; restart order documented
-- [ ] Ties into 34.3 DR: a site whose UPSes are all on battery can be
+- [ ] Ties into 35.3 DR: a site whose UPSes are all on battery can be
       pre-emptively failed over before it goes dark
 
 - [ ] Docs page + screenshots via `make screenshots` + 14-language i18n
@@ -16648,7 +16883,7 @@ because an orderly power-loss shutdown is part of surviving a site outage.
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Server cluster** -- pool members up, current
       leader, Postgres replica lag, and DR-site reachability; critical when a
-      failover would fail (card contract: Phase 37.1)
+      failover would fail (card contract: Phase 38.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -16666,7 +16901,7 @@ because an orderly power-loss shutdown is part of surviving a site outage.
 
 ---
 
-## Phase 35: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)
+## Phase 36: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)
 
 **Target Release:** v6.3.0.0
 **Focus:** Open an interactive shell on a managed host from the web UI, with
@@ -16681,7 +16916,7 @@ session closes.
 
 **SEQUENCING NOTE -- worth revisiting.** Placed last so no phase is
 renumbered, but a browser terminal is table stakes in this market (Cockpit,
-Landscape, AWS SSM Session Manager, Teleport all have one) and Phase 29 claims
+Landscape, AWS SSM Session Manager, Teleport all have one) and Phase 30 claims
 market parity at v5.0. Nothing here depends on 22-29, so pulling it ahead of
 the mobile arc costs nothing structurally. Bryan's call, not a silent reorder.
 
@@ -16738,7 +16973,7 @@ nicety:
     Idle timeout and maximum duration, with a kill switch in the UI.
   * **Not the store-and-forward queue.** Interactive bytes cannot go through
     `message_queue`; this needs a live streaming channel on the agent's
-    WebSocket. Under Phase 34 HA the browser must land on (or be relayed to)
+    WebSocket. Under Phase 35 HA the browser must land on (or be relayed to)
     the server instance holding that agent's connection.
 
 **Community / OSS -- the terminal and the controls that make it safe to ship
@@ -16753,7 +16988,7 @@ is a liability, not a feature.
       multiplexed on the agent's existing WebSocket -- NOT the store-and-forward
       `message_queue`, which is built for resilience, not keystrokes;
       per-session ids; backpressure so a flood of output cannot starve the
-      agent's heartbeats or queued command results; under Phase 34 HA the
+      agent's heartbeats or queued command results; under Phase 35 HA the
       browser is relayed to the server instance holding that agent's connection
 - [ ] **Its own role**: "Open Remote Terminal", separate from View/Manage
       Host, scoped per host / access group / tenant like every other role,
@@ -16825,7 +17060,7 @@ adjust.*
       one are each refused
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Terminal sessions** -- sessions open now and
-      sessions waiting for second-person approval (card contract: Phase 37.1)
+      sessions waiting for second-person approval (card contract: Phase 38.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -16843,7 +17078,7 @@ adjust.*
 
 ---
 
-## Phase 36: Fleet Targeting by Site & Network Segment (Enterprise)
+## Phase 37: Fleet Targeting by Site & Network Segment (Enterprise)
 
 **Target Release:** v6.4.0.0
 **Focus:** Choose WHERE work runs the way large estates are actually laid out:
@@ -16933,7 +17168,7 @@ federation (`Host.site_id`) and are not offered to scans yet.
         reachable on an unmanaged device raise a posture item (21.4)
 - [ ] Every home-screen card filterable **by site and by network segment** --
       one dashboard per site or segment, same cards (card contract: Phase
-      37.1)
+      38.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -16951,7 +17186,7 @@ federation (`Host.site_id`) and are not offered to scans yet.
 
 ---
 
-## Phase 37: Dashboard Insight Cards (Community / OSS; Pro+; Enterprise)
+## Phase 38: Dashboard Insight Cards (Community / OSS; Pro+; Enterprise)
 
 **Target Release:** v6.5.0.0
 **Focus:** Make the home screen answer "what needs me today?" across
@@ -16961,10 +17196,10 @@ reboots, antivirus, OpenTelemetry, clocks and hardware.
 **Added 2026-10-16 (Bryan).** Asked for home-screen cards that would add value
 for customers. Each card below reports on a capability that already exists;
 cards for features that do not exist yet live in the phase that builds the
-feature, on this phase's card contract (37.1): backups (24), automatic
-updates (26), mobile devices (27, 28), security tooling (31), Apple and
-Android MDM (32, 33), HA / DR and power (34), and remote-terminal
-approvals (35); Phase 36 makes every card filterable by site and segment. Production on 2026-10-16 is the case for most of
+feature, on this phase's card contract (38.1): backups (24), automatic
+updates (26), mobile devices (28, 29), security tooling (32), Apple and
+Android MDM (33, 34), HA / DR and power (35), and remote-terminal
+approvals (36); Phase 37 makes every card filterable by site and segment. Production on 2026-10-16 is the case for most of
 them: an unprivileged agent, an empty end-of-life registry, never-run
 malware scans and a hand-hidden nginx misconfiguration were each invisible
 from the home screen and found only by an operator asking why.
@@ -16980,7 +17215,7 @@ from the home screen and found only by an operator asking why.
 - Thresholds that are a judgment call (days until a certificate expires,
   free disk) are per-card settings with sensible defaults.
 
-#### 37.1 Card framework (Community / OSS)
+#### 38.1 Card framework (Community / OSS)
 
 - [ ] **Engine-contributed cards** -- a Pro+ engine registers its card through
       the plugin seam the way it registers routes and pages; the dashboard
@@ -16991,7 +17226,7 @@ from the home screen and found only by an operator asking why.
 - [ ] **Per-card thresholds** stored with the existing dashboard preferences
 - [ ] **Card order and sizing** -- drag to reorder; compact vs detailed
 
-#### 37.2 Community cards (OSS)
+#### 38.2 Community cards (OSS)
 
 - [ ] **Awaiting approval** -- hosts registered but not approved
 - [ ] **Not checking in** -- hosts past the heartbeat timeout, oldest first
@@ -17011,7 +17246,7 @@ from the home screen and found only by an operator asking why.
 - [ ] **Release upgrades pending** -- hosts with an OS release upgrade
       available
 
-#### 37.3 Pro+ cards
+#### 38.3 Pro+ cards
 
 - [ ] **Vulnerabilities** -- critical/high findings, hosts affected, and
       hosts never scanned (`vuln_engine`)
@@ -17023,7 +17258,7 @@ from the home screen and found only by an operator asking why.
       (`compliance_engine`)
 - [ ] **Alerts firing** -- open alerts by severity (`alerting_engine`)
 
-#### 37.4 Enterprise cards
+#### 38.4 Enterprise cards
 
 - [ ] **Fleet risk** -- the advisor's fleet score, with "partly assessed"
       shown, not hidden (21.2)
@@ -17036,7 +17271,7 @@ from the home screen and found only by an operator asking why.
 - [ ] **Federation sites** -- sites unreachable or lagging (12)
 - [ ] **Air-gap content freshness** -- age of the last ingested bundle (11)
 
-#### 37.5 Close-out
+#### 38.5 Close-out
 
 - [ ] Every card's empty, not-measured, unlicensed and multi-tenant cases
       covered by tests; a dashboard of every card loads within the existing
@@ -17089,19 +17324,20 @@ from the home screen and found only by an operator asking why.
 | 22 | v3.10.0.0 | Scale Hardening -- Thundering-Herd Remediation | Jittered agent schedules + send-on-change, high-throughput intake and fair queues, leader election, bounded/spread ticks, fleet pushes in waves, stage-then-swap module updates + CDN delivery, federation deltas, scale harness |
 | 23 | v3.11.0.0 | Hardware, Time & Asset Visibility | Drive health (SMART, NVMe), degraded arrays and ZFS pools, temperatures and hardware errors from every OS, with real-time email alerts; every host's clock drift measured, NTP managed fleet-wide, out-of-bounds hosts resynchronized and alerted on; asset tags bound to the physical machine (shared by every OS on it), a naming-scheme builder, search, reports and CSV import |
 | 24 | v3.12.0.0 | Fleet Backup & Recovery with restate | Scheduled, deduplicated per-host backups to a NAS target with restate (per-host repositories over NFSv4, append-only), quiesce hooks, a Backups page, file restore (Community); policies, encryption with OpenBAO-held keys and rotation, break-glass export, GFS retention, alerts, verification, drift timeline and package restore (Pro+) |
-| 25 | v3.13.0.0 | Fleet Backup at Scale | Per-site storage through federation, restore readiness, bare-metal rebuild and clones, fleet restore jobs, four-eyes approval, legal hold, restore drills, off-site / immutable / air-gap / Glacier copies (Enterprise); backup multi-tenancy (MULTITENANT_SAAS) |
+| 25 | v3.13.0.0 | Fleet Backup Completion | restate-proxy (backups over HTTPS, NFS measured against it), a backup runner without systemd, the SysManage server backing itself up, agent-server mutual TLS and server pinning (Community / Pro+) |
 | 26 | v3.14.0.0 | Automatic Update Application | Policies that apply updates on a schedule with reboot handling, opt-outs, holds and pinned packages (Community); runs aligned to maintenance windows and separate waiting periods for regular and critical-CVE patches (Pro+); fleet-by-fleet rollout with health gates (Enterprise) |
-| 27 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible**; plus a getting-started wizard and Setup health page for new installs (OSS) |
-| 28 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
-| 29 | **v5.0.0.0** | Market-Parity GA | **MAJOR -- market parity reached.** All gap features hardened; v5.0 GA |
-| 30 | v5.1.0.0 | Expanded Agent Architecture & Packaging | ppc64le + s390x (big-endian) + riscv64 agent packaging/CI; native channels for alpine/BSD (Community/OSS) |
-| 31 | v5.2.0.0 | Security Tooling Coexistence | Velociraptor IR/hunting + Wazuh ingestion (Enterprise) |
-| 32 | **v6.0.0.0** | Apple Native MDM | **MAJOR -- SysManage becomes the device authority**, not just an observer: Apple MDM protocol, APNs, profiles, remote lock/wipe -- **not air-gappable** |
-| 33 | v6.1.0.0 | Android Native MDM & Zero-Touch | Android Management API policy + bulk/zero-touch enrollment across both vendors -- **not air-gappable** |
-| 34 | v6.2.0.0 | High Availability & Disaster Recovery | Active server pool behind a load balancer, leader-elected singleton workers, Postgres failover integration, agent multi-endpoint failover to a DR site |
-| 35 | v6.3.0.0 | Browser Remote Terminal | Agent-tunneled PTY sessions from the web UI -- no sshd, no inbound port, no keys, host posture untouched (OSS); recording (Pro+), second-person approval (Enterprise) |
-| 36 | v6.4.0.0 | Fleet Targeting by Site & Network Segment | Target scans and other fleet work by site, and by CIDR network segment within a site; per-site/segment rollout limits (Enterprise) |
-| 37 | v6.5.0.0 | Dashboard Insight Cards | Card framework (engine-contributed cards, thresholds, drill-down) plus home-screen cards for approvals, check-ins, limited agents, certificates, disk, firewall, Livepatch, vulnerabilities, advisories, EOL, compliance, alerts, fleet risk, malware, drift, fleet jobs, unmanaged devices, sites and air-gap freshness |
+| 27 | v3.15.0.0 | Fleet Backup at Scale | Per-site storage through federation, restore readiness, bare-metal rebuild and clones, fleet restore jobs, four-eyes approval, legal hold, restore drills, off-site / immutable / air-gap / Glacier copies (Enterprise); backup multi-tenancy (MULTITENANT_SAAS) |
+| 28 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible**; plus a getting-started wizard and Setup health page for new installs (OSS) |
+| 29 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
+| 30 | **v5.0.0.0** | Market-Parity GA | **MAJOR -- market parity reached.** All gap features hardened; v5.0 GA |
+| 31 | v5.1.0.0 | Expanded Agent Architecture & Packaging | ppc64le + s390x (big-endian) + riscv64 agent packaging/CI; native channels for alpine/BSD (Community/OSS) |
+| 32 | v5.2.0.0 | Security Tooling Coexistence | Velociraptor IR/hunting + Wazuh ingestion (Enterprise) |
+| 33 | **v6.0.0.0** | Apple Native MDM | **MAJOR -- SysManage becomes the device authority**, not just an observer: Apple MDM protocol, APNs, profiles, remote lock/wipe -- **not air-gappable** |
+| 34 | v6.1.0.0 | Android Native MDM & Zero-Touch | Android Management API policy + bulk/zero-touch enrollment across both vendors -- **not air-gappable** |
+| 35 | v6.2.0.0 | High Availability & Disaster Recovery | Active server pool behind a load balancer, leader-elected singleton workers, Postgres failover integration, agent multi-endpoint failover to a DR site |
+| 36 | v6.3.0.0 | Browser Remote Terminal | Agent-tunneled PTY sessions from the web UI -- no sshd, no inbound port, no keys, host posture untouched (OSS); recording (Pro+), second-person approval (Enterprise) |
+| 37 | v6.4.0.0 | Fleet Targeting by Site & Network Segment | Target scans and other fleet work by site, and by CIDR network segment within a site; per-site/segment rollout limits (Enterprise) |
+| 38 | v6.5.0.0 | Dashboard Insight Cards | Card framework (engine-contributed cards, thresholds, drill-down) plus home-screen cards for approvals, check-ins, limited agents, certificates, disk, firewall, Livepatch, vulnerabilities, advisories, EOL, compliance, alerts, fleet risk, malware, drift, fleet jobs, unmanaged devices, sites and air-gap freshness |
 
 ---
 

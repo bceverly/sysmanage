@@ -23,6 +23,22 @@
     "title": "接受您的邀请",
     "validatingToken": "验证邀请..."
   },
+  "agentCertificates": {
+    "enforceAnyway": "仍然强制",
+    "fleet": "{{approved}} 台已批准的主机中有 {{presenting}} 台提供了有效证书；{{expiring}} 台正在续订，{{expired}} 台已过期。",
+    "intro": "每个代理都会为自己生成的密钥获取客户端证书，在证书过期前续订，并在每次连接时提供该证书。代理还会固定此服务器的证书，因此提供不同证书的中间代理服务器或其他服务器会被拒绝。",
+    "loadError": "无法加载代理证书设置。",
+    "mode": "模式",
+    "modeEnforced": "强制",
+    "modeEnforcedHelp": "每台已批准的主机都必须提供有效证书。没有当前有效证书的主机仍可申请证书，但不能执行其他任何操作。",
+    "modeOff": "关闭",
+    "modeOffHelp": "忽略客户端证书。代理仅凭其主机令牌连接。",
+    "modeOptional": "可选",
+    "modeOptionalHelp": "代理提供的证书必须对其主机有效；没有证书的代理仍可凭主机令牌连接。",
+    "noneYet": "目前还没有主机提供证书。代理在更新后会获得证书；服务器软件包添加其代理证书设置后，nginx 就会要求提供证书（当 SysManage CA 存在时，升级会完成此操作）。",
+    "saveError": "无法保存代理证书设置。",
+    "title": "代理证书（双向 TLS）"
+  },
   "agentMirrors": {
     "add": "添加",
     "colActions": "操作",
@@ -286,7 +302,7 @@
     "createdTitle": "API密钥已创建",
     "description": "API密钥允许自动化程序以您的身份进行身份验证。请妥善保管，如同对待密码一样处理它们。",
     "expires": "过期",
-    "expiresOptional": "将选期（可选）",
+    "expiresOptional": "过期时间（可选）",
     "lastUsed": "最后使用时间",
     "loadError": "无法加载 API 密钥。",
     "name": "名称",
@@ -760,7 +776,8 @@
     "clocksOutOfBounds": "时钟偏差超出阈值",
     "hardwareNeedsAttention": "需要关注的硬件",
     "backupsAttention": "需要关注的备份",
-    "backupsEscrowStale": "应急密钥导出已过时"
+    "backupsEscrowStale": "应急密钥导出已过时",
+    "backupsServerUnprotected": "此 SysManage 服务器没有成功的备份"
   },
   "dataGrid": {
     "columnVisibility": "列可见性",
@@ -1821,6 +1838,19 @@
     "capabilitiesFullTooltip": "此代理声明了完整的功能集",
     "capabilitiesLimited": "有限",
     "capabilitiesLimitedTooltip": "此代理报告无法运行某些命令",
+    "certificate": {
+      "column": "证书",
+      "expired": "已过期",
+      "expiredTip": "证书已过期。代理会在下次连接时申请新证书。",
+      "expiring": "续订中",
+      "expiringTip": "证书将在 30 天内过期；代理会自行续订。",
+      "none": "无",
+      "noneTip": "尚未签发证书：代理更新后会申请证书。",
+      "notPresented": "未提供",
+      "notPresentedTip": "已签发证书，但过去 24 小时内没有任何连接提供该证书。请更新代理，并检查 nginx 是否要求客户端证书。",
+      "presenting": "已提供",
+      "presentingTip": "此主机提供了有效的客户端证书。"
+    },
     "childHostFilter": "子主机筛选器",
     "childHostOf": "{{parent}}的子主机",
     "childHostsOnly": "仅子主机",
@@ -5410,6 +5440,7 @@
       "notPrivileged": "代理必须以 root 身份运行",
       "toolOutdated": "请升级 restate",
       "wrongPlatform": "此操作系统不支持",
+      "noNfsv4Client": "此操作系统没有 NFSv4 客户端",
       "missingNfsClient": "安装 NFS 客户端",
       "storageUnreachable": "无法访问备份存储"
     },
@@ -5677,7 +5708,9 @@
       "until": "约 {{days}} 天后达到 {{percent}}%"
     },
     "reach": {
-      "unreachable": "此主机无法访问备份存储（{{storage}}、{{address}}、NFS 端口 {{port}}）。备份需要一条通往它的网络路径。"
+      "unreachable": "此主机无法访问备份存储（{{storage}}、{{address}}、NFS 端口 {{port}}）。备份需要一条通往它的网络路径。",
+      "behindNat": "此主机位于 NAT 之后：备份存储（{{storage}}）将其视为 {{seen}}，而不是 {{address}}，因此拒绝挂载。请将主机接入存储主机所在的网络（虚拟机使用桥接网络），而不要放在其 NAT 之后。",
+      "behindNatLabel": "位于 NAT 之后"
     },
     "network": {
       "leftOut": "已自动排除（此主机上的网络挂载）：{{paths}}",
@@ -5788,6 +5821,27 @@
       "replaces": "此主机的以下设置将被替换：",
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "其设置已与标签策略一致。"
+    },
+    "server": {
+      "backUp": "备份此 SysManage 服务器",
+      "title": "备份此 SysManage 服务器",
+      "noGoodBackup": "此 SysManage 服务器 ({{host}}) 近期没有成功的备份。下方它所在的行说明了原因。",
+      "noPolicy": "此 SysManage 服务器 ({{host}}) 没有备份。一旦丢失，每个代理都必须重新注册，OpenBAO 机密和数据库也将丢失。",
+      "noPolicyMany": "此 SysManage 服务器没有备份。一旦丢失，每个代理都必须重新注册，OpenBAO 机密和数据库也将丢失。",
+      "unknown": "SysManage 无法判断哪台主机是此服务器，因此无法判断服务器是否已备份。请选择它的主机来进行备份。",
+      "saveError": "无法保存 SysManage 服务器备份。",
+      "host": "此 SysManage 服务器运行所在的主机",
+      "hostHelp": "没有与此服务器同名的主机。请选择运行其代理的主机。",
+      "kept": "备份内容",
+      "keptHelp": "代理的证书颁发机构和服务器身份（丢失后每个代理都必须重新注册）、OpenBAO、PostgreSQL、配置、TLS 证书和许可证，以及主机的其余部分。",
+      "skipped": "排除内容",
+      "skippedHelp": "需要时会重新下载：引擎包、GeoIP 数据库、软件包镜像和日志。",
+      "never": "从不备份",
+      "neverHelp": "这些文件包含 OpenBAO 的解封密钥或恢复密钥以及服务器的 OpenBAO 令牌。请将其副本保存在远离服务器的安全位置，例如密码管理器，这样被盗的备份就无法解封其中的 OpenBAO 副本。",
+      "pauseNote": "复制 PostgreSQL 自身文件期间会停止 PostgreSQL，因此这段时间内 SysManage 可能会显示错误。请选择一个空闲的开始时间。",
+      "unencrypted": "此备份未加密，并且包含配置中的数据库密码。请像保护服务器本身一样保护备份存储。",
+      "needsEscrow": "请先在某台主机的“加密”面板中保存应急托管密钥。SysManage 服务器自身的备份使用该密钥加密，因此恢复 OpenBAO 时绝不需要保存在 OpenBAO 中的密钥。",
+      "escrowEncrypted": "已使用您的应急托管密钥 ({{fingerprint}}) 加密。SysManage 从不持有其私密部分，因此需按服务器恢复手册所述，使用该密钥手动恢复此备份。"
     }
   },
   "cloudBackup": {

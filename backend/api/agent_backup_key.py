@@ -59,7 +59,7 @@ async def agent_backup_key(
     host_id = _authenticated_host_id(request, payload, authorization)
     host_db = _host_session(host_id, db)
     try:
-        _verify_host(host_db, host_id, x_host_token)
+        _verify_host(host_db, host_id, x_host_token, request)
         try:
             keys = key_release.release(host_db, host_id, payload.run_id)
         except key_release.KeyRefused as refused:

@@ -23,6 +23,22 @@
     "title": "Accepter votre invitation",
     "validatingToken": "Vérification de l'invitation..."
   },
+  "agentCertificates": {
+    "enforceAnyway": "Rendre obligatoire malgré tout",
+    "fleet": "{{presenting}} hôtes approuvés sur {{approved}} présentent un certificat valide ; {{expiring}} en renouvellement, {{expired}} expirés.",
+    "intro": "Chaque agent reçoit un certificat client pour une clé qu'il génère lui-même, le renouvelle avant son expiration et le présente à chaque connexion. Les agents épinglent aussi ce serveur, de sorte qu'un proxy ou un autre serveur présentant un certificat différent est refusé.",
+    "loadError": "Impossible de charger les paramètres des certificats d'agent.",
+    "mode": "Mode de vérification",
+    "modeEnforced": "Obligatoire",
+    "modeEnforcedHelp": "Chaque hôte approuvé doit présenter un certificat valide. Un hôte sans certificat en cours de validité peut encore en demander un, et rien d'autre.",
+    "modeOff": "Désactivé",
+    "modeOffHelp": "Les certificats client sont ignorés. Les agents se connectent avec leur seul jeton d'hôte.",
+    "modeOptional": "Facultatif",
+    "modeOptionalHelp": "Un certificat présenté par un agent doit être valide pour son hôte ; un agent qui n'en a pas se connecte toujours avec son jeton d'hôte.",
+    "noneYet": "Aucun hôte ne présente encore de certificat. Les agents en reçoivent un lors de leur mise à jour ; nginx le demande dès que le paquet serveur a ajouté ses paramètres de certificats d'agent (une mise à niveau le fait lorsque l'AC SysManage existe).",
+    "saveError": "Impossible d'enregistrer le paramètre des certificats d'agent.",
+    "title": "Certificats d'agent (TLS mutuel)"
+  },
   "agentMirrors": {
     "add": "Ajouter",
     "colActions": "Actions",
@@ -760,7 +776,8 @@
     "clocksOutOfBounds": "Horloges hors limites",
     "hardwareNeedsAttention": "Matériel nécessitant une attention",
     "backupsAttention": "Sauvegardes nécessitant une attention",
-    "backupsEscrowStale": "Export de clés d'urgence obsolète"
+    "backupsEscrowStale": "Export de clés d'urgence obsolète",
+    "backupsServerUnprotected": "Ce serveur SysManage n'a aucune sauvegarde réussie"
   },
   "dataGrid": {
     "columnVisibility": "Visibilité des colonnes",
@@ -1821,6 +1838,19 @@
     "capabilitiesFullTooltip": "Cet agent annonce l'ensemble complet des capacités",
     "capabilitiesLimited": "Limitée",
     "capabilitiesLimitedTooltip": "Cet agent signale qu'il ne peut exécuter certaines commandes",
+    "certificate": {
+      "column": "Certificat",
+      "expired": "Expiré",
+      "expiredTip": "Le certificat a expiré. L'agent en demande un nouveau lors de sa prochaine connexion.",
+      "expiring": "Renouvellement",
+      "expiringTip": "Le certificat expire dans les 30 jours ; l'agent le renouvelle de lui-même.",
+      "none": "Aucun",
+      "noneTip": "Aucun certificat émis pour l'instant : l'agent en demande un dès qu'il est mis à jour.",
+      "notPresented": "Non présenté",
+      "notPresentedTip": "Un certificat a été émis, mais aucune connexion au cours des dernières 24 heures ne l'a présenté. Mettez à jour l'agent et vérifiez que nginx demande les certificats client.",
+      "presenting": "Présenté",
+      "presentingTip": "Cet hôte présente un certificat client valide."
+    },
     "childHostFilter": "Filtre d'hôte enfant",
     "childHostOf": "Hôte enfant de {{parent}}",
     "childHostsOnly": "Hôtes enfants uniquement",
@@ -1887,7 +1917,7 @@
     },
     "rebootRequested": "Redémarrage demandé avec succès",
     "rebootRequired": "Redémarrage requis",
-    "rebootSelected": "Redémarrer Sélectionnés",
+    "rebootSelected": "Redémarrer la sélection",
     "refreshAllData": "Demander les Données de l'Hôte",
     "requestPackages": "Demander pquets dispon.",
     "requiresActivePrivileged": "Sélectionnez un hôte actif en mode privilégié",
@@ -2152,7 +2182,7 @@
     "description": "Description",
     "durationMinutes": "Durée (minutes)",
     "editWindow": "Modifier la fenêtre de maintenance",
-    "emergencyOverride": "Surcoupure d'urgence",
+    "emergencyOverride": "Dérogation d'urgence",
     "enabled": "Activé",
     "endsAt": "Se termine à (UTC)",
     "everyDay": "Tous les jours",
@@ -2167,7 +2197,7 @@
     "nTags": "{{count}} balise(s)",
     "name": "Nom",
     "nextWindow": "Prochaine fenêtre",
-    "overrideActive": "Surcoupure d'urgence active jusqu'à {{time}}",
+    "overrideActive": "Dérogation d'urgence active jusqu'à {{time}}",
     "overrideDuration": "Durée (minutes)",
     "overrideExplain": "Autoriser temporairement les modifications pour cet hôte, indépendamment des fenêtres autorisées. Cette action est auditable.",
     "overrideReason": "Raison",
@@ -4778,7 +4808,7 @@
       "column": "Tag d'actif",
       "paletteResult": "Tag d'actif : {{tag}}",
       "untagged": "Non étiqueté",
-      "untaggedOnly": "Seule la non-étiquetage",
+      "untaggedOnly": "Non étiquetés uniquement",
       "untaggedOnlyTooltip": "Afficher uniquement les hôtes dont la machine n'a pas d'étiquette d'actif"
     },
     "scheme": {
@@ -5410,6 +5440,7 @@
       "notPrivileged": "L'agent doit s'exécuter en tant que root",
       "toolOutdated": "Mettez à jour restate",
       "wrongPlatform": "Non pris en charge sur ce système d'exploitation",
+      "noNfsv4Client": "Ce système d'exploitation n'a pas de client NFSv4",
       "missingNfsClient": "Installer le client NFS",
       "storageUnreachable": "Stockage des sauvegardes inaccessible"
     },
@@ -5677,7 +5708,9 @@
       "until": "{{percent}}% dans environ {{days}} jours"
     },
     "reach": {
-      "unreachable": "Cet hôte ne peut pas atteindre le stockage des sauvegardes ({{storage}}, {{address}}, port NFS {{port}}). Les sauvegardes ont besoin d'un chemin réseau jusqu'à lui."
+      "unreachable": "Cet hôte ne peut pas atteindre le stockage des sauvegardes ({{storage}}, {{address}}, port NFS {{port}}). Les sauvegardes ont besoin d'un chemin réseau jusqu'à lui.",
+      "behindNat": "Cet hôte est derrière un NAT : le stockage des sauvegardes ({{storage}}) le voit comme {{seen}}, et non {{address}}, et refuse donc le montage. Placez l'hôte sur le réseau de l'hôte de stockage (un réseau ponté pour une machine virtuelle) au lieu de derrière son NAT.",
+      "behindNatLabel": "Derrière un NAT"
     },
     "network": {
       "leftOut": "Exclus automatiquement (montages réseau sur cet hôte) : {{paths}}",
@@ -5788,6 +5821,27 @@
       "replaces": "Ces paramètres de cet hôte sont remplacés :",
       "change": "{{setting}}: {{from}} -> {{to}}",
       "same": "Ses paramètres correspondent déjà à la politique d'étiquette."
+    },
+    "server": {
+      "backUp": "Sauvegarder ce serveur SysManage",
+      "title": "Sauvegarder ce serveur SysManage",
+      "noGoodBackup": "Ce serveur SysManage ({{host}}) n'a aucune sauvegarde réussie récente. Sa ligne ci-dessous en indique la raison.",
+      "noPolicy": "Ce serveur SysManage ({{host}}) n'est pas sauvegardé. S'il est perdu, chaque agent devra s'inscrire à nouveau, et les secrets OpenBAO et les bases de données seront perdus.",
+      "noPolicyMany": "Ce serveur SysManage n'est pas sauvegardé. S'il est perdu, chaque agent devra s'inscrire à nouveau, et les secrets OpenBAO et les bases de données seront perdus.",
+      "unknown": "SysManage ne peut pas déterminer quel hôte est ce serveur, ni donc si le serveur est sauvegardé. Choisissez son hôte pour le sauvegarder.",
+      "saveError": "La sauvegarde du serveur SysManage n'a pas pu être enregistrée.",
+      "host": "L'hôte sur lequel s'exécute ce serveur SysManage",
+      "hostHelp": "Aucun hôte ne porte le nom de ce serveur. Choisissez celui sur lequel s'exécute son agent.",
+      "kept": "Sauvegardé",
+      "keptHelp": "L'autorité de certification des agents et l'identité du serveur (si elles sont perdues, chaque agent doit s'inscrire à nouveau), OpenBAO, PostgreSQL, la configuration, les certificats TLS et la licence, avec le reste de l'hôte.",
+      "skipped": "Exclu",
+      "skippedHelp": "Téléchargé à nouveau en cas de besoin : paquets de moteurs, base de données GeoIP, miroirs de paquets et journaux.",
+      "never": "Jamais sauvegardé",
+      "neverHelp": "Ces fichiers contiennent la clé de descellement ou de récupération d'OpenBAO et le jeton OpenBAO du serveur. Conservez-en une copie en lieu sûr, loin du serveur, par exemple dans un gestionnaire de mots de passe, afin qu'une sauvegarde volée ne puisse pas desceller la copie d'OpenBAO qu'elle contient.",
+      "pauseNote": "PostgreSQL est arrêté pendant la copie de ses propres fichiers ; SysManage peut donc afficher des erreurs pendant ce temps. Choisissez une heure de début calme.",
+      "unencrypted": "Cette sauvegarde n'est pas chiffrée et contient le mot de passe de la base de données issu de la configuration. Protégez le stockage des sauvegardes autant que le serveur lui-même.",
+      "needsEscrow": "Enregistrez d'abord une clé de séquestre d'urgence dans le panneau Chiffrement d'un hôte. La sauvegarde du serveur SysManage lui-même est chiffrée avec elle, de sorte que restaurer OpenBAO ne nécessite jamais une clé conservée dans OpenBAO.",
+      "escrowEncrypted": "Chiffrée avec votre clé de séquestre d'urgence ({{fingerprint}}). SysManage n'en détient jamais la partie secrète : cette sauvegarde se restaure donc à la main avec cette clé, comme le décrit la procédure de reprise du serveur."
     }
   },
   "cloudBackup": {
