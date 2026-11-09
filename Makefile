@@ -1366,7 +1366,7 @@ lint-freebsd-port:
 	@$(PYTHON) scripts/check_freebsd_port.py --port-dir packaging/freebsd-ports/sysutils/sysmanage-canary
 
 
-lint: lint-file-length lint-license-headers lint-test-constraints lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-verify i18n-markup i18n-complete i18n-sync-check lint-version check-migrations lint-freebsd-port
+lint: lint-file-length lint-license-headers lint-test-constraints lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-verify i18n-markup i18n-complete i18n-sync-check lint-version check-migrations lint-freebsd-port roadmap-version
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: the per-platform nginx configs are GENERATED from one template.
@@ -1387,6 +1387,17 @@ check-msi-guids: $(VENV_ACTIVATE)
 
 # Guard: migrations must be expand-contract (backward-compatible across the
 # incremental fleet migration). See docs/migration-expand-contract.md.
+# ROADMAP.md's "Current Version:" line names the phase in progress: the first
+# phase whose "Phase exit gate" item is unticked.  Read from the ROADMAP alone
+# (no git).  It was hand-maintained and sat two to three releases behind.
+roadmap-version: $(VENV_ACTIVATE)
+	@$(PYTHON) scripts/check_roadmap_version.py
+
+roadmap-version-fix: $(VENV_ACTIVATE)
+	@$(PYTHON) scripts/check_roadmap_version.py --fix
+
+.PHONY: roadmap-version roadmap-version-fix
+
 check-migrations: $(VENV_ACTIVATE)
 	@echo "=== Migration expand-contract check ==="
 	@$(PYTHON) scripts/check_migrations.py

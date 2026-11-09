@@ -679,19 +679,22 @@ the explicit bullet is added to the in-progress and future phases.)
   flag it. (`sysmanage-professional-plus` has no product-version marker --
   its Cython engines bump independently via `make lint-modules-version-fix`;
   `sysmanage-docs` resolves the agent version at build time and has none.)
-  Also update the hand-maintained **`Current Version:`** line under Release
-  Versioning below -- nothing derives it and nothing checks it, so it drifts
-  unnoticed (it lagged three phases behind before Phase 19 caught it).
+  The **`Current Version:`** line under Release Versioning below follows by
+  itself: `make roadmap-version` (part of `make lint`) fails when it is not the
+  Target Release of the first phase whose exit gate is unticked, and
+  `make roadmap-version-fix` rewrites it -- so ticking this phase's exit gate
+  moves it to the next phase's release.
 
 ### Release Versioning
 
-**Current Version:** v3.10.0.0
+**Current Version:** v3.13.0.0
 
-*(This one line is HAND-maintained -- it is NOT git-tag-derived like the
-on-disk markers are, which is exactly how it sat silently at v3.3.0.0
-(Phase 16's target) all the way through Phases 17, 18.1, 18.2 and 19.  It
-names the release the current phase ships at, so it moves as part of closing
-a phase; see the "Version is bumped" item in the Phase Exit Gate.)*
+*(Derived from this file, not from git: the Target Release of the first
+phase whose "Phase exit gate" item is still unticked -- the release the phase
+in progress ships at.  `make roadmap-version` (in `make lint`) fails when the
+line disagrees and `make roadmap-version-fix` rewrites it.  It used to be
+hand-maintained, and drifted: v3.3.0.0 all through Phases 17-19, and v3.10.0.0
+while Phase 25 was being built, until 2026-11-09.)*
 
 We use four-part versioning: `major.minor.patch.build`
 
