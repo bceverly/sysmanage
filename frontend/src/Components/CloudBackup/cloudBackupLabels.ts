@@ -76,6 +76,9 @@ export const reasonText = (t: TFunction, reason: string | null, fallback: string
         case 'apple_busy':
             return t('cloudBackup.reason.appleBusy',
                 'Apple kept refusing downloads for this account, so SysManage stopped trying. Nothing is lost: press Run now to carry on.');
+        case 'listing_incomplete':
+            return t('cloudBackup.reason.listingIncomplete',
+                'iCloud ended its list of photos early, so not every photo was seen. Nothing is lost: the rest is downloaded on the next run.');
         case 'password_unavailable':
             return t('cloudBackup.reason.passwordUnavailable', 'The storage host could not get the password from the server for this job.');
         case 'checksum_mismatch':
@@ -83,7 +86,7 @@ export const reasonText = (t: TFunction, reason: string | null, fallback: string
                 'The downloaded icloudpd did not match its pinned checksum, so nothing was installed.');
         case 'no_python':
             return t('cloudBackup.reason.noPython',
-                'icloudpd needs Python 3.10 to 3.13 on the storage host. Install one (for example: pkg install python311), then press Enable iCloud backup again.');
+                'icloudpd needs Python 3.11 to 3.15 on the storage host. Install one (for example: pkg install python311), then press Enable iCloud backup again.');
         case 'wrong_platform':
             return t('cloudBackup.reason.wrongPlatform', 'icloudpd is not offered on the storage host\'s operating system.');
         case 'missing_tool':

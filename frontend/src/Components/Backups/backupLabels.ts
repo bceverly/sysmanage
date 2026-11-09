@@ -197,19 +197,24 @@ export interface PausedService {
     seconds: number | null;
     ok: boolean;
     message: string;
+    /** Dumped while it ran, its own files left out (restate 3.0:
+     *  ``postgresql.stop=never``): nothing was stopped. */
+    leftOut: boolean;
 }
 
 export const pausedServicesOf = (run: BackupRun): PausedService[] => {
-    const entries = (run.result as { quiesce?: Array<Record<string, string>> } | null)?.quiesce;
+    const entries = (run.result as { quiesce?: Array<Record<string, string | boolean>> } | null)?.quiesce;
     if (!Array.isArray(entries)) return [];
     return entries.map(entry => {
-        const paused = Date.parse(entry.paused_at ?? '');
-        const resumed = Date.parse(entry.resumed_at ?? '');
+        const text = (key: string): string => (typeof entry[key] === 'string' ? entry[key] as string : '');
+        const paused = Date.parse(text('paused_at'));
+        const resumed = Date.parse(text('resumed_at'));
         return {
-            service: [entry.kind, entry.name].filter(Boolean).join(' '),
+            service: [text('kind'), text('name')].filter(Boolean).join(' '),
             seconds: Number.isFinite(paused) && Number.isFinite(resumed) ? Math.round((resumed - paused) / 1000) : null,
             ok: entry.status === 'ok',
-            message: entry.message ?? '',
+            message: text('message'),
+            leftOut: entry.left_out === true,
         };
     });
 };

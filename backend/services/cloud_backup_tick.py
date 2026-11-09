@@ -32,6 +32,7 @@ host:
 """
 
 import logging
+import re
 from datetime import datetime, timedelta
 from typing import List, Optional
 
@@ -64,8 +65,19 @@ APPLE_BUSY_MARKERS = (
 )
 
 
+# icloudpd's log line: time, level, message.
+_LOG_PREFIX = re.compile(r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(?:,\d+)? +[A-Z]+ +")
+
+
 def apple_stopped(detail) -> bool:
-    return any(marker in (detail or "") for marker in APPLE_BUSY_MARKERS)
+    """A line whose MESSAGE is one of the markers: the run was stopped.  A
+    message that only contains one is about one file -- icloudpd 1.33.0 logs
+    "Could not connect to iCloud to download X: Cannot connect to Apple
+    iCloud service", skips that file and carries on."""
+    for line in (detail or "").splitlines():
+        if _LOG_PREFIX.sub("", line.strip()).startswith(APPLE_BUSY_MARKERS):
+            return True
+    return False
 
 
 APPLE_COOLDOWNS = tuple(timedelta(hours=h) for h in (1, 2, 4, 8, 12))

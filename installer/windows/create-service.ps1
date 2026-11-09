@@ -160,10 +160,14 @@ try {
 
     $ConfigPath = "C:\ProgramData\SysManage\sysmanage.yaml"
 
-    # Install service - run backend.main (not uvicorn directly): it binds
-    # api.host/api.port from sysmanage.yaml and sizes the workers for this
-    # machine (Phase 22.2).
-    & $nssmPath install $ServiceName $VenvPythonShort -m backend.main 2>&1 | Out-File -FilePath $LogFile -Append
+    # Install service - sysmanage-service.ps1 unseals OpenBAO (it is sealed
+    # after every restart) and then runs backend.main (not uvicorn directly:
+    # it binds api.host/api.port from sysmanage.yaml and sizes the workers
+    # for this machine, Phase 22.2).  NSSM 2.24 has no pre-start hook, so the
+    # launcher is the service's program.
+    $Launcher = Get-ShortPath (Join-Path $InstallDir "sysmanage-service.ps1")
+    $PowerShellExe = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
+    & $nssmPath install $ServiceName $PowerShellExe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $Launcher 2>&1 | Out-File -FilePath $LogFile -Append
 
     if ($LASTEXITCODE -ne 0) {
         throw "NSSM install command failed with exit code $LASTEXITCODE"
@@ -235,6 +239,47 @@ try {
 # service, and runs the init/unseal helper.  Wrapped so any failure is
 # logged but never fails the install.
 # ---------------------------------------------------------------
+# The example turns vault on, for the local OpenBAO set up below; where that
+# fails the server would start against an OpenBAO that is not there.  So, as
+# the Linux installer does (installer/openbao/install-openbao-linux.sh), the
+# vault block's enabled is set to false -- only for the local OpenBAO, a
+# backup of the file kept.
+function Disable-LocalVault {
+    $Config = "C:\ProgramData\SysManage\sysmanage.yaml"
+    if (-not (Test-Path $Config)) { return }
+    try {
+        $lines = Get-Content -Path $Config
+        $inBlock = $false
+        $indent = -1
+        $url = ""
+        $at = -1
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            $line = $lines[$i]
+            if ($line -match '^vault:\s*(#.*)?$') { $inBlock = $true; continue }
+            if ($inBlock -and $line -match '^[^\s#]') { $inBlock = $false }
+            if (-not $inBlock -or $line -notmatch '^(\s+)([^\s#][^:]*):\s*(.*)$') { continue }
+            if ($indent -lt 0) { $indent = $Matches[1].Length }
+            if ($Matches[1].Length -ne $indent) { continue }
+            $value = ($Matches[3] -replace '\s+#.*$', '').Trim().Trim('"').Trim("'")
+            if ($Matches[2] -eq "enabled" -and $value -match '^(true|yes|on)$') { $at = $i }
+            if ($Matches[2] -eq "url") { $url = $value }
+        }
+        if ($at -lt 0) { return }
+        if ($url -and $url -notmatch '^https?://(127\.0\.0\.1|localhost):8200') {
+            Write-Log "$Config uses a remote OpenBAO ($url); leaving vault.enabled as is."
+            return
+        }
+        $Backup = "$Config.pre-openbao-$(Get-Date -Format yyyyMMddHHmmss)"
+        Copy-Item -Path $Config -Destination $Backup
+        $lines[$at] = $lines[$at] -replace 'enabled:\s*[^\s#]+', 'enabled: false'
+        Set-Content -Path $Config -Value $lines -Encoding ascii
+        Write-Log "Set vault.enabled to false in $Config (backup: $Backup)."
+        Write-Log "Set it back to true once OpenBAO is installed and running."
+    } catch {
+        Write-Log "WARNING: could not set vault.enabled to false in ${Config}: $_"
+    }
+}
+
 try {
     $BaoExe = Join-Path $InstallDir "bao.exe"
     if (-not (Test-Path $BaoExe)) {
@@ -293,16 +338,24 @@ ui            = false
             $InitScript = Join-Path $InstallDir "scripts\openbao_init_unseal.py"
             if ((Test-Path $VenvPython) -and (Test-Path $InitScript)) {
                 $KeyFile = Join-Path $OpenBaoData "init.json"
-                & $VenvPython $InitScript --addr "http://127.0.0.1:8200" --keyfile $KeyFile 2>&1 | Out-File -FilePath $LogFile -Append
+                # The server's token (vault.token_file in sysmanage.yaml.example)
+                # beside init.json, under the same SYSTEM + Administrators ACL;
+                # the server runs as LocalSystem.  sysmanage-service.ps1 writes
+                # it again on every start, as the Linux init unit does.
+                $TokenFile = Join-Path $OpenBaoData "openbao-token"
+                & $VenvPython $InitScript --addr "http://127.0.0.1:8200" --keyfile $KeyFile --app-token-file $TokenFile 2>&1 | Out-File -FilePath $LogFile -Append
             }
         } else {
             Write-Log "WARNING: NSSM not found; OpenBAO service not registered."
+            Disable-LocalVault
         }
     } else {
-        Write-Log "WARNING: OpenBAO (bao.exe) not available; set vault.enabled=false."
+        Write-Log "WARNING: OpenBAO (bao.exe) not available."
+        Disable-LocalVault
     }
 } catch {
     Write-Log "WARNING: OpenBAO provisioning failed (non-fatal): $_"
+    Disable-LocalVault
 }
 
 # ---------------------------------------------------------------

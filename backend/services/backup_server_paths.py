@@ -26,6 +26,8 @@ is the right host's, because the marked host is this server.
 """
 
 import os
+import posixpath
+import re
 from pathlib import Path
 from typing import Iterable, List, Optional
 
@@ -48,6 +50,20 @@ _SOURCE_ROOT = Path(__file__).resolve().parents[2]
 # restate's hook for OpenBAO (a raft snapshot, or a stopped copy of the file
 # backend's data); asked for only once the host's restate reports it.
 OPENBAO_HOOK = "openbao"
+# Hook settings for the server's own capture (restate 3.0.0.0, hook_option),
+# sent only to an agent that reports the ``hook_option`` ability.  PostgreSQL
+# is never stopped: the server keeps running on it through the capture, and
+# the hook takes one consistent dump instead, leaving the live files out.
+# OpenBAO's file storage is copied stopped; started again it is sealed, so
+# the hook runs the packaged unseal unit (installer/openbao) and waits for it
+# at the server's own OpenBAO address: the hook's default is HTTPS, a
+# packaged OpenBAO listens on plain HTTP on loopback, and the wait then timed
+# out with OpenBAO long unsealed (drill, 2026-11-08).  Only a loopback address
+# is sent -- the agent refuses any other.
+HOOK_OPTION_ABILITY = "hook_option"
+POSTGRESQL_LIVE = "postgresql.stop=never"
+OPENBAO_UNSEAL = "openbao.unseal_unit=sysmanage-openbao-init"
+_LOOPBACK = re.compile(r"^https?://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{1,5}$")
 
 
 def _literal(path: str) -> str:
@@ -59,11 +75,14 @@ def _literal(path: str) -> str:
 
 
 def _absolute(paths: Iterable[Optional[str]]) -> List[str]:
+    """restate rules for a POSIX host: restate never runs on Windows, so
+    ``posixpath`` -- ``os.path`` would turn every rule into backslashes on a
+    Windows test runner, and a Windows path is no rule at all."""
     found: List[str] = []
     for path in paths:
-        if not path or not os.path.isabs(path):
+        if not path or not posixpath.isabs(path):
             continue
-        rule = _literal(os.path.normpath(path))
+        rule = _literal(posixpath.normpath(path))
         if rule not in found:
             found.append(rule)
     return found
@@ -142,6 +161,19 @@ def skip_rules(policy, stored: List[str]) -> List[str]:
 def quiesce(policy) -> bool:
     """The server's databases are always paused for its own capture."""
     return bool(policy.quiesce) or server_policy(policy)
+
+
+def hook_options(policy, hook_names: List[str], abilities: List[str]) -> List[str]:
+    """The server's policy's hook settings, for an agent that takes them."""
+    if not server_policy(policy) or HOOK_OPTION_ABILITY not in abilities:
+        return []
+    options = [POSTGRESQL_LIVE]
+    if OPENBAO_HOOK in hook_names:
+        options.append(OPENBAO_UNSEAL)
+        address = str((config.get_vault_config() or {}).get("url") or "").rstrip("/")
+        if _LOOPBACK.match(address):
+            options.append(f"openbao.address={address}")
+    return options
 
 
 def hooks(policy, stored: List[str], available: Optional[List[str]]) -> List[str]:

@@ -22,16 +22,17 @@ from backend.api import backups as api
 from backend.api import backups_server as server_api
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
+from backend.services import backup_host_reply as host_reply
 from backend.services import backup_server
 from backend.services import backup_server_paths as paths
 from backend.services import backup_views as views
 from tests.services.test_backup_results import _host, _setup
-from tests.test_backups_api import (
+from tests.test_backups_api import (  # noqa: F401  # pylint: disable=unused-import
     MANAGER,
     NOBODY,
     _status,
     sent,
-)  # noqa: F401  # pylint: disable=unused-import
+)
 
 SERVER = "sysmanage.example.com"
 
@@ -90,6 +91,75 @@ def test_the_server_policy_always_leaves_the_secrets_out_and_pauses(session):
     s.policy.available_hooks = json.dumps(["postgresql", "openbao"])
     capture = jobs.host_configuration(s.policy, s.target, s.host)["jobs"]["capture"]
     assert capture["quiesce_with"] == ["openbao"]
+
+
+def _capture(s):
+    return jobs.host_configuration(s.policy, s.target, s.host)["jobs"]["capture"]
+
+
+def test_the_server_keeps_postgresql_running_once_its_agent_takes_hook_options(session):
+    """restate 3.0.0.0: one consistent dump while the database runs, nothing
+    stopped; OpenBAO's file storage, copied stopped, is unsealed again by the
+    packaged unit.  An agent that does not report the ability gets neither."""
+    s = _setup(session)
+    s.policy.server_preset = True
+    assert "hook_option" not in _capture(s)
+    s.policy.host_abilities = json.dumps(["hook_option"])
+    assert _capture(s)["hook_option"] == ["postgresql.stop=never"]
+    s.policy.available_hooks = json.dumps(["openbao", "postgresql"])
+    vault = {"url": "http://127.0.0.1:8200/"}
+    with patch.object(paths.config, "get_vault_config", return_value=vault):
+        assert _capture(s)["hook_option"] == [
+            "postgresql.stop=never",
+            "openbao.unseal_unit=sysmanage-openbao-init",
+            # The hook's default is HTTPS; a packaged OpenBAO is plain HTTP.
+            "openbao.address=http://127.0.0.1:8200",
+        ]
+    # Only this host's own OpenBAO is ever named.
+    vault = {"url": "https://vault.example.com:8200"}
+    with patch.object(paths.config, "get_vault_config", return_value=vault):
+        assert _capture(s)["hook_option"] == [
+            "postgresql.stop=never",
+            "openbao.unseal_unit=sysmanage-openbao-init",
+        ]
+
+
+def test_an_ordinary_policy_gets_no_hook_options(session):
+    s = _setup(session)
+    s.policy.host_abilities = json.dumps(["hook_option"])
+    s.policy.available_hooks = json.dumps(["openbao", "postgresql"])
+    assert "hook_option" not in _capture(s)
+
+
+def test_a_reply_that_changes_the_servers_capture_re_sends_it(session):
+    """The first configure cannot know the agent's abilities or the hooks its
+    restate finds: when they change the server's capture job, it goes again."""
+    s = _setup(session)
+    s.policy.server_preset = True
+    version = s.policy.config_version
+    with patch.object(host_reply.backup_tick, "configure_now") as now:
+        host_reply.store(session, s.policy, {"hooks": [], "abilities": []})
+        assert s.policy.config_version == version and not now.called
+        host_reply.store(
+            session, s.policy, {"hooks": ["openbao"], "abilities": ["hook_option"]}
+        )
+        assert s.policy.config_version == version + 1 and now.called
+        now.reset_mock()
+        host_reply.store(
+            session, s.policy, {"hooks": ["openbao"], "abilities": ["hook_option"]}
+        )
+        assert s.policy.config_version == version + 1 and not now.called
+
+
+def test_an_ordinary_policys_reply_is_only_stored(session):
+    s = _setup(session)
+    version = s.policy.config_version
+    with patch.object(host_reply.backup_tick, "configure_now") as now:
+        host_reply.store(
+            session, s.policy, {"hooks": ["openbao"], "abilities": ["hook_option"]}
+        )
+    assert s.policy.config_version == version and not now.called
+    assert json.loads(s.policy.host_abilities) == ["hook_option"]
 
 
 def test_an_ordinary_policy_is_left_as_it_is(session):

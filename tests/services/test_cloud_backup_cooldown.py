@@ -147,3 +147,30 @@ def test_a_lost_connection_to_icloud_carries_on_after_the_cooldown(session, sent
     assert cloud.parse_json(run.result)["reason"] == tick.APPLE_BUSY
     assert account.last_full_at is None
     assert tick.transfer_action(account, cloud.now()) == cloud.RECONCILE
+
+
+def test_one_files_lost_connection_is_not_a_refusal(session, sent):
+    """icloudpd 1.33.0 logs a lost connection for one file, skips it and carries
+    on: the run is good, with that file tried again next time."""
+    s, account = _account(session, enabled=True)
+    one_file = (
+        "2026-11-08 10:00:00 ERROR    Could not connect to iCloud to download "
+        "/srv/x/IMG_1.HEIC: Cannot connect to Apple iCloud service\n"
+        "2026-11-08 10:00:09 ERROR    Could not download IMG_1.HEIC. Please try again later."
+    )
+    run = _finish(session, s, account, cloud.now(), status="ok", exit_code=0,
+                  reason="some_failed", detail=one_file, downloaded=40,
+                  message="1 file(s) could not be downloaded")  # fmt: skip
+    assert run.status == cloud.OK
+    assert cloud.parse_json(run.result)["reason"] == "some_failed"
+
+
+def test_a_jobs_icloudpd_version_is_kept(session, sent):
+    """The agent upgrades icloudpd to its pin before a run; Enable's version
+    would otherwise stay the one it installed."""
+    s, account = _account(session, enabled=True)
+    run = cloud.queue_account_run(session, account, cloud.DOWNLOAD, "ops")
+    results.record_result(session, s.nas.id, {
+        "run_id": str(run.id), "status": "ok", "exit_code": 0, "tool_version": "1.33.0",
+    })  # fmt: skip
+    assert cloud.enable_row(session, run.target_id).tool_version == "1.33.0"

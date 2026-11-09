@@ -5510,6 +5510,7 @@
       "clearBody": "Abgeschlossene Aufträge verschwinden aus dieser Liste; wartende und laufende bleiben. Aus dem Prüfprotokoll wird nichts entfernt, und der Sicherungsstatus oben ändert sich nicht.",
       "clearError": "Die Auftragsliste konnte nicht geleert werden.",
       "paused": "{{service}} für {{seconds}} s pausiert",
+      "dumpedLive": "{{service}} im laufenden Betrieb gedumpt; seine Dateien wurden ausgelassen",
       "pauseFailed": "{{service}} konnte nicht pausiert oder fortgesetzt werden: {{message}}"
     },
     "status": {
@@ -5900,7 +5901,8 @@
       "webAccessOff": "Die iCloud-Daten dieses Kontos sind aus dem Web nicht erreichbar. Wenn der erweiterte Datenschutz aktiv ist, schalten Sie auf dem iPhone \"Auf iCloud-Daten im Web zugreifen\" ein (Einstellungen, Ihr Name, iCloud) und versuchen Sie es erneut.",
       "passwordUnavailable": "Der Speicher-Host konnte das Passwort für diesen Auftrag nicht vom Server erhalten.",
       "checksumMismatch": "Das heruntergeladene icloudpd stimmte nicht mit seiner festgelegten Prüfsumme überein, daher wurde nichts installiert.",
-      "noPython": "icloudpd benötigt Python 3.10 bis 3.13 auf dem Speicher-Host. Installieren Sie eine Version (zum Beispiel: pkg install python311) und klicken Sie dann erneut auf iCloud-Sicherung aktivieren.",
+      "listingIncomplete": "iCloud hat seine Fotoliste vorzeitig beendet, daher wurden nicht alle Fotos erfasst. Es geht nichts verloren: Der Rest wird beim nächsten Lauf heruntergeladen.",
+      "noPython": "icloudpd benötigt Python 3.11 bis 3.15 auf dem Speicher-Host. Installieren Sie eine Version (zum Beispiel: pkg install python311) und klicken Sie dann erneut auf iCloud-Sicherung aktivieren.",
       "wrongPlatform": "icloudpd wird für das Betriebssystem des Speicher-Hosts nicht angeboten.",
       "missingTool": "icloudpd ist auf dem Speicher-Host nicht installiert. Klicken Sie auf iCloud-Sicherung aktivieren.",
       "agentOutdated": "Der Agent des Speicher-Hosts ist zu alt für die iCloud-Sicherung. Aktualisieren Sie den Agenten.",

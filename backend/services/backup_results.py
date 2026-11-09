@@ -21,7 +21,6 @@ not yet immutable).  The repository's size is each capture's
 """
 
 import json
-import re
 import logging
 import uuid
 from datetime import datetime
@@ -32,6 +31,7 @@ from sqlalchemy.orm import Session
 from backend.persistence import models
 from backend.services import backup_drift
 from backend.services import backup_first_fit as first_fit
+from backend.services import backup_host_reply as host_reply
 from backend.services import backup_jobs as jobs
 from backend.services import backup_network_mounts as network_mounts
 from backend.services import backup_signing
@@ -167,26 +167,6 @@ def _dismiss_superseded_configures(db: Session, run: models.BackupRun) -> None:
         older = _int(_parameters(old).get("config_version"))
         if older is not None and older < version:
             old.dismissed_at = jobs.now()
-
-
-_HOOK_NAME = re.compile(r"^[a-z0-9_-]{1,32}$")
-
-
-def _store_hooks(policy: Optional[models.BackupPolicy], hooks: Any) -> None:
-    """The quiesce hooks the host's restate finds present (older agents and
-    restates send none: the dialog then takes names as typed)."""
-    if policy is not None and isinstance(hooks, list):
-        names = sorted({h for h in hooks if isinstance(h, str) and _HOOK_NAME.match(h)})
-        policy.available_hooks = json.dumps(names[:64])
-
-
-_ABILITIES = ("list", "status", "cache", "decrypt", "verify", "diff", "packages")
-
-
-def _store_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
-    """Browse / what changed / write cache: what the host's restate offers."""
-    if policy is not None and isinstance(found, list):
-        policy.host_abilities = json.dumps(sorted(set(found) & set(_ABILITIES)))
 
 
 def _store_protects(policy: Optional[models.BackupPolicy], installed: Any) -> None:
@@ -340,9 +320,7 @@ def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
     if isinstance(reply, dict):
         _configured_version(_policy(db, run), role, reply.get("restate_version"))
     if role == "host" and isinstance(reply, dict):
-        _store_hooks(_policy(db, run), reply.get("hooks"))
-        _store_abilities(_policy(db, run), reply.get("abilities"))
-        network_mounts.store_configured(_policy(db, run), reply.get("network_mounts"))
+        host_reply.store(db, _policy(db, run), reply)
     if role != "storage":
         return
     if isinstance(reply, dict):
@@ -369,8 +347,8 @@ def _configured_self(db: Session, run: models.BackupRun, reply: Any) -> None:
     version = reply.get("restate_version")
     _configured_version(policy, "host", version)
     _configured_version(policy, "storage", version)
-    _store_hooks(policy, reply.get("hooks"))
-    _store_abilities(policy, reply.get("abilities"))
+    host_reply.store_hooks(policy, reply.get("hooks"))
+    host_reply.store_abilities(policy, reply.get("abilities"))
     network_mounts.store_configured(policy, reply.get("network_mounts"))
     jobs.store_storage_abilities(policy, reply.get("storage_abilities"))
     _store_protects(policy, reply.get("installed"))

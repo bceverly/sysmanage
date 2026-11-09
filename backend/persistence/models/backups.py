@@ -361,7 +361,9 @@ class BackupPolicyKey(Base):
     # The encryption subkey's 16-hex key id, as restate's keyless ``du``
     # report names the key a file is sealed to.
     subkey_id = Column(String(16), nullable=True)
-    key_ref = Column(String(1024), nullable=False)
+    # The OpenBAO reference of the secret key; none for the server's own
+    # policy, encrypted to the operator's escrow key (q83, 25.9).
+    key_ref = Column(String(1024), nullable=True)
     created_at = Column(DateTime, nullable=False)
     replaced_at = Column(DateTime, nullable=True)
     retired_at = Column(DateTime, nullable=True)

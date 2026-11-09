@@ -5510,6 +5510,7 @@
       "clearBody": "Les tâches terminées quittent cette liste ; celles en attente ou en cours restent. Rien n'est supprimé du journal d'audit, et l'état des sauvegardes ci-dessus ne change pas.",
       "clearError": "La liste des tâches n'a pas pu être effacée.",
       "paused": "{{service}} mis en pause pendant {{seconds}} s",
+      "dumpedLive": "Vidage de {{service}} effectué pendant son fonctionnement ; ses fichiers ont été exclus",
       "pauseFailed": "Impossible de mettre en pause ou de reprendre {{service}} : {{message}}"
     },
     "status": {
@@ -5900,7 +5901,8 @@
       "webAccessOff": "Les données iCloud de ce compte ne sont pas accessibles depuis le Web. Si la protection avancée des données est activée, activez \"Accéder aux données iCloud sur le Web\" sur l'iPhone (Réglages, votre nom, iCloud), puis réessayez.",
       "passwordUnavailable": "L'hôte de stockage n'a pas pu obtenir le mot de passe auprès du serveur pour cette tâche.",
       "checksumMismatch": "Le fichier icloudpd téléchargé ne correspondait pas à sa somme de contrôle fixée, donc rien n'a été installé.",
-      "noPython": "icloudpd nécessite Python 3.10 à 3.13 sur l'hôte de stockage. Installez-en un (par exemple : pkg install python311), puis cliquez de nouveau sur Activer la sauvegarde iCloud.",
+      "listingIncomplete": "iCloud a terminé sa liste de photos trop tôt, donc toutes les photos n'ont pas été vues. Rien n'est perdu : le reste sera téléchargé lors de la prochaine exécution.",
+      "noPython": "icloudpd nécessite Python 3.11 à 3.15 sur l'hôte de stockage. Installez-en un (par exemple : pkg install python311), puis cliquez de nouveau sur Activer la sauvegarde iCloud.",
       "wrongPlatform": "icloudpd n'est pas proposé pour le système d'exploitation de l'hôte de stockage.",
       "missingTool": "icloudpd n'est pas installé sur l'hôte de stockage. Cliquez sur Activer la sauvegarde iCloud.",
       "agentOutdated": "L'agent de l'hôte de stockage est trop ancien pour la sauvegarde iCloud. Mettez l'agent à jour.",

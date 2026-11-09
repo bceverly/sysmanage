@@ -70,6 +70,18 @@ registry:
   port: 5432
   name: "sysmanage"
 
+# OpenBAO secrets broker.  The installer installs, initializes and unseals a
+# local one (the SysManageOpenBAO service; the SysManage service unseals it
+# again each time it starts), and writes this server's token to token_file,
+# readable by SYSTEM and Administrators only.  Self-service tenant
+# provisioning and the secrets engine need it.  Where the installer could not
+# set OpenBAO up it sets enabled to false itself.  Point url at a remote
+# OpenBAO to use that instead.
+vault:
+  enabled: true
+  url: "http://127.0.0.1:8200"
+  token_file: 'C:\ProgramData\SysManage\openbao\openbao-token'
+
 # Bootstrap fallback only (v3.0). secure-installation generates jwt_secret /
 # password_salt into OpenBAO and seeds the admin user in the database; the JWT
 # timeouts move to Settings -> Configuration. Everything below is read from YAML

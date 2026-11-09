@@ -237,6 +237,19 @@ def quiesce_names(policy: models.BackupPolicy) -> List[str]:
     return server_paths.hooks(policy, _json_strings(policy.quiesce_with), available)
 
 
+def hook_options(policy: models.BackupPolicy) -> List[str]:
+    """``hook_option`` for the capture: the server's own policy only (25.9)."""
+    return server_paths.hook_options(
+        policy, quiesce_names(policy), _json_strings(policy.host_abilities)
+    )
+
+
+def capture_hooks(policy: models.BackupPolicy) -> Tuple[List[str], List[str]]:
+    """What a configure reply can change in the capture job: the hooks it
+    names and their settings (both follow what the host reports)."""
+    return quiesce_names(policy), hook_options(policy)
+
+
 def path_rules(policy: models.BackupPolicy) -> Dict[str, List[str]]:
     """The operator's ``keep_paths`` / ``skip_paths``, only those set."""
     rules = {
@@ -283,6 +296,11 @@ def host_configuration(
                 "baseline_content": False,
                 "quiesce": server_paths.quiesce(policy),
                 "quiesce_with": quiesce_names(policy),
+                **(
+                    {"hook_option": hook_options(policy)}
+                    if hook_options(policy)
+                    else {}
+                ),
                 **path_rules(policy),
             },
             "snapshots": {},

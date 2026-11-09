@@ -5510,6 +5510,7 @@
       "clearBody": "已完成的作业会从此列表中移除；排队中和运行中的作业会保留。审计日志中的内容不会被删除，上方的备份状态也不受影响。",
       "clearError": "无法清除作业列表。",
       "paused": "已暂停 {{service}} {{seconds}} 秒",
+      "dumpedLive": "已在 {{service}} 运行时转储；其文件已排除",
       "pauseFailed": "无法暂停或恢复 {{service}}：{{message}}"
     },
     "status": {
@@ -5900,7 +5901,8 @@
       "webAccessOff": "无法通过网页访问此账户的 iCloud 数据。如果开启了高级数据保护，请在 iPhone 上开启“通过网页访问 iCloud 数据”（设置、您的姓名、iCloud），然后重试。",
       "passwordUnavailable": "存储主机无法从服务器获取此作业的密码。",
       "checksumMismatch": "下载的 icloudpd 与其固定的校验和不符，因此未安装任何内容。",
-      "noPython": "icloudpd 需要存储主机上有 Python 3.10 至 3.13。请安装一个（例如：pkg install python311），然后再次点击“启用 iCloud 备份”。",
+      "listingIncomplete": "iCloud 提前结束了照片列表，因此并非每张照片都已检查。没有任何丢失：其余部分会在下次运行时下载。",
+      "noPython": "icloudpd 需要存储主机上有 Python 3.11 至 3.15。请安装一个（例如：pkg install python311），然后再次点击“启用 iCloud 备份”。",
       "wrongPlatform": "存储主机的操作系统不提供 icloudpd。",
       "missingTool": "存储主机上未安装 icloudpd。请点击“启用 iCloud 备份”。",
       "agentOutdated": "存储主机的代理版本过旧，无法使用 iCloud 备份。请更新代理。",

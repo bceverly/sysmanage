@@ -507,6 +507,20 @@ describe("Backups page", () => {
     expect(screen.getByText("Could not pause or resume nextcloud: occ exited 1")).toBeInTheDocument();
   });
 
+  test("a database dumped while it ran is not called paused", async () => {
+    // restate 3.0, postgresql.stop=never: nothing stopped, its files left out.
+    const live = run({ id: "r7", action: "capture", status: "ok",
+      result: { quiesce: [
+        { kind: "postgresql", name: "16-main", paused_at: "2026-11-08T02:00:00Z",
+          resumed_at: "2026-11-08T02:00:40Z", status: "ok", left_out: true, message: "" },
+      ] } });
+    vi.mocked(getRuns).mockResolvedValue({ total: 1, runs: [live] });
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    expect(await screen.findByText("Dumped postgresql 16-main while it ran; its files were left out"))
+      .toBeInTheDocument();
+    expect(screen.queryByText(/^Paused postgresql/)).not.toBeInTheDocument();
+  });
+
   test("a load failure is shown", async () => {
     vi.mocked(getBackupOverview).mockRejectedValue(new Error("boom"));
     render(<MemoryRouter><Backups /></MemoryRouter>);

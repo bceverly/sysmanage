@@ -366,6 +366,23 @@ Step "Operator scripts and GETTING-STARTED.txt installed" {
     "present"
 }
 
+Step "The server gets its OpenBAO token, and unseals OpenBAO as it starts" {
+    # create-service.ps1 writes the token beside init.json; the service runs
+    # sysmanage-service.ps1, which unseals OpenBAO before the server starts.
+    if (Get-Service -Name "SysManageOpenBAO" -ErrorAction SilentlyContinue) {
+        $token = "C:\ProgramData\SysManage\openbao\openbao-token"
+        if (-not (Test-Path $token)) { throw "$token missing" }
+    } else {
+        Note "no SysManageOpenBAO service (OpenBAO could not be set up): no token expected"
+    }
+    # NSSM keeps the program's arguments in the service's Parameters key.
+    $parameters = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\SysManageServer\Parameters" -Name AppParameters -ErrorAction SilentlyContinue).AppParameters
+    if ($parameters -notmatch "sysmanage-service\.ps1|SYSMAN~\d\.PS1") {
+        throw "SysManageServer does not run sysmanage-service.ps1: $parameters"
+    }
+    "token present; service runs the launcher"
+}
+
 Step "Secrets are not readable by ordinary users" {
     # BUILTIN\Users (S-1-5-32-545) and Authenticated Users (S-1-5-11) must have
     # no access to the config, the TLS folder or the OpenBAO keys.

@@ -5510,6 +5510,7 @@
       "clearBody": "As tarefas concluídas saem desta lista; as que estão na fila ou em execução continuam. Nada é removido do log de auditoria, e o status de backup acima não é afetado.",
       "clearError": "Não foi possível limpar a lista de tarefas.",
       "paused": "{{service}} pausado por {{seconds}} s",
+      "dumpedLive": "Dump de {{service}} feito com o serviço em execução; seus arquivos foram deixados de fora",
       "pauseFailed": "Não foi possível pausar ou retomar {{service}}: {{message}}"
     },
     "status": {
@@ -5900,7 +5901,8 @@
       "webAccessOff": "Os dados do iCloud desta conta não podem ser acessados pela web. Com a Proteção Avançada de Dados ativa, ative \"Acessar dados do iCloud na web\" no iPhone (Ajustes, seu nome, iCloud) e tente de novo.",
       "passwordUnavailable": "O host de armazenamento não conseguiu obter a senha do servidor para esta tarefa.",
       "checksumMismatch": "O icloudpd baixado não correspondeu à sua soma de verificação fixada, então nada foi instalado.",
-      "noPython": "O icloudpd precisa do Python 3.10 a 3.13 no host de armazenamento. Instale um (por exemplo: pkg install python311) e clique de novo em Ativar backup do iCloud.",
+      "listingIncomplete": "O iCloud terminou a lista de fotos antes do tempo, então nem todas as fotos foram vistas. Nada se perdeu: o restante é baixado na próxima execução.",
+      "noPython": "O icloudpd precisa do Python 3.11 a 3.15 no host de armazenamento. Instale um (por exemplo: pkg install python311) e clique de novo em Ativar backup do iCloud.",
       "wrongPlatform": "O icloudpd não é oferecido para o sistema operacional do host de armazenamento.",
       "missingTool": "O icloudpd não está instalado no host de armazenamento. Clique em Ativar backup do iCloud.",
       "agentOutdated": "O agente do host de armazenamento é antigo demais para o backup do iCloud. Atualize o agente.",

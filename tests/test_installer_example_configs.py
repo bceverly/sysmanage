@@ -101,3 +101,33 @@ def test_example_admin_userid_can_actually_log_in(path):
         f"{path} sets admin_userid={admin_userid!r}; the login endpoint "
         "validates it as an email address and rejects anything else with 422"
     )
+
+
+@pytest.mark.parametrize("path", EXAMPLES, ids=_ids(EXAMPLES))
+def test_example_uses_the_openbao_the_installer_sets_up(path):
+    """Every installer provisions, initializes and unseals a local OpenBAO
+    and writes the server's token to /etc/sysmanage/openbao-token, yet until
+    2026-11-09 no example said ``vault:`` -- Ubuntu's commented one in as
+    ``openbao:``, which the loader ignores -- so vault.enabled defaulted to
+    false and a packaged server never used it (self-service provisioning
+    refused, drill 2026-11-09).  The Linux helper turns it off where OpenBAO
+    could not be installed."""
+    vault = yaml.safe_load(path.read_text(encoding="utf-8")).get("vault") or {}
+    assert vault.get("enabled") is True, f"{path} leaves OpenBAO off"
+    assert vault.get("url") == "http://127.0.0.1:8200", f"{path} vault.url"
+
+
+def test_windows_reads_the_token_its_installer_writes():
+    """Windows keeps the token beside init.json under OpenBAO's own ACL; the
+    installer writes it once and the service launcher on every start."""
+    windows = REPO_ROOT / "installer" / "windows"
+    vault = yaml.safe_load(
+        (windows / "sysmanage.yaml.example").read_text(encoding="utf-8")
+    )["vault"]
+    assert vault["token_file"] == r"C:\ProgramData\SysManage\openbao\openbao-token"
+    for script in ("create-service.ps1", "sysmanage-service.ps1"):
+        text = (windows / script).read_text(encoding="utf-8")
+        assert "--app-token-file" in text, script
+        assert (
+            '"openbao-token"' in text and "C:\\ProgramData\\SysManage\\openbao" in text
+        ), script

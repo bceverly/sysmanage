@@ -5510,6 +5510,7 @@
       "clearBody": "Las tareas terminadas salen de esta lista; las que están en cola o en ejecución se quedan. No se elimina nada del registro de auditoría y el estado de las copias de seguridad de arriba no cambia.",
       "clearError": "No se pudo borrar la lista de tareas.",
       "paused": "{{service}} pausado durante {{seconds}} s",
+      "dumpedLive": "Volcado de {{service}} hecho mientras se ejecutaba; sus archivos se dejaron fuera",
       "pauseFailed": "No se pudo pausar o reanudar {{service}}: {{message}}"
     },
     "status": {
@@ -5900,7 +5901,8 @@
       "webAccessOff": "Los datos de iCloud de esta cuenta no son accesibles desde la web. Con la protección de datos avanzada activada, active \"Acceder a los datos de iCloud en la web\" en el iPhone (Ajustes, su nombre, iCloud) y vuelva a intentarlo.",
       "passwordUnavailable": "El host de almacenamiento no pudo obtener la contraseña del servidor para este trabajo.",
       "checksumMismatch": "El icloudpd descargado no coincidía con su suma de comprobación fijada, así que no se instaló nada.",
-      "noPython": "icloudpd necesita Python 3.10 a 3.13 en el host de almacenamiento. Instale una versión (por ejemplo: pkg install python311) y pulse de nuevo Habilitar copia de seguridad de iCloud.",
+      "listingIncomplete": "iCloud terminó su lista de fotos antes de tiempo, así que no se vieron todas. No se pierde nada: el resto se descarga en la próxima ejecución.",
+      "noPython": "icloudpd necesita Python 3.11 a 3.15 en el host de almacenamiento. Instale una versión (por ejemplo: pkg install python311) y pulse de nuevo Habilitar copia de seguridad de iCloud.",
       "wrongPlatform": "icloudpd no se ofrece para el sistema operativo del host de almacenamiento.",
       "missingTool": "icloudpd no está instalado en el host de almacenamiento. Pulse Habilitar copia de seguridad de iCloud.",
       "agentOutdated": "El agente del host de almacenamiento es demasiado antiguo para la copia de seguridad de iCloud. Actualice el agente.",

@@ -116,11 +116,15 @@ license:
   phone_home_interval_hours: 24
   modules_path: "/var/lib/sysmanage/modules"
 
-# OpenBAO / Vault integration (optional)
-# openbao:
-#   enabled: false
-#   address: "http://localhost:8200"
-#   token: ""
+# OpenBAO secrets broker.  The package installs, initializes and unseals a
+# local one, and writes this server's token to /etc/sysmanage/openbao-token
+# (read from there; set vault.token_file to keep it elsewhere).  Self-service
+# tenant provisioning and the secrets engine need it.  Where the installer
+# could not install OpenBAO it sets enabled to false itself.  Point url at a
+# remote OpenBAO to use that instead.
+vault:
+  enabled: true
+  url: "http://127.0.0.1:8200"
 
 # OpenTelemetry (optional)
 # telemetry:

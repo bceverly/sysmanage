@@ -5510,6 +5510,7 @@
       "clearBody": "완료된 작업은 이 목록에서 사라지고, 대기 중이거나 실행 중인 작업은 남습니다. 감사 로그에서는 아무것도 삭제되지 않으며 위의 백업 상태도 바뀌지 않습니다.",
       "clearError": "작업 목록을 지울 수 없습니다.",
       "paused": "{{service}}을(를) {{seconds}}초 동안 일시 중지함",
+      "dumpedLive": "{{service}}을(를) 실행 중인 상태로 덤프함. 해당 파일은 제외됨",
       "pauseFailed": "{{service}}을(를) 일시 중지하거나 재개하지 못했습니다: {{message}}"
     },
     "status": {
@@ -5900,7 +5901,8 @@
       "webAccessOff": "이 계정의 iCloud 데이터에 웹에서 접근할 수 없습니다. 고급 데이터 보호가 켜져 있으면 iPhone에서 'iCloud 데이터에 웹으로 접근'을 켜고(설정, 사용자 이름, iCloud) 다시 시도하세요.",
       "passwordUnavailable": "스토리지 호스트가 이 작업에 필요한 암호를 서버에서 받지 못했습니다.",
       "checksumMismatch": "다운로드한 icloudpd가 고정된 체크섬과 일치하지 않아 아무것도 설치하지 않았습니다.",
-      "noPython": "icloudpd를 실행하려면 스토리지 호스트에 Python 3.10~3.13이 필요합니다. 하나를 설치한 다음(예: pkg install python311) iCloud 백업 활성화를 다시 누르세요.",
+      "listingIncomplete": "iCloud가 사진 목록을 일찍 끝내서 모든 사진을 확인하지 못했습니다. 잃어버린 것은 없습니다. 나머지는 다음 실행 때 다운로드됩니다.",
+      "noPython": "icloudpd를 실행하려면 스토리지 호스트에 Python 3.11~3.15이 필요합니다. 하나를 설치한 다음(예: pkg install python311) iCloud 백업 활성화를 다시 누르세요.",
       "wrongPlatform": "스토리지 호스트의 운영 체제에는 icloudpd가 제공되지 않습니다.",
       "missingTool": "스토리지 호스트에 icloudpd가 설치되어 있지 않습니다. iCloud 백업 활성화를 누르세요.",
       "agentOutdated": "스토리지 호스트의 에이전트가 너무 오래되어 iCloud 백업을 사용할 수 없습니다. 에이전트를 업데이트하세요.",

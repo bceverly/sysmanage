@@ -198,6 +198,15 @@ def _stopped_by_apple(run, status: str, detail: Optional[str]) -> bool:
     )
 
 
+def _ran_with(db: Session, run, payload: Dict[str, Any]) -> None:
+    """The icloudpd an account's job ran: the agent upgrades it to its pin
+    before a run, so Enable's version goes stale without this."""
+    version = _text(payload.get("tool_version"), 32)
+    row = cloud.enable_row(db, run.target_id) if version else None
+    if row is not None:
+        row.tool_version = version
+
+
 def record_result(db: Session, host_id: Any, payload: Dict[str, Any]):
     """Store one job's outcome; the run, or None when ignored."""
     run = _run(db, host_id, payload)
@@ -240,6 +249,8 @@ def record_result(db: Session, host_id: Any, payload: Dict[str, Any]):
     run.progress = None
     if run.action == cloud.ENABLE:
         _enable_result(db, run, payload, status)
+    else:
+        _ran_with(db, run, payload)
     account = _account(db, run)
     if account is not None and run.action != cloud.REMOVE:
         _account_result(account, run, payload, status)

@@ -56,6 +56,16 @@ registry:
   port: 5432
   name: "sysmanage"
 
+# OpenBAO secrets broker.  The package installs, initializes and unseals a
+# local one, and writes this server's token to /etc/sysmanage/openbao-token
+# (read from there; set vault.token_file to keep it elsewhere).  Self-service
+# tenant provisioning and the secrets engine need it.  Where the installer
+# could not install OpenBAO it sets enabled to false itself (Linux), or says
+# to.  Point url at a remote OpenBAO to use that instead.
+vault:
+  enabled: true
+  url: "http://127.0.0.1:8200"
+
 # Bootstrap fallback only (v3.0). secure-installation generates jwt_secret /
 # password_salt into OpenBAO and seeds the admin user in the database; the JWT
 # timeouts move to Settings -> Configuration. Everything below is read from YAML

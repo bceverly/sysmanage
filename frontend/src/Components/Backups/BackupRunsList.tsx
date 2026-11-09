@@ -19,11 +19,13 @@ import {
     Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { getRuns } from '../../Services/backups';
 import type { BackupRun } from '../../Services/backups';
 import { useVisiblePolling } from '../../hooks/useVisiblePolling';
 import RestoreNotes from './RestoreNotes';
 import { actionLabel, formatTime, pausedServicesOf, runStatusColor, runStatusLabel } from './backupLabels';
+import type { PausedService } from './backupLabels';
 
 const runDetail = (run: BackupRun): string => {
     if (run.snapshot) return run.snapshot;
@@ -32,6 +34,20 @@ const runDetail = (run: BackupRun): string => {
 
 // Each service restate paused for this capture, how long, and how it ended:
 // a failed pause or resume is why a run is Incomplete.
+const pausedText = (t: TFunction, paused: PausedService): string => {
+    if (!paused.ok) {
+        return t('backups.runs.pauseFailed', 'Could not pause or resume {{service}}: {{message}}', {
+            service: paused.service, message: paused.message });
+    }
+    // Dumped while it ran (postgresql.stop=never): nothing was stopped.
+    if (paused.leftOut) {
+        return t('backups.runs.dumpedLive', 'Dumped {{service}} while it ran; its files were left out', {
+            service: paused.service });
+    }
+    return t('backups.runs.paused', 'Paused {{service}} for {{seconds}} s', {
+        service: paused.service, seconds: paused.seconds ?? '?' });
+};
+
 const PausedServices: React.FC<{ run: BackupRun }> = ({ run }) => {
     const { t } = useTranslation();
     return (
@@ -39,11 +55,7 @@ const PausedServices: React.FC<{ run: BackupRun }> = ({ run }) => {
             {pausedServicesOf(run).map(paused => (
                 <Typography key={paused.service} variant="caption" display="block"
                     color={paused.ok ? 'text.secondary' : 'warning.main'}>
-                    {paused.ok
-                        ? t('backups.runs.paused', 'Paused {{service}} for {{seconds}} s', {
-                            service: paused.service, seconds: paused.seconds ?? '?' })
-                        : t('backups.runs.pauseFailed', 'Could not pause or resume {{service}}: {{message}}', {
-                            service: paused.service, message: paused.message })}
+                    {pausedText(t, paused)}
                 </Typography>
             ))}
         </>

@@ -5510,6 +5510,7 @@
       "clearBody": "Afgeronde taken verdwijnen uit deze lijst; taken in de wachtrij en lopende taken blijven. Er wordt niets uit het auditlogboek verwijderd en de back-upstatus hierboven verandert niet.",
       "clearError": "De takenlijst kon niet worden gewist.",
       "paused": "{{service}} {{seconds}} s gepauzeerd",
+      "dumpedLive": "Dump van {{service}} gemaakt terwijl het draaide; de bestanden ervan zijn weggelaten",
       "pauseFailed": "Kan {{service}} niet pauzeren of hervatten: {{message}}"
     },
     "status": {
@@ -5900,7 +5901,8 @@
       "webAccessOff": "De iCloud-gegevens van dit account zijn niet via het web bereikbaar. Zet bij geavanceerde gegevensbescherming op de iPhone \"Toegang tot iCloud-gegevens via het web\" aan (Instellingen, uw naam, iCloud) en probeer het opnieuw.",
       "passwordUnavailable": "De opslaghost kon het wachtwoord voor deze taak niet van de server krijgen.",
       "checksumMismatch": "De gedownloade icloudpd kwam niet overeen met de vastgelegde controlesom, dus er is niets geïnstalleerd.",
-      "noPython": "icloudpd heeft Python 3.10 tot 3.13 nodig op de opslaghost. Installeer er een (bijvoorbeeld: pkg install python311) en klik dan opnieuw op iCloud-back-up inschakelen.",
+      "listingIncomplete": "iCloud beëindigde de lijst met foto's te vroeg, dus niet elke foto is gezien. Er gaat niets verloren: de rest wordt bij de volgende run gedownload.",
+      "noPython": "icloudpd heeft Python 3.11 tot 3.15 nodig op de opslaghost. Installeer er een (bijvoorbeeld: pkg install python311) en klik dan opnieuw op iCloud-back-up inschakelen.",
       "wrongPlatform": "icloudpd wordt niet aangeboden voor het besturingssysteem van de opslaghost.",
       "missingTool": "icloudpd is niet geïnstalleerd op de opslaghost. Klik op iCloud-back-up inschakelen.",
       "agentOutdated": "De agent van de opslaghost is te oud voor iCloud-back-up. Werk de agent bij.",

@@ -5510,6 +5510,7 @@
       "clearBody": "Finished jobs leave this list; queued and running jobs stay. Nothing is removed from the audit log, and the backup status above is not affected.",
       "clearError": "The job list could not be cleared.",
       "paused": "Paused {{service}} for {{seconds}} s",
+      "dumpedLive": "Dumped {{service}} while it ran; its files were left out",
       "pauseFailed": "Could not pause or resume {{service}}: {{message}}"
     },
     "status": {
@@ -5900,7 +5901,8 @@
       "webAccessOff": "iCloud data cannot be reached from the web for this account. With Advanced Data Protection on, turn on \"Access iCloud Data on the Web\" on the iPhone (Settings, your name, iCloud), then try again.",
       "passwordUnavailable": "The storage host could not get the password from the server for this job.",
       "checksumMismatch": "The downloaded icloudpd did not match its pinned checksum, so nothing was installed.",
-      "noPython": "icloudpd needs Python 3.10 to 3.13 on the storage host. Install one (for example: pkg install python311), then press Enable iCloud backup again.",
+      "listingIncomplete": "iCloud ended its list of photos early, so not every photo was seen. Nothing is lost: the rest is downloaded on the next run.",
+      "noPython": "icloudpd needs Python 3.11 to 3.15 on the storage host. Install one (for example: pkg install python311), then press Enable iCloud backup again.",
       "wrongPlatform": "icloudpd is not offered on the storage host's operating system.",
       "missingTool": "icloudpd is not installed on the storage host. Press Enable iCloud backup.",
       "agentOutdated": "The storage host's agent is too old for iCloud backup. Update the agent.",

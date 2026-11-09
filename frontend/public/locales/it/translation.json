@@ -5510,6 +5510,7 @@
       "clearBody": "I processi terminati escono da questo elenco; quelli in coda o in esecuzione restano. Dal registro di controllo non viene rimosso nulla e lo stato dei backup qui sopra non cambia.",
       "clearError": "Impossibile cancellare l'elenco dei processi.",
       "paused": "{{service}} sospeso per {{seconds}} s",
+      "dumpedLive": "Dump di {{service}} eseguito mentre era in funzione; i suoi file sono stati esclusi",
       "pauseFailed": "Impossibile sospendere o riprendere {{service}}: {{message}}"
     },
     "status": {
@@ -5900,7 +5901,8 @@
       "webAccessOff": "I dati iCloud di questo account non sono raggiungibili dal web. Con la protezione avanzata dei dati attiva, attiva \"Accedi ai dati di iCloud sul web\" sull'iPhone (Impostazioni, il tuo nome, iCloud), poi riprova.",
       "passwordUnavailable": "L'host di archiviazione non ha potuto ottenere la password dal server per questo processo.",
       "checksumMismatch": "L'icloudpd scaricato non corrispondeva al suo checksum fissato, quindi non è stato installato nulla.",
-      "noPython": "icloudpd richiede Python da 3.10 a 3.13 sull'host di archiviazione. Installane uno (per esempio: pkg install python311), poi premi di nuovo Abilita backup di iCloud.",
+      "listingIncomplete": "iCloud ha terminato in anticipo l'elenco delle foto, quindi non tutte le foto sono state viste. Non si perde nulla: il resto viene scaricato alla prossima esecuzione.",
+      "noPython": "icloudpd richiede Python da 3.11 a 3.15 sull'host di archiviazione. Installane uno (per esempio: pkg install python311), poi premi di nuovo Abilita backup di iCloud.",
       "wrongPlatform": "icloudpd non è offerto per il sistema operativo dell'host di archiviazione.",
       "missingTool": "icloudpd non è installato sull'host di archiviazione. Premi Abilita backup di iCloud.",
       "agentOutdated": "L'agente dell'host di archiviazione è troppo vecchio per il backup di iCloud. Aggiorna l'agente.",
