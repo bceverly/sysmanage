@@ -742,7 +742,7 @@
     "secretSetHelp": "Una contraseña está almacenada en OpenBAO. Escriba una nueva para reemplazarla.",
     "secretUnset": "No configurado",
     "secretUnsetHelp": "Almacenado de forma segura en OpenBAO, no en la base de datos.",
-    "title": "Configuración"
+    "title": "Configuración general"
   },
   "connection": {
     "networkError": "Error de red: No se pudo alcanzar el servidor",

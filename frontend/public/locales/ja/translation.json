@@ -742,7 +742,7 @@
     "secretSetHelp": "OpenBAO にパスワードが保存されています。新しいパスワードを入力して置き換えてください。",
     "secretUnset": "設定されていません",
     "secretUnsetHelp": "OpenBAOに安全に保存されます。データベースには保存されません。",
-    "title": "設定"
+    "title": "構成"
   },
   "connection": {
     "networkError": "ネットワークエラー: サーバに接続できません",

@@ -2525,7 +2525,7 @@
     "scrollLeft": "Faites défiler vers la gauche",
     "scrollRight": "Faites défiler vers la droite",
     "search": "Rechercher (Ctrl+K)",
-    "secrets": "Sécrets",
+    "secrets": "Secrets",
     "settings": "Paramètres",
     "sites": "Sites",
     "toggleMenu": "Basculer le menu",
@@ -3169,7 +3169,7 @@
     "secretSubtype": "Sous-type de Secret",
     "secretType": "Type de Secret",
     "subtypeRequired": "Le sous-type de secret est requis",
-    "title": "Sécrets",
+    "title": "Secrets",
     "type": {
       "api_keys": "Clés API",
       "database_credentials": "Identifiants de Base de Données",
