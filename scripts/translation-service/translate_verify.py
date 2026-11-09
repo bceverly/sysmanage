@@ -267,6 +267,8 @@ def make_router(
         if not isinstance(verdict, dict):
             return False, "the judge gave no readable verdict"
         answer = str(verdict.get("answer", "")).strip().lower()
+        # The judge's own reply, returned to the caller (no request is built).
+        # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
         return answer == "yes", str(verdict.get("reason", "")).strip()
 
     async def judged(  # pylint: disable=too-many-arguments,too-many-positional-arguments

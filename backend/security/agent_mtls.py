@@ -385,6 +385,7 @@ def _probe_tls_spki() -> List[str]:
         return []
     address, port, server_name = target
     context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
     # Reading our OWN front door's certificate to publish it, not trusting it.
     context.check_hostname = False  # NOSONAR
     context.verify_mode = ssl.CERT_NONE  # NOSONAR
@@ -423,9 +424,16 @@ def served_tls_spki() -> List[str]:
     return value
 
 
+_PSS = padding.PSS(
+    mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.DIGEST_LENGTH
+)
+
+
 def _sign(key, data: bytes) -> bytes:
     if isinstance(key, rsa.RSAPrivateKey):
-        return key.sign(data, padding.PKCS1v15(), hashes.SHA256())
+        # PSS: nothing deployed checks the older PKCS#1 v1.5 form, so the
+        # statement starts with the padding semgrep and CodeQL accept.
+        return key.sign(data, _PSS, hashes.SHA256())
     return key.sign(data, ec.ECDSA(hashes.SHA256()))
 
 

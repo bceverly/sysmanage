@@ -14783,6 +14783,28 @@ working over NFS for anyone who mounts a repository by hand.
       numbers), and what an installation still on NFS must do before
       upgrading
 
+#### 26.9 Dependency upkeep (Community / OSS) (added 2026-11-09, Bryan)
+
+- [ ] **Playwright 1.65.0, for the Brotli decoder out-of-bounds write
+      (code scanning #2177, Semgrep `ssc-9c34c675-756b-44e8-9512-28718930fef2`,
+      found 2026-11-09):** `playwright-core` 1.64.1 bundles a Brotli 1.0.3 to
+      1.2.0 decoder, likely CVE-2026-111497 (disclosed 2026-10-21).  It
+      reaches us only through `@playwright/test`, a dev dependency for the e2e
+      tests and `make screenshots`, never shipped.  The alert is on the
+      FreeBSD port's copy,
+      `packaging/freebsd-ports/sysutils/sysmanage/files/packagejsons/frontend/package-lock.json`
+      (byte-for-byte `frontend/package-lock.json`, which `.semgrepignore`
+      skips for an old punycode reason).  No source names the fixed
+      Playwright release; 1.65.0 (published 2026-11-05, after the disclosure)
+      is the likely one, and clears the repository's 7-day npm cooldown
+      (`.github/dependabot.yml`) on 2026-11-12.  On or after that date:
+      `@playwright/test` to `^1.65.0` in `frontend/package.json`, the
+      lockfile regenerated, both files copied over the FreeBSD port's,
+      `npx playwright install` for the new browsers, then `make test-e2e` and
+      a full `make screenshots` pass.  If the next scan still flags 1.65.0,
+      dismiss #2177 in GitHub as "used in tests" with that reason.  Done when
+      #2177 is closed (fixed or dismissed with the reason) and both runs pass
+
 ### Licensing summary
 
 - **Community / OSS:** automatic update application by policy -- scope, what to apply, a schedule, reboot handling, per-host opt-out, holds, pinned packages, results and audit.
@@ -14810,6 +14832,10 @@ working over NFS for anyone who mounts a repository by hand.
 **NFS retired (26.8, only on a "go" from Phase 25)**
 
 - [ ] No target uses NFS; sysmanage, sysmanage-agent and sysmanage-docs carry no NFS transport code or NFS instructions (a search of all three for NFS finds only the release note); production and the lab back up and restore through restate-proxy alone
+
+**Dependency upkeep (26.9)**
+
+- [ ] Playwright on 1.65.0 or later in `frontend/` and the FreeBSD port's copy, the e2e tests and `make screenshots` passing on it, and code scanning #2177 closed
 
 **Every phase**
 

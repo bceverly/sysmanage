@@ -32,6 +32,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from backend.persistence.models import MessageQueue
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.queue_enums import QueueDirection
 
 logger = logging.getLogger(__name__)
@@ -69,7 +70,9 @@ async def confirm(connection, message_id: Optional[str], status: str) -> None:
         )
     except Exception:  # pylint: disable=broad-exception-caught
         # The agent resends after its timeout; the duplicate is not stored.
-        logger.debug("Could not confirm message %s", message_id, exc_info=True)
+        logger.debug(
+            "Could not confirm message %s", sanitize_log(message_id), exc_info=True
+        )
 
 
 def already_queued(db: Session, message_id: Optional[str]) -> bool:

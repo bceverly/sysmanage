@@ -18,7 +18,7 @@ from urllib.parse import quote
 import pytest
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import ec, padding, rsa
+from cryptography.hazmat.primitives.asymmetric import ec, rsa
 from cryptography.x509.oid import NameOID
 from fastapi import HTTPException
 
@@ -57,6 +57,30 @@ def _csr(key=None, cn="ignored.example.com"):
         .sign(key, hashes.SHA256())
     )
     return csr.public_bytes(serialization.Encoding.PEM).decode()
+
+
+# Requests for keys too weak to certify, made once and kept as text: only
+# their public halves are here, and no test makes a weak key.
+RSA_1024_CSR = """\
+-----BEGIN CERTIFICATE REQUEST-----
+MIIBXTCBxwIBADAeMRwwGgYDVQQDDBNpZ25vcmVkLmV4YW1wbGUuY29tMIGfMA0G
+CSqGSIb3DQEBAQUAA4GNADCBiQKBgQDSnLPmc3e7cnOmg1a/xpKJtL6aOZlZpoP8
+mkMRVZAhVKgIYvf/ew2s9Zq/erts36UR9ku1akUdAD8U3KzEKociqLuFWVKuTBxu
+aTw05I0nvzjR4U4ZEX4GjsdsDxvuvxfHNCZDuBCQYArl4CruiWrzhQidASt2XSCk
+olR/+G37UQIDAQABoAAwDQYJKoZIhvcNAQELBQADgYEA0T2CPbHRsQDpOaRtrtTm
+Rt1f/ImzzR5Zvx4ZAzN6W59vf1Gp1TQoEroaWhrE7S3pvS/ipYF3C3h3WF+06Dvq
+2UmRTqq8w1mqBWWdsBG8v60xIAufulFDMji67/OPlARrbJVZqWqAzDJ4ZrMJ8ssm
+lENNL60MSkgy0vV9qO1cCQ4=
+-----END CERTIFICATE REQUEST-----
+"""
+P192_CSR = """\
+-----BEGIN CERTIFICATE REQUEST-----
+MIG5MHACAQAwHjEcMBoGA1UEAwwTaWdub3JlZC5leGFtcGxlLmNvbTBJMBMGByqG
+SM49AgEGCCqGSM49AwEBAzIABI0+YVr7ceMkYaV+Qj6GXGvZEw4aCjd9I63T2bRf
+XqAtSo0j6oPTCjzgQGUuiyPTW6AAMAoGCCqGSM49BAMCAzkAMDYCGQD+HNwvAMex
+Dr+NMbA7wh0ijaJ+Ei6uZGcCGQDH7WwUDLTiHMFGZg9oKtZngP3GX5t/khA=
+-----END CERTIFICATE REQUEST-----
+"""
 
 
 def _issued(host):
@@ -115,8 +139,8 @@ def test_a_renewal_keeps_the_replaced_serial():
     "csr",
     [
         "not a request",
-        _csr(rsa.generate_private_key(public_exponent=65537, key_size=1024)),
-        _csr(ec.generate_private_key(ec.SECP192R1())),
+        RSA_1024_CSR,
+        P192_CSR,
     ],
     ids=["unreadable", "rsa-1024", "p-192"],
 )
@@ -344,7 +368,7 @@ def test_the_identity_statement_is_signed_by_a_certificate_from_the_ca():
     signature = base64.b64decode(document["signature"])
     key = identity.public_key()
     if isinstance(key, rsa.RSAPublicKey):
-        key.verify(signature, statement, padding.PKCS1v15(), hashes.SHA256())
+        key.verify(signature, statement, agent_mtls._PSS, hashes.SHA256())
     else:
         key.verify(signature, statement, ec.ECDSA(hashes.SHA256()))
     body = json.loads(statement)
