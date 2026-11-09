@@ -5630,7 +5630,14 @@
       "appendOnly": "不是僅附加：{{hosts}} 可能刪除或覆寫自己已完成的備份。下次備份之後的保護步驟會將其鎖定（restate 2.1.0.1 或更新版本；在使用 ZFS 的 FreeBSD 上為 2.1.0.3 或更新版本）。",
       "other": "儲存檢查：{{code}}",
       "prepareHint": "每台主機「備份」分頁中的「準備儲存」會為該主機提供獨立的檔案系統和僅限於它的匯出。儲存主機的 NFS 伺服器設定仍由您自行設定。",
-      "nfsV4Unknown": "無法檢查儲存主機是否提供 NFSv4，主機透過它存取其備份。"
+      "nfsV4Unknown": "無法檢查儲存主機是否提供 NFSv4，主機透過它存取其備份。",
+      "proxyCertExpired": "restate-proxy 憑證已過期。在續約之前，主機會拒絕此 Proxy。",
+      "proxyCertExpiring": "restate-proxy 憑證將在 {{days}} 天後到期。請在此之前續約。",
+      "proxyCertMissing": "儲存主機的 /etc/restate/proxy.crt 中沒有 restate-proxy 憑證。",
+      "proxyCertUnreadable": "儲存主機上的 restate-proxy 憑證不是代理可讀取的憑證。",
+      "proxyGrants": "restate-proxy 不接受以下主機的存取授權：{{hosts}}。請在儲存主機上執行 restate-proxy --check-grants 查看原因。",
+      "proxyMissing": "儲存主機上未安裝 restate-proxy，因此主機無法透過它存取其備份。",
+      "proxyStopped": "儲存主機上的 restate-proxy 未在執行，因此主機無法透過它存取其備份。"
     },
     "prepare": {
       "title": "要為此主機準備儲存嗎？",
@@ -5843,6 +5850,26 @@
       "unencrypted": "此備份未加密，並且包含設定中的資料庫密碼。請像保護伺服器本身一樣保護備份儲存空間。",
       "needsEscrow": "請先在某台主機的「加密」面板中儲存緊急託管金鑰。SysManage 伺服器自身的備份使用該金鑰加密，因此還原 OpenBAO 時絕不需要保存在 OpenBAO 中的金鑰。",
       "escrowEncrypted": "已使用您的緊急託管金鑰 ({{fingerprint}}) 加密。SysManage 從不持有其私密部分，因此需依伺服器復原手冊所述，使用該金鑰手動還原此備份。"
+    },
+    "transport": {
+      "ca": "自有 CA 憑證（PEM，選用）",
+      "caHelp": "用於由您自己的 CA 簽署的 Proxy 憑證。主機只會針對其備份信任它。",
+      "caKept": "已儲存一個 CA。貼上另一個即可取代它；留空則保留已儲存的 CA。",
+      "caRemove": "移除已儲存的 CA 並信任系統存放區",
+      "change": "變更",
+      "host": "主機連線使用的 Proxy 位址",
+      "hostHelp": "Proxy 憑證中的名稱或位址，與主機解析時所用的相同。",
+      "label": "存取儲存空間的方式",
+      "nfs": "NFS（每台主機掛載自己的匯出）",
+      "pin": "釘選的金鑰（SHA-256，選用）",
+      "pinHelp": "主機將只接受具有此公開金鑰的 Proxy 憑證。",
+      "port": "連接埠",
+      "proxy": "restate-proxy（以 HTTPS 連到儲存主機）",
+      "proxyIntro": "在儲存主機上執行 restate-proxy。每台主機會為它建立自己的令牌，該令牌絕不會離開主機，而存取授權由儲存主機寫入。還原、瀏覽和比較都會經過 Proxy；在 restate 能透過它擷取備份之前，備份本身仍使用 NFS。",
+      "saveError": "無法儲存主機存取儲存空間的方式。",
+      "title": "主機存取儲存空間的方式",
+      "viaNfs": "NFS",
+      "viaProxy": "restate-proxy 位於"
     }
   },
   "cloudBackup": {

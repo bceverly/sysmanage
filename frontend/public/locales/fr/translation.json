@@ -5630,7 +5630,14 @@
       "appendOnly": "Pas en ajout seul : {{hosts}} pourraient supprimer ou écraser leurs propres sauvegardes terminées. L'étape de protection après la prochaine sauvegarde les verrouille (restate 2.1.0.1 ou ultérieur ; 2.1.0.3 sous FreeBSD avec ZFS).",
       "other": "Vérification du stockage : {{code}}",
       "prepareHint": "Préparer le stockage, dans l'onglet Sauvegardes de chaque hôte, donne à cet hôte son propre système de fichiers et un export limité à lui. Les paramètres du serveur NFS de l'hôte de stockage restent à votre charge.",
-      "nfsV4Unknown": "Impossible de vérifier si l'hôte de stockage sert NFSv4, que les hôtes utilisent pour accéder à leurs sauvegardes."
+      "nfsV4Unknown": "Impossible de vérifier si l'hôte de stockage sert NFSv4, que les hôtes utilisent pour accéder à leurs sauvegardes.",
+      "proxyCertExpired": "Le certificat de restate-proxy a expiré. Les hôtes refusent le proxy jusqu'à son renouvellement.",
+      "proxyCertExpiring": "Le certificat de restate-proxy expire dans {{days}} jours. Renouvelez-le avant cette date.",
+      "proxyCertMissing": "L'hôte de stockage n'a pas de certificat restate-proxy dans /etc/restate/proxy.crt.",
+      "proxyCertUnreadable": "Le certificat de restate-proxy sur l'hôte de stockage n'est pas un certificat que l'agent peut lire.",
+      "proxyGrants": "restate-proxy n'accepte pas l'autorisation pour : {{hosts}}. Exécutez restate-proxy --check-grants sur l'hôte de stockage pour en connaître la raison.",
+      "proxyMissing": "restate-proxy n'est pas installé sur l'hôte de stockage ; les hôtes ne peuvent donc pas accéder à leurs sauvegardes par son intermédiaire.",
+      "proxyStopped": "restate-proxy n'est pas en cours d'exécution sur l'hôte de stockage ; les hôtes ne peuvent donc pas accéder à leurs sauvegardes par son intermédiaire."
     },
     "prepare": {
       "title": "Préparer le stockage pour cet hôte ?",
@@ -5843,6 +5850,26 @@
       "unencrypted": "Cette sauvegarde n'est pas chiffrée et contient le mot de passe de la base de données issu de la configuration. Protégez le stockage des sauvegardes autant que le serveur lui-même.",
       "needsEscrow": "Enregistrez d'abord une clé de séquestre d'urgence dans le panneau Chiffrement d'un hôte. La sauvegarde du serveur SysManage lui-même est chiffrée avec elle, de sorte que restaurer OpenBAO ne nécessite jamais une clé conservée dans OpenBAO.",
       "escrowEncrypted": "Chiffrée avec votre clé de séquestre d'urgence ({{fingerprint}}). SysManage n'en détient jamais la partie secrète : cette sauvegarde se restaure donc à la main avec cette clé, comme le décrit la procédure de reprise du serveur."
+    },
+    "transport": {
+      "ca": "Certificat de la CA du site (PEM, facultatif)",
+      "caHelp": "Pour un certificat de proxy signé par votre propre CA. Les hôtes lui font confiance uniquement pour leurs sauvegardes.",
+      "caKept": "Une CA est enregistrée. Collez-en une autre pour la remplacer ; si le champ reste vide, la CA enregistrée est conservée.",
+      "caRemove": "Supprimer la CA enregistrée et faire confiance au magasin du système",
+      "change": "Modifier",
+      "host": "Adresse du proxy accessible aux hôtes",
+      "hostHelp": "Le nom ou l'adresse figurant dans le certificat du proxy, tel que les hôtes le résolvent.",
+      "label": "Accéder au stockage via",
+      "nfs": "NFS (chaque hôte monte son propre export)",
+      "pin": "Clé épinglée (SHA-256, facultatif)",
+      "pinHelp": "Les hôtes n'acceptent alors qu'un certificat de proxy portant cette clé publique.",
+      "port": "Port",
+      "proxy": "restate-proxy (HTTPS vers l'hôte de stockage)",
+      "proxyIntro": "Exécutez restate-proxy sur l'hôte de stockage. Chaque hôte crée son propre jeton pour celui-ci, qui ne quitte jamais l'hôte, et l'hôte de stockage écrit les autorisations. Les restaurations, la navigation et les comparaisons passent par le proxy ; les sauvegardes elles-mêmes utilisent encore NFS jusqu'à ce que restate puisse effectuer la capture par son intermédiaire.",
+      "saveError": "Le mode d'accès des hôtes au stockage n'a pas pu être enregistré.",
+      "title": "Accès des hôtes au stockage",
+      "viaNfs": "NFS",
+      "viaProxy": "restate-proxy à l'adresse"
     }
   },
   "cloudBackup": {

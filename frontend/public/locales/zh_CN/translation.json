@@ -5630,7 +5630,14 @@
       "appendOnly": "不是仅追加：{{hosts}} 可能删除或覆盖自己已完成的备份。下次备份之后的保护步骤会将其锁定（restate 2.1.0.1 或更高版本；在使用 ZFS 的 FreeBSD 上为 2.1.0.3 或更高版本）。",
       "other": "存储检查：{{code}}",
       "prepareHint": "每台主机“备份”选项卡中的“准备存储”会为该主机提供独立的文件系统和仅限于它的导出。存储主机的 NFS 服务器设置仍由您自行配置。",
-      "nfsV4Unknown": "无法检查存储主机是否提供 NFSv4，主机通过它访问其备份。"
+      "nfsV4Unknown": "无法检查存储主机是否提供 NFSv4，主机通过它访问其备份。",
+      "proxyCertExpired": "restate-proxy 证书已过期。在续订之前，主机会拒绝该网络代理。",
+      "proxyCertExpiring": "restate-proxy 证书将在 {{days}} 天后过期。请在此之前续订。",
+      "proxyCertMissing": "存储主机在 /etc/restate/proxy.crt 处没有 restate-proxy 证书。",
+      "proxyCertUnreadable": "存储主机上的 restate-proxy 证书不是代理能够读取的证书。",
+      "proxyGrants": "restate-proxy 不接受以下主机的授权：{{hosts}}。请在存储主机上运行 restate-proxy --check-grants 查看原因。",
+      "proxyMissing": "存储主机上未安装 restate-proxy，因此主机无法通过它访问其备份。",
+      "proxyStopped": "存储主机上的 restate-proxy 未在运行，因此主机无法通过它访问其备份。"
     },
     "prepare": {
       "title": "为此主机准备存储？",
@@ -5843,6 +5850,26 @@
       "unencrypted": "此备份未加密，并且包含配置中的数据库密码。请像保护服务器本身一样保护备份存储。",
       "needsEscrow": "请先在某台主机的“加密”面板中保存应急托管密钥。SysManage 服务器自身的备份使用该密钥加密，因此恢复 OpenBAO 时绝不需要保存在 OpenBAO 中的密钥。",
       "escrowEncrypted": "已使用您的应急托管密钥 ({{fingerprint}}) 加密。SysManage 从不持有其私密部分，因此需按服务器恢复手册所述，使用该密钥手动恢复此备份。"
+    },
+    "transport": {
+      "ca": "站点 CA 证书（PEM，可选）",
+      "caHelp": "用于由您自己的 CA 签发的网络代理证书。主机仅在备份时信任该 CA。",
+      "caKept": "已保存一个 CA。粘贴另一个 CA 可将其替换；留空则保留已保存的 CA。",
+      "caRemove": "删除已保存的 CA 并信任系统证书存储",
+      "change": "更改",
+      "host": "主机访问的网络代理地址",
+      "hostHelp": "网络代理证书中的名称或地址，即主机解析时所用的名称或地址。",
+      "label": "访问存储的方式",
+      "nfs": "NFS（每台主机挂载自己的导出）",
+      "pin": "固定的密钥（SHA-256，可选）",
+      "pinHelp": "设置后，主机只接受具有此公钥的网络代理证书。",
+      "port": "端口",
+      "proxy": "restate-proxy（通过 HTTPS 连接存储主机）",
+      "proxyIntro": "在存储主机上运行 restate-proxy。每台主机为其生成自己的令牌，该令牌永远不会离开主机，存储主机则负责写入授权。恢复、浏览和比较都通过该网络代理进行；在 restate 能够通过它进行捕获之前，备份本身仍使用 NFS。",
+      "saveError": "无法保存主机访问存储的方式。",
+      "title": "主机如何访问存储",
+      "viaNfs": "NFS",
+      "viaProxy": "restate-proxy，地址："
     }
   },
   "cloudBackup": {

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 12:11-0500\n"
+"POT-Creation-Date: 2026-11-09 10:56-0500\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3229,6 +3229,27 @@ msgstr ""
 msgid "Failed to delete antivirus default: %s"
 msgstr "فشل في حذف الإعدادات الافتراضية لمكافحة الفيروسات: %s"
 
+#: backend/api/backups_transport.py:37
+msgid "Unknown transport"
+msgstr "طريقة نقل غير معروفة"
+
+#: backend/api/backups_transport.py:39
+msgid "The proxy address is not a host name or IP address"
+msgstr "عنوان الوكيل الوسيط ليس اسم مضيف ولا عنوان IP"
+
+#: backend/api/backups_transport.py:42
+msgid "The proxy port must be between 1 and 65535"
+msgstr "يجب أن يكون منفذ الوكيل الوسيط بين 1 و65535"
+
+#: backend/api/backups_transport.py:45
+msgid "The pinned key must be a SHA-256 in hex (64 characters)"
+msgstr ""
+"يجب أن يكون المفتاح المثبَّت قيمة SHA-256 بالصيغة الست عشرية (64 حرفًا)"
+
+#: backend/api/backups_transport.py:48
+msgid "The proxy's CA must be a PEM certificate"
+msgstr "يجب أن تكون CA الخاصة بالوكيل الوسيط شهادة PEM"
+
 #: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
 msgstr "حدث الأجهزة غير موجود"
@@ -5965,11 +5986,11 @@ msgstr ""
 "نفسه بهذا المفتاح، فلا تحتاج استعادة OpenBAO أبدًا إلى مفتاح محفوظ داخل "
 "OpenBAO"
 
-#: backend/services/cloud_backup_tick.py:315
+#: backend/services/cloud_backup_tick.py:327
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "ينتهي تسجيل الدخول إلى iCloud قريبًا: سجّل الدخول مرة أخرى"
 
-#: backend/services/cloud_backup_tick.py:317
+#: backend/services/cloud_backup_tick.py:329
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, SysManage cannot download its photos until someone signs in again.\n"

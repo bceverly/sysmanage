@@ -45,6 +45,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
+from backend.services import backup_proxy as proxy
 from backend.services import backup_server_paths as server_paths
 from backend.services import config_mgmt_dispatch
 from backend.services.agent_capability_service import get_capability_report
@@ -289,6 +290,9 @@ def host_configuration(
             "repo_dir": policy_repo_dir(policy, host),
             **nfs_source(policy, storage),
             **_previous(policy, storage),
+            # restate-proxy (25.5): where the host reads its repository over
+            # HTTPS, once its restate can; it captures over NFS until 3.2.0.0.
+            **proxy.host_proxy(policy, target, host),
         },
         "jobs": {
             "capture": {
@@ -512,6 +516,8 @@ def queue_configure(
         run_host = host.id
     elif role == "storage":
         payload = storage_configuration(policy, target, host)
+        # restate-proxy (25.5): this host's grants, and the target's clients.
+        payload["target"].update(proxy.storage_proxy(db, policy, target, host))
         run_host = target.storage_host_id
         policy.storage_client_address = payload["target"]["client_address"]
     else:

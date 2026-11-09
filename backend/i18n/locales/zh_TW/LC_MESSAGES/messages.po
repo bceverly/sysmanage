@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 12:11-0500\n"
+"POT-Creation-Date: 2026-11-09 10:56-0500\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3129,6 +3129,26 @@ msgstr "找不到此操作系統的防病毒默認值"
 msgid "Failed to delete antivirus default: %s"
 msgstr "刪除防毒預設值時失敗：%s"
 
+#: backend/api/backups_transport.py:37
+msgid "Unknown transport"
+msgstr "未知的傳輸方式"
+
+#: backend/api/backups_transport.py:39
+msgid "The proxy address is not a host name or IP address"
+msgstr "Proxy 位址不是主機名稱或 IP 位址"
+
+#: backend/api/backups_transport.py:42
+msgid "The proxy port must be between 1 and 65535"
+msgstr "Proxy 連接埠必須介於 1 到 65535 之間"
+
+#: backend/api/backups_transport.py:45
+msgid "The pinned key must be a SHA-256 in hex (64 characters)"
+msgstr "釘選的金鑰必須是十六進位的 SHA-256（64 個字元）"
+
+#: backend/api/backups_transport.py:48
+msgid "The proxy's CA must be a PEM certificate"
+msgstr "Proxy 的 CA 必須是 PEM 憑證"
+
 #: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
 msgstr "未找到硬體事件"
@@ -5776,11 +5796,11 @@ msgid ""
 msgstr ""
 "請先儲存緊急託管金鑰：SysManage 伺服器自身的備份使用該金鑰加密，因此還原 OpenBAO 時絕不需要保存在 OpenBAO 中的金鑰"
 
-#: backend/services/cloud_backup_tick.py:315
+#: backend/services/cloud_backup_tick.py:327
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "iCloud 登入即將到期：請重新登入"
 
-#: backend/services/cloud_backup_tick.py:317
+#: backend/services/cloud_backup_tick.py:329
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, SysManage cannot download its photos until someone signs in again.\n"

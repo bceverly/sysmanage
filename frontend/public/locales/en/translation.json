@@ -5630,7 +5630,14 @@
       "appendOnly": "Not append-only: {{hosts}} could delete or overwrite their own finished backups. The protect step after the next backup locks them (restate 2.1.0.1 or later; 2.1.0.3 on FreeBSD with ZFS).",
       "other": "Storage check: {{code}}",
       "prepareHint": "Prepare storage, on each host's Backups tab, gives that host its own filesystem and an export limited to it. The storage host's NFS server settings stay yours to set.",
-      "nfsV4Unknown": "Could not check whether the storage host serves NFSv4, which hosts use to reach their backups."
+      "nfsV4Unknown": "Could not check whether the storage host serves NFSv4, which hosts use to reach their backups.",
+      "proxyCertExpired": "The restate-proxy certificate has expired. Hosts refuse the proxy until it is renewed.",
+      "proxyCertExpiring": "The restate-proxy certificate expires in {{days}} days. Renew it before then.",
+      "proxyCertMissing": "The storage host has no restate-proxy certificate at /etc/restate/proxy.crt.",
+      "proxyCertUnreadable": "The restate-proxy certificate on the storage host is not a certificate the agent can read.",
+      "proxyGrants": "restate-proxy does not accept the grant for: {{hosts}}. Run restate-proxy --check-grants on the storage host to see why.",
+      "proxyMissing": "restate-proxy is not installed on the storage host, so hosts cannot reach their backups through it.",
+      "proxyStopped": "restate-proxy is not running on the storage host, so hosts cannot reach their backups through it."
     },
     "prepare": {
       "title": "Prepare the storage for this host?",
@@ -5843,6 +5850,26 @@
       "unencrypted": "This backup is not encrypted, and it holds the database password from the configuration. Keep the backup storage as safe as the server itself.",
       "needsEscrow": "Save a break-glass escrow key first, in a host's Encryption panel. The SysManage server's own backup is encrypted to it, so restoring OpenBAO never needs a key kept inside OpenBAO.",
       "escrowEncrypted": "Encrypted to your break-glass escrow key ({{fingerprint}}). SysManage never holds its secret half, so this backup is restored by hand with that key, as the server recovery runbook describes."
+    },
+    "transport": {
+      "ca": "Site CA certificate (PEM, optional)",
+      "caHelp": "For a proxy certificate your own CA signed. Hosts trust it for their backups only.",
+      "caKept": "A CA is saved. Paste another to replace it; left empty, the saved one is kept.",
+      "caRemove": "Remove the saved CA and trust the system store",
+      "change": "Change",
+      "host": "Proxy address hosts reach",
+      "hostHelp": "The name or address in the proxy's certificate, as hosts resolve it.",
+      "label": "Reach the storage through",
+      "nfs": "NFS (each host mounts its own export)",
+      "pin": "Pinned key (SHA-256, optional)",
+      "pinHelp": "Hosts then accept only a proxy certificate with this public key.",
+      "port": "Port",
+      "proxy": "restate-proxy (HTTPS to the storage host)",
+      "proxyIntro": "Run restate-proxy on the storage host. Each host makes its own token for it, which never leaves the host, and the storage host writes the grants. Restores, browsing and comparisons go through the proxy; backups themselves still use NFS until restate can capture through it.",
+      "saveError": "How hosts reach the storage could not be saved.",
+      "title": "How hosts reach the storage",
+      "viaNfs": "NFS",
+      "viaProxy": "restate-proxy at"
     }
   },
   "cloudBackup": {

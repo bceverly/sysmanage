@@ -5630,7 +5630,14 @@
       "appendOnly": "No es solo de anexión: {{hosts}} podrían borrar o sobrescribir sus propias copias de seguridad terminadas. El paso de protección tras la próxima copia de seguridad las bloquea (restate 2.1.0.1 o posterior; 2.1.0.3 en FreeBSD con ZFS).",
       "other": "Comprobación del almacenamiento: {{code}}",
       "prepareHint": "Preparar almacenamiento, en la pestaña Copias de seguridad de cada host, da a ese host su propio sistema de archivos y una exportación limitada a él. La configuración del servidor NFS del host de almacenamiento sigue siendo cosa suya.",
-      "nfsV4Unknown": "No se pudo comprobar si el host de almacenamiento ofrece NFSv4, que los hosts usan para acceder a sus copias de seguridad."
+      "nfsV4Unknown": "No se pudo comprobar si el host de almacenamiento ofrece NFSv4, que los hosts usan para acceder a sus copias de seguridad.",
+      "proxyCertExpired": "El certificado de restate-proxy ha caducado. Los hosts rechazan el proxy hasta que se renueve.",
+      "proxyCertExpiring": "El certificado de restate-proxy caduca dentro de {{days}} días. Renuévelo antes de esa fecha.",
+      "proxyCertMissing": "El host de almacenamiento no tiene ningún certificado de restate-proxy en /etc/restate/proxy.crt.",
+      "proxyCertUnreadable": "El certificado de restate-proxy del host de almacenamiento no es un certificado que el agente pueda leer.",
+      "proxyGrants": "restate-proxy no acepta la concesión de: {{hosts}}. Ejecute restate-proxy --check-grants en el host de almacenamiento para ver el motivo.",
+      "proxyMissing": "restate-proxy no está instalado en el host de almacenamiento, por lo que los hosts no pueden acceder a sus copias de seguridad a través de él.",
+      "proxyStopped": "restate-proxy no se está ejecutando en el host de almacenamiento, por lo que los hosts no pueden acceder a sus copias de seguridad a través de él."
     },
     "prepare": {
       "title": "¿Preparar el almacenamiento para este host?",
@@ -5843,6 +5850,26 @@
       "unencrypted": "Esta copia de seguridad no está cifrada y contiene la contraseña de la base de datos de la configuración. Proteja el almacenamiento de copias tanto como el propio servidor.",
       "needsEscrow": "Guarde primero una clave de custodia de emergencia en el panel Cifrado de un host. La copia de seguridad del propio servidor SysManage se cifra con ella, de modo que restaurar OpenBAO nunca necesita una clave guardada dentro de OpenBAO.",
       "escrowEncrypted": "Cifrada con su clave de custodia de emergencia ({{fingerprint}}). SysManage nunca guarda su parte secreta, así que esta copia se restaura a mano con esa clave, como describe el manual de recuperación del servidor."
+    },
+    "transport": {
+      "ca": "Certificado de la CA del sitio (PEM, opcional)",
+      "caHelp": "Para un certificado de proxy firmado por su propia CA. Los hosts confían en ella solo para sus copias de seguridad.",
+      "caKept": "Hay una CA guardada. Pegue otra para sustituirla; si lo deja vacío, se conserva la guardada.",
+      "caRemove": "Eliminar la CA guardada y confiar en el almacén del sistema",
+      "change": "Cambiar",
+      "host": "Dirección del proxy a la que acceden los hosts",
+      "hostHelp": "El nombre o la dirección que figura en el certificado del proxy, tal como lo resuelven los hosts.",
+      "label": "Acceder al almacenamiento mediante",
+      "nfs": "NFS (cada host monta su propia exportación)",
+      "pin": "Clave anclada (SHA-256, opcional)",
+      "pinHelp": "Así, los hosts solo aceptan un certificado de proxy con esta clave pública.",
+      "port": "Puerto",
+      "proxy": "restate-proxy (HTTPS al host de almacenamiento)",
+      "proxyIntro": "Ejecute restate-proxy en el host de almacenamiento. Cada host crea su propio token para él, que nunca sale del host, y el host de almacenamiento escribe las concesiones. Las restauraciones, la exploración y las comparaciones pasan por el proxy; las copias de seguridad en sí siguen usando NFS hasta que restate pueda realizarlas a través de él.",
+      "saveError": "No se pudo guardar cómo acceden los hosts al almacenamiento.",
+      "title": "Cómo acceden los hosts al almacenamiento",
+      "viaNfs": "NFS",
+      "viaProxy": "restate-proxy en"
     }
   },
   "cloudBackup": {

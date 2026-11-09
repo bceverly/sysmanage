@@ -289,3 +289,6 @@ nl: hardwareHealth.reason.deviceNotOnline
 # "Use the tag policy" confirmation (2026-11-03): one changed setting, pure
 # interpolation ("{{setting}}: {{from}} -> {{to}}") in every locale.
 backups.useTag.change
+
+# How hosts reach the storage (25.5): "NFS" is a protocol name in every locale.
+backups.transport.viaNfs

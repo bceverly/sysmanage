@@ -32,6 +32,10 @@ HOST_WIDE = (
     "nfs_local_locks",
     "nfs_v4_root",
     "service_account",
+    # restate-proxy (25.5): the proxy and its certificate serve every host;
+    # each host's grant (proxy_grants) is its own.
+    "proxy_running",
+    "proxy_certificate",
 )
 _RANK = {"error": 2, "warning": 1, "ok": 0}
 

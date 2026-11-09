@@ -43,6 +43,7 @@ from backend.persistence.tenant_context import tenant_scope
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_escrow
 from backend.services import backup_jobs as jobs
+from backend.services import backup_proxy
 from backend.services import backup_reach as reach
 from backend.services import backup_tag_policies as tag_policies
 from backend.services import backup_verify as verify
@@ -446,6 +447,9 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
     tag_policies.resolve(db)
     # Then keys, so a rotated key's job files go out on this same pass.
     rotate_keys(db, target, now)
+    # restate-proxy (25.5): a host joined, left or was deleted -- re-send the
+    # storage host's grants on this same pass.
+    backup_proxy.sync_clients(db, target)
     storage_ready = _eligible(jobs.storage_host(db, target))
     queued = start_requested(db)  # asked for first, then the schedule
     for policy in _target_policies(db, target):

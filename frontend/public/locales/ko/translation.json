@@ -5630,7 +5630,14 @@
       "appendOnly": "추가 전용이 아님: {{hosts}}이(가) 자신의 완료된 백업을 삭제하거나 덮어쓸 수 있습니다. 다음 백업 후의 보호 단계에서 잠깁니다(restate 2.1.0.1 이상, ZFS를 사용하는 FreeBSD에서는 2.1.0.3 이상).",
       "other": "스토리지 검사: {{code}}",
       "prepareHint": "각 호스트의 백업 탭에 있는 스토리지 준비는 해당 호스트에 자체 파일 시스템과 그 호스트로 제한된 내보내기를 제공합니다. 스토리지 호스트의 NFS 서버 설정은 계속 직접 지정해야 합니다.",
-      "nfsV4Unknown": "스토리지 호스트가 NFSv4를 제공하는지 확인할 수 없습니다. 호스트는 이를 통해 백업에 접근합니다."
+      "nfsV4Unknown": "스토리지 호스트가 NFSv4를 제공하는지 확인할 수 없습니다. 호스트는 이를 통해 백업에 접근합니다.",
+      "proxyCertExpired": "restate-proxy 인증서가 만료되었습니다. 인증서가 갱신될 때까지 호스트는 프록시를 거부합니다.",
+      "proxyCertExpiring": "restate-proxy 인증서가 {{days}}일 후에 만료됩니다. 그 전에 갱신하십시오.",
+      "proxyCertMissing": "스토리지 호스트의 /etc/restate/proxy.crt에 restate-proxy 인증서가 없습니다.",
+      "proxyCertUnreadable": "스토리지 호스트의 restate-proxy 인증서는 에이전트가 읽을 수 있는 인증서가 아닙니다.",
+      "proxyGrants": "restate-proxy가 다음 호스트의 권한 부여(grant)를 수락하지 않습니다: {{hosts}}. 원인을 확인하려면 스토리지 호스트에서 restate-proxy --check-grants를 실행하십시오.",
+      "proxyMissing": "스토리지 호스트에 restate-proxy가 설치되어 있지 않으므로, 호스트가 이를 통해 백업에 접근할 수 없습니다.",
+      "proxyStopped": "스토리지 호스트에서 restate-proxy가 실행되고 있지 않으므로, 호스트가 이를 통해 백업에 접근할 수 없습니다."
     },
     "prepare": {
       "title": "이 호스트용 스토리지를 준비할까요?",
@@ -5843,6 +5850,26 @@
       "unencrypted": "이 백업은 암호화되지 않으며 구성의 데이터베이스 비밀번호를 포함합니다. 백업 저장소를 서버 자체만큼 안전하게 보호하세요.",
       "needsEscrow": "먼저 호스트의 암호화 패널에서 비상용 에스크로 키를 저장하세요. SysManage 서버 자체의 백업은 이 키로 암호화되므로 OpenBAO를 복원할 때 OpenBAO 안에 보관된 키가 필요하지 않습니다.",
       "escrowEncrypted": "비상용 에스크로 키({{fingerprint}})로 암호화되었습니다. SysManage는 비밀 키 부분을 보관하지 않으므로, 이 백업은 서버 복구 런북에 설명된 대로 그 키로 직접 복원합니다."
+    },
+    "transport": {
+      "ca": "사이트 CA 인증서(PEM, 선택 사항)",
+      "caHelp": "자체 CA가 서명한 프록시 인증서용입니다. 호스트는 백업에 대해서만 이 CA를 신뢰합니다.",
+      "caKept": "CA가 저장되어 있습니다. 교체하려면 다른 CA를 붙여 넣으십시오. 비워 두면 저장된 CA가 유지됩니다.",
+      "caRemove": "저장된 CA를 제거하고 시스템 신뢰 저장소 사용",
+      "change": "변경",
+      "host": "호스트가 접근하는 프록시 주소",
+      "hostHelp": "호스트가 확인(resolve)하는 대로의, 프록시 인증서에 있는 이름 또는 주소입니다.",
+      "label": "스토리지 접근 방식",
+      "nfs": "NFS(각 호스트가 자체 내보내기를 마운트)",
+      "pin": "고정된 키(SHA-256, 선택 사항)",
+      "pinHelp": "그러면 호스트는 이 공개 키를 가진 프록시 인증서만 수락합니다.",
+      "port": "포트",
+      "proxy": "restate-proxy(스토리지 호스트로 HTTPS 연결)",
+      "proxyIntro": "스토리지 호스트에서 restate-proxy를 실행하십시오. 각 호스트는 프록시용 자체 토큰을 만들며 이 토큰은 절대 호스트를 떠나지 않고, 스토리지 호스트가 권한 부여(grant)를 기록합니다. 복원, 탐색, 비교는 프록시를 거칩니다. 백업 자체는 restate가 프록시를 통해 캡처할 수 있을 때까지 계속 NFS를 사용합니다.",
+      "saveError": "스토리지 접근 방식을 저장할 수 없습니다.",
+      "title": "호스트의 스토리지 접근 방식",
+      "viaNfs": "NFS",
+      "viaProxy": "restate-proxy 주소:"
     }
   },
   "cloudBackup": {

@@ -108,7 +108,27 @@ export interface StorageStatus {
   stale: Record<"seal_stale" | "prune_stale" | "check_stale", string[]>;
 }
 
+/** How hosts reach a target's storage (ROADMAP 25.5): NFS, or restate-proxy. */
+export interface TargetTransport {
+  transport: 'nfs' | 'proxy';
+  proxy_host?: string;
+  proxy_port?: number;
+  proxy_pin_sha256?: string | null;
+  proxy_ca?: boolean;
+  url?: string;
+}
+
+export interface TransportInput {
+  transport: 'nfs' | 'proxy';
+  proxy_host?: string | null;
+  proxy_port?: number | null;
+  proxy_pin_sha256?: string | null;
+  proxy_ca_pem?: string | null;
+  remove_proxy_ca?: boolean;
+}
+
 export interface BackupTarget {
+  transport?: TargetTransport;
   id: string;
   name: string;
   host_mount_point: string;
@@ -502,6 +522,13 @@ export const saveTarget = async (
   id
     ? (await axiosInstance.put<BackupTarget>(`${base}/backups/targets/${id}`, input)).data
     : (await axiosInstance.post<BackupTarget>(`${base}/backups/targets`, input)).data;
+
+/** Switch how hosts reach the storage; every host's jobs are re-sent. */
+export const setTransport = async (
+  targetId: string,
+  input: TransportInput,
+): Promise<BackupTarget> =>
+  (await axiosInstance.put<BackupTarget>(`${base}/backups/targets/${targetId}/transport`, input)).data;
 
 export const getHostBackup = async (hostId: string): Promise<HostBackup> =>
   (await axiosInstance.get<HostBackup>(`${base}/host/${hostId}/backup`)).data;

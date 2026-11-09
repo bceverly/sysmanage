@@ -5630,7 +5630,14 @@
       "appendOnly": "Não é somente acréscimo: {{hosts}} poderiam excluir ou sobrescrever seus próprios backups concluídos. A etapa de proteção após o próximo backup os bloqueia (restate 2.1.0.1 ou posterior; 2.1.0.3 no FreeBSD com ZFS).",
       "other": "Verificação do armazenamento: {{code}}",
       "prepareHint": "Preparar armazenamento, na aba Backups de cada host, dá a esse host um sistema de arquivos próprio e uma exportação restrita a ele. As configurações do servidor NFS do host de armazenamento continuam por sua conta.",
-      "nfsV4Unknown": "Não foi possível verificar se o host de armazenamento oferece NFSv4, que os hosts usam para acessar seus backups."
+      "nfsV4Unknown": "Não foi possível verificar se o host de armazenamento oferece NFSv4, que os hosts usam para acessar seus backups.",
+      "proxyCertExpired": "O certificado do restate-proxy expirou. Os hosts recusam o proxy até que ele seja renovado.",
+      "proxyCertExpiring": "O certificado do restate-proxy expira em {{days}} dias. Renove-o antes disso.",
+      "proxyCertMissing": "O host de armazenamento não tem um certificado do restate-proxy em /etc/restate/proxy.crt.",
+      "proxyCertUnreadable": "O certificado do restate-proxy no host de armazenamento não é um certificado que o agente consiga ler.",
+      "proxyGrants": "O restate-proxy não aceita a concessão para: {{hosts}}. Execute restate-proxy --check-grants no host de armazenamento para ver o motivo.",
+      "proxyMissing": "O restate-proxy não está instalado no host de armazenamento, portanto os hosts não conseguem acessar seus backups por meio dele.",
+      "proxyStopped": "O restate-proxy não está em execução no host de armazenamento, portanto os hosts não conseguem acessar seus backups por meio dele."
     },
     "prepare": {
       "title": "Preparar o armazenamento para este host?",
@@ -5843,6 +5850,26 @@
       "unencrypted": "Este backup não é criptografado e contém a senha do banco de dados da configuração. Proteja o armazenamento de backup tanto quanto o próprio servidor.",
       "needsEscrow": "Salve primeiro uma chave de custódia de emergência no painel Criptografia de um host. O backup do próprio servidor SysManage é criptografado com ela, para que restaurar o OpenBAO nunca precise de uma chave guardada dentro do OpenBAO.",
       "escrowEncrypted": "Criptografado com sua chave de custódia de emergência ({{fingerprint}}). O SysManage nunca guarda a parte secreta dela, então este backup é restaurado manualmente com essa chave, como descreve o procedimento de recuperação do servidor."
+    },
+    "transport": {
+      "ca": "Certificado da sua CA (PEM, opcional)",
+      "caHelp": "Para um certificado de proxy assinado pela sua própria CA. Os hosts confiam nela apenas para os seus backups.",
+      "caKept": "Há uma CA salva. Cole outra para substituí-la; se ficar vazio, a CA salva é mantida.",
+      "caRemove": "Remover a CA salva e confiar no repositório do sistema",
+      "change": "Alterar",
+      "host": "Endereço do proxy que os hosts acessam",
+      "hostHelp": "O nome ou endereço que consta no certificado do proxy, como os hosts o resolvem.",
+      "label": "Acessar o armazenamento via",
+      "nfs": "NFS (cada host monta sua própria exportação)",
+      "pin": "Chave fixada (SHA-256, opcional)",
+      "pinHelp": "Os hosts passam a aceitar apenas um certificado de proxy com esta chave pública.",
+      "port": "Porta",
+      "proxy": "restate-proxy (HTTPS até o host de armazenamento)",
+      "proxyIntro": "Execute o restate-proxy no host de armazenamento. Cada host cria seu próprio token para ele, que nunca sai do host, e o host de armazenamento grava as concessões. Restaurações, navegação e comparações passam pelo proxy; os backups em si ainda usam NFS até que o restate consiga fazer a captura por meio dele.",
+      "saveError": "Não foi possível salvar como os hosts acessam o armazenamento.",
+      "title": "Como os hosts acessam o armazenamento",
+      "viaNfs": "NFS",
+      "viaProxy": "restate-proxy em"
     }
   },
   "cloudBackup": {

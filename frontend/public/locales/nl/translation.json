@@ -5630,7 +5630,14 @@
       "appendOnly": "Niet alleen-toevoegen: {{hosts}} kunnen hun eigen voltooide back-ups verwijderen of overschrijven. De beveiligingsstap na de volgende back-up vergrendelt ze (restate 2.1.0.1 of later; 2.1.0.3 op FreeBSD met ZFS).",
       "other": "Opslagcontrole: {{code}}",
       "prepareHint": "Opslag voorbereiden, op het tabblad Back-ups van elke host, geeft die host een eigen bestandssysteem en een export die tot die host beperkt is. De NFS-serverinstellingen van de opslaghost blijven uw verantwoordelijkheid.",
-      "nfsV4Unknown": "Kon niet controleren of de opslaghost NFSv4 aanbiedt, waarmee hosts hun back-ups bereiken."
+      "nfsV4Unknown": "Kon niet controleren of de opslaghost NFSv4 aanbiedt, waarmee hosts hun back-ups bereiken.",
+      "proxyCertExpired": "Het restate-proxy-certificaat is verlopen. Hosts weigeren de proxy totdat het is vernieuwd.",
+      "proxyCertExpiring": "Het restate-proxy-certificaat verloopt over {{days}} dagen. Vernieuw het vóór die tijd.",
+      "proxyCertMissing": "De opslaghost heeft geen restate-proxy-certificaat in /etc/restate/proxy.crt.",
+      "proxyCertUnreadable": "Het restate-proxy-certificaat op de opslaghost is geen certificaat dat de agent kan lezen.",
+      "proxyGrants": "restate-proxy accepteert de machtiging niet voor: {{hosts}}. Voer restate-proxy --check-grants uit op de opslaghost om te zien waarom.",
+      "proxyMissing": "restate-proxy is niet geïnstalleerd op de opslaghost, dus hosts kunnen hun back-ups niet via de proxy bereiken.",
+      "proxyStopped": "restate-proxy draait niet op de opslaghost, dus hosts kunnen hun back-ups niet via de proxy bereiken."
     },
     "prepare": {
       "title": "De opslag voor deze host voorbereiden?",
@@ -5843,6 +5850,26 @@
       "unencrypted": "Deze back-up is niet versleuteld en bevat het databasewachtwoord uit de configuratie. Beveilig de back-upopslag net zo goed als de server zelf.",
       "needsEscrow": "Sla eerst een noodsleutel voor bewaring op in het paneel Versleuteling van een host. De back-up van de SysManage-server zelf wordt daarmee versleuteld, zodat het herstellen van OpenBAO nooit een sleutel nodig heeft die in OpenBAO bewaard wordt.",
       "escrowEncrypted": "Versleuteld met uw noodsleutel voor bewaring ({{fingerprint}}). SysManage heeft nooit het geheime deel ervan, dus deze back-up wordt met de hand met die sleutel hersteld, zoals het herstelplan van de server beschrijft."
+    },
+    "transport": {
+      "ca": "CA-certificaat van de site (PEM, optioneel)",
+      "caHelp": "Voor een proxycertificaat dat door uw eigen CA is ondertekend. Hosts vertrouwen het alleen voor hun back-ups.",
+      "caKept": "Er is een CA opgeslagen. Plak een andere om die te vervangen; leeg gelaten blijft de opgeslagen CA behouden.",
+      "caRemove": "Opgeslagen CA verwijderen en de systeemopslag vertrouwen",
+      "change": "Wijzigen",
+      "host": "Proxyadres dat hosts bereiken",
+      "hostHelp": "De naam of het adres in het certificaat van de proxy, zoals hosts het opzoeken.",
+      "label": "Opslag bereiken via",
+      "nfs": "NFS (elke host koppelt zijn eigen export)",
+      "pin": "Gepinde sleutel (SHA-256, optioneel)",
+      "pinHelp": "Hosts accepteren dan alleen een proxycertificaat met deze publieke sleutel.",
+      "port": "Poort",
+      "proxy": "restate-proxy (HTTPS naar de opslaghost)",
+      "proxyIntro": "Draai restate-proxy op de opslaghost. Elke host maakt er een eigen token voor, dat de host nooit verlaat, en de opslaghost schrijft de machtigingen. Herstelacties, bladeren en vergelijkingen gaan via de proxy; de back-ups zelf gebruiken nog NFS totdat restate via de proxy back-ups kan maken.",
+      "saveError": "Hoe hosts de opslag bereiken kon niet worden opgeslagen.",
+      "title": "Hoe hosts de opslag bereiken",
+      "viaNfs": "NFS",
+      "viaProxy": "restate-proxy op"
     }
   },
   "cloudBackup": {

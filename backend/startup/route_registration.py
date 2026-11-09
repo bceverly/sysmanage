@@ -116,6 +116,7 @@ from backend.api import (
     backups_browse,
     backups_drift,
     backups_escrow,
+    backups_transport,
     backups_tag_policies,
     backups_equip,
     backups_retention,
@@ -477,6 +478,7 @@ def register_routes(app: FastAPI):
     _include_versioned(app, backups_browse.router, tags=["backups"])
     _include_versioned(app, backups_drift.router, tags=["backups"])
     _include_versioned(app, backups_escrow.router, tags=["backups"])
+    _include_versioned(app, backups_transport.router, tags=["backups"])
     # Every edition: a lapse never locks anyone out of their keys (2026-11-03).
     _include_versioned(app, backups_breakglass.router, tags=["backups"])
     _include_versioned(app, backups_tag_policies.router, tags=["backups"])

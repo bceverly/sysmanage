@@ -14547,7 +14547,7 @@ before Pro+ encryption.
 
 - [ ] **The target's setting:** "How hosts reach the storage" -- NFS (today,
       unchanged) or restate-proxy -- switchable either way per target, with
-      the repositories left where they are
+      the repositories left where they are -- BUILT 2026-11-09: `backup_target.transport` nfs/proxy with `proxy_host`, `proxy_port` (8443), an optional pinned key or site CA (q84backupproxy); `PUT /backups/targets/{id}/transport` (Manage Backups, audited, every host's and the storage host's jobs re-sent); "How hosts reach the storage" on the target card, its dialog keeping a saved CA unless removed; 14 locales, verified
 - [ ] **Equip:** installs and upgrades `restate-proxy` on the storage host like
       restate today, and its certificate
 - [ ] **The allow list from the target's hosts:** the agent on the storage host
@@ -14556,17 +14556,17 @@ before Pro+ encryption.
       host, only their hashes go in the file, and the token is delivered to
       the host over the agent channel and written as its
       `repository_token_file`; rotation adds the new hash before removing the
-      old one
+      old one -- BUILT 2026-11-09, with one change (Bryan, 2026-11-09): each HOST makes its own tokens (`rsp_` + 32 random bytes) and installs them root's alone (`/etc/restate/tokens/<policy>.token`, and `.previous.token` for the repository before Pro+ encryption); only their SHA-256 reaches the server (`proxy_token_sha256`, `_old`, `proxy_previous_token_sha256`) and the storage host, so no token is ever in a command, the queue or a database. The storage host's agent writes `/etc/restate/proxy.d/<host id>.conf` (and `<host id>.previous.conf`, read only) labelled for the target, and removes every grant it labelled whose client the target no longer has: each storage configure carries the target's whole client list, and the backup tick re-sends it when a host joins, leaves or is deleted (`proxy_clients`). Rotation: a new hash keeps the old one in the grant until the host reports the new one again. A grant is written with `install`, not renamed into place (the agent has no `mv`); the proxy re-reads it on change
 - [ ] **Job files:** each host's capture, restore, browse and compare jobs name
       `https://<proxy>/v1/<client>` and `repository_token_file` instead of a
       mount; the job validation (24.0) accepts exactly those keys and nothing
-      else new
+      else new -- BUILT 2026-11-09 for the read jobs (restate 3.1.0.0 reads through the proxy): restore, browse, status, compare and verify name `https://<proxy>/v1/<host id>` with `repository_token_file`, and `repository_ca_file` or `repository_pin_sha256`, with no NFS mount; only when the host's restate reports `remote_repository` and its token is there. Captures (and the configured snapshot listing) stay on NFS until restate 3.2.0.0 captures through the proxy
 - [ ] **Restores:** the server's Restore Files role and audit gate the restore
       job as now; the host reads its own repository with its own token, as
       its NFS export allows today.  Per-job read-only restore grants (the
-      allow list's expiry field) are a possible later step
+      allow list's expiry field) are a possible later step -- BUILT 2026-11-09: a restore through the proxy is gated and audited as before; the host reads its own repository with its own token
 - [ ] **Storage audit (24.5) for the proxy:** proxy running, certificate valid
-      and not near expiry, the `proxy.d` files matching the target's hosts
+      and not near expiry, the `proxy.d` files matching the target's hosts -- BUILT 2026-11-09: the storage host reports `proxy_running` (not installed / stopped), `proxy_certificate` (missing, unreadable, expired, or expiring within 21 days) and, per host, `proxy_grants` as `restate-proxy --check-grants --json` reads them; shown with the target's other storage warnings, in 14 locales. none of 25.5 is proven yet against a running restate-proxy in the lab
 - [ ] **Measure the unknowns, NFS against restate-proxy (Bryan, 2026-11-05):**
       on the same storage host and the same hosts, both transports: a first
       full capture of a large host (nextcloud-sized), a nightly incremental
@@ -14602,7 +14602,7 @@ before Pro+ encryption.
 
 #### 25.6 Docs, screenshots, i18n
 
-- [ ] sysmanage-docs, Community / Pro+: backing up the SysManage server itself, and the server recovery runbook (25.9) -- PAGES DONE 2026-11-09: `docs/administration/backup.html` now leads with "The server backs itself up" (what it needs, setup, what goes in, consistent databases, Community / Pro+ encryption, what to keep in escrow) and the recovery runbook proven in the drills (seven steps, a new address, OpenBAO alone, one tenant database alone); the by-hand procedure stays below it for a server that cannot reach a target; 14 locales, hand-translated and verified. OPEN: a screenshot of the Back up this SysManage server dialog through `make screenshots`
+- [x] sysmanage-docs, Community / Pro+: backing up the SysManage server itself, and the server recovery runbook (25.9) -- PAGES DONE 2026-11-09: `docs/administration/backup.html` now leads with "The server backs itself up" (what it needs, setup, what goes in, consistent databases, Community / Pro+ encryption, what to keep in escrow) and the recovery runbook proven in the drills (seven steps, a new address, OpenBAO alone, one tenant database alone); the by-hand procedure stays below it for a server that cannot reach a target; 14 locales, hand-translated and verified. its screenshot (`backups-server.png`, the dialog, Community tier) added to `screenshots/shotlist.json` 2026-11-09 and proven on the Enterprise VM; the Community image comes from the next full `make screenshots`
 - [ ] sysmanage-docs, restate-proxy (25.5): choosing NFS or the proxy per target, the allow list, and the remote route through a firewall (pfSense HAProxy in TCP mode as the worked example)
 - [x] **No ROADMAP phases in the public docs (Bryan, 2026-11-05):** "Phase" and phase numbers are an internal planning term and must not appear in sysmanage-docs. Found 2026-11-05 on ten pages (`roadmap/index.html`, `architecture/` load-balancing, communication-protocols, performance-and-scale, websocket-protocol and system-architecture, `server/` deployment and troubleshooting, `deployment/production-checklist.html`, `getting-started/first-deployment.html`) -- "Phase 34" for high availability, "Phase 29", "ROADMAP 27.3" and others, already wrong after the renumbers. Rewrite each to name the feature or say "planned" without a number, and update the strings in 14 locales; then add a docs lint check that fails on "Phase <number>" or "ROADMAP <number>" in published pages so it cannot creep back -- DONE 2026-11-09: 67 strings on 22 pages (not ten), each now naming the feature, "planned" or the release; 14 locales; `make no-phases` (sysmanage-docs scripts/check_no_phases.py) is part of the docs `make lint`
 - [ ] All new strings in 14 locales, verified -- 2026-11-09: the server backup, recovery runbook, mutual TLS and phase-cleanup strings (192 keys, plus 3 reworded headings) hand-translated in 13 locales, hash-stamped, and every value verified against the service (`make i18n-verify` green); restate-proxy's pages still to come

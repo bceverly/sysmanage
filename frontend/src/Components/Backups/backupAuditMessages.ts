@@ -65,6 +65,26 @@ export const auditText = (t: TFunction, target: BackupTarget, hosts: BackupHost[
             return t('backups.audit.appendOnly',
                 'Not append-only: {{hosts}} could delete or overwrite their own finished backups. The protect step after the next backup locks them (restate 2.1.0.1 or later; 2.1.0.3 on FreeBSD with ZFS).',
                 { hosts: who });
+        case 'audit_proxy_running':
+            return params.problem === 'not_installed'
+                ? t('backups.audit.proxyMissing', 'restate-proxy is not installed on the storage host, so hosts cannot reach their backups through it.')
+                : t('backups.audit.proxyStopped', 'restate-proxy is not running on the storage host, so hosts cannot reach their backups through it.');
+        case 'audit_proxy_certificate':
+            switch (params.problem) {
+                case 'expired':
+                    return t('backups.audit.proxyCertExpired', 'The restate-proxy certificate has expired. Hosts refuse the proxy until it is renewed.');
+                case 'expiring':
+                    return t('backups.audit.proxyCertExpiring', 'The restate-proxy certificate expires in {{days}} days. Renew it before then.',
+                        { days: typeof params.days === 'number' ? params.days : '?' });
+                case 'unreadable':
+                    return t('backups.audit.proxyCertUnreadable', 'The restate-proxy certificate on the storage host is not a certificate the agent can read.');
+                default:
+                    return t('backups.audit.proxyCertMissing', 'The storage host has no restate-proxy certificate at /etc/restate/proxy.crt.');
+            }
+        case 'audit_proxy_grants':
+            return t('backups.audit.proxyGrants',
+                'restate-proxy does not accept the grant for: {{hosts}}. Run restate-proxy --check-grants on the storage host to see why.',
+                { hosts: who });
         default:
             return t('backups.audit.other', 'Storage check: {{code}}', { code: code.replace(/^audit_/, '') });
     }

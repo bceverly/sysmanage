@@ -93,6 +93,17 @@ def test_the_certificate_names_the_host_not_the_request():
     )
 
 
+def test_a_long_host_name_is_cut_in_the_common_name_and_kept_in_the_san():
+    """X.509 allows 64 characters in a common name; a host's name can be
+    longer, and its certificate must still be issued."""
+    fqdn = ("a" * 60) + ".lab.example.com"
+    cert = _issued(_host(fqdn=fqdn))
+    cn = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
+    assert cn == fqdn[:64]
+    san = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
+    assert san.value.get_values_for_type(x509.DNSName) == [fqdn]
+
+
 def test_a_renewal_keeps_the_replaced_serial():
     host = _host()
     first = _issued(host)

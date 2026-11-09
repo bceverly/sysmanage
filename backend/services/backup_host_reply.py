@@ -5,7 +5,9 @@
 """What a backed-up host's configure reply says about its restate (Phase 24,
 25.9): the quiesce hooks it finds present, what it can do beyond the 2.0
 contract, and its network shares -- stored on the policy, and the server's
-own capture job re-sent when they change it."""
+own capture job re-sent when they change it.  With restate-proxy (25.5): the
+hashes of the proxy tokens the host made for itself, and whether its restate
+reads through the proxy -- either changing re-sends both sides' jobs."""
 
 import json
 import re
@@ -16,6 +18,7 @@ from sqlalchemy.orm import Session
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
 from backend.services import backup_network_mounts as network_mounts
+from backend.services import backup_proxy as proxy
 from backend.services import backup_server_paths as server_paths
 from backend.services import backup_tick
 
@@ -39,6 +42,7 @@ _ABILITIES = (
     "diff",
     "packages",
     "hook_option",
+    proxy.REMOTE_ABILITY,
 )
 
 
@@ -56,13 +60,17 @@ def store(
     takes ``hook_option`` -- its job files are re-sent now: the first
     configure could not know them (25.9)."""
     before = jobs.capture_hooks(policy) if policy is not None else None
+    could_read = policy is not None and proxy.host_reads_through_proxy(policy)
     store_hooks(policy, reply.get("hooks"))
     store_abilities(policy, reply.get("abilities"))
     network_mounts.store_configured(policy, reply.get("network_mounts"))
+    tokens_changed = proxy.store_tokens(policy, reply)
+    if policy is None:
+        return
     if (
-        policy is not None
-        and server_paths.server_policy(policy)
-        and jobs.capture_hooks(policy) != before
+        (server_paths.server_policy(policy) and jobs.capture_hooks(policy) != before)
+        or tokens_changed
+        or proxy.host_reads_through_proxy(policy) != could_read
     ):
         policy.config_version += 1
         backup_tick.configure_now(db)

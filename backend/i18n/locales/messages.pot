@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-06 12:11-0500\n"
+"POT-Creation-Date: 2026-11-09 10:56-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3115,6 +3115,26 @@ msgstr ""
 msgid "Failed to delete antivirus default: %s"
 msgstr ""
 
+#: backend/api/backups_transport.py:37
+msgid "Unknown transport"
+msgstr ""
+
+#: backend/api/backups_transport.py:39
+msgid "The proxy address is not a host name or IP address"
+msgstr ""
+
+#: backend/api/backups_transport.py:42
+msgid "The proxy port must be between 1 and 65535"
+msgstr ""
+
+#: backend/api/backups_transport.py:45
+msgid "The pinned key must be a SHA-256 in hex (64 characters)"
+msgstr ""
+
+#: backend/api/backups_transport.py:48
+msgid "The proxy's CA must be a PEM certificate"
+msgstr ""
+
 #: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
 msgstr ""
@@ -5733,11 +5753,11 @@ msgid ""
 "encrypted to it, so restoring OpenBAO never needs a key kept inside OpenBAO"
 msgstr ""
 
-#: backend/services/cloud_backup_tick.py:315
+#: backend/services/cloud_backup_tick.py:327
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr ""
 
-#: backend/services/cloud_backup_tick.py:317
+#: backend/services/cloud_backup_tick.py:329
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, "

@@ -5630,7 +5630,14 @@
       "appendOnly": "Nicht nur anhängend: {{hosts}} könnten ihre eigenen fertigen Sicherungen löschen oder überschreiben. Der Schutzschritt nach der nächsten Sicherung sperrt sie (restate 2.1.0.1 oder neuer; 2.1.0.3 unter FreeBSD mit ZFS).",
       "other": "Speicherprüfung: {{code}}",
       "prepareHint": "\"Speicher vorbereiten\" auf der Registerkarte \"Sicherungen\" jedes Hosts gibt diesem Host ein eigenes Dateisystem und eine auf ihn beschränkte Freigabe. Die NFS-Servereinstellungen des Speicher-Hosts legen Sie weiterhin selbst fest.",
-      "nfsV4Unknown": "Es konnte nicht geprüft werden, ob der Speicher-Host NFSv4 bereitstellt, über das Hosts ihre Sicherungen erreichen."
+      "nfsV4Unknown": "Es konnte nicht geprüft werden, ob der Speicher-Host NFSv4 bereitstellt, über das Hosts ihre Sicherungen erreichen.",
+      "proxyCertExpired": "Das Zertifikat von restate-proxy ist abgelaufen. Hosts lehnen den Proxy ab, bis es erneuert ist.",
+      "proxyCertExpiring": "Das Zertifikat von restate-proxy läuft in {{days}} Tagen ab. Erneuern Sie es vorher.",
+      "proxyCertMissing": "Der Speicher-Host hat kein Zertifikat für restate-proxy unter /etc/restate/proxy.crt.",
+      "proxyCertUnreadable": "Das Zertifikat von restate-proxy auf dem Speicher-Host ist kein Zertifikat, das der Agent lesen kann.",
+      "proxyGrants": "restate-proxy akzeptiert die Freigabe nicht für: {{hosts}}. Führen Sie restate-proxy --check-grants auf dem Speicher-Host aus, um den Grund zu sehen.",
+      "proxyMissing": "restate-proxy ist auf dem Speicher-Host nicht installiert, daher können Hosts ihre Sicherungen nicht darüber erreichen.",
+      "proxyStopped": "restate-proxy läuft auf dem Speicher-Host nicht, daher können Hosts ihre Sicherungen nicht darüber erreichen."
     },
     "prepare": {
       "title": "Speicher für diesen Host vorbereiten?",
@@ -5843,6 +5850,26 @@
       "unencrypted": "Diese Sicherung ist nicht verschlüsselt und enthält das Datenbankpasswort aus der Konfiguration. Schützen Sie den Sicherungsspeicher so gut wie den Server selbst.",
       "needsEscrow": "Speichern Sie zuerst einen Notfall-Treuhandschlüssel im Verschlüsselungsbereich eines Hosts. Die eigene Sicherung des SysManage-Servers wird damit verschlüsselt, sodass die Wiederherstellung von OpenBAO nie einen in OpenBAO verwahrten Schlüssel braucht.",
       "escrowEncrypted": "Mit Ihrem Notfall-Treuhandschlüssel verschlüsselt ({{fingerprint}}). SysManage besitzt nie dessen geheimen Teil, daher wird diese Sicherung von Hand mit diesem Schlüssel wiederhergestellt, wie es das Wiederherstellungshandbuch des Servers beschreibt."
+    },
+    "transport": {
+      "ca": "Eigenes CA-Zertifikat (PEM, optional)",
+      "caHelp": "Für ein Proxy-Zertifikat, das Ihre eigene CA signiert hat. Hosts vertrauen ihr nur für ihre Sicherungen.",
+      "caKept": "Eine CA ist gespeichert. Fügen Sie eine andere ein, um sie zu ersetzen; bleibt das Feld leer, wird die gespeicherte beibehalten.",
+      "caRemove": "Gespeicherte CA entfernen und dem Systemspeicher vertrauen",
+      "change": "Ändern",
+      "host": "Proxy-Adresse, die Hosts erreichen",
+      "hostHelp": "Der Name oder die Adresse im Zertifikat des Proxys, so wie Hosts sie auflösen.",
+      "label": "Speicher erreichen über",
+      "nfs": "NFS (jeder Host bindet seinen eigenen Export ein)",
+      "pin": "Gepinnter Schlüssel (SHA-256, optional)",
+      "pinHelp": "Hosts akzeptieren dann nur ein Proxy-Zertifikat mit diesem öffentlichen Schlüssel.",
+      "port": "Port",
+      "proxy": "restate-proxy (HTTPS zum Speicher-Host)",
+      "proxyIntro": "Führen Sie restate-proxy auf dem Speicher-Host aus. Jeder Host erzeugt dafür sein eigenes Token, das den Host nie verlässt, und der Speicher-Host schreibt die Freigaben. Wiederherstellungen, Durchsuchen und Vergleiche laufen über den Proxy; die Sicherungen selbst verwenden weiterhin NFS, bis restate über ihn sichern kann.",
+      "saveError": "Die Einstellung, wie Hosts den Speicher erreichen, konnte nicht gespeichert werden.",
+      "title": "Wie Hosts den Speicher erreichen",
+      "viaNfs": "NFS",
+      "viaProxy": "restate-proxy unter"
     }
   },
   "cloudBackup": {

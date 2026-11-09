@@ -33,6 +33,7 @@ from backend.services import backup_first_fit as first_fit
 from backend.services import backup_forecast
 from backend.services import backup_jobs as jobs
 from backend.services import backup_package_restore as package_restore
+from backend.services import backup_proxy
 from backend.services import backup_storage_audit as storage_audit
 from backend.services import backup_storage_health as storage_health
 from backend.services import backup_storage_status as storage_status
@@ -108,6 +109,8 @@ def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
         "forecast": backup_forecast.for_target(db, target, health, jobs.now()),
         "storage_audit": audit,
         "service_account": target.service_account or jobs.DEFAULT_SERVICE_ACCOUNT,
+        # How hosts reach the storage: NFS, or restate-proxy (25.5).
+        "transport": backup_proxy.target_view(target),
         # Snapshot signing (Pro+ 24.6): the signer's fingerprint, or None.
         "signing": (
             {

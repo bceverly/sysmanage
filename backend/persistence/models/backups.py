@@ -97,6 +97,17 @@ class BackupTarget(Base):
     escrow_uid = Column(String(255), nullable=True)
     escrow_saved_at = Column(DateTime, nullable=True)
     escrow_saved_by = Column(String(255), nullable=True)
+    # How hosts reach the storage (q84, 25.5): "nfs", or "proxy" for
+    # restate-proxy on the storage host at proxy_host:proxy_port, trusted
+    # through the system store, a site CA (proxy_ca_pem, a certificate, not
+    # a secret) or a pinned key (proxy_pin_sha256).
+    transport = Column(String(16), nullable=False, default="nfs")
+    proxy_host = Column(String(255), nullable=True)
+    proxy_port = Column(Integer, nullable=True)
+    proxy_pin_sha256 = Column(String(64), nullable=True)
+    proxy_ca_pem = Column(Text, nullable=True)
+    # The clients the storage host's grants were last built for (JSON).
+    proxy_clients = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=False)
     created_by = Column(String(255), nullable=True)
     updated_at = Column(DateTime, nullable=False)
@@ -195,6 +206,13 @@ class BackupPolicy(Base):
     # 25.9): the databases are always paused for the capture, and OpenBAO's
     # init material and token are always left out (services/backup_server_paths).
     server_preset = Column(Boolean, nullable=False, default=False)
+    # The SHA-256 of the proxy tokens this policy's host made for itself
+    # (q84, 25.5): the host keeps the tokens, the storage host's grants name
+    # these.  _old while a rotation is under way; previous for the repository
+    # before Pro+ encryption.
+    proxy_token_sha256 = Column(String(64), nullable=True)
+    proxy_token_sha256_old = Column(String(64), nullable=True)
+    proxy_previous_token_sha256 = Column(String(64), nullable=True)
     config_version = Column(Integer, nullable=False, default=1)
     host_acked_version = Column(Integer, nullable=False, default=0)
     storage_acked_version = Column(Integer, nullable=False, default=0)

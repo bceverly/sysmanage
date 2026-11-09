@@ -27,6 +27,8 @@ from backend.config.config import get_config
 
 # Constants for certificate attributes
 LOCATION_SAN_FRANCISCO = "San Francisco"
+# X.509 (RFC 5280 ub-common-name): the most a common name may hold.
+MAX_COMMON_NAME = 64
 
 
 def _secure_chmod(path, mode) -> None:
@@ -304,15 +306,19 @@ class CertificateManager:
 
         The subject is set here -- CN = the host's name, OU = its id -- never
         taken from the requester, so a host cannot ask for another's identity.
+        The host is known by its id; the CN is for people, and is cut to the
+        64 characters X.509 allows (the SAN keeps the whole name), so a long
+        host name cannot fail the issue.
         """
         ca_cert, ca_key = self._load_ca()
+        common_name = (hostname or str(host_id))[:MAX_COMMON_NAME]
         subject = x509.Name(
             [
                 x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
                 x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "CA"),
                 x509.NameAttribute(NameOID.LOCALITY_NAME, LOCATION_SAN_FRANCISCO),
                 x509.NameAttribute(NameOID.ORGANIZATION_NAME, "SysManage Agent"),
-                x509.NameAttribute(NameOID.COMMON_NAME, hostname),
+                x509.NameAttribute(NameOID.COMMON_NAME, common_name),
                 x509.NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, str(host_id)),
             ]
         )
