@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-09 10:56-0500\n"
+"POT-Creation-Date: 2026-11-10 09:24-0800\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -6046,7 +6046,17 @@ msgstr "gpg 未能封存密钥导出"
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "没有选择的主机有加密备份"
 
-#: backend/services/backup_reach.py:115
+#: backend/services/backup_reach.py:146
+#, python-format
+msgid ""
+"This host cannot reach the backup storage's restate-proxy (%(address)s, port"
+" %(port)s): %(error)s. Backups need a network path to it, and a certificate "
+"this host trusts."
+msgstr ""
+"此主机无法连接备份存储的 restate-proxy（%(address)s，端口 "
+"%(port)s）：%(error)s。备份需要一条通往它的网络路径，以及此主机信任的证书。"
+
+#: backend/services/backup_reach.py:156
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6057,7 +6067,7 @@ msgstr ""
 "此主机位于 NAT 之后：备份存储（%(storage)s）将其视为 %(seen)s，而不是 "
 "%(address)s，因此拒绝挂载。请将主机接入存储主机所在的网络（虚拟机使用桥接网络），而不要放在其 NAT 之后。"
 
-#: backend/services/backup_reach.py:125
+#: backend/services/backup_reach.py:166
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

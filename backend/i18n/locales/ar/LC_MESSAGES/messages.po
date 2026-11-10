@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-09 10:56-0500\n"
+"POT-Creation-Date: 2026-11-10 09:24-0800\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -6240,7 +6240,18 @@ msgstr "لم يختم gpg تصدير المفاتيح"
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "لا يوجد أي من المضيفين المختارين لديه نسخ احتياطية مشفرة"
 
-#: backend/services/backup_reach.py:115
+#: backend/services/backup_reach.py:146
+#, python-format
+msgid ""
+"This host cannot reach the backup storage's restate-proxy (%(address)s, port"
+" %(port)s): %(error)s. Backups need a network path to it, and a certificate "
+"this host trusts."
+msgstr ""
+"لا يستطيع هذا المضيف الوصول إلى restate-proxy الخاص بتخزين النسخ الاحتياطي "
+"(%(address)s، المنفذ %(port)s): %(error)s. تحتاج النسخ الاحتياطية إلى مسار "
+"شبكة إليه، وإلى شهادة يثق بها هذا المضيف."
+
+#: backend/services/backup_reach.py:156
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6252,7 +6263,7 @@ msgstr ""
 "%(seen)s، وليس %(address)s، لذا يرفض التحميل. ضع المضيف على شبكة مضيف "
 "التخزين (شبكة مجسورة للجهاز الافتراضي) بدلًا من وضعه خلف NAT الخاص به."
 
-#: backend/services/backup_reach.py:125
+#: backend/services/backup_reach.py:166
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

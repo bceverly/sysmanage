@@ -5718,7 +5718,8 @@
     "reach": {
       "unreachable": "Questo host non riesce a raggiungere lo spazio di backup ({{storage}}, {{address}}, porta NFS {{port}}). I backup richiedono un percorso di rete fino a esso.",
       "behindNat": "Questo host è dietro NAT: l'archiviazione dei backup ({{storage}}) lo vede come {{seen}}, non come {{address}}, quindi rifiuta il montaggio. Metti l'host sulla rete dell'host di archiviazione (una rete con bridge per una macchina virtuale) invece che dietro il suo NAT.",
-      "behindNatLabel": "Dietro NAT"
+      "behindNatLabel": "Dietro NAT",
+      "proxyUnreachable": "Questo host non riesce a raggiungere il restate-proxy dell'archivio dei backup ({{address}}, porta {{port}}): {{error}}. I backup richiedono un percorso di rete fino a esso e un certificato di cui questo host si fidi."
     },
     "network": {
       "leftOut": "Esclusi automaticamente (mount di rete su questo host): {{paths}}",

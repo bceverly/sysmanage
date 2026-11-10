@@ -382,6 +382,9 @@ export interface BackupReach {
   storage_fqdn: string | null;
   error: string | null;
   checked_at: string | null;
+  /** 25.5: what the host must reach is the target's restate-proxy (its
+   *  address and HTTPS port, and a certificate the host trusts). */
+  proxy?: boolean;
 }
 
 export interface BackupEquipState {

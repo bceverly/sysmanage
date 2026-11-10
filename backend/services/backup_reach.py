@@ -25,8 +25,18 @@ export widened to the gateway's address: every host behind it could mount
 the repository.  NAT that rewrites the source port is not recognized, and
 then nothing is said.
 
-Never-checked, still-checking, or checked against another address (the
-storage host moved) is unknown, and unknown never blocks.  Checks are asked
+Through restate-proxy (25.5) what a host must reach is the proxy: its
+address and port as the target names them.  The check is then sent the
+port and how the proxy's certificate is trusted (a site CA, a pinned key),
+and the agent completes a TLS handshake as restate's curl will, so a host
+that reaches the port but would refuse the certificate is told so too.  NAT
+does not apply: the proxy knows hosts by their token, never their address.
+An agent too old to check a proxy answers for port 2049, and that answer is
+not kept (unknown).
+
+Never-checked, still-checking, or checked against another address or port
+(the storage host moved, the target changed transport) is unknown, and
+unknown never blocks.  Checks are asked
 for when a host has none for the current address, once a day after that,
 and on "Check again".
 """
@@ -41,6 +51,7 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.services import agent_capability_service as capabilities
 from backend.services import backup_jobs as jobs
+from backend.services import backup_proxy as proxy
 
 logger = logging.getLogger(__name__)
 
@@ -58,13 +69,27 @@ ANSWER_WITHIN = timedelta(minutes=10)
 
 
 def storage_address(db: Session) -> Optional[Dict[str, Any]]:
-    """``{"address", "host_id", "fqdn"}`` of the target's storage host, as
-    hosts mount from it (its IPv4, backup_jobs.nfs_source), or None."""
-    storage = jobs.storage_host(db, jobs.the_target(db))
-    address = jobs.host_address(storage) if storage is not None else None
+    """``{"address", "port", "host_id", "fqdn", "proxy"}`` of what hosts must
+    reach: the storage host as they mount from it (its IPv4, port 2049,
+    backup_jobs.nfs_source), or the target's restate-proxy (``proxy``: what
+    the agent's TLS check needs).  None when there is no storage host."""
+    target = jobs.the_target(db)
+    storage = jobs.storage_host(db, target)
+    if storage is None:
+        return None
+    found = {"host_id": storage.id, "fqdn": storage.fqdn, "proxy": None}
+    if proxy.uses_proxy(target):
+        port = target.proxy_port or proxy.DEFAULT_PORT
+        check = {"port": port}
+        if target.proxy_pin_sha256:
+            check["pin_sha256"] = target.proxy_pin_sha256
+        if target.proxy_ca_pem:
+            check["ca"] = target.proxy_ca_pem
+        return dict(found, address=target.proxy_host, port=port, proxy=check)
+    address = jobs.host_address(storage)
     if not address:
         return None
-    return {"address": address, "host_id": storage.id, "fqdn": storage.fqdn}
+    return dict(found, address=address, port=PORT)
 
 
 def _row(db: Session, host_id: Any) -> Optional[models.BackupReach]:
@@ -85,7 +110,7 @@ def state(db: Session, host: models.Host) -> Optional[Dict[str, Any]]:
     """The last answer for the current storage address, or None (unknown)."""
     storage = storage_address(db)
     row = _row(db, host.id)
-    if storage is None or row is None or row.address != storage["address"]:
+    if storage is None or row is None or not _same(row, storage):
         return None
     if row.reachable is None:
         return None
@@ -98,7 +123,13 @@ def state(db: Session, host: models.Host) -> Optional[Dict[str, Any]]:
         "storage_fqdn": storage["fqdn"],
         "error": row.error,
         "checked_at": row.checked_at.isoformat() if row.checked_at else None,
+        "proxy": storage["proxy"] is not None,
     }
+
+
+def _same(row: models.BackupReach, storage: Dict[str, Any]) -> bool:
+    """The row is an answer for what hosts must reach now."""
+    return row.address == storage["address"] and (row.port or PORT) == storage["port"]
 
 
 def blocked(db: Session, host: models.Host) -> bool:
@@ -110,6 +141,16 @@ def blocked(db: Session, host: models.Host) -> bool:
 def message(db: Session, host: models.Host) -> str:
     """Why backups are not offered to this host."""
     found = state(db, host) or {}
+    if found.get("proxy"):
+        return _(
+            "This host cannot reach the backup storage's restate-proxy "
+            "(%(address)s, port %(port)s): %(error)s. Backups need a network "
+            "path to it, and a certificate this host trusts."
+        ) % {
+            "address": found.get("address") or "",
+            "port": found.get("port") or "",
+            "error": found.get("error") or "",
+        }
     if found.get("reachable") and found.get("seen_as"):
         return _(
             "This host is behind NAT: the backup storage (%(storage)s) sees "
@@ -139,7 +180,7 @@ def due(db: Session, host: models.Host, now=None) -> bool:
         return False  # the storage host does not mount its own storage
     now = now or jobs.now()
     row = _row(db, host.id)
-    if row is None or row.address != storage["address"]:
+    if row is None or not _same(row, storage):
         return True
     if row.checked_at is None or row.requested_at > row.checked_at:
         return row.requested_at + ANSWER_WITHIN <= now
@@ -159,16 +200,18 @@ def start(db: Session, host: models.Host, force: bool = False) -> Optional[str]:
     if str(storage["host_id"]) == str(host.id):
         return None
     parameters: Dict[str, Any] = {"address": storage["address"]}
-    if _storage_lists_peers(db, storage["host_id"]):
+    if storage["proxy"] is not None:
+        parameters["proxy"] = storage["proxy"]
+    elif _storage_lists_peers(db, storage["host_id"]):
         parameters["hold_seconds"] = HOLD_SECONDS
     command_id = queue_command(
         db, host.id, CommandType.CHECK_BACKUP_STORAGE, parameters
     )
     row = _row(db, host.id) or models.BackupReach(host_id=host.id)
-    if row.address != storage["address"]:
+    if not _same(row, storage):
         row.reachable, row.error, row.checked_at = None, None, None
         row.seen_as, row.nat_checked_at = None, None
-    row.address, row.port = storage["address"], PORT
+    row.address, row.port = storage["address"], storage["port"]
     row.command_id, row.requested_at = command_id, jobs.now()
     row.local_port, row.peers_command_id = None, None
     db.add(row)
@@ -204,10 +247,26 @@ def record_result(db: Session, host_id: Any, message_data: Dict[str, Any]) -> bo
             outcome.get("error") or message_data.get("error"),
         )
         return False
+    if outcome.get("port") not in (None, row.port):
+        # An agent too old to check a proxy answered for NFS's port.
+        logger.info(
+            "check_backup_storage from host %s was for port %s, not %s: ignored",
+            host_id,
+            outcome.get("port"),
+            row.port,
+        )
+        return False
     row.reachable = outcome["reachable"]
     row.error = str(outcome.get("error") or "")[:255] or None
+    tls = outcome.get("tls")
+    if row.reachable and isinstance(tls, dict) and tls.get("ok") is not True:
+        # The port answers, but this host would refuse the certificate.
+        row.reachable = False
+        row.error = f"TLS: {tls.get('error') or 'failed'}"[:255]
     row.checked_at = jobs.now()
     port = outcome.get("local_port")
+    if row.port != PORT:
+        port = None  # restate-proxy: NAT does not apply
     if row.reachable and isinstance(port, int) and not isinstance(port, bool):
         row.local_port = port
         _ask_storage_for_peers(db, row)

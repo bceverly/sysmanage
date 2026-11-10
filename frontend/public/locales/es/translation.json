@@ -5718,7 +5718,8 @@
     "reach": {
       "unreachable": "Este host no puede llegar al almacenamiento de copias de seguridad ({{storage}}, {{address}}, puerto NFS {{port}}). Las copias de seguridad necesitan una ruta de red hasta él.",
       "behindNat": "Este host está detrás de NAT: el almacenamiento de copias de seguridad ({{storage}}) lo ve como {{seen}}, no como {{address}}, por lo que rechaza el montaje. Ponga el host en la red del host de almacenamiento (una red en puente para una máquina virtual) en lugar de detrás de su NAT.",
-      "behindNatLabel": "Detrás de NAT"
+      "behindNatLabel": "Detrás de NAT",
+      "proxyUnreachable": "Este host no puede llegar al restate-proxy del almacenamiento de copias de seguridad ({{address}}, puerto {{port}}): {{error}}. Las copias de seguridad necesitan una ruta de red hasta él y un certificado en el que este host confíe."
     },
     "network": {
       "leftOut": "Excluidos automáticamente (montajes de red en este host): {{paths}}",

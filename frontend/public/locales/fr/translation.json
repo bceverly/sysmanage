@@ -5718,7 +5718,8 @@
     "reach": {
       "unreachable": "Cet hôte ne peut pas atteindre le stockage des sauvegardes ({{storage}}, {{address}}, port NFS {{port}}). Les sauvegardes ont besoin d'un chemin réseau jusqu'à lui.",
       "behindNat": "Cet hôte est derrière un NAT : le stockage des sauvegardes ({{storage}}) le voit comme {{seen}}, et non {{address}}, et refuse donc le montage. Placez l'hôte sur le réseau de l'hôte de stockage (un réseau ponté pour une machine virtuelle) au lieu de derrière son NAT.",
-      "behindNatLabel": "Derrière un NAT"
+      "behindNatLabel": "Derrière un NAT",
+      "proxyUnreachable": "Cet hôte ne peut pas joindre le restate-proxy du stockage des sauvegardes ({{address}}, port {{port}}) : {{error}}. Les sauvegardes ont besoin d'un chemin réseau jusqu'à lui, et d'un certificat auquel cet hôte fait confiance."
     },
     "network": {
       "leftOut": "Exclus automatiquement (montages réseau sur cet hôte) : {{paths}}",

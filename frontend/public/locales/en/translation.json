@@ -5718,7 +5718,8 @@
     "reach": {
       "unreachable": "This host cannot reach the backup storage ({{storage}}, {{address}}, NFS port {{port}}). Backups need a network path to it.",
       "behindNat": "This host is behind NAT: the backup storage ({{storage}}) sees it as {{seen}}, not {{address}}, so it refuses the mount. Put the host on the storage host's network (a bridged network for a virtual machine) instead of behind its NAT.",
-      "behindNatLabel": "Behind NAT"
+      "behindNatLabel": "Behind NAT",
+      "proxyUnreachable": "This host cannot reach the backup storage's restate-proxy ({{address}}, port {{port}}): {{error}}. Backups need a network path to it, and a certificate this host trusts."
     },
     "network": {
       "leftOut": "Left out automatically (network mounts on this host): {{paths}}",

@@ -5718,7 +5718,8 @@
     "reach": {
       "unreachable": "此主機無法連到備份儲存（{{storage}}、{{address}}、NFS 連接埠 {{port}}）。備份需要一條通往它的網路路徑。",
       "behindNat": "此主機位於 NAT 之後：備份儲存（{{storage}}）將其視為 {{seen}}，而不是 {{address}}，因此拒絕掛載。請將主機接入儲存主機所在的網路（虛擬機器使用橋接網路），而不要放在其 NAT 之後。",
-      "behindNatLabel": "位於 NAT 之後"
+      "behindNatLabel": "位於 NAT 之後",
+      "proxyUnreachable": "此主機無法連線到備份儲存的 restate-proxy（{{address}}，連接埠 {{port}}）：{{error}}。備份需要一條通往它的網路路徑，以及此主機信任的憑證。"
     },
     "network": {
       "leftOut": "已自動排除（此主機上的網路掛載）：{{paths}}",

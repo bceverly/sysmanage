@@ -42,7 +42,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, object_session
 
 from backend.persistence import models
 from backend.services import backup_proxy as proxy
@@ -54,6 +54,9 @@ from backend.websocket.messages import CommandType
 logger = logging.getLogger(__name__)
 
 GROUP = "backup"
+# The agent's reason for a host with no NFSv4 client (OpenBSD, NetBSD); the
+# server gives it too when such a host's target is not on restate-proxy.
+NO_NFSV4_CLIENT = "no_nfsv4_client"
 SYSTEM_ACTOR = "system:backup-scheduler"
 
 HOST_ACTIONS = ("capture", "snapshots", "estimate")
@@ -219,8 +222,17 @@ def equipped(host: Optional[models.Host]) -> Tuple[bool, Optional[str]]:
     if GROUP in not_applicable:
         return False, str(not_applicable[GROUP])
     if GROUP in (report.get("capabilities") or []):
+        # OpenBSD and NetBSD (25.5): able to back up only through a proxy,
+        # which this target is not on.
+        if proxy.needs_proxy(host) and not _target_on_proxy(host):
+            return False, NO_NFSV4_CLIENT
         return True, None
     return False, "agent_outdated"
+
+
+def _target_on_proxy(host: models.Host) -> bool:
+    db = object_session(host)
+    return db is not None and proxy.uses_proxy(the_target(db))
 
 
 def _json_strings(text: Optional[str]) -> List[str]:
@@ -409,6 +421,12 @@ def storage_configuration(
         out["jobs"][SIGNATURES] = {}
         if getattr(target, "sign_public_key", None):
             out["trusted_key"] = target.sign_public_key
+    if encrypted(policy) and proxy.host_captures_through_proxy(policy, target, host):
+        # restate-proxy (25.5): through a proxy the host cannot make its
+        # repository, so the storage host's prepare does -- encrypted to this
+        # PUBLIC key (restate init --encrypt-to), as the host's own first
+        # capture would over NFS.  Never the secret key.
+        out["encrypt_key"] = policy.encrypt_public_key
     return out
 
 

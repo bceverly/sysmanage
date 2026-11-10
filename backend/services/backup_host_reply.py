@@ -43,6 +43,7 @@ _ABILITIES = (
     "packages",
     "hook_option",
     proxy.REMOTE_ABILITY,
+    proxy.REMOTE_CAPTURE,
 )
 
 
@@ -50,6 +51,13 @@ def store_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
     """Browse / what changed / write cache: what the host's restate offers."""
     if policy is not None and isinstance(found, list):
         policy.host_abilities = json.dumps(sorted(set(found) & set(_ABILITIES)))
+
+
+def _proxy_abilities(policy: models.BackupPolicy) -> tuple:
+    """What the host's restate can do through a proxy: a change re-sends
+    both sides' jobs (reads, then captures, go through it)."""
+    found = set(proxy.abilities(policy))
+    return (proxy.REMOTE_ABILITY in found, proxy.REMOTE_CAPTURE in found)
 
 
 def store(
@@ -60,7 +68,7 @@ def store(
     takes ``hook_option`` -- its job files are re-sent now: the first
     configure could not know them (25.9)."""
     before = jobs.capture_hooks(policy) if policy is not None else None
-    could_read = policy is not None and proxy.host_reads_through_proxy(policy)
+    could = policy is not None and _proxy_abilities(policy)
     store_hooks(policy, reply.get("hooks"))
     store_abilities(policy, reply.get("abilities"))
     network_mounts.store_configured(policy, reply.get("network_mounts"))
@@ -70,7 +78,7 @@ def store(
     if (
         (server_paths.server_policy(policy) and jobs.capture_hooks(policy) != before)
         or tokens_changed
-        or proxy.host_reads_through_proxy(policy) != could_read
+        or _proxy_abilities(policy) != could
     ):
         policy.config_version += 1
         backup_tick.configure_now(db)

@@ -5718,7 +5718,8 @@
     "reach": {
       "unreachable": "이 호스트는 백업 스토리지({{storage}}, {{address}}, NFS 포트 {{port}})에 연결할 수 없습니다. 백업하려면 그곳까지의 네트워크 경로가 필요합니다.",
       "behindNat": "이 호스트는 NAT 뒤에 있습니다. 백업 스토리지({{storage}})에서 이 호스트가 {{address}}가 아니라 {{seen}}(으)로 보이므로 마운트를 거부합니다. 호스트를 NAT 뒤에 두지 말고 스토리지 호스트의 네트워크(가상 머신의 경우 브리지 네트워크)에 연결하세요.",
-      "behindNatLabel": "NAT 뒤"
+      "behindNatLabel": "NAT 뒤",
+      "proxyUnreachable": "이 호스트는 백업 스토리지의 restate-proxy({{address}}, 포트 {{port}})에 연결할 수 없습니다: {{error}}. 백업에는 그곳까지의 네트워크 경로와 이 호스트가 신뢰하는 인증서가 필요합니다."
     },
     "network": {
       "leftOut": "자동으로 제외됨(이 호스트의 네트워크 마운트): {{paths}}",

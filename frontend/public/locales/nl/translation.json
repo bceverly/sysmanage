@@ -5718,7 +5718,8 @@
     "reach": {
       "unreachable": "Deze host kan de back-upopslag niet bereiken ({{storage}}, {{address}}, NFS-poort {{port}}). Back-ups hebben een netwerkpad ernaartoe nodig.",
       "behindNat": "Deze host staat achter NAT: de back-upopslag ({{storage}}) ziet hem als {{seen}}, niet als {{address}}, en weigert daarom de koppeling. Zet de host op het netwerk van de opslaghost (een gebridged netwerk voor een virtuele machine) in plaats van achter zijn NAT.",
-      "behindNatLabel": "Achter NAT"
+      "behindNatLabel": "Achter NAT",
+      "proxyUnreachable": "Deze host kan de restate-proxy van de back-upopslag niet bereiken ({{address}}, poort {{port}}): {{error}}. Back-ups hebben een netwerkpad ernaartoe nodig, en een certificaat dat deze host vertrouwt."
     },
     "network": {
       "leftOut": "Automatisch uitgesloten (netwerkkoppelingen op deze host): {{paths}}",

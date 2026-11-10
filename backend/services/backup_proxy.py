@@ -18,11 +18,16 @@ repositories stay where they are on disk, so a target switches either way.
   names that hash.  No token is ever in a command, the queue or a database.
   A new hash keeps the one before it in the grant for one more configure,
   so a job started with the old token still finishes.
-* **Reading first.**  restate 3.1.0.0 reads through the proxy (snapshots,
-  list, diff, status, check, restore); capture through it is restate
-  3.2.0.0.  So a host is told about the proxy only once its restate reports
-  ``remote_repository``, it reads through it from then on, and it captures
-  over NFS until capture through the proxy ships.
+* **Reading, then capturing.**  restate 3.1.0.0 reads through the proxy
+  (snapshots, list, diff, status, check, restore); 3.2.0.0 captures through
+  it too.  So a host is told about the proxy once its restate reports
+  ``remote_repository`` and reads through it from then on; once it reports
+  ``remote_capture`` it is told ``capture`` as well, and backs up through the
+  proxy with no NFS mount at all.  Its storage host is then told the host
+  needs no export (``export: false``), and its prepare makes the repository
+  instead -- through a proxy restate cannot make one.
+* **Hosts with no NFSv4 client** (OpenBSD, NetBSD) back up only that way:
+  ``needs_proxy`` hosts are kept off an NFS target (backup_jobs.equipped).
 """
 
 import ipaddress
@@ -39,8 +44,12 @@ NFS = "nfs"
 PROXY = "proxy"
 TRANSPORTS = (NFS, PROXY)
 DEFAULT_PORT = 8443
-# The host's restate can read a repository through the proxy (3.1.0.0).
+# The host's restate can read a repository through the proxy (3.1.0.0),
+# and capture into one through it (3.2.0.0).
 REMOTE_ABILITY = "remote_repository"
+REMOTE_CAPTURE = "remote_capture"
+# Platforms with no NFSv4 client: they back up through the proxy alone.
+PROXY_ONLY_PLATFORMS = ("OpenBSD", "NetBSD")
 PREVIOUS_SUFFIX = ".previous"
 # Grants: the current repository is appended to and read; the one before
 # Pro+ encryption only read.
@@ -127,7 +136,7 @@ def client_name(host: models.Host) -> str:
     return str(host.id)
 
 
-def _abilities(policy: models.BackupPolicy) -> List[str]:
+def abilities(policy: models.BackupPolicy) -> List[str]:
     try:
         found = json.loads(policy.host_abilities or "[]")
     except ValueError:
@@ -137,7 +146,33 @@ def _abilities(policy: models.BackupPolicy) -> List[str]:
 
 def host_reads_through_proxy(policy: models.BackupPolicy) -> bool:
     """The host's restate reported it can read through the proxy."""
-    return REMOTE_ABILITY in _abilities(policy)
+    return REMOTE_ABILITY in abilities(policy)
+
+
+def host_captures_through_proxy(
+    policy: models.BackupPolicy,
+    target: Optional[models.BackupTarget],
+    host: Optional[models.Host] = None,
+) -> bool:
+    """The host backs up through the target's proxy: the target is on it and
+    the host's restate reported it can capture through one -- or the host
+    has no NFSv4 client (``needs_proxy``).  Such a host offers backups only
+    when its restate captures through a proxy, so its capability report has
+    said so already; and waiting for its abilities would never end: it
+    refuses an NFS policy, so it never makes the configure reply that
+    carries them (lab, 2026-11-10)."""
+    if not uses_proxy(target):
+        return False
+    found = abilities(policy)
+    return needs_proxy(host) or (REMOTE_ABILITY in found and REMOTE_CAPTURE in found)
+
+
+def needs_proxy(host: Optional[models.Host]) -> bool:
+    """A host that cannot mount NFSv4, so backs up through a proxy alone."""
+    return (
+        host is not None
+        and (getattr(host, "platform", None) or "") in PROXY_ONLY_PLATFORMS
+    )
 
 
 def _trust(target: models.BackupTarget) -> Dict[str, Any]:
@@ -155,12 +190,16 @@ def host_proxy(
     """``{"proxy": {...}}`` for the host's target, or ``{}``: where it reads
     its repository through the proxy, and whether the one before Pro+
     encryption is there too.  Nothing until the host's restate can."""
-    if not uses_proxy(target) or not host_reads_through_proxy(policy):
+    if not uses_proxy(target) or not (
+        host_reads_through_proxy(policy) or needs_proxy(host)
+    ):
         return {}
     url = f"{base_url(target)}/v1/{client_name(host)}"
     out: Dict[str, Any] = {"url": url, **_trust(target)}
     if policy.previous_repository_dir:
         out["previous_url"] = url + PREVIOUS_SUFFIX
+    if host_captures_through_proxy(policy, target, host):
+        out["capture"] = True
     return {"proxy": out}
 
 
@@ -232,16 +271,19 @@ def storage_proxy(
     """``{"proxy": {...}}`` for the storage side of one host's repository,
     sent whatever the transport: the grants its agent writes for this host,
     and every client the target has, so the agent removes the grants it
-    wrote for any other (none at all when the target is back on NFS)."""
+    wrote for any other (none at all when the target is back on NFS).
+    ``export: false`` only for a host that captures through the proxy (an
+    older storage agent takes no ``export`` key, and no such host needs it)."""
     enabled = uses_proxy(target)
-    return {
-        "proxy": {
-            "target_id": str(target.id),
-            "enabled": enabled,
-            "grants": _grants(policy, host) if enabled else [],
-            "clients": target_clients(db, target),
-        }
+    out: Dict[str, Any] = {
+        "target_id": str(target.id),
+        "enabled": enabled,
+        "grants": _grants(policy, host) if enabled else [],
+        "clients": target_clients(db, target),
     }
+    if host_captures_through_proxy(policy, target, host):
+        out["export"] = False
+    return {"proxy": out}
 
 
 def store_tokens(policy: Optional[models.BackupPolicy], reply: Any) -> bool:

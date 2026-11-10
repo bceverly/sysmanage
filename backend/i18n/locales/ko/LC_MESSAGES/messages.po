@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-09 10:56-0500\n"
+"POT-Creation-Date: 2026-11-10 09:24-0800\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -6105,7 +6105,17 @@ msgstr "gpg는 키 내보내기를 봉인하지 못했습니다."
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "선택된 호스트 중 하나도 암호화된 백업을 가지고 있지 않습니다."
 
-#: backend/services/backup_reach.py:115
+#: backend/services/backup_reach.py:146
+#, python-format
+msgid ""
+"This host cannot reach the backup storage's restate-proxy (%(address)s, port"
+" %(port)s): %(error)s. Backups need a network path to it, and a certificate "
+"this host trusts."
+msgstr ""
+"이 호스트는 백업 스토리지의 restate-proxy(%(address)s, 포트 %(port)s)에 연결할 수 없습니다: "
+"%(error)s. 백업에는 그곳까지의 네트워크 경로와 이 호스트가 신뢰하는 인증서가 필요합니다."
+
+#: backend/services/backup_reach.py:156
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6117,7 +6127,7 @@ msgstr ""
 "%(seen)s(으)로 보이므로 마운트를 거부합니다. 호스트를 NAT 뒤에 두지 말고 스토리지 호스트의 네트워크(가상 머신의 경우 브리지"
 " 네트워크)에 연결하세요."
 
-#: backend/services/backup_reach.py:125
+#: backend/services/backup_reach.py:166
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

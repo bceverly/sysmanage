@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-09 10:56-0500\n"
+"POT-Creation-Date: 2026-11-10 09:24-0800\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -6399,7 +6399,18 @@ msgstr "gpg не запечатал экспорт ключа"
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "Ни один из выбранных хостов не имеет зашифрованных резервных копий"
 
-#: backend/services/backup_reach.py:115
+#: backend/services/backup_reach.py:146
+#, python-format
+msgid ""
+"This host cannot reach the backup storage's restate-proxy (%(address)s, port"
+" %(port)s): %(error)s. Backups need a network path to it, and a certificate "
+"this host trusts."
+msgstr ""
+"Этот хост не может связаться с restate-proxy хранилища резервных копий "
+"(%(address)s, порт %(port)s): %(error)s. Для резервного копирования нужен "
+"сетевой путь к нему и сертификат, которому этот хост доверяет."
+
+#: backend/services/backup_reach.py:156
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6412,7 +6423,7 @@ msgstr ""
 "Подключите хост к сети хоста хранения (для виртуальной машины это сеть в "
 "режиме моста), а не размещайте его за NAT."
 
-#: backend/services/backup_reach.py:125
+#: backend/services/backup_reach.py:166
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

@@ -5718,7 +5718,8 @@
     "reach": {
       "unreachable": "此主机无法访问备份存储（{{storage}}、{{address}}、NFS 端口 {{port}}）。备份需要一条通往它的网络路径。",
       "behindNat": "此主机位于 NAT 之后：备份存储（{{storage}}）将其视为 {{seen}}，而不是 {{address}}，因此拒绝挂载。请将主机接入存储主机所在的网络（虚拟机使用桥接网络），而不要放在其 NAT 之后。",
-      "behindNatLabel": "位于 NAT 之后"
+      "behindNatLabel": "位于 NAT 之后",
+      "proxyUnreachable": "此主机无法连接备份存储的 restate-proxy（{{address}}，端口 {{port}}）：{{error}}。备份需要一条通往它的网络路径，以及此主机信任的证书。"
     },
     "network": {
       "leftOut": "已自动排除（此主机上的网络挂载）：{{paths}}",

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-09 10:56-0500\n"
+"POT-Creation-Date: 2026-11-10 09:24-0800\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -6364,7 +6364,18 @@ msgstr "gpg ने कुंजी निर्यात को सील नह
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "चुने गए किसी भी होस्ट पर एन्क्रिप्टेड बैकअप नहीं हैं"
 
-#: backend/services/backup_reach.py:115
+#: backend/services/backup_reach.py:146
+#, python-format
+msgid ""
+"This host cannot reach the backup storage's restate-proxy (%(address)s, port"
+" %(port)s): %(error)s. Backups need a network path to it, and a certificate "
+"this host trusts."
+msgstr ""
+"यह होस्ट बैकअप स्टोरेज के restate-proxy (%(address)s, पोर्ट %(port)s) तक "
+"नहीं पहुँच सकता: %(error)s। बैकअप के लिए उस तक नेटवर्क पथ और ऐसा प्रमाणपत्र "
+"चाहिए जिस पर यह होस्ट भरोसा करता हो।"
+
+#: backend/services/backup_reach.py:156
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6377,7 +6388,7 @@ msgstr ""
 "उसके NAT के पीछे रखने के बजाय स्टोरेज होस्ट के नेटवर्क पर रखें (वर्चुअल मशीन"
 " के लिए ब्रिज्ड नेटवर्क)।"
 
-#: backend/services/backup_reach.py:125
+#: backend/services/backup_reach.py:166
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

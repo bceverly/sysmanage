@@ -64,6 +64,15 @@ describe("storage reach", () => {
     expect(canSetUp(row({ reach: { ...NO_PATH, reachable: true, seen_as: null } }))).toBe(true);
   });
 
+  test("a host that cannot reach the target's restate-proxy says so, and why (25.5)", () => {
+    const proxied = row({ reach: { ...NO_PATH, proxy: true, address: "nas.example.lan",
+      port: 8443, error: "TLS: pin_mismatch" } });
+    expect(canSetUp(proxied)).toBe(false);
+    expect(pickBlocked(t as unknown as TFunction, proxied)).toBe(
+      "This host cannot reach the backup storage's restate-proxy (nas.example.lan, port 8443): "
+      + "TLS: pin_mismatch. Backups need a network path to it, and a certificate this host trusts.");
+  });
+
   test("unknown or reachable never blocks", () => {
     expect(canSetUp(row({ reach: null }))).toBe(true);
     expect(canSetUp(row({ reach: { ...NO_PATH, reachable: true } }))).toBe(true);
