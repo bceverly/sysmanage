@@ -137,6 +137,15 @@ def judge_terms(source: str, lang: str, language: str) -> str:
     )
 
 
+def _field(verdict: dict, key: str) -> str:
+    """One member of the judge's JSON verdict as text, empty when missing.
+
+    Read by subscript, not ``dict.get``: Semgrep Pro took the decoded
+    reply's ``.get`` for an httpx request (code scanning #2125, #2183).
+    """
+    return str(verdict[key]).strip() if key in verdict else ""
+
+
 def _cosine(a: List[float], b: List[float]) -> float:
     dot = sum(x * y for x, y in zip(a, b))
     norm = math.sqrt(sum(x * x for x in a) * sum(y * y for y in b))
@@ -266,10 +275,7 @@ def make_router(
             return False, "the judge gave no readable verdict"
         if not isinstance(verdict, dict):
             return False, "the judge gave no readable verdict"
-        answer = str(verdict.get("answer", "")).strip().lower()
-        # The judge's own reply, returned to the caller (no request is built).
-        # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
-        return answer == "yes", str(verdict.get("reason", "")).strip()
+        return _field(verdict, "answer").lower() == "yes", _field(verdict, "reason")
 
     async def judged(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         client: httpx.AsyncClient,
