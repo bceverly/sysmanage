@@ -32,11 +32,18 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	chmod 755 /var/log/sysmanage
 	chmod 750 /etc/sysmanage
 
-	# Fix virtualenv to work with system Python
+	# The server needs Python 3.11+ (its dependencies' security fixes ship
+	# only for 3.11+).  The helper prints the system python3 when it is new
+	# enough, and otherwise installs the pinned, sha256-verified Python that
+	# SysManage brings (Ubuntu 22.04 ships 3.10) under /opt/sysmanage/python.
 	echo "Setting up Python virtual environment..."
+	if ! SYSMANAGE_PYTHON="$(/bin/sh /usr/share/sysmanage/python/install-python-linux.sh)"; then
+		echo "ERROR: SysManage needs Python 3.11 or newer; see the messages above." >&2
+		exit 1
+	fi
 	cd /opt/sysmanage
 	rm -rf .venv
-	python3 -m venv .venv
+	"$SYSMANAGE_PYTHON" -m venv .venv
 	.venv/bin/pip install --quiet --upgrade pip
 	# Install runtime-only deps.  The full requirements.txt carries dev
 	# tooling (pylint/astroid/pytest/playwright) that the server does not

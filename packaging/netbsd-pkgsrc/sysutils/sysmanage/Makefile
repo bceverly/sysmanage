@@ -59,7 +59,8 @@ DEPENDS+=	${PYPKGPREFIX}-packaging-[0-9]*:../../devel/py-packaging
 DEPENDS+=	postgresql15-server-[0-9]*:../../databases/postgresql15-server
 DEPENDS+=	nginx-[0-9]*:../../www/nginx
 
-PYTHON_VERSIONS_INCOMPATIBLE=	27
+# The server needs Python 3.11+: its dependencies ship security fixes only for 3.11+.
+PYTHON_VERSIONS_INCOMPATIBLE=	27 39 310
 
 do-install:
 	${INSTALL_DATA_DIR} ${DESTDIR}${PREFIX}/libexec/sysmanage

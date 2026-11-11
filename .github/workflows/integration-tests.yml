@@ -15,7 +15,7 @@ on:
         required: false
         default: "3.12"
         type: choice
-        options: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        options: ["3.11", "3.12", "3.13", "3.14"]
       pytest_marker:
         description: "Marker filter (default: 'integration'). Use 'integration or e2e' to widen."
         required: false

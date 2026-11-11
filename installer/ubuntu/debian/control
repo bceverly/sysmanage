@@ -27,6 +27,7 @@ Depends: ${misc:Depends}, ${riscv64:Depends},
  libpq-dev,
  gcc,
  adduser,
+ curl | wget,
  systemd,
  nodejs (>= 18),
  nginx

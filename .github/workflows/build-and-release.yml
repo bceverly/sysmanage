@@ -99,11 +99,11 @@ jobs:
       # this ref".  So the check-names below must match ci.yml's job names.  The
       # Python matrix runs against a Postgres service, so Linux+Postgres coverage
       # is already gated here.
-      - name: Wait for Backend Tests (Python 3.10)
+      - name: Wait for Backend Tests (Python 3.11)
         uses: lewagon/wait-on-check-action@74049309dfeff245fe8009a0137eacf28136cb3c # v1.5.0
         with:
           ref: ${{ github.sha }}
-          check-name: 'Backend Tests (Python 3.10)'
+          check-name: 'Backend Tests (Python 3.11)'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 30
 
@@ -2641,7 +2641,7 @@ jobs:
           - **Operating System**: Ubuntu 22.04+, Debian 11+, Alpine Linux 3.20+, and other supported platforms
           - **Database**: PostgreSQL 12+ (recommended) or SQLite
           - **Web Server**: Nginx (for serving frontend)
-          - **Python**: 3.10+ (included in package)
+          - **Python**: 3.11+ (on Ubuntu 22.04 the package installs its own)
           - **Node.js**: Not required at runtime (frontend pre-built)
 
           ## What's Included

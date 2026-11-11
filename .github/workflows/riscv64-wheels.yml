@@ -68,7 +68,7 @@ jobs:
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
         with:
           path: riscv64-wheels
-          key: riscv64-wheels-${{ matrix.release }}-${{ hashFiles('requirements-prod.txt') }}-${{ steps.key.outputs.month }}
+          key: riscv64-wheels-${{ matrix.release }}-${{ hashFiles('requirements-prod.txt', 'installer/python/install-python-linux.sh') }}-${{ steps.key.outputs.month }}
 
       - name: Enable riscv64 emulation
         if: steps.cache.outputs.cache-hit != 'true'
@@ -94,7 +94,12 @@ jobs:
             curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs \
               | sh -s -- -y --profile minimal
             . "$HOME/.cargo/env"
-            python3 -m venv /tmp/v
+            # The Python that the package postinst builds the server from:
+            # the system python3 where it is 3.11+, else the pinned build
+            # SysManage installs (jammy).  Wheels compiled for any other
+            # Python would not load there.
+            PY="$(sh installer/python/install-python-linux.sh --prefix /tmp/py)"
+            "$PY" -m venv /tmp/v
             /tmp/v/bin/pip install -q --upgrade pip wheel
             # Every requirement, transitive ones included: PyPI riscv64 wheels
             # where they exist, built from source where they do not.

@@ -15,3 +15,4 @@ installer/ubuntu/sysmanage-nginx.conf etc/nginx/sites-available/
 installer/openbao/openbao.hcl usr/share/sysmanage/openbao/
 installer/openbao/install-openbao-linux.sh usr/share/sysmanage/openbao/
 installer/openbao/sysmanage-openbao-init.service lib/systemd/system/
+installer/python/install-python-linux.sh usr/share/sysmanage/python/

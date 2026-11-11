@@ -638,9 +638,11 @@ DEP_COUNT=\$(ls -1 apt-deps/*.deb 2>/dev/null | wc -l)
 echo "Installing \$MAIN_DEB + \$DEP_COUNT deps..."
 if [ "\$DEP_COUNT" -gt 0 ]; then
   exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
+       SYSMANAGE_PYTHON_BUNDLE="\$(pwd)/python" \\
        dpkg -i apt-deps/*.deb "\$MAIN_DEB"
 else
   exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
+       SYSMANAGE_PYTHON_BUNDLE="\$(pwd)/python" \\
        dpkg -i "\$MAIN_DEB"
 fi
 EOF
@@ -902,7 +904,19 @@ build_ubuntu_like() {
           || curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/requirements.txt" -o "$REQ" \
           || { echo "could not obtain requirements for ${PKG}" >&2; exit 1; }
       fi
-      python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
+      # Build the wheels with the Python the package postinst will use.  The
+      # server package carries a helper that picks it: the system python3
+      # where it is 3.11+, else a pinned, sha256-verified Python (Ubuntu
+      # 22.04 ships 3.10).  --keep-archive puts that archive in the bundle,
+      # where the install script points the postinst at it.  The agent
+      # package has no helper and keeps the system python3.
+      BUILD_PY=python3
+      HELPER=usr/share/sysmanage/python/install-python-linux.sh
+      if dpkg-deb --fsys-tarfile "$PKG"_*.deb | tar -xO "./$HELPER" > /tmp/pyhelper.sh 2>/dev/null \
+         && [ -s /tmp/pyhelper.sh ]; then
+        BUILD_PY="$(sh /tmp/pyhelper.sh --prefix /tmp/py --keep-archive /out/python)"
+      fi
+      "$BUILD_PY" -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
     || { _linux_build_failed "$platform" "$outdir"; return; }
 
@@ -1001,7 +1015,19 @@ build_debian_like() {
           || curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/requirements.txt" -o "$REQ" \
           || { echo "could not obtain requirements for ${PKG}" >&2; exit 1; }
       fi
-      python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
+      # Build the wheels with the Python the package postinst will use.  The
+      # server package carries a helper that picks it: the system python3
+      # where it is 3.11+, else a pinned, sha256-verified Python (Ubuntu
+      # 22.04 ships 3.10).  --keep-archive puts that archive in the bundle,
+      # where the install script points the postinst at it.  The agent
+      # package has no helper and keeps the system python3.
+      BUILD_PY=python3
+      HELPER=usr/share/sysmanage/python/install-python-linux.sh
+      if dpkg-deb --fsys-tarfile "$PKG"_*.deb | tar -xO "./$HELPER" > /tmp/pyhelper.sh 2>/dev/null \
+         && [ -s /tmp/pyhelper.sh ]; then
+        BUILD_PY="$(sh /tmp/pyhelper.sh --prefix /tmp/py --keep-archive /out/python)"
+      fi
+      "$BUILD_PY" -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
     || { _linux_build_failed "$platform" "$outdir"; return; }
 

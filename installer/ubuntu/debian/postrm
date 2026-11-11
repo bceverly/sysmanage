@@ -12,6 +12,9 @@ if [ "$1" = "purge" ]; then
 	rm -rf /var/lib/sysmanage
 	rm -rf /var/log/sysmanage
 	rm -rf /etc/sysmanage
+	# The Python SysManage installed where the system's was too old, and the
+	# virtual environment built from it.
+	rm -rf /opt/sysmanage/python /opt/sysmanage/.venv
 fi
 
 #DEBHELPER#

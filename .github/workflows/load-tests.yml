@@ -36,7 +36,7 @@ on:
         required: false
         default: "3.12"
         type: choice
-        options: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        options: ["3.11", "3.12", "3.13", "3.14"]
   push:
     # Mirror build-and-release.yml's tag pattern so a release tag also
     # captures a load-test baseline as part of the release record.

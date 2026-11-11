@@ -86,11 +86,10 @@ RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}aiohttp>0:www/py-aiohttp@${PY_FLAVOR} \
 # both in one transaction silently deinstalled whichever landed first, so the
 # port would have forced users onto an old major or failed outright.  USES
 # takes the default version that satisfies 15+, matching psycopg.
-# python:3.10+, NOT 3.9+.  The Debian control file requires python3 (>= 3.10)
-# and the backend uses syntax that 3.9 cannot parse; declaring 3.9+ would let
-# the port install against a 3.9 default and fail at first import, which no
-# build-time check catches.  (The AGENT is genuinely 3.9-compatible -- it has a
-# 3.9 CI leg -- so the two ports differ here on purpose.)
+# python:3.11+, NOT older.  The server's dependencies ship their security
+# fixes only for 3.11+ (Pillow 13, dnspython 2.9); declaring less would let
+# the port install against an older default with dependency releases that
+# have known, unfixed vulnerabilities, which no build-time check catches.
 # nodejs:build MUST come with an explicit ``build`` argument.  npm.mk includes
 # nodejs.mk itself, and nodejs.mk's own default registers node as a RUN
 # dependency -- so USES=npm alone put www/node24 in RUN_DEPENDS, making every
@@ -99,7 +98,7 @@ RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}aiohttp>0:www/py-aiohttp@${PY_FLAVOR} \
 # Confirmed 2026-08-10 with ``make run-depends-list | grep node``; nothing in
 # the build, poudriere, check-plist or stage-qa notices, because a superfluous
 # runtime dependency is not an error -- just a cost paid by everyone.
-USES=		nodejs:build npm:npm,build pgsql:15+ python:3.10+,run shebangfix
+USES=		nodejs:build npm:npm,build pgsql:15+ python:3.11+,run shebangfix
 
 # shebangfix does nothing without SHEBANG_FILES: it rewrites only the files
 # named here.  sysmanage_migrate.py starts with "#!/usr/bin/env python3",
