@@ -94,6 +94,7 @@ async def test_the_transport_needs_the_role_and_resends_every_job(session, sent)
         "transport": "proxy", "proxy_host": "nas.example.lan", "proxy_port": 8443,
         "proxy_pin_sha256": None, "proxy_ca": False,
         "url": "https://nas.example.lan:8443",
+        "certificate": None,  # until the storage host asks for one
     }  # fmt: skip
     session.refresh(s.policy)
     assert s.policy.config_version > before
