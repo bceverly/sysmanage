@@ -83,8 +83,9 @@ def storage_address(db: Session) -> Optional[Dict[str, Any]]:
         check = {"port": port}
         if target.proxy_pin_sha256:
             check["pin_sha256"] = target.proxy_pin_sha256
-        if target.proxy_ca_pem:
-            check["ca"] = target.proxy_ca_pem
+        ca = proxy.trust_ca(target)
+        if ca:
+            check["ca"] = ca
         return dict(found, address=target.proxy_host, port=port, proxy=check)
     address = jobs.host_address(storage)
     if not address:

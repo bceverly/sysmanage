@@ -143,12 +143,23 @@ const BackupTransport: React.FC<{
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const proxy = target.transport?.transport === 'proxy';
+    const certificate = target.transport?.certificate;
     return (
         <Typography variant="body2" component="div">
             {t('backups.transport.title', 'How hosts reach the storage')}:{' '}
             {proxy
                 ? <>{t('backups.transport.viaProxy', 'restate-proxy at')} <code>{target.transport?.url}</code></>
                 : t('backups.transport.viaNfs', 'NFS')}
+            {proxy && !target.transport?.proxy_ca && (
+                <Typography variant="caption" color="text.secondary" display="block">
+                    {certificate
+                        ? t('backups.transport.certIssued',
+                            'Certificate from the SysManage CA, valid until {{date}}',
+                            { date: new Date(certificate.expires).toLocaleDateString() })
+                        : t('backups.transport.certWaiting',
+                            'Waiting for the storage host to ask for its certificate')}
+                </Typography>
+            )}
             {canManage && (
                 <Button size="small" sx={{ ml: 1 }} onClick={() => setOpen(true)}>
                     {t('backups.transport.change', 'Change')}

@@ -5874,7 +5874,9 @@
       "saveError": "Не удалось сохранить способ доступа хостов к хранилищу.",
       "title": "Как хосты получают доступ к хранилищу",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy по адресу"
+      "viaProxy": "restate-proxy по адресу",
+      "certIssued": "Сертификат от ЦС SysManage, действителен до {{date}}",
+      "certWaiting": "Ожидание запроса сертификата от хоста хранения"
     }
   },
   "cloudBackup": {

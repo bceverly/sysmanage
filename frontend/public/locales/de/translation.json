@@ -5870,7 +5870,9 @@
       "saveError": "Die Einstellung, wie Hosts den Speicher erreichen, konnte nicht gespeichert werden.",
       "title": "Wie Hosts den Speicher erreichen",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy unter"
+      "viaProxy": "restate-proxy unter",
+      "certIssued": "Zertifikat von der SysManage-CA, gültig bis {{date}}",
+      "certWaiting": "Wartet darauf, dass der Speicher-Host sein Zertifikat anfordert"
     }
   },
   "cloudBackup": {

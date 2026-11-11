@@ -5870,7 +5870,9 @@
       "saveError": "No se pudo guardar cómo acceden los hosts al almacenamiento.",
       "title": "Cómo acceden los hosts al almacenamiento",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy en"
+      "viaProxy": "restate-proxy en",
+      "certIssued": "Certificado de la CA de SysManage, válido hasta {{date}}",
+      "certWaiting": "Esperando a que el host de almacenamiento solicite su certificado"
     }
   },
   "cloudBackup": {

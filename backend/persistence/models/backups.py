@@ -106,6 +106,9 @@ class BackupTarget(Base):
     proxy_port = Column(Integer, nullable=True)
     proxy_pin_sha256 = Column(String(64), nullable=True)
     proxy_ca_pem = Column(Text, nullable=True)
+    # The proxy's certificate, signed by the SysManage CA from the storage
+    # host's own request (q85); hosts trust it through that CA.
+    proxy_cert_pem = Column(Text, nullable=True)
     # The clients the storage host's grants were last built for (JSON).
     proxy_clients = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=False)

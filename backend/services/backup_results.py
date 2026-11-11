@@ -34,6 +34,7 @@ from backend.services import backup_first_fit as first_fit
 from backend.services import backup_host_reply as host_reply
 from backend.services import backup_jobs as jobs
 from backend.services import backup_network_mounts as network_mounts
+from backend.services import backup_proxy_cert
 from backend.services import backup_signing
 from backend.services import backup_storage_status as storage_status
 from backend.services import backup_tick
@@ -332,6 +333,8 @@ def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
             # and Back up now / Prepare wait on its acknowledgment.
             backup_tick.configure_now(db)
         _store_protects(_policy(db, run), reply.get("installed"))
+        if backup_proxy_cert.store_csr(db, _policy(db, run), reply):
+            backup_tick.configure_now(db)  # the certificate goes out now
     _reprotect(db, run)
     if not _prepare_new_repository(db, run):
         _reprepare(db, run)

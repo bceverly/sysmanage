@@ -5870,7 +5870,9 @@
       "saveError": "无法保存主机访问存储的方式。",
       "title": "主机如何访问存储",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy，地址："
+      "viaProxy": "restate-proxy，地址：",
+      "certIssued": "由 SysManage CA 签发的证书，有效期至 {{date}}",
+      "certWaiting": "正在等待存储主机申请其证书"
     }
   },
   "cloudBackup": {

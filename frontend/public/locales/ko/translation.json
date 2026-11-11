@@ -5870,7 +5870,9 @@
       "saveError": "스토리지 접근 방식을 저장할 수 없습니다.",
       "title": "호스트의 스토리지 접근 방식",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy 주소:"
+      "viaProxy": "restate-proxy 주소:",
+      "certIssued": "SysManage CA가 발급한 인증서, {{date}}까지 유효",
+      "certWaiting": "스토리지 호스트가 인증서를 요청하기를 기다리는 중"
     }
   },
   "cloudBackup": {

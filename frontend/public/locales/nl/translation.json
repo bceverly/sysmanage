@@ -5870,7 +5870,9 @@
       "saveError": "Hoe hosts de opslag bereiken kon niet worden opgeslagen.",
       "title": "Hoe hosts de opslag bereiken",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy op"
+      "viaProxy": "restate-proxy op",
+      "certIssued": "Certificaat van de SysManage-CA, geldig tot {{date}}",
+      "certWaiting": "Wacht tot de opslaghost zijn certificaat aanvraagt"
     }
   },
   "cloudBackup": {

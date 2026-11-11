@@ -5870,7 +5870,9 @@
       "saveError": "تعذّر حفظ طريقة وصول المضيفين إلى التخزين.",
       "title": "طريقة وصول المضيفين إلى التخزين",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy على"
+      "viaProxy": "restate-proxy على",
+      "certIssued": "شهادة من مرجع SysManage المصدِّق، صالحة حتى {{date}}",
+      "certWaiting": "في انتظار أن يطلب مضيف التخزين شهادته"
     }
   },
   "cloudBackup": {

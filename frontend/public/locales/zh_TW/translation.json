@@ -5870,7 +5870,9 @@
       "saveError": "無法儲存主機存取儲存空間的方式。",
       "title": "主機存取儲存空間的方式",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy 位於"
+      "viaProxy": "restate-proxy 位於",
+      "certIssued": "由 SysManage CA 簽發的憑證，有效期至 {{date}}",
+      "certWaiting": "正在等待儲存主機申請其憑證"
     }
   },
   "cloudBackup": {

@@ -5870,7 +5870,9 @@
       "saveError": "ストレージへの接続方法を保存できませんでした。",
       "title": "ホストからストレージへの接続方法",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy 接続先:"
+      "viaProxy": "restate-proxy 接続先:",
+      "certIssued": "SysManage CA が発行した証明書、{{date}} まで有効",
+      "certWaiting": "ストレージホストが証明書を要求するのを待っています"
     }
   },
   "cloudBackup": {

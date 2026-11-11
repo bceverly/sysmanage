@@ -5870,7 +5870,9 @@
       "saveError": "होस्ट स्टोरेज तक कैसे पहुँचते हैं, यह सेटिंग सहेजी नहीं जा सकी।",
       "title": "होस्ट स्टोरेज तक कैसे पहुँचते हैं",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy, पता:"
+      "viaProxy": "restate-proxy, पता:",
+      "certIssued": "SysManage CA से प्रमाणपत्र, {{date}} तक मान्य",
+      "certWaiting": "स्टोरेज होस्ट के अपना प्रमाणपत्र माँगने की प्रतीक्षा है"
     }
   },
   "cloudBackup": {

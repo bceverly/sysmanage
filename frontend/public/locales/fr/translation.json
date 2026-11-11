@@ -5870,7 +5870,9 @@
       "saveError": "Le mode d'accès des hôtes au stockage n'a pas pu être enregistré.",
       "title": "Accès des hôtes au stockage",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy à l'adresse"
+      "viaProxy": "restate-proxy à l'adresse",
+      "certIssued": "Certificat de l'autorité de certification SysManage, valide jusqu'au {{date}}",
+      "certWaiting": "En attente de la demande de certificat de l'hôte de stockage"
     }
   },
   "cloudBackup": {

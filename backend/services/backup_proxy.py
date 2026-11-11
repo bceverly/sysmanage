@@ -175,12 +175,22 @@ def needs_proxy(host: Optional[models.Host]) -> bool:
     )
 
 
+def trust_ca(target: models.BackupTarget) -> Optional[str]:
+    """The CA hosts trust the proxy through: the operator's site CA, or the
+    SysManage CA once the server has issued the proxy's certificate."""
+    # pylint: disable=import-outside-toplevel
+    from backend.services import backup_proxy_cert  # noqa: PLC0415
+
+    return target.proxy_ca_pem or backup_proxy_cert.host_ca(target)
+
+
 def _trust(target: models.BackupTarget) -> Dict[str, Any]:
     out: Dict[str, Any] = {}
     if target.proxy_pin_sha256:
         out["pin_sha256"] = target.proxy_pin_sha256
-    if target.proxy_ca_pem:
-        out["ca"] = target.proxy_ca_pem
+    ca = trust_ca(target)
+    if ca:
+        out["ca"] = ca
     return out
 
 
@@ -283,6 +293,12 @@ def storage_proxy(
     }
     if host_captures_through_proxy(policy, target, host):
         out["export"] = False
+    # pylint: disable=import-outside-toplevel
+    from backend.services import backup_proxy_cert  # noqa: PLC0415
+
+    cert = backup_proxy_cert.storage_block(target) if enabled else None
+    if cert is not None:
+        out["cert"] = cert  # only then: an older storage agent takes no such key
     return {"proxy": out}
 
 
@@ -323,4 +339,12 @@ def target_view(target: models.BackupTarget) -> Dict[str, Any]:
         "proxy_pin_sha256": target.proxy_pin_sha256,
         "proxy_ca": bool(target.proxy_ca_pem),
         "url": base_url(target),
+        "certificate": _certificate_view(target),
     }
+
+
+def _certificate_view(target: models.BackupTarget) -> Optional[Dict[str, Any]]:
+    # pylint: disable=import-outside-toplevel
+    from backend.services import backup_proxy_cert  # noqa: PLC0415
+
+    return backup_proxy_cert.view(target)

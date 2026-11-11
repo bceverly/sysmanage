@@ -116,6 +116,9 @@ export interface TargetTransport {
   proxy_pin_sha256?: string | null;
   proxy_ca?: boolean;
   url?: string;
+  /** 25.5: the proxy's certificate, issued by the SysManage CA (null until
+   *  the storage host has asked for one, or when a site CA is set). */
+  certificate?: { expires: string; current: boolean } | null;
 }
 
 export interface TransportInput {

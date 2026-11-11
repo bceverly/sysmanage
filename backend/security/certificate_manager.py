@@ -360,6 +360,58 @@ class CertificateManager:
             .sign(ca_key, hashes.SHA256())
         )
 
+    def issue_proxy_certificate(self, public_key, name: str) -> x509.Certificate:
+        """Sign a TLS server certificate for a storage host's restate-proxy
+        (ROADMAP 25.5), naming ``name`` -- the address hosts reach it at, a
+        host name or an IP address.  Only the public key comes from the
+        storage host; the name is the target's, never the requester's."""
+        ca_cert, ca_key = self._load_ca()
+        try:
+            alt: x509.GeneralName = x509.IPAddress(ipaddress.ip_address(name))
+        except ValueError:
+            alt = x509.DNSName(name)
+        subject = x509.Name(
+            [
+                x509.NameAttribute(
+                    NameOID.ORGANIZATION_NAME, "SysManage restate-proxy"
+                ),
+                x509.NameAttribute(NameOID.COMMON_NAME, name[:MAX_COMMON_NAME]),
+            ]
+        )
+        now = datetime.now(timezone.utc)
+        return (
+            x509.CertificateBuilder()
+            .subject_name(subject)
+            .issuer_name(ca_cert.subject)
+            .public_key(public_key)
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(now - timedelta(minutes=5))
+            .not_valid_after(now + timedelta(days=self.CLIENT_CERT_DAYS))
+            .add_extension(x509.SubjectAlternativeName([alt]), critical=False)
+            .add_extension(
+                x509.BasicConstraints(ca=False, path_length=None), critical=True
+            )
+            .add_extension(
+                x509.KeyUsage(
+                    digital_signature=True,
+                    content_commitment=False,
+                    key_encipherment=True,
+                    data_encipherment=False,
+                    key_agreement=False,
+                    key_cert_sign=False,
+                    crl_sign=False,
+                    encipher_only=False,
+                    decipher_only=False,
+                ),
+                critical=True,
+            )
+            .add_extension(
+                x509.ExtendedKeyUsage([x509.oid.ExtendedKeyUsageOID.SERVER_AUTH]),
+                critical=True,
+            )
+            .sign(ca_key, hashes.SHA256())
+        )
+
     def generate_client_certificate(
         self, hostname: str, host_id: str
     ) -> Tuple[bytes, bytes]:

@@ -89,6 +89,18 @@ describe("BackupTransport", () => {
     expect(vi.mocked(setTransport).mock.calls[0][1].remove_proxy_ca).toBe(true);
   });
 
+  test("the proxy's certificate from the SysManage CA is shown, or that it is awaited", () => {
+    const issued = target({ transport: { ...proxyTarget().transport!,
+      certificate: { expires: "2027-11-10T00:00:00+00:00", current: true } } });
+    const { rerender } = render(<BackupTransport target={issued} canManage={false} onChanged={vi.fn()} />);
+    expect(screen.getByText(/Certificate from the SysManage CA, valid until/)).toBeTruthy();
+    rerender(<BackupTransport target={proxyTarget()} canManage={false} onChanged={vi.fn()} />);
+    expect(screen.getByText("Waiting for the storage host to ask for its certificate")).toBeTruthy();
+    // A site CA of the operator's own: SysManage issues nothing, says nothing.
+    rerender(<BackupTransport target={proxyTarget(true)} canManage={false} onChanged={vi.fn()} />);
+    expect(screen.queryByText(/SysManage CA|Waiting for the storage host/)).toBeNull();
+  });
+
   test("a refusal is shown in the dialog", async () => {
     vi.mocked(setTransport).mockRejectedValue({ response: { data: { detail: "The proxy port must be between 1 and 65535" } } });
     render(<BackupTransport target={proxyTarget()} canManage onChanged={vi.fn()} />);

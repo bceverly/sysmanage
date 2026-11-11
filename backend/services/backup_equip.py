@@ -107,6 +107,18 @@ def state(db: Session, host_id: Any, now=None) -> Optional[Dict[str, Any]]:
     }
 
 
+def parameters(db: Session, host: models.Host) -> Dict[str, Any]:
+    """What Equip is told: ``proxy`` for the storage host of a target on
+    restate-proxy (25.5), which then installs restate-proxy beside restate.
+    Never a package name, URL or command -- the agent decides those."""
+    # pylint: disable=import-outside-toplevel
+    from backend.services import backup_proxy  # noqa: PLC0415
+
+    target = jobs.the_target(db)
+    storage = target is not None and str(target.storage_host_id) == str(host.id)
+    return {"proxy": True} if storage and backup_proxy.uses_proxy(target) else {}
+
+
 def start(
     db: Session, host: models.Host, userid: str
 ) -> Tuple[Optional[str], Optional[str]]:
@@ -120,7 +132,9 @@ def start(
     why = blocker(db, host)
     if why:
         return None, why
-    command_id = queue_command(db, host.id, CommandType.EQUIP_BACKUP, {})
+    command_id = queue_command(
+        db, host.id, CommandType.EQUIP_BACKUP, parameters(db, host)
+    )
     row = _row(db, host.id) or models.BackupEquip(host_id=host.id)
     row.status, row.reason, row.detail, row.installed = RUNNING, None, None, None
     row.command_id = command_id

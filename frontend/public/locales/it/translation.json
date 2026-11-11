@@ -5870,7 +5870,9 @@
       "saveError": "Impossibile salvare il modo in cui gli host raggiungono l'archiviazione.",
       "title": "Come gli host raggiungono l'archiviazione",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy su"
+      "viaProxy": "restate-proxy su",
+      "certIssued": "Certificato dalla CA di SysManage, valido fino al {{date}}",
+      "certWaiting": "In attesa che l'host di archiviazione richieda il suo certificato"
     }
   },
   "cloudBackup": {

@@ -5870,7 +5870,9 @@
       "saveError": "Não foi possível salvar como os hosts acessam o armazenamento.",
       "title": "Como os hosts acessam o armazenamento",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy em"
+      "viaProxy": "restate-proxy em",
+      "certIssued": "Certificado da CA do SysManage, válido até {{date}}",
+      "certWaiting": "Aguardando o host de armazenamento solicitar seu certificado"
     }
   },
   "cloudBackup": {

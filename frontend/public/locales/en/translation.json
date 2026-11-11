@@ -5870,7 +5870,9 @@
       "saveError": "How hosts reach the storage could not be saved.",
       "title": "How hosts reach the storage",
       "viaNfs": "NFS",
-      "viaProxy": "restate-proxy at"
+      "viaProxy": "restate-proxy at",
+      "certIssued": "Certificate from the SysManage CA, valid until {{date}}",
+      "certWaiting": "Waiting for the storage host to ask for its certificate"
     }
   },
   "cloudBackup": {
