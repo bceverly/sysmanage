@@ -2708,6 +2708,8 @@ installer-deb:
 		cp installer/openbao/openbao.hcl "$$BUILD_DIR/installer/openbao/"; \
 		cp installer/openbao/install-openbao-linux.sh "$$BUILD_DIR/installer/openbao/"; \
 		cp installer/openbao/sysmanage-openbao-init.service "$$BUILD_DIR/installer/openbao/"; \
+		mkdir -p "$$BUILD_DIR/installer/python"; \
+		cp installer/python/install-python-linux.sh "$$BUILD_DIR/installer/python/"; \
 	echo "✓ Packaging files copied"; \
 	echo ""; \
 	echo "Building package..."; \
