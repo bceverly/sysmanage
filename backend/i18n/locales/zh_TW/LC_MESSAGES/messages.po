@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 09:24-0800\n"
+"POT-Creation-Date: 2026-11-10 15:43-0800\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1228,28 +1228,28 @@ msgstr "權限 denied: UNLOCK_USER 角色所需"
 msgid "Permission denied: LOCK_USER role required"
 msgstr "權限 denied: LOCK_USER 角色所需"
 
-#: backend/api/user.py:752 backend/api/profile.py:288
+#: backend/api/user.py:752 backend/api/profile.py:309
 #: backend/api/report_branding.py:133
 msgid "No file provided"
 msgstr "未提供檔案"
 
-#: backend/api/user.py:759 backend/api/profile.py:295
+#: backend/api/user.py:759 backend/api/profile.py:316
 msgid "Error reading uploaded file"
 msgstr "讀取上傳文件時發生錯誤"
 
-#: backend/api/user.py:787 backend/api/profile.py:328
+#: backend/api/user.py:787 backend/api/profile.py:349
 msgid "Profile image uploaded successfully"
 msgstr "個人頭像已成功上傳"
 
-#: backend/api/user.py:811 backend/api/profile.py:356
+#: backend/api/user.py:811 backend/api/profile.py:377
 msgid "No profile image found"
 msgstr "未找到個人頭像"
 
-#: backend/api/user.py:852 backend/api/profile.py:397
+#: backend/api/user.py:852 backend/api/profile.py:418
 msgid "No profile image to delete"
 msgstr "無頭像可供刪除"
 
-#: backend/api/user.py:861 backend/api/profile.py:407
+#: backend/api/user.py:861 backend/api/profile.py:428
 msgid "Profile image deleted successfully"
 msgstr "個人頭像已成功刪除"
 
@@ -3784,27 +3784,37 @@ msgstr "不支持多租戶。"
 msgid "Logout successful"
 msgstr "登出成功"
 
-#: backend/api/profile.py:156 backend/api/first_admin.py:99
+#: backend/api/profile.py:157 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "新密碼和確認密碼不匹配"
 
-#: backend/api/profile.py:187
+#: backend/api/profile.py:188
 msgid "Current password is incorrect"
 msgstr "當前密碼不正確"
 
-#: backend/api/profile.py:199
+#: backend/api/profile.py:200
 msgid "Password changed successfully"
 msgstr "密碼已成功更改"
 
-#: backend/api/profile.py:226
+#: backend/api/profile.py:237
+msgid ""
+"Profile images cannot be uploaded on this server: it runs Python 3.10, where"
+" the image library still has security issues that are fixed only for Python "
+"3.11 and later. Move the server to Python 3.11 or later (Ubuntu 24.04 or "
+"newer) to upload images."
+msgstr ""
+"無法在此伺服器上傳頭像：它執行 Python 3.10，其影像函式庫仍有僅在 Python 3.11 "
+"及更新版本中修正的安全問題。若要上傳圖片，請將伺服器遷移到 Python 3.11 或更新版本（Ubuntu 24.04 或更新）。"
+
+#: backend/api/profile.py:247
 msgid "File size too large. Maximum allowed size is 5MB."
 msgstr "檔案大小過大。最大允許大小為 5MB。"
 
-#: backend/api/profile.py:238
+#: backend/api/profile.py:259
 msgid "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
 msgstr "不支援的圖像格式。允許的格式：PNG、JPEG、JPG、GIF、WEBP"
 
-#: backend/api/profile.py:269
+#: backend/api/profile.py:290
 msgid "Invalid image file. Please upload a valid image."
 msgstr "無效的圖像文件。請上傳有效的圖像。"
 

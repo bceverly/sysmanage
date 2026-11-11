@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 09:24-0800\n"
+"POT-Creation-Date: 2026-11-10 15:43-0800\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1264,28 +1264,28 @@ msgstr "प्रवेश नहीं: UNLOCK_USER भूमिका की �
 msgid "Permission denied: LOCK_USER role required"
 msgstr "प्रवेश नहीं: LOCK_USER भूमिका की आवश्यकता है"
 
-#: backend/api/user.py:752 backend/api/profile.py:288
+#: backend/api/user.py:752 backend/api/profile.py:309
 #: backend/api/report_branding.py:133
 msgid "No file provided"
 msgstr "कोई फ़ाइल नहीं दी गई"
 
-#: backend/api/user.py:759 backend/api/profile.py:295
+#: backend/api/user.py:759 backend/api/profile.py:316
 msgid "Error reading uploaded file"
 msgstr "परिभाषित संचयित फ़ाइल को पढ़ने में त्रुटि"
 
-#: backend/api/user.py:787 backend/api/profile.py:328
+#: backend/api/user.py:787 backend/api/profile.py:349
 msgid "Profile image uploaded successfully"
 msgstr "प्रोफाइल छवि सफलतापूर्वक अपलोड की गई"
 
-#: backend/api/user.py:811 backend/api/profile.py:356
+#: backend/api/user.py:811 backend/api/profile.py:377
 msgid "No profile image found"
 msgstr "कोई प्रोफाइल इमेज नहीं मिला"
 
-#: backend/api/user.py:852 backend/api/profile.py:397
+#: backend/api/user.py:852 backend/api/profile.py:418
 msgid "No profile image to delete"
 msgstr "कोई हटाने के लिए प्रोफाइल इमेज नहीं मिला"
 
-#: backend/api/user.py:861 backend/api/profile.py:407
+#: backend/api/user.py:861 backend/api/profile.py:428
 msgid "Profile image deleted successfully"
 msgstr "प्रोफाइल छवि को सफलतापूर्वक हटा दिया गया"
 
@@ -3961,29 +3961,41 @@ msgstr "बहु-तनाव नहीं है।"
 msgid "Logout successful"
 msgstr "लॉगआउट सफल"
 
-#: backend/api/profile.py:156 backend/api/first_admin.py:99
+#: backend/api/profile.py:157 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "नए पासवर्ड और पुष्टि में मेल नहीं आता है"
 
-#: backend/api/profile.py:187
+#: backend/api/profile.py:188
 msgid "Current password is incorrect"
 msgstr "वर्तमान पासवर्ड गलत है"
 
-#: backend/api/profile.py:199
+#: backend/api/profile.py:200
 msgid "Password changed successfully"
 msgstr "पासवर्ड की सफलता से बदली गई"
 
-#: backend/api/profile.py:226
+#: backend/api/profile.py:237
+msgid ""
+"Profile images cannot be uploaded on this server: it runs Python 3.10, where"
+" the image library still has security issues that are fixed only for Python "
+"3.11 and later. Move the server to Python 3.11 or later (Ubuntu 24.04 or "
+"newer) to upload images."
+msgstr ""
+"इस सर्वर पर प्रोफ़ाइल चित्र अपलोड नहीं किए जा सकते: यह Python 3.10 पर चलता "
+"है, जहाँ इमेज लाइब्रेरी में अब भी ऐसी सुरक्षा समस्याएँ हैं जो केवल Python "
+"3.11 और उसके बाद के संस्करणों के लिए ठीक की गई हैं। चित्र अपलोड करने के लिए "
+"सर्वर को Python 3.11 या बाद के संस्करण (Ubuntu 24.04 या नया) पर ले जाएँ।"
+
+#: backend/api/profile.py:247
 msgid "File size too large. Maximum allowed size is 5MB."
 msgstr "फाइल आकार बहुत बड़ा है। सबसे अधिक दी गई आवश्यकता 5MB है।"
 
-#: backend/api/profile.py:238
+#: backend/api/profile.py:259
 msgid "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
 msgstr ""
 "निषेधित छवि वर्णन की फ़ार्मेट। अनुमति हेतु फ़ार्मेट: PNG, JPEG, JPG, GIF, "
 "WEBP"
 
-#: backend/api/profile.py:269
+#: backend/api/profile.py:290
 msgid "Invalid image file. Please upload a valid image."
 msgstr "अमान्य छवि फ़ाइल। कृपया मान्य छवि फ़ाइल अपलोड करें।"
 

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 09:24-0800\n"
+"POT-Creation-Date: 2026-11-10 15:43-0800\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1257,28 +1257,28 @@ msgstr "لا تملك الإذن: يتطلب دور UNLOCK_USER"
 msgid "Permission denied: LOCK_USER role required"
 msgstr "غير مسموح بالوصول: يتطلب دور LOCK_USER"
 
-#: backend/api/user.py:752 backend/api/profile.py:288
+#: backend/api/user.py:752 backend/api/profile.py:309
 #: backend/api/report_branding.py:133
 msgid "No file provided"
 msgstr "لم يتم تقديم ملف"
 
-#: backend/api/user.py:759 backend/api/profile.py:295
+#: backend/api/user.py:759 backend/api/profile.py:316
 msgid "Error reading uploaded file"
 msgstr "خطأ في قراءة الملف المرفوع"
 
-#: backend/api/user.py:787 backend/api/profile.py:328
+#: backend/api/user.py:787 backend/api/profile.py:349
 msgid "Profile image uploaded successfully"
 msgstr "تم تحميل صورة الملف الشخصي بنجاح"
 
-#: backend/api/user.py:811 backend/api/profile.py:356
+#: backend/api/user.py:811 backend/api/profile.py:377
 msgid "No profile image found"
 msgstr "لم يتم العثور على صورة الملف الشخصي"
 
-#: backend/api/user.py:852 backend/api/profile.py:397
+#: backend/api/user.py:852 backend/api/profile.py:418
 msgid "No profile image to delete"
 msgstr "لا يوجد صورة ملف شخصي للحذف"
 
-#: backend/api/user.py:861 backend/api/profile.py:407
+#: backend/api/user.py:861 backend/api/profile.py:428
 msgid "Profile image deleted successfully"
 msgstr "تم حذف صورة الملف الشخصي بنجاح"
 
@@ -3900,28 +3900,39 @@ msgstr "لم يتم تمكين متعددة المستخدمين."
 msgid "Logout successful"
 msgstr "تسجيل الخروج ناجح"
 
-#: backend/api/profile.py:156 backend/api/first_admin.py:99
+#: backend/api/profile.py:157 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "كلمة المرور الجديدة غير متطابقة مع تأكيدها"
 
-#: backend/api/profile.py:187
+#: backend/api/profile.py:188
 msgid "Current password is incorrect"
 msgstr "كلمة المرور الحالية غير صحيحة"
 
-#: backend/api/profile.py:199
+#: backend/api/profile.py:200
 msgid "Password changed successfully"
 msgstr " تم تغيير كلمة المرور بنجاح"
 
-#: backend/api/profile.py:226
+#: backend/api/profile.py:237
+msgid ""
+"Profile images cannot be uploaded on this server: it runs Python 3.10, where"
+" the image library still has security issues that are fixed only for Python "
+"3.11 and later. Move the server to Python 3.11 or later (Ubuntu 24.04 or "
+"newer) to upload images."
+msgstr ""
+"لا يمكن رفع صور الملف الشخصي على هذا الخادم: فهو يعمل بـ Python 3.10، وما "
+"زالت مكتبة الصور فيه تحمل مشكلات أمنية لم تُصلح إلا لـ Python 3.11 وما بعده."
+" انقل الخادم إلى Python 3.11 أو أحدث (Ubuntu 24.04 أو أحدث) لرفع الصور."
+
+#: backend/api/profile.py:247
 msgid "File size too large. Maximum allowed size is 5MB."
 msgstr "حجم الملف كبير جداً. الحجم الأقصى المسموح به هو 5MB."
 
-#: backend/api/profile.py:238
+#: backend/api/profile.py:259
 msgid "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
 msgstr ""
 "تنسيق الصورة غير مدعوم. التنسيقات المسموح بها: PNG، JPEG، JPG، GIF، WEBP"
 
-#: backend/api/profile.py:269
+#: backend/api/profile.py:290
 msgid "Invalid image file. Please upload a valid image."
 msgstr "ملف الصورة غير صالح. يرجى تحميل صورة صالحة."
 

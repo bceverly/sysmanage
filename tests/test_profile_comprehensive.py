@@ -26,6 +26,12 @@ from backend.api.profile import (
 )
 
 
+@pytest.fixture(autouse=True)
+def _images_supported(monkeypatch):
+    """Uploads work here on any Python: the 3.10 refusal has its own tests."""
+    monkeypatch.setattr("backend.api.profile.images_supported", lambda *a: True)
+
+
 class MockUser:
     """Mock user object for testing."""
 
@@ -597,3 +603,30 @@ class TestImageUploadIntegration:
 
         content = asyncio.run(test_read())
         assert content == b"test content"
+
+
+class TestImagesNeedPython311:
+    """Pillow's parser fixes need Python 3.11: uploads are refused on 3.10."""
+
+    def test_the_python_version_decides(self, monkeypatch):
+        # The module fixture stands images_supported in; undo it for this one.
+        from backend.api import profile  # noqa: PLC0415
+
+        monkeypatch.undo()
+        assert not profile.images_supported((3, 10, 14))
+        assert profile.images_supported((3, 11, 0))
+        assert profile.images_supported((3, 14, 4))
+
+    def test_an_upload_on_python_3_10_is_refused_before_pillow_sees_it(
+        self, monkeypatch
+    ):
+        from backend.api import profile  # noqa: PLC0415
+
+        monkeypatch.setattr(profile, "images_supported", lambda *a: False)
+        opened = []
+        monkeypatch.setattr(profile.Image, "open", lambda *a: opened.append(a))
+        with pytest.raises(HTTPException) as refused:
+            validate_and_process_image(b"\x89PNG not even an image", "x.png")
+        assert refused.value.status_code == 501
+        assert "Python 3.11" in refused.value.detail
+        assert not opened

@@ -7,6 +7,7 @@ This module houses the API routes for user profile management in SysManage.
 """
 
 import io
+import sys
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -203,6 +204,16 @@ async def change_password(
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB limit to prevent DoS attacks
 ALLOWED_FORMATS = {"PNG", "JPEG", "JPG", "GIF", "WEBP"}
 MAX_DIMENSIONS = (512, 512)  # Maximum width and height in pixels
+# Pillow's fixes for its image-parser advisories (13.0.0) need Python 3.11.  On
+# Python 3.10 (Ubuntu 22.04) the newest Pillow still carries them, and an
+# uploaded image is outside data parsed by it, so uploads are refused there
+# (Bryan, 2026-11-10).  Showing an image already stored is unaffected.
+IMAGES_NEED_PYTHON = (3, 11)
+
+
+def images_supported(version=None) -> bool:
+    """This server's Pillow has the parser fixes (Python 3.11 or later)."""
+    return tuple((version or sys.version_info)[:2]) >= IMAGES_NEED_PYTHON
 
 
 def validate_and_process_image(file_content: bytes, filename: str) -> tuple[bytes, str]:
@@ -219,6 +230,16 @@ def validate_and_process_image(file_content: bytes, filename: str) -> tuple[byte
     Raises:
         HTTPException: If validation fails
     """
+    if not images_supported():
+        raise HTTPException(
+            status_code=501,
+            detail=_(
+                "Profile images cannot be uploaded on this server: it runs Python "
+                "3.10, where the image library still has security issues that are "
+                "fixed only for Python 3.11 and later. Move the server to Python "
+                "3.11 or later (Ubuntu 24.04 or newer) to upload images."
+            ),
+        )
     # Check file size to prevent DoS attacks
     if len(file_content) > MAX_FILE_SIZE:
         raise HTTPException(

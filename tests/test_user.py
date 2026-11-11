@@ -29,6 +29,12 @@ from backend.api.user import (
 )
 
 
+@pytest.fixture(autouse=True)
+def _images_supported(monkeypatch):
+    """Uploads work here on any Python: the 3.10 refusal has its own tests."""
+    monkeypatch.setattr("backend.api.profile.images_supported", lambda *a: True)
+
+
 class MockUser:
     """Mock user object."""
 

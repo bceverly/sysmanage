@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 09:24-0800\n"
+"POT-Creation-Date: 2026-11-10 15:43-0800\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1264,28 +1264,28 @@ msgstr "Toegang geweigerd: UNLOCK_USER rol vereist"
 msgid "Permission denied: LOCK_USER role required"
 msgstr "Toegang geweigerd: LOCK_USER rol vereist"
 
-#: backend/api/user.py:752 backend/api/profile.py:288
+#: backend/api/user.py:752 backend/api/profile.py:309
 #: backend/api/report_branding.py:133
 msgid "No file provided"
 msgstr "Geen bestand opgegeven"
 
-#: backend/api/user.py:759 backend/api/profile.py:295
+#: backend/api/user.py:759 backend/api/profile.py:316
 msgid "Error reading uploaded file"
 msgstr "Fout bij lezen van geüploade bestand"
 
-#: backend/api/user.py:787 backend/api/profile.py:328
+#: backend/api/user.py:787 backend/api/profile.py:349
 msgid "Profile image uploaded successfully"
 msgstr "Profielafbeelding succesvol geŵladen"
 
-#: backend/api/user.py:811 backend/api/profile.py:356
+#: backend/api/user.py:811 backend/api/profile.py:377
 msgid "No profile image found"
 msgstr "Geen profielfoto gevonden"
 
-#: backend/api/user.py:852 backend/api/profile.py:397
+#: backend/api/user.py:852 backend/api/profile.py:418
 msgid "No profile image to delete"
 msgstr "Geen profielfoto om te verwijderen"
 
-#: backend/api/user.py:861 backend/api/profile.py:407
+#: backend/api/user.py:861 backend/api/profile.py:428
 msgid "Profile image deleted successfully"
 msgstr "Profielafbeelding succesvol verwijderd"
 
@@ -3968,29 +3968,42 @@ msgstr "Multi-tenantie is niet ingeschakeld."
 msgid "Logout successful"
 msgstr "Uitloggen succesvol"
 
-#: backend/api/profile.py:156 backend/api/first_admin.py:99
+#: backend/api/profile.py:157 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "Nieuwe wachtwoord en bevestiging komen niet overeen"
 
-#: backend/api/profile.py:187
+#: backend/api/profile.py:188
 msgid "Current password is incorrect"
 msgstr "Huidig wachtwoord is onjuist"
 
-#: backend/api/profile.py:199
+#: backend/api/profile.py:200
 msgid "Password changed successfully"
 msgstr "Wachtwoord succesvol gewijzigd"
 
-#: backend/api/profile.py:226
+#: backend/api/profile.py:237
+msgid ""
+"Profile images cannot be uploaded on this server: it runs Python 3.10, where"
+" the image library still has security issues that are fixed only for Python "
+"3.11 and later. Move the server to Python 3.11 or later (Ubuntu 24.04 or "
+"newer) to upload images."
+msgstr ""
+"Op deze server kunnen geen profielafbeeldingen worden geüpload: hij draait "
+"op Python 3.10, waar de afbeeldingsbibliotheek nog beveiligingsproblemen "
+"heeft die alleen voor Python 3.11 en later zijn verholpen. Zet de server "
+"over op Python 3.11 of later (Ubuntu 24.04 of nieuwer) om afbeeldingen te "
+"uploaden."
+
+#: backend/api/profile.py:247
 msgid "File size too large. Maximum allowed size is 5MB."
 msgstr "Bestandsgrootte is te groot. Maximale toegestane grootte is 5MB."
 
-#: backend/api/profile.py:238
+#: backend/api/profile.py:259
 msgid "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
 msgstr ""
 "Niet-ondersteunde afbeeldingsindeling. Toegestane indelingen: PNG, JPEG, "
 "JPG, GIF, WEBP"
 
-#: backend/api/profile.py:269
+#: backend/api/profile.py:290
 msgid "Invalid image file. Please upload a valid image."
 msgstr "Ongeldig afbeeldingsbestand. Upload een geldig afbeeldingsbestand."
 

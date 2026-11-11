@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 09:24-0800\n"
+"POT-Creation-Date: 2026-11-10 15:43-0800\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1285,28 +1285,28 @@ msgstr "Permission denied: role UNLOCK_USER requis"
 msgid "Permission denied: LOCK_USER role required"
 msgstr "Permission denied: role LOCK_USER requis"
 
-#: backend/api/user.py:752 backend/api/profile.py:288
+#: backend/api/user.py:752 backend/api/profile.py:309
 #: backend/api/report_branding.py:133
 msgid "No file provided"
 msgstr "Aucun fichier fourni"
 
-#: backend/api/user.py:759 backend/api/profile.py:295
+#: backend/api/user.py:759 backend/api/profile.py:316
 msgid "Error reading uploaded file"
 msgstr "Erreur lors de la lecture du fichier téléchargé"
 
-#: backend/api/user.py:787 backend/api/profile.py:328
+#: backend/api/user.py:787 backend/api/profile.py:349
 msgid "Profile image uploaded successfully"
 msgstr "Image de profil téléchargée avec succès"
 
-#: backend/api/user.py:811 backend/api/profile.py:356
+#: backend/api/user.py:811 backend/api/profile.py:377
 msgid "No profile image found"
 msgstr "Aucune image de profil trouvée"
 
-#: backend/api/user.py:852 backend/api/profile.py:397
+#: backend/api/user.py:852 backend/api/profile.py:418
 msgid "No profile image to delete"
 msgstr "Aucune image de profil pour supprimer"
 
-#: backend/api/user.py:861 backend/api/profile.py:407
+#: backend/api/user.py:861 backend/api/profile.py:428
 msgid "Profile image deleted successfully"
 msgstr "Image de profil supprimée avec succès"
 
@@ -4056,30 +4056,43 @@ msgstr "Le multi-locataire n'est pas activé."
 msgid "Logout successful"
 msgstr "Déconnexion réussie"
 
-#: backend/api/profile.py:156 backend/api/first_admin.py:99
+#: backend/api/profile.py:157 backend/api/first_admin.py:99
 msgid "New password and confirmation do not match"
 msgstr "Le nouveau mot de passe et la confirmation ne correspondent pas"
 
-#: backend/api/profile.py:187
+#: backend/api/profile.py:188
 msgid "Current password is incorrect"
 msgstr "Le mot de passe actuel est incorrect"
 
-#: backend/api/profile.py:199
+#: backend/api/profile.py:200
 msgid "Password changed successfully"
 msgstr "Mot de passe modifié avec succès"
 
-#: backend/api/profile.py:226
+#: backend/api/profile.py:237
+msgid ""
+"Profile images cannot be uploaded on this server: it runs Python 3.10, where"
+" the image library still has security issues that are fixed only for Python "
+"3.11 and later. Move the server to Python 3.11 or later (Ubuntu 24.04 or "
+"newer) to upload images."
+msgstr ""
+"Impossible de téléverser des images de profil sur ce serveur : il utilise "
+"Python 3.10, où la bibliothèque d'images présente encore des failles de "
+"sécurité corrigées uniquement pour Python 3.11 et versions ultérieures. "
+"Passez le serveur à Python 3.11 ou ultérieur (Ubuntu 24.04 ou plus récent) "
+"pour téléverser des images."
+
+#: backend/api/profile.py:247
 msgid "File size too large. Maximum allowed size is 5MB."
 msgstr ""
 "Taille du fichier trop importante. La taille maximale autorisée est de 5 Mo."
 
-#: backend/api/profile.py:238
+#: backend/api/profile.py:259
 msgid "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
 msgstr ""
 "Format d'image non pris en charge. Formats autorisés : PNG, JPEG, JPG, GIF, "
 "WEBP"
 
-#: backend/api/profile.py:269
+#: backend/api/profile.py:290
 msgid "Invalid image file. Please upload a valid image."
 msgstr ""
 "Fichier d'image invalide. Veuillez uploader un fichier d'image vérifiable."
