@@ -99,6 +99,9 @@ jobs:
             # SysManage installs (jammy).  Wheels compiled for any other
             # Python would not load there.
             PY="$(sh installer/python/install-python-linux.sh --prefix /tmp/py)"
+            # The pinned build records clang as its compiler; this
+            # image has gcc, so source builds must be told to use it.
+            export CC=gcc CXX=g++
             "$PY" -m venv /tmp/v
             /tmp/v/bin/pip install -q --upgrade pip wheel
             # Every requirement, transitive ones included: PyPI riscv64 wheels

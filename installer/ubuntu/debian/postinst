@@ -43,6 +43,9 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	fi
 	cd /opt/sysmanage
 	rm -rf .venv
+	# The pinned Python records clang as its compiler; a requirement
+	# that has to be built from source must use the system gcc.
+	export CC="${CC:-gcc}" CXX="${CXX:-g++}"
 	"$SYSMANAGE_PYTHON" -m venv .venv
 	.venv/bin/pip install --quiet --upgrade pip
 	# Install runtime-only deps.  The full requirements.txt carries dev
