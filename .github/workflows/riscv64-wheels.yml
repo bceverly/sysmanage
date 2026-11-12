@@ -100,8 +100,9 @@ jobs:
             # Python would not load there.
             PY="$(sh installer/python/install-python-linux.sh --prefix /tmp/py)"
             # The pinned build records clang as its compiler; this
-            # image has gcc, so source builds must be told to use it.
-            export CC=gcc CXX=g++
+            # image has gcc, so source builds must be told to use it (and
+            # its llvm-ar path does not exist here either).
+            export CC=gcc CXX=g++ AR=ar
             "$PY" -m venv /tmp/v
             /tmp/v/bin/pip install -q --upgrade pip wheel
             # Every requirement, transitive ones included: PyPI riscv64 wheels

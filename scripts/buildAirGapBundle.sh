@@ -916,8 +916,8 @@ build_ubuntu_like() {
          && [ -s /tmp/pyhelper.sh ]; then
         BUILD_PY="$(sh /tmp/pyhelper.sh --prefix /tmp/py --keep-archive /out/python)"
       fi
-      # The pinned build records clang as its compiler; build with gcc.
-      export CC=gcc CXX=g++
+      # The pinned build records clang and llvm-ar; build with gcc and ar.
+      export CC=gcc CXX=g++ AR=ar
       "$BUILD_PY" -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
     || { _linux_build_failed "$platform" "$outdir"; return; }
@@ -1029,8 +1029,8 @@ build_debian_like() {
          && [ -s /tmp/pyhelper.sh ]; then
         BUILD_PY="$(sh /tmp/pyhelper.sh --prefix /tmp/py --keep-archive /out/python)"
       fi
-      # The pinned build records clang as its compiler; build with gcc.
-      export CC=gcc CXX=g++
+      # The pinned build records clang and llvm-ar; build with gcc and ar.
+      export CC=gcc CXX=g++ AR=ar
       "$BUILD_PY" -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
     || { _linux_build_failed "$platform" "$outdir"; return; }
