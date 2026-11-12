@@ -5637,7 +5637,8 @@
       "proxyCertUnreadable": "Il certificato di restate-proxy sull'host di archiviazione non è un certificato che l'agente possa leggere.",
       "proxyGrants": "restate-proxy non accetta l'autorizzazione (grant) per: {{hosts}}. Esegui restate-proxy --check-grants sull'host di archiviazione per scoprire il motivo.",
       "proxyMissing": "restate-proxy non è installato sull'host di archiviazione, quindi gli host non possono raggiungere i loro backup tramite esso.",
-      "proxyStopped": "restate-proxy non è in esecuzione sull'host di archiviazione, quindi gli host non possono raggiungere i loro backup tramite esso."
+      "proxyStopped": "restate-proxy non è in esecuzione sull'host di archiviazione, quindi gli host non possono raggiungere i loro backup tramite esso.",
+      "repositoryMade": "Nessun repository ancora sull'host di archiviazione: {{hosts}}. Prepara archiviazione, nella scheda Backup di ogni host, lo crea; fino ad allora restate-proxy rifiuta i loro backup."
     },
     "prepare": {
       "title": "Preparare l'archiviazione per questo host?",

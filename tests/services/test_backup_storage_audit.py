@@ -108,6 +108,22 @@ def test_the_target_summarizes_audits_worst_first(session):
     assert target["problem"] is True
 
 
+def test_prepare_storage_leads_until_what_it_makes_is_there(session):
+    """Over NFS the repository's own export; through restate-proxy the
+    repository itself, which the proxy answers 404 no-repository without."""
+    s = _setup(session)
+    assert audit.needs_prepare(s.policy) is False  # nothing reported yet
+    for code in ("export_own", "repository_made"):
+        s.policy.storage_audit = json.dumps([{"code": code, "level": "error"}])
+        assert audit.needs_prepare(s.policy) is True
+        s.policy.storage_audit = json.dumps([{"code": code, "level": "ok"}])
+        assert audit.needs_prepare(s.policy) is False
+    s.policy.storage_audit = json.dumps([{"code": "repository_made", "level": "error"}])
+    session.commit()
+    summary = audit.summarize(session, s.target)
+    assert summary["repository_made"]["hosts"] == [str(s.host.id)]  # per host
+
+
 def test_a_storage_hosts_audit_outside_any_job_is_stored(session, sent):
     # The agent's storage_reaudit: at start, daily, Request Host Data
     # (production 2026-10-27: an NFSv4 finding two days stale).

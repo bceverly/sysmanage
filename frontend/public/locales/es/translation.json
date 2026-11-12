@@ -5637,7 +5637,8 @@
       "proxyCertUnreadable": "El certificado de restate-proxy del host de almacenamiento no es un certificado que el agente pueda leer.",
       "proxyGrants": "restate-proxy no acepta la concesión de: {{hosts}}. Ejecute restate-proxy --check-grants en el host de almacenamiento para ver el motivo.",
       "proxyMissing": "restate-proxy no está instalado en el host de almacenamiento, por lo que los hosts no pueden acceder a sus copias de seguridad a través de él.",
-      "proxyStopped": "restate-proxy no se está ejecutando en el host de almacenamiento, por lo que los hosts no pueden acceder a sus copias de seguridad a través de él."
+      "proxyStopped": "restate-proxy no se está ejecutando en el host de almacenamiento, por lo que los hosts no pueden acceder a sus copias de seguridad a través de él.",
+      "repositoryMade": "Aún no hay repositorio en el host de almacenamiento: {{hosts}}. Preparar almacenamiento, en la pestaña Copias de seguridad de cada host, lo crea; hasta entonces restate-proxy rechaza sus copias de seguridad."
     },
     "prepare": {
       "title": "¿Preparar el almacenamiento para este host?",

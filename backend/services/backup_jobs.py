@@ -57,6 +57,7 @@ GROUP = "backup"
 # The agent's reason for a host with no NFSv4 client (OpenBSD, NetBSD); the
 # server gives it too when such a host's target is not on restate-proxy.
 NO_NFSV4_CLIENT = "no_nfsv4_client"
+MISSING_NFS_CLIENT = "missing_nfs_client"
 SYSTEM_ACTOR = "system:backup-scheduler"
 
 HOST_ACTIONS = ("capture", "snapshots", "estimate")
@@ -225,6 +226,9 @@ def equipped(host: Optional[models.Host]) -> Tuple[bool, Optional[str]]:
         # OpenBSD and NetBSD (25.5): able to back up only through a proxy,
         # which this target is not on.
         if proxy.needs_proxy(host) and not _target_on_proxy(host):
+            # Linux can install its NFS client; OpenBSD and NetBSD cannot.
+            if (host.platform or "") == "Linux":
+                return False, MISSING_NFS_CLIENT
             return False, NO_NFSV4_CLIENT
         return True, None
     return False, "agent_outdated"

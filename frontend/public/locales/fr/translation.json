@@ -5637,7 +5637,8 @@
       "proxyCertUnreadable": "Le certificat de restate-proxy sur l'hôte de stockage n'est pas un certificat que l'agent peut lire.",
       "proxyGrants": "restate-proxy n'accepte pas l'autorisation pour : {{hosts}}. Exécutez restate-proxy --check-grants sur l'hôte de stockage pour en connaître la raison.",
       "proxyMissing": "restate-proxy n'est pas installé sur l'hôte de stockage ; les hôtes ne peuvent donc pas accéder à leurs sauvegardes par son intermédiaire.",
-      "proxyStopped": "restate-proxy n'est pas en cours d'exécution sur l'hôte de stockage ; les hôtes ne peuvent donc pas accéder à leurs sauvegardes par son intermédiaire."
+      "proxyStopped": "restate-proxy n'est pas en cours d'exécution sur l'hôte de stockage ; les hôtes ne peuvent donc pas accéder à leurs sauvegardes par son intermédiaire.",
+      "repositoryMade": "Pas encore de dépôt sur l'hôte de stockage : {{hosts}}. Préparer le stockage, dans l'onglet Sauvegardes de chaque hôte, le crée ; d'ici là, restate-proxy refuse leurs sauvegardes."
     },
     "prepare": {
       "title": "Préparer le stockage pour cet hôte ?",

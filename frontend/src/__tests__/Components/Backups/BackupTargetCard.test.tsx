@@ -181,6 +181,17 @@ describe("BackupTargetCard storage side", () => {
     expect(alertWith(/enable_locallocks=1/)?.className).toMatch(/Error/);
   });
 
+  test("a repository restate-proxy has none of yet points at Prepare storage", () => {
+    show(target({
+      storage_audit: { repository_made: { level: "error", hosts: ["h1"], params: {} } },
+      warnings: ["audit_repository_made"],
+      problem: true,
+    }));
+    const alert = alertWith(/No repository on the storage host yet: web.lab/);
+    expect(alert?.className).toMatch(/Error/);
+    expect(alert?.textContent).toMatch(/Prepare storage/);
+  });
+
   test("the dialog offers the btrfs seal and sends its snapshot directory", async () => {
     vi.mocked(saveTarget).mockResolvedValue(target());
     show(target(), true);

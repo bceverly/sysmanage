@@ -26,8 +26,10 @@ repositories stay where they are on disk, so a target switches either way.
   proxy with no NFS mount at all.  Its storage host is then told the host
   needs no export (``export: false``), and its prepare makes the repository
   instead -- through a proxy restate cannot make one.
-* **Hosts with no NFSv4 client** (OpenBSD, NetBSD) back up only that way:
-  ``needs_proxy`` hosts are kept off an NFS target (backup_jobs.equipped).
+* **Hosts with no NFSv4 client** (OpenBSD, NetBSD, and a Linux host with
+  no NFS client whose restate captures through the proxy) back up only that
+  way: ``needs_proxy`` hosts are kept off an NFS target
+  (backup_jobs.equipped).
 """
 
 import ipaddress
@@ -50,6 +52,9 @@ REMOTE_ABILITY = "remote_repository"
 REMOTE_CAPTURE = "remote_capture"
 # Platforms with no NFSv4 client: they back up through the proxy alone.
 PROXY_ONLY_PLATFORMS = ("OpenBSD", "NetBSD")
+# What the agent of a Linux host with no NFS client reports when its restate
+# captures through the proxy: it backs up that way alone, too.
+PROXY_ONLY_CAPABILITY = "backup_proxy_only"
 PREVIOUS_SUFFIX = ".previous"
 # Grants: the current repository is appended to and read; the one before
 # Pro+ encryption only read.
@@ -168,11 +173,19 @@ def host_captures_through_proxy(
 
 
 def needs_proxy(host: Optional[models.Host]) -> bool:
-    """A host that cannot mount NFSv4, so backs up through a proxy alone."""
-    return (
-        host is not None
-        and (getattr(host, "platform", None) or "") in PROXY_ONLY_PLATFORMS
-    )
+    """A host that cannot mount NFSv4, so backs up through a proxy alone:
+    OpenBSD and NetBSD, and a Linux host with no NFS client whose restate
+    captures through the proxy (its agent says ``backup_proxy_only``)."""
+    if host is None:
+        return False
+    if (getattr(host, "platform", None) or "") in PROXY_ONLY_PLATFORMS:
+        return True
+    try:
+        report = json.loads(getattr(host, "agent_capabilities", None) or "{}")
+    except (TypeError, ValueError):
+        return False
+    found = report.get("capabilities") if isinstance(report, dict) else None
+    return isinstance(found, list) and PROXY_ONLY_CAPABILITY in found
 
 
 def trust_ca(target: models.BackupTarget) -> Optional[str]:

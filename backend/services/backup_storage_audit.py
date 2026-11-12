@@ -11,8 +11,9 @@ configure and storage job.  Here they become the target's warnings:
 * host-wide findings -- the NFS server, NFSv4, local locks, the v4 root,
   the service account -- once;
 * per-repository findings -- its own filesystem, its own export, the export
-  restricted to the host and mapped to the account, the append-only layout
-  -- with the hosts they affect.
+  restricted to the host and mapped to the account, the append-only layout,
+  and through restate-proxy whether the repository is made yet -- with the
+  hosts they affect.
 
 Each becomes the warning code ``audit_<code>``; an ``error`` counts the
 target as a problem on the dashboard.
@@ -48,12 +49,18 @@ def _findings(policy: models.BackupPolicy) -> List[Dict[str, Any]]:
     return [f for f in found if isinstance(f, dict) and f.get("level") in _RANK]
 
 
+# What Prepare storage makes: over NFS the repository's own export; through
+# restate-proxy (25.5) the repository itself, which the proxy answers 404
+# no-repository for until then.
+PREPARE_MAKES = ("export_own", "repository_made")
+
+
 def needs_prepare(policy: models.BackupPolicy) -> bool:
-    """The storage host reports this repository has no export of its own --
-    what Prepare storage makes.  False when nothing was reported (an older
-    agent, or before the first storage configure)."""
+    """The storage host reports this repository lacks what Prepare storage
+    makes.  False when nothing was reported (an older agent, or before the
+    first storage configure)."""
     return any(
-        f.get("code") == "export_own" and f.get("level") != "ok"
+        f.get("code") in PREPARE_MAKES and f.get("level") != "ok"
         for f in _findings(policy)
     )
 

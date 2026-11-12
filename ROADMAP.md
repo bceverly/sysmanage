@@ -14851,7 +14851,7 @@ working over NFS for anyone who mounts a repository by hand.
 ## Phase 27: Fleet Backup at Scale -- Multi-Site, Recovery & Multi-Tenancy (Enterprise / MULTITENANT_SAAS)
 
 **Target Release:** **v3.15.0.0**
-**Focus:** The backup work that only matters once there are several sites, a dead host to rebuild, or many tenants: per-site storage through federation, restore readiness, bare-metal recovery, clones, fleet-wide restore jobs, four-eyes approval, legal hold, restore drills, off-site, immutable, air-gap and cloud copies (S3 Glacier Deep Archive), and backup multi-tenancy -- on top of Phase 24's and Phase 25's Community and Pro+ backups.
+**Focus:** The backup work that only matters once there are several sites, a dead host to rebuild, or many tenants: per-site storage through federation, restore readiness, bare-metal recovery, clones, fleet-wide restore jobs, four-eyes approval, legal hold, restore drills, off-site, immutable, air-gap and cloud copies (S3 Glacier Deep Archive), and backup multi-tenancy -- on top of Phase 24's and Phase 25's Community and Pro+ backups. One Community section rides along: the rest of iCloud -- Drive, Contacts, Calendars and Notes -- beside 24.12's Photos (27.5, added 2026-11-12, Bryan).
 
 **Why here (and why still v3.x):** split out of Phase 25 on 2026-11-05 (Bryan) to balance the phases: Phase 25 had 117 open items against Phase 26's 49, and half of them were this Enterprise / MULTITENANT_SAAS work, which no customer needs yet. Phase 25 keeps what production needs now, automatic updates (Phase 26) reach Community users next, and this phase follows. It stays v3.x -- Bryan: "don't let it tick over to 4.0 until we have backup fully in our rear-view mirror" -- so mobile (Phase 28) keeps the **v4.0.0.0** major bump and starts after it.
 
@@ -15008,13 +15008,33 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
 - [ ] **Lifecycle:** tenant provisioning (self-service provisioning) creates the tenant's storage namespace and keys, or prompts for a bring-your-own target; tenant removal has a **retention and export step** (the tenant takes its backups or has them deleted, both audited) before its storage is destroyed
 - [ ] **Isolation tests:** two tenants on one pool; neither can list, read, mount or deduplicate against the other's data, and neither's keys open the other's repositories
 
-#### 27.5 Docs, screenshots, i18n
+#### 27.5 More of iCloud: Drive, Contacts, Calendars and Notes (Community / OSS) (added 2026-11-12, Bryan)
 
+24.12 brings iCloud Photos home; this brings the rest of what a household or small office keeps only in iCloud onto the same storage host, through the same cloud-account model (an account, its password or app-specific password in OpenBAO, a destination of its own under the storage path, a schedule, results on the Backups page). Bryan, 2026-11-12: a different open-source tool per kind of data is fine. One-way, always, as 24.12: nothing is ever deleted or changed in iCloud, and nothing downloaded is deleted locally.
+
+**The tools (checked 2026-11-12):**
+- **iCloud Drive: rclone's `iclouddrive` backend** ([rclone.org/iclouddrive](https://rclone.org/iclouddrive/), MIT, added in rclone v1.69). Needs the Apple ID's own password and two-factor (an app-specific password is not accepted); its trust token lasts about 30 days, so a re-sign-in is needed monthly (icloudpd's is about two months). Like icloudpd it uses web access, so an account with Advanced Data Protection needs "Access iCloud Data on the Web" on. One integration (Plakar's) reported sign-in not working at one point -- the spike settles it. Fallback: pyicloud's Drive API, the library icloudpd itself uses, which could share the Photos account's session.
+- **Contacts and Calendars: CardDAV and CalDAV**, Apple's standard protocols (`contacts.icloud.com`, `caldav.icloud.com`), with an **app-specific password** -- no two-factor prompts and no web-access setting -- and outside Advanced Data Protection's end-to-end encryption by Apple's own design, so they work for every account. **vdirsyncer** (BSD) mirrors each address book and calendar to plain files: one `.vcf` per contact, one `.ics` per event, which any contacts or calendar app imports. Reminders are CalDAV task lists on older accounts only (upgraded Reminders moved to CloudKit): taken where they appear, not promised.
+- **Notes: no iCloud API.** Every open-source exporter reads the Notes database (`NoteStore.sqlite`) on a Mac or iPhone that syncs it -- Apple Cloud Notes Parser (Ruby, the most complete), apple-notes-parser (Python), apple-notes-to-sqlite (Apache 2.0). So notes come from a **managed Mac signed into the Apple ID**: the agent there exports them (HTML or Markdown per note, attachments beside them), which needs Full Disk Access for the agent, and that Mac's regular backup carries the export. Locked notes cannot be exported until unlocked in Notes; that is said, not worked around.
+
+- [ ] **Spike (first):** by hand, one Apple ID: rclone `iclouddrive` sign-in with two-factor and a full copy of a real Drive, then an incremental one (`rclone copy`, never `sync`, so nothing is ever deleted locally); vdirsyncer against iCloud CalDAV / CardDAV with an app-specific password, a full pull and a second run; and Notes exported on macbookair by Apple Cloud Notes Parser and by apple-notes-parser, compared. Record for each: time and size, how the password and two-factor code reach the tool without a command line, environment or file (as 24.12's stdin relay), where the session lands and how long it lasts, and what is lost (Drive's shared folders, notes' drawings and tables, calendar attachments)
+- [ ] **Equip the tools:** pinned, checksum-verified installs on the storage host, as icloudpd's (24.12 Equip): rclone's release binary, vdirsyncer from PyPI into its own venv; the Notes exporter on the Mac only. Reported as capabilities, so the UI offers each kind only where it can run
+- [ ] **Accounts and kinds:** an iCloud account in Cloud backup gains kinds -- Photos (24.12), Drive, Contacts, Calendars, Notes -- each turned on separately, with its own destination directory (`icloud-<id>/drive`, `/contacts`, `/calendars`), schedule and status. The app-specific password (Contacts, Calendars) is kept in OpenBAO beside the Apple ID password, never shown again, and fetched for one run only, as 24.12
+- [ ] **Drive:** full, then incremental by `rclone copy` (present files skipped; never `sync`, never `--delete-*`; the agent refuses a command line holding one, as icloudpd's `layout.NEVER`); Apple's throttling waited out by 24.12's cooldowns; the 30-day re-sign-in shown as "Needs sign-in" before it lapses
+- [ ] **Contacts and Calendars:** vdirsyncer one way only (iCloud to local; `conflict_resolution` never lets local win, and the storage side is never a sync source), every address book and calendar the account has, new ones picked up; deleted entries kept locally, as photos are
+- [ ] **Notes from a managed Mac:** a per-Mac option, "Export Notes for <Apple ID>", on a Mac whose Notes syncs that account; the agent exports into its own directory before the Mac's nightly capture, so the export is in that Mac's snapshots; Full Disk Access asked for once with a plain reason; refused with a reason on a Mac that does not sync the account
+- [ ] **Getting it back:** ordinary files -- Drive's folders as they were, `.vcf` and `.ics` to import into Contacts or Calendar (or any CardDAV / CalDAV app), notes as HTML / Markdown with their attachments; the docs show each import
+- [ ] Docs (setup per kind, app-specific passwords, the Advanced Data Protection / web-access note, the monthly Drive sign-in, Notes needing a Mac) and every string in 14 locales
+
+#### 27.6 Docs, screenshots, i18n
+
+- [ ] sysmanage-docs, Community: the rest of iCloud -- Drive, Contacts, Calendars and Notes (27.5), on the iCloud backup page
 - [ ] sysmanage-docs, Enterprise / MULTITENANT_SAAS: fleet operations across sites and restore readiness; rebuild, clone and fleet restore jobs; four-eyes approval, legal hold and restore drills; off-site, immutable, air-gap and cloud copies; multi-tenancy -- each on its tier page, with screenshots through `make screenshots`
 - [ ] All new strings in 14 locales, verified
 
-#### 27.6 Editions
+#### 27.7 Editions
 
+- [ ] **Community / OSS -- the rest of iCloud (27.5):** Drive, Contacts, Calendars and Notes beside Photos, for one or more Apple IDs, in every edition
 - [ ] **Enterprise -- multi-site and recovery at scale:**
   - multiple targets; per-site targets through federation; off-site replication (`restate copy`) to a second site; immutable copies; air-gap media for isolated sites (27.3)
   - bare-metal recovery through the provisioning engine (PXE + autoinstall); clone / migrate to a VM or metal (`--as`) (27.2)
@@ -15025,10 +15045,15 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
 
 ### Licensing summary
 
+- **Community / OSS:** the rest of iCloud -- Drive, Contacts, Calendars and Notes -- beside 24.12's Photos (27.5).
 - **Enterprise:** multi-site and recovery at scale -- many targets, per-site targets through federation, off-site replication, immutable copies, air-gap media, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes approval, legal hold and automated restore drills.
 - **MULTITENANT_SAAS:** per-tenant storage namespaces and keys, operator storage pools, quotas and usage metering, bring-your-own storage, and tenant lifecycle handling for backup data.
 
 ### Exit Criteria
+
+**Community / OSS**
+
+- [ ] **The rest of iCloud proven (27.5):** for one real Apple ID, its Drive, every address book and every calendar downloaded to the storage host and a second run downloading only what changed; its notes exported on a managed Mac and in that Mac's next snapshot; a contact, an event and a note each restored into its app from those files; and nothing in iCloud changed by any of it
 
 **Enterprise**
 
@@ -15047,7 +15072,7 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
 **Every phase**
 
 - [ ] Every tier 402-clean when unlicensed, in both repos
-- [ ] Docs + 14-language i18n complete (27.5)
+- [ ] Docs + 14-language i18n complete (27.6)
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped.
 - [ ] **Pro+ engines built for every OS + architecture and verified in R2**
       (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase))

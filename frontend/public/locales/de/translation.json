@@ -5637,7 +5637,8 @@
       "proxyCertUnreadable": "Das Zertifikat von restate-proxy auf dem Speicher-Host ist kein Zertifikat, das der Agent lesen kann.",
       "proxyGrants": "restate-proxy akzeptiert die Freigabe nicht für: {{hosts}}. Führen Sie restate-proxy --check-grants auf dem Speicher-Host aus, um den Grund zu sehen.",
       "proxyMissing": "restate-proxy ist auf dem Speicher-Host nicht installiert, daher können Hosts ihre Sicherungen nicht darüber erreichen.",
-      "proxyStopped": "restate-proxy läuft auf dem Speicher-Host nicht, daher können Hosts ihre Sicherungen nicht darüber erreichen."
+      "proxyStopped": "restate-proxy läuft auf dem Speicher-Host nicht, daher können Hosts ihre Sicherungen nicht darüber erreichen.",
+      "repositoryMade": "Noch kein Repository auf dem Speicher-Host: {{hosts}}. \"Speicher vorbereiten\" auf der Registerkarte \"Sicherungen\" jedes Hosts legt es an; bis dahin lehnt restate-proxy ihre Sicherungen ab."
     },
     "prepare": {
       "title": "Speicher für diesen Host vorbereiten?",

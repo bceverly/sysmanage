@@ -5637,7 +5637,8 @@
       "proxyCertUnreadable": "Het restate-proxy-certificaat op de opslaghost is geen certificaat dat de agent kan lezen.",
       "proxyGrants": "restate-proxy accepteert de machtiging niet voor: {{hosts}}. Voer restate-proxy --check-grants uit op de opslaghost om te zien waarom.",
       "proxyMissing": "restate-proxy is niet geïnstalleerd op de opslaghost, dus hosts kunnen hun back-ups niet via de proxy bereiken.",
-      "proxyStopped": "restate-proxy draait niet op de opslaghost, dus hosts kunnen hun back-ups niet via de proxy bereiken."
+      "proxyStopped": "restate-proxy draait niet op de opslaghost, dus hosts kunnen hun back-ups niet via de proxy bereiken.",
+      "repositoryMade": "Nog geen repository op de opslaghost: {{hosts}}. Opslag voorbereiden, op het tabblad Back-ups van elke host, maakt die aan; tot dan weigert restate-proxy hun back-ups."
     },
     "prepare": {
       "title": "De opslag voor deze host voorbereiden?",

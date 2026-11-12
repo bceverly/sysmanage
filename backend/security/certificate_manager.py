@@ -142,6 +142,10 @@ class CertificateManager:
                 ),
                 critical=True,
             )
+            .add_extension(
+                x509.SubjectKeyIdentifier.from_public_key(ca_key.public_key()),
+                critical=False,
+            )
             .sign(ca_key, hashes.SHA256())
         )
 
@@ -263,6 +267,14 @@ class CertificateManager:
                 ),
                 critical=True,
             )
+            .add_extension(
+                x509.SubjectKeyIdentifier.from_public_key(server_key.public_key()),
+                critical=False,
+            )
+            .add_extension(
+                x509.AuthorityKeyIdentifier.from_issuer_public_key(ca_key.public_key()),
+                critical=False,
+            )
             .sign(ca_key, hashes.SHA256())
         )
 
@@ -357,6 +369,14 @@ class CertificateManager:
                 x509.ExtendedKeyUsage([x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH]),
                 critical=True,
             )
+            .add_extension(
+                x509.SubjectKeyIdentifier.from_public_key(public_key),
+                critical=False,
+            )
+            .add_extension(
+                x509.AuthorityKeyIdentifier.from_issuer_public_key(ca_key.public_key()),
+                critical=False,
+            )
             .sign(ca_key, hashes.SHA256())
         )
 
@@ -408,6 +428,14 @@ class CertificateManager:
             .add_extension(
                 x509.ExtendedKeyUsage([x509.oid.ExtendedKeyUsageOID.SERVER_AUTH]),
                 critical=True,
+            )
+            .add_extension(
+                x509.SubjectKeyIdentifier.from_public_key(public_key),
+                critical=False,
+            )
+            .add_extension(
+                x509.AuthorityKeyIdentifier.from_issuer_public_key(ca_key.public_key()),
+                critical=False,
             )
             .sign(ca_key, hashes.SHA256())
         )

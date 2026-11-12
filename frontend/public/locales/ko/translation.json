@@ -5637,7 +5637,8 @@
       "proxyCertUnreadable": "스토리지 호스트의 restate-proxy 인증서는 에이전트가 읽을 수 있는 인증서가 아닙니다.",
       "proxyGrants": "restate-proxy가 다음 호스트의 권한 부여(grant)를 수락하지 않습니다: {{hosts}}. 원인을 확인하려면 스토리지 호스트에서 restate-proxy --check-grants를 실행하십시오.",
       "proxyMissing": "스토리지 호스트에 restate-proxy가 설치되어 있지 않으므로, 호스트가 이를 통해 백업에 접근할 수 없습니다.",
-      "proxyStopped": "스토리지 호스트에서 restate-proxy가 실행되고 있지 않으므로, 호스트가 이를 통해 백업에 접근할 수 없습니다."
+      "proxyStopped": "스토리지 호스트에서 restate-proxy가 실행되고 있지 않으므로, 호스트가 이를 통해 백업에 접근할 수 없습니다.",
+      "repositoryMade": "스토리지 호스트에 아직 리포지토리가 없습니다: {{hosts}}. 각 호스트의 백업 탭에 있는 스토리지 준비가 이를 만듭니다. 그때까지 restate-proxy는 해당 백업을 거부합니다."
     },
     "prepare": {
       "title": "이 호스트용 스토리지를 준비할까요?",

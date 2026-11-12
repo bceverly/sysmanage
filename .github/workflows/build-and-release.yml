@@ -1785,7 +1785,10 @@ jobs:
   release:
     name: Create Release and Publish to R2
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 60, not 30: the agent's R2 publish ran past its hour on a slow R2 day
+    # (2026-11-12), and a timeout here skips every channel after it.  Each
+    # sync now says how long it took.
+    timeout-minutes: 60
     needs: [build-ubuntu, build-openbsd-port, build-openbsd-libs, build-freebsd-npm-distfile, build-openbsd-packages, build-centos-rpm, build-el9-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64, build-alpine]
 
     steps:
@@ -1862,10 +1865,13 @@ jobs:
           # A sync that still lost files after its retries is run again; each
           # pass copies only what the bucket (or the stage) is still missing.
           s3sync() {
-            local pass
+            local pass began=$SECONDS
             for pass in 1 2 3; do
-              s3 sync "$@" && return 0
-              echo "R2 sync pass $pass was incomplete; trying again in $((pass * 30))s"
+              if s3 sync "$@"; then
+                echo "R2 sync $1 -> $2: $((SECONDS - began))s (pass $pass)"
+                return 0
+              fi
+              echo "R2 sync pass $pass was incomplete after $((SECONDS - began))s; trying again in $((pass * 30))s"
               sleep $((pass * 30))
             done
             return 1

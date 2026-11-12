@@ -5637,7 +5637,8 @@
       "proxyCertUnreadable": "儲存主機上的 restate-proxy 憑證不是代理可讀取的憑證。",
       "proxyGrants": "restate-proxy 不接受以下主機的存取授權：{{hosts}}。請在儲存主機上執行 restate-proxy --check-grants 查看原因。",
       "proxyMissing": "儲存主機上未安裝 restate-proxy，因此主機無法透過它存取其備份。",
-      "proxyStopped": "儲存主機上的 restate-proxy 未在執行，因此主機無法透過它存取其備份。"
+      "proxyStopped": "儲存主機上的 restate-proxy 未在執行，因此主機無法透過它存取其備份。",
+      "repositoryMade": "儲存主機上還沒有儲存庫：{{hosts}}。每台主機「備份」分頁中的「準備儲存」會建立它；在此之前，restate-proxy 會拒絕它們的備份。"
     },
     "prepare": {
       "title": "要為此主機準備儲存嗎？",

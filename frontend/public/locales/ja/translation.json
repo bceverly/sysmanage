@@ -5637,7 +5637,8 @@
       "proxyCertUnreadable": "ストレージホスト上の restate-proxy の証明書は、エージェントが読み取れる証明書ではありません。",
       "proxyGrants": "restate-proxy が次のホストの許可を受け入れません: {{hosts}}。理由を確認するには、ストレージホストで restate-proxy --check-grants を実行してください。",
       "proxyMissing": "ストレージホストに restate-proxy がインストールされていないため、ホストはこれを経由してバックアップにアクセスできません。",
-      "proxyStopped": "ストレージホストで restate-proxy が実行されていないため、ホストはこれを経由してバックアップにアクセスできません。"
+      "proxyStopped": "ストレージホストで restate-proxy が実行されていないため、ホストはこれを経由してバックアップにアクセスできません。",
+      "repositoryMade": "ストレージホストにまだリポジトリがありません: {{hosts}}。各ホストの「バックアップ」タブにある「ストレージを準備」で作成されます。それまでは restate-proxy がそのバックアップを拒否します。"
     },
     "prepare": {
       "title": "このホスト用にストレージを準備しますか?",

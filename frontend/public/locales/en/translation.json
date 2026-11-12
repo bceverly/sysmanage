@@ -5637,7 +5637,8 @@
       "proxyCertUnreadable": "The restate-proxy certificate on the storage host is not a certificate the agent can read.",
       "proxyGrants": "restate-proxy does not accept the grant for: {{hosts}}. Run restate-proxy --check-grants on the storage host to see why.",
       "proxyMissing": "restate-proxy is not installed on the storage host, so hosts cannot reach their backups through it.",
-      "proxyStopped": "restate-proxy is not running on the storage host, so hosts cannot reach their backups through it."
+      "proxyStopped": "restate-proxy is not running on the storage host, so hosts cannot reach their backups through it.",
+      "repositoryMade": "No repository on the storage host yet: {{hosts}}. Prepare storage, on each host's Backups tab, makes it; until then restate-proxy refuses their backups."
     },
     "prepare": {
       "title": "Prepare the storage for this host?",

@@ -54,6 +54,10 @@ export const auditText = (t: TFunction, target: BackupTarget, hosts: BackupHost[
                 { hosts: who });
         case 'audit_export_own':
             return t('backups.audit.exportOwn', 'Without an export of their own: {{hosts}}.', { hosts: who });
+        case 'audit_repository_made':
+            return t('backups.audit.repositoryMade',
+                'No repository on the storage host yet: {{hosts}}. Prepare storage, on each host\'s Backups tab, makes it; until then restate-proxy refuses their backups.',
+                { hosts: who });
         case 'audit_export_restricted':
             return t('backups.audit.exportRestricted',
                 'Exports not limited to the host\'s own address: {{hosts}}.', { hosts: who });

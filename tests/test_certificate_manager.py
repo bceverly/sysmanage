@@ -748,3 +748,56 @@ class TestCertificateValidationErrors:
             # Validation should fail and return None
             result = cert_manager.validate_client_certificate(cert_pem)
             assert result is None
+
+
+@patch("backend.security.certificate_manager.get_config")
+def test_issued_certificates_pass_a_strict_x509_check(mock_get_config, tmp_path):
+    """Python 3.13's default TLS context is X.509-strict: a CA without a
+    Subject Key Identifier, or a leaf without an Authority Key Identifier, is
+    refused.  The SysManage CA's certificates carry both (prod, 2026-11-12:
+    hosts on 3.13+ refused the restate-proxy certificate)."""
+    # pylint: disable=import-outside-toplevel
+    import asyncio
+    import ssl
+
+    from cryptography.hazmat.primitives.asymmetric import ec
+
+    mock_get_config.return_value = {"certificates": {"path": str(tmp_path)}}
+    with patch("backend.security.certificate_manager.os.environ", {}):
+        manager = CertificateManager()
+        manager.ensure_ca_certificate()
+        key = ec.generate_private_key(ec.SECP256R1())
+        leaf = manager.issue_proxy_certificate(key.public_key(), "localhost")
+        ca_pem = Path(manager.ca_cert_path).read_text(encoding="ascii")
+    ca = x509.load_pem_x509_certificate(ca_pem.encode())
+    ski = ca.extensions.get_extension_for_class(x509.SubjectKeyIdentifier).value
+    aki = leaf.extensions.get_extension_for_class(x509.AuthorityKeyIdentifier).value
+    assert aki.key_identifier == ski.digest
+    leaf.extensions.get_extension_for_class(x509.SubjectKeyIdentifier)
+
+    cert = tmp_path / "proxy.crt"
+    cert.write_bytes(leaf.public_bytes(serialization.Encoding.PEM))
+    keyfile = tmp_path / "proxy.key"
+    keyfile.write_bytes(key.private_bytes(
+        serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption()))  # fmt: skip
+
+    async def handshake():
+        server_side = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        server_side.load_cert_chain(cert, keyfile)
+        server = await asyncio.start_server(
+            lambda _r, w: w.close(), "127.0.0.1", 0, ssl=server_side
+        )
+        port = server.sockets[0].getsockname()[1]
+        client = ssl.create_default_context(cadata=ca_pem)
+        client.verify_flags |= getattr(ssl, "VERIFY_X509_STRICT", 0)
+        try:
+            _r, writer = await asyncio.open_connection(
+                "127.0.0.1", port, ssl=client, server_hostname="localhost"
+            )
+            writer.close()
+        finally:
+            server.close()
+            await server.wait_closed()
+
+    asyncio.run(handshake())

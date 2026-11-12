@@ -5637,7 +5637,8 @@
       "proxyCertUnreadable": "存储主机上的 restate-proxy 证书不是代理能够读取的证书。",
       "proxyGrants": "restate-proxy 不接受以下主机的授权：{{hosts}}。请在存储主机上运行 restate-proxy --check-grants 查看原因。",
       "proxyMissing": "存储主机上未安装 restate-proxy，因此主机无法通过它访问其备份。",
-      "proxyStopped": "存储主机上的 restate-proxy 未在运行，因此主机无法通过它访问其备份。"
+      "proxyStopped": "存储主机上的 restate-proxy 未在运行，因此主机无法通过它访问其备份。",
+      "repositoryMade": "存储主机上还没有存储库：{{hosts}}。每台主机“备份”选项卡中的“准备存储”会创建它；在此之前，restate-proxy 会拒绝它们的备份。"
     },
     "prepare": {
       "title": "为此主机准备存储？",

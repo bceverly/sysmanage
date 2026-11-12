@@ -160,6 +160,33 @@ def test_a_host_with_no_nfsv4_client_gets_the_proxy_before_its_abilities(session
     assert sent[-1][2]["target"]["proxy"]["export"] is False
 
 
+def test_a_linux_host_with_no_nfs_client_backs_up_through_the_proxy_alone(
+    session, sent
+):
+    """Alpine with no nfs-utils, whose restate captures through the proxy:
+    its agent says ``backup_proxy_only``, and it is treated as OpenBSD is --
+    equipped for a proxy target, kept off an NFS one."""
+    s = _on_proxy(session, abilities=())
+    s.host.platform = "Linux"
+    s.host.agent_capabilities = json.dumps(
+        {"capabilities": ["backup", proxy.PROXY_ONLY_CAPABILITY]}
+    )
+    session.commit()
+    assert proxy.needs_proxy(s.host)
+    assert jobs.equipped(s.host) == (True, None)
+    got = jobs.host_configuration(s.policy, s.target, s.host)["target"]["proxy"]
+    assert got["capture"] is True
+    s.target.transport = proxy.NFS
+    session.commit()
+    assert jobs.equipped(s.host) == (False, jobs.MISSING_NFS_CLIENT)  # its to install
+    # Without the word, a Linux host is an NFS client as before.
+    s.host.agent_capabilities = json.dumps({"capabilities": ["backup"]})
+    session.commit()
+    assert not proxy.needs_proxy(s.host)
+    s.host.agent_capabilities = "not json"
+    assert not proxy.needs_proxy(s.host)
+
+
 def test_an_encrypted_proxy_host_s_storage_side_gets_its_public_key(session, sent):
     # Its prepare makes the repository encrypted to it (restate init
     # --encrypt-to); an NFS host's storage side never needs it.
