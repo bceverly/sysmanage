@@ -44,10 +44,10 @@ apps:
       - network-bind
 
 parts:
-  python310:
+  python312:
     plugin: nil
-    source: https://www.python.org/ftp/python/3.10.15/Python-3.10.15.tgz
-    source-checksum: sha256/a27864e5ba2a4474f8f6c58ab92ff52767ac8b66f1646923355a53fe3ef15074
+    source: https://www.python.org/ftp/python/3.12.16/Python-3.12.16.tgz
+    source-checksum: sha256/710c3e75dac8b2f258d9cd0f76e5c4c2e9175fac9e249c98901552f7cf33b7dd
     build-attributes:
       - enable-patchelf
     build-packages:
@@ -74,7 +74,7 @@ parts:
       ldconfig -n $CRAFT_PART_INSTALL/usr/lib || true
 
   backend:
-    after: [python310]
+    after: [python312]
     plugin: nil
     build-packages:
       - libpq-dev
@@ -115,10 +115,10 @@ parts:
         python3 scripts/update-requirements-prod.py
       fi
 
-      # Install Python packages using our compiled Python 3.10
+      # Install Python packages using our compiled Python 3.12
       export LD_LIBRARY_PATH=$CRAFT_STAGE/usr/lib:${LD_LIBRARY_PATH:-}
       export PYTHONHASHSEED=0
-      $CRAFT_STAGE/usr/bin/python3.10 -m pip install --no-cache-dir --target=$CRAFT_PART_INSTALL/lib/python3.10/site-packages \
+      $CRAFT_STAGE/usr/bin/python3.12 -m pip install --no-cache-dir --target=$CRAFT_PART_INSTALL/lib/python3.12/site-packages \
         -r /tmp/build/requirements-prod.txt
 
       # Copy application files
@@ -165,7 +165,7 @@ parts:
       export SYSMANAGE_CONFIG_PATH="${SYSMANAGE_CONFIG_PATH:-$SNAP_COMMON/sysmanage.yaml}"
       export SYSMANAGE_CERT_PATH="${SYSMANAGE_CERT_PATH:-$SNAP_COMMON/certs}"
       export SYSMANAGE_LOG_DIR="${SYSMANAGE_LOG_DIR:-$SNAP_COMMON/logs}"
-      export PYTHONPATH="$SNAP/app:$SNAP/lib/python3.10/site-packages"
+      export PYTHONPATH="$SNAP/app:$SNAP/lib/python3.12/site-packages"
       export LD_LIBRARY_PATH="$SNAP/usr/lib:$LD_LIBRARY_PATH"
 
       # Ensure directories exist
@@ -179,9 +179,9 @@ parts:
         cp "$SNAP/app/config/sysmanage.yaml.example" "$SYSMANAGE_CONFIG_PATH"
         chmod 600 "$SYSMANAGE_CONFIG_PATH"
         # Generate this install's secrets (Lucky 13 #12).
-        ( cd "$SNAP/app" && $SNAP/usr/bin/python3.10 -m backend.config.install_secrets --apply "$SYSMANAGE_CONFIG_PATH" ) || true
+        ( cd "$SNAP/app" && $SNAP/usr/bin/python3.12 -m backend.config.install_secrets --apply "$SYSMANAGE_CONFIG_PATH" ) || true
         # Size the database pool for this machine (Phase 22.2).
-        ( cd "$SNAP/app" && $SNAP/usr/bin/python3.10 -m backend.persistence.pool_sizing --apply "$SYSMANAGE_CONFIG_PATH" ) || true
+        ( cd "$SNAP/app" && $SNAP/usr/bin/python3.12 -m backend.persistence.pool_sizing --apply "$SYSMANAGE_CONFIG_PATH" ) || true
         echo ""
         echo "WARNING: Using default configuration. Edit the config file:"
         echo "  $SYSMANAGE_CONFIG_PATH"
@@ -302,14 +302,14 @@ parts:
         $SNAP/bin/bao server -config=$SNAP_DATA/openbao/openbao.hcl &
         OPENBAO_PID=$!
         echo "OpenBAO started with PID $OPENBAO_PID"
-        $SNAP/usr/bin/python3.10 $SNAP/app/scripts/openbao_init_unseal.py \
+        $SNAP/usr/bin/python3.12 $SNAP/app/scripts/openbao_init_unseal.py \
           --addr http://127.0.0.1:8200 --keyfile $SNAP_DATA/openbao/init.json || \
           echo "OpenBAO init/unseal did not complete"
       fi
 
       # Start the backend in the background
       cd $SNAP/app
-      $SNAP/usr/bin/python3.10 -m backend.main &
+      $SNAP/usr/bin/python3.12 -m backend.main &
       BACKEND_PID=$!
       echo "Backend started with PID $BACKEND_PID"
 
