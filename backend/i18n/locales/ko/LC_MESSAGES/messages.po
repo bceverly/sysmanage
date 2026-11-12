@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 15:43-0800\n"
+"POT-Creation-Date: 2026-11-12 06:40-0800\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3165,25 +3165,57 @@ msgstr "이 운영 체제에 대한 기본_ANTIVIRUS_설정을 찾을 수 없습
 msgid "Failed to delete antivirus default: %s"
 msgstr "디폴트 악성코드 제거 프로그램 삭제 실패: %s"
 
-#: backend/api/backups_transport.py:37
+#: backend/api/backups_transport.py:46
 msgid "Unknown transport"
 msgstr "알 수 없는 전송 방식"
 
-#: backend/api/backups_transport.py:39
+#: backend/api/backups_transport.py:48
 msgid "The proxy address is not a host name or IP address"
 msgstr "프록시 주소가 호스트 이름 또는 IP 주소가 아닙니다"
 
-#: backend/api/backups_transport.py:42
+#: backend/api/backups_transport.py:51
 msgid "The proxy port must be between 1 and 65535"
 msgstr "프록시 포트는 1에서 65535 사이여야 합니다"
 
-#: backend/api/backups_transport.py:45
+#: backend/api/backups_transport.py:54
 msgid "The pinned key must be a SHA-256 in hex (64 characters)"
 msgstr "고정된 키는 16진수 SHA-256(64자)이어야 합니다"
 
-#: backend/api/backups_transport.py:48
+#: backend/api/backups_transport.py:57
 msgid "The proxy's CA must be a PEM certificate"
 msgstr "프록시의 CA는 PEM 인증서여야 합니다"
+
+#: backend/api/backups_transport.py:120
+msgid "Give at most 25 bandwidth rules"
+msgstr "대역폭 규칙은 최대 25개까지 지정하십시오"
+
+#: backend/api/backups_transport.py:123
+msgid ""
+"A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours"
+" and a rate (08-18 2MiB/s)"
+msgstr ""
+"대역폭 규칙은 속도(512KiB/s, 2MiB/s, 1GiB/s 또는 unlimited)이거나 시간대와 속도(08-18 "
+"2MiB/s)입니다"
+
+#: backend/api/backups_transport.py:127
+msgid "A bandwidth rate must be at least 64KiB/s"
+msgstr "대역폭 속도는 최소 64KiB/s여야 합니다"
+
+#: backend/api/backups_transport.py:130
+msgid "Give one rate for every other hour, not two"
+msgstr "그 밖의 모든 시간에 대한 속도는 하나만 지정하십시오"
+
+#: backend/api/backups_transport.py:133
+msgid "Bandwidth hours run from 00 to 24, from one hour to another"
+msgstr "대역폭 시간은 00부터 24까지이며 시작과 끝은 서로 다른 시각이어야 합니다"
+
+#: backend/api/backups_transport.py:135
+msgid "An hour is in two bandwidth rules"
+msgstr "한 시간이 두 대역폭 규칙에 들어 있습니다"
+
+#: backend/api/backups_transport.py:163
+msgid "Bandwidth limits by the hour need the Professional+ backup engine"
+msgstr "시간대별 대역폭 제한에는 Professional+ 백업 엔진이 필요합니다"
 
 #: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
@@ -6116,7 +6148,7 @@ msgstr "gpg는 키 내보내기를 봉인하지 못했습니다."
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "선택된 호스트 중 하나도 암호화된 백업을 가지고 있지 않습니다."
 
-#: backend/services/backup_reach.py:146
+#: backend/services/backup_reach.py:147
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6126,7 +6158,7 @@ msgstr ""
 "이 호스트는 백업 스토리지의 restate-proxy(%(address)s, 포트 %(port)s)에 연결할 수 없습니다: "
 "%(error)s. 백업에는 그곳까지의 네트워크 경로와 이 호스트가 신뢰하는 인증서가 필요합니다."
 
-#: backend/services/backup_reach.py:156
+#: backend/services/backup_reach.py:157
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6138,7 +6170,7 @@ msgstr ""
 "%(seen)s(으)로 보이므로 마운트를 거부합니다. 호스트를 NAT 뒤에 두지 말고 스토리지 호스트의 네트워크(가상 머신의 경우 브리지"
 " 네트워크)에 연결하세요."
 
-#: backend/services/backup_reach.py:166
+#: backend/services/backup_reach.py:167
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

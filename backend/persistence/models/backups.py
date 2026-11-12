@@ -111,6 +111,8 @@ class BackupTarget(Base):
     proxy_cert_pem = Column(Text, nullable=True)
     # The clients the storage host's grants were last built for (JSON).
     proxy_clients = Column(Text, nullable=True)
+    # Bandwidth by the hour, restate-proxy's grant lines (JSON list, q86; Pro+).
+    proxy_bandwidth = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=False)
     created_by = Column(String(255), nullable=True)
     updated_at = Column(DateTime, nullable=False)

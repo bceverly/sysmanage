@@ -94,7 +94,7 @@ export const TransportDialog: React.FC<{
                         <>
                             <Typography variant="body2" color="text.secondary">
                                 {t('backups.transport.proxyIntro',
-                                    'Run restate-proxy on the storage host. Each host makes its own token for it, which never leaves the host, and the storage host writes the grants. Restores, browsing and comparisons go through the proxy; backups themselves still use NFS until restate can capture through it.')}
+                                    'Run restate-proxy on the storage host. Each host makes its own token for it, which never leaves the host, and the storage host writes the grants. Backups, restores, browsing and comparisons all go through the proxy, with no NFS mount, once a host\'s restate can capture through it.')}
                             </Typography>
                             <TextField label={t('backups.transport.host', 'Proxy address hosts reach')} value={form.proxy_host ?? ''}
                                 onChange={e => set({ proxy_host: e.target.value })}

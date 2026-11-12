@@ -130,8 +130,18 @@ export interface TransportInput {
   remove_proxy_ca?: boolean;
 }
 
+/** Bandwidth by the hour through restate-proxy (25.7, Professional+). */
+export interface ProxyBandwidth {
+  /** restate-proxy's grant lines: "08-18 2MiB/s", "20MiB/s". */
+  rules: string[];
+  licensed: boolean;
+  applied: boolean;
+  reason?: 'unlicensed' | 'storage_too_old';
+}
+
 export interface BackupTarget {
   transport?: TargetTransport;
+  proxy_bandwidth?: ProxyBandwidth;
   id: string;
   name: string;
   host_mount_point: string;
@@ -535,6 +545,13 @@ export const setTransport = async (
   input: TransportInput,
 ): Promise<BackupTarget> =>
   (await axiosInstance.put<BackupTarget>(`${base}/backups/targets/${targetId}/transport`, input)).data;
+
+/** Bandwidth rules for the target's proxy (Professional+; [] clears them). */
+export const setProxyBandwidth = async (
+  targetId: string,
+  rules: string[],
+): Promise<BackupTarget> =>
+  (await axiosInstance.put<BackupTarget>(`${base}/backups/targets/${targetId}/proxy-bandwidth`, { rules })).data;
 
 export const getHostBackup = async (hostId: string): Promise<HostBackup> =>
   (await axiosInstance.get<HostBackup>(`${base}/host/${hostId}/backup`)).data;

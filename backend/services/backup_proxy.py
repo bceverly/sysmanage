@@ -272,6 +272,19 @@ def sync_clients(db: Session, target: models.BackupTarget) -> bool:
     return True
 
 
+def _limited_grants(
+    policy: models.BackupPolicy, target: models.BackupTarget, host: models.Host
+) -> List[Dict[str, Any]]:
+    """This host's grants with the target's bandwidth rules (Pro+), when its
+    storage host can apply them."""
+    # pylint: disable=import-outside-toplevel
+    from backend.services import backup_proxy_limits  # noqa: PLC0415
+
+    return backup_proxy_limits.with_rules(
+        _grants(policy, host), backup_proxy_limits.grant_rules(policy, target)
+    )
+
+
 def storage_proxy(
     db: Session,
     policy: models.BackupPolicy,
@@ -288,7 +301,7 @@ def storage_proxy(
     out: Dict[str, Any] = {
         "target_id": str(target.id),
         "enabled": enabled,
-        "grants": _grants(policy, host) if enabled else [],
+        "grants": _limited_grants(policy, target, host) if enabled else [],
         "clients": target_clients(db, target),
     }
     if host_captures_through_proxy(policy, target, host):

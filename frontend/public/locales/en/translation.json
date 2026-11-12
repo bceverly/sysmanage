@@ -5866,13 +5866,31 @@
       "pinHelp": "Hosts then accept only a proxy certificate with this public key.",
       "port": "Port",
       "proxy": "restate-proxy (HTTPS to the storage host)",
-      "proxyIntro": "Run restate-proxy on the storage host. Each host makes its own token for it, which never leaves the host, and the storage host writes the grants. Restores, browsing and comparisons go through the proxy; backups themselves still use NFS until restate can capture through it.",
+      "proxyIntro": "Run restate-proxy on the storage host. Each host makes its own token for it, which never leaves the host, and the storage host writes the grants. Backups, restores, browsing and comparisons all go through the proxy, with no NFS mount, once a host's restate can capture through it.",
       "saveError": "How hosts reach the storage could not be saved.",
       "title": "How hosts reach the storage",
       "viaNfs": "NFS",
       "viaProxy": "restate-proxy at",
       "certIssued": "Certificate from the SysManage CA, valid until {{date}}",
       "certWaiting": "Waiting for the storage host to ask for its certificate"
+    },
+    "bandwidth": {
+      "title": "Bandwidth through restate-proxy",
+      "saveError": "The bandwidth limits could not be saved.",
+      "intro": "Hold each host to a rate during the hours you name, by the storage host's own clock: for example 2MiB/s from 08 to 18, so a backup that runs late stays out of the working day's link. Rates are 512KiB/s, 2MiB/s, 1GiB/s or unlimited, and 64KiB/s at the least.",
+      "from": "From",
+      "to": "To",
+      "rate": "Rate",
+      "removeRule": "Remove this rule",
+      "addRule": "Add hours",
+      "rest": "Every other hour (optional)",
+      "restHelp": "Left empty, the other hours have no limit.",
+      "clear": "Remove every limit",
+      "unlicensed": "Not applied: bandwidth limits need Professional+. Backups through the proxy run at full speed.",
+      "proPlus": "Bandwidth limits by the hour are a Professional+ feature.",
+      "tooOld": "Not applied yet: the storage host's restate is too old to apply bandwidth limits. Upgrade restate on it.",
+      "label": "Bandwidth",
+      "none": "no limit"
     }
   },
   "cloudBackup": {

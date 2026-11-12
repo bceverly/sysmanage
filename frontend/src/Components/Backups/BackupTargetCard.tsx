@@ -35,6 +35,7 @@ import type { BackupHost, BackupTarget, TargetInput } from '../../Services/backu
 import { apiDetail, reasonLabel } from './backupLabels';
 import BackupStorageStatus from './BackupStorageStatus';
 import BackupTransport from './BackupTransport';
+import BackupProxyBandwidth from './BackupProxyBandwidth';
 
 const EMPTY: TargetInput = {
     name: '',
@@ -254,6 +255,7 @@ const BackupTargetCard: React.FC<{
                             {target.storage_reason && target.storage_hostname && ` (${reasonLabel(t, target.storage_reason)})`}
                         </Typography>
                         <BackupTransport target={target} canManage={canManage} onChanged={onChanged} />
+                        <BackupProxyBandwidth target={target} canManage={canManage} onChanged={onChanged} />
                         <Typography variant="body2">
                             {t('backups.target.sealMode', 'Seal each backup')}:{' '}
                             {sealDescription(t, target)}

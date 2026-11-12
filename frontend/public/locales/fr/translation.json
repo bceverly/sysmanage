@@ -5866,13 +5866,31 @@
       "pinHelp": "Les hôtes n'acceptent alors qu'un certificat de proxy portant cette clé publique.",
       "port": "Port",
       "proxy": "restate-proxy (HTTPS vers l'hôte de stockage)",
-      "proxyIntro": "Exécutez restate-proxy sur l'hôte de stockage. Chaque hôte crée son propre jeton pour celui-ci, qui ne quitte jamais l'hôte, et l'hôte de stockage écrit les autorisations. Les restaurations, la navigation et les comparaisons passent par le proxy ; les sauvegardes elles-mêmes utilisent encore NFS jusqu'à ce que restate puisse effectuer la capture par son intermédiaire.",
+      "proxyIntro": "Exécutez restate-proxy sur l'hôte de stockage. Chaque hôte crée son propre jeton pour lui, qui ne quitte jamais l'hôte, et l'hôte de stockage écrit les autorisations. Les sauvegardes, restaurations, parcours et comparaisons passent tous par le proxy, sans montage NFS, dès que le restate d'un hôte peut sauvegarder à travers lui.",
       "saveError": "Le mode d'accès des hôtes au stockage n'a pas pu être enregistré.",
       "title": "Accès des hôtes au stockage",
       "viaNfs": "NFS",
       "viaProxy": "restate-proxy à l'adresse",
       "certIssued": "Certificat de l'autorité de certification SysManage, valide jusqu'au {{date}}",
       "certWaiting": "En attente de la demande de certificat de l'hôte de stockage"
+    },
+    "bandwidth": {
+      "title": "Bande passante via restate-proxy",
+      "saveError": "Les limites de bande passante n'ont pas pu être enregistrées.",
+      "intro": "Limitez chaque hôte à un débit pendant les heures que vous indiquez, selon l'horloge de l'hôte de stockage : par exemple 2MiB/s de 08 à 18, pour qu'une sauvegarde qui se prolonge n'occupe pas la liaison pendant la journée de travail. Les débits sont 512KiB/s, 2MiB/s, 1GiB/s ou unlimited, et 64KiB/s au minimum.",
+      "from": "De",
+      "to": "À",
+      "rate": "Débit",
+      "removeRule": "Supprimer cette règle",
+      "addRule": "Ajouter des heures",
+      "rest": "Toutes les autres heures (facultatif)",
+      "restHelp": "Laissé vide, les autres heures n'ont pas de limite.",
+      "clear": "Supprimer toutes les limites",
+      "unlicensed": "Non appliqué : les limites de bande passante nécessitent Professional+. Les sauvegardes via le proxy s'exécutent à pleine vitesse.",
+      "proPlus": "Les limites de bande passante par heure sont une fonctionnalité Professional+.",
+      "tooOld": "Pas encore appliqué : le restate de l'hôte de stockage est trop ancien pour appliquer des limites de bande passante. Mettez restate à jour sur cet hôte.",
+      "label": "Bande passante",
+      "none": "aucune limite"
     }
   },
   "cloudBackup": {

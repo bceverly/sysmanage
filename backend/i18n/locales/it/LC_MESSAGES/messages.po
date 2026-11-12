@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 15:43-0800\n"
+"POT-Creation-Date: 2026-11-12 06:40-0800\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3321,26 +3321,60 @@ msgstr "Nessuna predefinita antivirus trovata per questo OS"
 msgid "Failed to delete antivirus default: %s"
 msgstr "Impossibile cancellare la configurazione antivirus predefinita: %s"
 
-#: backend/api/backups_transport.py:37
+#: backend/api/backups_transport.py:46
 msgid "Unknown transport"
 msgstr "Trasporto sconosciuto"
 
-#: backend/api/backups_transport.py:39
+#: backend/api/backups_transport.py:48
 msgid "The proxy address is not a host name or IP address"
 msgstr "L'indirizzo del proxy non è un nome host né un indirizzo IP"
 
-#: backend/api/backups_transport.py:42
+#: backend/api/backups_transport.py:51
 msgid "The proxy port must be between 1 and 65535"
 msgstr "La porta del proxy deve essere compresa tra 1 e 65535"
 
-#: backend/api/backups_transport.py:45
+#: backend/api/backups_transport.py:54
 msgid "The pinned key must be a SHA-256 in hex (64 characters)"
 msgstr ""
 "La chiave fissata deve essere uno SHA-256 in esadecimale (64 caratteri)"
 
-#: backend/api/backups_transport.py:48
+#: backend/api/backups_transport.py:57
 msgid "The proxy's CA must be a PEM certificate"
 msgstr "La CA del proxy deve essere un certificato PEM"
+
+#: backend/api/backups_transport.py:120
+msgid "Give at most 25 bandwidth rules"
+msgstr "Indicate al massimo 25 regole di larghezza di banda"
+
+#: backend/api/backups_transport.py:123
+msgid ""
+"A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours"
+" and a rate (08-18 2MiB/s)"
+msgstr ""
+"Una regola di larghezza di banda è una velocità (512KiB/s, 2MiB/s, 1GiB/s o "
+"unlimited), oppure delle ore e una velocità (08-18 2MiB/s)"
+
+#: backend/api/backups_transport.py:127
+msgid "A bandwidth rate must be at least 64KiB/s"
+msgstr "Una velocità di larghezza di banda deve essere di almeno 64KiB/s"
+
+#: backend/api/backups_transport.py:130
+msgid "Give one rate for every other hour, not two"
+msgstr "Indicate una sola velocità per tutte le altre ore, non due"
+
+#: backend/api/backups_transport.py:133
+msgid "Bandwidth hours run from 00 to 24, from one hour to another"
+msgstr "Le ore di larghezza di banda vanno da 00 a 24, da un'ora a un'altra"
+
+#: backend/api/backups_transport.py:135
+msgid "An hour is in two bandwidth rules"
+msgstr "Un'ora compare in due regole di larghezza di banda"
+
+#: backend/api/backups_transport.py:163
+msgid "Bandwidth limits by the hour need the Professional+ backup engine"
+msgstr ""
+"I limiti di larghezza di banda per ora richiedono il motore di backup di "
+"Professional+"
 
 #: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
@@ -6492,7 +6526,7 @@ msgstr "gpg non ha sigillato l'esportazione della chiave"
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "Nessuno degli host selezionati dispone di backup crittografati"
 
-#: backend/services/backup_reach.py:146
+#: backend/services/backup_reach.py:147
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6503,7 +6537,7 @@ msgstr ""
 "backup (%(address)s, porta %(port)s): %(error)s. I backup richiedono un "
 "percorso di rete fino a esso e un certificato di cui questo host si fidi."
 
-#: backend/services/backup_reach.py:156
+#: backend/services/backup_reach.py:157
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6516,7 +6550,7 @@ msgstr ""
 "l'host sulla rete dell'host di archiviazione (una rete con bridge per una "
 "macchina virtuale) invece che dietro il suo NAT."
 
-#: backend/services/backup_reach.py:166
+#: backend/services/backup_reach.py:167
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

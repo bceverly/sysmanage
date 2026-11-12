@@ -5866,13 +5866,31 @@
       "pinHelp": "设置后，主机只接受具有此公钥的网络代理证书。",
       "port": "端口",
       "proxy": "restate-proxy（通过 HTTPS 连接存储主机）",
-      "proxyIntro": "在存储主机上运行 restate-proxy。每台主机为其生成自己的令牌，该令牌永远不会离开主机，存储主机则负责写入授权。恢复、浏览和比较都通过该网络代理进行；在 restate 能够通过它进行捕获之前，备份本身仍使用 NFS。",
+      "proxyIntro": "在存储主机上运行 restate-proxy。每台主机为其创建自己的令牌，该令牌从不离开主机，由存储主机写入授权。一旦主机的 restate 能通过代理备份，备份、还原、浏览和比较都将经由代理进行，无需 NFS 挂载。",
       "saveError": "无法保存主机访问存储的方式。",
       "title": "主机如何访问存储",
       "viaNfs": "NFS",
       "viaProxy": "restate-proxy，地址：",
       "certIssued": "由 SysManage CA 签发的证书，有效期至 {{date}}",
       "certWaiting": "正在等待存储主机申请其证书"
+    },
+    "bandwidth": {
+      "title": "通过 restate-proxy 的带宽",
+      "saveError": "无法保存带宽限制。",
+      "intro": "在您指定的时段内将每台主机限制在某个速率，时间以存储主机自身的时钟为准：例如 08 到 18 点限制为 2MiB/s，这样拖延的备份不会在工作时间占用链路。速率可以是 512KiB/s、2MiB/s、1GiB/s 或 unlimited，最低 64KiB/s。",
+      "from": "从",
+      "to": "到",
+      "rate": "速率",
+      "removeRule": "删除此规则",
+      "addRule": "添加时段",
+      "rest": "其他所有时间（可选）",
+      "restHelp": "留空则其他时间不限速。",
+      "clear": "删除所有限制",
+      "unlicensed": "未应用：带宽限制需要 Professional+。通过代理的备份以全速运行。",
+      "proPlus": "按时段的带宽限制是 Professional+ 功能。",
+      "tooOld": "尚未应用：存储主机上的 restate 版本过旧，无法应用带宽限制。请在该主机上升级 restate。",
+      "label": "带宽",
+      "none": "不限速"
     }
   },
   "cloudBackup": {

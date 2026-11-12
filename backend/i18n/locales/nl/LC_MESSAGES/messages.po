@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 15:43-0800\n"
+"POT-Creation-Date: 2026-11-12 06:40-0800\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3275,25 +3275,57 @@ msgstr "Geen antivirus-standaard gevonden voor dit OS"
 msgid "Failed to delete antivirus default: %s"
 msgstr "Mislukt om de standaardantivirusinstellingen te verwijderen: %s"
 
-#: backend/api/backups_transport.py:37
+#: backend/api/backups_transport.py:46
 msgid "Unknown transport"
 msgstr "Onbekend transport"
 
-#: backend/api/backups_transport.py:39
+#: backend/api/backups_transport.py:48
 msgid "The proxy address is not a host name or IP address"
 msgstr "Het proxyadres is geen hostnaam of IP-adres"
 
-#: backend/api/backups_transport.py:42
+#: backend/api/backups_transport.py:51
 msgid "The proxy port must be between 1 and 65535"
 msgstr "De proxypoort moet tussen 1 en 65535 liggen"
 
-#: backend/api/backups_transport.py:45
+#: backend/api/backups_transport.py:54
 msgid "The pinned key must be a SHA-256 in hex (64 characters)"
 msgstr "De gepinde sleutel moet een SHA-256 in hex zijn (64 tekens)"
 
-#: backend/api/backups_transport.py:48
+#: backend/api/backups_transport.py:57
 msgid "The proxy's CA must be a PEM certificate"
 msgstr "De CA van de proxy moet een PEM-certificaat zijn"
+
+#: backend/api/backups_transport.py:120
+msgid "Give at most 25 bandwidth rules"
+msgstr "Geef hoogstens 25 bandbreedteregels op"
+
+#: backend/api/backups_transport.py:123
+msgid ""
+"A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours"
+" and a rate (08-18 2MiB/s)"
+msgstr ""
+"Een bandbreedteregel is een snelheid (512KiB/s, 2MiB/s, 1GiB/s of "
+"unlimited), of uren en een snelheid (08-18 2MiB/s)"
+
+#: backend/api/backups_transport.py:127
+msgid "A bandwidth rate must be at least 64KiB/s"
+msgstr "Een bandbreedtesnelheid moet minstens 64KiB/s zijn"
+
+#: backend/api/backups_transport.py:130
+msgid "Give one rate for every other hour, not two"
+msgstr "Geef één snelheid op voor alle andere uren, niet twee"
+
+#: backend/api/backups_transport.py:133
+msgid "Bandwidth hours run from 00 to 24, from one hour to another"
+msgstr "Bandbreedte-uren lopen van 00 tot 24, van het ene uur naar een ander"
+
+#: backend/api/backups_transport.py:135
+msgid "An hour is in two bandwidth rules"
+msgstr "Een uur staat in twee bandbreedteregels"
+
+#: backend/api/backups_transport.py:163
+msgid "Bandwidth limits by the hour need the Professional+ backup engine"
+msgstr "Bandbreedtelimieten per uur vereisen de Professional+-back-upengine"
 
 #: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
@@ -6374,7 +6406,7 @@ msgstr "gpg verzegelde de sleutelexport niet."
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "Geen van de geselecteerde hosts heeft versleutelde back-ups."
 
-#: backend/services/backup_reach.py:146
+#: backend/services/backup_reach.py:147
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6385,7 +6417,7 @@ msgstr ""
 "(%(address)s, poort %(port)s): %(error)s. Back-ups hebben een netwerkpad "
 "ernaartoe nodig, en een certificaat dat deze host vertrouwt."
 
-#: backend/services/backup_reach.py:156
+#: backend/services/backup_reach.py:157
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6398,7 +6430,7 @@ msgstr ""
 "op het netwerk van de opslaghost (een gebridged netwerk voor een virtuele "
 "machine) in plaats van achter zijn NAT."
 
-#: backend/services/backup_reach.py:166
+#: backend/services/backup_reach.py:167
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

@@ -5866,13 +5866,31 @@
       "pinHelp": "Así, los hosts solo aceptan un certificado de proxy con esta clave pública.",
       "port": "Puerto",
       "proxy": "restate-proxy (HTTPS al host de almacenamiento)",
-      "proxyIntro": "Ejecute restate-proxy en el host de almacenamiento. Cada host crea su propio token para él, que nunca sale del host, y el host de almacenamiento escribe las concesiones. Las restauraciones, la exploración y las comparaciones pasan por el proxy; las copias de seguridad en sí siguen usando NFS hasta que restate pueda realizarlas a través de él.",
+      "proxyIntro": "Ejecute restate-proxy en el host de almacenamiento. Cada host crea su propio token para él, que nunca sale del host, y el host de almacenamiento escribe los permisos. Las copias de seguridad, restauraciones, exploraciones y comparaciones pasan todas por el proxy, sin montaje NFS, en cuanto el restate de un host puede realizar copias a través de él.",
       "saveError": "No se pudo guardar cómo acceden los hosts al almacenamiento.",
       "title": "Cómo acceden los hosts al almacenamiento",
       "viaNfs": "NFS",
       "viaProxy": "restate-proxy en",
       "certIssued": "Certificado de la CA de SysManage, válido hasta {{date}}",
       "certWaiting": "Esperando a que el host de almacenamiento solicite su certificado"
+    },
+    "bandwidth": {
+      "title": "Ancho de banda a través de restate-proxy",
+      "saveError": "No se pudieron guardar los límites de ancho de banda.",
+      "intro": "Limite cada host a una velocidad durante las horas que indique, según el reloj del propio host de almacenamiento: por ejemplo, 2MiB/s de 08 a 18, para que una copia de seguridad que se retrase no ocupe el enlace durante la jornada laboral. Las velocidades son 512KiB/s, 2MiB/s, 1GiB/s o unlimited, y como mínimo 64KiB/s.",
+      "from": "Desde",
+      "to": "Hasta",
+      "rate": "Velocidad",
+      "removeRule": "Quitar esta regla",
+      "addRule": "Añadir horas",
+      "rest": "Todas las demás horas (opcional)",
+      "restHelp": "Si se deja vacío, las demás horas no tienen límite.",
+      "clear": "Quitar todos los límites",
+      "unlicensed": "No se aplica: los límites de ancho de banda requieren Professional+. Las copias de seguridad a través del proxy se ejecutan a velocidad completa.",
+      "proPlus": "Los límites de ancho de banda por hora son una función de Professional+.",
+      "tooOld": "Aún no se aplica: el restate del host de almacenamiento es demasiado antiguo para aplicar límites de ancho de banda. Actualice restate en él.",
+      "label": "Ancho de banda",
+      "none": "sin límite"
     }
   },
   "cloudBackup": {

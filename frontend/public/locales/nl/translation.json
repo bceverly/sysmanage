@@ -5866,13 +5866,31 @@
       "pinHelp": "Hosts accepteren dan alleen een proxycertificaat met deze publieke sleutel.",
       "port": "Poort",
       "proxy": "restate-proxy (HTTPS naar de opslaghost)",
-      "proxyIntro": "Draai restate-proxy op de opslaghost. Elke host maakt er een eigen token voor, dat de host nooit verlaat, en de opslaghost schrijft de machtigingen. Herstelacties, bladeren en vergelijkingen gaan via de proxy; de back-ups zelf gebruiken nog NFS totdat restate via de proxy back-ups kan maken.",
+      "proxyIntro": "Draai restate-proxy op de opslaghost. Elke host maakt er zijn eigen token voor, dat de host nooit verlaat, en de opslaghost schrijft de machtigingen. Back-ups, herstel, bladeren en vergelijkingen gaan allemaal via de proxy, zonder NFS-koppeling, zodra de restate van een host erdoorheen een back-up kan maken.",
       "saveError": "Hoe hosts de opslag bereiken kon niet worden opgeslagen.",
       "title": "Hoe hosts de opslag bereiken",
       "viaNfs": "NFS",
       "viaProxy": "restate-proxy op",
       "certIssued": "Certificaat van de SysManage-CA, geldig tot {{date}}",
       "certWaiting": "Wacht tot de opslaghost zijn certificaat aanvraagt"
+    },
+    "bandwidth": {
+      "title": "Bandbreedte via restate-proxy",
+      "saveError": "De bandbreedtelimieten konden niet worden opgeslagen.",
+      "intro": "Beperk elke host tot een snelheid tijdens de uren die u opgeeft, volgens de klok van de opslaghost zelf: bijvoorbeeld 2MiB/s van 08 tot 18, zodat een back-up die uitloopt de verbinding tijdens de werkdag niet belast. Snelheden zijn 512KiB/s, 2MiB/s, 1GiB/s of unlimited, en minimaal 64KiB/s.",
+      "from": "Van",
+      "to": "Tot",
+      "rate": "Snelheid",
+      "removeRule": "Deze regel verwijderen",
+      "addRule": "Uren toevoegen",
+      "rest": "Alle andere uren (optioneel)",
+      "restHelp": "Leeg gelaten hebben de andere uren geen limiet.",
+      "clear": "Alle limieten verwijderen",
+      "unlicensed": "Niet toegepast: bandbreedtelimieten vereisen Professional+. Back-ups via de proxy draaien op volle snelheid.",
+      "proPlus": "Bandbreedtelimieten per uur zijn een Professional+-functie.",
+      "tooOld": "Nog niet toegepast: de restate van de opslaghost is te oud om bandbreedtelimieten toe te passen. Werk restate daar bij.",
+      "label": "Bandbreedte",
+      "none": "geen limiet"
     }
   },
   "cloudBackup": {

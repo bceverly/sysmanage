@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 15:43-0800\n"
+"POT-Creation-Date: 2026-11-12 06:40-0800\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3298,27 +3298,61 @@ msgstr "Не найдено значения по умолчанию для ан
 msgid "Failed to delete antivirus default: %s"
 msgstr "Не удалось удалить стандартную антивирусную конфигурацию: %s"
 
-#: backend/api/backups_transport.py:37
+#: backend/api/backups_transport.py:46
 msgid "Unknown transport"
 msgstr "Неизвестный способ доступа"
 
-#: backend/api/backups_transport.py:39
+#: backend/api/backups_transport.py:48
 msgid "The proxy address is not a host name or IP address"
 msgstr "Адрес прокси не является именем хоста или IP-адресом"
 
-#: backend/api/backups_transport.py:42
+#: backend/api/backups_transport.py:51
 msgid "The proxy port must be between 1 and 65535"
 msgstr "Порт прокси должен быть в диапазоне от 1 до 65535"
 
-#: backend/api/backups_transport.py:45
+#: backend/api/backups_transport.py:54
 msgid "The pinned key must be a SHA-256 in hex (64 characters)"
 msgstr ""
 "Закрепленный ключ должен быть хешем SHA-256 в шестнадцатеричном виде (64 "
 "символа)"
 
-#: backend/api/backups_transport.py:48
+#: backend/api/backups_transport.py:57
 msgid "The proxy's CA must be a PEM certificate"
 msgstr "CA прокси должен быть сертификатом PEM"
+
+#: backend/api/backups_transport.py:120
+msgid "Give at most 25 bandwidth rules"
+msgstr "Укажите не более 25 правил пропускной способности"
+
+#: backend/api/backups_transport.py:123
+msgid ""
+"A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours"
+" and a rate (08-18 2MiB/s)"
+msgstr ""
+"Правило пропускной способности задаётся скоростью (512KiB/s, 2MiB/s, 1GiB/s "
+"или unlimited) либо часами и скоростью (08-18 2MiB/s)"
+
+#: backend/api/backups_transport.py:127
+msgid "A bandwidth rate must be at least 64KiB/s"
+msgstr "Скорость должна быть не меньше 64KiB/s"
+
+#: backend/api/backups_transport.py:130
+msgid "Give one rate for every other hour, not two"
+msgstr "Укажите одну скорость для всех остальных часов, а не две"
+
+#: backend/api/backups_transport.py:133
+msgid "Bandwidth hours run from 00 to 24, from one hour to another"
+msgstr "Часы задаются от 00 до 24, от одного часа до другого"
+
+#: backend/api/backups_transport.py:135
+msgid "An hour is in two bandwidth rules"
+msgstr "Один и тот же час указан в двух правилах пропускной способности"
+
+#: backend/api/backups_transport.py:163
+msgid "Bandwidth limits by the hour need the Professional+ backup engine"
+msgstr ""
+"Для ограничений пропускной способности по часам нужен модуль резервного "
+"копирования Professional+"
 
 #: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
@@ -6411,7 +6445,7 @@ msgstr "gpg не запечатал экспорт ключа"
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "Ни один из выбранных хостов не имеет зашифрованных резервных копий"
 
-#: backend/services/backup_reach.py:146
+#: backend/services/backup_reach.py:147
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6422,7 +6456,7 @@ msgstr ""
 "(%(address)s, порт %(port)s): %(error)s. Для резервного копирования нужен "
 "сетевой путь к нему и сертификат, которому этот хост доверяет."
 
-#: backend/services/backup_reach.py:156
+#: backend/services/backup_reach.py:157
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6435,7 +6469,7 @@ msgstr ""
 "Подключите хост к сети хоста хранения (для виртуальной машины это сеть в "
 "режиме моста), а не размещайте его за NAT."
 
-#: backend/services/backup_reach.py:166
+#: backend/services/backup_reach.py:167
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

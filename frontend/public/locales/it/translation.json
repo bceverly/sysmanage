@@ -5866,13 +5866,31 @@
       "pinHelp": "Gli host accettano quindi solo un certificato del proxy con questa chiave pubblica.",
       "port": "Porta",
       "proxy": "restate-proxy (HTTPS verso l'host di archiviazione)",
-      "proxyIntro": "Esegui restate-proxy sull'host di archiviazione. Ogni host crea il proprio token per il proxy, che non lascia mai l'host, e l'host di archiviazione scrive le autorizzazioni (grant). Ripristini, navigazione e confronti passano attraverso il proxy; i backup veri e propri usano ancora NFS finché restate non potrà acquisirli tramite il proxy.",
+      "proxyIntro": "Eseguite restate-proxy sull'host di archiviazione. Ogni host crea il proprio token per esso, che non lascia mai l'host, e l'host di archiviazione scrive le autorizzazioni. Backup, ripristini, esplorazioni e confronti passano tutti attraverso il proxy, senza montaggio NFS, non appena il restate di un host può eseguire backup attraverso di esso.",
       "saveError": "Impossibile salvare il modo in cui gli host raggiungono l'archiviazione.",
       "title": "Come gli host raggiungono l'archiviazione",
       "viaNfs": "NFS",
       "viaProxy": "restate-proxy su",
       "certIssued": "Certificato dalla CA di SysManage, valido fino al {{date}}",
       "certWaiting": "In attesa che l'host di archiviazione richieda il suo certificato"
+    },
+    "bandwidth": {
+      "title": "Larghezza di banda tramite restate-proxy",
+      "saveError": "Impossibile salvare i limiti di larghezza di banda.",
+      "intro": "Limitate ogni host a una velocità nelle ore indicate, secondo l'orologio dell'host di archiviazione: ad esempio 2MiB/s dalle 08 alle 18, così un backup che si protrae non occupa il collegamento durante la giornata lavorativa. Le velocità sono 512KiB/s, 2MiB/s, 1GiB/s o unlimited, e almeno 64KiB/s.",
+      "from": "Dalle",
+      "to": "Alle",
+      "rate": "Velocità",
+      "removeRule": "Rimuovi questa regola",
+      "addRule": "Aggiungi ore",
+      "rest": "Tutte le altre ore (facoltativo)",
+      "restHelp": "Se lasciato vuoto, le altre ore non hanno limiti.",
+      "clear": "Rimuovi tutti i limiti",
+      "unlicensed": "Non applicato: i limiti di larghezza di banda richiedono Professional+. I backup tramite il proxy vengono eseguiti alla massima velocità.",
+      "proPlus": "I limiti di larghezza di banda per ora sono una funzionalità di Professional+.",
+      "tooOld": "Non ancora applicato: il restate dell'host di archiviazione è troppo vecchio per applicare limiti di larghezza di banda. Aggiornate restate su quell'host.",
+      "label": "Larghezza di banda",
+      "none": "nessun limite"
     }
   },
   "cloudBackup": {

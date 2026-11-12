@@ -5866,13 +5866,31 @@
       "pinHelp": "Os hosts passam a aceitar apenas um certificado de proxy com esta chave pública.",
       "port": "Porta",
       "proxy": "restate-proxy (HTTPS até o host de armazenamento)",
-      "proxyIntro": "Execute o restate-proxy no host de armazenamento. Cada host cria seu próprio token para ele, que nunca sai do host, e o host de armazenamento grava as concessões. Restaurações, navegação e comparações passam pelo proxy; os backups em si ainda usam NFS até que o restate consiga fazer a captura por meio dele.",
+      "proxyIntro": "Execute o restate-proxy no host de armazenamento. Cada host cria seu próprio token para ele, que nunca sai do host, e o host de armazenamento grava as permissões. Backups, restaurações, navegação e comparações passam todos pelo proxy, sem montagem NFS, assim que o restate de um host puder fazer backup por ele.",
       "saveError": "Não foi possível salvar como os hosts acessam o armazenamento.",
       "title": "Como os hosts acessam o armazenamento",
       "viaNfs": "NFS",
       "viaProxy": "restate-proxy em",
       "certIssued": "Certificado da CA do SysManage, válido até {{date}}",
       "certWaiting": "Aguardando o host de armazenamento solicitar seu certificado"
+    },
+    "bandwidth": {
+      "title": "Largura de banda pelo restate-proxy",
+      "saveError": "Não foi possível salvar os limites de largura de banda.",
+      "intro": "Limite cada host a uma taxa nas horas que você indicar, pelo relógio do próprio host de armazenamento: por exemplo, 2MiB/s das 08 às 18, para que um backup que atrase não ocupe o link durante o expediente. As taxas são 512KiB/s, 2MiB/s, 1GiB/s ou unlimited, e no mínimo 64KiB/s.",
+      "from": "De",
+      "to": "Até",
+      "rate": "Taxa",
+      "removeRule": "Remover esta regra",
+      "addRule": "Adicionar horas",
+      "rest": "Todas as outras horas (opcional)",
+      "restHelp": "Se ficar vazio, as outras horas não têm limite.",
+      "clear": "Remover todos os limites",
+      "unlicensed": "Não aplicado: os limites de largura de banda exigem o Professional+. Os backups pelo proxy são executados em velocidade total.",
+      "proPlus": "Limites de largura de banda por hora são um recurso do Professional+.",
+      "tooOld": "Ainda não aplicado: o restate do host de armazenamento é antigo demais para aplicar limites de largura de banda. Atualize o restate nele.",
+      "label": "Largura de banda",
+      "none": "sem limite"
     }
   },
   "cloudBackup": {

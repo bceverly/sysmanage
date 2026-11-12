@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 15:43-0800\n"
+"POT-Creation-Date: 2026-11-12 06:40-0800\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3128,25 +3128,55 @@ msgstr "为当前操作系统未找到防病毒默认设置"
 msgid "Failed to delete antivirus default: %s"
 msgstr "删除反病毒默认设置失败：%s"
 
-#: backend/api/backups_transport.py:37
+#: backend/api/backups_transport.py:46
 msgid "Unknown transport"
 msgstr "未知的传输方式"
 
-#: backend/api/backups_transport.py:39
+#: backend/api/backups_transport.py:48
 msgid "The proxy address is not a host name or IP address"
 msgstr "网络代理地址不是主机名或 IP 地址"
 
-#: backend/api/backups_transport.py:42
+#: backend/api/backups_transport.py:51
 msgid "The proxy port must be between 1 and 65535"
 msgstr "网络代理端口必须介于 1 到 65535 之间"
 
-#: backend/api/backups_transport.py:45
+#: backend/api/backups_transport.py:54
 msgid "The pinned key must be a SHA-256 in hex (64 characters)"
 msgstr "固定的密钥必须是十六进制的 SHA-256（64 个字符）"
 
-#: backend/api/backups_transport.py:48
+#: backend/api/backups_transport.py:57
 msgid "The proxy's CA must be a PEM certificate"
 msgstr "网络代理的 CA 必须是 PEM 证书"
+
+#: backend/api/backups_transport.py:120
+msgid "Give at most 25 bandwidth rules"
+msgstr "最多指定 25 条带宽规则"
+
+#: backend/api/backups_transport.py:123
+msgid ""
+"A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours"
+" and a rate (08-18 2MiB/s)"
+msgstr "带宽规则是一个速率（512KiB/s、2MiB/s、1GiB/s 或 unlimited），或者时段加速率（08-18 2MiB/s）"
+
+#: backend/api/backups_transport.py:127
+msgid "A bandwidth rate must be at least 64KiB/s"
+msgstr "带宽速率至少为 64KiB/s"
+
+#: backend/api/backups_transport.py:130
+msgid "Give one rate for every other hour, not two"
+msgstr "其他所有时间只能指定一个速率，不能两个"
+
+#: backend/api/backups_transport.py:133
+msgid "Bandwidth hours run from 00 to 24, from one hour to another"
+msgstr "带宽时段从 00 到 24，起止须为不同的整点"
+
+#: backend/api/backups_transport.py:135
+msgid "An hour is in two bandwidth rules"
+msgstr "同一小时出现在两条带宽规则中"
+
+#: backend/api/backups_transport.py:163
+msgid "Bandwidth limits by the hour need the Professional+ backup engine"
+msgstr "按时段的带宽限制需要 Professional+ 备份引擎"
 
 #: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
@@ -6056,7 +6086,7 @@ msgstr "gpg 未能封存密钥导出"
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "没有选择的主机有加密备份"
 
-#: backend/services/backup_reach.py:146
+#: backend/services/backup_reach.py:147
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6066,7 +6096,7 @@ msgstr ""
 "此主机无法连接备份存储的 restate-proxy（%(address)s，端口 "
 "%(port)s）：%(error)s。备份需要一条通往它的网络路径，以及此主机信任的证书。"
 
-#: backend/services/backup_reach.py:156
+#: backend/services/backup_reach.py:157
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6077,7 +6107,7 @@ msgstr ""
 "此主机位于 NAT 之后：备份存储（%(storage)s）将其视为 %(seen)s，而不是 "
 "%(address)s，因此拒绝挂载。请将主机接入存储主机所在的网络（虚拟机使用桥接网络），而不要放在其 NAT 之后。"
 
-#: backend/services/backup_reach.py:166
+#: backend/services/backup_reach.py:167
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

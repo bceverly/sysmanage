@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 15:43-0800\n"
+"POT-Creation-Date: 2026-11-12 06:40-0800\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3171,25 +3171,57 @@ msgstr "このOSに対してデフォルトのアンチウイルス設定が見�
 msgid "Failed to delete antivirus default: %s"
 msgstr "デフォルトアンチウイルス設定を削除できませんでした: %s"
 
-#: backend/api/backups_transport.py:37
+#: backend/api/backups_transport.py:46
 msgid "Unknown transport"
 msgstr "不明な接続方法です"
 
-#: backend/api/backups_transport.py:39
+#: backend/api/backups_transport.py:48
 msgid "The proxy address is not a host name or IP address"
 msgstr "プロキシのアドレスがホスト名でも IP アドレスでもありません"
 
-#: backend/api/backups_transport.py:42
+#: backend/api/backups_transport.py:51
 msgid "The proxy port must be between 1 and 65535"
 msgstr "プロキシのポートは 1 から 65535 の範囲で指定してください"
 
-#: backend/api/backups_transport.py:45
+#: backend/api/backups_transport.py:54
 msgid "The pinned key must be a SHA-256 in hex (64 characters)"
 msgstr "ピン留めする鍵は 16 進数の SHA-256 (64 文字) で指定してください"
 
-#: backend/api/backups_transport.py:48
+#: backend/api/backups_transport.py:57
 msgid "The proxy's CA must be a PEM certificate"
 msgstr "プロキシの CA は PEM 形式の証明書で指定してください"
+
+#: backend/api/backups_transport.py:120
+msgid "Give at most 25 bandwidth rules"
+msgstr "帯域幅のルールは 25 個までにしてください"
+
+#: backend/api/backups_transport.py:123
+msgid ""
+"A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours"
+" and a rate (08-18 2MiB/s)"
+msgstr ""
+"帯域幅のルールは速度 (512KiB/s、2MiB/s、1GiB/s、または unlimited)、または時間帯と速度 (08-18 2MiB/s) "
+"です"
+
+#: backend/api/backups_transport.py:127
+msgid "A bandwidth rate must be at least 64KiB/s"
+msgstr "帯域幅の速度は 64KiB/s 以上にしてください"
+
+#: backend/api/backups_transport.py:130
+msgid "Give one rate for every other hour, not two"
+msgstr "その他の時間の速度は 1 つだけ指定してください"
+
+#: backend/api/backups_transport.py:133
+msgid "Bandwidth hours run from 00 to 24, from one hour to another"
+msgstr "帯域幅の時間は 00 から 24 までで、開始と終了は別の時刻にしてください"
+
+#: backend/api/backups_transport.py:135
+msgid "An hour is in two bandwidth rules"
+msgstr "同じ時間が 2 つの帯域幅ルールに含まれています"
+
+#: backend/api/backups_transport.py:163
+msgid "Bandwidth limits by the hour need the Professional+ backup engine"
+msgstr "時間帯別の帯域幅制限には Professional+ のバックアップエンジンが必要です"
 
 #: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
@@ -6134,7 +6166,7 @@ msgstr "gpg が鍵のエクスポートを封印しませんでした"
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "選択されたホストのうち、暗号化バックアップはありません"
 
-#: backend/services/backup_reach.py:146
+#: backend/services/backup_reach.py:147
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6144,7 +6176,7 @@ msgstr ""
 "このホストはバックアップストレージの restate-proxy（%(address)s、ポート %(port)s）に到達できません: "
 "%(error)s。バックアップには、そこへのネットワーク経路と、このホストが信頼する証明書が必要です。"
 
-#: backend/services/backup_reach.py:156
+#: backend/services/backup_reach.py:157
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6156,7 +6188,7 @@ msgstr ""
 "として見えるため、マウントが拒否されます。ホストを NAT の内側に置くのではなく、ストレージホストのネットワーク "
 "(仮想マシンの場合はブリッジネットワーク) に接続してください。"
 
-#: backend/services/backup_reach.py:166
+#: backend/services/backup_reach.py:167
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

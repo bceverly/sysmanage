@@ -5866,13 +5866,31 @@
       "pinHelp": "Hosts akzeptieren dann nur ein Proxy-Zertifikat mit diesem öffentlichen Schlüssel.",
       "port": "Port",
       "proxy": "restate-proxy (HTTPS zum Speicher-Host)",
-      "proxyIntro": "Führen Sie restate-proxy auf dem Speicher-Host aus. Jeder Host erzeugt dafür sein eigenes Token, das den Host nie verlässt, und der Speicher-Host schreibt die Freigaben. Wiederherstellungen, Durchsuchen und Vergleiche laufen über den Proxy; die Sicherungen selbst verwenden weiterhin NFS, bis restate über ihn sichern kann.",
+      "proxyIntro": "Führen Sie restate-proxy auf dem Speicher-Host aus. Jeder Host erstellt dafür sein eigenes Token, das den Host nie verlässt, und der Speicher-Host schreibt die Berechtigungen. Sicherungen, Wiederherstellungen, Durchsuchen und Vergleiche laufen alle über den Proxy, ohne NFS-Mount, sobald das restate eines Hosts darüber sichern kann.",
       "saveError": "Die Einstellung, wie Hosts den Speicher erreichen, konnte nicht gespeichert werden.",
       "title": "Wie Hosts den Speicher erreichen",
       "viaNfs": "NFS",
       "viaProxy": "restate-proxy unter",
       "certIssued": "Zertifikat von der SysManage-CA, gültig bis {{date}}",
       "certWaiting": "Wartet darauf, dass der Speicher-Host sein Zertifikat anfordert"
+    },
+    "bandwidth": {
+      "title": "Bandbreite über restate-proxy",
+      "saveError": "Die Bandbreitenlimits konnten nicht gespeichert werden.",
+      "intro": "Begrenzen Sie jeden Host in den von Ihnen genannten Stunden auf eine Rate, nach der Uhr des Speicher-Hosts: zum Beispiel 2MiB/s von 08 bis 18, damit eine Sicherung, die spät läuft, die Leitung während des Arbeitstags nicht belegt. Raten sind 512KiB/s, 2MiB/s, 1GiB/s oder unlimited, mindestens 64KiB/s.",
+      "from": "Von",
+      "to": "Bis",
+      "rate": "Übertragungsrate",
+      "removeRule": "Diese Regel entfernen",
+      "addRule": "Stunden hinzufügen",
+      "rest": "Alle übrigen Stunden (optional)",
+      "restHelp": "Leer gelassen, gilt für die übrigen Stunden kein Limit.",
+      "clear": "Alle Limits entfernen",
+      "unlicensed": "Nicht angewendet: Bandbreitenlimits erfordern Professional+. Sicherungen über den Proxy laufen mit voller Geschwindigkeit.",
+      "proPlus": "Bandbreitenlimits nach Stunden sind eine Professional+-Funktion.",
+      "tooOld": "Noch nicht angewendet: Das restate des Speicher-Hosts ist zu alt, um Bandbreitenlimits anzuwenden. Aktualisieren Sie restate dort.",
+      "label": "Bandbreite",
+      "none": "kein Limit"
     }
   },
   "cloudBackup": {
