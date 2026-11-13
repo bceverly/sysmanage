@@ -206,6 +206,7 @@ def _tick_mirrors_one_db(session, engine, automation, now):
                 "dnf": engine.build_dnf_mirror_sync_plan,
                 "zypper": engine.build_zypper_mirror_sync_plan,
                 "pkg": engine.build_pkg_mirror_sync_plan,
+                "apk": engine.build_apk_mirror_sync_plan,
             }.get(row.package_manager)
             if builder is None:
                 row.last_sync_status = "FAILURE"

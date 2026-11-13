@@ -36,7 +36,8 @@ Recommends: postgresql (>= 12),
  docker.io,
  gnupg,
  apt-utils,
- createrepo-c
+ createrepo-c,
+ zstd
 Suggests: postgresql-client,
  sysmanage-canary
 Description: Centralized system management server

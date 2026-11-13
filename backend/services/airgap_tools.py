@@ -76,10 +76,15 @@ _EL = ("rhel", "rocky", "alma", "almalinux", "centos")
 
 
 def family(distro: str) -> Optional[str]:
-    """``apt`` or ``rpm`` where a tools repository is built, else None."""
+    """``apt``, ``rpm``, ``apk`` or ``pkg`` where a tools repository is
+    built, else None."""
     distro = (distro or "").lower()
     if distro.startswith("ubuntu"):
         return "apt"
+    if distro.startswith("alpine"):
+        return "apk"
+    if distro.startswith("freebsd"):
+        return "pkg"
     if distro.startswith(("fedora", "opensuse", "sles")) or distro.startswith(_EL):
         return "rpm"
     return None
@@ -253,6 +258,52 @@ def _rpm_family(distro: str, version: str) -> List[Dict[str, str]]:
     return items
 
 
+def _alpine(version: str) -> List[Dict[str, str]]:
+    """restate's packages for this Alpine release (both processors), and the
+    agent's (noarch, one per release: ``alpine322`` for 3.22)."""
+    restate = _github_assets("bceverly/restate")
+    items = [
+        {"name": name, **info}
+        for name, info in sorted(restate.items())
+        if name.startswith(("restate-", "restate-proxy-"))
+        and not name.startswith("restate-doc-")
+        and f"-r0-alpine{version}-" in name
+        and name.endswith(".apk")
+    ]
+    agent = _github_assets("bceverly/sysmanage-agent")
+    items += _pick(
+        agent, starts="sysmanage-agent-", ends=f"-alpine{version.replace('.', '')}.apk"
+    )
+    return items
+
+
+def _freebsd(version: str) -> List[Dict[str, str]]:
+    """restate's packages for the newest point release of this FreeBSD major
+    (all of a major share pkg's ABI), and the agent's FreeBSD package."""
+    major = version.split(".")[0]
+    restate = _github_assets("bceverly/restate")
+    marker = f"-freebsd-{major}."
+    releases = sorted(
+        {
+            name.split(marker, 1)[1].split("-", 1)[0]
+            for name in restate
+            if marker in name
+        },
+        key=lambda r: [int(p) for p in r.split(".") if p.isdigit()],
+    )
+    items: List[Dict[str, str]] = []
+    if releases:
+        tail = f"-freebsd-{major}.{releases[-1]}-"
+        items = [{"name": n, **i} for n, i in sorted(restate.items())
+                 if tail in n and n.endswith(".pkg")]  # fmt: skip
+    agent = _github_assets("bceverly/sysmanage-agent")
+    # The FreeBSD package is the bare one (macOS's is ``-macos.pkg``).
+    items += [{"name": n, **i} for n, i in agent.items()
+              if n.startswith("sysmanage-agent-") and n.endswith(".pkg")
+              and n.count("-") == 2]  # fmt: skip
+    return items
+
+
 def resolve(distro: str, version: str) -> List[Dict[str, str]]:
     """``[{name, url, sha256}]`` for this target's tools; empty where none
     are served or the sources cannot be read (logged, never raised)."""
@@ -262,6 +313,10 @@ def resolve(distro: str, version: str) -> List[Dict[str, str]]:
             return _ubuntu(str(version))
         if kind == "rpm":
             return _rpm_family(distro, str(version))
+        if kind == "apk":
+            return _alpine(str(version))
+        if kind == "pkg":
+            return _freebsd(str(version))
     except Exception as error:  # pylint: disable=broad-exception-caught
         logger.warning(
             "SysManage tools for %s %s could not be resolved: %s",
@@ -439,6 +494,23 @@ def _rpm_index(folder: str, env: Dict[str, str]) -> Optional[str]:
     return err if code else None
 
 
+def _index(kind: str, folder: str, env: Dict[str, str], root: str) -> Optional[str]:
+    """The signed index of one tools repository: OpenPGP for apt and rpm-md,
+    the site's RSA key for apk and pkg (services/airgap_tools_formats.py)."""
+    if kind == "apt":
+        return _apt_index(folder, env)
+    if kind == "rpm":
+        return _rpm_index(folder, env)
+    # pylint: disable-next=import-outside-toplevel
+    from backend.services import airgap_tools_formats as formats  # noqa: PLC0415
+
+    key, public = formats.ensure_rsa_key(_gnupg_home(root), root)
+    if kind == "apk":
+        with open(public, "rb") as handle:
+            return formats.build_apk_repository(folder, key, handle.read())
+    return formats.build_pkg_repository(folder, key)
+
+
 def build(repo_root: str, manifest: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Build and sign a tools repository per target the signed manifest
     lists (``tools``).  ``[{distro, version, kept, error}]``."""
@@ -464,17 +536,22 @@ def build(repo_root: str, manifest: Dict[str, Any]) -> List[Dict[str, Any]]:
             or ".." in distro + version
         ):
             continue
+        source = os.path.join(repo_root, target_dir(distro, version))
+        if not os.path.isdir(source):
+            # Not on this disc (a multi-disc set carries the tools on disc 1
+            # only): what an earlier disc built stays.
+            continue
         dest = os.path.join(root, distro, version)
         shutil.rmtree(dest, ignore_errors=True)
-        kept = _verified_copy(os.path.join(repo_root, target_dir(distro, version)), dest,
+        kept = _verified_copy(source, dest,
                               entry.get("files") or [])  # fmt: skip
         error = None
         if not kept:
             error = "no package matched the signed manifest"
-        elif public is None:
+        elif public is None and kind in ("apt", "rpm"):
             error = "no signing key (gpg missing)"
         else:
-            error = (_apt_index if kind == "apt" else _rpm_index)(dest, env)
+            error = _index(kind, dest, env, root)
         if error:
             shutil.rmtree(dest, ignore_errors=True)
             logger.error(
@@ -496,14 +573,23 @@ def served(repo_root: str, distro: str, version: str) -> bool:
     """A signed tools repository exists for this target."""
     folder = os.path.join(tools_root(repo_root), distro, version)
     kind = family(distro)
-    marker = (
-        "InRelease" if kind == "apt" else os.path.join("repodata", "repomd.xml.asc")
-    )
-    return bool(kind) and os.path.isfile(os.path.join(folder, marker))
+    markers = {
+        "apt": ["InRelease"],
+        "rpm": [os.path.join("repodata", "repomd.xml.asc")],
+        "apk": [os.path.join(a, "APKINDEX.tar.gz") for a in ("x86_64", "aarch64")],
+        "pkg": ["packagesite.pkg"],
+    }.get(kind, [])
+    return any(os.path.isfile(os.path.join(folder, m)) for m in markers)
 
 
-def public_key(repo_root: str) -> Optional[str]:
-    path = os.path.join(tools_root(repo_root), KEY_FILE)
+def public_key(repo_root: str, kind: str = "apt") -> Optional[str]:
+    """The site's published key: OpenPGP for apt and rpm-md, RSA (PEM) for
+    apk and pkg."""
+    # pylint: disable-next=import-outside-toplevel
+    from backend.services.airgap_tools_formats import RSA_PUB  # noqa: PLC0415
+
+    name = RSA_PUB if kind in ("apk", "pkg") else KEY_FILE
+    path = os.path.join(tools_root(repo_root), name)
     try:
         with open(path, encoding="ascii") as handle:
             return handle.read()

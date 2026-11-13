@@ -134,7 +134,7 @@ def _cleanup_staging(staging: Path) -> None:
                 "--rm",
                 "-v",
                 f"{staging}:/work",
-                "alpine:3.20",
+                "alpine:3.22",
                 "sh",
                 "-c",
                 f"chown -R {os.getuid()}:{os.getgid()} /work",

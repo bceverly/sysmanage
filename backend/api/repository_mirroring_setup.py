@@ -158,7 +158,7 @@ async def install_mirror_tools(
 # ---------------------------------------------------------------------
 
 
-_VALID_PLATFORMS = {"apt", "dnf", "zypper", "pkg"}
+_VALID_PLATFORMS = {"apt", "dnf", "zypper", "pkg", "apk"}
 
 
 class PlatformConfigRequest(BaseModel):

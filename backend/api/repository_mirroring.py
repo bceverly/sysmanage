@@ -255,6 +255,7 @@ async def sync_mirror(mirror_id: str, db: Session = Depends(get_tenant_db)):
         "dnf": engine.build_dnf_mirror_sync_plan,
         "zypper": engine.build_zypper_mirror_sync_plan,
         "pkg": engine.build_pkg_mirror_sync_plan,
+        "apk": engine.build_apk_mirror_sync_plan,
     }.get(row.package_manager)
     if builder is None:
         raise HTTPException(

@@ -88,7 +88,7 @@ def test_an_unreachable_source_or_an_unserved_distro_gives_nothing(monkeypatch):
 
     monkeypatch.setattr(tools, "_get", broken)
     assert tools.resolve("ubuntu", "24.04") == []
-    assert tools.resolve("alpine", "3.22") == [] and tools.family("freebsd") is None
+    assert tools.resolve("openbsd", "8.0") == [] and tools.family("openbsd") is None
 
 
 def test_the_fetch_never_fails_the_mirror_run_and_is_checked():
@@ -287,3 +287,52 @@ def test_the_tools_column_comes_and_goes_idempotently():
         _alembic(["upgrade", "head"], db_path)
     finally:
         os.unlink(db_path)
+
+
+def test_a_disc_without_the_tools_leaves_disc_1s_repository(tmp_path):
+    """A multi-disc set carries the tools on disc 1 only, while every disc's
+    signed manifest lists them: ingesting disc 2 must not undo disc 1."""
+    root = tmp_path / "airgap-tools" / "ubuntu" / "noble"
+    root.mkdir(parents=True)
+    (root / "InRelease").write_text("signed")
+    manifest = {"tools": [{"distro": "ubuntu", "version": "noble",
+                           "files": [{"name": "restate_1.0_amd64.deb", "sha256": SHA}]}]}  # fmt: skip
+    (tmp_path / "airgap-repo").mkdir()
+    assert tools.build(str(tmp_path / "airgap-repo"), manifest) == []
+    assert (root / "InRelease").read_text() == "signed"
+
+
+def test_a_multidisc_run_puts_the_tools_on_disc_1(monkeypatch):
+    from backend.services import (
+        airgap_run_tick,
+    )  # noqa: PLC0415  pylint: disable=import-outside-toplevel
+
+    item = {"name": "restate_1.0_amd64.deb", "url": "https://x/r.deb", "sha256": SHA}
+    monkeypatch.setattr(tools, "resolve", lambda distro, version: [item])
+    monkeypatch.setattr(
+        airgap_run_tick, "_sign_manifest_or_raw", lambda engine, m: {"manifest": m}
+    )
+    seen = {}
+
+    def builder(req, **kwargs):
+        seen.update(kwargs)
+        return {"commands": []}
+
+    engine = SimpleNamespace(build_snapshot_multidisc_collection_plan=builder)
+    run = SimpleNamespace(id="r1", iso_label="x", include_cve=True, include_compliance=True,
+                          targets=[SimpleNamespace(distro="ubuntu", version="noble")],
+                          tools_manifest=None)  # fmt: skip
+    assert airgap_run_tick._build_multidisc_plan(engine, run, {}, {"ubuntu:noble": "/m"},
+                                                 {"ubuntu:noble": 1}, 1, 1) == {"commands": []}  # fmt: skip
+    fetches = [
+        c["argv"]
+        for c in seen["disc1_extra"]["commands"]
+        if c["argv"][:2] == ["sudo", "curl"]
+    ]
+    assert (
+        fetches
+        and "/airgap-staging/r1/disc-1/sysmanage-tools/ubuntu/noble/" in fetches[0][6]
+    )
+    assert (
+        seen["manifest_envelope"]["manifest"]["tools"][0]["files"][0]["sha256"] == SHA
+    )

@@ -107,15 +107,14 @@ def _tools_manifest(run) -> list:
     return found if isinstance(found, list) else []
 
 
-def _add_tools(run, plan) -> None:
-    """The SysManage tools (agent, restate, restate-proxy) for each target,
-    fetched by the mirror host's agent into this run's staging tree beside
-    the mirrors (services/airgap_tools.py).  Never fails the run."""
+def _resolve_tools(run, staging_dir: str) -> dict:
+    """The SysManage tools (agent, restate, restate-proxy) for each target:
+    the ``{files, commands}`` that fetch them into ``staging_dir`` beside the
+    mirrors, and their names and hashes kept on the run for the signed
+    manifest (services/airgap_tools.py).  Never fails the run."""
     # pylint: disable-next=import-outside-toplevel
     from backend.services import airgap_tools  # noqa: PLC0415
 
-    if not isinstance(plan, dict) or not isinstance(plan.get("commands"), list):
-        return
     tools = [
         {
             "distro": t.distro,
@@ -124,12 +123,17 @@ def _add_tools(run, plan) -> None:
         }
         for t in (run.targets or [])
     ]
-    extra = airgap_tools.fetch_plan(
-        f"/var/lib/sysmanage/airgap-staging/{run.id}", tools
-    )
+    run.tools_manifest = json.dumps(airgap_tools.manifest_entries(tools))
+    return airgap_tools.fetch_plan(staging_dir, tools)
+
+
+def _add_tools(run, plan) -> None:
+    """The tools appended to a single-disc staging plan."""
+    if not isinstance(plan, dict) or not isinstance(plan.get("commands"), list):
+        return
+    extra = _resolve_tools(run, f"/var/lib/sysmanage/airgap-staging/{run.id}")
     plan["commands"] = list(plan["commands"]) + extra["commands"]
     plan["files"] = list(plan.get("files") or []) + extra["files"]
-    run.tools_manifest = json.dumps(airgap_tools.manifest_entries(tools))
 
 
 def _sign_manifest_or_raw(engine, manifest: dict) -> dict:
@@ -426,12 +430,18 @@ def _build_multidisc_plan(
     # own disc_index/disc_count onto a copy.  Same signed
     # payload the single-disc path embeds -- so a multi-disc
     # bundle passes the repository's strict verify too.
+    # The SysManage tools ride on disc 1 (25.9); every disc's signed
+    # manifest lists them.
+    disc1_extra = _resolve_tools(
+        run, f"/var/lib/sysmanage/airgap-staging/{run.id}/disc-1"
+    )
     multidisc_manifest = {
         "format_version": 1,
         "iso_label": run.iso_label,
         "include_cve": run.include_cve,
         "include_compliance": run.include_compliance,
         "targets": _manifest_targets(run),
+        "tools": _tools_manifest(run),
     }
     signed_envelope = _sign_manifest_or_raw(engine, multidisc_manifest)
     try:
@@ -445,6 +455,7 @@ def _build_multidisc_plan(
             iso_path_prefix=str(run.id),
             staging_root=f"/var/lib/sysmanage/airgap-staging/{run.id}",
             manifest_envelope=signed_envelope,
+            disc1_extra=disc1_extra,
         )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         # CollectorConfigError raised when a single target

@@ -135,6 +135,34 @@ class HostRegistrationLegacy(BaseModel):
     os_info: Optional[Dict[str, Any]] = None
 
 
+def _hardware_fields(host) -> dict:
+    """What every host view shows of its platform and hardware, and whether
+    it needs a reboot or its package manager a repair (2026-11-13)."""
+    return {
+        "platform": host.platform,
+        "platform_release": host.platform_release,
+        "platform_version": host.platform_version,
+        "machine_architecture": host.machine_architecture,
+        "processor": host.processor,
+        "cpu_vendor": host.cpu_vendor,
+        "cpu_model": host.cpu_model,
+        "cpu_cores": host.cpu_cores,
+        "cpu_threads": host.cpu_threads,
+        "cpu_frequency_mhz": host.cpu_frequency_mhz,
+        "memory_total_mb": host.memory_total_mb,
+        "reboot_required": host.reboot_required,
+        "package_manager_needs_repair": bool(
+            getattr(host, "package_manager_needs_repair", False)
+        ),
+        "package_manager_repair_reason": getattr(
+            host, "package_manager_repair_reason", None
+        ),
+        "package_manager_repairable": bool(
+            getattr(host, "package_manager_repairable", False)
+        ),
+    }
+
+
 def _limited_flag(host):
     """Three-valued limited flag -- see agent_capability_service.limited_flag."""
     from backend.services.agent_capability_service import limited_flag  # noqa: PLC0415
@@ -289,28 +317,8 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
             ),
             "status": host.status,
             "approval_status": host.approval_status,
-            "platform": host.platform,
-            "platform_release": host.platform_release,
-            "platform_version": host.platform_version,
-            "machine_architecture": host.machine_architecture,
-            "processor": host.processor,
+            **_hardware_fields(host),
             "timezone": getattr(host, "timezone", None),
-            "cpu_vendor": host.cpu_vendor,
-            "cpu_model": host.cpu_model,
-            "cpu_cores": host.cpu_cores,
-            "cpu_threads": host.cpu_threads,
-            "cpu_frequency_mhz": host.cpu_frequency_mhz,
-            "memory_total_mb": host.memory_total_mb,
-            "reboot_required": host.reboot_required,
-            "package_manager_needs_repair": bool(
-                getattr(host, "package_manager_needs_repair", False)
-            ),
-            "package_manager_repair_reason": getattr(
-                host, "package_manager_repair_reason", None
-            ),
-            "package_manager_repairable": bool(
-                getattr(host, "package_manager_repairable", False)
-            ),
             "is_agent_privileged": host.is_agent_privileged,
             "agent_version": host.agent_version,
             # Phase 19 agent capability advertisement.
@@ -394,28 +402,8 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
             ),
             "status": host.status,
             "approval_status": host.approval_status,
-            "platform": host.platform,
-            "platform_release": host.platform_release,
-            "platform_version": host.platform_version,
-            "machine_architecture": host.machine_architecture,
-            "processor": host.processor,
+            **_hardware_fields(host),
             "timezone": getattr(host, "timezone", None),
-            "cpu_vendor": host.cpu_vendor,
-            "cpu_model": host.cpu_model,
-            "cpu_cores": host.cpu_cores,
-            "cpu_threads": host.cpu_threads,
-            "cpu_frequency_mhz": host.cpu_frequency_mhz,
-            "memory_total_mb": host.memory_total_mb,
-            "reboot_required": host.reboot_required,
-            "package_manager_needs_repair": bool(
-                getattr(host, "package_manager_needs_repair", False)
-            ),
-            "package_manager_repair_reason": getattr(
-                host, "package_manager_repair_reason", None
-            ),
-            "package_manager_repairable": bool(
-                getattr(host, "package_manager_repairable", False)
-            ),
             "is_agent_privileged": host.is_agent_privileged,
             "agent_version": host.agent_version,
             # Phase 19 agent capability advertisement.
@@ -527,27 +515,7 @@ def _get_all_hosts_sync(tenant_id=None):
                 "approval_status": host.approval_status,
                 "certificate_status": agent_mtls.certificate_status(host),
                 "held_commands": held.get(str(host.id), 0),
-                "platform": host.platform,
-                "platform_release": host.platform_release,
-                "platform_version": host.platform_version,
-                "machine_architecture": host.machine_architecture,
-                "processor": host.processor,
-                "cpu_vendor": host.cpu_vendor,
-                "cpu_model": host.cpu_model,
-                "cpu_cores": host.cpu_cores,
-                "cpu_threads": host.cpu_threads,
-                "cpu_frequency_mhz": host.cpu_frequency_mhz,
-                "memory_total_mb": host.memory_total_mb,
-                "reboot_required": host.reboot_required,
-                "package_manager_needs_repair": bool(
-                    getattr(host, "package_manager_needs_repair", False)
-                ),
-                "package_manager_repair_reason": getattr(
-                    host, "package_manager_repair_reason", None
-                ),
-                "package_manager_repairable": bool(
-                    getattr(host, "package_manager_repairable", False)
-                ),
+                **_hardware_fields(host),
                 "is_agent_privileged": host.is_agent_privileged,
                 "agent_version": host.agent_version,
                 # Phase 19 agent capability advertisement.

@@ -241,6 +241,7 @@ def _build_pkg_repoint_plan(repo_url: str) -> dict:
 # agent, restate and restate-proxy, signed with the site's own key.
 TOOLS_APT_KEY = "/usr/share/keyrings/sysmanage-tools.asc"
 TOOLS_RPM_KEY = "/etc/pki/rpm-gpg/RPM-GPG-KEY-sysmanage-tools"
+TOOLS_PKG_KEY = "/usr/local/etc/pkg/keys/sysmanage-tools.pub"
 
 
 def tools_url(repo_url: str, distro: str, version: str) -> str:
@@ -289,9 +290,34 @@ def _with_tools(kind: str, plan: dict, url: str, key: str) -> dict:
                             "refresh"], 600, False, "refresh zypper against the local mirror")  # fmt: skip
         if refresh:
             commands.append(refresh)
+    elif kind == "apk":
+        # apk reads one repositories file: the mirror's line, then ours; the
+        # key goes by the name the index's signature names.
+        name = _apk_key_name(key)
+        files = [f for f in files if f["path"] != "/etc/apk/repositories"]
+        mirror = next(
+            f["content"] for f in plan["files"] if f["path"] == "/etc/apk/repositories"
+        )
+        files += [_file(f"/etc/apk/keys/{name}.rsa.pub", key),
+                  _file("/etc/apk/repositories", mirror + f"{url}\n")]  # fmt: skip
+    elif kind == "pkg":
+        conf = ("sysmanage-tools: {\n"
+                f'  url: "{url}",\n'
+                '  signature_type: "pubkey",\n'
+                f'  pubkey: "{TOOLS_PKG_KEY}",\n'
+                "  enabled: yes\n}\n")  # fmt: skip
+        files += [_file(TOOLS_PKG_KEY, key),
+                  _file("/usr/local/etc/pkg/repos/sysmanage-tools.conf", conf)]  # fmt: skip
     else:
         return plan
     return {**plan, "files": files, "commands": commands}
+
+
+def _apk_key_name(public_pem: str) -> str:
+    # pylint: disable-next=import-outside-toplevel
+    from backend.services.airgap_tools_formats import key_name  # noqa: PLC0415
+
+    return key_name(public_pem.encode("ascii"))
 
 
 def repoint_plan(distro: str, repo_url: str, suite: str) -> Optional[tuple]:
@@ -350,7 +376,7 @@ def _tools_for(repo) -> Optional[tuple]:
 
     if not airgap_tools.served(REPO_ROOT, repo.distro, repo.version):
         return None
-    key = airgap_tools.public_key(REPO_ROOT)
+    key = airgap_tools.public_key(REPO_ROOT, airgap_tools.family(repo.distro) or "apt")
     if not key:
         return None
     return tools_url(repo.repo_url, repo.distro, repo.version), key
