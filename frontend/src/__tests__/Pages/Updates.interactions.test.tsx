@@ -354,6 +354,71 @@ describe("selection and execution", () => {
   });
 });
 
+describe("selecting every matching update, on every page", () => {
+  const page = (n: number, offset: number) =>
+    Array.from({ length: n }, (_v, i) =>
+      anUpdate({ id: `p${offset + i}`, package_name: `pkg${offset + i}`, host_id: `h${(offset + i) % 3}` }),
+    );
+
+  test("a whole page selected offers all of them, and executing applies every one", async () => {
+    m(updatesService.getAllUpdates).mockImplementation(
+      async (_s: unknown, _y: unknown, _a: unknown, _p: unknown, limit: number, offset: number) =>
+        limit === 50 ? listResponse(page(50, 0), 120) : listResponse(page(120, 0).slice(offset, offset + limit), 120),
+    );
+    render(<Updates />);
+    await screen.findByText(/Select All/);
+    expect(screen.queryByText("Select all 120 updates")).toBeNull();
+    fireEvent.click(document.querySelector(".updates__select-all svg") as Element);
+    fireEvent.click(screen.getByText("Select all 120 updates"));
+    expect(screen.getByText(/All 120 updates on every page are selected/)).toBeInTheDocument();
+    expect(screen.getByText(/Execute Selected Updates/).textContent).toContain("(120)");
+    fireEvent.click(screen.getByText(/Execute Selected Updates/));
+    await waitFor(() => expect(updatesService.executeUpdates).toHaveBeenCalledTimes(3));
+    expect(updatesService.getAllUpdates).toHaveBeenCalledWith(undefined, undefined, undefined, undefined, 1000, 0);
+    const sent = m(updatesService.executeUpdates).mock.calls.flatMap((c) => c[1] as string[]);
+    expect(new Set(sent).size).toBe(120);
+  });
+
+  test("Clear selection, or unticking a row, goes back to the page alone", async () => {
+    m(updatesService.getAllUpdates).mockResolvedValue(listResponse(page(50, 0), 120));
+    render(<Updates />);
+    await screen.findByText(/Select All/);
+    fireEvent.click(document.querySelector(".updates__select-all svg") as Element);
+    fireEvent.click(screen.getByText("Select all 120 updates"));
+    fireEvent.click(screen.getByText("Clear selection"));
+    expect(screen.getByText(/Select All/).textContent).toContain("(0/50)");
+    expect(screen.queryByText(/Execute Selected Updates/)).toBeNull();
+  });
+
+  test("not offered when everything fits on one page", async () => {
+    m(updatesService.getAllUpdates).mockResolvedValue(listResponse(page(3, 0), 3));
+    render(<Updates />);
+    await screen.findByText(/Select All/);
+    fireEvent.click(document.querySelector(".updates__select-all svg") as Element);
+    expect(screen.queryByText(/Select all \d+ updates/)).toBeNull();
+  });
+
+  test("rows picked on an earlier page are applied too", async () => {
+    m(updatesService.getAllUpdates).mockImplementation(
+      async (_s: unknown, _y: unknown, _a: unknown, _p: unknown, _l: number, offset: number) =>
+        listResponse(page(50, offset), 120),
+    );
+    render(<Updates />);
+    await screen.findByText("pkg0");
+    fireEvent.click(document.querySelector(".updates__select-all svg") as Element);
+    fireEvent.click(screen.getByText("Next"));
+    await screen.findByText("pkg50");
+    fireEvent.click(document.querySelector(".updates__select-all svg") as Element);
+    expect(screen.getByText(/Execute Selected Updates/).textContent).toContain("(100)");
+    fireEvent.click(screen.getByText(/Execute Selected Updates/));
+    await waitFor(() => expect(updatesService.executeUpdates).toHaveBeenCalled());
+    await waitFor(() => {
+      const sent = m(updatesService.executeUpdates).mock.calls.flatMap((c) => c[1] as string[]);
+      expect(new Set(sent).size).toBe(100);
+    });
+  });
+});
+
 describe("search, filters and pagination", () => {
   test("search filters by package name and can be cleared", async () => {
     m(updatesService.getAllUpdates).mockResolvedValue(

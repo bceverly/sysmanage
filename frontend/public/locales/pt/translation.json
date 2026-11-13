@@ -1959,7 +1959,13 @@
     "heldCount": "Retidos: {{count}}",
     "heldTitle": "Há comandos aguardando uma janela de manutenção",
     "scriptsNeedApproval": "Scripts exigem aprovação",
-    "scriptsNeedApprovalTooltip": "O agente deste host executa apenas scripts aprovados pelo fluxo de aprovação (Professional+). Scripts avulsos são recusados."
+    "scriptsNeedApprovalTooltip": "O agente deste host executa apenas scripts aprovados pelo fluxo de aprovação (Professional+). Scripts avulsos são recusados.",
+    "packageManagerNeedsRepair": "O gerenciador de pacotes precisa de reparo",
+    "repairPackageManager": "Reparar gerenciador de pacotes",
+    "requiresRepairHost": "Selecione um host cujo gerenciador de pacotes precise de reparo",
+    "repairStarted": "Reparo do gerenciador de pacotes iniciado em {{count}} host(s).",
+    "repairStarted_one": "Reparo do gerenciador de pacotes iniciado em {{count}} host(s).",
+    "repairStarted_other": "Reparo do gerenciador de pacotes iniciado em {{count}} host(s)."
   },
   "idp": {
     "action": {
@@ -3712,7 +3718,14 @@
       "security": "Segurança",
       "system": "Sistema"
     },
-    "unknown": "Desconhecido"
+    "unknown": "Desconhecido",
+    "selectAllMatching": "Selecionar todas as {{count}} atualizações",
+    "selectAllMatching_one": "Selecionar todas as {{count}} atualizações",
+    "selectAllMatching_other": "Selecionar todas as {{count}} atualizações",
+    "allMatchingSelected": "Todas as {{count}} atualizações de todas as páginas estão selecionadas.",
+    "allMatchingSelected_one": "Todas as {{count}} atualizações de todas as páginas estão selecionadas.",
+    "allMatchingSelected_other": "Todas as {{count}} atualizações de todas as páginas estão selecionadas.",
+    "clearSelection": "Limpar seleção"
   },
   "upgradeProfiles": {
     "add": "Adicionar Perfil",
@@ -5373,7 +5386,8 @@
       "title": "Backup",
       "writeCache": "Cache de gravação neste host: {{size}}",
       "writeCacheOver": "acima do limite de {{budget}} GB",
-      "encrypted": "Criptografado"
+      "encrypted": "Criptografado",
+      "needsServerPolicy": "Este host é o servidor SysManage, copiado como um host comum: seu banco de dados é parado a cada backup, e a chave de desselagem do OpenBAO é copiada para ele. Configurar faz o backup dele como servidor."
     },
     "coverage": {
       "filesOnly": "Somente arquivos",
@@ -5400,7 +5414,8 @@
       "waiting": "Aguardando uma vaga livre",
       "unreadable": "Arquivos não lidos: {{n}}",
       "showAll": "Mostrar todos os hosts",
-      "heldNote": "O próximo backup aguarda a janela de manutenção deste host"
+      "heldNote": "O próximo backup aguarda a janela de manutenção deste host",
+      "needsServerPolicy": "O servidor SysManage: faça o backup dele como servidor"
     },
     "loadError": "Não foi possível carregar os backups.",
     "policy": {
@@ -5559,7 +5574,10 @@
       "spaceLow": "Avisar quando o armazenamento estiver tão cheio (%)",
       "spaceCritical": "Crítico quando o armazenamento estiver tão cheio (%)",
       "cacheBudget": "Limite do cache de gravação por host (GB)",
-      "cacheBudgetHelp": "O restate mantém um cache de gravação não criptografado em cada host de um repositório criptografado; um host acima deste valor é sinalizado."
+      "cacheBudgetHelp": "O restate mantém um cache de gravação não criptografado em cada host de um repositório criptografado; um host acima deste valor é sinalizado.",
+      "changeTransport": "Alterar como os hosts chegam ao armazenamento",
+      "changeBandwidth": "Alterar os limites de largura de banda",
+      "details": "Detalhes"
     },
     "title": "Backups",
     "warning": {
@@ -5638,7 +5656,9 @@
       "proxyGrants": "O restate-proxy não aceita a concessão para: {{hosts}}. Execute restate-proxy --check-grants no host de armazenamento para ver o motivo.",
       "proxyMissing": "O restate-proxy não está instalado no host de armazenamento, portanto os hosts não conseguem acessar seus backups por meio dele.",
       "proxyStopped": "O restate-proxy não está em execução no host de armazenamento, portanto os hosts não conseguem acessar seus backups por meio dele.",
-      "repositoryMade": "Ainda não há repositório no host de armazenamento: {{hosts}}. Preparar armazenamento, na aba Backups de cada host, o cria; até lá, o restate-proxy recusa os backups deles."
+      "repositoryMade": "Ainda não há repositório no host de armazenamento: {{hosts}}. Preparar armazenamento, na aba Backups de cada host, o cria; até lá, o restate-proxy recusa os backups deles.",
+      "proxyInstall": "Instalar restate-proxy",
+      "proxyInstalling": "Instalando restate-proxy no host de armazenamento. Este aviso desaparece após a próxima verificação de armazenamento."
     },
     "prepare": {
       "title": "Preparar o armazenamento para este host?",
@@ -5696,7 +5716,8 @@
       "recheck": "Verificar novamente",
       "recheckError": "Não foi possível solicitar a verificação.",
       "running": "Preparando: instalando o restate...",
-      "started": "Instalando o restate; isso pode levar alguns minutos."
+      "started": "Instalando o restate; isso pode levar alguns minutos.",
+      "failNoLocal": "O repositório próprio deste site isolado não tem um pacote do restate para este sistema"
     },
     "verify": {
       "title": "Verificação com leitura completa",
@@ -5851,7 +5872,8 @@
       "pauseNote": "O PostgreSQL é parado enquanto seus próprios arquivos são copiados, então o SysManage pode mostrar erros durante esse tempo. Escolha uma hora de início tranquila.",
       "unencrypted": "Este backup não é criptografado e contém a senha do banco de dados da configuração. Proteja o armazenamento de backup tanto quanto o próprio servidor.",
       "needsEscrow": "Salve primeiro uma chave de custódia de emergência no painel Criptografia de um host. O backup do próprio servidor SysManage é criptografado com ela, para que restaurar o OpenBAO nunca precise de uma chave guardada dentro do OpenBAO.",
-      "escrowEncrypted": "Criptografado com sua chave de custódia de emergência ({{fingerprint}}). O SysManage nunca guarda a parte secreta dela, então este backup é restaurado manualmente com essa chave, como descreve o procedimento de recuperação do servidor."
+      "escrowEncrypted": "Criptografado com sua chave de custódia de emergência ({{fingerprint}}). O SysManage nunca guarda a parte secreta dela, então este backup é restaurado manualmente com essa chave, como descreve o procedimento de recuperação do servidor.",
+      "ordinaryPolicy": "Este servidor SysManage ({{host}}) é copiado como um host comum: seu banco de dados é parado a cada backup, e a chave de desselagem do OpenBAO é copiada para ele. Faça o backup dele como o servidor SysManage."
     },
     "transport": {
       "ca": "Certificado da sua CA (PEM, opcional)",

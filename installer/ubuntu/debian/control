@@ -33,7 +33,10 @@ Depends: ${misc:Depends}, ${riscv64:Depends},
  nginx
 Recommends: postgresql (>= 12),
  xorriso,
- docker.io
+ docker.io,
+ gnupg,
+ apt-utils,
+ createrepo-c
 Suggests: postgresql-client,
  sysmanage-canary
 Description: Centralized system management server

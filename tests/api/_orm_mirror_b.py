@@ -199,6 +199,7 @@ class AirgapCollectionRun(TestBase):
     # up on the test SQLite session with "no such column".
     worker_message_id = Column(String(80), nullable=True)
     burn_device = Column(String(200), nullable=True)
+    tools_manifest = Column(Text, nullable=True)
 
 
 class AirgapCollectionSchedule(TestBase):

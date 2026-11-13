@@ -93,6 +93,11 @@ type SysManageHost = {
     // Update management fields
     reboot_required?: boolean;
     reboot_required_updated_at?: string;
+    /** Package manager needs repair (2026-11-13): an interrupted dpkg, broken
+     *  dependencies -- every update fails until it is fixed. */
+    package_manager_needs_repair?: boolean;
+    package_manager_repair_reason?: string | null;
+    package_manager_repairable?: boolean;
     // Diagnostics request tracking fields
     diagnostics_requested_at?: string;
     diagnostics_request_status?: string;
@@ -640,6 +645,27 @@ const doUpdateAgent = async (hostId: string) => {
     return result;
 };
 
+export interface PackageManagerRepairResult {
+    requested: number;
+    started: number;
+    skipped: { host_id: string; fqdn: string | null; reason: string }[];
+}
+
+/** "Repair Package Manager" on the checked hosts: those that need a repair
+ *  their agent can make are asked to; the rest come back with why not. */
+const doRepairPackageManagers = async (hostIds: string[]): Promise<PackageManagerRepairResult> => {
+    let result = {} as PackageManagerRepairResult;
+    await api.post("/api/v1/hosts/repair-package-manager", { host_ids: hostIds })
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        throw error;
+    });
+    return result;
+};
+
 const doRequestPackages = async (hostId: string) => {
     let result = {} as SuccessResponse;
 
@@ -865,4 +891,4 @@ type UbuntuProInfo = {
 }
 
 export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, PaginatedSoftwareResponse, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService, UbuntuProLivepatch, RebootPreCheckResponse, OrchestratedRebootResponse, RebootOrchestrationStatus };
-export { doDeleteHost, doGetHostByID, doGetHosts, doGetHostsSummary, doApproveHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doReenrollHost, doUpdateAgent, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus };
+export { doDeleteHost, doGetHostByID, doGetHosts, doGetHostsSummary, doApproveHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doReenrollHost, doUpdateAgent, doRepairPackageManagers, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus };

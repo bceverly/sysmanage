@@ -139,7 +139,9 @@ const BackupTransport: React.FC<{
     target: BackupTarget;
     canManage: boolean;
     onChanged: () => void;
-}> = ({ target, canManage, onChanged }) => {
+    /** false: the card puts the Change button in its own header. */
+    inline?: boolean;
+}> = ({ target, canManage, onChanged, inline = true }) => {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const proxy = target.transport?.transport === 'proxy';
@@ -160,12 +162,14 @@ const BackupTransport: React.FC<{
                             'Waiting for the storage host to ask for its certificate')}
                 </Typography>
             )}
-            {canManage && (
+            {canManage && inline && (
                 <Button size="small" sx={{ ml: 1 }} onClick={() => setOpen(true)}>
                     {t('backups.transport.change', 'Change')}
                 </Button>
             )}
-            <TransportDialog open={open} target={target} onClose={() => setOpen(false)} onSaved={onChanged} />
+            {inline && (
+                <TransportDialog open={open} target={target} onClose={() => setOpen(false)} onSaved={onChanged} />
+            )}
         </Typography>
     );
 };

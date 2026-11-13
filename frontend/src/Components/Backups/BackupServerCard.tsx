@@ -20,6 +20,11 @@ export const serverMessage = (t: TFunction, server: ServerBackupStatus): string 
             'This SysManage server ({{host}}) has no recent good backup. Its row below says why.',
             { host: server.fqdn ?? '' });
     }
+    if (server.status === 'ordinary_policy') {
+        return t('backups.server.ordinaryPolicy',
+            'This SysManage server ({{host}}) is backed up as an ordinary host: its database is stopped for each backup, and OpenBAO\'s unseal key is copied into it. Back it up as the SysManage server instead.',
+            { host: server.fqdn ?? '' });
+    }
     if (server.status === 'no_policy') {
         return server.fqdn
             ? t('backups.server.noPolicy',

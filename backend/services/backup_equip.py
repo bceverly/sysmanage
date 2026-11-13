@@ -72,6 +72,11 @@ def blocker(db: Session, host: models.Host, now=None) -> Optional[str]:
     """Why Equip for backup cannot start on this host now, or None."""
     now = now or jobs.now()
     ready, reason = jobs.equipped(host)
+    # A proxy target's storage host can already run restate and still lack
+    # restate-proxy, or run an older one: Equip installs or upgrades it there
+    # (production's nas, 2026-11-12, was refused as "already equipped").
+    if ready and _serves_proxy(db, host):
+        ready, reason = False, "missing_tool"
     if ready or reason not in FIXABLE:
         return NOT_NEEDED if ready else reason
     report = capabilities.get_capability_report(host) or {}
@@ -107,16 +112,31 @@ def state(db: Session, host_id: Any, now=None) -> Optional[Dict[str, Any]]:
     }
 
 
-def parameters(db: Session, host: models.Host) -> Dict[str, Any]:
-    """What Equip is told: ``proxy`` for the storage host of a target on
-    restate-proxy (25.5), which then installs restate-proxy beside restate.
-    Never a package name, URL or command -- the agent decides those."""
+def _serves_proxy(db: Session, host: models.Host) -> bool:
+    """This host is the storage host of a target on restate-proxy (25.5)."""
     # pylint: disable=import-outside-toplevel
     from backend.services import backup_proxy  # noqa: PLC0415
 
     target = jobs.the_target(db)
     storage = target is not None and str(target.storage_host_id) == str(host.id)
-    return {"proxy": True} if storage and backup_proxy.uses_proxy(target) else {}
+    return storage and backup_proxy.uses_proxy(target)
+
+
+def parameters(db: Session, host: models.Host) -> Dict[str, Any]:
+    """What Equip is told: ``proxy`` for the storage host of a target on
+    restate-proxy (25.5), which then installs restate-proxy beside restate;
+    ``local`` on an air-gapped site (25.9), where the host installs from the
+    site's own repositories and reaches no PPA, COPR or GitHub.  Never a
+    package name, URL or command -- the agent decides those."""
+    # pylint: disable=import-outside-toplevel
+    from backend.services.cloud_backup_jobs import airgapped  # noqa: PLC0415
+
+    found: Dict[str, Any] = {}
+    if _serves_proxy(db, host):
+        found["proxy"] = True
+    if airgapped():
+        found["local"] = True
+    return found
 
 
 def start(

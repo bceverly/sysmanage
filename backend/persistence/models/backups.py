@@ -217,6 +217,8 @@ class BackupPolicy(Base):
     # before Pro+ encryption.
     proxy_token_sha256 = Column(String(64), nullable=True)
     proxy_token_sha256_old = Column(String(64), nullable=True)
+    # The token the host will rotate to, granted before it is used (q87).
+    proxy_token_sha256_next = Column(String(64), nullable=True)
     proxy_previous_token_sha256 = Column(String(64), nullable=True)
     config_version = Column(Integer, nullable=False, default=1)
     host_acked_version = Column(Integer, nullable=False, default=0)

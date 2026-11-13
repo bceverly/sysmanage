@@ -1959,7 +1959,13 @@
     "heldCount": "暂缓：{{count}}",
     "heldTitle": "有命令正在等待维护时段",
     "scriptsNeedApproval": "脚本需要批准",
-    "scriptsNeedApprovalTooltip": "此主机的代理仅运行经批准流程（Professional+）批准的脚本。一次性脚本将被拒绝。"
+    "scriptsNeedApprovalTooltip": "此主机的代理仅运行经批准流程（Professional+）批准的脚本。一次性脚本将被拒绝。",
+    "packageManagerNeedsRepair": "包管理器需要修复",
+    "repairPackageManager": "修复包管理器",
+    "requiresRepairHost": "选择包管理器需要修复的主机",
+    "repairStarted": "已在 {{count}} 台主机上开始修复包管理器。",
+    "repairStarted_one": "已在 {{count}} 台主机上开始修复包管理器。",
+    "repairStarted_other": "已在 {{count}} 台主机上开始修复包管理器。"
   },
   "idp": {
     "action": {
@@ -3712,7 +3718,14 @@
       "security": "安全",
       "system": "系统"
     },
-    "unknown": "未知"
+    "unknown": "未知",
+    "selectAllMatching": "选择全部 {{count}} 个更新",
+    "selectAllMatching_one": "选择全部 {{count}} 个更新",
+    "selectAllMatching_other": "选择全部 {{count}} 个更新",
+    "allMatchingSelected": "已选择所有页面上的全部 {{count}} 个更新。",
+    "allMatchingSelected_one": "已选择所有页面上的全部 {{count}} 个更新。",
+    "allMatchingSelected_other": "已选择所有页面上的全部 {{count}} 个更新。",
+    "clearSelection": "清除选择"
   },
   "upgradeProfiles": {
     "add": "添加配置文件",
@@ -5373,7 +5386,8 @@
       "title": "备份",
       "writeCache": "此主机上的写入缓存：{{size}}",
       "writeCacheOver": "超出 {{budget}} GB 上限",
-      "encrypted": "已加密"
+      "encrypted": "已加密",
+      "needsServerPolicy": "此主机是 SysManage 服务器，却被当作普通主机备份：每次备份都会停止其数据库，并且 OpenBAO 的解封密钥会被复制到备份中。“配置”会改为将其作为服务器备份。"
     },
     "coverage": {
       "filesOnly": "仅文件",
@@ -5400,7 +5414,8 @@
       "waiting": "等待空闲名额",
       "unreadable": "未读取的文件：{{n}}",
       "showAll": "显示所有主机",
-      "heldNote": "下一次备份将等待此主机的维护时段"
+      "heldNote": "下一次备份将等待此主机的维护时段",
+      "needsServerPolicy": "SysManage 服务器：请将其作为服务器备份"
     },
     "loadError": "无法加载备份。",
     "policy": {
@@ -5559,7 +5574,10 @@
       "spaceLow": "存储使用率达到此值时警告 (%)",
       "spaceCritical": "存储使用率达到此值时为严重 (%)",
       "cacheBudget": "每台主机的写入缓存上限（GB）",
-      "cacheBudgetHelp": "restate 会在加密仓库的每台主机上保留未加密的写入缓存；超过此值的主机将被标记。"
+      "cacheBudgetHelp": "restate 会在加密仓库的每台主机上保留未加密的写入缓存；超过此值的主机将被标记。",
+      "changeTransport": "更改主机访问存储的方式",
+      "changeBandwidth": "更改带宽限制",
+      "details": "详细信息"
     },
     "title": "备份",
     "warning": {
@@ -5638,7 +5656,9 @@
       "proxyGrants": "restate-proxy 不接受以下主机的授权：{{hosts}}。请在存储主机上运行 restate-proxy --check-grants 查看原因。",
       "proxyMissing": "存储主机上未安装 restate-proxy，因此主机无法通过它访问其备份。",
       "proxyStopped": "存储主机上的 restate-proxy 未在运行，因此主机无法通过它访问其备份。",
-      "repositoryMade": "存储主机上还没有存储库：{{hosts}}。每台主机“备份”选项卡中的“准备存储”会创建它；在此之前，restate-proxy 会拒绝它们的备份。"
+      "repositoryMade": "存储主机上还没有存储库：{{hosts}}。每台主机“备份”选项卡中的“准备存储”会创建它；在此之前，restate-proxy 会拒绝它们的备份。",
+      "proxyInstall": "安装 restate-proxy",
+      "proxyInstalling": "正在存储主机上安装 restate-proxy。下一次存储检查后，此警告会消失。"
     },
     "prepare": {
       "title": "为此主机准备存储？",
@@ -5696,7 +5716,8 @@
       "recheck": "重新检查",
       "recheckError": "无法请求检查。",
       "running": "正在配备：正在安装 restate...",
-      "started": "正在安装 restate；这可能需要几分钟。"
+      "started": "正在安装 restate；这可能需要几分钟。",
+      "failNoLocal": "此隔离站点自己的存储库中没有适用于此系统的 restate 软件包"
     },
     "verify": {
       "title": "完整读取验证",
@@ -5851,7 +5872,8 @@
       "pauseNote": "复制 PostgreSQL 自身文件期间会停止 PostgreSQL，因此这段时间内 SysManage 可能会显示错误。请选择一个空闲的开始时间。",
       "unencrypted": "此备份未加密，并且包含配置中的数据库密码。请像保护服务器本身一样保护备份存储。",
       "needsEscrow": "请先在某台主机的“加密”面板中保存应急托管密钥。SysManage 服务器自身的备份使用该密钥加密，因此恢复 OpenBAO 时绝不需要保存在 OpenBAO 中的密钥。",
-      "escrowEncrypted": "已使用您的应急托管密钥 ({{fingerprint}}) 加密。SysManage 从不持有其私密部分，因此需按服务器恢复手册所述，使用该密钥手动恢复此备份。"
+      "escrowEncrypted": "已使用您的应急托管密钥 ({{fingerprint}}) 加密。SysManage 从不持有其私密部分，因此需按服务器恢复手册所述，使用该密钥手动恢复此备份。",
+      "ordinaryPolicy": "此 SysManage 服务器 ({{host}}) 被当作普通主机备份：每次备份都会停止其数据库，并且 OpenBAO 的解封密钥会被复制到备份中。请改为将其作为 SysManage 服务器备份。"
     },
     "transport": {
       "ca": "站点 CA 证书（PEM，可选）",

@@ -150,6 +150,7 @@ ar	0762b65dc43a62fe	model
 ar	076783daaa2e49af	model
 ar	0767f1655303c78e	model
 ar	076e21c6e8f046a9	human Uses this catalog's existing rendering of air-gapped (threatModel.attribute.air_gapped: معزول عن الشبكة): the role of the network-isolated server
+ar	0778cb3c9830a81b	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	0778e4ca3ba8e3dd	model
 ar	07867301ed8068a3	model
 ar	078f2e5f25ea5513	model
@@ -246,6 +247,7 @@ ar	0b768ef8b9e8c901	model
 ar	0b7ef148079ad37e	model
 ar	0b8ba968a754100e	model
 ar	0b8c6cbd6d29f078	model
+ar	0ba0e48fdd1edb4f	human hand-translated by Claude, button name matched to the locale's label (2026-11-13)
 ar	0baa4acc6a72ed9f	model
 ar	0bd23588b2e28b34	model
 ar	0bd8bf6a42f8b79e	model
@@ -394,6 +396,7 @@ ar	11c0209dcd25b369	model
 ar	11c0e3aad1dcc02b	model
 ar	11c4d81ddce91d4f	model
 ar	11c5073e93d6c67e	model
+ar	11ce179adc9fd2d4	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	11d0a58576430f42	model
 ar	11de557ec1bffa0c	model
 ar	11e9dc4c043123d0	model
@@ -519,6 +522,7 @@ ar	17bff5ed9347f15c	model
 ar	17c77f76c1ada0ab	model
 ar	17d0f7b85b9b60d1	model
 ar	17e24cb2380ae332	model
+ar	17e60a727caba80a	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	1806c5b8d0ba9c53	model
 ar	181325536690e66c	model
 ar	1834f89f95b54969	model (verified in sysmanage-docs)
@@ -956,6 +960,7 @@ ar	2a7466f2cb9b4f95	model
 ar	2a8c9036f079a12b	model
 ar	2aa91848fd82bcf1	model
 ar	2ac59f86e63d642e	model
+ar	2acb9b00e3caae41	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	2adc48c8ef775066	model
 ar	2adc9d80f831e4bc	model
 ar	2ae78d71679a09db	model
@@ -1265,6 +1270,7 @@ ar	38096f261cc596aa	model
 ar	381d29d74853d9cb	model
 ar	382407ffcda98850	model
 ar	38427fd2fe1006e1	model
+ar	384f4ffd9526aa32	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ar	3855ae57e931e0e8	model
 ar	386a6d46242f68d8	model
 ar	38707d19eefb7ac6	model
@@ -1986,7 +1992,7 @@ ar	5b4ea483366f5ced	model
 ar	5b6137c4aa989957	model
 ar	5b6d033e8420a93e	model
 ar	5b74546b857d7a2e	model
-ar	5b7dd0e73b387cc9	model
+ar	5b7dd0e73b387cc9	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	5b93e50d6262f996	model
 ar	5b98518d5e3b3f49	model
 ar	5bbf02d73af293b8	model
@@ -2193,6 +2199,7 @@ ar	63f194f79a98c942	model
 ar	63f24c7046ba6f67	model
 ar	63f2ed72fb3f6746	model
 ar	63f71e55216f4aea	model
+ar	642113143cc45e88	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ar	643224752d2bdaee	model
 ar	64396788c557c966	model
 ar	643c2a1ea68b4126	model
@@ -2746,6 +2753,7 @@ ar	7c2335fba3eeb57b	model
 ar	7c3c86d288548fbe	model
 ar	7c403e8f35e51170	model
 ar	7c4131a17b8bf5a2	model
+ar	7c43d360ba16e640	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	7c54e366aa103825	model
 ar	7c55490871760f9e	model
 ar	7c55b1390e6a758f	model
@@ -3527,6 +3535,7 @@ ar	9e8ed6aa6be2e890	model
 ar	9e97fde56a9614c4	model
 ar	9e9c0ccf21190fde	model
 ar	9eb71b615d96185c	model
+ar	9ec3b3eda11a9b72	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	9ed0a8e5c3559497	model
 ar	9edcb6dfcc4c13b7	model
 ar	9ee38b4c6157c212	model
@@ -3674,6 +3683,7 @@ ar	a5695d0a17c923bc	model
 ar	a57301c4164fd0e8	model
 ar	a577b7d2fe2214e4	model
 ar	a57dc86173c193e8	model
+ar	a584a3d05bd3fa89	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	a5890dd6fce69fc0	model
 ar	a59dad5e2a6301c4	model
 ar	a5b217eb4917e79a	model
@@ -4521,6 +4531,7 @@ ar	cc14fcf65f89bdae	model
 ar	cc1b475399e35b8b	human hand-checked 2026-10-20: column header for the time a job was queued; the rendering says exactly that
 ar	cc249d12a73880dd	model
 ar	cc2c908921906870	model
+ar	cc4c8758cf4fcb57	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ar	cc54ffd8c06ac180	model
 ar	cc69aa63abab98f7	model
 ar	cc6ec1b2c90fc401	model
@@ -5128,6 +5139,7 @@ ar	e7f3c407a07afe57	model
 ar	e7f47eb76144f404	model
 ar	e7fd39af2f520a87	model
 ar	e802c4f918e01c7f	model
+ar	e80434f3dfc9f3ac	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	e81c0ab1bcd20432	model
 ar	e81ea1bf47462a5b	model
 ar	e82715c0947e8d75	model
@@ -5174,6 +5186,7 @@ ar	e9cae5217246dd8d	model
 ar	e9ce75d7d37ba857	model
 ar	e9f35a06d08da65d	human standard Arabic technical term for prefix
 ar	e9fb70362230f8f0	model
+ar	ea0fe8f4cff7615c	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	ea13754e649d3554	model
 ar	ea13b52ecfeef82c	model
 ar	ea2c4c66606146fe	model
@@ -5382,7 +5395,7 @@ ar	f33e84196a5d9ac1	model
 ar	f34bd1605ecb0e5b	model
 ar	f37504dc4bbf1536	model
 ar	f389df30918232df	model
-ar	f392ce11eb32ae4a	model
+ar	f392ce11eb32ae4a	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	f39450251d45ed55	model
 ar	f39ae0d84c2ab94d	model
 ar	f3a0d018344ecee9	model
@@ -5391,6 +5404,7 @@ ar	f3a5c33ff033a2a1	model
 ar	f3bb66a292ac666c	model
 ar	f3c83a95ce1fcc6c	model
 ar	f3c8b33e2754d0d3	model
+ar	f3ef111bf84d1a69	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	f3f61bc265de70d7	model
 ar	f401e517e589d658	model
 ar	f41c4b7c420ca67e	model
@@ -5546,6 +5560,7 @@ ar	facead92c76d6e5d	model
 ar	facf29c616e174b1	model
 ar	faddbbb37a2e3606	model
 ar	fae8f6b0018d0bef	model
+ar	faf9bdc5c157b1ba	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	fafc656706dfac48	model
 ar	fb05726a4c5f85e5	model
 ar	fb1527c074f8bf49	model
@@ -5636,6 +5651,7 @@ ar	fe67db1403c348bf	model
 ar	fe721502179fdb92	model
 ar	fe92c3b977739fc2	model
 ar	fea25e3637cfe722	model
+ar	fea7d79509bf1750	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ar	feb1677ca22f2690	model
 ar	feb4416bf330832d	model
 ar	febbf6621d2a7235	model
@@ -6009,6 +6025,7 @@ de	0f04487f23a234b6	model
 de	0f05528c6a8188bf	model
 de	0f0adba1448e1e3f	model
 de	0f0d5a4b6ac6e282	model
+de	0f130e102246b397	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 de	0f20449cc09d28e2	model
 de	0f2834dcddd5b00f	model
 de	0f59f1190a1f37ba	model
@@ -6413,6 +6430,7 @@ de	2147722c58b88132	model
 de	2165fc777a0cf1a5	model
 de	21665854bce2fa15	model
 de	2172edbedcca0a7a	model
+de	217d34740e54c50a	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	21897315f1c88bf6	model
 de	218a8d91dabbfbda	model
 de	21953f52c5ac01a0	model
@@ -6553,6 +6571,7 @@ de	2870f0d97b3d17bb	model
 de	28725a3edf5fac87	model
 de	2873216fe10c7b1c	model
 de	2877620605ad7f19	model
+de	2889f725918e170c	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	288cdabd3085113c	model
 de	288fb469f48d33d2	model
 de	28aa619fdae32dc8	model
@@ -7037,6 +7056,7 @@ de	3ec0c163147a9dcc	model
 de	3ecdd0977b686036	model
 de	3ecfccf05e491a5f	model
 de	3ee50b4ca705b500	model
+de	3f001471335aa776	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 de	3f108413af2456f2	model
 de	3f1d250d261a3594	model
 de	3f1e66d1276f82f9	model
@@ -7679,10 +7699,12 @@ de	5d262e1b64a1af9f	model
 de	5d3b8623280d196d	model
 de	5d407dab00783afa	model
 de	5d42a4b1abf74f6f	model
+de	5d43fcdac8368d40	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	5d48bf49381cf530	model
 de	5d4f5ec3dbf79673	model
 de	5d671e793c7ada77	model
 de	5d89085d69c8a8a6	model
+de	5d8fe11be667e6ee	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	5da8b9cdf41a70fb	model
 de	5dc19c09248e7d15	model
 de	5dcb8995dceedea1	model
@@ -7913,6 +7935,7 @@ de	6a2d4e828533cddb	model
 de	6a3ddc5b91de1451	model
 de	6a51cab73cec2f4f	model
 de	6a55f16782c4ca73	model
+de	6a5aa1d4dc48ee59	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	6a64e27aae4b9541	model
 de	6a6e9eeaaecb7534	model
 de	6a746738f86190e4	model
@@ -8348,6 +8371,7 @@ de	7d95f2813304e49e	model
 de	7d9f5726340817d0	model
 de	7db0948f57d8083e	model
 de	7db9835fbda70405	model
+de	7dc04301533c1114	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 de	7de12339ae2596fe	model
 de	7de3b6f66a25b81b	model
 de	7de439f616074942	model
@@ -8613,6 +8637,7 @@ de	8918f7fa41e18951	model
 de	891cae8508232693	model
 de	894bab9d7a64b8f0	model
 de	894fbd010b5bdca1	model
+de	8962ee11bf0115e1	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	896bff31971379e7	model
 de	89737c2fa0da85d4	model
 de	8975dd933327b2ed	model
@@ -9171,7 +9196,7 @@ de	a3a6458aa8855463	model
 de	a3bdd74133f2ad22	model
 de	a3c4f91c644c01df	model
 de	a3ce1fc232d832dc	model
-de	a3dc2b02ac68a5bf	model
+de	a3dc2b02ac68a5bf	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	a3e78dda431461d9	model
 de	a3f7cf9574948159	model
 de	a40399753a4aef10	model
@@ -9416,6 +9441,7 @@ de	ae325fdeee544cd5	model
 de	ae3d997159618d62	model
 de	ae4bc79fb1bdc0af	model
 de	ae4f5b4c92f15238	model
+de	ae7d96b8cf9bd43d	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	ae841054ae61aded	model
 de	ae8930b2ac7a29d0	model
 de	aeb202c30802b67f	model
@@ -9747,6 +9773,7 @@ de	bcd310ed69fa5595	model
 de	bcd842ddcfa0329b	model
 de	bcff48e1fa8fe341	model
 de	bd028c131c14c415	model
+de	bd05c0ee8206638d	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	bd0d03a23adf5722	model
 de	bd163b9363251d75	model
 de	bd193812fe7e26c9	model
@@ -10186,6 +10213,7 @@ de	d169107950fe6c4c	model
 de	d16c1111b285bc67	model
 de	d16ce2ebf0135de7	model
 de	d16db2cbc966899f	model
+de	d16dc1e6bd8e5c68	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	d16f9c9b5dcf07db	model
 de	d174a691a487723d	model
 de	d17f8d26146abc7c	model
@@ -10234,6 +10262,7 @@ de	d32c8d8507f2e1c9	model
 de	d33b66713705d8c0	model
 de	d3430f75e0f4c7b4	model
 de	d357495cf4ae140c	model
+de	d366069c503e5d56	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	d36a6efe8444e1fa	model
 de	d37c21cc8b055153	model
 de	d38420939b3d65cc	model
@@ -10676,6 +10705,7 @@ de	e7556a78602fbedf	model
 de	e7733a46e496dbbc	model
 de	e77b53a314ddc53b	model
 de	e77c531de869b0ac	model
+de	e79a44f66f72d670	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	e7a087012be1b8a3	model
 de	e7a21bcf81027855	model
 de	e7b51b9ef6479680	model
@@ -11158,6 +11188,7 @@ de	fe1811978d2f7b7f	model
 de	fe209e35b71e84f5	model
 de	fe20aed42ad7be49	model
 de	fe2bec27d1dc1e0a	model
+de	fe2c2c6a586c61a8	human hand-translated by Claude, reviewed against the English (2026-11-13)
 de	fe2c47a868db0e3d	model
 de	fe3f1643120267c8	model
 de	fe43a79a4732db02	model
@@ -11404,6 +11435,7 @@ es	08e918d5d4833cf7	model
 es	09097b082e429a4f	model
 es	090d65608a61f083	model (verified in sysmanage-professional-plus)
 es	090f3e96a06a7349	model
+es	0910cd49dfecc40a	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 es	091638d3eee34c1b	model
 es	091f1c997fed87d9	model
 es	0922aee36de6a3cb	model
@@ -11518,6 +11550,7 @@ es	0da09f8bbf3d1f08	model
 es	0da1b1c2ebeabbd3	model
 es	0da4ed706227e907	model
 es	0da8633194e30205	model
+es	0db067aa88d5a2af	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 es	0dbb56c74fdd8e35	model
 es	0dc334137a93c2ab	model
 es	0dd8a136a81d87bb	model
@@ -11760,6 +11793,7 @@ es	19807f65169fbc3f	model
 es	1981d0f7517a1bbf	model
 es	19959399ba3656ad	model
 es	199dfc417f762404	model
+es	19a2ab811c8f6df9	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	19a3c37b299d8da1	model
 es	19add8f63d54e137	model
 es	19b0242418c7f757	model
@@ -11814,6 +11848,7 @@ es	1c417795f9fe6ac1	model
 es	1c52e411865080a6	model
 es	1c76f9fcf6ce1228	model
 es	1c7bb98bf2c89c73	model
+es	1c912b74c4b6b4c2	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 es	1c9333da762d07cd	model
 es	1ca644740353564b	model
 es	1cbf4e1be28dbe45	model
@@ -11948,6 +11983,7 @@ es	226de2cdcdf24b04	model
 es	2270f1d49d9b7ea5	model
 es	22748076a21211fd	model
 es	227bb9e205ba0978	model
+es	229f6bf18d56ac43	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	22abfa89bd1fe3d8	model
 es	22b9a23b1e2d96d8	model
 es	22be559dfbe34b48	model
@@ -11979,10 +12015,12 @@ es	2451136a93a0a1b8	model
 es	245d8fec8a987ef0	model
 es	2463eb37e1a4061a	model
 es	2472000f3902eaa9	model
+es	2472b01078bf0b96	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	248791420dc54fd4	model
 es	248f4c40a7a442f1	model
 es	24a2c0cbcc694c70	model
 es	24a397ba2377d38a	model
+es	24a824bbf147b4cf	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	24b1b4c8c893c24f	model
 es	24b5046e97d1cb8f	model
 es	24b88449e1b65ce8	model
@@ -12094,6 +12132,7 @@ es	283f7bef633841bc	model
 es	284a61df8a18e8b4	model
 es	284ad77b41d2ed42	model
 es	285b211837d21004	model
+es	286ac2583e5bbf67	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	288fe6f4412bad47	model
 es	289de8f653bfaf12	model
 es	28addef9ea457fbc	model
@@ -12219,7 +12258,7 @@ es	2dcb0e95607278c8	model
 es	2dd451af094b0869	model
 es	2dd88fa5956d2b41	model
 es	2debdf6a9bf9f6c0	model
-es	2df19c0ebadf6d22	model
+es	2df19c0ebadf6d22	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	2e0198d0e32e8b58	model
 es	2e24a8c10602a0d7	model
 es	2e42d75d58573750	model
@@ -13277,6 +13316,7 @@ es	5f584149013caa5c	model
 es	5f6488865aefbce6	model
 es	5f65ddbb3c933397	model
 es	5f98a9f1028bb0a7	model
+es	5f9dba6a90da327d	human hand-translated by Claude, button name matched to the locale's label (2026-11-13)
 es	5fbb15238b6594f3	model
 es	5fd0071ea2368d89	model
 es	5fd50a9b9eba0369	model
@@ -13999,6 +14039,7 @@ es	80b368147e186ca0	model
 es	80bb398756a8da0e	model
 es	80c8bcbb6519148f	model
 es	80d11fdda3f5341e	model
+es	80d52e87cfb44091	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	80d8f061ec172757	model
 es	80e45628497f021c	model
 es	80f059c35ae96f30	model
@@ -14353,6 +14394,7 @@ es	90fecf27332792db	model
 es	9101edc8f5eae960	model
 es	910cb21c8bbfb122	model
 es	91204e15b50a54d7	model
+es	9132cacf80b22d91	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	9143854b9373a690	model
 es	91570c727f453670	model
 es	915ed8d6c0182323	model
@@ -14580,12 +14622,14 @@ es	9c1cef1039d9e4b6	model
 es	9c2c318d9a359e68	model
 es	9c3fdd6511c7b5dc	model
 es	9c41b39491896df8	model
+es	9c44016c09cd11b5	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	9c460aa288e4cf33	model
 es	9c51534fedce6efc	model
 es	9c646a4ca13eac02	model
 es	9c78db5932a55d4b	model
 es	9c7b72e166c51284	model
 es	9c7b81a7fb1be46e	model
+es	9c83020348d4d981	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	9c901a844fe3a37d	model
 es	9c923d9ffb34e8c9	model
 es	9c927fe544221f41	model
@@ -14604,6 +14648,7 @@ es	9d13c0bb5992c865	model
 es	9d210e9e81bac24e	model
 es	9d23b686ac070fa7	model
 es	9d266a07e8b473de	model
+es	9d3230e269f794c3	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	9d35bd29cbb8f61a	model
 es	9d638ecb61506478	model
 es	9d68bcdc5cdd7637	model
@@ -15609,6 +15654,7 @@ es	cb445090284651c4	model
 es	cb52ae84a1a2e11c	model
 es	cb5600f895a52ec4	model
 es	cb5abd2f5fb8098a	model
+es	cb7c4fad75bae6ab	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	cb834947dcbf7dcc	model
 es	cb84740ab7fb0a0f	model
 es	cb8915837e63c2c9	model
@@ -15739,6 +15785,7 @@ es	d18562b8f084d6e6	model
 es	d1a1bf4ac2c4a651	model
 es	d1aaef343b62b926	model
 es	d1d1c96d810dcc7e	model
+es	d1d6cbd3c2d10a88	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	d1dee409ab360625	model
 es	d1e15c30b09ffab8	model
 es	d1e8be1a3acbdd2a	model
@@ -16504,6 +16551,7 @@ es	f2f8a7a262796573	model
 es	f30a58a8e45a8962	model
 es	f3136c2a4ad6e8cc	model
 es	f3161b28f78d08bf	model
+es	f325c5036c46291e	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	f32ac31584fb4d57	model
 es	f335fbabdcd2a6c4	model
 es	f34580a411bc5316	model
@@ -17009,6 +17057,7 @@ fr	0a1f0e43d06599c3	model
 fr	0a6982d664cfc32c	model
 fr	0a6bb8b5881d8454	model
 fr	0a72083e913caae4	model
+fr	0a793538dcb3715d	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	0a83085d4d367499	model
 fr	0a8542d41ce78b85	model
 fr	0a9da3eb52ef60bb	model
@@ -17380,6 +17429,7 @@ fr	1b851c3f97c49966	model
 fr	1b874602a54e3ba6	model
 fr	1b908409979d50de	model
 fr	1b982dc6c1931010	model
+fr	1bb35813eb322810	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	1bb400c3ee74132c	model
 fr	1bb5bf8f98b3d3c6	model
 fr	1bbc4d22de6d56fc	model
@@ -17466,6 +17516,7 @@ fr	1f297edba4a3d4e7	model
 fr	1f399290cb7d0174	model
 fr	1f3fdcb20e444914	model
 fr	1f40c622ebca2a12	model
+fr	1f4f3be70a58d1b9	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	1f571095cbfc63e4	model
 fr	1f63ae4d8e63186d	model
 fr	1f7fe04d0c796ed6	model
@@ -17495,6 +17546,7 @@ fr	20a68627fc35a07f	model
 fr	20b2eed517854762	model
 fr	20b9a0628f8e4eac	model
 fr	20b9b10ee89be5b9	model
+fr	20bddb3e753d1c01	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	20c62411db1f1723	model
 fr	20daf10a83010921	model
 fr	20dc9237d1e73ddf	model
@@ -17785,6 +17837,7 @@ fr	2d1c332fb2a5a854	model
 fr	2d209863526b04eb	model
 fr	2d23b9c3378ff53e	model
 fr	2d2cd60218fef884	model
+fr	2d4fd32774df9851	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	2d5e592e7536f7c3	model
 fr	2d680577cb229cd0	model
 fr	2d7b740be76d33ad	model
@@ -17940,6 +17993,7 @@ fr	34065aa094b8cc67	model
 fr	3412981670a8d3a3	model
 fr	341377edef68ac3a	model
 fr	341bd40ad2edc145	model
+fr	34288784b6cacd69	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 fr	342b37c1ff00e8c8	model
 fr	34374283fe6e0391	model
 fr	343f4a7ed8172b91	model
@@ -17971,7 +18025,7 @@ fr	357102f945283fd3	model
 fr	35738a9727621d18	model
 fr	3573d6acae0873d9	model
 fr	35777c6cda019895	model
-fr	357a1a4f48d5c0df	model
+fr	357a1a4f48d5c0df	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	35873a201baebbbc	model
 fr	35a935f1892ed76b	model
 fr	35c3eca2acb5e78d	model
@@ -18155,6 +18209,7 @@ fr	3e5669fb2a5485d4	model
 fr	3e589e8107bfdb1b	model
 fr	3e6f21972e6f5ab1	model
 fr	3e72f78e8517ee9f	model
+fr	3e745d3e1178753d	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	3e77624d95071aef	model
 fr	3e8d5494d1a0b4a3	model
 fr	3ec4d6fdbf04400e	model
@@ -18698,6 +18753,7 @@ fr	57289bac03a17f11	model
 fr	5735bf6f611912d8	model
 fr	5741481f88a1f471	model
 fr	5746bcd8f02ca186	model
+fr	57514a230ffaa3dc	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	575362abeab99f7f	model
 fr	5754432bda9621b2	model
 fr	5759421fccec6a3a	model
@@ -19061,6 +19117,7 @@ fr	667a6e0acb7713cd	model
 fr	66a374da4c594b6f	model
 fr	66aae540d15ae177	model
 fr	66ad90432bd7f256	model
+fr	66b9425c6d78e893	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 fr	66bf6dc1ceab398e	model
 fr	66cbcc98cd628c94	model
 fr	66dbf3a021759069	model
@@ -19252,6 +19309,7 @@ fr	6f3f99acafbf0b59	model
 fr	6f5cd4da838d1b71	model
 fr	6f5f1d86aee7df8e	model
 fr	6f8772a1eb896419	model
+fr	6f8eaed0b298cd50	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	6f93c26cc5413d3f	model
 fr	6f96a1c754734cb8	model
 fr	6f96c4261472526f	model
@@ -19267,6 +19325,7 @@ fr	7000c609bf738ea3	model
 fr	702495d0e856033a	model
 fr	70322cf93cc10231	model
 fr	70374585b9b5376b	model
+fr	703ae8f920fcfb48	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	706ab4ad0e1762c8	model
 fr	70749db739132e12	model
 fr	70761b34e225337d	model
@@ -20169,7 +20228,7 @@ fr	9b280a35fdab7e1d	model
 fr	9b2aaf460f7df710	model
 fr	9b2e16784b6c3865	model
 fr	9b39830d526504bc	model
-fr	9b51294c03d5b0ed	model
+fr	9b51294c03d5b0ed	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	9b528a9d66228579	model
 fr	9b53eacd48410c54	model
 fr	9b700dc1d762b97a	model
@@ -21157,6 +21216,7 @@ fr	c9cfb6988c3ee343	model
 fr	c9dcaf48eb11ec57	model
 fr	c9e5601d1d7b6440	model
 fr	c9e5b623980cc9ff	model
+fr	c9f07f32f8e8842a	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	c9f08b31431f1766	model
 fr	c9f28a14af98b894	model
 fr	c9f8b6c7bcbf2bad	model
@@ -21254,6 +21314,7 @@ fr	ce74be82677da328	model
 fr	ce7d8b9a663b0ddf	model
 fr	ce9176640172a40c	model
 fr	ce939d333cc2705f	model
+fr	ce9920ee977916ba	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	cea74a022313eea6	model
 fr	cec26fc4b944ce9e	model
 fr	cec3d678755a84b3	model
@@ -21540,6 +21601,7 @@ fr	dc1bd9d9409fceb7	model
 fr	dc1e843f555907ab	model
 fr	dc1f2729dd2ab986	model
 fr	dc20a604626d7805	model
+fr	dc2ed3ca7b729572	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 fr	dc2ef83ca9136805	model
 fr	dc43131fb9ac5abe	model
 fr	dc475b9229b820cc	model
@@ -21968,6 +22030,7 @@ fr	ee160818e97444a4	model
 fr	ee1867af933a0291	model
 fr	ee3f6e6400758982	model
 fr	ee4ecba61427b232	model
+fr	ee50ec3527955864	human hand-translated by Claude, reviewed against the English (2026-11-13)
 fr	ee59ee44a46cee61	model
 fr	ee61aebbe72f8552	model
 fr	ee64c6671f283ad2	model
@@ -22538,6 +22601,7 @@ hi	087b59dac8ac1548	model
 hi	08a18cec156ad46c	model
 hi	08a1bb36659ec4a8	model
 hi	08bafb353683e917	model
+hi	08c7dfb7e821fcee	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 hi	08d1b43698a72f04	model
 hi	08d9238081931df0	model
 hi	08da3faf422517fb	model
@@ -22687,6 +22751,7 @@ hi	0e7fa1b9cab5fa7c	model
 hi	0e919bc0dbf87946	model
 hi	0e94f769c8cf7b71	model
 hi	0eb0adbcdeda3a98	model
+hi	0eb0d5af9cbc25cd	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	0eb3a4f80bb553aa	model
 hi	0ecd1efa4f692f24	model
 hi	0eda9d5efc1f7186	model
@@ -23185,6 +23250,7 @@ hi	258e9430553df956	model
 hi	259de500a188f176	model
 hi	25a46c26ee60e3f6	model
 hi	25b80f0ce45c5593	model
+hi	25b96980fa872bd7	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	25bf29b4d149bb00	model
 hi	25cffc13be363062	model
 hi	25e01a0564ac1c77	model
@@ -23340,6 +23406,7 @@ hi	2d1f1ebb28c4123d	model
 hi	2d22864121c8cc3e	model
 hi	2d22e4f84cd006e3	model
 hi	2d3663fd7867742f	model
+hi	2d3992557cd03138	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	2d53036758805473	model
 hi	2d5626d81a8385d0	model
 hi	2d5fb31afeb242d1	model
@@ -23565,6 +23632,7 @@ hi	372f40b9e04b0359	model
 hi	373ab76df576ce1d	model
 hi	37478bb17075fe57	model
 hi	374a1118630f85b6	model
+hi	374e458fa12e6891	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	374e7ed53d0a8d17	model
 hi	375bb8a4bdb6c84b	model
 hi	3761b48eeef36858	model
@@ -23620,7 +23688,7 @@ hi	39bd9c593ab94e4a	model
 hi	39bf5d1d76a5100f	model
 hi	39dbd8b102ccbe48	model
 hi	39f42d372cc304a7	model
-hi	39fe294f5d2da551	model
+hi	39fe294f5d2da551	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	39ff128f788ec2ff	model
 hi	3a05b33b9c80eaf6	model
 hi	3a2ddb1b3dac1ba1	model
@@ -24625,6 +24693,7 @@ hi	68082499e1abea84	model
 hi	6812b89f0c40ad5c	model
 hi	681a5ed8fd4180bb	model
 hi	681a73ffbaddcab1	model
+hi	681ac3b491c0197f	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	6820ff76df8a7e5b	model
 hi	682d9c558b604c10	model
 hi	6831cb2541894af5	model
@@ -24667,6 +24736,7 @@ hi	69d242532123a54c	model
 hi	69d2cb0691494370	model
 hi	69de8d7b19b50e0d	model
 hi	69e10d2893f17d84	model
+hi	69e3081a56a69bf4	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 hi	6a09e7d09b531790	model
 hi	6a0df3ae3f69f8c6	model
 hi	6a394945de17e924	model
@@ -24919,6 +24989,7 @@ hi	75ce9b449f90da66	model
 hi	75d220bf30e5488c	model
 hi	75d956302e8c8b29	model
 hi	75db9ab59afef9f2	model
+hi	75ddc22f7564011d	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	75df26dee78e3fe8	model
 hi	75e61514b4c8575b	model
 hi	75e6c0824704f63f	model
@@ -25035,6 +25106,7 @@ hi	7a92da1df45e2a90	model (verified in sysmanage-docs)
 hi	7aa837c5a87a2d4c	model
 hi	7ac05da59080bc27	model
 hi	7ae16ac88a93bdbe	model
+hi	7ae9d3cd8a7fc854	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	7af16b73f863b238	model
 hi	7b07a08fbb3cb2d1	model
 hi	7b0a655f759e483c	model
@@ -25051,6 +25123,7 @@ hi	7b5f63c42ef8c530	model
 hi	7b5fa33d7bf68f4c	model
 hi	7b735943435fd672	model
 hi	7b98506df62b0644	model
+hi	7b9ef01fed30ede2	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	7ba127778ffed087	model
 hi	7bba321117a28637	model
 hi	7bbd266276aa734e	model
@@ -25128,6 +25201,7 @@ hi	7ee035e24b1ac716	model
 hi	7f2564327114c0d7	model
 hi	7f2e08817c4a548a	model
 hi	7f3c7113f43fa953	model
+hi	7f47cde9b141a4bd	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 hi	7f4e06633ac96bf6	model
 hi	7f4f857a3190d926	model
 hi	7f548d068d39426e	model
@@ -25810,6 +25884,7 @@ hi	9df21b8b52ed91d8	model
 hi	9e007d603062122d	model
 hi	9e2f78a33f8a4331	model
 hi	9e4800905d5893a9	model
+hi	9e4db30d014a176a	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	9e4f86f2586a4f09	model
 hi	9e56ae0724f8144d	model
 hi	9e834dac7a44e7e1	model
@@ -26401,7 +26476,7 @@ hi	b9412e8b0e104e3e	model
 hi	b94e69b55094ac57	model
 hi	b94e6b2e22362c62	model
 hi	b95e362751443bae	model
-hi	b95ee76154083594	model
+hi	b95ee76154083594	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	b985218b59c9904f	model
 hi	b987dd8167925344	model
 hi	b995a41bfe417603	model
@@ -26449,6 +26524,7 @@ hi	bbbc34cd18d0edaa	model
 hi	bbc5ea352fcf640f	model
 hi	bbd6511e9f259792	model
 hi	bbeda8404062d523	model
+hi	bbf45dfbf9a11975	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	bc105b7bd0c89c48	model
 hi	bc16980afbf9d15f	model
 hi	bc21def515d31ded	model
@@ -26813,6 +26889,7 @@ hi	cc72eaca3157ca18	model
 hi	cc76b92eff870dc6	model
 hi	cc7c9790a88c050c	model
 hi	cc97aca55d17b3be	model
+hi	cc9df01d967844ca	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	cca4968bc505bef5	model
 hi	cca9bd29df22cd0b	model
 hi	ccc40f0ffa3b98ee	model
@@ -27395,6 +27472,7 @@ hi	e54e7582f4cd6dd5	model
 hi	e55c0783070417b1	model
 hi	e55d0760b5c28ca4	model
 hi	e562b2c6cf552b9b	model
+hi	e573f48f1a91cb00	human hand-translated by Claude, reviewed against the English (2026-11-13)
 hi	e58770e65c7329cc	model
 hi	e5b62342fe7c7e66	model
 hi	e5caa16ab5a2485e	model
@@ -28163,6 +28241,7 @@ it	0830a80ab6591e7d	model
 it	083d879f5891f766	model
 it	08629293047f9432	model
 it	08870edb6014d45d	model
+it	088891fe72165a17	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	088d87f1e0a0db82	model
 it	08912422e39960d9	model
 it	089a302ce9ae1b28	model
@@ -28299,6 +28378,7 @@ it	0e3932e19047b9cb	model
 it	0e407b9cb95d34f6	model
 it	0e449c52df84c937	model
 it	0e474f09a62064b5	model
+it	0e59978204fde5b4	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	0e60f04f850170ae	model
 it	0e632428f80eb354	model
 it	0e762b28bf6f5623	model
@@ -28498,6 +28578,7 @@ it	16faf1f5b9d8bd67	model
 it	170c340adf16ea85	model
 it	171a723342e380b7	model
 it	1723088791f413b7	model
+it	17416d7c624cedb6	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	174855260ba80221	model
 it	174b01dbacc7ff36	model
 it	174ce831e7f8739f	model
@@ -28599,6 +28680,7 @@ it	1b0fef6bcc6d5c0c	model
 it	1b1cd84fdb682212	model
 it	1b1db65d31968294	model
 it	1b220a38ae3f978d	model
+it	1b315831428845d1	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	1b40d9d47c88ff74	model
 it	1b443534a4469e0e	model
 it	1b458a3dd43304c8	model
@@ -28775,6 +28857,7 @@ it	235fda45d21f087c	model
 it	237220ed05f7e84c	model
 it	239a44818206c8d3	model
 it	23b06e9553f090bb	model
+it	23c1a2e7ed28c364	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	23d3dbf19a0fa9fb	model
 it	23d9af62dfd92186	model
 it	23dffa6a1e64bb5b	model
@@ -28995,6 +29078,7 @@ it	2d9c8f1ead838737	model
 it	2d9fbb8568039b98	model
 it	2db046a4e2f0844e	model
 it	2db07ff027812504	model
+it	2dc4426db0c6b147	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 it	2dec5ea4438b96e8	model
 it	2e01ec7219fc61a6	model
 it	2e15edeaf2fee68d	model
@@ -30141,6 +30225,7 @@ it	617c5f1e9308c544	model
 it	61809b63b4bbc429	model
 it	61868dba5c74b885	model
 it	61aa5e76520ba9ed	model
+it	61c88aa8da25f875	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	61cbc02afea96203	model
 it	61ceae53e1a6a851	model
 it	61d1bf6e285afa13	model
@@ -30566,6 +30651,7 @@ it	7592424f0b1ceb2e	model
 it	759f6f4477899fb4	model
 it	75aabe8789ecf7c6	model
 it	75b24c49209b33fb	model
+it	75c13aab3aa4f579	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	75cdadc31c4ad12a	model
 it	75defbea911342de	model
 it	75ec0f8ef762f8eb	model
@@ -30573,6 +30659,7 @@ it	75ed29d85d848062	model
 it	75fac96ce0a57c5c	model
 it	761aae4d03e57183	model
 it	7647157092de198a	model
+it	764abd6464fb6bef	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	7652e67b02363e21	model
 it	765c10340b30fadb	model
 it	765c1819fa87c256	model
@@ -31059,6 +31146,7 @@ it	8c3b02d046a10b87	model
 it	8c5ef2b8f2daa1dc	model
 it	8c6782817d10a4c3	model
 it	8ca63772b6c64c3f	model
+it	8cb519e0f13c110f	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	8cce884e0a124a66	model
 it	8cd3faa6d489b463	model
 it	8cd9434aa19b855c	model
@@ -31382,6 +31470,7 @@ it	9becd51dc8680a66	model
 it	9beec7a80338c327	model
 it	9bf291cfe4971c21	model
 it	9c0d4f5acfefe849	model
+it	9c11c8c77c2d407f	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	9c19f696b00d948d	model
 it	9c25d3af2e4d2bf9	model
 it	9c36dfe060aff160	model
@@ -31595,6 +31684,7 @@ it	a49b8cf971696e1b	model
 it	a4a5455cc2cc58ca	model
 it	a4ad0531d7024fbb	model
 it	a4c09f05ed59ec1e	model
+it	a4f960ad5b42315b	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 it	a539844a8f4a65a3	model
 it	a56a3f3378d51d6a	model
 it	a56c556f99240e61	model
@@ -32653,6 +32743,7 @@ it	d644e3b320975e07	model
 it	d654c1edcaaaf255	model
 it	d65b2dbbcd74a549	model
 it	d661cba6fc292092	model
+it	d66c7dc1ad5a2098	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	d66c885d286ed3e8	model
 it	d67b3805636899ec	model
 it	d67bef876d7cb6d3	model
@@ -32901,7 +32992,7 @@ it	e139d97d7aba93f9	model
 it	e13aa3b59ed1456f	model
 it	e13e79a13cb834c4	model
 it	e146f0ce0f3e28e6	model
-it	e14727d0b7044819	model
+it	e14727d0b7044819	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	e150a9af29f37a77	model
 it	e177fdcf780c40f4	model
 it	e188c6027bb459ba	model
@@ -33012,6 +33103,7 @@ it	e674d573f20a9a60	model
 it	e67af31ac16e59bb	model
 it	e68835efe83a4788	model
 it	e69862fd4c3aecba	model
+it	e69aba71e0901b11	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	e69ed1480ee4fec7	model
 it	e6bb302ec7fa1848	model
 it	e6c77ffa3a65bac6	model
@@ -33252,6 +33344,7 @@ it	f1a95008eed039d0	model
 it	f1af7360e330a181	model
 it	f1ca6fd720b8881b	model
 it	f1da959e933b56aa	model
+it	f1e0be0fc964941c	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 it	f1e7c2dc0e091f9d	model
 it	f1f09ac0d5fa14f3	model
 it	f1ff96c44bc00556	model
@@ -33289,7 +33382,7 @@ it	f2f6bcd917c8db1d	model
 it	f2ff422a17bc1fd4	model
 it	f3013ff163bee36d	model
 it	f3104bb243ec6e1b	model
-it	f311e4ccc5848f1b	model
+it	f311e4ccc5848f1b	human hand-translated by Claude, reviewed against the English (2026-11-13)
 it	f319f7a022583333	model
 it	f31ebf38df9fa085	model
 it	f32b20fd89816793	model
@@ -33852,7 +33945,7 @@ ja	0d209855492edde6	model
 ja	0d3774ab1cbe72c9	model
 ja	0d499c366e103681	model
 ja	0d534cc82a03b934	model
-ja	0d568ac1261ee987	model
+ja	0d568ac1261ee987	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	0d5a44f2ff002518	model
 ja	0d60ec2c88ea8475	model
 ja	0d6f29cbcccba706	model
@@ -33889,6 +33982,7 @@ ja	0ea8250c538a2f70	model
 ja	0ec6ae82abf58651	model
 ja	0ed2d1ec8a9b741a	model
 ja	0edb650bc3a1ba29	model
+ja	0edfba9db5dc9ff4	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	0ee4e5abae03042e	model
 ja	0ef8ce527d05c5e3	model
 ja	0efc4567b5c18d16	model
@@ -34341,6 +34435,7 @@ ja	23f01f2f4f13f2eb	model
 ja	23fd29356a8891a9	model
 ja	240d2b1205e6806a	model
 ja	240f43d492b1b2d0	model
+ja	241046ab5f763788	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	243e6f1230baeffc	model
 ja	246c0d49e7e0ce3e	model
 ja	2477f59f42a618cb	model
@@ -34369,6 +34464,7 @@ ja	254e07791ee3f996	model
 ja	2554e8d03acb672b	model
 ja	255d9b8586fac1ff	model
 ja	258a45255119532f	model
+ja	259ec5904c83cf2d	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	25b574ce76259831	model
 ja	25e5e8402ba60467	model
 ja	25eb7ff88a985482	model
@@ -34472,6 +34568,7 @@ ja	2a3effe3e9d0eae9	model
 ja	2a413ae96d408b34	model
 ja	2a4975c8ce5ac3d0	model
 ja	2a4c5345f2aa9209	model
+ja	2a601417e26c3574	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	2a64ea035b45f275	model
 ja	2a6ae95f4cb54579	model
 ja	2a74a06cf6598468	model
@@ -35018,6 +35115,7 @@ ja	4266596dcfa1bada	model
 ja	426ef8cc451507c3	model
 ja	4286d65047d9213b	model
 ja	4290b42b7e9522c9	model
+ja	4292033d42823f41	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	429981e01762ab83	model
 ja	42bf65447328b416	model
 ja	42c0ed762102f544	model
@@ -35179,6 +35277,7 @@ ja	4b83c2bbd186ab6e	model
 ja	4b8fee86f84cdd16	model
 ja	4b94cfffbf5f7117	model
 ja	4b984f20fbdeb7a4	model
+ja	4b9cc80f65a1181a	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	4b9fe5723e3ef305	model
 ja	4bdcf4ef7587c89a	model
 ja	4c2abb5bc6a6ea4b	model
@@ -35325,6 +35424,7 @@ ja	52f9abd4f8f57eb8	model
 ja	53105db46bea29be	model
 ja	5312eec670273518	model
 ja	5314936433029d55	model
+ja	531e1426376ed562	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ja	5328176aaf56451b	model
 ja	5344402c8ed70b9e	model
 ja	534d78b178d26e42	model
@@ -35770,6 +35870,7 @@ ja	681d41216ac59f91	model
 ja	6834fc3add1d8705	model
 ja	683f8b5d10166a35	model
 ja	6841decf151bda9e	model
+ja	684ad899dcd81129	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	6852947ad1891e0c	model
 ja	6854edd64f6505fb	model
 ja	6860bb99b13653ee	model
@@ -36204,6 +36305,7 @@ ja	7c807ea9a37a5e2d	model
 ja	7ca4ae50c28e9228	model
 ja	7cb419406af3aa7b	model
 ja	7cb4ae92ddcd12c4	model
+ja	7cd0e865dadf705b	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	7ce0a3e43a517125	model
 ja	7ce4bb08d592d40e	model
 ja	7cf7f28e62a3f135	model
@@ -36283,6 +36385,7 @@ ja	7ff2bb0040e27f02	model
 ja	800c976d7afcc86c	model
 ja	801542855b28a7a4	model
 ja	802bd96efb9ea514	model
+ja	802ec3274c1d02e0	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	80339a4e8c86822e	model
 ja	8035e3e5fbac17fb	model
 ja	80373b7cdcc19191	model
@@ -36329,6 +36432,7 @@ ja	81e1f7cb2376fea2	model
 ja	81f73da5662f8173	model
 ja	81f9d6c289f3fd22	model
 ja	820338082af8baa3	model
+ja	820b42a4f5e99983	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ja	820cc2cf12866c83	model
 ja	8220fa723bbb0cb4	model
 ja	82215445b64cd40e	model
@@ -36441,6 +36545,7 @@ ja	875f6fff26878cd8	model
 ja	8762d5e3ea2f90fc	model
 ja	8767555767a37cc2	model
 ja	878514b5330a941c	model
+ja	878625309de3f97f	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	878a46700fc21719	model
 ja	8793af1cebabcfaa	model
 ja	87960a3dd158c43c	model
@@ -36778,7 +36883,7 @@ ja	958fe30f3e74d9cd	model
 ja	9591ef953c3f2575	model
 ja	9595b3c766ec5106	model
 ja	9599c9ead1727d47	model
-ja	95a47b83a03b6867	model
+ja	95a47b83a03b6867	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	95a74e5cae05748a	model
 ja	95b29d82467a3b17	model
 ja	95d6619a544c0494	model
@@ -37372,6 +37477,7 @@ ja	b050dcf28b6e7ba7	model
 ja	b053fa47fa25ed40	model
 ja	b05855d7e5ddcc05	model
 ja	b058c6b3811c7099	model
+ja	b059b4876c7f4ae9	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ja	b0624a8b3a05586d	model
 ja	b0646a47528b4b58	model
 ja	b0877ce1662747b8	model
@@ -37668,6 +37774,7 @@ ja	bd41b8592af9a0a9	model
 ja	bd517a12393d7124	model
 ja	bd5318d3c1e26422	model
 ja	bd75cf5c459945e0	model
+ja	bd76585ca4c168c8	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	bd846176ca788faf	model
 ja	bdab22f2ba784a93	model
 ja	bdafb2634edc303b	model
@@ -38198,6 +38305,7 @@ ja	d5014103416f1576	model
 ja	d5346f2e0e356ff5	model
 ja	d54afe57252f1971	model
 ja	d54cf7db2ec46c32	model
+ja	d54e33eef2b808ca	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ja	d561c47b01890a26	model
 ja	d569a57b6b3835df	model
 ja	d587d8737bc0ad89	model
@@ -39332,6 +39440,7 @@ ko	093ec0ec03112ec2	model
 ko	0947e27c996190a7	model
 ko	0950744328256017	model
 ko	0955d62d105109a4	model
+ko	096d1475b64e6827	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	0979fac088b40565	model
 ko	097b20aa8c511943	model
 ko	097c6528e2b764f3	model
@@ -39423,6 +39532,7 @@ ko	0d85bfd7b3fbb989	model
 ko	0d8bca4787225631	model
 ko	0da124847716f503	model
 ko	0dbd0ce3449f1d2e	model
+ko	0dbe6851723c22b8	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	0dc4ca15cea1393c	model
 ko	0dce3fd675ec15c5	model
 ko	0dd1f6afb4bece1b	model
@@ -39563,6 +39673,7 @@ ko	13b432ae7b5030d5	model
 ko	13b712b333a3045e	human a hardware component state: '고장' (broken down) is the right word for a failed drive; '실패' would mean a failed operation
 ko	13b979c449f98526	model
 ko	13bb1d342281d48e	model
+ko	13bf74fde8f459fa	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	13c12e3a947ef58f	model
 ko	13faeb7051d4b5e3	model
 ko	140aefd15204354a	model
@@ -40218,7 +40329,7 @@ ko	3075dc639beb16ef	model
 ko	30a72bf1ba99b639	model
 ko	30a90c41b5f584bb	model
 ko	30b0af98854941b5	model
-ko	30cfc3ab66478a39	model
+ko	30cfc3ab66478a39	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	30dc52c323ac596a	model
 ko	30ddcba6103dd13e	model
 ko	30ec46dfe282b300	model
@@ -40527,12 +40638,14 @@ ko	3f26bf83e78cc049	model
 ko	3f4be764fc3ec789	model
 ko	3f5dbae5f13db74c	model
 ko	3f70c80fa33fbc15	model
+ko	3f8575b517ce51b3	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	3f85bed2a8ffbf56	model
 ko	3f85fb698388ecd4	model
 ko	3f96d0e7ea009d83	model
 ko	3fa00bc761bbe138	model
 ko	3fa6a2739f48e360	model
 ko	3fb4e03d2e527e2f	model
+ko	3fbab807ae81b9e6	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	3fc0a675d965fd86	model
 ko	3fdec82ce70fa5b3	model
 ko	3fee0f1f45c56b70	model
@@ -40644,7 +40757,7 @@ ko	4472d00f5b18e979	model
 ko	4487123ba83cd9e3	model
 ko	448afe5ae0def399	model
 ko	449bf0a28634f4b8	model
-ko	44aac97eadfc4452	model
+ko	44aac97eadfc4452	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	44bc6ce0682ac8ff	model
 ko	44e280086f45d79d	model
 ko	44ed64bc00a53e5f	model
@@ -41215,6 +41328,7 @@ ko	5f3b43cef057972a	model
 ko	5f430bd9698716fc	model
 ko	5f4ce167e1287cac	model
 ko	5f5063fec6461040	model
+ko	5f607e568d76fc4c	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	5f651f16dca3b787	model
 ko	5f7047f37ff8c206	model
 ko	5f86749ea7f1de9d	model
@@ -41428,6 +41542,7 @@ ko	67e188c290c6b0b5	model
 ko	67f9c59305c40703	model
 ko	6825b0914171b303	model
 ko	6838ff58a3bec060	model
+ko	6848792a0f225c2b	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ko	68553cca4e5b6499	model
 ko	6855525ec37c3cb2	model
 ko	685b48c1c5289998	model
@@ -41706,6 +41821,7 @@ ko	752dce8354bedc80	model
 ko	753b3031bafb3092	model
 ko	753fb251f1d8809b	model
 ko	756d947e9518f950	model
+ko	75726d833780e6e1	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ko	757f78208088e240	model
 ko	7585d849f6a7fc81	model
 ko	75864e8d4b3740e6	model
@@ -41857,6 +41973,7 @@ ko	7c5f69035af26b04	model
 ko	7c79e194bdc90219	model
 ko	7c8f76cdf2fa2cd3	model
 ko	7c97ca0f76013c3d	model
+ko	7ca5a080b680264c	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	7cac2ef8f65175b9	model
 ko	7cad10185dce7df2	model
 ko	7cad12b9141e4059	model
@@ -42407,6 +42524,7 @@ ko	943d7b2c0ace4c6c	model
 ko	944c8f38c7e94a4b	model
 ko	94506afaacbbdcf5	model
 ko	94848e6644a9ef56	model
+ko	948bc0a21ae2585a	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	948f8d1d18cafacb	model
 ko	949a62eb04b0fc2e	model
 ko	949ab792bb2f515e	model
@@ -42851,6 +42969,7 @@ ko	aa36ed4fc96f9a14	model
 ko	aa37941aaf893e2f	human 지우기 is standard for Clear
 ko	aa3aace9e543c487	model
 ko	aa4acdcf9b53f052	model
+ko	aa65021e15ab1e44	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ko	aa6cc6898dbb0aba	model
 ko	aa8f7207ae32b721	model
 ko	aa90b52a4b21f6b9	model
@@ -43285,6 +43404,7 @@ ko	bda9fcbcce212bd6	model
 ko	bdc3019f890faf37	model
 ko	bdc3c0e2d08f08c9	model
 ko	bdca4e59fc63d0ac	model
+ko	bdd0d149376b824f	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	bde69dca3c7062d3	model
 ko	bdeec1e5b80ff30a	model
 ko	be0a47b2ac639afc	model
@@ -43416,6 +43536,7 @@ ko	c4357fdaae65e28d	model
 ko	c439f1d5f19fccf9	model
 ko	c451a6bd58e14915	model
 ko	c45da8b122b54685	model
+ko	c4643425366d9090	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	c46cbb4f5838457d	model
 ko	c47b8bc704666fc7	model
 ko	c47f6465b8e1066b	model
@@ -43895,6 +44016,7 @@ ko	d978b0c1e236f940	model
 ko	d9811ec3cbb98a3e	model
 ko	d98babdba24e61c3	model
 ko	d98fe6cef8c79271	model
+ko	d993e3a5e1d268b1	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	d997da71cf12191c	model
 ko	d9b32d147f53db7f	model
 ko	d9b3ace91c369566	model
@@ -43982,6 +44104,7 @@ ko	de648f3b6c604d12	model
 ko	de6b767b978ae7bd	model
 ko	de7b579963df79c2	model
 ko	de975feace89bec2	model
+ko	de98ee9655f8f824	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ko	de9effcb0cf057ff	model
 ko	dea24577ce36df32	model
 ko	deac2c619ca4497a	model
@@ -45256,6 +45379,7 @@ nl	1a1bc1861c9e7079	model
 nl	1a1d90067622a320	model
 nl	1a254f01badbb213	model
 nl	1a3098d0f078f2ec	model
+nl	1a36bd306ca0e0b4	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	1a580b1a5860926b	model
 nl	1a588b0c82475ad3	model
 nl	1a5b4bc2ca4e6085	model
@@ -45482,6 +45606,7 @@ nl	23bc39ba40582f28	model
 nl	23c17d967d0c5960	model
 nl	23c4a62b4b251bd7	model
 nl	23e06810dd61f4b6	model
+nl	23e223bf4cf261cf	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 nl	23e64c2b198ea605	model
 nl	240653a6971b8d58	model
 nl	2406b534ad95abb0	model
@@ -45537,6 +45662,7 @@ nl	2692a6e782f79f9b	model
 nl	26b64ead238487b6	model
 nl	26c297a197cda37d	model
 nl	26c463a8eac9e0f6	model
+nl	26d5fadfeac84141	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	26de0143d31b8e0f	model
 nl	26de4dd002f13f14	model
 nl	26f42625b87da567	model
@@ -45713,6 +45839,7 @@ nl	2edc68775f5a5c07	model
 nl	2efb9766237e07ae	model
 nl	2f01e9f1a3cc3a0b	model
 nl	2f05b6579b866af0	model
+nl	2f0f37f33a8b898d	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	2f3aa4bc49b7c7bc	model
 nl	2f3b419d56b87814	model
 nl	2f4a76eddb8374c8	model
@@ -46583,6 +46710,7 @@ nl	57237d7594472e45	model
 nl	57279178bb58b79f	model
 nl	57308a4a1183f6be	model
 nl	574dd9f680f985c4	model
+nl	57854d66f0d7f86f	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	57afc33dbb4571c3	model
 nl	57b9bfacfada6cad	model
 nl	57c48ab63c3d44cf	model
@@ -46874,6 +47002,7 @@ nl	64b918074b32818e	model
 nl	64bc2ec46c3c5d69	model
 nl	64cb2f00c9d8454f	model
 nl	64cc2ed5742b528e	model (verified in sysmanage-professional-plus)
+nl	64d2113a2241fe65	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	64efe83098cb6e1d	model
 nl	64faf7686682e91a	model
 nl	6502c242d239001e	model
@@ -47341,6 +47470,7 @@ nl	799f690bf7030259	model
 nl	79a226845a9fb489	model
 nl	79b28fd6d199b95c	model
 nl	79bf47977bee1ca7	model
+nl	79dea3c62f3444b9	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 nl	79eb702eed9234d9	model
 nl	79ebe3a01ba2b3c0	model
 nl	79f8d226895cb285	model
@@ -47455,7 +47585,7 @@ nl	7f539335a3142fa7	model
 nl	7f55571c544288f3	model
 nl	7f5c459bc2e884c4	model
 nl	7f736e48220e81a8	model
-nl	7f85384350f6ff9f	model
+nl	7f85384350f6ff9f	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	7f8ba7cf524db668	model
 nl	7fa61c72bffd26bb	model
 nl	7fb8a6c7df09d388	model
@@ -47725,6 +47855,7 @@ nl	8c01a0c6172bafbe	model
 nl	8c0d06ed2089726f	model
 nl	8c111700dab0e316	model
 nl	8c1cac5eb905770e	model
+nl	8c1d8c1c237dbdbc	human hand-translated by Claude, button name matched to the locale's label (2026-11-13)
 nl	8c2a192e76121d62	model
 nl	8c2f82eb20941eb2	model
 nl	8c3e974b7fc1ff4a	model
@@ -48167,6 +48298,7 @@ nl	a01a170f8517db3b	model
 nl	a02afb6dabef8147	model
 nl	a034a3657f8c708b	model
 nl	a041dbfeb83c1708	model
+nl	a0537f736ca5e35b	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	a053b518a3855b29	model
 nl	a056f8ab15d0ddd1	model
 nl	a05a5cedcc166b37	model
@@ -48277,6 +48409,7 @@ nl	a50719adfe1d913c	model
 nl	a51b691a36baf4ce	model
 nl	a52c949ef7c7a260	model
 nl	a52ed83dfe402514	model
+nl	a53c34313da74657	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	a5411587cede8264	model
 nl	a54e334e230de5c0	model
 nl	a555149fbc18cf69	model
@@ -48341,6 +48474,7 @@ nl	a7b34e062780024f	model
 nl	a7c11ccbd589a6f8	model
 nl	a7cccd7defa9e531	model
 nl	a7d53fc8e775fc97	model
+nl	a7e4de1777a1338d	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	a7e640fcd3004e52	model
 nl	a7ed4489bc9ccfa3	model
 nl	a80f3d0f4558802e	model
@@ -48608,6 +48742,7 @@ nl	b38ac39505fc35d7	model
 nl	b3a2a51e5320552e	model
 nl	b3be1ada88a706af	model
 nl	b3c97ec8aa683e45	model
+nl	b3d4bb6c0fbee87e	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 nl	b3d53799410b322e	model
 nl	b3d7f8e151ce58ea	model
 nl	b3f994bba707415a	model
@@ -48765,6 +48900,7 @@ nl	ba97c3b341574612	model
 nl	bacbadac51d47ff4	model
 nl	bacd1ae0e2ad7376	model
 nl	bad393c9b7944f2d	model
+nl	bada4c78efad13ca	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	badc7833a5c8052a	model
 nl	bae176003b0055e4	model
 nl	bae4cb06272ccb96	model
@@ -49408,6 +49544,7 @@ nl	d88472b307fdf408	model
 nl	d887c3cbe2df8119	model
 nl	d891821be7f0dc87	model
 nl	d895c06048feb3be	model
+nl	d898935c0cbf6269	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	d899dc4b9b740307	model
 nl	d89a64f1f3e07213	model
 nl	d8a098bcdee09e02	model
@@ -49586,6 +49723,7 @@ nl	df3245557452355f	model
 nl	df332b5867066c5a	model
 nl	df34b627334edcf4	model
 nl	df4f1d6ae3b55df4	model
+nl	df51051de903f732	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	df5224c7f542aab1	model
 nl	df56c11ef2471204	model
 nl	df5cfffb8db85f1a	model
@@ -49879,6 +50017,7 @@ nl	ec2e8b24a0c4cae8	model
 nl	ec3c80559e620617	model
 nl	ec3cb61f3509cdc1	model
 nl	ec40b85d58fe3f89	model
+nl	ec690a3be37c8268	human hand-translated by Claude, reviewed against the English (2026-11-13)
 nl	ec6ed42de7b77aa3	model
 nl	ec70d748c512a31d	model
 nl	ec7efef59302d156	model
@@ -52532,6 +52671,7 @@ pt	695442599c63a5ee	model
 pt	695476e7bc680191	model
 pt	6959ab64f29f0f79	model
 pt	69910ae9efbf461e	model
+pt	6996e1e6052f09a5	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	699c7ad12657d798	model
 pt	69a7aa8251b82522	model
 pt	69c05f72b2dc213a	model
@@ -52793,6 +52933,7 @@ pt	75dacd03e5578050	model
 pt	75e10dfc5190a928	model
 pt	75e409959b90ac45	model
 pt	75eb14962217803c	model
+pt	75f7571b08776d5c	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	75fdae44d972ff8a	model
 pt	7605db6542e002e6	model
 pt	760cb8ece95b5ed6	model
@@ -52971,6 +53112,7 @@ pt	7e7eb0b639d72b62	model
 pt	7e7edd4bda14761e	model
 pt	7ea0dbac24275af5	model
 pt	7eb5755723d34e60	model
+pt	7ed3e2c855358507	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	7ed52b680b741d0b	model
 pt	7ed80750ac9baeab	model
 pt	7eded54fbe616d04	model
@@ -52993,6 +53135,7 @@ pt	7f9aa6d57bb2dcba	model
 pt	7f9af8080b7614a7	model
 pt	7f9c1af5ed56f3be	model
 pt	7fa2c0277e99422b	model
+pt	7fad6c3899d31d8e	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	7fb2d549c1a372a5	model (verified in sysmanage-docs)
 pt	7fbe882edca6f5ac	model
 pt	7fc98764d20544fd	model
@@ -53421,6 +53564,7 @@ pt	937180f43447ce91	model
 pt	9374b56fab234269	model
 pt	937a773644ba82d7	model
 pt	937f222b7dfca6b3	model
+pt	938da3e0e46ef58e	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	938f0cab0773ae78	model
 pt	9390e73be69fe231	model
 pt	9393ff6b73becd6e	model
@@ -53460,6 +53604,7 @@ pt	9550147d2eeb5262	model
 pt	956139c5b3000c24	model
 pt	956c41190ddd86e3	model
 pt	95831706056f1458	model
+pt	9584d5143b858c87	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	958b961b125c3b70	model
 pt	95a97830c1860d10	model
 pt	95bddba2165b7c79	model
@@ -53566,6 +53711,7 @@ pt	99e347bf13c7d241	model
 pt	99e5fcc8f000e3b7	model
 pt	99e7b02e7c99daea	model
 pt	99ed9f7388028b44	model
+pt	99f166be3ae835cc	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	9a054c7d1d87a8e0	model
 pt	9a0722e3c9544887	model
 pt	9a2383d6274bc1c0	model
@@ -54061,6 +54207,7 @@ pt	b0ab7eb2f9c0be7c	model
 pt	b0c8e312687f9112	model
 pt	b0ccbd422d27899d	model
 pt	b0dc1d2a8dc256e7	model
+pt	b0e8242ff705c883	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 pt	b0ea103a5f4f4d8a	model
 pt	b0ffb72f79d10195	model
 pt	b10205f0b05d77dc	model
@@ -54516,7 +54663,7 @@ pt	c4efe627fdf2acf9	model
 pt	c503455ce90956fa	model
 pt	c50762edc3b5d05b	model
 pt	c50a30d4094a234a	model
-pt	c534828ca9e337e4	model
+pt	c534828ca9e337e4	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	c53c227e3d6cf770	model
 pt	c53ee72fda3f1667	model
 pt	c564a5b63d54ed44	model
@@ -54743,6 +54890,7 @@ pt	cfed5e7c2f24280c	model
 pt	cff1bce67a8b3390	model
 pt	cff77ab8cdcd7296	model
 pt	d00be7da5c629e13	model
+pt	d02691f495869cac	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 pt	d029d48025e22d12	model
 pt	d02ba95ddad6da27	model
 pt	d036f5bbdb1817aa	model (verified in sysmanage-professional-plus)
@@ -54787,6 +54935,7 @@ pt	d1bd4dec13a5dae6	model
 pt	d1bf3168c5cbc881	model
 pt	d1caa56a596eca59	model
 pt	d1cf4dad62b26597	model
+pt	d1fd6505d91ace55	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	d2037d2e28f255d0	model
 pt	d2073f2f48b1717f	model
 pt	d20bc49208da35a0	model
@@ -54804,10 +54953,12 @@ pt	d281c0c4f049d271	model
 pt	d29c069848b140eb	model
 pt	d2c115a70db5d5e3	model
 pt	d2cb4bce2b72a457	model
+pt	d2ce176d8e21a578	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	d2d0b7e22cfaff75	model
 pt	d2d622a0dbce089e	model
 pt	d2e3696d9556d974	model
 pt	d2e8df4d733969bc	model
+pt	d2f8ef172a00f1bb	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	d30b148e59c81cab	model
 pt	d30bd2376780fc08	model
 pt	d31311707fc83131	model
@@ -54872,6 +55023,7 @@ pt	d65bbfe295e7c0cc	model
 pt	d6651392e6812a8f	model
 pt	d66bf3fd167a8cb9	model
 pt	d67a7fa85bcb284b	model
+pt	d6b0e6b868aee08f	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	d6b443d120b9c7db	model
 pt	d6bc7ded4dbcf7f2	model
 pt	d6d8ebb2d9dbbd0a	model
@@ -55111,7 +55263,7 @@ pt	e18cfd33562bf6bd	model
 pt	e198343ae85518eb	model
 pt	e19b1fb1b37900b8	model
 pt	e1a2cc3526eebaee	model
-pt	e1a40be066519286	model
+pt	e1a40be066519286	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	e1a4889ce501cd99	model
 pt	e1b736556c298920	model
 pt	e1b73d76007606bc	model
@@ -55365,6 +55517,7 @@ pt	ec1273bfa5fc4a53	model
 pt	ec1e956af67b86eb	model
 pt	ec5a0408ae41ee71	model
 pt	ec6053ba8d3a1d97	model
+pt	ec67bdfa8b14d878	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 pt	ec7923b46ada03ba	model
 pt	ec7e9fac1a78cd68	model
 pt	ec88fbcacf6e6a5c	model
@@ -55395,6 +55548,7 @@ pt	ed4d20d67e1f0632	model
 pt	ed4ee68b9b1a0a7f	model
 pt	ed568291c1d42262	model
 pt	ed86f2a9fec955f3	model
+pt	ed89e5fd0b0e02d0	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	edce5b2646069eba	model
 pt	edd1474eab1e35bd	model
 pt	ede580a2fd479e1e	model
@@ -56282,6 +56436,7 @@ ru	1460ff16dbcc3ae5	model
 ru	146afe603a5e459b	model
 ru	146f6ba7032a3f89	model
 ru	14721408af32cdf0	model
+ru	148e7695084f00e5	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	1491b66936de33d3	model
 ru	14a76eec4b1ea6be	model
 ru	14b57ab23454365f	model
@@ -56689,6 +56844,7 @@ ru	28a5ce81418dde0b	model
 ru	28a96fc9e2d8c10d	model
 ru	28a9ed191dc6fdbe	model
 ru	28acd618b9b579b5	model
+ru	28b3a703803bfe36	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ru	28c6f601b95397fa	model
 ru	28cf1ea3500508ae	model
 ru	28dd2672bb9b09a8	model
@@ -56975,6 +57131,7 @@ ru	353e106750216f77	model
 ru	3542a784d36f5057	model
 ru	354527f94b87a502	model
 ru	354584beed2afa67	model
+ru	3552cc6f90271d59	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	35546a9b7f884039	model
 ru	35559a091c7cc4b9	model
 ru	3562596939d50b97	model
@@ -57114,6 +57271,7 @@ ru	3aa2e97a9bb15f69	model
 ru	3aa6df966333fb33	model
 ru	3aab83f231042976	model
 ru	3aae1e40403128fe	model
+ru	3af1aad6e0a00782	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ru	3af73c88ade582db	model
 ru	3afa35c570f3455a	model
 ru	3b01352434029e35	model
@@ -57177,6 +57335,7 @@ ru	3daff1c649000a68	model
 ru	3dbddafb3da192ef	model
 ru	3dc854b9e119d788	model
 ru	3dcbb444a74611a2	model
+ru	3df15e05a77240d2	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	3df86119ccba8c5d	model
 ru	3df97862e43ae380	model
 ru	3e00adb0a18f7c7b	model
@@ -57252,6 +57411,7 @@ ru	419c3680540798c2	model
 ru	419f22a7b69d4e71	model
 ru	41a806bba82b641b	model
 ru	41d119053094637c	model
+ru	41d2cf366610a371	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	41daa68bb2d831f6	model
 ru	41e07bd0de842302	model
 ru	42046640fb99d5b1	model
@@ -57597,6 +57757,7 @@ ru	50bb1fbb2cc7a685	model
 ru	50c1027b0cc5aad6	model
 ru	50caff66ed899b69	model
 ru	50cf79b25a2a3a3e	model
+ru	50d8f1a76a1fe7cb	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	50e0a7c14f85eec6	model
 ru	50eb208b4e26fdea	model
 ru	50ee53da160ce5b4	model
@@ -57733,7 +57894,9 @@ ru	57b7b7cfa38b4af7	model
 ru	57bad3a80754d644	model
 ru	57cc20215e9b05d2	model
 ru	57cd8f36e1b2e02c	model
+ru	57e5f225e077e2c4	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	57eacfb9acc1054c	model
+ru	57f1993cced42f53	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	58016b56f5cfd06c	model
 ru	58028446960babfb	model
 ru	5825e352af9f39d6	model
@@ -57841,6 +58004,7 @@ ru	5c8fa7ec2de2a711	model
 ru	5c98ae78351d638f	model
 ru	5ca82c657b6cd4b0	model
 ru	5cab404498f4cbfc	model
+ru	5cc00ffeb39e7dc6	human hand-translated by Claude, button name matched to the locale's label (2026-11-13)
 ru	5cc8cca01ac21a3d	model
 ru	5ccd633f36f56bee	model
 ru	5ccf64c06c59d700	model
@@ -57937,12 +58101,14 @@ ru	609af3362a5af213	model
 ru	609c5577501af23f	model
 ru	609da7d99c2dd77c	model
 ru	60a232fdbb9f33fa	model
+ru	60b04f2eb7e762d0	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	60b7e6943952688a	model
 ru	60c110acf6b98390	model
 ru	60c5ab26b946d024	model
 ru	60c6e62e3395a723	model
 ru	60e5666bd7c27a0f	model
 ru	60e575f6dd9572e8	model
+ru	6104837061a8e22f	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	6110338f2945d67c	model
 ru	6113d1811d26f48a	model
 ru	61247a8ea5b1d9d8	model
@@ -58308,7 +58474,7 @@ ru	70917d888b9e08b3	model
 ru	70ac07b7ae12f480	model
 ru	70c8ac7a9bce5307	model
 ru	70cfb58ebb422a4e	model
-ru	70d5a71eeac83c1a	model
+ru	70d5a71eeac83c1a	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	70eca7dc70507b46	model
 ru	70f3a54ee7bc78f0	model
 ru	7101e387c6d7f8b4	model
@@ -58604,6 +58770,7 @@ ru	7e82414006d1d1d0	model
 ru	7e9a8986d7353c0c	model
 ru	7e9bdc2f9da852a5	model (verified in sysmanage-docs)
 ru	7eb02362ffcbc7e2	model
+ru	7eb4419cfe51901b	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	7eb7538f0af672ad	model
 ru	7ec327b0f23bf7d1	model
 ru	7ec74e413544c98d	model
@@ -59679,6 +59846,7 @@ ru	ae851ee41cdaa15a	model
 ru	ae892486daf1cdf4	model
 ru	aea72fd6dbeaef61	model
 ru	aea73a52dc4083d8	model
+ru	aeb67d91cd613fe8	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 ru	aeb86679bdc2c287	model
 ru	aeb8d8ea4c274f3b	model
 ru	aed9639973855eb1	model
@@ -60158,6 +60326,7 @@ ru	c593e4d8e8a39f95	model
 ru	c5a37c5f1ba94e00	model
 ru	c5b819ebe2b92b0d	model
 ru	c5baf90a7f988712	model
+ru	c5bf92b03a3392a5	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	c5c8bbf736d1df4d	model
 ru	c5cbee3ef819e265	model
 ru	c5dedac39cabcd71	model
@@ -60367,6 +60536,7 @@ ru	cf6fc9b5a9cc9f34	model
 ru	cf7432af1c80e9cb	model
 ru	cf7bb0ef380cdd65	model
 ru	cf8335858b755892	model
+ru	cfa067afa22bd19c	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	cfa4ad1bc8b07df6	model
 ru	cfb39057076a3e22	model
 ru	cfc84ec14cd62c82	model
@@ -60890,6 +61060,7 @@ ru	e6993a6fc2d01fe1	model
 ru	e69f31b2a47b8a49	model
 ru	e6a21be781d86efd	model
 ru	e6a5be93142fd843	model
+ru	e6b01528ddc72a18	human hand-translated by Claude, reviewed against the English (2026-11-13)
 ru	e6b4bfd9eb4d74c0	model
 ru	e6c4965c83836353	model
 ru	e6ce12473293ae79	model
@@ -61869,6 +62040,7 @@ zh_CN	119e38610835c07e	model
 zh_CN	119fd46538ae9d59	model
 zh_CN	11a4f45bcd52b897	model
 zh_CN	11ad79fa6d750ecf	model
+zh_CN	11bc907f3d949030	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	11bfb266c31b22a7	model
 zh_CN	11c6a43ce3f3a217	model
 zh_CN	11c99f4026ffc3fe	model
@@ -62216,6 +62388,7 @@ zh_CN	216cd93c910e2ac2	model
 zh_CN	217226815703bd2b	model
 zh_CN	21730c69b1897475	model
 zh_CN	217f2a5aa8392e04	model
+zh_CN	218a3fb3f5a095dc	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	218d3e08eff3d4f7	model
 zh_CN	21908f5609e78db0	model
 zh_CN	219153422d587a8c	model
@@ -62303,7 +62476,9 @@ zh_CN	259ef7cd15171585	model
 zh_CN	25ab1e015915aa80	model
 zh_CN	25acbf1a8d5b2804	model
 zh_CN	25af6f158d4030d1	model
+zh_CN	25b6023cbc9cfc7a	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	25c4bd00dd8338b6	model
+zh_CN	25dba8c968b86d6d	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	25f9e71d47c4d048	model
 zh_CN	25fadf7e75d5a78c	model
 zh_CN	25fd3dd0b1de251b	model
@@ -62422,6 +62597,7 @@ zh_CN	2aa2f1d1543282f3	model
 zh_CN	2abd26d16696fbc1	model
 zh_CN	2ae76869170d0355	model
 zh_CN	2aedd921bfd3bad8	model
+zh_CN	2afa808610e8ffa1	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	2afc20629fb22657	model
 zh_CN	2b07172e2d908bc1	model
 zh_CN	2b0cfab2a6cbd50a	model
@@ -62763,6 +62939,7 @@ zh_CN	397d051a35ca2299	model
 zh_CN	398349b8923e4bb8	model
 zh_CN	3992ef713a2b3264	model
 zh_CN	39aa065111b38015	model
+zh_CN	39bbe75bb64a679e	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	39c939baa0e45dc9	model
 zh_CN	39dfae1672f46bd4	model
 zh_CN	39e1c170b6016546	model
@@ -63568,6 +63745,7 @@ zh_CN	5faaf06f80034916	model
 zh_CN	5fb2abade87fd9a7	model
 zh_CN	5fb90dcdd7415574	model
 zh_CN	5fbf86d8bab16919	model
+zh_CN	5fc465428b1a595c	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	5fcd7e8cc4e50e90	model
 zh_CN	5fd8bd50f4fc7f1d	human Certificate status Renewing; 续订中 is exact
 zh_CN	5fdbe91ce7d3e539	model
@@ -63996,6 +64174,7 @@ zh_CN	7469355acc345593	model
 zh_CN	746b86a9acbc3df8	model
 zh_CN	746cc07bf6737240	model
 zh_CN	7489f11944bd0d96	model
+zh_CN	748a800d5872ea66	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	74950e3a84863d89	model
 zh_CN	749652a98fbafa2e	model
 zh_CN	7499272108430224	model
@@ -64498,6 +64677,7 @@ zh_CN	8b7fd18d702043f1	model
 zh_CN	8b987d375ecd8460	model
 zh_CN	8ba269bc9180fe0f	model
 zh_CN	8bb2e59ff46d921e	model
+zh_CN	8bba32b64ac99a6d	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 zh_CN	8bbc7de7e3cd1bc9	model
 zh_CN	8bda3707f19ced9c	model
 zh_CN	8bde135d5f36c870	model
@@ -64513,15 +64693,17 @@ zh_CN	8c6d658e1dac9c09	model
 zh_CN	8c6fd036d65d48cc	model
 zh_CN	8c75451531ede501	model
 zh_CN	8c84b6336f3c7f9b	model
-zh_CN	8c9264bea52cead0	model
+zh_CN	8c9264bea52cead0	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	8c92e4d33a358555	model
 zh_CN	8c99cca1ddeaace9	model
+zh_CN	8cae0b0366deec2b	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	8cbcb1e68983ec17	model
 zh_CN	8cda71fa2bd1a3e5	model
 zh_CN	8cdff6fc08b3b8fc	model
 zh_CN	8ceeb7edd542df49	model
 zh_CN	8cf949c493dede8d	model
 zh_CN	8d0138ab84fd184c	model
+zh_CN	8d1cb24b2b5241d2	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	8d1d4e01a60dc43f	model
 zh_CN	8d20ee4d2ecd6c09	model
 zh_CN	8d24f22988eb9ea2	model
@@ -65354,6 +65536,7 @@ zh_CN	b216b3c688a5722d	model
 zh_CN	b221eed0cd1a614b	model
 zh_CN	b23f94f5ee680fb9	model
 zh_CN	b2437a1afe6907ae	model
+zh_CN	b24d1c3fcd531b31	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	b24deb4831ebafe0	model
 zh_CN	b253e820ed891e26	model
 zh_CN	b268acd55500210d	model
@@ -65507,6 +65690,7 @@ zh_CN	b93c1c16f959d6e3	model
 zh_CN	b94b844c20b2edca	model
 zh_CN	b950656a2bd417cd	model
 zh_CN	b98c6585176eb8de	model
+zh_CN	b9a1529a99f41d3d	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	b9b28fcf70a5d1a8	model
 zh_CN	b9bee522a12f3184	model
 zh_CN	b9d5496e4eba2e8e	model
@@ -65519,6 +65703,7 @@ zh_CN	ba419839efb9fa16	model
 zh_CN	ba449c26da7c0c3f	model
 zh_CN	ba6216ffaac3aaee	model
 zh_CN	ba73bcb09d0105fe	model
+zh_CN	ba7ba9027a71cc95	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 zh_CN	ba8241c6dd4757f8	model
 zh_CN	ba94f1e064b94623	model
 zh_CN	ba969362db635daa	model
@@ -65623,6 +65808,7 @@ zh_CN	bf210a85c49f0565	model
 zh_CN	bf2176f62fa2bc85	model
 zh_CN	bf25487ec37f9046	model
 zh_CN	bf28eb2de27698f8	model
+zh_CN	bf454fee0df4cf35	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 zh_CN	bf57fa63f645f377	model
 zh_CN	bf5c0edf5ea86991	model
 zh_CN	bf72d8fb48629b34	model
@@ -65688,6 +65874,7 @@ zh_CN	c266680acc7f43ed	model
 zh_CN	c26f2011b467a328	model
 zh_CN	c27080ec9796d8b5	model
 zh_CN	c27779498aa5262a	model
+zh_CN	c27d53e63c14c00f	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_CN	c27e083834c0ac77	model
 zh_CN	c27f68cd707d6735	model
 zh_CN	c27f76b3e2baad18	model
@@ -67193,6 +67380,7 @@ zh_TW	066cf224272f66d9	model
 zh_TW	06718f2f12929605	model
 zh_TW	067ad70ed5755840	model
 zh_TW	0686c90bc941c183	model
+zh_TW	06a361c4cbfb4838	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	06a73d2f6de977c9	model
 zh_TW	06b31b6fda99c0f4	model
 zh_TW	06d4d5cd840ec10c	model
@@ -67699,6 +67887,7 @@ zh_TW	1e63f9a4e2840e8c	model
 zh_TW	1e724cf7875b3c15	model
 zh_TW	1e78c330f521b582	model
 zh_TW	1e8e4fea1fbedd03	model
+zh_TW	1e9472949b0f6eee	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	1eab3a507e6b8d18	model
 zh_TW	1eb353e48aae3446	model
 zh_TW	1ec0a20797d169f0	model
@@ -67728,6 +67917,7 @@ zh_TW	2019218086359bb5	model
 zh_TW	20270411fe01b92d	model
 zh_TW	2030b36b7c16a241	model
 zh_TW	203a095ad9054dda	model
+zh_TW	204b34d8214c650a	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	2067834b51a8a1be	model
 zh_TW	206e12c6a514a082	model
 zh_TW	2073e22231c1685b	model
@@ -68705,6 +68895,7 @@ zh_TW	4cd92f4ff1bbbcc1	model
 zh_TW	4ce2d293eb49ff3e	model
 zh_TW	4cfdaaf77c64f1af	model
 zh_TW	4d0546ae76a46459	model
+zh_TW	4d058b5702cc88b8	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	4d0a5d92078ca519	model
 zh_TW	4d16abc393eb5e94	model
 zh_TW	4d1bd34812b640ba	model
@@ -69129,6 +69320,7 @@ zh_TW	604d0245d4f3193d	model
 zh_TW	605501bab3db8d38	model
 zh_TW	605825717b732a7e	model
 zh_TW	60634f918a8d2094	model
+zh_TW	607245d6caa62cc6	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	6075fdc3a0a82e73	model
 zh_TW	607bf3df229a2480	model
 zh_TW	6084af98be6daa3a	model
@@ -69285,6 +69477,7 @@ zh_TW	66c7bcd74cdd0b92	model
 zh_TW	66e7c8a997029c39	model
 zh_TW	6709eecb03341fed	model
 zh_TW	6716a342ef6b7795	model
+zh_TW	6717054ef186edf4	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	671a3c79c3545a65	model
 zh_TW	671c4b81508455b8	model
 zh_TW	672146003cdd2347	model
@@ -69363,6 +69556,7 @@ zh_TW	6a6b77685227bfbc	model
 zh_TW	6a6bd9784ad928ba	model
 zh_TW	6a70ecd302fff6fe	model
 zh_TW	6a73f17a27d6fba2	model
+zh_TW	6a7c551eab94e64b	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 zh_TW	6a8062033e86dfa1	model
 zh_TW	6a80860fc5e1e34e	model
 zh_TW	6a835e332cf19ff9	model
@@ -69373,6 +69567,7 @@ zh_TW	6aceb45840d7f1ff	model
 zh_TW	6ad84390e4bc41e1	model
 zh_TW	6ae303b173324bc2	model
 zh_TW	6aea1006e5bfb364	model
+zh_TW	6aecea38832381f6	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 zh_TW	6aefe82d35a83209	model
 zh_TW	6af3275006e11974	model
 zh_TW	6b1bdd740ed4ce6d	model
@@ -69733,6 +69928,7 @@ zh_TW	7b88618315466e2d	model
 zh_TW	7ba171111b010d58	model
 zh_TW	7bd0d307c36aef3c	model
 zh_TW	7bdb244c26067a55	model
+zh_TW	7bef148ab2f62303	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	7c069cfcb4f0a65f	model
 zh_TW	7c06f656398e50a6	model
 zh_TW	7c1a185d3f5251cc	model
@@ -69962,6 +70158,7 @@ zh_TW	87461f1ed94033ca	model
 zh_TW	874dfff7ff608638	model
 zh_TW	8758ba7494fcc6d2	model
 zh_TW	876ef96f6f2f86b6	model
+zh_TW	87729ea903d93534	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	8775255f2cb8213b	model
 zh_TW	8778a79f4a9a4b74	model
 zh_TW	8787309996a08a8f	model
@@ -70205,6 +70402,7 @@ zh_TW	91af3daa6e274604	model
 zh_TW	91bffcc4da4c8938	model
 zh_TW	91cbf0d2a5170ee4	model
 zh_TW	91f5432af55e71bf	model
+zh_TW	9204111e4279e0f2	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 zh_TW	920569c049e78f14	model
 zh_TW	924792eac3800c86	model
 zh_TW	92516f51c525af0d	model
@@ -70276,7 +70474,7 @@ zh_TW	95695e45090660a2	model
 zh_TW	956d354a08d9196a	model
 zh_TW	957194b9dfb0e584	model
 zh_TW	9573b1ee574e03bd	model
-zh_TW	958cc937ff183f40	model
+zh_TW	958cc937ff183f40	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	958f8bfb22f503b7	model
 zh_TW	959c39c0578a0308	model
 zh_TW	95aec8cc0458acfd	model
@@ -70554,6 +70752,7 @@ zh_TW	a25f3f9d4b242dab	model
 zh_TW	a2614c2dc0e3d062	model
 zh_TW	a2693ee26fabbccd	model
 zh_TW	a274b93b2971a5ac	model
+zh_TW	a27b04d306c23424	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	a292c396de3a3880	model
 zh_TW	a293d43690e3716f	model
 zh_TW	a2b9debceb43c8e6	model
@@ -71167,6 +71366,7 @@ zh_TW	bd966dd8ffa4b75f	model
 zh_TW	bd9c71d395374bbf	model
 zh_TW	bda21cc03468e7b9	model
 zh_TW	bda730aea0fcc851	model
+zh_TW	bdae736f53927c83	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	bdb779046b0bfa5b	model
 zh_TW	bdc895cab7e1931d	model
 zh_TW	bdc90bff608c399e	model
@@ -71887,6 +72087,7 @@ zh_TW	df81dcf3b0096116	model
 zh_TW	df8494d92ce38736	model
 zh_TW	df8a97c98ceaf864	model
 zh_TW	df935597a7738510	model
+zh_TW	df97ce54858fdd05	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	df9fedf145099394	model
 zh_TW	dfaa5e03bb7e6ccf	model
 zh_TW	dfae12692a15ea34	model
@@ -72181,6 +72382,7 @@ zh_TW	eb9a7223c0023c67	model
 zh_TW	ebcd9ce93135ae0c	model
 zh_TW	ebd28e37aebb7326	model
 zh_TW	ebd6dee8b064a592	model
+zh_TW	ebd708d23cdcc703	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	ebef449499bc4861	model
 zh_TW	ebf11a48878e0a30	model
 zh_TW	ec196809de415b36	model
@@ -72425,7 +72627,7 @@ zh_TW	f6b83f0d57e3011e	model
 zh_TW	f6bd0638413119e0	model
 zh_TW	f6c1580947556698	model
 zh_TW	f6d127a78f3833d7	model
-zh_TW	f6dfd53266f1acb4	model
+zh_TW	f6dfd53266f1acb4	human hand-translated by Claude, reviewed against the English (2026-11-13)
 zh_TW	f6dff7caa310f988	model
 zh_TW	f6ea778ff6c1dabe	model
 zh_TW	f6eacc5aa6c93a3d	model

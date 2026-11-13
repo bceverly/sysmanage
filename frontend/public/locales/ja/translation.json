@@ -1959,7 +1959,13 @@
     "heldCount": "保留中: {{count}}",
     "heldTitle": "コマンドがメンテナンスウィンドウを待っています",
     "scriptsNeedApproval": "スクリプトには承認が必要",
-    "scriptsNeedApprovalTooltip": "このホストのエージェントは、承認ワークフロー（Professional+）で承認されたスクリプトのみを実行します。単発のスクリプトは拒否されます。"
+    "scriptsNeedApprovalTooltip": "このホストのエージェントは、承認ワークフロー（Professional+）で承認されたスクリプトのみを実行します。単発のスクリプトは拒否されます。",
+    "packageManagerNeedsRepair": "パッケージマネージャーの修復が必要",
+    "repairPackageManager": "パッケージマネージャーを修復",
+    "requiresRepairHost": "パッケージマネージャーの修復が必要なホストを選択してください",
+    "repairStarted": "{{count}} 台のホストでパッケージマネージャーの修復を開始しました。",
+    "repairStarted_one": "{{count}} 台のホストでパッケージマネージャーの修復を開始しました。",
+    "repairStarted_other": "{{count}} 台のホストでパッケージマネージャーの修復を開始しました。"
   },
   "idp": {
     "action": {
@@ -3712,7 +3718,14 @@
       "security": "セキュリティ",
       "system": "システム"
     },
-    "unknown": "不明"
+    "unknown": "不明",
+    "selectAllMatching": "{{count}} 件の更新をすべて選択",
+    "selectAllMatching_one": "{{count}} 件の更新をすべて選択",
+    "selectAllMatching_other": "{{count}} 件の更新をすべて選択",
+    "allMatchingSelected": "すべてのページの {{count}} 件の更新がすべて選択されています。",
+    "allMatchingSelected_one": "すべてのページの {{count}} 件の更新がすべて選択されています。",
+    "allMatchingSelected_other": "すべてのページの {{count}} 件の更新がすべて選択されています。",
+    "clearSelection": "選択を解除"
   },
   "upgradeProfiles": {
     "add": "プロファイルを追加",
@@ -5373,7 +5386,8 @@
       "title": "バックアップ",
       "writeCache": "このホストの書き込みキャッシュ: {{size}}",
       "writeCacheOver": "上限の {{budget}} GB を超えています",
-      "encrypted": "暗号化済み"
+      "encrypted": "暗号化済み",
+      "needsServerPolicy": "このホストは SysManage サーバーですが、通常のホストとしてバックアップされています。バックアップのたびにデータベースが停止され、OpenBAO のアンシールキーがバックアップにコピーされます。「設定」を使うと、代わりにサーバーとしてバックアップされます。"
     },
     "coverage": {
       "filesOnly": "ファイルのみ",
@@ -5400,7 +5414,8 @@
       "waiting": "空き枠を待っています",
       "unreadable": "読み取れなかったファイル: {{n}}",
       "showAll": "すべてのホストを表示",
-      "heldNote": "次のバックアップは、このホストのメンテナンスウィンドウを待っています"
+      "heldNote": "次のバックアップは、このホストのメンテナンスウィンドウを待っています",
+      "needsServerPolicy": "SysManage サーバー: サーバーとしてバックアップしてください"
     },
     "loadError": "バックアップを読み込めませんでした。",
     "policy": {
@@ -5559,7 +5574,10 @@
       "spaceLow": "ストレージがこの使用率になったら警告 (%)",
       "spaceCritical": "ストレージがこの使用率になったら重大 (%)",
       "cacheBudget": "ホストごとの書き込みキャッシュ上限（GB）",
-      "cacheBudgetHelp": "restate は、暗号化されたリポジトリの各ホストに暗号化されていない書き込みキャッシュを保持します。この値を超えたホストにはフラグが付きます。"
+      "cacheBudgetHelp": "restate は、暗号化されたリポジトリの各ホストに暗号化されていない書き込みキャッシュを保持します。この値を超えたホストにはフラグが付きます。",
+      "changeTransport": "ホストからストレージへの接続方法を変更",
+      "changeBandwidth": "帯域幅の制限を変更",
+      "details": "詳細"
     },
     "title": "バックアップ",
     "warning": {
@@ -5638,7 +5656,9 @@
       "proxyGrants": "restate-proxy が次のホストの許可を受け入れません: {{hosts}}。理由を確認するには、ストレージホストで restate-proxy --check-grants を実行してください。",
       "proxyMissing": "ストレージホストに restate-proxy がインストールされていないため、ホストはこれを経由してバックアップにアクセスできません。",
       "proxyStopped": "ストレージホストで restate-proxy が実行されていないため、ホストはこれを経由してバックアップにアクセスできません。",
-      "repositoryMade": "ストレージホストにまだリポジトリがありません: {{hosts}}。各ホストの「バックアップ」タブにある「ストレージを準備」で作成されます。それまでは restate-proxy がそのバックアップを拒否します。"
+      "repositoryMade": "ストレージホストにまだリポジトリがありません: {{hosts}}。各ホストの「バックアップ」タブにある「ストレージを準備」で作成されます。それまでは restate-proxy がそのバックアップを拒否します。",
+      "proxyInstall": "restate-proxy をインストール",
+      "proxyInstalling": "ストレージホストに restate-proxy をインストールしています。この警告は次回のストレージチェック後に消えます。"
     },
     "prepare": {
       "title": "このホスト用にストレージを準備しますか?",
@@ -5696,7 +5716,8 @@
       "recheck": "再確認",
       "recheckError": "確認を依頼できませんでした。",
       "running": "対応処理中: restate をインストールしています...",
-      "started": "restate をインストールしています。数分かかることがあります。"
+      "started": "restate をインストールしています。数分かかることがあります。",
+      "failNoLocal": "このエアギャップ環境のリポジトリには、このシステム用の restate パッケージがありません"
     },
     "verify": {
       "title": "全読み取り検証",
@@ -5851,7 +5872,8 @@
       "pauseNote": "PostgreSQL は自身のファイルのコピー中に停止されるため、その間 SysManage にエラーが表示されることがあります。負荷の少ない開始時刻を選んでください。",
       "unencrypted": "このバックアップは暗号化されておらず、設定に含まれるデータベースのパスワードを含みます。バックアップストレージはサーバー自体と同じように厳重に保護してください。",
       "needsEscrow": "まず、ホストの暗号化パネルで緊急用エスクローキーを保存してください。SysManage サーバー自身のバックアップはこのキーで暗号化されるため、OpenBAO の復元に OpenBAO 内に保管されたキーが必要になることはありません。",
-      "escrowEncrypted": "緊急用エスクローキー ({{fingerprint}}) で暗号化されています。SysManage はその秘密部分を保持しないため、このバックアップはサーバー復旧手順書のとおり、そのキーを使って手動で復元します。"
+      "escrowEncrypted": "緊急用エスクローキー ({{fingerprint}}) で暗号化されています。SysManage はその秘密部分を保持しないため、このバックアップはサーバー復旧手順書のとおり、そのキーを使って手動で復元します。",
+      "ordinaryPolicy": "この SysManage サーバー ({{host}}) は通常のホストとしてバックアップされています。バックアップのたびにデータベースが停止され、OpenBAO のアンシールキーがバックアップにコピーされます。代わりに SysManage サーバーとしてバックアップしてください。"
     },
     "transport": {
       "ca": "サイトの CA 証明書 (PEM、任意)",

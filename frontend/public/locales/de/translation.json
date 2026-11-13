@@ -1959,7 +1959,13 @@
     "heldCount": "Zurückgehalten: {{count}}",
     "heldTitle": "Befehle warten auf ein Wartungsfenster",
     "scriptsNeedApproval": "Skripte erfordern Genehmigung",
-    "scriptsNeedApprovalTooltip": "Der Agent dieses Hosts führt nur Skripte aus, die über den Genehmigungsablauf (Professional+) genehmigt wurden. Einmalige Skripte werden abgelehnt."
+    "scriptsNeedApprovalTooltip": "Der Agent dieses Hosts führt nur Skripte aus, die über den Genehmigungsablauf (Professional+) genehmigt wurden. Einmalige Skripte werden abgelehnt.",
+    "packageManagerNeedsRepair": "Paketverwaltung muss repariert werden",
+    "repairPackageManager": "Paketverwaltung reparieren",
+    "requiresRepairHost": "Wählen Sie einen Host, dessen Paketverwaltung repariert werden muss",
+    "repairStarted": "Reparatur der Paketverwaltung auf {{count}} Host(s) gestartet.",
+    "repairStarted_one": "Reparatur der Paketverwaltung auf {{count}} Host(s) gestartet.",
+    "repairStarted_other": "Reparatur der Paketverwaltung auf {{count}} Host(s) gestartet."
   },
   "idp": {
     "action": {
@@ -3712,7 +3718,14 @@
       "security": "Sicherheit",
       "system": "System"
     },
-    "unknown": "Unbekannt"
+    "unknown": "Unbekannt",
+    "selectAllMatching": "Alle {{count}} Updates auswählen",
+    "selectAllMatching_one": "Alle {{count}} Updates auswählen",
+    "selectAllMatching_other": "Alle {{count}} Updates auswählen",
+    "allMatchingSelected": "Alle {{count}} Updates auf allen Seiten sind ausgewählt.",
+    "allMatchingSelected_one": "Alle {{count}} Updates auf allen Seiten sind ausgewählt.",
+    "allMatchingSelected_other": "Alle {{count}} Updates auf allen Seiten sind ausgewählt.",
+    "clearSelection": "Auswahl aufheben"
   },
   "upgradeProfiles": {
     "add": "Profil hinzufügen",
@@ -5373,7 +5386,8 @@
       "title": "Sicherung",
       "writeCache": "Schreibcache auf diesem Host: {{size}}",
       "writeCacheOver": "über dem Budget von {{budget}} GB",
-      "encrypted": "Verschlüsselt"
+      "encrypted": "Verschlüsselt",
+      "needsServerPolicy": "Dieser Host ist der SysManage-Server und wird wie ein gewöhnlicher Host gesichert: Seine Datenbank wird bei jeder Sicherung angehalten, und der Entsiegelungsschlüssel von OpenBAO wird mitgesichert. „Konfigurieren“ sichert ihn stattdessen als Server."
     },
     "coverage": {
       "filesOnly": "Nur Dateien",
@@ -5400,7 +5414,8 @@
       "waiting": "Wartet auf einen freien Platz",
       "unreadable": "Nicht gelesene Dateien: {{n}}",
       "showAll": "Alle Hosts anzeigen",
-      "heldNote": "Das nächste Backup wartet auf das Wartungsfenster dieses Hosts"
+      "heldNote": "Das nächste Backup wartet auf das Wartungsfenster dieses Hosts",
+      "needsServerPolicy": "Der SysManage-Server: als Server sichern"
     },
     "loadError": "Die Sicherungen konnten nicht geladen werden.",
     "policy": {
@@ -5559,7 +5574,10 @@
       "spaceLow": "Warnen, wenn der Speicher so voll ist (%)",
       "spaceCritical": "Kritisch, wenn der Speicher so voll ist (%)",
       "cacheBudget": "Schreibcache-Budget pro Host (GB)",
-      "cacheBudgetHelp": "restate hält auf jedem Host eines verschlüsselten Repositorys einen unverschlüsselten Schreibcache; ein Host darüber wird markiert."
+      "cacheBudgetHelp": "restate hält auf jedem Host eines verschlüsselten Repositorys einen unverschlüsselten Schreibcache; ein Host darüber wird markiert.",
+      "changeTransport": "Ändern, wie Hosts den Speicher erreichen",
+      "changeBandwidth": "Bandbreitenlimits ändern",
+      "details": "Details"
     },
     "title": "Sicherungen",
     "warning": {
@@ -5638,7 +5656,9 @@
       "proxyGrants": "restate-proxy akzeptiert die Freigabe nicht für: {{hosts}}. Führen Sie restate-proxy --check-grants auf dem Speicher-Host aus, um den Grund zu sehen.",
       "proxyMissing": "restate-proxy ist auf dem Speicher-Host nicht installiert, daher können Hosts ihre Sicherungen nicht darüber erreichen.",
       "proxyStopped": "restate-proxy läuft auf dem Speicher-Host nicht, daher können Hosts ihre Sicherungen nicht darüber erreichen.",
-      "repositoryMade": "Noch kein Repository auf dem Speicher-Host: {{hosts}}. \"Speicher vorbereiten\" auf der Registerkarte \"Sicherungen\" jedes Hosts legt es an; bis dahin lehnt restate-proxy ihre Sicherungen ab."
+      "repositoryMade": "Noch kein Repository auf dem Speicher-Host: {{hosts}}. \"Speicher vorbereiten\" auf der Registerkarte \"Sicherungen\" jedes Hosts legt es an; bis dahin lehnt restate-proxy ihre Sicherungen ab.",
+      "proxyInstall": "restate-proxy installieren",
+      "proxyInstalling": "restate-proxy wird auf dem Speicher-Host installiert. Diese Warnung verschwindet nach der nächsten Speicherprüfung."
     },
     "prepare": {
       "title": "Speicher für diesen Host vorbereiten?",
@@ -5696,7 +5716,8 @@
       "recheck": "Erneut prüfen",
       "recheckError": "Die Prüfung konnte nicht angefordert werden.",
       "running": "Wird ausgestattet: restate wird installiert...",
-      "started": "restate wird installiert; das kann einige Minuten dauern."
+      "started": "restate wird installiert; das kann einige Minuten dauern.",
+      "failNoLocal": "Das eigene Repository dieses vom Netz getrennten Standorts enthält kein restate-Paket für dieses System"
     },
     "verify": {
       "title": "Verifizierung mit vollständigem Lesen",
@@ -5851,7 +5872,8 @@
       "pauseNote": "PostgreSQL wird angehalten, während seine eigenen Dateien kopiert werden, daher kann SysManage in dieser Zeit Fehler anzeigen. Wählen Sie eine ruhige Startstunde.",
       "unencrypted": "Diese Sicherung ist nicht verschlüsselt und enthält das Datenbankpasswort aus der Konfiguration. Schützen Sie den Sicherungsspeicher so gut wie den Server selbst.",
       "needsEscrow": "Speichern Sie zuerst einen Notfall-Treuhandschlüssel im Verschlüsselungsbereich eines Hosts. Die eigene Sicherung des SysManage-Servers wird damit verschlüsselt, sodass die Wiederherstellung von OpenBAO nie einen in OpenBAO verwahrten Schlüssel braucht.",
-      "escrowEncrypted": "Mit Ihrem Notfall-Treuhandschlüssel verschlüsselt ({{fingerprint}}). SysManage besitzt nie dessen geheimen Teil, daher wird diese Sicherung von Hand mit diesem Schlüssel wiederhergestellt, wie es das Wiederherstellungshandbuch des Servers beschreibt."
+      "escrowEncrypted": "Mit Ihrem Notfall-Treuhandschlüssel verschlüsselt ({{fingerprint}}). SysManage besitzt nie dessen geheimen Teil, daher wird diese Sicherung von Hand mit diesem Schlüssel wiederhergestellt, wie es das Wiederherstellungshandbuch des Servers beschreibt.",
+      "ordinaryPolicy": "Dieser SysManage-Server ({{host}}) wird wie ein gewöhnlicher Host gesichert: Seine Datenbank wird bei jeder Sicherung angehalten, und der Entsiegelungsschlüssel von OpenBAO wird mitgesichert. Sichern Sie ihn stattdessen als SysManage-Server."
     },
     "transport": {
       "ca": "Eigenes CA-Zertifikat (PEM, optional)",

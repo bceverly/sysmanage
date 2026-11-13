@@ -9,6 +9,9 @@
 
 import React, { useEffect, useState } from 'react';
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
     Alert,
     Box,
     Button,
@@ -27,6 +30,7 @@ import {
     Typography,
 } from '@mui/material';
 import StorageIcon from '@mui/icons-material/Storage';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import AsyncButton from '../AsyncButton';
@@ -34,8 +38,27 @@ import { saveTarget } from '../../Services/backups';
 import type { BackupHost, BackupTarget, TargetInput } from '../../Services/backups';
 import { apiDetail, reasonLabel } from './backupLabels';
 import BackupStorageStatus from './BackupStorageStatus';
-import BackupTransport from './BackupTransport';
-import BackupProxyBandwidth from './BackupProxyBandwidth';
+import BackupTransport, { TransportDialog } from './BackupTransport';
+import BackupProxyBandwidth, { BandwidthDialog } from './BackupProxyBandwidth';
+
+// Whether the card's details are open, per viewer (a convenience only).
+const DETAILS_KEY = 'sysmanage.backups.targetDetailsOpen';
+
+const readOpen = (): boolean => {
+    try {
+        return globalThis.localStorage?.getItem(DETAILS_KEY) === '1';
+    } catch {
+        return false;
+    }
+};
+
+const writeOpen = (open: boolean): void => {
+    try {
+        globalThis.localStorage?.setItem(DETAILS_KEY, open ? '1' : '0');
+    } catch {
+        // private window or blocked storage: it just opens closed next time
+    }
+};
 
 const EMPTY: TargetInput = {
     name: '',
@@ -222,18 +245,39 @@ const BackupTargetCard: React.FC<{
 }> = ({ target, hosts, versions, canManage, onChanged }) => {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
+    const [transportOpen, setTransportOpen] = useState(false);
+    const [bandwidthOpen, setBandwidthOpen] = useState(false);
+    const [detailsOpen, setDetailsOpen] = useState(readOpen);
+    const onProxy = target?.transport?.transport === 'proxy';
+    const bandwidth = target?.proxy_bandwidth;
+    const canChangeBandwidth = onProxy && !!bandwidth && (bandwidth.licensed || bandwidth.rules.length > 0);
     return (
         <Card variant="outlined" sx={{ mb: 2 }}>
-            <CardContent>
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                    <StorageIcon />
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                        {target ? target.name : t('backups.target.none', 'No backup target yet')}
-                    </Typography>
+            <CardContent sx={{ pb: 1, '&:last-child': { pb: 1 } }}>
+                {/* The name and what matters at a glance; every change top right. */}
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ sm: 'center' }} sx={{ mb: 1 }}>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ flexGrow: 1, minWidth: 0 }}>
+                        <StorageIcon />
+                        <Typography variant="h6" noWrap>
+                            {target ? target.name : t('backups.target.none', 'No backup target yet')}
+                        </Typography>
+                    </Stack>
                     {canManage && (
-                        <Button variant="outlined" size="small" onClick={() => setOpen(true)}>
-                            {target ? t('backups.target.edit', 'Edit target') : t('backups.target.add', 'Set up target')}
-                        </Button>
+                        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="flex-end">
+                            {target && (
+                                <Button variant="outlined" size="small" onClick={() => setTransportOpen(true)}>
+                                    {t('backups.target.changeTransport', 'Change how hosts reach storage')}
+                                </Button>
+                            )}
+                            {target && canChangeBandwidth && (
+                                <Button variant="outlined" size="small" onClick={() => setBandwidthOpen(true)}>
+                                    {t('backups.target.changeBandwidth', 'Change bandwidth limits')}
+                                </Button>
+                            )}
+                            <Button variant="outlined" size="small" onClick={() => setOpen(true)}>
+                                {target ? t('backups.target.edit', 'Edit target') : t('backups.target.add', 'Set up target')}
+                            </Button>
+                        </Stack>
                     )}
                 </Stack>
                 {!target && (
@@ -245,33 +289,50 @@ const BackupTargetCard: React.FC<{
                 {target && (
                     <Box>
                         <Typography variant="body2">
-                            {t('backups.target.mountedAt', 'Hosts mount it at')}: <code>{target.host_mount_point}</code>
-                        </Typography>
-                        <Typography variant="body2">
                             {t('backups.target.storageHost', 'Storage host')}:{' '}
                             {target.storage_hostname
                                 ? <>{target.storage_hostname} <code>{target.storage_path}</code></>
                                 : t('backups.target.noStorageHost', 'None')}
                             {target.storage_reason && target.storage_hostname && ` (${reasonLabel(t, target.storage_reason)})`}
                         </Typography>
-                        <BackupTransport target={target} canManage={canManage} onChanged={onChanged} />
-                        <BackupProxyBandwidth target={target} canManage={canManage} onChanged={onChanged} />
-                        <Typography variant="body2">
-                            {t('backups.target.sealMode', 'Seal each backup')}:{' '}
-                            {sealDescription(t, target)}
-                        </Typography>
-                        <Typography variant="body2">
-                            {t('backups.target.signing', 'Sign each snapshot')}:{' '}
-                            {target.signing
-                                ? t('backups.target.signingOn', 'On, key {{fingerprint}}', { fingerprint: target.signing.fingerprint })
-                                : t('backups.target.signingOff', 'Off (Professional+)')}
-                        </Typography>
-                        {versions.length > 0 && (
-                            <Typography variant="body2" color="text.secondary">
-                                {t('backups.target.restateVersions', 'restate versions in use')}: {versions.join(', ')}
-                            </Typography>
+                        <BackupTransport target={target} canManage={canManage} onChanged={onChanged} inline={false} />
+                        <BackupStorageStatus target={target} hosts={hosts} canManage={canManage} part="warnings" />
+                        <Accordion disableGutters elevation={0} expanded={detailsOpen}
+                            onChange={(_e, expanded) => { setDetailsOpen(expanded); writeOpen(expanded); }}
+                            sx={{ mt: 1, bgcolor: 'transparent', '&::before': { display: 'none' } }}>
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0, minHeight: 0 }}
+                                aria-controls="backup-target-details" id="backup-target-details-header">
+                                <Typography variant="body2" color="text.secondary">
+                                    {t('backups.target.details', 'Details')}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ px: 0, pt: 0 }} id="backup-target-details">
+                                <Typography variant="body2">
+                                    {t('backups.target.mountedAt', 'Hosts mount it at')}: <code>{target.host_mount_point}</code>
+                                </Typography>
+                                <BackupProxyBandwidth target={target} canManage={canManage} onChanged={onChanged} inline={false} />
+                                <Typography variant="body2">
+                                    {t('backups.target.sealMode', 'Seal each backup')}:{' '}
+                                    {sealDescription(t, target)}
+                                </Typography>
+                                <Typography variant="body2">
+                                    {t('backups.target.signing', 'Sign each snapshot')}:{' '}
+                                    {target.signing
+                                        ? t('backups.target.signingOn', 'On, key {{fingerprint}}', { fingerprint: target.signing.fingerprint })
+                                        : t('backups.target.signingOff', 'Off (Professional+)')}
+                                </Typography>
+                                {versions.length > 0 && (
+                                    <Typography variant="body2" color="text.secondary">
+                                        {t('backups.target.restateVersions', 'restate versions in use')}: {versions.join(', ')}
+                                    </Typography>
+                                )}
+                                <BackupStorageStatus target={target} hosts={hosts} canManage={canManage} part="details" />
+                            </AccordionDetails>
+                        </Accordion>
+                        <TransportDialog open={transportOpen} target={target} onClose={() => setTransportOpen(false)} onSaved={onChanged} />
+                        {canChangeBandwidth && (
+                            <BandwidthDialog open={bandwidthOpen} target={target} onClose={() => setBandwidthOpen(false)} onSaved={onChanged} />
                         )}
-                        <BackupStorageStatus target={target} hosts={hosts} />
                     </Box>
                 )}
                 <TargetDialog open={open} target={target} hosts={hosts} onClose={() => setOpen(false)} onSaved={onChanged} />

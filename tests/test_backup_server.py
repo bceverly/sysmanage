@@ -211,9 +211,68 @@ async def test_the_server_policy_needs_the_role_and_is_marked_and_paused(
     assert saved["server_preset"] is True and saved["quiesce"] is True
     found = await server_api.server_backup(None, session)
     assert found["status"] == "no_good_backup" and found["warn"]
-    # An ordinary Configure keeps the mark: it is still the server's policy.
-    await api.put_policy(str(s.server.id), api.PolicyBody(), session, MANAGER)
+    # An ordinary Configure is refused there: the server dialog changes it.
+    assert (
+        await _status(
+            api.put_policy(str(s.server.id), api.PolicyBody(), session, MANAGER)
+        )
+        == 409
+    )
     assert backup_server.marked(session).host_id == s.server.id
+
+
+@pytest.mark.asyncio
+async def test_the_servers_host_is_never_configured_as_an_ordinary_host(
+    session, named, sent
+):
+    """Production, 2026-11-12: Configure on the server's host made a plain
+    policy that stopped PostgreSQL.  Found by name, it is refused before
+    anything is marked; another host is not."""
+    s = _server(session)
+    assert backup_server.server_host_id(session) == str(s.server.id)
+    assert (
+        await _status(
+            api.put_policy(str(s.server.id), api.PolicyBody(), session, MANAGER)
+        )
+        == 409
+    )
+    assert (
+        session.query(models.BackupPolicy).filter_by(host_id=s.server.id).count() == 0
+    )
+    await api.put_policy(str(s.host.id), api.PolicyBody(), session, MANAGER)
+    row = views.host_status(session, s.host)
+    assert row["server_host"] is False and row["needs_server_policy"] is False
+
+
+@pytest.mark.asyncio
+async def test_an_ordinary_policy_already_on_the_servers_host_is_flagged(
+    session, named, sent
+):
+    s = _server(session)
+    session.add(models.BackupPolicy(host_id=s.server.id, target_id=s.target.id,
+                                    config_version=1, host_acked_version=0,
+                                    storage_acked_version=0, created_at=jobs.now(),
+                                    updated_at=jobs.now()))  # fmt: skip
+    session.commit()
+    overview = views.overview(session)
+    row = next(r for r in overview["hosts"] if r["host_id"] == str(s.server.id))
+    assert row["server_host"] and row["needs_server_policy"]
+    assert (
+        overview["server"]["status"] == "ordinary_policy" and overview["server"]["warn"]
+    )
+    # The server dialog makes it the server's policy, and the flag goes.
+    await server_api.put_server_policy(_body(s.server), session, MANAGER)
+    row = views.host_status(session, s.server)
+    assert row["server_host"] and not row["needs_server_policy"]
+
+
+def test_a_tag_policy_never_takes_the_servers_host(session, named):
+    from backend.services import backup_tag_policies  # noqa: PLC0415
+
+    s = _server(session)
+    with patch.object(backup_tag_policies.jobs, "equipped", return_value=(True, None)):
+        assert backup_tag_policies._skip_reason(session, s.server) == "sysmanage_server"
+        assert backup_tag_policies._skip_reason(session, s.host) in ("", "unreachable")
 
 
 @pytest.mark.asyncio

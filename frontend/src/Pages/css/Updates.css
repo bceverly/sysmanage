@@ -255,6 +255,29 @@
   color: var(--first-color);
 }
 
+/* "Select all N updates": every page, not only the one on screen. */
+.updates__selection {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.updates__select-every {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 500;
+  color: var(--first-color);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.updates__select-every-note {
+  color: var(--text-color);
+}
+
 .updates__execute {
   display: flex;
   align-items: center;

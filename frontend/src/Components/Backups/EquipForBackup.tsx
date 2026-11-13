@@ -41,6 +41,8 @@ export const equipFailureLabel = (t: TFunction, reason: string | null): string =
             return t('backups.equip.failNoRelease', 'restate has no package for this release of the operating system');
         case 'download_failed':
             return t('backups.equip.failDownload', 'The package could not be downloaded');
+        case 'no_local_package':
+            return t('backups.equip.failNoLocal', 'This air-gapped site has no restate package for this system in its own repository');
         case 'checksum_mismatch':
             return t('backups.equip.failChecksum', 'The downloaded package did not match its published checksum, so it was not installed');
         case 'no_answer':

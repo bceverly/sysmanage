@@ -51,6 +51,7 @@ the error via the same tooltip pattern used for mirror failures.
 
 from __future__ import annotations
 
+import json
 import logging
 import socket
 from datetime import datetime, timezone
@@ -96,6 +97,39 @@ def _manifest_targets(run: "models.AirgapCollectionRun") -> list:
     inside the signed payload so a tampered target list is rejected.
     """
     return [{"distro": t.distro, "version": t.version} for t in (run.targets or [])]
+
+
+def _tools_manifest(run) -> list:
+    try:
+        found = json.loads(getattr(run, "tools_manifest", None) or "[]")
+    except (ValueError, TypeError):
+        return []
+    return found if isinstance(found, list) else []
+
+
+def _add_tools(run, plan) -> None:
+    """The SysManage tools (agent, restate, restate-proxy) for each target,
+    fetched by the mirror host's agent into this run's staging tree beside
+    the mirrors (services/airgap_tools.py).  Never fails the run."""
+    # pylint: disable-next=import-outside-toplevel
+    from backend.services import airgap_tools  # noqa: PLC0415
+
+    if not isinstance(plan, dict) or not isinstance(plan.get("commands"), list):
+        return
+    tools = [
+        {
+            "distro": t.distro,
+            "version": t.version,
+            "items": airgap_tools.resolve(t.distro, t.version),
+        }
+        for t in (run.targets or [])
+    ]
+    extra = airgap_tools.fetch_plan(
+        f"/var/lib/sysmanage/airgap-staging/{run.id}", tools
+    )
+    plan["commands"] = list(plan["commands"]) + extra["commands"]
+    plan["files"] = list(plan.get("files") or []) + extra["files"]
+    run.tools_manifest = json.dumps(airgap_tools.manifest_entries(tools))
 
 
 def _sign_manifest_or_raw(engine, manifest: dict) -> dict:
@@ -523,6 +557,7 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
             timeout = 28800  # multi-hour for big bundles
         else:
             plan = _build_single_disc_plan(engine, run, req, source_snapshots)
+            _add_tools(run, plan)
             stage = "mirroring"
             timeout = 14400
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -569,6 +604,9 @@ def _advance_staging_complete_to_building_iso(db, run, engine) -> None:
             "include_cve": run.include_cve,
             "include_compliance": run.include_compliance,
             "targets": _manifest_targets(run),
+            # The SysManage tools on the media, each with its SHA-256 (25.9):
+            # signed here, checked file by file on the repository side.
+            "tools": _tools_manifest(run),
         }
         # Sign the manifest before embedding it.  The repository side
         # verifies the ``/manifest.json`` that lives ON the disc (not

@@ -34,6 +34,7 @@ from backend.services import backup_first_fit as first_fit
 from backend.services import backup_host_reply as host_reply
 from backend.services import backup_jobs as jobs
 from backend.services import backup_network_mounts as network_mounts
+from backend.services import backup_proxy
 from backend.services import backup_proxy_cert
 from backend.services import backup_signing
 from backend.services import backup_storage_status as storage_status
@@ -109,6 +110,10 @@ def _acknowledge(db: Session, run: models.BackupRun) -> None:
         policy.storage_acked_version = max(policy.storage_acked_version or 0, version)
     if role != "storage":  # host, or self: both sides on one machine (24.13)
         policy.host_acked_version = max(policy.host_acked_version or 0, version)
+    # restate-proxy token rotation: the storage host holds the host's next
+    # token and both sides are current, so the host may now switch to it.
+    if backup_proxy.release_next(db, policy):
+        backup_tick.configure_now(db)
 
 
 def _storage_filesystem(db: Session, run: models.BackupRun, reply: Any) -> None:

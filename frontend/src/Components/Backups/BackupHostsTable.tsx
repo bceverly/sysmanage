@@ -27,6 +27,7 @@ import { BACKUP_STATUS_ORDER } from '../../Services/backups';
 import type { BackupHost } from '../../Services/backups';
 import BackupBulkBar from './BackupBulkBar';
 import BackupPolicyDialog from './BackupPolicyDialog';
+import BackupServerDialog from './BackupServerDialog';
 import RestoreFilesDialog from './RestoreFilesDialog';
 import BackupRowActions from './BackupRowActions';
 import BackupStatusCell from './BackupStatusCell';
@@ -116,6 +117,11 @@ const HostCell: React.FC<{ row: BackupHost }> = ({ row }) => {
                     </Tooltip>
                 )}
             </Stack>
+            {row.needs_server_policy && (
+                <Typography variant="caption" color="warning.main" display="block" data-testid="backup-needs-server-policy">
+                    {t('backups.hosts.needsServerPolicy', 'The SysManage server: back it up as the server')}
+                </Typography>
+            )}
             {row.policy?.restate_version && (
                 <Typography variant="caption" color="text.secondary" sx={NOWRAP}>
                     {t('backups.hosts.restateVersion', 'restate {{version}}', { version: row.policy.restate_version })}
@@ -228,8 +234,14 @@ const BackupHostsTable: React.FC<{
                     })}
                 </TableBody>
             </Table>
-            {editing && (
+            {editing && !editing.server_host && (
                 <BackupPolicyDialog open hostId={editing.host_id} fqdn={editing.fqdn} policy={editing.policy}
+                    onClose={() => setEditing(null)} onSaved={onChanged} />
+            )}
+            {editing?.server_host && (
+                // The server's own host has the server's policy only (25.9).
+                <BackupServerDialog open hostId={editing.host_id}
+                    hosts={rows.map(h => ({ host_id: h.host_id, fqdn: h.fqdn }))}
                     onClose={() => setEditing(null)} onSaved={onChanged} />
             )}
             {restoring && (

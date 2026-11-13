@@ -19,6 +19,7 @@ import { useModuleLicensed } from '../../hooks/useModuleLicensed';
 import { PolicySourceLine } from './PolicySource';
 import { UseTagPolicyButton } from './UseTagPolicy';
 import BackupPolicyDialog from './BackupPolicyDialog';
+import BackupServerDialog from './BackupServerDialog';
 import BackupChangesDialog from './BackupChangesDialog';
 import BackupPrepareButton from './BackupPrepareButton';
 import BackupRepackButton from './BackupRepackButton';
@@ -204,10 +205,20 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                         {t('backups.card.open', 'All backups')}
                     </Button>
                 </Stack>
-                {editing && (
+                {editing && !data.server_host && (
                     <BackupPolicyDialog open hostId={hostId} fqdn={data.fqdn} policy={data.policy}
                         source={data.policy_source}
                         onClose={() => setEditing(false)} onSaved={() => void load()} />
+                )}
+                {editing && data.server_host && (
+                    <BackupServerDialog open hostId={hostId} hosts={[{ host_id: hostId, fqdn: data.fqdn }]}
+                        onClose={() => setEditing(false)} onSaved={() => void load()} />
+                )}
+                {data.needs_server_policy && (
+                    <Alert severity="warning" sx={{ mt: 1 }}>
+                        {t('backups.card.needsServerPolicy',
+                            'This host is the SysManage server, backed up as an ordinary host: its database is stopped for each backup, and OpenBAO\'s unseal key is copied into it. Configure backs it up as the server instead.')}
+                    </Alert>
                 )}
                 {changes && <BackupChangesDialog hostId={hostId} fqdn={data.fqdn} onClose={() => setChanges(false)} />}
                 {restoring && (

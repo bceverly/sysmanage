@@ -1959,7 +1959,13 @@
     "heldCount": "Vastgehouden: {{count}}",
     "heldTitle": "Er wachten opdrachten op een onderhoudsvenster",
     "scriptsNeedApproval": "Scripts vereisen goedkeuring",
-    "scriptsNeedApprovalTooltip": "De agent van deze host voert alleen scripts uit die via de goedkeuringsworkflow (Professional+) zijn goedgekeurd. Eenmalige scripts worden geweigerd."
+    "scriptsNeedApprovalTooltip": "De agent van deze host voert alleen scripts uit die via de goedkeuringsworkflow (Professional+) zijn goedgekeurd. Eenmalige scripts worden geweigerd.",
+    "packageManagerNeedsRepair": "Pakketbeheerder moet worden hersteld",
+    "repairPackageManager": "Pakketbeheerder herstellen",
+    "requiresRepairHost": "Selecteer een host waarvan de pakketbeheerder moet worden hersteld",
+    "repairStarted": "Herstel van de pakketbeheerder gestart op {{count}} host(s).",
+    "repairStarted_one": "Herstel van de pakketbeheerder gestart op {{count}} host(s).",
+    "repairStarted_other": "Herstel van de pakketbeheerder gestart op {{count}} host(s)."
   },
   "idp": {
     "action": {
@@ -3712,7 +3718,14 @@
       "security": "Beveiliging",
       "system": "Systeem"
     },
-    "unknown": "Onbekend"
+    "unknown": "Onbekend",
+    "selectAllMatching": "Alle {{count}} updates selecteren",
+    "selectAllMatching_one": "Alle {{count}} updates selecteren",
+    "selectAllMatching_other": "Alle {{count}} updates selecteren",
+    "allMatchingSelected": "Alle {{count}} updates op alle pagina's zijn geselecteerd.",
+    "allMatchingSelected_one": "Alle {{count}} updates op alle pagina's zijn geselecteerd.",
+    "allMatchingSelected_other": "Alle {{count}} updates op alle pagina's zijn geselecteerd.",
+    "clearSelection": "Selectie wissen"
   },
   "upgradeProfiles": {
     "add": "Profiel toevoegen",
@@ -5373,7 +5386,8 @@
       "title": "Back-up",
       "writeCache": "Schrijfcache op deze host: {{size}}",
       "writeCacheOver": "boven het budget van {{budget}} GB",
-      "encrypted": "Versleuteld"
+      "encrypted": "Versleuteld",
+      "needsServerPolicy": "Deze host is de SysManage-server en wordt als een gewone host geback-upt: de database wordt bij elke back-up gestopt en de ontzegelingssleutel van OpenBAO wordt erin gekopieerd. Configureren maakt er in plaats daarvan een back-up van als server."
     },
     "coverage": {
       "filesOnly": "Alleen bestanden",
@@ -5400,7 +5414,8 @@
       "waiting": "Wacht op een vrije plek",
       "unreadable": "Niet gelezen bestanden: {{n}}",
       "showAll": "Alle hosts tonen",
-      "heldNote": "De volgende back-up wacht op het onderhoudsvenster van deze host"
+      "heldNote": "De volgende back-up wacht op het onderhoudsvenster van deze host",
+      "needsServerPolicy": "De SysManage-server: maak er een back-up van als server"
     },
     "loadError": "De back-ups konden niet worden geladen.",
     "policy": {
@@ -5559,7 +5574,10 @@
       "spaceLow": "Waarschuwen als de opslag zo vol is (%)",
       "spaceCritical": "Kritiek als de opslag zo vol is (%)",
       "cacheBudget": "Budget schrijfcache per host (GB)",
-      "cacheBudgetHelp": "restate houdt op elke host van een versleutelde repository een onversleutelde schrijfcache bij; een host die dit overschrijdt, wordt gemarkeerd."
+      "cacheBudgetHelp": "restate houdt op elke host van een versleutelde repository een onversleutelde schrijfcache bij; een host die dit overschrijdt, wordt gemarkeerd.",
+      "changeTransport": "Wijzigen hoe hosts de opslag bereiken",
+      "changeBandwidth": "Bandbreedtelimieten wijzigen",
+      "details": "Details"
     },
     "title": "Back-ups",
     "warning": {
@@ -5638,7 +5656,9 @@
       "proxyGrants": "restate-proxy accepteert de machtiging niet voor: {{hosts}}. Voer restate-proxy --check-grants uit op de opslaghost om te zien waarom.",
       "proxyMissing": "restate-proxy is niet geïnstalleerd op de opslaghost, dus hosts kunnen hun back-ups niet via de proxy bereiken.",
       "proxyStopped": "restate-proxy draait niet op de opslaghost, dus hosts kunnen hun back-ups niet via de proxy bereiken.",
-      "repositoryMade": "Nog geen repository op de opslaghost: {{hosts}}. Opslag voorbereiden, op het tabblad Back-ups van elke host, maakt die aan; tot dan weigert restate-proxy hun back-ups."
+      "repositoryMade": "Nog geen repository op de opslaghost: {{hosts}}. Opslag voorbereiden, op het tabblad Back-ups van elke host, maakt die aan; tot dan weigert restate-proxy hun back-ups.",
+      "proxyInstall": "restate-proxy installeren",
+      "proxyInstalling": "restate-proxy wordt geïnstalleerd op de opslaghost. Deze waarschuwing verdwijnt na de volgende opslagcontrole."
     },
     "prepare": {
       "title": "De opslag voor deze host voorbereiden?",
@@ -5696,7 +5716,8 @@
       "recheck": "Opnieuw controleren",
       "recheckError": "De controle kon niet worden aangevraagd.",
       "running": "Bezig met uitrusten: restate wordt geïnstalleerd...",
-      "started": "restate wordt geïnstalleerd; dit kan enkele minuten duren."
+      "started": "restate wordt geïnstalleerd; dit kan enkele minuten duren.",
+      "failNoLocal": "De eigen repository van deze afgeschermde site heeft geen restate-pakket voor dit systeem"
     },
     "verify": {
       "title": "Verificatie met volledig lezen",
@@ -5851,7 +5872,8 @@
       "pauseNote": "PostgreSQL wordt gestopt terwijl de eigen bestanden worden gekopieerd, dus SysManage kan in die tijd fouten tonen. Kies een rustig startuur.",
       "unencrypted": "Deze back-up is niet versleuteld en bevat het databasewachtwoord uit de configuratie. Beveilig de back-upopslag net zo goed als de server zelf.",
       "needsEscrow": "Sla eerst een noodsleutel voor bewaring op in het paneel Versleuteling van een host. De back-up van de SysManage-server zelf wordt daarmee versleuteld, zodat het herstellen van OpenBAO nooit een sleutel nodig heeft die in OpenBAO bewaard wordt.",
-      "escrowEncrypted": "Versleuteld met uw noodsleutel voor bewaring ({{fingerprint}}). SysManage heeft nooit het geheime deel ervan, dus deze back-up wordt met de hand met die sleutel hersteld, zoals het herstelplan van de server beschrijft."
+      "escrowEncrypted": "Versleuteld met uw noodsleutel voor bewaring ({{fingerprint}}). SysManage heeft nooit het geheime deel ervan, dus deze back-up wordt met de hand met die sleutel hersteld, zoals het herstelplan van de server beschrijft.",
+      "ordinaryPolicy": "Deze SysManage-server ({{host}}) wordt als een gewone host geback-upt: de database wordt bij elke back-up gestopt en de ontzegelingssleutel van OpenBAO wordt erin gekopieerd. Maak er in plaats daarvan een back-up van als de SysManage-server."
     },
     "transport": {
       "ca": "CA-certificaat van de site (PEM, optioneel)",

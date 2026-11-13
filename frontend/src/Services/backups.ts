@@ -364,6 +364,10 @@ export interface BackupHost {
   /** Where its settings come from (Pro+ 24.6): its own policy (Configure)
    *  or a tag policy, by name and priority. */
   policy_source?: PolicySource;
+  /** The SysManage server's own host (25.9): Configure opens the server's
+   *  dialog, and an ordinary policy on it is flagged. */
+  server_host?: boolean;
+  needs_server_policy?: boolean;
 }
 
 export interface PolicySource {
@@ -431,8 +435,9 @@ export interface BackupOverview {
 }
 
 /** ok, no_good_backup (its policy has no good capture in time), no_policy
- * (its host found, no server policy) or unknown (no host named as it is). */
-export type ServerBackupState = 'ok' | 'no_good_backup' | 'no_policy' | 'unknown';
+ * (its host found, no server policy), ordinary_policy (its host is backed up
+ * as an ordinary host) or unknown (no host named as it is). */
+export type ServerBackupState = 'ok' | 'no_good_backup' | 'no_policy' | 'ordinary_policy' | 'unknown';
 
 export interface ServerBackupStatus {
   status: ServerBackupState;

@@ -38,7 +38,7 @@ import re
 from typing import Any, Dict, List, Optional
 
 from cryptography import x509
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, object_session
 
 from backend.persistence import models
 
@@ -223,14 +223,78 @@ def host_proxy(
         out["previous_url"] = url + PREVIOUS_SUFFIX
     if host_captures_through_proxy(policy, target, host):
         out["capture"] = True
+    if getattr(policy, "proxy_token_sha256_next", None):
+        # Only while a rotation is under way: an agent too old to rotate
+        # takes no such key (and never reports a next token).
+        out["granted"] = storage_granted(policy, host)
     return {"proxy": out}
+
+
+def _configure_runs(policy: models.BackupPolicy):
+    db = object_session(policy)
+    if db is None:
+        return []
+    return (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.policy_id == policy.id,
+            models.BackupRun.action == "configure",
+            models.BackupRun.status == "ok",
+        )
+        .order_by(models.BackupRun.queued_at.desc())
+        .limit(20)
+        .all()
+    )
+
+
+def storage_granted(policy: models.BackupPolicy, host: models.Host) -> List[str]:
+    """The token hashes the storage host's grant for this host holds: those
+    of the newest storage configure it acknowledged.  A host switches to its
+    next token only once that is in it (token rotation, 2026-11-13)."""
+    client = client_name(host)
+    for run in _configure_runs(policy):
+        try:
+            params = json.loads(run.parameters or "{}")
+        except ValueError:
+            continue
+        if params.get("role") != "storage":
+            continue
+        grants = ((params.get("target") or {}).get("proxy") or {}).get("grants") or []
+        for grant in grants:
+            if isinstance(grant, dict) and grant.get("client") == client:
+                return [
+                    h for h in grant.get("token_sha256") or [] if isinstance(h, str)
+                ]
+        return []
+    return []
+
+
+def release_next(db: Session, policy: Optional[models.BackupPolicy]) -> bool:
+    """Once the storage host holds the host's next token and both sides have
+    the current job files, send them again so the host learns it may switch.
+    True when re-sent.  Only then: the host's switch ends the rotation."""
+    if policy is None or not getattr(policy, "proxy_token_sha256_next", None):
+        return False
+    if (policy.host_acked_version or 0) < policy.config_version or (
+        policy.storage_acked_version or 0
+    ) < policy.config_version:
+        return False
+    db.flush()  # the acknowledged run's status, for storage_granted
+    host = db.query(models.Host).filter(models.Host.id == policy.host_id).first()
+    if host is None or policy.proxy_token_sha256_next not in storage_granted(
+        policy, host
+    ):
+        return False
+    policy.config_version += 1
+    return True
 
 
 def _grants(policy: models.BackupPolicy, host: models.Host) -> List[Dict[str, Any]]:
     """This host's grants: the current repository's, and the one before Pro+
     encryption's (named by its directory) -- each once the host has made
     its token."""
-    current = [h for h in (policy.proxy_token_sha256, policy.proxy_token_sha256_old)
+    current = [h for h in (policy.proxy_token_sha256, policy.proxy_token_sha256_old,
+                           getattr(policy, "proxy_token_sha256_next", None))
                if h]  # fmt: skip
     if not current:
         return []
@@ -330,9 +394,11 @@ def storage_proxy(
 
 def store_tokens(policy: Optional[models.BackupPolicy], reply: Any) -> bool:
     """Keep the token hashes the host reported in its configure reply
-    (``proxy_tokens``: ``current`` and ``previous``).  A new current hash
-    keeps the one it replaces in the grant until the host reports the new
-    one again; True when the storage side needs its grants again."""
+    (``proxy_tokens``: ``current``, ``previous`` and, while it rotates,
+    ``next``).  A new current hash keeps the one it replaces in the grant
+    until the host reports the new one again; a next hash is granted beside
+    the current one before the host uses it.  True when the storage side
+    needs its grants again."""
     tokens = reply.get("proxy_tokens") if isinstance(reply, dict) else None
     if policy is None or not isinstance(tokens, dict):
         return False
@@ -342,16 +408,22 @@ def store_tokens(policy: Optional[models.BackupPolicy], reply: Any) -> bool:
     previous = (
         previous if isinstance(previous, str) and _SHA256.match(previous) else None
     )
+    nxt = tokens.get("next")
+    nxt = (
+        nxt if isinstance(nxt, str) and _SHA256.match(nxt) and nxt != current else None
+    )
     before = (policy.proxy_token_sha256, policy.proxy_token_sha256_old,
-              policy.proxy_previous_token_sha256)  # fmt: skip
+              policy.proxy_previous_token_sha256, policy.proxy_token_sha256_next)  # fmt: skip
     if current != policy.proxy_token_sha256:
         policy.proxy_token_sha256_old = policy.proxy_token_sha256
         policy.proxy_token_sha256 = current
     else:
         policy.proxy_token_sha256_old = None  # the host kept the new token
     policy.proxy_previous_token_sha256 = previous
+    policy.proxy_token_sha256_next = nxt
     return before != (policy.proxy_token_sha256, policy.proxy_token_sha256_old,
-                      policy.proxy_previous_token_sha256)  # fmt: skip
+                      policy.proxy_previous_token_sha256,
+                      policy.proxy_token_sha256_next)  # fmt: skip
 
 
 def target_view(target: models.BackupTarget) -> Dict[str, Any]:

@@ -286,9 +286,16 @@ def _recent_runs(db: Session, policy, last_capture, running) -> Dict[str, Any]:
     return {key: run_dict(run) if run else None for key, run in found.items()}
 
 
-def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
-    """One host's backup summary, for the hosts table and the Info tab."""
+def host_status(
+    db: Session, host: models.Host, now=None, server_id: Any = False
+) -> Dict[str, Any]:
+    """One host's backup summary, for the hosts table and the Info tab.
+    ``server_id``: the server's own host, when the caller found it already
+    (the hosts table, once for every row)."""
     now = now or jobs.now()
+    if server_id is False:
+        server_id = backup_server.server_host_id(db)
+    server_host = server_id is not None and str(host.id) == str(server_id)
     ready, reason = jobs.equipped(host)
     policy = (
         db.query(models.BackupPolicy)
@@ -312,6 +319,11 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         "policy": policy_dict(policy) if policy else None,
         # Where its settings come from (24.6): its own, or a tag policy.
         "policy_source": backup_tag_policies.source_of(db, policy),
+        # The SysManage server's own host (25.9): Configure opens the server
+        # dialog, and an ordinary policy on it is flagged.
+        "server_host": server_host,
+        "needs_server_policy": server_host
+        and backup_server.needs_server_policy(policy),
         "last_capture": None,
         "last_good_capture": None,
         "last_check": None,
@@ -382,7 +394,10 @@ def overview(db: Session) -> Dict[str, Any]:
         .order_by(models.Host.fqdn)
         .all()
     )
-    rows: List[Dict[str, Any]] = [host_status(db, host) for host in hosts]
+    server_id = backup_server.server_host_id(db)
+    rows: List[Dict[str, Any]] = [
+        host_status(db, host, server_id=server_id) for host in hosts
+    ]
     counts: Dict[str, int] = {}
     for row in rows:
         counts[row["status"]] = counts.get(row["status"], 0) + 1

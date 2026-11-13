@@ -12,6 +12,7 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import SecurityIcon from '@mui/icons-material/Security';
 import CampaignIcon from '@mui/icons-material/Campaign';
+import BuildIcon from '@mui/icons-material/Build';
 import { useTranslation } from 'react-i18next';
 import SelectionActionBar, { SelectionAction } from './SelectionActionBar';
 
@@ -22,6 +23,10 @@ interface HostsActionBarProps {
     canShutdownHost: boolean;
     canUpdateAgent: boolean;
     canDeleteHost: boolean;
+    /** Repair Package Manager (2026-11-13): the Apply Software Update role. */
+    canRepairPackageManager?: boolean;
+    hasRepairSelection?: boolean;
+    onRepairPackageManager?: () => void;
     selectionCount: number;
     hasPendingSelection: boolean;
     hasActivePrivilegedSelection: boolean;
@@ -69,6 +74,9 @@ const HostsActionBar: React.FC<HostsActionBarProps> = ({
     onUpdateAgentSelected,
     onDelete,
     onClearSelection,
+    canRepairPackageManager = false,
+    hasRepairSelection = false,
+    onRepairPackageManager,
 }) => {
     const { t } = useTranslation();
 
@@ -118,6 +126,19 @@ const HostsActionBar: React.FC<HostsActionBarProps> = ({
             disabled: !hasActivePrivilegedSelection,
             disabledReason: needsPrivileged,
             onClick: onUpdateAgentSelected,
+        },
+        {
+            // A primary only while a checked host needs it: every update to
+            // such a host fails until its package manager is fixed.
+            id: 'repair-package-manager',
+            label: t('hosts.repairPackageManager', 'Repair Package Manager'),
+            icon: <BuildIcon />,
+            color: 'warning',
+            primary: hasRepairSelection,
+            hidden: !canRepairPackageManager || !onRepairPackageManager,
+            disabled: !hasRepairSelection,
+            disabledReason: t('hosts.requiresRepairHost', 'Select a host whose package manager needs repair'),
+            onClick: () => onRepairPackageManager?.(),
         },
         {
             id: 'diagnostics',

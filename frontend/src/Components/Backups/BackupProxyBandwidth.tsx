@@ -143,7 +143,9 @@ const BackupProxyBandwidth: React.FC<{
     target: BackupTarget;
     canManage: boolean;
     onChanged: () => void;
-}> = ({ target, canManage, onChanged }) => {
+    /** false: the card puts the Change button in its own header. */
+    inline?: boolean;
+}> = ({ target, canManage, onChanged, inline = true }) => {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     if (target.transport?.transport !== 'proxy') {
@@ -163,12 +165,12 @@ const BackupProxyBandwidth: React.FC<{
         <Typography variant="body2" component="div">
             {t('backups.bandwidth.label', 'Bandwidth')}:{' '}
             {rules.length ? <code>{rules.join(', ')}</code> : t('backups.bandwidth.none', 'no limit')}
-            {canManage && view.licensed && (
+            {canManage && inline && view.licensed && (
                 <Button size="small" sx={{ ml: 1 }} onClick={() => setOpen(true)}>
                     {t('backups.transport.change', 'Change')}
                 </Button>
             )}
-            {canManage && !view.licensed && rules.length > 0 && (
+            {canManage && inline && !view.licensed && rules.length > 0 && (
                 <Button size="small" sx={{ ml: 1 }} onClick={() => setOpen(true)}>
                     {t('backups.bandwidth.clear', 'Remove every limit')}
                 </Button>
@@ -176,7 +178,9 @@ const BackupProxyBandwidth: React.FC<{
             {note && (
                 <Typography variant="caption" color="text.secondary" display="block">{note}</Typography>
             )}
-            <BandwidthDialog open={open} target={target} onClose={() => setOpen(false)} onSaved={onChanged} />
+            {inline && (
+                <BandwidthDialog open={open} target={target} onClose={() => setOpen(false)} onSaved={onChanged} />
+            )}
         </Typography>
     );
 };

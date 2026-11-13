@@ -51,6 +51,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_escrow
+from backend.services import backup_server
 from backend.services import backup_jobs as jobs
 from backend.services import backup_package_restore as package_restore
 from backend.services import backup_reach as reach
@@ -564,7 +565,10 @@ async def put_policy(
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
-    return save_policy(db, current_user, _host_or_404(db, host_id), body)
+    host = _host_or_404(db, host_id)
+    if backup_server.server_host_id(db) == str(host.id):
+        raise HTTPException(status_code=409, detail=backup_server.SERVER_HOST)
+    return save_policy(db, current_user, host, body)
 
 
 def save_policy(db, current_user, host, body: PolicyBody, mark=None) -> Dict[str, Any]:

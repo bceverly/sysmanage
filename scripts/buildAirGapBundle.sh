@@ -87,15 +87,23 @@ case "$PRODUCT" in
     EXTRAS_DEB="postgresql postgresql-contrib"
     EXTRAS_RPM="postgresql-server postgresql-contrib"
     EXTRAS_APK="postgresql postgresql-contrib"
+    EXTRA_PPA_NAME=""
+    EXTRA_COPR_NAME=""
     ;;
   agent)
     PKG_NAME="sysmanage-agent"
     PPA_NAME="bceverly/sysmanage-agent"
     REQ_PATH_IN_DEB="./opt/sysmanage-agent/requirements-prod.txt"
     REQ_PATH_IN_RPM="/opt/sysmanage-agent/requirements-prod.txt"
-    EXTRAS_DEB=""
-    EXTRAS_RPM=""
+    # Backups on an air-gapped site (ROADMAP 25.9): restate, restate-proxy
+    # (for a storage host) and the NFS client travel with the agent, from
+    # restate's own PPA and COPR, so "Equip for backup" installs them from
+    # the site's repository rather than the internet.
+    EXTRAS_DEB="restate restate-proxy nfs-common"
+    EXTRAS_RPM="restate restate-proxy nfs-utils"
     EXTRAS_APK=""
+    EXTRA_PPA_NAME="bceverly/restate"
+    EXTRA_COPR_NAME="bceverly/restate"
     ;;
   proplus)
     # The Pro+ overlay doesn't bundle OS packages -- it carries the
@@ -110,6 +118,8 @@ case "$PRODUCT" in
     EXTRAS_DEB=""
     EXTRAS_RPM=""
     EXTRAS_APK=""
+    EXTRA_PPA_NAME=""
+    EXTRA_COPR_NAME=""
     ;;
 esac
 
@@ -124,7 +134,7 @@ DEST_DIR="${DEST_DIR:-/tmp}"
 # competes with RAM.  Honour an explicit STAGING_DIR / TMPDIR override.
 STAGING_DIR="${STAGING_DIR:-$(mktemp -d "${TMPDIR:-/var/tmp}/sysmanage-bundle-XXXXXX")}"
 PARALLEL="${PARALLEL:-1}"
-PLATFORMS_ALL="ubuntu-jammy ubuntu-noble ubuntu-questing ubuntu-resolute debian-bookworm fedora-40 fedora-41 rhel-9 opensuse-leap alpine-3.20 freebsd netbsd openbsd macos windows"
+PLATFORMS_ALL="ubuntu-jammy ubuntu-noble ubuntu-questing ubuntu-resolute debian-bookworm fedora-40 fedora-41 rhel-9 opensuse-leap alpine-3.22 freebsd netbsd openbsd macos windows"
 PLATFORMS="${PLATFORMS:-$PLATFORMS_ALL}"
 ISO_LABEL="SYSMANAGE-$(echo "$PRODUCT" | tr a-z A-Z)"
 ISO_PATH="${DEST_DIR}/sysmanage-${PRODUCT}-bundle.iso"
@@ -806,6 +816,7 @@ build_ubuntu_like() {
     -v "$outdir:/out" \
     -e PKG="$PKG_NAME" \
     -e PPA="$PPA_NAME" \
+    -e EXTRA_PPA="$EXTRA_PPA_NAME" \
     -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH="$REQ_PATH_IN_DEB" \
     -e PY="$py" \
@@ -818,6 +829,8 @@ build_ubuntu_like() {
         python3 python3-pip python3-venv \
         gcc libffi-dev libssl-dev libpq-dev python3-dev
       add-apt-repository -y "ppa:${PPA}"
+      # The agent also carries restate (25.9): its own PPA.
+      if [ -n "$EXTRA_PPA" ]; then add-apt-repository -y "ppa:${EXTRA_PPA}"; fi
       apt-get update -qq
 
       cd /out
@@ -1063,6 +1076,7 @@ build_fedora() {
     -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH_RPM="${REQ_PATH_IN_RPM#/}" \
     -e EXTRAS="$EXTRAS_RPM" \
+    -e EXTRA_COPR="$EXTRA_COPR_NAME" \
     "fedora:$ver" bash -euxc '
       # dnf-plugins-core provides the `dnf download` subcommand --
       # absent in stock fedora images, so without it the download
@@ -1072,6 +1086,8 @@ build_fedora() {
         curl jq python3 python3-pip python3-devel \
         gcc libffi-devel openssl-devel libpq-devel \
         cpio rpm-build dnf-plugins-core
+      # The agent also carries restate (25.9): its own COPR.
+      if [ -n "$EXTRA_COPR" ]; then dnf -y copr enable "$EXTRA_COPR"; fi
       cd /out
       mkdir -p rpm-deps wheels
 
@@ -1258,7 +1274,7 @@ build_opensuse() {
 # Alpine -- apk-based, uses musl libc.  Different filename pattern:
 # .apk archives instead of .rpm/.deb.
 build_alpine() {
-  local platform="$1"           # e.g. alpine-3.20
+  local platform="$1"           # e.g. alpine-3.22
   local ver="${platform#alpine-}"
   local outdir="$STAGING_DIR/linux-${platform}"
   mkdir -p "$outdir"
@@ -1270,6 +1286,7 @@ build_alpine() {
     -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH_RPM="${REQ_PATH_IN_RPM#/}" \
     -e EXTRAS="$EXTRAS_APK" \
+    -e ALPINE_NODOT="${ver//./}" \
     "alpine:$ver" sh -euxc '
       apk add --no-cache \
         curl jq python3 py3-pip python3-dev \
@@ -1278,14 +1295,14 @@ build_alpine() {
       cd /out
       mkdir -p apk-deps wheels
 
-      # Alpine variants: build-and-release.yml:1806 produces
-      # sysmanage-agent-<ver>-alpine<NNN>.apk for alpine 3.19/3.20/3.21.
-      # Pick the highest version number (which sorts naturally as the
-      # last entry when grouped by alpine<NNN>).
+      # Alpine variants: the agent release publishes one package per
+      # Alpine release, sysmanage-agent-<ver>-alpine<NNN>.apk (alpine322
+      # for 3.22).  Take the one built for THIS release: the highest of
+      # them all (until 2026-11-13) put a 3.22 package on 3.20 media.
       ASSET_URL=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
-                  | jq -r ".assets[] | select(.name | test(\"alpine[0-9]+\\\\.apk$\")) | .browser_download_url" \
-                  | sort -V | tail -1)
-      [ -n "$ASSET_URL" ] || { echo "no alpine[NNN].apk in releases for $REPO" >&2; exit 1; }
+                  | jq -r --arg want "alpine${ALPINE_NODOT}.apk" ".assets[] | select(.name | endswith(\$want)) | .browser_download_url" \
+                  | head -1)
+      [ -n "$ASSET_URL" ] || { echo "no alpine${ALPINE_NODOT}.apk in releases for $REPO" >&2; exit 1; }
       curl -fsSL -o "${PKG}.apk" "$ASSET_URL"
 
       # apk fetch --recursive walks the dep tree and writes .apk files
@@ -1577,8 +1594,69 @@ build_openbsd() {
 # ---------------------------------------------------------------------------
 
 # Dispatcher: route each platform key to its builder function.
+# restate for an air-gapped site's backups (ROADMAP 25.9): where restate
+# has no PPA or COPR the agent can reach (EL, openSUSE, Alpine, the BSDs),
+# its own GitHub release's packages -- restate and restate-proxy -- go on
+# the ISO under <platform>/restate/, each checked against the release's
+# SHA256SUMS before it is kept.  Ubuntu and Fedora carry them in their
+# dependency walk (EXTRAS_DEB / EXTRAS_RPM).  Debian has none: restate
+# builds no .deb outside its Ubuntu PPA.  Agent bundles only.
+_restate_pattern() {
+  case "$1" in
+    rhel-*)            echo "\\.el${1#rhel-}\\.[a-z0-9_]+\\.rpm$" ;;
+    opensuse-leap)     echo "\\.opensuseleap[0-9.]*\\.[a-z0-9_]+\\.rpm$" ;;
+    alpine-*)          echo "-r0-alpine${1#alpine-}-[a-z0-9_]+\\.apk$" ;;
+    freebsd)           echo "-freebsd-[0-9.]+-[a-z0-9_]+\\.pkg$" ;;
+    netbsd)            echo "-netbsd-[0-9.]+-[a-z0-9_]+\\.tgz$" ;;
+    openbsd)           echo "-openbsd-[0-9.]+-[a-z0-9_]+\\.tgz$" ;;
+    *)                 echo "" ;;
+  esac
+}
+
+_platform_dir() {
+  case "$1" in
+    freebsd|netbsd|openbsd|macos|windows) echo "$STAGING_DIR/$1" ;;
+    *) echo "$STAGING_DIR/linux-$1" ;;
+  esac
+}
+
+fetch_restate() {
+  local p="$1"
+  [[ "$PRODUCT" == "agent" ]] || return 0
+  local pattern; pattern=$(_restate_pattern "$p")
+  [[ -n "$pattern" ]] || return 0
+  local dir; dir="$(_platform_dir "$p")/restate"
+  mkdir -p "$dir"
+  local release; release=$(curl -fsSL "https://api.github.com/repos/bceverly/restate/releases/latest") \
+    || { warn "[$p] restate: the release list could not be read; no restate on this platform's media"; return 0; }
+  local sums="$dir/SHA256SUMS"
+  local sums_url; sums_url=$(jq -r '.assets[] | select(.name == "SHA256SUMS") | .browser_download_url' <<<"$release")
+  [[ -n "$sums_url" ]] && curl -fsSL -o "$sums" "$sums_url" \
+    || { warn "[$p] restate: no SHA256SUMS in its release; no restate on this platform's media"; return 0; }
+  local name url kept=0
+  while IFS=$'\t' read -r name url; do
+    [[ -n "$name" ]] || continue
+    curl -fsSL -o "$dir/$name" "$url" || { warn "[$p] restate: $name did not download"; continue; }
+    if ! (cd "$dir" && grep -E "[ *]\\.?/?${name}\$" SHA256SUMS | sed 's|\./||' | sha256sum -c --status -); then
+      warn "[$p] restate: $name does not match SHA256SUMS -- left out"
+      rm -f "$dir/$name"
+      continue
+    fi
+    kept=$((kept + 1))
+  done < <(jq -r --arg re "$pattern" \
+      '.assets[] | select(.name | test("^restate(-proxy|-doc)?-")) | select(.name | test($re)) | [.name, .browser_download_url] | @tsv' \
+      <<<"$release")
+  if (( kept == 0 )); then
+    warn "[$p] restate: its release has no package for this platform"
+    rm -rf "$dir"
+  else
+    log "[$p] restate: $kept package(s) for air-gapped backups"
+  fi
+}
+
 build_one() {
   local p="$1"
+  fetch_restate "$p"
   case "$p" in
     ubuntu-*)   build_ubuntu_like "$p" ;;
     debian-*)   build_debian_like "$p" ;;

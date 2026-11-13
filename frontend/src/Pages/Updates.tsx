@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 import {
@@ -33,6 +33,18 @@ interface SelectedUpdate {
   packageName: string;
   packageManager: string;
 }
+
+const updateKey = (update: PackageUpdate): string =>
+  `${update.host_id}-${update.package_name}-${update.package_manager}`;
+
+const toSelected = (update: PackageUpdate): SelectedUpdate => ({
+  hostId: update.host_id,
+  packageName: update.package_name,
+  packageManager: update.package_manager,
+});
+
+// "Select all N" fetches every matching update in pages this size.
+const ALL_MATCHING_PAGE = 1000;
 
 interface HostWithUpdates {
   hostId: string;
@@ -67,6 +79,11 @@ const Updates: React.FC = () => {
   const [updateStats, setUpdateStats] = useState<UpdateStatsSummary | null>(null);
   const [updates, setUpdates] = useState<PackageUpdate[]>([]);
   const [selectedUpdates, setSelectedUpdates] = useState<Set<string>>(new Set());
+  // What each selected key names, kept across pages: executing used only the
+  // page on screen, so updates picked on earlier pages were silently skipped.
+  const selectedInfo = useRef<Map<string, SelectedUpdate>>(new Map());
+  // Every update matching the filters, on every page ("Select all N").
+  const [allMatching, setAllMatching] = useState(false);
   const [updateStatuses, setUpdateStatuses] = useState<Map<string, UpdateStatus>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -228,6 +245,8 @@ const Updates: React.FC = () => {
     ]);
     setIsRefreshing(false);
     setSelectedUpdates(new Set());
+    selectedInfo.current.clear();
+    setAllMatching(false);
     
     // Trigger notification bell refresh after data refresh
     void triggerRefresh();
@@ -371,60 +390,110 @@ const Updates: React.FC = () => {
     }));
     setCurrentPage(0);
     setSelectedUpdates(new Set());
+    selectedInfo.current.clear();
+    setAllMatching(false);
   };
 
   const handleSelectUpdate = (update: PackageUpdate) => {
-    const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;
+    const key = updateKey(update);
     const newSelected = new Set(selectedUpdates);
-    
+
     if (newSelected.has(key)) {
       newSelected.delete(key);
+      selectedInfo.current.delete(key);
     } else {
       newSelected.add(key);
+      selectedInfo.current.set(key, toSelected(update));
     }
-    
+    setAllMatching(false);
     setSelectedUpdates(newSelected);
   };
 
+  const pageFullySelected = updates.length > 0 && updates.every(u => selectedUpdates.has(updateKey(u)));
+
   const handleSelectAll = () => {
-    if (selectedUpdates.size === updates.length) {
-      setSelectedUpdates(new Set());
+    const newSelected = new Set(selectedUpdates);
+    if (pageFullySelected) {
+      updates.forEach(update => {
+        newSelected.delete(updateKey(update));
+        selectedInfo.current.delete(updateKey(update));
+      });
     } else {
-      const allKeys = updates.map(update => 
-        `${update.host_id}-${update.package_name}-${update.package_manager}`
+      updates.forEach(update => {
+        newSelected.add(updateKey(update));
+        selectedInfo.current.set(updateKey(update), toSelected(update));
+      });
+    }
+    setAllMatching(false);
+    setSelectedUpdates(newSelected);
+  };
+
+  const clearSelection = () => {
+    setSelectedUpdates(new Set());
+    selectedInfo.current.clear();
+    setAllMatching(false);
+  };
+
+  // Offered once the whole page is selected and more match than one page
+  // shows.  A search narrows only the page on screen, so not with one.
+  const canSelectAllMatching =
+    pageFullySelected && !filters.host_id && !searchQuery && totalCount > updates.length;
+
+  /** Every update matching the current filters, across every page. */
+  const fetchAllMatching = async (): Promise<PackageUpdate[]> => {
+    const found: PackageUpdate[] = [];
+    for (let offset = 0; ; offset += ALL_MATCHING_PAGE) {
+      const response: UpdatesResponse = await updatesService.getAllUpdates( // NOSONAR - one page after another
+        filters.security_only || undefined,
+        filters.system_only || undefined,
+        filters.application_only || undefined,
+        filters.package_manager || undefined,
+        ALL_MATCHING_PAGE,
+        offset
       );
-      setSelectedUpdates(new Set(allKeys));
+      const page = Array.isArray(response.updates) ? response.updates : [];
+      found.push(...page);
+      if (page.length < ALL_MATCHING_PAGE || found.length >= response.total_count) {
+        return found;
+      }
     }
   };
 
+  const selectionCount = allMatching ? totalCount : selectedUpdates.size;
+
   const executeSelectedUpdates = async () => {
-    if (selectedUpdates.size === 0) return;
+    if (selectionCount === 0) return;
+
+    let chosen: Map<string, SelectedUpdate>;
+    if (allMatching) {
+      try {
+        chosen = new Map((await fetchAllMatching()).map(u => [updateKey(u), toSelected(u)]));
+      } catch (error) {
+        console.error('Failed to list every matching update:', error);
+        return;
+      }
+    } else {
+      chosen = new Map(Array.from(selectedUpdates)
+        .filter(key => selectedInfo.current.has(key))
+        .map(key => [key, selectedInfo.current.get(key)!]));
+    }
 
     const updatesByHost = new Map<string, SelectedUpdate[]>();
-    
-    updates.forEach(update => {
-      const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;
-      if (selectedUpdates.has(key)) {
-        const hostId = update.host_id;
-        if (hostId === null || hostId === undefined) {
-          console.error('ERROR: Found null/undefined host_id in update:', update);
-          return; // Skip this update
-        }
-        
-        if (!updatesByHost.has(hostId)) {
-          updatesByHost.set(hostId, []);
-        }
-        updatesByHost.get(hostId)!.push({
-          hostId: update.host_id,
-          packageName: update.package_name,
-          packageManager: update.package_manager
-        });
+    chosen.forEach((selected) => {
+      const hostId = selected.hostId;
+      if (hostId === null || hostId === undefined) {
+        console.error('ERROR: Found null/undefined host_id in update:', selected);
+        return; // Skip this update
       }
+      if (!updatesByHost.has(hostId)) {
+        updatesByHost.set(hostId, []);
+      }
+      updatesByHost.get(hostId)!.push(selected);
     });
 
     // Set pending status for all selected updates
     const newStatuses = new Map(updateStatuses);
-    selectedUpdates.forEach(key => {
+    chosen.forEach((_selected, key) => {
       newStatuses.set(key, {
         status: 'pending',
         timestamp: Date.now()
@@ -433,7 +502,7 @@ const Updates: React.FC = () => {
     setUpdateStatuses(newStatuses);
 
     // Clear checkboxes immediately after setting pending status
-    setSelectedUpdates(new Set());
+    clearSelection();
 
     try {
       const hosts = Array.from(updatesByHost.entries());
@@ -514,7 +583,7 @@ const Updates: React.FC = () => {
     if (!canApplySoftwareUpdate) {
       return <IoSquareOutline style={{ opacity: 0.3, cursor: 'not-allowed' }} />;
     }
-    if (selectedUpdates.size === updates.length) {
+    if (pageFullySelected) {
       return <IoCheckbox onClick={handleSelectAll} />;
     }
     return <IoSquareOutline onClick={handleSelectAll} />;
@@ -748,16 +817,29 @@ const Updates: React.FC = () => {
               {renderSelectAllCheckbox()}
               {t('updates.selectAll', 'Select All')} ({selectedUpdates.size}/{updates.length})
             </label>
+            {canApplySoftwareUpdate && canSelectAllMatching && !allMatching && (
+              <button type="button" className="updates__select-every" onClick={() => setAllMatching(true)}>
+                {t('updates.selectAllMatching', 'Select all {{count}} updates', { count: totalCount })}
+              </button>
+            )}
+            {allMatching && (
+              <span className="updates__select-every-note">
+                {t('updates.allMatchingSelected', 'All {{count}} updates on every page are selected.', { count: totalCount })}{' '}
+                <button type="button" className="updates__select-every" onClick={clearSelection}>
+                  {t('updates.clearSelection', 'Clear selection')}
+                </button>
+              </span>
+            )}
           </div>
 
-          {selectedUpdates.size > 0 && canApplySoftwareUpdate && (
+          {selectionCount > 0 && canApplySoftwareUpdate && (
             <button
               type="button"
               className="updates__execute"
               onClick={executeSelectedUpdates}
             >
               <IoPlay />
-              {t('updates.executeSelected', 'Execute Selected Updates')} ({selectedUpdates.size})
+              {t('updates.executeSelected', 'Execute Selected Updates')} ({selectionCount})
             </button>
           )}
         </div>

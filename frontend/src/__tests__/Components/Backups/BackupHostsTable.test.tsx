@@ -15,7 +15,8 @@ vi.mock("react-i18next", async () => {
 });
 vi.mock("../../../Services/backups", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../../Services/backups")>();
-  return { ...actual, backupNow: vi.fn(), equipBackup: vi.fn(), recheckBackup: vi.fn(), checkBackupReach: vi.fn() };
+  return { ...actual, backupNow: vi.fn(), equipBackup: vi.fn(), recheckBackup: vi.fn(), checkBackupReach: vi.fn(),
+    getServerBackup: vi.fn(() => new Promise(() => undefined)) };
 });
 
 import { backupNow } from "../../../Services/backups";
@@ -64,6 +65,15 @@ const show = (rows: BackupHost[], storageHostId: string | null = null) =>
     onChanged={vi.fn()} onError={vi.fn()} />);
 
 describe("BackupHostsTable", () => {
+  test("the SysManage server's host is configured only as the server, and flagged when it is not", () => {
+    show([host({ host_id: "s1", fqdn: "sysmanage.lab", server_host: true, needs_server_policy: true })]);
+    expect(screen.getByTestId("backup-needs-server-policy")).toHaveTextContent("back it up as the server");
+    fireEvent.click(screen.getByRole("button", { name: "More: sysmanage.lab" }));
+    fireEvent.click(within(screen.getByRole("menu")).getByText("Configure"));
+    expect(screen.getByText("Back up this SysManage server")).toBeInTheDocument();
+  });
+
+
   test("the secondary actions are in the row's More menu", () => {
     show([host()]);
     expect(screen.getByRole("button", { name: "Back up now" })).toBeInTheDocument();

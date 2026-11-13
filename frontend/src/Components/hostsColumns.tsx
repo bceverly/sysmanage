@@ -150,6 +150,17 @@ export function buildHostColumns({
                                 variant="outlined"
                             />
                         )}
+                        {row.package_manager_needs_repair && (
+                            <Tooltip title={row.package_manager_repair_reason ?? ''}>
+                                <Chip
+                                    label={t('hosts.packageManagerNeedsRepair', 'Package manager needs repair')}
+                                    color="error"
+                                    size="small"
+                                    variant="outlined"
+                                    data-testid="package-manager-needs-repair"
+                                />
+                            </Tooltip>
+                        )}
                         {(row.security_updates_count > 0 || row.system_updates_count > 0) && (() => {
                             const hasBothUpdates = row.security_updates_count > 0 && row.system_updates_count > 0;
                             const hasSecurityOnly = row.security_updates_count > 0;

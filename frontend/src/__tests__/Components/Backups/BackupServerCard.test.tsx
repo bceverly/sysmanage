@@ -71,6 +71,12 @@ describe("BackupServerCard", () => {
     expect(input.skip_paths).toEqual(PRESET.skip_paths);
   });
 
+  test("a server backed up as an ordinary host says so and offers the server's policy", () => {
+    show(server({ status: "ordinary_policy", host_status: "ok" }));
+    expect(screen.getByText(/is backed up as an ordinary host: its database is stopped/)).toBeInTheDocument();
+    expect(screen.getByText("Back up this SysManage server")).toBeInTheDocument();
+  });
+
   test("no good backup points at its row and offers no new policy", () => {
     show(server({ status: "no_good_backup", host_status: "failed" }));
     expect(screen.getByText(/has no recent good backup/)).toBeInTheDocument();

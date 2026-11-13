@@ -8,8 +8,8 @@
 // nothing seals, prunes or checks on the storage side the repositories just
 // grow, so that is never quiet.
 
-import React from 'react';
-import { Alert, Box, Stack, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { Alert, Box, Button, Stack, Typography } from '@mui/material';
 import type { AlertColor } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -20,8 +20,9 @@ import type {
     StorageRunBrief,
     TargetWarning,
 } from '../../Services/backups';
+import { equipBackup } from '../../Services/backups';
 import { auditSeverity, auditText } from './backupAuditMessages';
-import { formatBytes, formatTime, reasonLabel, runStatusLabel } from './backupLabels';
+import { apiDetail, formatBytes, formatTime, reasonLabel, runStatusLabel } from './backupLabels';
 
 export const warningSeverity = (warning: TargetWarning, target?: BackupTarget): AlertColor => {
     if (warning.startsWith('audit_') && target) return auditSeverity(target, warning);
@@ -159,13 +160,52 @@ const LastRun: React.FC<{ label: string; run: StorageRunBrief | null }> = ({ lab
 const PREPARE_FIXES = new Set(['audit_own_filesystem', 'audit_export_shared', 'audit_export_own',
     'audit_export_restricted', 'audit_export_mapping']);
 
-const BackupStorageStatus: React.FC<{ target: BackupTarget; hosts: BackupHost[] }> = ({ target, hosts }) => {
+/** restate-proxy missing on the storage host: Equip installs it (and
+ *  upgrades it, when it is there), as the agent installs restate. */
+const InstallProxy: React.FC<{ target: BackupTarget }> = ({ target }) => {
+    const { t } = useTranslation();
+    const [busy, setBusy] = useState(false);
+    const [note, setNote] = useState<string | null>(null);
+    const hostId = target.storage_host_id;
+    if (!hostId) return null;
+    const install = async () => {
+        setBusy(true);
+        try {
+            await equipBackup(hostId);
+            setNote(t('backups.audit.proxyInstalling',
+                'Installing restate-proxy on the storage host. This warning clears after its next storage check.'));
+        } catch (err) {
+            setNote(apiDetail(err, t('backups.equip.error', 'Equip for backup could not be started.')));
+            setBusy(false);
+        }
+    };
+    return (
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
+            <Button size="small" variant="outlined" disabled={busy} onClick={() => void install()}
+                data-testid="backup-install-proxy">
+                {t('backups.audit.proxyInstall', 'Install restate-proxy')}
+            </Button>
+            {note && <Typography variant="caption">{note}</Typography>}
+        </Stack>
+    );
+};
+
+const proxyMissing = (target: BackupTarget, warning: TargetWarning): boolean =>
+    warning === 'audit_proxy_running' && target.storage_audit?.proxy_running?.params?.problem === 'not_installed';
+
+const BackupStorageStatus: React.FC<{
+    target: BackupTarget;
+    hosts: BackupHost[];
+    canManage?: boolean;
+    /** The warnings (critical: always shown), the details, or both. */
+    part?: 'warnings' | 'details' | 'all';
+}> = ({ target, hosts, canManage = false, part = 'all' }) => {
     const { t } = useTranslation();
     const status = target.storage_status;
     const fs = target.storage_fs;
     return (
         <Box>
-            {status && (
+            {status && part !== 'warnings' && (
                 <Box sx={{ mt: 1 }} data-testid="backup-storage-status">
                     <Typography variant="body2">
                         {t('backups.storage.confirmed', 'Storage job files confirmed: {{confirmed}} of {{total}}',
@@ -192,10 +232,11 @@ const BackupStorageStatus: React.FC<{ target: BackupTarget; hosts: BackupHost[] 
                     )}
                 </Box>
             )}
-            <Stack spacing={1} sx={{ mt: 1 }}>
+            {part !== 'details' && <Stack spacing={1} sx={{ mt: 1 }}>
                 {target.warnings.map(w => (
                     <Alert key={w} severity={warningSeverity(w, target)} variant={w === 'fs_unchecked' ? 'outlined' : 'standard'}>
                         {warningText(t, target, hosts, w)}
+                        {canManage && proxyMissing(target, w) && <InstallProxy target={target} />}
                     </Alert>
                 ))}
                 {target.warnings.some(w => PREPARE_FIXES.has(w)) && (
@@ -204,7 +245,7 @@ const BackupStorageStatus: React.FC<{ target: BackupTarget; hosts: BackupHost[] 
                             'Prepare storage, on each host\'s Backups tab, gives that host its own filesystem and an export limited to it. The storage host\'s NFS server settings stay yours to set.')}
                     </Alert>
                 )}
-            </Stack>
+            </Stack>}
         </Box>
     );
 };

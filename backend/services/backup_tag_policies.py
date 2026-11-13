@@ -198,6 +198,11 @@ def _skip_reason(db: Session, host: Optional[models.Host]) -> str:
         return "no_host"
     if not jobs.equipped(host)[0]:
         return "not_equipped"
+    # pylint: disable=import-outside-toplevel
+    from backend.services import backup_server  # noqa: PLC0415
+
+    if backup_server.server_host_id(db) == str(host.id):
+        return "sysmanage_server"  # its own policy only (25.9)
     return reach.UNREACHABLE if reach.blocked(db, host) else ""
 
 

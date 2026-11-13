@@ -211,6 +211,17 @@ class Host(Base):
     reboot_required = Column(Boolean, nullable=False, default=False)
     reboot_required_reason = Column(String(255), nullable=True)
     reboot_required_updated_at = Column(DateTime, nullable=True)
+    # Package manager needs repair (q88pmrepair, 2026-11-13): an interrupted
+    # dpkg failed every update while the host looked healthy.
+    package_manager_name = Column(String(16), nullable=True)
+    package_manager_needs_repair = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    package_manager_repair_reason = Column(String(255), nullable=True)
+    package_manager_repairable = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    package_manager_checked_at = Column(DateTime, nullable=True)
 
     # Agent privilege status
     is_agent_privileged = Column(Boolean, nullable=True, default=False)

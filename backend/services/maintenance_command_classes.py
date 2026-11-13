@@ -111,6 +111,8 @@ WINDOW_GATED_COMMANDS = frozenset(
         "backup_restore",
         # installs restate (a PPA plus a package, or pkg add on FreeBSD)
         "equip_backup",
+        # finishes an interrupted dpkg run / installs missing dependencies
+        "repair_package_manager",
         # 24.12 iCloud Photos on the storage host: enable installs icloudpd
         # and creates datasets; a run writes photos.  A sign-in or library
         # listing (an operator waiting to type a code) is exempt below.

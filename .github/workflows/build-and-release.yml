@@ -1785,10 +1785,11 @@ jobs:
   release:
     name: Create Release and Publish to R2
     runs-on: ubuntu-latest
-    # 60, not 30: the agent's R2 publish ran past its hour on a slow R2 day
-    # (2026-11-12), and a timeout here skips every channel after it.  Each
-    # sync now says how long it took.
-    timeout-minutes: 60
+    # 360, GitHub's most for a hosted runner: the agent's R2 publish ran
+    # past an hour (2026-11-12) and then past two (2026-11-13) on slow R2
+    # days, and this job's publish works the same way.  Each sync says how
+    # long it took.
+    timeout-minutes: 360
     needs: [build-ubuntu, build-openbsd-port, build-openbsd-libs, build-freebsd-npm-distfile, build-openbsd-packages, build-centos-rpm, build-el9-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64, build-alpine]
 
     steps:

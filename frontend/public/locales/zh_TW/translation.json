@@ -1959,7 +1959,13 @@
     "heldCount": "暫緩：{{count}}",
     "heldTitle": "有命令正在等待維護時段",
     "scriptsNeedApproval": "腳本需要批准",
-    "scriptsNeedApprovalTooltip": "此主機的代理僅執行經批准流程（Professional+）批准的腳本。一次性腳本將被拒絕。"
+    "scriptsNeedApprovalTooltip": "此主機的代理僅執行經批准流程（Professional+）批准的腳本。一次性腳本將被拒絕。",
+    "packageManagerNeedsRepair": "套件管理員需要修復",
+    "repairPackageManager": "修復套件管理員",
+    "requiresRepairHost": "選取套件管理員需要修復的主機",
+    "repairStarted": "已在 {{count}} 台主機上開始修復套件管理員。",
+    "repairStarted_one": "已在 {{count}} 台主機上開始修復套件管理員。",
+    "repairStarted_other": "已在 {{count}} 台主機上開始修復套件管理員。"
   },
   "idp": {
     "action": {
@@ -3712,7 +3718,14 @@
       "security": "安全性",
       "system": "系統"
     },
-    "unknown": "未知"
+    "unknown": "未知",
+    "selectAllMatching": "選取全部 {{count}} 個更新",
+    "selectAllMatching_one": "選取全部 {{count}} 個更新",
+    "selectAllMatching_other": "選取全部 {{count}} 個更新",
+    "allMatchingSelected": "已選取所有頁面上的全部 {{count}} 個更新。",
+    "allMatchingSelected_one": "已選取所有頁面上的全部 {{count}} 個更新。",
+    "allMatchingSelected_other": "已選取所有頁面上的全部 {{count}} 個更新。",
+    "clearSelection": "清除選取"
   },
   "upgradeProfiles": {
     "add": "新增設定檔",
@@ -5373,7 +5386,8 @@
       "title": "備份",
       "writeCache": "此主機上的寫入快取：{{size}}",
       "writeCacheOver": "超出 {{budget}} GB 上限",
-      "encrypted": "已加密"
+      "encrypted": "已加密",
+      "needsServerPolicy": "此主機是 SysManage 伺服器，卻被當作一般主機備份：每次備份都會停止其資料庫，且 OpenBAO 的解封金鑰會被複製到備份中。「設定」會改為將其作為伺服器備份。"
     },
     "coverage": {
       "filesOnly": "僅檔案",
@@ -5400,7 +5414,8 @@
       "waiting": "等待空閒名額",
       "unreadable": "未讀取的檔案：{{n}}",
       "showAll": "顯示所有主機",
-      "heldNote": "下一次備份將等待此主機的維護時段"
+      "heldNote": "下一次備份將等待此主機的維護時段",
+      "needsServerPolicy": "SysManage 伺服器：請將其作為伺服器備份"
     },
     "loadError": "無法載入備份。",
     "policy": {
@@ -5559,7 +5574,10 @@
       "spaceLow": "儲存使用率達到此值時警告 (%)",
       "spaceCritical": "儲存使用率達到此值時為嚴重 (%)",
       "cacheBudget": "每台主機的寫入快取上限（GB）",
-      "cacheBudgetHelp": "restate 會在加密儲存庫的每台主機上保留未加密的寫入快取；超過此值的主機將被標記。"
+      "cacheBudgetHelp": "restate 會在加密儲存庫的每台主機上保留未加密的寫入快取；超過此值的主機將被標記。",
+      "changeTransport": "變更主機存取儲存的方式",
+      "changeBandwidth": "變更頻寬限制",
+      "details": "詳細資料"
     },
     "title": "備份",
     "warning": {
@@ -5638,7 +5656,9 @@
       "proxyGrants": "restate-proxy 不接受以下主機的存取授權：{{hosts}}。請在儲存主機上執行 restate-proxy --check-grants 查看原因。",
       "proxyMissing": "儲存主機上未安裝 restate-proxy，因此主機無法透過它存取其備份。",
       "proxyStopped": "儲存主機上的 restate-proxy 未在執行，因此主機無法透過它存取其備份。",
-      "repositoryMade": "儲存主機上還沒有儲存庫：{{hosts}}。每台主機「備份」分頁中的「準備儲存」會建立它；在此之前，restate-proxy 會拒絕它們的備份。"
+      "repositoryMade": "儲存主機上還沒有儲存庫：{{hosts}}。每台主機「備份」分頁中的「準備儲存」會建立它；在此之前，restate-proxy 會拒絕它們的備份。",
+      "proxyInstall": "安裝 restate-proxy",
+      "proxyInstalling": "正在儲存主機上安裝 restate-proxy。下一次儲存檢查後，此警告會消失。"
     },
     "prepare": {
       "title": "要為此主機準備儲存嗎？",
@@ -5696,7 +5716,8 @@
       "recheck": "重新檢查",
       "recheckError": "無法要求檢查。",
       "running": "準備中：正在安裝 restate...",
-      "started": "正在安裝 restate；這可能需要幾分鐘。"
+      "started": "正在安裝 restate；這可能需要幾分鐘。",
+      "failNoLocal": "此隔離站點自己的儲存庫中沒有適用於此系統的 restate 套件"
     },
     "verify": {
       "title": "完整讀取驗證",
@@ -5851,7 +5872,8 @@
       "pauseNote": "複製 PostgreSQL 自身檔案期間會停止 PostgreSQL，因此這段時間內 SysManage 可能會顯示錯誤。請選擇一個空閒的開始時間。",
       "unencrypted": "此備份未加密，並且包含設定中的資料庫密碼。請像保護伺服器本身一樣保護備份儲存空間。",
       "needsEscrow": "請先在某台主機的「加密」面板中儲存緊急託管金鑰。SysManage 伺服器自身的備份使用該金鑰加密，因此還原 OpenBAO 時絕不需要保存在 OpenBAO 中的金鑰。",
-      "escrowEncrypted": "已使用您的緊急託管金鑰 ({{fingerprint}}) 加密。SysManage 從不持有其私密部分，因此需依伺服器復原手冊所述，使用該金鑰手動還原此備份。"
+      "escrowEncrypted": "已使用您的緊急託管金鑰 ({{fingerprint}}) 加密。SysManage 從不持有其私密部分，因此需依伺服器復原手冊所述，使用該金鑰手動還原此備份。",
+      "ordinaryPolicy": "此 SysManage 伺服器 ({{host}}) 被當作一般主機備份：每次備份都會停止其資料庫，且 OpenBAO 的解封金鑰會被複製到備份中。請改為將其作為 SysManage 伺服器備份。"
     },
     "transport": {
       "ca": "自有 CA 憑證（PEM，選用）",

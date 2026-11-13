@@ -1959,7 +1959,13 @@
     "heldCount": "Retenues : {{count}}",
     "heldTitle": "Des commandes attendent une fenêtre de maintenance",
     "scriptsNeedApproval": "Les scripts nécessitent une approbation",
-    "scriptsNeedApprovalTooltip": "L'agent de cet hôte n'exécute que les scripts approuvés via le processus d'approbation (Professional+). Les scripts ponctuels sont refusés."
+    "scriptsNeedApprovalTooltip": "L'agent de cet hôte n'exécute que les scripts approuvés via le processus d'approbation (Professional+). Les scripts ponctuels sont refusés.",
+    "packageManagerNeedsRepair": "Le gestionnaire de paquets doit être réparé",
+    "repairPackageManager": "Réparer le gestionnaire de paquets",
+    "requiresRepairHost": "Sélectionnez un hôte dont le gestionnaire de paquets doit être réparé",
+    "repairStarted": "Réparation du gestionnaire de paquets lancée sur {{count}} hôte(s).",
+    "repairStarted_one": "Réparation du gestionnaire de paquets lancée sur {{count}} hôte(s).",
+    "repairStarted_other": "Réparation du gestionnaire de paquets lancée sur {{count}} hôte(s)."
   },
   "idp": {
     "action": {
@@ -3712,7 +3718,14 @@
       "security": "Sécurité",
       "system": "Système"
     },
-    "unknown": "Inconnu"
+    "unknown": "Inconnu",
+    "selectAllMatching": "Sélectionner les {{count}} mises à jour",
+    "selectAllMatching_one": "Sélectionner les {{count}} mises à jour",
+    "selectAllMatching_other": "Sélectionner les {{count}} mises à jour",
+    "allMatchingSelected": "Les {{count}} mises à jour de toutes les pages sont sélectionnées.",
+    "allMatchingSelected_one": "Les {{count}} mises à jour de toutes les pages sont sélectionnées.",
+    "allMatchingSelected_other": "Les {{count}} mises à jour de toutes les pages sont sélectionnées.",
+    "clearSelection": "Effacer la sélection"
   },
   "upgradeProfiles": {
     "add": "Ajouter un profil",
@@ -5373,7 +5386,8 @@
       "title": "Sauvegarde",
       "writeCache": "Cache d'écriture sur cet hôte : {{size}}",
       "writeCacheOver": "au-delà du budget de {{budget}} GB",
-      "encrypted": "Chiffré"
+      "encrypted": "Chiffré",
+      "needsServerPolicy": "Cet hôte est le serveur SysManage, sauvegardé comme un hôte ordinaire : sa base de données est arrêtée à chaque sauvegarde, et la clé de descellement d'OpenBAO y est copiée. Configurer le sauvegarde plutôt en tant que serveur."
     },
     "coverage": {
       "filesOnly": "Fichiers uniquement",
@@ -5400,7 +5414,8 @@
       "waiting": "En attente d'une place libre",
       "unreadable": "Fichiers non lus : {{n}}",
       "showAll": "Afficher tous les hôtes",
-      "heldNote": "La prochaine sauvegarde attend la fenêtre de maintenance de cet hôte"
+      "heldNote": "La prochaine sauvegarde attend la fenêtre de maintenance de cet hôte",
+      "needsServerPolicy": "Le serveur SysManage : sauvegardez-le en tant que serveur"
     },
     "loadError": "Impossible de charger les sauvegardes.",
     "policy": {
@@ -5559,7 +5574,10 @@
       "spaceLow": "Avertir quand le stockage est rempli à ce point (%)",
       "spaceCritical": "Critique quand le stockage est rempli à ce point (%)",
       "cacheBudget": "Budget du cache d'écriture par hôte (GB)",
-      "cacheBudgetHelp": "restate conserve un cache d'écriture non chiffré sur chaque hôte d'un dépôt chiffré ; un hôte qui dépasse cette valeur est signalé."
+      "cacheBudgetHelp": "restate conserve un cache d'écriture non chiffré sur chaque hôte d'un dépôt chiffré ; un hôte qui dépasse cette valeur est signalé.",
+      "changeTransport": "Modifier la façon dont les hôtes atteignent le stockage",
+      "changeBandwidth": "Modifier les limites de bande passante",
+      "details": "Détails"
     },
     "title": "Sauvegardes",
     "warning": {
@@ -5638,7 +5656,9 @@
       "proxyGrants": "restate-proxy n'accepte pas l'autorisation pour : {{hosts}}. Exécutez restate-proxy --check-grants sur l'hôte de stockage pour en connaître la raison.",
       "proxyMissing": "restate-proxy n'est pas installé sur l'hôte de stockage ; les hôtes ne peuvent donc pas accéder à leurs sauvegardes par son intermédiaire.",
       "proxyStopped": "restate-proxy n'est pas en cours d'exécution sur l'hôte de stockage ; les hôtes ne peuvent donc pas accéder à leurs sauvegardes par son intermédiaire.",
-      "repositoryMade": "Pas encore de dépôt sur l'hôte de stockage : {{hosts}}. Préparer le stockage, dans l'onglet Sauvegardes de chaque hôte, le crée ; d'ici là, restate-proxy refuse leurs sauvegardes."
+      "repositoryMade": "Pas encore de dépôt sur l'hôte de stockage : {{hosts}}. Préparer le stockage, dans l'onglet Sauvegardes de chaque hôte, le crée ; d'ici là, restate-proxy refuse leurs sauvegardes.",
+      "proxyInstall": "Installer restate-proxy",
+      "proxyInstalling": "Installation de restate-proxy sur l'hôte de stockage. Cet avertissement disparaît après sa prochaine vérification du stockage."
     },
     "prepare": {
       "title": "Préparer le stockage pour cet hôte ?",
@@ -5696,7 +5716,8 @@
       "recheck": "Vérifier de nouveau",
       "recheckError": "La vérification n'a pas pu être demandée.",
       "running": "Équipement en cours : installation de restate...",
-      "started": "Installation de restate ; cela peut prendre quelques minutes."
+      "started": "Installation de restate ; cela peut prendre quelques minutes.",
+      "failNoLocal": "Le dépôt propre à ce site isolé n'a pas de paquet restate pour ce système"
     },
     "verify": {
       "title": "Vérification par lecture complète",
@@ -5851,7 +5872,8 @@
       "pauseNote": "PostgreSQL est arrêté pendant la copie de ses propres fichiers ; SysManage peut donc afficher des erreurs pendant ce temps. Choisissez une heure de début calme.",
       "unencrypted": "Cette sauvegarde n'est pas chiffrée et contient le mot de passe de la base de données issu de la configuration. Protégez le stockage des sauvegardes autant que le serveur lui-même.",
       "needsEscrow": "Enregistrez d'abord une clé de séquestre d'urgence dans le panneau Chiffrement d'un hôte. La sauvegarde du serveur SysManage lui-même est chiffrée avec elle, de sorte que restaurer OpenBAO ne nécessite jamais une clé conservée dans OpenBAO.",
-      "escrowEncrypted": "Chiffrée avec votre clé de séquestre d'urgence ({{fingerprint}}). SysManage n'en détient jamais la partie secrète : cette sauvegarde se restaure donc à la main avec cette clé, comme le décrit la procédure de reprise du serveur."
+      "escrowEncrypted": "Chiffrée avec votre clé de séquestre d'urgence ({{fingerprint}}). SysManage n'en détient jamais la partie secrète : cette sauvegarde se restaure donc à la main avec cette clé, comme le décrit la procédure de reprise du serveur.",
+      "ordinaryPolicy": "Ce serveur SysManage ({{host}}) est sauvegardé comme un hôte ordinaire : sa base de données est arrêtée à chaque sauvegarde, et la clé de descellement d'OpenBAO y est copiée. Sauvegardez-le plutôt en tant que serveur SysManage."
     },
     "transport": {
       "ca": "Certificat de la CA du site (PEM, facultatif)",

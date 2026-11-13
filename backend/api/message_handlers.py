@@ -211,6 +211,26 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
             )
         return None
 
+    # Repair package manager (2026-11-13): the health after the repair.
+    if (
+        command_type_of(message_data) == "repair_package_manager"
+        or command_type_from_queue(db, message_data) == "repair_package_manager"
+    ):
+        from backend.services import package_manager_repair  # noqa: PLC0415
+
+        try:
+            if package_manager_repair.record_result(
+                db, getattr(connection, "host_id", None), message_data
+            ):
+                db.commit()
+        except Exception:  # pylint: disable=broad-except
+            db.rollback()
+            logger.exception(
+                "Package manager repair result could not be recorded for %s",
+                getattr(connection, "hostname", "unknown"),
+            )
+        return None
+
     # Equip for backup: the agent's answer to installing restate.
     if (
         command_type_of(message_data) == "equip_backup"

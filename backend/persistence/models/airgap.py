@@ -77,6 +77,9 @@ class AirgapCollectionRun(Base):
     # goes ISO_BUILT → COMPLETE directly -- the typical "build a
     # downloadable ISO file" flow that doesn't touch optical media.
     burn_device = Column(String(200), nullable=True)
+    # The SysManage tools fetched onto the media (q89airgaptools, 25.9): JSON
+    # [{distro, version, files: [{name, sha256}]}], signed into its manifest.
+    tools_manifest = Column(Text, nullable=True)
 
     created_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)

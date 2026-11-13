@@ -447,6 +447,23 @@ def process_copy_result(session, run, outcome) -> None:
     run.completed_at = _now_naive()
     run.error_message = None
     _register_local_repositories(session, run)
+    _build_tools_repositories(run)
+
+
+def _build_tools_repositories(run) -> None:
+    """The SysManage tools on the media, checked against the signed manifest
+    and served as signed repositories beside the mirrors (25.9).  Never fails
+    the ingest: hosts keep their operating-system mirror either way."""
+    # pylint: disable-next=import-outside-toplevel
+    from backend.services import airgap_tools  # noqa: PLC0415
+
+    try:
+        manifest = json.loads(run.manifest_json or "{}")
+        airgap_tools.build(REPO_ROOT, manifest if isinstance(manifest, dict) else {})
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.exception(
+            "SysManage tools repositories could not be built for ingest %s", run.id
+        )
 
 
 def _mirror_base_url() -> str:

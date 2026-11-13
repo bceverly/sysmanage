@@ -72,6 +72,32 @@ def marked(db: Session) -> Optional[models.BackupPolicy]:
     )
 
 
+def server_host_id(db: Session) -> Optional[str]:
+    """The host that is this server: the one its marked policy is on, else
+    the only approved host named as this machine is, else None (none, or
+    several to choose from -- the operator picks one in the server dialog)."""
+    policy = marked(db)
+    if policy is not None:
+        return str(policy.host_id)
+    hosts = candidates(db)
+    return str(hosts[0].id) if len(hosts) == 1 else None
+
+
+# Configure on the server's own host (found 2026-11-12): production's plain
+# policy stopped PostgreSQL for 5 min 42 s, backed up OpenBAO's init.json and
+# the server's token, and encrypted to a key kept in that same OpenBAO.
+SERVER_HOST = _(
+    "This host is the SysManage server. Use Back up this SysManage server, "
+    "which keeps its database running, leaves OpenBAO's unseal key out and "
+    "encrypts to the escrow key"
+)
+
+
+def needs_server_policy(policy: Optional[models.BackupPolicy]) -> bool:
+    """An ordinary policy on the server's host: the server dialog fixes it."""
+    return policy is not None and not server_paths.server_policy(policy)
+
+
 def mirror_roots(db: Session, host_id) -> List[str]:
     """Package mirrors kept on this host: fetched again, so left out."""
     rows = (
@@ -111,9 +137,16 @@ def status(db: Session, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         found["status"] = "no_policy" if hosts else "unknown"
         if len(hosts) == 1:
             found.update(host_id=str(hosts[0].id), fqdn=hosts[0].fqdn)
-    found["warn"] = found["status"] in ("no_good_backup", "no_policy") or (
-        found["status"] == "unknown" and not _multitenant()
-    )
+            row = by_id.get(str(hosts[0].id))
+            if row and row.get("policy"):
+                # Backed up, but as an ordinary host (production, 2026-11-12).
+                found["status"] = "ordinary_policy"
+                found["host_status"] = row["status"]
+    found["warn"] = found["status"] in (
+        "no_good_backup",
+        "no_policy",
+        "ordinary_policy",
+    ) or (found["status"] == "unknown" and not _multitenant())
     return found
 
 

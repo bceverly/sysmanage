@@ -62,6 +62,7 @@ from backend.api.package_handlers import (
     handle_packages_delta,
 )
 from backend.api.update_handlers import handle_update_apply_result
+from backend.services import package_manager_repair
 from backend.i18n import _
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.messages import MessageType
@@ -109,6 +110,12 @@ async def route_inbound_message(  # NOSONAR
 
         elif message_type == MessageType.PACKAGE_UPDATES_UPDATE:
             await handle_package_updates_update(db, mock_connection, message_data)
+            # Can the package manager install anything at all (2026-11-13)?
+            package_manager_repair.store_for_host(
+                db,
+                getattr(mock_connection, "host_id", None),
+                message_data.get("package_manager_health"),
+            )
             success = True
 
         elif message_type == MessageType.AVAILABLE_PACKAGES_BATCH_START:

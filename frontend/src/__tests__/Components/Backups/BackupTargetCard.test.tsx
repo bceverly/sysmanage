@@ -225,3 +225,31 @@ describe("BackupTargetCard snapshot signing (Pro+ 24.6)", () => {
   });
 });
 
+
+describe("BackupTargetCard layout (2026-11-13)", () => {
+  test("every change is a spelled-out button in the header", () => {
+    show(target({
+      transport: { transport: "proxy", url: "https://nas:8443", proxy_ca: true } as BackupTarget["transport"],
+      proxy_bandwidth: { rules: [], licensed: true, applied: true },
+    }), true);
+    expect(screen.getByRole("button", { name: "Edit target" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Change how hosts reach storage" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Change bandwidth limits" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Change" })).toBeNull();  // no bare "Change" left inline
+  });
+
+  test("the details sit under a collapsed Details, the warnings stay out", () => {
+    show(target({ warnings: ["no_storage_host"] }));
+    const details = screen.getByRole("button", { name: "Details" });
+    expect(details).toHaveAttribute("aria-expanded", "false");
+    expect(alertWith(/No storage host/)).toBeVisible();
+    fireEvent.click(details);
+    expect(details).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText(/Seal each backup/)).toBeInTheDocument();
+  });
+
+  test("a viewer gets no buttons", () => {
+    show(target());
+    expect(screen.queryByRole("button", { name: "Edit target" })).toBeNull();
+  });
+});

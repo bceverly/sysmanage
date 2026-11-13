@@ -166,3 +166,40 @@ def test_equip_tells_only_a_proxy_targets_storage_host_to_add_the_proxy(session)
     s.target.transport = proxy.NFS
     session.commit()
     assert backup_equip.parameters(session, s.nas) == {}
+
+
+def test_equip_installs_or_upgrades_the_proxy_on_an_equipped_storage_host(session):
+    """A storage host that already runs restate is still offered Equip while
+    its target is on the proxy (production's nas, 2026-11-12), and only then."""
+    from backend.services import backup_equip  # noqa: PLC0415
+
+    s = _on_proxy(session)
+    report = json.loads(s.nas.agent_capabilities or "{}")
+    report["capabilities"] = sorted(
+        {*report.get("capabilities", []), "backup", "backup_equip"}
+    )
+    s.nas.agent_capabilities = json.dumps(report)
+    session.commit()
+    assert jobs.equipped(s.nas) == (True, None)
+    assert backup_equip.blocker(session, s.nas) is None
+    assert backup_equip.blocker(session, s.host) == backup_equip.NOT_NEEDED
+    s.target.transport = proxy.NFS
+    session.commit()
+    assert backup_equip.blocker(session, s.nas) == backup_equip.NOT_NEEDED
+
+
+def test_an_air_gapped_site_tells_equip_to_use_its_own_repositories(session):
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from backend.services import backup_equip, server_config_service  # noqa: PLC0415
+
+    s = _on_proxy(session)
+    with patch.object(
+        server_config_service, "get_server_role", return_value="repository"
+    ):
+        assert backup_equip.parameters(session, s.nas) == {"proxy": True, "local": True}
+        assert backup_equip.parameters(session, s.host) == {"local": True}
+    with patch.object(
+        server_config_service, "get_server_role", return_value="standard"
+    ):
+        assert backup_equip.parameters(session, s.host) == {}

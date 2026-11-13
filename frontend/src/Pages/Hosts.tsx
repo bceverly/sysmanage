@@ -10,7 +10,7 @@ import { Autocomplete, FormControlLabel, Switch, TextField, ToggleButton, Toggle
 import { useTranslation } from 'react-i18next';
 
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
-import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doUpdateAgent, doRequestHostDiagnostics } from '../Services/hosts'
+import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doUpdateAgent, doRepairPackageManagers, doRequestHostDiagnostics } from '../Services/hosts'
 import { doDeployOpenTelemetry } from '../Services/opentelemetry'
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
@@ -73,6 +73,7 @@ const Hosts = () => {
     const [canRebootHost, setCanRebootHost] = useState<boolean>(false);
     const [canShutdownHost, setCanShutdownHost] = useState<boolean>(false);
     const [canUpdateAgent, setCanUpdateAgent] = useState<boolean>(false);
+    const [canRepairPackageManager, setCanRepairPackageManager] = useState<boolean>(false);
     const [canDeployAntivirus, setCanDeployAntivirus] = useState<boolean>(false);
     const [hasHealthData, setHasHealthData] = useState<boolean>(false);
     const { triggerRefresh } = useNotificationRefresh();
@@ -310,6 +311,28 @@ const Hosts = () => {
         }
     }
 
+    // Repair Package Manager (2026-11-13): checked hosts whose package
+    // manager needs a repair their agent can make.
+    const repairSelection = useMemo(() =>
+        selection.filter(id => {
+            const host = filteredData.find(h => h.id.toString() === id.toString());
+            return host?.package_manager_needs_repair && host.package_manager_repairable;
+        }), [selection, filteredData]);
+
+    const handleRepairPackageManager = async () => {
+        try {
+            const result = await doRepairPackageManagers(repairSelection.map(String));
+            const notes = result.skipped.map(row => `${row.fqdn ?? row.host_id}: ${row.reason}`);
+            alert([
+                t('hosts.repairStarted', 'Package manager repair started on {{count}} host(s).', { count: result.started }),
+                ...notes,
+            ].join('\n'));
+            setSelection([]);
+        } catch (error) {
+            console.error('Error requesting package manager repair:', error);
+        }
+    };
+
     // Helper function to check if any selected hosts can be rebooted/shutdown - memoized
     const hasActivePrivilegedSelection = useMemo(() =>
         selection.some(id => {
@@ -473,15 +496,17 @@ const Hosts = () => {
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [approve, deleteHost, viewDetails, reboot, shutdown, updateAgent, deployAntivirus] = await Promise.all([
+            const [approve, deleteHost, viewDetails, reboot, shutdown, updateAgent, deployAntivirus, applyUpdates] = await Promise.all([
                 hasPermission(SecurityRoles.APPROVE_HOST_REGISTRATION),
                 hasPermission(SecurityRoles.DELETE_HOST),
                 hasPermission(SecurityRoles.VIEW_HOST_DETAILS),
                 hasPermission(SecurityRoles.REBOOT_HOST),
                 hasPermission(SecurityRoles.SHUTDOWN_HOST),
                 hasPermission(SecurityRoles.UPDATE_AGENT),
-                hasPermission(SecurityRoles.DEPLOY_ANTIVIRUS)
+                hasPermission(SecurityRoles.DEPLOY_ANTIVIRUS),
+                hasPermission(SecurityRoles.APPLY_SOFTWARE_UPDATE)
             ]);
+            setCanRepairPackageManager(applyUpdates);
             setCanApproveHosts(approve);
             setCanDeleteHost(deleteHost);
             setCanViewHostDetails(viewDetails);
@@ -770,6 +795,9 @@ const Hosts = () => {
                 onShutdownSelected={handleShutdownSelected}
                 onUpdateAgentSelected={handleUpdateAgentSelected}
                 onDelete={handleDelete}
+                canRepairPackageManager={canRepairPackageManager}
+                hasRepairSelection={repairSelection.length > 0}
+                onRepairPackageManager={handleRepairPackageManager}
             />
         </Box>
     );

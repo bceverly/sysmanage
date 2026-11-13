@@ -165,6 +165,7 @@ class CommandType(str, Enum):
     # "Equip for backup": the agent installs restate (Ubuntu PPA, FreeBSD
     # release package) -- it decides how; the server only asks.
     EQUIP_BACKUP = "equip_backup"
+    REPAIR_PACKAGE_MANAGER = "repair_package_manager"
     # Can the host reach its backup storage (a TCP connection to NFS port 2049
     # of the storage host's address)?  Only that address is sent.
     CHECK_BACKUP_STORAGE = "check_backup_storage"

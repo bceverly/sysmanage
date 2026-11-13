@@ -1978,7 +1978,13 @@
     "reenrollDone": "Credential cleared. Approve the host again once its agent reconnects.",
     "reenrollFailed": "Failed to re-enroll the host",
     "heldCount": "Held: {{count}}",
-    "heldTitle": "Commands are waiting for a maintenance window"
+    "heldTitle": "Commands are waiting for a maintenance window",
+    "packageManagerNeedsRepair": "Package manager needs repair",
+    "repairPackageManager": "Repair Package Manager",
+    "requiresRepairHost": "Select a host whose package manager needs repair",
+    "repairStarted": "Package manager repair started on {{count}} host(s).",
+    "repairStarted_one": "Package manager repair started on {{count}} host(s).",
+    "repairStarted_other": "Package manager repair started on {{count}} host(s)."
   },
   "idp": {
     "action": {
@@ -3731,7 +3737,14 @@
       "security": "Security",
       "system": "System"
     },
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "selectAllMatching": "Select all {{count}} updates",
+    "selectAllMatching_one": "Select all {{count}} updates",
+    "selectAllMatching_other": "Select all {{count}} updates",
+    "allMatchingSelected": "All {{count}} updates on every page are selected.",
+    "allMatchingSelected_one": "All {{count}} updates on every page are selected.",
+    "allMatchingSelected_other": "All {{count}} updates on every page are selected.",
+    "clearSelection": "Clear selection"
   },
   "upgradeProfiles": {
     "add": "Add Profile",
@@ -5373,7 +5386,8 @@
       "title": "Backup",
       "writeCache": "Write cache on this host: {{size}}",
       "writeCacheOver": "over the {{budget}} GB budget",
-      "encrypted": "Encrypted"
+      "encrypted": "Encrypted",
+      "needsServerPolicy": "This host is the SysManage server, backed up as an ordinary host: its database is stopped for each backup, and OpenBAO's unseal key is copied into it. Configure backs it up as the server instead."
     },
     "coverage": {
       "filesOnly": "Files only",
@@ -5400,7 +5414,8 @@
       "waiting": "Waiting for a free slot",
       "unreadable": "Files not read: {{n}}",
       "showAll": "Show all hosts",
-      "heldNote": "The next backup waits for this host's maintenance window"
+      "heldNote": "The next backup waits for this host's maintenance window",
+      "needsServerPolicy": "The SysManage server: back it up as the server"
     },
     "loadError": "Could not load the backups.",
     "policy": {
@@ -5559,7 +5574,10 @@
       "spaceLow": "Warn when the storage is this full (%)",
       "spaceCritical": "Critical when the storage is this full (%)",
       "cacheBudget": "Write cache budget per host (GB)",
-      "cacheBudgetHelp": "restate keeps an unencrypted write cache on each host of an encrypted repository; a host over this is flagged."
+      "cacheBudgetHelp": "restate keeps an unencrypted write cache on each host of an encrypted repository; a host over this is flagged.",
+      "changeTransport": "Change how hosts reach storage",
+      "changeBandwidth": "Change bandwidth limits",
+      "details": "Details"
     },
     "title": "Backups",
     "warning": {
@@ -5638,7 +5656,9 @@
       "proxyGrants": "restate-proxy does not accept the grant for: {{hosts}}. Run restate-proxy --check-grants on the storage host to see why.",
       "proxyMissing": "restate-proxy is not installed on the storage host, so hosts cannot reach their backups through it.",
       "proxyStopped": "restate-proxy is not running on the storage host, so hosts cannot reach their backups through it.",
-      "repositoryMade": "No repository on the storage host yet: {{hosts}}. Prepare storage, on each host's Backups tab, makes it; until then restate-proxy refuses their backups."
+      "repositoryMade": "No repository on the storage host yet: {{hosts}}. Prepare storage, on each host's Backups tab, makes it; until then restate-proxy refuses their backups.",
+      "proxyInstall": "Install restate-proxy",
+      "proxyInstalling": "Installing restate-proxy on the storage host. This warning clears after its next storage check."
     },
     "prepare": {
       "title": "Prepare the storage for this host?",
@@ -5696,7 +5716,8 @@
       "recheck": "Check again",
       "recheckError": "The check could not be requested.",
       "running": "Equipping: installing restate...",
-      "started": "Installing restate; this can take a few minutes."
+      "started": "Installing restate; this can take a few minutes.",
+      "failNoLocal": "This air-gapped site has no restate package for this system in its own repository"
     },
     "verify": {
       "title": "Full-read verification",
@@ -5851,7 +5872,8 @@
       "pauseNote": "PostgreSQL is stopped while its own files are copied, so SysManage may show errors for that time. Pick a quiet start hour.",
       "unencrypted": "This backup is not encrypted, and it holds the database password from the configuration. Keep the backup storage as safe as the server itself.",
       "needsEscrow": "Save a break-glass escrow key first, in a host's Encryption panel. The SysManage server's own backup is encrypted to it, so restoring OpenBAO never needs a key kept inside OpenBAO.",
-      "escrowEncrypted": "Encrypted to your break-glass escrow key ({{fingerprint}}). SysManage never holds its secret half, so this backup is restored by hand with that key, as the server recovery runbook describes."
+      "escrowEncrypted": "Encrypted to your break-glass escrow key ({{fingerprint}}). SysManage never holds its secret half, so this backup is restored by hand with that key, as the server recovery runbook describes.",
+      "ordinaryPolicy": "This SysManage server ({{host}}) is backed up as an ordinary host: its database is stopped for each backup, and OpenBAO's unseal key is copied into it. Back it up as the SysManage server instead."
     },
     "transport": {
       "ca": "Site CA certificate (PEM, optional)",

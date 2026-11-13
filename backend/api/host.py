@@ -302,6 +302,15 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
             "cpu_frequency_mhz": host.cpu_frequency_mhz,
             "memory_total_mb": host.memory_total_mb,
             "reboot_required": host.reboot_required,
+            "package_manager_needs_repair": bool(
+                getattr(host, "package_manager_needs_repair", False)
+            ),
+            "package_manager_repair_reason": getattr(
+                host, "package_manager_repair_reason", None
+            ),
+            "package_manager_repairable": bool(
+                getattr(host, "package_manager_repairable", False)
+            ),
             "is_agent_privileged": host.is_agent_privileged,
             "agent_version": host.agent_version,
             # Phase 19 agent capability advertisement.
@@ -398,6 +407,15 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
             "cpu_frequency_mhz": host.cpu_frequency_mhz,
             "memory_total_mb": host.memory_total_mb,
             "reboot_required": host.reboot_required,
+            "package_manager_needs_repair": bool(
+                getattr(host, "package_manager_needs_repair", False)
+            ),
+            "package_manager_repair_reason": getattr(
+                host, "package_manager_repair_reason", None
+            ),
+            "package_manager_repairable": bool(
+                getattr(host, "package_manager_repairable", False)
+            ),
             "is_agent_privileged": host.is_agent_privileged,
             "agent_version": host.agent_version,
             # Phase 19 agent capability advertisement.
@@ -521,6 +539,15 @@ def _get_all_hosts_sync(tenant_id=None):
                 "cpu_frequency_mhz": host.cpu_frequency_mhz,
                 "memory_total_mb": host.memory_total_mb,
                 "reboot_required": host.reboot_required,
+                "package_manager_needs_repair": bool(
+                    getattr(host, "package_manager_needs_repair", False)
+                ),
+                "package_manager_repair_reason": getattr(
+                    host, "package_manager_repair_reason", None
+                ),
+                "package_manager_repairable": bool(
+                    getattr(host, "package_manager_repairable", False)
+                ),
                 "is_agent_privileged": host.is_agent_privileged,
                 "agent_version": host.agent_version,
                 # Phase 19 agent capability advertisement.
