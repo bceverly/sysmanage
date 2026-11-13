@@ -202,6 +202,7 @@ parts:
       mkdir -p $SNAP_DATA/nginx/tmp/scgi
       mkdir -p $SNAP_DATA/tls
       mkdir -p $SNAP_DATA/airgap-repo
+      mkdir -p $SNAP_DATA/airgap-tools
 
       # TLS certificate.  The shared config serves on 443 and nginx REFUSES TO
       # START without a certificate -- deliberate, so a management console can

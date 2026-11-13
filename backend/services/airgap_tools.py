@@ -43,6 +43,7 @@ import hashlib
 import json
 import logging
 import os
+import posixpath
 import shutil
 import subprocess  # nosec B404
 import time
@@ -383,7 +384,9 @@ def manifest_entries(tools: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 def tools_root(repo_root: str) -> str:
     """Beside the mirror root (which each ingest's rsync --delete rewrites)."""
-    return os.path.join(os.path.dirname(repo_root.rstrip("/")), "airgap-tools")
+    # posixpath: the roots are "/"-separated on every platform, Windows too
+    # (airgap_paths), as nginx takes them.
+    return posixpath.join(posixpath.dirname(repo_root.rstrip("/")), "airgap-tools")
 
 
 def _gnupg_home(root: str) -> str:

@@ -24,6 +24,7 @@ from backend.persistence.models import (
     UbuntuProInfo,
     UbuntuProService,
 )
+from backend.services import ubuntu_pro_auto_attach
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
 
@@ -240,9 +241,9 @@ async def handle_os_version_update(  # NOSONAR
                     and host.approval_status == "approved"
                 ):
                     try:
-                        from backend.api.repository_mirroring import (
+                        from backend.api.repository_mirroring import (  # pylint: disable=import-outside-toplevel
                             apply_default_mirrors_for_new_host,
-                        )  # pylint: disable=import-outside-toplevel
+                        )
 
                         dispatched = apply_default_mirrors_for_new_host(str(host.id))
                         if dispatched:
@@ -682,6 +683,10 @@ async def handle_ubuntu_pro_update(  # NOSONAR
         debug_logger.debug(
             "Completed adding all %d Ubuntu Pro services to database session",
             len(services),
+        )
+
+        ubuntu_pro_auto_attach.consider(
+            db, host, bool(ubuntu_pro_data.get("attached", False))
         )
 
         debug_logger.info(

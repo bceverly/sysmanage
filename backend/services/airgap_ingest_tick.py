@@ -69,6 +69,7 @@ from backend.config import config as config_module
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.services import airgap_paths
 from backend.startup.tick_runner import run_periodic
 
 logger = logging.getLogger(__name__)
@@ -89,7 +90,8 @@ STATUS_FAILED = "FAILED"
 # rsynced.  Match the constants the engine's ``build_ingestion_plan``
 # baked in so a repository configured by either path lines up.
 MOUNT_POINT = "/mnt/sysmanage-airgap-ingest"
-REPO_ROOT = "/var/lib/sysmanage/airgap-repo"
+# Per platform, the tree that platform's nginx serves at /airgap-repo/.
+REPO_ROOT = airgap_paths.repo_root()
 
 # rsync --stats parse (same two reliably-parseable lines the mirror
 # snapshot path keys off; commas stripped before int()).

@@ -144,6 +144,8 @@ class Host(TestBase):
         Boolean, nullable=False, default=False, server_default=false()
     )
     package_manager_checked_at = Column(DateTime, nullable=True)
+    # Automatic Ubuntu Pro attach, handled once (q90proautoattach).
+    ubuntu_pro_auto_attach_at = Column(DateTime, nullable=True)
 
     # Agent privilege status
     is_agent_privileged = Column(Boolean, nullable=True, default=False)
