@@ -2,12 +2,22 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  act,
+} from "@testing-library/react";
 import { vi, describe, beforeEach, afterEach, test, expect } from "vitest";
 
 // One `t` per module, never per render -- see UserDetail.test.tsx.
 vi.mock("react-i18next", () => {
-  const t = (key: string, fallback?: string, opts?: Record<string, unknown>) => {
+  const t = (
+    key: string,
+    fallback?: string,
+    opts?: Record<string, unknown>,
+  ) => {
     let s = typeof fallback === "string" ? fallback : key;
     if (opts) {
       for (const [k, v] of Object.entries(opts)) {
@@ -20,10 +30,7 @@ vi.mock("react-i18next", () => {
 });
 
 vi.mock("@mui/x-data-grid", () => ({
-  DataGrid: ({
-    rows,
-    columns,
-  }: { rows?: any[]; columns?: any[] }) => (
+  DataGrid: ({ rows, columns }: { rows?: any[]; columns?: any[] }) => (
     <div data-testid="grid">
       {(rows ?? []).map((row, i) => (
         <div key={String(row.id ?? i)} data-testid="row">
@@ -96,6 +103,18 @@ vi.mock("../../Components/AirgapCollectionsDialogs", () => ({
         ))}
         <button type="button" onClick={onClose}>
           close-picker
+        </button>
+      </div>
+    ) : null,
+  NextDiscDialog: ({ run, submitting, onClose, onConfirm }: any) =>
+    run ? (
+      <div data-testid="next-disc-dialog">
+        <span data-testid="next-disc-submitting">{String(submitting)}</span>
+        <button type="button" onClick={() => onConfirm(run)}>
+          confirm-next-disc
+        </button>
+        <button type="button" onClick={onClose}>
+          close-next-disc
         </button>
       </div>
     ) : null,
@@ -207,9 +226,7 @@ describe("AirgapCollections", () => {
   test("the new-run dialog opens and creates a run", async () => {
     render(<AirgapCollections />);
     await screen.findByText("weekly-set");
-    fireEvent.click(
-      screen.getByRole("button", { name: "New Collection Run" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "New Collection Run" }));
     expect(await screen.findByTestId("new-run-dialog")).toBeInTheDocument();
     fireEvent.click(screen.getByText("set-label"));
     fireEvent.click(screen.getByText("set-mirror"));
@@ -226,7 +243,9 @@ describe("AirgapCollections", () => {
         }),
       ),
     );
-    expect(await screen.findByText("Collection run queued")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Collection run queued"),
+    ).toBeInTheDocument();
   });
 
   test("surfaces the server's detail when a create is refused", async () => {
@@ -235,9 +254,7 @@ describe("AirgapCollections", () => {
     });
     render(<AirgapCollections />);
     await screen.findByText("weekly-set");
-    fireEvent.click(
-      screen.getByRole("button", { name: "New Collection Run" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "New Collection Run" }));
     fireEvent.click(await screen.findByText("set-label"));
     fireEvent.click(screen.getByText("set-mirror"));
     fireEvent.click(screen.getByText("do-create"));
@@ -248,9 +265,7 @@ describe("AirgapCollections", () => {
     vi.mocked(axiosInstance.post).mockRejectedValue(new Error("boom"));
     render(<AirgapCollections />);
     await screen.findByText("weekly-set");
-    fireEvent.click(
-      screen.getByRole("button", { name: "New Collection Run" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "New Collection Run" }));
     fireEvent.click(await screen.findByText("set-label"));
     fireEvent.click(screen.getByText("set-mirror"));
     fireEvent.click(screen.getByText("do-create"));
@@ -276,7 +291,9 @@ describe("AirgapCollections", () => {
     fireEvent.click(del);
     const confirm = screen
       .queryAllByRole("button")
-      .find((b) => /^(delete|confirm|yes)$/i.test((b.textContent || "").trim()));
+      .find((b) =>
+        /^(delete|confirm|yes)$/i.test((b.textContent || "").trim()),
+      );
     if (confirm) fireEvent.click(confirm);
     await waitFor(() => expect(axiosInstance.get).toHaveBeenCalled());
   });
@@ -296,7 +313,9 @@ describe("AirgapCollections", () => {
     fireEvent.click(del);
     const confirm = screen
       .queryAllByRole("button")
-      .find((b) => /^(delete|confirm|yes)$/i.test((b.textContent || "").trim()));
+      .find((b) =>
+        /^(delete|confirm|yes)$/i.test((b.textContent || "").trim()),
+      );
     if (confirm) fireEvent.click(confirm);
     await waitFor(() => expect(axiosInstance.get).toHaveBeenCalled());
   });
@@ -411,8 +430,9 @@ describe("AirgapCollections downloads and validation", () => {
   };
 
   const lastAnchor = () =>
-    clickSpy.mock.instances[clickSpy.mock.instances.length - 1] as unknown as
-      HTMLAnchorElement;
+    clickSpy.mock.instances[
+      clickSpy.mock.instances.length - 1
+    ] as unknown as HTMLAnchorElement;
 
   test("renders column values for a run", async () => {
     vi.mocked(axiosInstance.get).mockResolvedValue({
@@ -508,7 +528,9 @@ describe("AirgapCollections downloads and validation", () => {
     routeGet({ "/discs": fail(500) });
     render(<AirgapCollections />);
     await clickDownload();
-    expect(await screen.findByText("Failed to download ISO")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Failed to download ISO"),
+    ).toBeInTheDocument();
   });
 
   test("a forbidden token mint does not fall back to manifests", async () => {
@@ -529,7 +551,9 @@ describe("AirgapCollections downloads and validation", () => {
     vi.mocked(axiosInstance.post).mockRejectedValue(new Error("net"));
     render(<AirgapCollections />);
     await clickDownload();
-    expect(await screen.findByText("Failed to download ISO")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Failed to download ISO"),
+    ).toBeInTheDocument();
   });
 
   test("a gone ISO with no manifests reports nothing downloadable", async () => {
@@ -604,7 +628,9 @@ describe("AirgapCollections downloads and validation", () => {
     });
     render(<AirgapCollections />);
     await clickDownload();
-    expect(await screen.findByText("Failed to download ISO")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Failed to download ISO"),
+    ).toBeInTheDocument();
   });
 
   test("deleting confirms, deletes and reports success", async () => {
@@ -679,7 +705,9 @@ describe("AirgapCollections downloads and validation", () => {
       expect(screen.getByTestId("mirror-count")).toHaveTextContent("2"),
     );
     fireEvent.click(screen.getByText("do-create"));
-    expect(await screen.findByText("ISO label is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("ISO label is required"),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByText("set-label"));
     fireEvent.click(screen.getByText("do-create"));
     expect(
@@ -731,5 +759,95 @@ describe("AirgapCollections downloads and validation", () => {
     expect(axiosInstance.get).toHaveBeenCalledWith(
       "/api/v1/airgap/collector/runs",
     );
+  });
+
+  test("a set waiting for media offers the next-disc action and confirms it", async () => {
+    const waiting = {
+      ...RUN,
+      status: "AWAITING_MEDIA",
+      burn_device: "/dev/sr0",
+      disc_count: 3,
+      burned_disc_count: 1,
+    };
+    vi.mocked(axiosInstance.get).mockResolvedValue({ data: [waiting] });
+    render(<AirgapCollections />);
+    await screen.findByText("weekly-set");
+    expect(
+      screen.getByText("Disc 1 of 3 burned. Load a blank disc."),
+    ).toBeInTheDocument();
+    // The discs already built stay downloadable while the run waits.
+    expect(
+      screen.getByRole("button", { name: "Download ISO" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Next disc loaded" }));
+    expect(await screen.findByTestId("next-disc-dialog")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("confirm-next-disc"));
+    await waitFor(() =>
+      expect(axiosInstance.post).toHaveBeenCalledWith(
+        "/api/v1/airgap/collector/runs/r1/next-disc",
+      ),
+    );
+    expect(await screen.findByText("Burning disc 2 of 3.")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByTestId("next-disc-dialog")).not.toBeInTheDocument(),
+    );
+  });
+
+  test("a refused next-disc confirmation shows the detail and keeps the dialog", async () => {
+    vi.mocked(axiosInstance.get).mockResolvedValue({
+      data: [
+        {
+          ...RUN,
+          status: "AWAITING_MEDIA",
+          burn_device: "/dev/sr0",
+          disc_count: 2,
+          burned_disc_count: 1,
+        },
+      ],
+    });
+    vi.mocked(axiosInstance.post).mockRejectedValueOnce({
+      response: { data: { detail: "not waiting" } },
+    });
+    render(<AirgapCollections />);
+    await screen.findByText("weekly-set");
+    fireEvent.click(screen.getByRole("button", { name: "Next disc loaded" }));
+    fireEvent.click(await screen.findByText("confirm-next-disc"));
+    expect(await screen.findByText("not waiting")).toBeInTheDocument();
+    expect(screen.getByTestId("next-disc-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("next-disc-submitting")).toHaveTextContent(
+      "false",
+    );
+    fireEvent.click(screen.getByText("close-next-disc"));
+    expect(screen.queryByTestId("next-disc-dialog")).not.toBeInTheDocument();
+  });
+
+  test("a next-disc failure without detail uses the generic message", async () => {
+    vi.mocked(axiosInstance.get).mockResolvedValue({
+      data: [
+        {
+          ...RUN,
+          status: "AWAITING_MEDIA",
+          burn_device: "/dev/sr0",
+          disc_count: 2,
+          burned_disc_count: 1,
+        },
+      ],
+    });
+    vi.mocked(axiosInstance.post).mockRejectedValueOnce(new Error("down"));
+    render(<AirgapCollections />);
+    await screen.findByText("weekly-set");
+    fireEvent.click(screen.getByRole("button", { name: "Next disc loaded" }));
+    fireEvent.click(await screen.findByText("confirm-next-disc"));
+    expect(
+      await screen.findByText("Failed to start the next disc"),
+    ).toBeInTheDocument();
+  });
+
+  test("only a run waiting for media offers the next-disc action", async () => {
+    render(<AirgapCollections />);
+    await screen.findByText("weekly-set");
+    expect(
+      screen.queryByRole("button", { name: "Next disc loaded" }),
+    ).not.toBeInTheDocument();
   });
 });

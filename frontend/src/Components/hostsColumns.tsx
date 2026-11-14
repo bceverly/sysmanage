@@ -319,7 +319,7 @@ export function buildHostColumns({
                 let timeText = '';
 
                 if (absDiff < 60) {
-                    timeText = diffSeconds < 0 ? t('hosts.justNow', 'Just now') : t('hosts.secondsAgo', '{{seconds}}s ago', { seconds: absDiff });
+                    timeText = diffSeconds < 0 ? t('hosts.justNow', 'just now') : t('hosts.secondsAgo', '{{seconds}}s ago', { seconds: absDiff });
                 } else if (absDiff < 3600) {
                     timeText = t('hosts.minutesAgo', '{{minutes}}m ago', { minutes: Math.floor(absDiff / 60) });
                 } else if (absDiff < 86400) {

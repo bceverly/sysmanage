@@ -250,12 +250,12 @@ const UpgradeProfilesSettings: React.FC = () => {
     },
     {
       field: 'cron',
-      headerName: t('upgradeProfiles.cron', 'Cron'),
+      headerName: t('upgradeProfiles.cron', 'Cron Schedule'),
       width: 160,
     },
     {
       field: 'security_only',
-      headerName: t('upgradeProfiles.securityOnly', 'Security Only'),
+      headerName: t('upgradeProfiles.securityOnly', 'Security Updates Only'),
       width: 130,
       renderCell: (params: GridRenderCellParams<UpgradeProfile>) =>
         params.row.security_only ? (
@@ -266,7 +266,7 @@ const UpgradeProfilesSettings: React.FC = () => {
     },
     {
       field: 'staggered_window_min',
-      headerName: t('upgradeProfiles.window', 'Window (min)'),
+      headerName: t('upgradeProfiles.window', 'Staggered Window (minutes)'),
       width: 130,
     },
     {
@@ -375,7 +375,7 @@ const UpgradeProfilesSettings: React.FC = () => {
         <DialogTitle>
           {editing
             ? t('upgradeProfiles.edit', 'Edit Update Profile')
-            : t('upgradeProfiles.add', 'Add Update Profile')}
+            : t('upgradeProfiles.addDialogTitle', 'Add Update Profile')}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>

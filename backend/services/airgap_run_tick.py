@@ -34,12 +34,17 @@ Lifecycle the tick drives:
     MIRRORING        → (no action; waiting on agent result)
     STAGING_COMPLETE → build ISO plan, dispatch, set BUILDING_ISO
     BUILDING_ISO     → (no action; waiting on agent result)
-    ISO_BUILT        → if ``burn_device`` set: build burn plan,
-                       dispatch, set BURNING.  Else: set COMPLETE.
+    ISO_BUILT        → if ``burn_device`` set: build burn plan for the
+                       next unburned disc, dispatch, set BURNING.
+                       Else: set COMPLETE.
     BURNING          → (no action; waiting on agent result)
+    AWAITING_MEDIA   → (no action; a disc of a set is burned and the
+                       operator must load a blank one and confirm it
+                       through POST /runs/{id}/next-disc, which puts
+                       the run back at ISO_BUILT for the next disc)
 
 The agent-side transitions (MIRRORING → STAGING_COMPLETE,
-BUILDING_ISO → ISO_BUILT, BURNING → COMPLETE) are driven from
+BUILDING_ISO → ISO_BUILT, BURNING → COMPLETE or AWAITING_MEDIA) are driven from
 ``proplus_dispatch._apply_airgap_run_result`` when the agent's
 ``command_result`` lands.
 
@@ -53,6 +58,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import socket
 from datetime import datetime, timezone
 
@@ -78,12 +84,70 @@ STATUS_STAGING_COMPLETE = "STAGING_COMPLETE"
 STATUS_BUILDING_ISO = "BUILDING_ISO"
 STATUS_ISO_BUILT = "ISO_BUILT"
 STATUS_BURNING = "BURNING"
+STATUS_AWAITING_MEDIA = "AWAITING_MEDIA"
 STATUS_COMPLETE = "COMPLETE"
 STATUS_FAILED = "FAILED"
 
 
+# Where the ISO plans write their output: ``<run.id>.iso`` for one disc,
+# ``<run.id>-disc-<N>.iso`` for each disc of a set.  The runs API's download
+# endpoints read the same directory.
+ISO_OUTPUT_DIR = "/var/lib/sysmanage/airgap-iso"
+
+# Correlation stage of the burn of disc N of a set.  A single disc (and a
+# plan dispatched before sets were burned disc by disc) uses plain
+# ``burning``.
+BURN_STAGE = "burning"
+_BURN_DISC_STAGE_PREFIX = "burning_disc_"
+
+
 def _now_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def burn_disc_stage(disc: int) -> str:
+    """The correlation stage for burning disc ``disc`` of a set."""
+    return f"{_BURN_DISC_STAGE_PREFIX}{disc}"
+
+
+def parse_burn_stage(stage: str) -> "int | None":
+    """The disc a burn stage names: 0 for plain ``burning`` (one disc, or a
+    plan from before sets were burned disc by disc), N for disc N of a set,
+    None when ``stage`` is not a burn at all."""
+    if stage == BURN_STAGE:
+        return 0
+    if stage.startswith(_BURN_DISC_STAGE_PREFIX):
+        rest = stage[len(_BURN_DISC_STAGE_PREFIX) :]
+        if rest.isdigit() and int(rest) > 0:
+            return int(rest)
+    return None
+
+
+def run_disc_count(run) -> int:
+    """How many discs the run's media is: the recorded ``disc_count``, or,
+    for a run from before it was recorded, the disc files on disk.  One
+    when neither says more."""
+    recorded = getattr(run, "disc_count", None)
+    if recorded:
+        return int(recorded)
+    found = 0
+    while os.path.isfile(
+        os.path.join(ISO_OUTPUT_DIR, f"{run.id}-disc-{found + 1}.iso")
+    ):
+        found += 1
+    return max(found, 1)
+
+
+def _plan_disc_count(plan, multidisc: bool) -> int:
+    """The number of discs a dispatched collection plan makes.  The
+    multi-disc builder says so in ``metadata.disc_count``; an engine that
+    does not leaves it to the disc files (``run_disc_count``), so 0 is
+    returned and the column stays NULL."""
+    if not multidisc:
+        return 1
+    metadata = plan.get("metadata") if isinstance(plan, dict) else None
+    count = metadata.get("disc_count") if isinstance(metadata, dict) else None
+    return count if isinstance(count, int) and count > 0 else 0
 
 
 def _manifest_targets(run: "models.AirgapCollectionRun") -> list:
@@ -594,6 +658,8 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
     # (rsync only); the orchestrator dispatches build_iso_plan as a
     # follow-up.
     run.status = STATUS_BUILDING_ISO if need_multidisc else STATUS_MIRRORING
+    run.disc_count = _plan_disc_count(plan, need_multidisc) or None
+    run.burned_disc_count = 0
     run.started_at = _now_naive()
     run.worker_message_id = msg_id
     run.error_message = None
@@ -631,7 +697,7 @@ def _advance_staging_complete_to_building_iso(db, run, engine) -> None:
         manifest_payload = _sign_manifest_or_raw(engine, manifest)
         plan = engine.build_iso_plan(
             staging_dir=f"/var/lib/sysmanage/airgap-staging/{run.id}",
-            output_iso=f"/var/lib/sysmanage/airgap-iso/{run.id}.iso",
+            output_iso=f"{ISO_OUTPUT_DIR}/{run.id}.iso",
             manifest_dict=manifest_payload,
             iso_label=run.iso_label,
         )
@@ -684,13 +750,30 @@ def _advance_iso_built_to_complete(run) -> None:
     run.worker_message_id = None
 
 
+def _next_burn(run) -> "tuple[str, str]":
+    """The ISO to burn next and its correlation stage.
+
+    One disc burns ``<run.id>.iso`` under plain ``burning``.  A set burns
+    ``<run.id>-disc-<N>.iso`` under ``burning_disc_<N>``, N being the first
+    disc not yet burned; the result handler records it and parks the run at
+    AWAITING_MEDIA until the operator loads the next blank disc.
+    """
+    if run_disc_count(run) <= 1:
+        return f"{ISO_OUTPUT_DIR}/{run.id}.iso", BURN_STAGE
+    disc = int(getattr(run, "burned_disc_count", None) or 0) + 1
+    return f"{ISO_OUTPUT_DIR}/{run.id}-disc-{disc}.iso", burn_disc_stage(disc)
+
+
 def _advance_iso_built_to_burning(db, run, engine) -> None:
     """Dispatch a burn plan and flip ISO_BUILT → BURNING.
 
     ``run.burn_device`` is the validated device path (e.g.
     ``/dev/sr0``); the engine's ``build_burn_plan`` wraps cdrecord /
-    growisofs with that target.  On result the run advances to
-    COMPLETE via ``_apply_airgap_run_result``.
+    growisofs with that target and ejects the disc after.  One drive
+    burns one disc per plan, so a set is burned disc by disc (see
+    ``_next_burn``).  On result the run advances to COMPLETE -- or, with
+    discs of a set still to burn, to AWAITING_MEDIA -- via
+    ``_apply_airgap_run_result``.
     """
     host = _find_collector_host(db)
     if host is None:
@@ -699,11 +782,9 @@ def _advance_iso_built_to_burning(db, run, engine) -> None:
             "could not find a registered Host to dispatch the burn plan to",
         )
         return
+    iso_path, stage = _next_burn(run)
     try:
-        plan = engine.build_burn_plan(
-            iso_path=f"/var/lib/sysmanage/airgap-iso/{run.id}.iso",
-            device=run.burn_device,
-        )
+        plan = engine.build_burn_plan(iso_path=iso_path, device=run.burn_device)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _mark_failed(run, f"burn plan build failed: {exc}")
         return
@@ -714,7 +795,7 @@ def _advance_iso_built_to_burning(db, run, engine) -> None:
         )
 
         msg_id = enqueue_apply_plan(host_id=str(host.id), plan=plan, timeout=7200)
-        register_airgap_run_correlation(msg_id, "burning", str(run.id), str(host.id))
+        register_airgap_run_correlation(msg_id, stage, str(run.id), str(host.id))
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _mark_failed(run, f"burn plan dispatch failed: {exc}")
         return
@@ -738,7 +819,11 @@ def _dispatch_run_advance(db, run, engine) -> None:
         # Branch on burn_device: with it set we dispatch a burn plan to
         # an agent that has access to the optical device.  Without it,
         # ISO_BUILT IS the done-state and we shortcut to COMPLETE.
-        if run.burn_device:
+        # A set whose every disc is already burned (only reachable by hand)
+        # is done, not burned again.
+        if run.burn_device and (
+            int(getattr(run, "burned_disc_count", None) or 0) < run_disc_count(run)
+        ):
             _advance_iso_built_to_burning(db, run, engine)
         else:
             _advance_iso_built_to_complete(run)
@@ -780,8 +865,10 @@ def _run_one_tick() -> dict:
     db = next(get_db())
     try:
         # Pick up runs whose status is one of the "ready to advance"
-        # values.  Runs in MIRRORING / BUILDING_ISO are mid-flight and
-        # waited on by the result handler, not this tick.
+        # values.  Runs in MIRRORING / BUILDING_ISO / BURNING are
+        # mid-flight and waited on by the result handler, not this tick;
+        # AWAITING_MEDIA waits on the operator (POST .../next-disc) and is
+        # never dispatched from here.
         rows = (
             db.query(models.AirgapCollectionRun)
             .filter(

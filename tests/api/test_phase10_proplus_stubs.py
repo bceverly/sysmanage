@@ -8,7 +8,7 @@ Phase 10 Pro+ stub-route smoke tests.
 When the virtualization_engine and observability_engine modules aren't
 loaded (the default for OSS deployments and the test harness), the
 proplus_routes wrapper mounts stub routes under /api/v1/virt/* and
-/api/v1/observability/* that always return ``{"licensed": False}``.
+/api/v1/observability/* that always answer 402 (``pro_plus_required``).
 
 These tests verify the stubs are mounted and gated behind auth -- the
 licensed (engine-loaded) happy path is exercised directly against the
@@ -33,10 +33,9 @@ class TestVirtualizationStubRoutes:
             headers=auth_headers,
         )
         # Stub or real engine -- engine isn't loaded in test harness so
-        # the stub route serves: returns 200 + {"licensed": False}.
-        assert r.status_code in [200, 402, 403, 404]
-        if r.status_code == 200:
-            assert r.json() == {"licensed": False}
+        # the stub route serves: 402, like every unlicensed stub.
+        assert r.status_code == 402
+        assert r.json()["detail"]["error"] == "pro_plus_required"
 
     def test_bhyve_stub_returns_unlicensed(self, client, auth_headers):
         r = client.post(
@@ -62,9 +61,8 @@ class TestVirtualizationStubRoutes:
             headers=auth_headers,
             json={"vm_name": "x", "hostname": "x", "distribution": "ubuntu"},
         )
-        assert r.status_code in [200, 402, 403, 404, 422]
-        if r.status_code == 200:
-            assert r.json() == {"licensed": False}
+        assert r.status_code == 402
+        assert r.json()["detail"]["error"] == "pro_plus_required"
 
     def test_kvm_delete_stub(self, client, auth_headers):
         r = client.post(
@@ -178,9 +176,8 @@ class TestObservabilityStubRoutes:
             f"/api/v1/observability/otel/{_HOST_ID}/status",
             headers=auth_headers,
         )
-        assert r.status_code in [200, 402, 403, 404]
-        if r.status_code == 200:
-            assert r.json() == {"licensed": False}
+        assert r.status_code == 402
+        assert r.json()["detail"]["error"] == "pro_plus_required"
 
     def test_graylog_stub_returns_unlicensed(self, client, auth_headers):
         r = client.post(

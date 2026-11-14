@@ -327,7 +327,7 @@ describe('dates', () => {
         // never reported or reported something unparseable.
         expect(formatTimestamp(t, null)).toBe('never');
         expect(formatTimestamp(t, undefined)).toBe('never');
-        expect(formatTimestamp(t, 'not-a-date')).toBe('invalid');
+        expect(formatTimestamp(t, 'not-a-date')).toBe('Invalid date');
     });
 
     test('getDisplayStatus uses a 5-minute liveness window', () => {

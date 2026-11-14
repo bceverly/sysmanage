@@ -6261,3 +6261,13 @@ msgstr ""
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
+
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
+msgstr ""

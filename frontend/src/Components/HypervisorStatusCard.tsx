@@ -350,7 +350,7 @@ const HypervisorActions: React.FC<HypervisorActionsProps> = ({
 }) => {
   const privilegedTitle = isAgentPrivileged
     ? ''
-    : t('hostDetail.privilegedModeRequired', 'Privileged mode required');
+    : t('hostDetail.privilegedModeRequired', 'Privileged mode required for service control');
 
   const showEnable = canShowEnableButton && canEnable && !!onEnable;
   const showLoadModules =

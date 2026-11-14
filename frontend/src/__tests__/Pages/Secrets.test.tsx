@@ -80,8 +80,9 @@ describe("initial load", () => {
   });
 
   test("an unlicensed response yields an empty list, not a crash", async () => {
-    // The service answers `{ licensed: false }` rather than erroring, so the
-    // page has to recognize that shape instead of treating it as a secret.
+    // The server answers 402 and the service turns that into
+    // `{ licensed: false }`, so the page has to recognize that shape
+    // instead of treating it as a secret.
     m(secretsService.getSecrets).mockResolvedValue({ licensed: false, secrets: [] });
     render(<Secrets />);
     await waitFor(() => expect(screen.getByTestId("grid")).toHaveTextContent(""));

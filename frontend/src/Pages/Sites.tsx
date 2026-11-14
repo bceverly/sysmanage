@@ -7,7 +7,8 @@
  *
  * Lists every subordinate site server registered with this coordinator.
  * On OSS / Community / unlicensed Enterprise installs the backend
- * returns ``{licensed: false}`` and this page renders an Enterprise
+ * answers 402, the service reads that as ``{licensed: false}``, and
+ * this page renders an Enterprise
  * upsell instead of the empty Sites grid (otherwise a fresh install
  * looks broken when the user clicks the nav link).
  *

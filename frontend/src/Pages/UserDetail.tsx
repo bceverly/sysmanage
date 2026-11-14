@@ -209,7 +209,7 @@ const UserDetail = () => { // NOSONAR
 
             setResetSuccess(
                 response.data.message ||
-                t('userDetail.passwordResetSuccess', 'Password reset email has been sent to {email}', { email: user.userid })
+                t('userDetail.passwordResetSuccess', 'Password reset email has been sent to {{email}}', { email: user.userid })
             );
         } catch (err: unknown) {
             console.error('Password reset error:', err);
@@ -670,7 +670,7 @@ const UserDetail = () => { // NOSONAR
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="password-reset-dialog-description">
-                        {t('userDetail.confirmResetMessage', 'Are you sure you want to send a password reset email to {email}? This will allow the user to set a new password.', { email: user?.userid })}
+                        {t('userDetail.confirmResetMessage', 'Are you sure you want to send a password reset email to {{email}}? This will allow the user to set a new password.', { email: user?.userid })}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

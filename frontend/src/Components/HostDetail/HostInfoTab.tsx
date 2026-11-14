@@ -317,7 +317,7 @@ const HostOpenTelemetryCard: React.FC<{
             }
             return (
               <Typography variant="body2" color="textSecondary">
-                {t("common.notAvailable", "Not Available")}
+                {t("common.notAvailable", "N/A")}
               </Typography>
             );
           })()}
@@ -385,7 +385,7 @@ const HostBasicInfoCard: React.FC<{
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography variant="body2" color="textSecondary">
-                {t("hosts.ipv4", "IPv4")}
+                {t("hosts.ipv4", "IPv4 Address")}
               </Typography>
               <Typography variant="body1">
                 {host.ipv4 || t("common.notAvailable")}
@@ -393,7 +393,7 @@ const HostBasicInfoCard: React.FC<{
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography variant="body2" color="textSecondary">
-                {t("hosts.ipv6", "IPv6")}
+                {t("hosts.ipv6", "IPv6 Address")}
               </Typography>
               <Typography variant="body1">
                 {host.ipv6 || t("common.notAvailable")}
@@ -620,7 +620,7 @@ const HostOsInfoCard: React.FC<{
                   color="textSecondary"
                   sx={{ display: "flex", alignItems: "center", gap: 1 }}
                 >
-                  {t("hostDetail.osDetails", "Additional Details")}
+                  {t("hostDetail.osDetails", "Additional OS Details")}
                   <IconButton
                     size="small"
                     onClick={() =>

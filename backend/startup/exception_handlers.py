@@ -21,6 +21,20 @@ logger = get_logger("backend.startup.exceptions")
 # Log message format constant for request debugging
 LOG_MSG_REQUEST_METHOD_HEADERS = "Request method: %s, Headers: %s"
 
+# Headers whose values are credentials.  They were logged in full on every
+# error, which put bearer tokens and session cookies in the server log.
+_SECRET_HEADERS = frozenset(
+    {"authorization", "cookie", "set-cookie", "x-api-key", "proxy-authorization"}
+)
+
+
+def _safe_headers(request: Request) -> dict:
+    """The request's headers with every credential value redacted."""
+    return {
+        name: ("[redacted]" if name.lower() in _SECRET_HEADERS else value)
+        for name, value in request.headers.items()
+    }
+
 
 def register_exception_handlers(app: FastAPI, origins: list):
     """
@@ -70,14 +84,20 @@ def register_exception_handlers(app: FastAPI, origins: list):
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc: StarletteHTTPException):
         """Handle HTTP exceptions and ensure CORS headers are included."""
-        logger.warning(
-            "HTTP Exception occurred - Status: %s, Detail: %s, Path: %s",
+        # A 4xx is the API answering as designed (401, 402, 404, 422 ...), so
+        # it is one INFO line; only a 5xx raised as an HTTPException warns.
+        # Logging every 4xx at WARNING with the full headers flooded CI (the
+        # route walk refuses 800+ routes) and production logs alike.
+        level = logger.warning if exc.status_code >= 500 else logger.info
+        level(
+            "HTTP Exception occurred - Status: %s, Detail: %s, %s %s",
             exc.status_code,
             exc.detail,
+            request.method,
             request.url.path,
         )
-        logger.warning(
-            LOG_MSG_REQUEST_METHOD_HEADERS, request.method, dict(request.headers)
+        logger.debug(
+            LOG_MSG_REQUEST_METHOD_HEADERS, request.method, _safe_headers(request)
         )
 
         response = JSONResponse(
@@ -92,10 +112,9 @@ def register_exception_handlers(app: FastAPI, origins: list):
             response.headers["Access-Control-Allow-Origin"] = request_origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Expose-Headers"] = "Authorization"
-        else:
-            logger.warning(
-                "Origin %s not in allowed origins or not provided", request_origin
-            )
+        elif request_origin:
+            # No Origin at all is a same-origin or non-browser call: normal.
+            logger.warning("Origin %s not in allowed origins", request_origin)
 
         return response
 
@@ -111,7 +130,7 @@ def register_exception_handlers(app: FastAPI, origins: list):
             exc_info=True,
         )
         logger.error(
-            LOG_MSG_REQUEST_METHOD_HEADERS, request.method, dict(request.headers)
+            LOG_MSG_REQUEST_METHOD_HEADERS, request.method, _safe_headers(request)
         )
         logger.error("Exception type: %s", type(exc).__name__)
         logger.error("Exception args: %s", exc.args)
@@ -128,7 +147,7 @@ def register_exception_handlers(app: FastAPI, origins: list):
             response.headers["Access-Control-Allow-Origin"] = request_origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Expose-Headers"] = "Authorization"
-        else:
+        elif request_origin:
             logger.warning(
                 "Origin %s not in allowed origins for 500 error", request_origin
             )
@@ -148,7 +167,7 @@ def register_exception_handlers(app: FastAPI, origins: list):
             exc_info=True,
         )
         logger.error(
-            LOG_MSG_REQUEST_METHOD_HEADERS, request.method, dict(request.headers)
+            LOG_MSG_REQUEST_METHOD_HEADERS, request.method, _safe_headers(request)
         )
         logger.error("Exception type: %s", type(exc).__name__)
         logger.error("Exception args: %s", exc.args)

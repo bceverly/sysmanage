@@ -6651,6 +6651,16 @@ msgstr ""
 "macOS-kwetsbaarheden per besturingssysteemversie, uit de gegevens van NVD "
 "over getroffen versies"
 
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr "Deze uitvoering wacht niet op een lege schijf (status: %s)."
+
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
+msgstr "Lege schijf geplaatst voor schijf %(disc)d van %(count)d van air-gap collectie uitvoering '%(iso_label)s'"
+
 #~ msgid ""
 #~ "Confirm that photos will be deleted from iCloud once they are downloaded"
 #~ msgstr ""

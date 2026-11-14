@@ -411,7 +411,7 @@ describe("adding a repository per platform", () => {
   test("macOS builds a Homebrew tap", async () => {
     await loaded("macOS 15");
     const dlg = await openAdd();
-    fill(dlg, "Tap User/Org", "homebrew");
+    fill(dlg, "Tap User", "homebrew");
     fill(dlg, "Tap Repository", "cask-versions");
     expect(within(dlg).getByText("homebrew/cask-versions")).toBeInTheDocument();
     await submit(dlg);
@@ -438,7 +438,7 @@ describe("adding a repository per platform", () => {
     await loaded("NetBSD 10.1");
     const dlg = await openAdd();
     fill(dlg, "Repository Name", "wip");
-    fill(dlg, "Git Repository URL", "https://github.com/NetBSD/pkgsrc-wip");
+    fill(dlg, "Repository URL", "https://github.com/NetBSD/pkgsrc-wip");
     expect(
       within(dlg).getByText("https://github.com/NetBSD/pkgsrc-wip"),
     ).toBeInTheDocument();

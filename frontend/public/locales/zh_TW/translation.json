@@ -71,7 +71,7 @@
       "tooltip": {
         "current": "主機包與最新鏡像狀態匹配，且自上次轉移以來未出現任何公共 CVE。",
         "not_applied": "這些修復已存在於本地鏡像中。不需要新的媒體傳輸 -- 主機尚未運行其套件管理器。",
-        "not_transferred": "這些修復還未在本地鏡像中。要關閉差距需要另一個 collector → 媒體 → 倉庫轉移週期。"
+        "not_transferred": "這些修復尚未出現在本地鏡像中。要補上這個差距，需要再進行一次 收集器 → 媒體 → 儲存庫 的傳輸週期。"
       }
     },
     "freshness": {
@@ -134,9 +134,9 @@
     "deleteError": "無法刪除捆綁包",
     "deleted": "組件包已刪除",
     "dockerInstallHint": "在具有 sudo 權限的用戶下在此 sysmanage 服務器上運行：",
-    "dockerNoGroup": "Docker 正在運行，但 {{user}} 使用者不在 docker 群組中，因此建立子程序無法連接到 daemon socket。",
+    "dockerNoGroup": "Docker 正在執行，但 {{user}} 使用者不在 docker 群組中，因此建置子程序無法連接到常駐程式的通訊端。",
     "dockerNotInstalled": "此伺服器上未安裝 Docker。捆綁建立需要 Docker 以取得特定分發版的 Linux 套件。",
-    "dockerNotRunning": "Docker 已安裝，但 daemon 不可達。請使用：sudo systemctl enable --now docker 來啟動它。",
+    "dockerNotRunning": "Docker 已安裝，但無法連線到常駐程式。請使用以下指令啟動：sudo systemctl enable --now docker。",
     "dockerPermissionDenied": "Docker 守護程序正在運行，但 {{user}} 用戶（執行此 SysManage 进程的用户）無法讀取 /var/run/docker.sock。將用戶添加到 docker 群組，然後重新啟動 SysManage 进程以使新的群組設置生效。",
     "dockerReady": "Docker 已準備好",
     "dockerReadyHint": "構建通常需要5-30分鐘，具體取決於啟用的平台數量。",
@@ -161,7 +161,8 @@
   "airgapCollections": {
     "actions": {
       "delete": "刪除",
-      "download": "下載 ISO 檔案"
+      "download": "下載 ISO 檔案",
+      "nextDisc": "已放入下一張光碟"
     },
     "column": {
       "actions": "操作",
@@ -184,7 +185,7 @@
       "hostMismatch": "所有選中的鏡像必須在同一主機上。",
       "hostMismatchWarning": "您選擇的鏡像跨越多個主機。收集計劃只會發送到單一主機，因此所有選擇必須共享一個主機。",
       "includeCompliance": "包含合規性套件",
-      "includeCve": "包含CVE feed快照",
+      "includeCve": "包含 CVE 資料來源快照",
       "isoLabel": "ISO標籤",
       "isoLabelHelper": "短標識符，嵌入生成的ISO中（例如\"monthly-2026-05\"）。",
       "isoLabelRequired": "ISO標籤是必填的",
@@ -210,14 +211,26 @@
     "multiDiscInfo": "此次運行產生了 {{count}} 張光碟。選擇要下載的光碟。",
     "newRun": "新增收集執行",
     "noIsoOnDisk": "尚未在磁盤上找到 ISO 檔案 -- 請稍後再試。",
-    "noManifestFound": "運行尚未有清單 -- 狀態為 COMPLETE 時再試一次。",
+    "noManifestFound": "此執行尚無可下載的 ISO -- 請等待狀態變為 ISO_BUILT 或 COMPLETE。",
     "notApplicable": "此頁面僅在收集器角色部署中才有意義。",
     "refresh": "刷新",
     "subtitle": "觸發一次性收集運行，這些運行會鏡像配置的倉庫、建立一個簽名 ISO，並為空氣隔離側寫入一個清單以供攝取。",
-    "title": "隔離收集執行"
+    "title": "隔離收集執行",
+    "burnSet": {
+      "awaitingMedia": "第 {{burned}} 張光碟（共 {{total}} 張）已燒錄。請放入空白光碟。",
+      "burning": "第 {{disc}} 張光碟（共 {{total}} 張）"
+    },
+    "nextDisc": {
+      "title": "放入下一張光碟",
+      "body": "第 {{burned}} 張光碟（共 {{total}} 張）已燒錄完成，並已從 {{device}} 退出。請將其標示為第 {{burned}} 張光碟，在光碟機中放入一張空白光碟，然後確認以燒錄第 {{next}} 張光碟。",
+      "cancel": "暫不",
+      "confirm": "燒錄第 {{next}} 張光碟",
+      "started": "正在燒錄第 {{disc}} 張光碟（共 {{total}} 張）。",
+      "error": "無法開始下一張光碟"
+    }
   },
   "airgapDevices": {
-    "empty": "未找到符合條件的磁盤。插入媒體並按下 Rescan。",
+    "empty": "找不到符合條件的磁碟機。請插入媒體並按下「重新掃描」。",
     "help": "選擇持有收集器媒體的光碟/USB驅動器。在Air-Gap存儲庫頁面上的導入按鈕在插入可讀取的ISO時可用。在導入期間會驗證媒體簽名。",
     "label": "區塊設備",
     "loadError": "無法枚舉磁碟機。",
@@ -538,7 +551,8 @@
     "status": "狀態",
     "unknownPackage": "(未知)",
     "violations": "違規",
-    "violationsFor": "違規 -- {{name}}"
+    "violationsFor": "違規 -- {{name}}",
+    "scanTooltip": "根據快取的軟體清單進行掃描"
   },
   "configDrift": {
     "actions": "動作",
@@ -946,7 +960,7 @@
     "currentTag": "(目前)",
     "enroll": {
       "coordIdentityKey": "協調器身分公開金鑰（PEM）",
-      "coordIdentityKeyHelp": "必填。粘貼從協調器的 Server Role 頁面獲取的身份公開金鑰。此站點拒絕入網，除非協調器證明了這個確切的金鑰 -- 這就是防止入網時的中間人攻擊的方法。",
+      "coordIdentityKeyHelp": "必填。貼上透過其他管道（從協調器的「伺服器角色」頁面）取得的協調器身分公開金鑰。除非協調器證明持有這把金鑰，否則此站點會拒絕註冊 -- 這正是防範註冊時中間人攻擊的機制。",
       "coordUrl": "協調器 URL",
       "enrolled": "已與協調器註冊",
       "error": "無法與協調器入網。",
@@ -1393,7 +1407,6 @@
     "completedAt": "完成時間",
     "complianceTab": "合規",
     "configurationFiles": "配置文件",
-    "confirmDeleteInstallation": "您確定要刪除這個安裝記錄嗎？",
     "confirmDeleteInstallationMessage": "您確定要刪除此安裝記錄嗎?此動作無法復原。",
     "confirmRequestPackages": "請求可用套件",
     "confirmRequestPackagesMessage": "這將觸發主機上的套件收集,可能消耗大量資源且需要幾分鐘才能完成。要繼續嗎?",
@@ -1711,7 +1724,7 @@
     "softwareTab": "軟體",
     "speed": "速度",
     "sshKeysDeployedError": "SSH金鑰部署失敗",
-    "sshKeysDeployedSuccess": "SSH金鑰部署成功",
+    "sshKeysDeployedSuccess": "SSH 金鑰部署已成功排入佇列",
     "start": "啟動",
     "startChildHost": "啟動",
     "status": "狀態",
@@ -1740,7 +1753,7 @@
     "ubuntuProAttachConfirm": "連結",
     "ubuntuProAttachDescription": "輸入您的 Ubuntu Pro 權杖以將此系統連結到您的訂閱。",
     "ubuntuProAttachError": "連結 Ubuntu Pro 失敗",
-    "ubuntuProAttachSuccess": "Ubuntu Pro 已成功連結",
+    "ubuntuProAttachSuccess": "已要求連結 Ubuntu Pro",
     "ubuntuProAttachTitle": "連結 Ubuntu Pro",
     "ubuntuProAttaching": "正在連結...",
     "ubuntuProDetach": "脫離",
@@ -1748,7 +1761,7 @@
     "ubuntuProDetachConfirmMessage": "您確定要從此系統中斷連結 Ubuntu Pro 嗎？這將移除此主機的所有 Ubuntu Pro 權益和服務。",
     "ubuntuProDetachConfirmTitle": "確認中斷連結 Ubuntu Pro",
     "ubuntuProDetachError": "中斷連結 Ubuntu Pro 失敗",
-    "ubuntuProDetachSuccess": "Ubuntu Pro 已成功中斷連結",
+    "ubuntuProDetachSuccess": "已要求中斷連結 Ubuntu Pro",
     "ubuntuProDetaching": "正在中斷連結...",
     "ubuntuProInfo": "Ubuntu Pro 資訊",
     "ubuntuProTab": "Ubuntu Pro",
@@ -2668,7 +2681,8 @@
     "updated": "合規設定檔已儲存",
     "version": "版本",
     "versionOp": "操作",
-    "versionOpAny": "(任意)"
+    "versionOpAny": "(任意)",
+    "loadOneError": "載入合規設定檔失敗"
   },
   "policies": {
     "actions": {
@@ -2833,7 +2847,8 @@
     },
     "title": "查詢套件",
     "validateFailed": "無法檢查套件",
-    "version": "版本"
+    "version": "版本",
+    "livePollFailed": "無法讀取即時查詢結果"
   },
   "queues": {
     "created": "建立時間",
@@ -2894,7 +2909,8 @@
     "subtitle": "渲染器在內建報告類型之上套用的自訂版面",
     "tabLabel": "報告模板",
     "title": "報告範本",
-    "updated": "範本已儲存"
+    "updated": "範本已儲存",
+    "addDialogTitle": "新增報告範本"
   },
   "reportViewer": {
     "iframeTitle": "報告內容",
@@ -3185,7 +3201,8 @@
     "updateError": "機密更新失敗",
     "updateSuccess": "機密更新成功",
     "updatedAt": "更新於",
-    "viewSecret": "檢視機密"
+    "viewSecret": "檢視機密",
+    "loadOneError": "載入機密失敗"
   },
   "security": {
     "addRole": "新增角色",
@@ -3501,8 +3518,8 @@
     "opentelemetry": {
       "collectorUrl": "收集器 URL",
       "configuration": "組態設定",
-      "disabledMessage": "OpenTelemetry 偵測功能目前已停用。移除 OTEL_ENABLED=false 或設定 OTEL_ENABLED=true 以啟用分散式追蹤和指標收集。",
-      "enableHint": "OpenTelemetry 預設為啟用。若要停用，請設定 OTEL_ENABLED=false 環境變數並重新啟動伺服器。",
+      "disabledMessage": "OpenTelemetry 偵測功能已停用（預設）。若要啟用分散式追蹤和指標收集，請設定 OTEL_ENABLED=true 環境變數（或在 sysmanage.yaml 中設定 telemetry.enabled: true）並重新啟動伺服器。",
+      "enableHint": "若要停用 OpenTelemetry，請設定 OTEL_ENABLED=false 環境變數（或在 sysmanage.yaml 中設定 telemetry.enabled: false）並重新啟動伺服器。",
       "fetchError": "無法獲取OpenTelemetry狀態",
       "instrumentation": "檢測",
       "metricsCount": "指標",
@@ -3610,7 +3627,8 @@
     "windowsTypeHelp": "選擇 Chocolatey 或 winget",
     "windowsUrl": "儲存庫 URL",
     "windowsUrlHelp": "例如:https://mycompany.com/chocolatey",
-    "winget": "winget"
+    "winget": "winget",
+    "obsRepoUrl": "OBS 儲存庫 URL"
   },
   "ubuntuPro": {
     "actions": {
@@ -3761,7 +3779,8 @@
     "updated": "更新設定檔已儲存",
     "window": "分階段視窗 (分鐘)",
     "windowHelp": "將代理派送分散在這麼多分鐘內 (0-720)",
-    "windowRange": "分階段視窗必須在 0 至 720 分鐘之間"
+    "windowRange": "分階段視窗必須在 0 至 720 分鐘之間",
+    "addDialogTitle": "新增更新設定檔"
   },
   "userDetail": {
     "active": "活躍",
@@ -5649,7 +5668,7 @@
       "other": "儲存檢查：{{code}}",
       "prepareHint": "每台主機「備份」分頁中的「準備儲存」會為該主機提供獨立的檔案系統和僅限於它的匯出。儲存主機的 NFS 伺服器設定仍由您自行設定。",
       "nfsV4Unknown": "無法檢查儲存主機是否提供 NFSv4，主機透過它存取其備份。",
-      "proxyCertExpired": "restate-proxy 憑證已過期。在續約之前，主機會拒絕此 Proxy。",
+      "proxyCertExpired": "restate-proxy 憑證已過期。在續約之前，主機會拒絕此代理。",
       "proxyCertExpiring": "restate-proxy 憑證將在 {{days}} 天後到期。請在此之前續約。",
       "proxyCertMissing": "儲存主機的 /etc/restate/proxy.crt 中沒有 restate-proxy 憑證。",
       "proxyCertUnreadable": "儲存主機上的 restate-proxy 憑證不是代理可讀取的憑證。",
@@ -5877,16 +5896,16 @@
     },
     "transport": {
       "ca": "自有 CA 憑證（PEM，選用）",
-      "caHelp": "用於由您自己的 CA 簽署的 Proxy 憑證。主機只會針對其備份信任它。",
+      "caHelp": "用於由您自己的 CA 簽署的代理憑證。主機只會為其備份信任它。",
       "caKept": "已儲存一個 CA。貼上另一個即可取代它；留空則保留已儲存的 CA。",
       "caRemove": "移除已儲存的 CA 並信任系統存放區",
       "change": "變更",
-      "host": "主機連線使用的 Proxy 位址",
-      "hostHelp": "Proxy 憑證中的名稱或位址，與主機解析時所用的相同。",
+      "host": "主機連線使用的代理位址",
+      "hostHelp": "代理憑證中的名稱或位址，與主機解析時所用的相同。",
       "label": "存取儲存空間的方式",
       "nfs": "NFS（每台主機掛載自己的匯出）",
       "pin": "釘選的金鑰（SHA-256，選用）",
-      "pinHelp": "主機將只接受具有此公開金鑰的 Proxy 憑證。",
+      "pinHelp": "主機將只接受具有此公開金鑰的代理憑證。",
       "port": "連接埠",
       "proxy": "restate-proxy（以 HTTPS 連到儲存主機）",
       "proxyIntro": "在儲存主機上執行 restate-proxy。每台主機為其建立自己的權杖，該權杖從不離開主機，由儲存主機寫入授權。一旦主機的 restate 能透過代理備份，備份、還原、瀏覽和比較都會經由代理進行，無需 NFS 掛載。",

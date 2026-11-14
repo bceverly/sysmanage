@@ -133,11 +133,20 @@ class TestModuleCode:
 
         assert ModuleCode.HEALTH_ENGINE.value == "health_engine"
 
-    def test_security_scanner_value(self):
-        """Test SECURITY_SCANNER has correct value."""
+    def test_removed_module_codes_are_gone(self):
+        """The six codes with no engine behind them were removed (2026-11-14)."""
         from backend.licensing.features import ModuleCode
 
-        assert ModuleCode.SECURITY_SCANNER.value == "security_scanner"
+        values = {m.value for m in ModuleCode}
+        for gone in (
+            "security_scanner",
+            "performance_analyzer",
+            "anomaly_detector",
+            "prediction_engine",
+            "log_analyzer",
+            "metrics_aggregator",
+        ):
+            assert gone not in values
 
     def test_vuln_engine_value(self):
         """Test VULN_ENGINE has correct value."""
@@ -208,20 +217,14 @@ class TestModuleCode:
 
         expected_modules = [
             "HEALTH_ENGINE",
-            "SECURITY_SCANNER",
             "VULN_ENGINE",
             "COMPLIANCE_ENGINE",
-            "PERFORMANCE_ANALYZER",
-            "ANOMALY_DETECTOR",
-            "PREDICTION_ENGINE",
             "PROPLUS_CORE",
             "ALERTING_ENGINE",
             "REPORTING_ENGINE",
             "AUDIT_ENGINE",
             "SECRETS_ENGINE",
             "CONTAINER_ENGINE",
-            "LOG_ANALYZER",
-            "METRICS_AGGREGATOR",
         ]
 
         for module_name in expected_modules:
@@ -312,6 +315,8 @@ class TestTierFeatures:
             FeatureCode.MULTI_USER,
             # The reporting engine's gate; issued at Professional (2026-11-14).
             FeatureCode.HEALTH_REPORTS,
+            # Issued at Professional by the generator; moved here 2026-11-14.
+            FeatureCode.API_EXTENDED,
         }
         assert pro_features == expected
 
@@ -369,7 +374,6 @@ class TestTierModules:
         pro_modules = TIER_MODULES[LicenseTier.PROFESSIONAL]
         expected = {
             ModuleCode.HEALTH_ENGINE,
-            ModuleCode.SECURITY_SCANNER,
             ModuleCode.VULN_ENGINE,
             ModuleCode.COMPLIANCE_ENGINE,
             ModuleCode.ALERTING_ENGINE,
@@ -414,11 +418,11 @@ class TestTierModules:
         from backend.licensing.features import TIER_MODULES, LicenseTier, ModuleCode
 
         ent_modules = TIER_MODULES[LicenseTier.ENTERPRISE]
-        assert ModuleCode.PERFORMANCE_ANALYZER in ent_modules
-        assert ModuleCode.ANOMALY_DETECTOR in ent_modules
-        assert ModuleCode.PREDICTION_ENGINE in ent_modules
-        assert ModuleCode.LOG_ANALYZER in ent_modules
-        assert ModuleCode.METRICS_AGGREGATOR in ent_modules
+        assert ModuleCode.AIRGAP_COLLECTOR_ENGINE in ent_modules
+        assert ModuleCode.AIRGAP_REPOSITORY_ENGINE in ent_modules
+        assert ModuleCode.FEDERATION_CONTROLLER_ENGINE in ent_modules
+        assert ModuleCode.FEDERATION_SITE_ENGINE in ent_modules
+        assert ModuleCode.MALWARE_ENGINE in ent_modules
 
     def test_all_tiers_in_mapping(self):
         """Test all license tiers are in TIER_MODULES."""

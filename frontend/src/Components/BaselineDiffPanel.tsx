@@ -207,7 +207,7 @@ const BaselineDiffPanel: React.FC<BaselineDiffPanelProps> = ({ hostId, hosts }) 
             case 'not_watched':
                 return t(
                     'baselineDiff.reason.notWatched',
-                    'Not on this host\u2019s watch list.',
+                    'Not on this host’s watch list.',
                 );
             case 'unreadable':
                 return t(

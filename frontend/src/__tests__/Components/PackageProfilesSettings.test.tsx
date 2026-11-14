@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { vi, beforeEach, afterEach, test, expect } from "vitest";
 
 // Error-path tests intentionally log to console.error; silence the expected
@@ -99,19 +99,18 @@ test("opens the create dialog", async () => {
   render(<PackageProfilesSettings />);
   await screen.findByText("Baseline");
 
-  fireEvent.click(screen.getByRole("button", { name: /Add Profile/ }));
+  fireEvent.click(screen.getByRole("button", { name: /Add Compliance Profile/ }));
 
-  await waitFor(() =>
-    expect(screen.getByText("Add Compliance Profile")).toBeInTheDocument(),
-  );
+  const dialog = await screen.findByRole("dialog");
+  expect(within(dialog).getByText("Add Compliance Profile")).toBeInTheDocument();
 });
 
 test("creates a profile with a name and a constraint", async () => {
   render(<PackageProfilesSettings />);
   await screen.findByText("Baseline");
 
-  fireEvent.click(screen.getByRole("button", { name: /Add Profile/ }));
-  await screen.findByText("Add Compliance Profile");
+  fireEvent.click(screen.getByRole("button", { name: /Add Compliance Profile/ }));
+  await screen.findByRole("dialog");
 
   const nameField = screen.getByLabelText(/Name/) as HTMLInputElement;
   fireEvent.change(nameField, { target: { value: "New Profile" } });
@@ -131,8 +130,8 @@ test("blocks save when the name is empty", async () => {
   render(<PackageProfilesSettings />);
   await screen.findByText("Baseline");
 
-  fireEvent.click(screen.getByRole("button", { name: /Add Profile/ }));
-  await screen.findByText("Add Compliance Profile");
+  fireEvent.click(screen.getByRole("button", { name: /Add Compliance Profile/ }));
+  await screen.findByRole("dialog");
 
   fireEvent.click(screen.getByRole("button", { name: /^Save$/ }));
 

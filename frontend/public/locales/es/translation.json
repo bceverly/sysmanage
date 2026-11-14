@@ -161,7 +161,8 @@
   "airgapCollections": {
     "actions": {
       "delete": "Eliminar",
-      "download": "Descargar ISO"
+      "download": "Descargar ISO",
+      "nextDisc": "Siguiente disco insertado"
     },
     "column": {
       "actions": "Acciones",
@@ -210,11 +211,23 @@
     "multiDiscInfo": "Esta ejecución produjo {{count}} discos. Elija cuáles descargar.",
     "newRun": "Nueva ejecución de recopilación",
     "noIsoOnDisk": "Aún no se ha encontrado ningún archivo ISO en el disco -- vuelva a consultar en unos momentos.",
-    "noManifestFound": "La ejecución aún no tiene manifestación -- inténtelo nuevlica una vez que el estado sea COMPLETE.",
+    "noManifestFound": "La ejecución aún no tiene una ISO descargable -- espere hasta que el estado llegue a ISO_BUILT o COMPLETE.",
     "notApplicable": "Esta página solo tiene sentido en implementaciones con rol recolector.",
     "refresh": "Actualizar",
     "subtitle": "Desencadena ejecuciones en un solo momento que reflejan los repositorios configurados, construye un ISO firmado y escribe una manifestación para la ingestión en el lado aislado de red.",
-    "title": "Ejecuciones de recopilación aislada"
+    "title": "Ejecuciones de recopilación aislada",
+    "burnSet": {
+      "awaitingMedia": "Disco {{burned}} de {{total}} grabado. Inserte un disco virgen.",
+      "burning": "Disco {{disc}} de {{total}}"
+    },
+    "nextDisc": {
+      "title": "Inserte el siguiente disco",
+      "body": "El disco {{burned}} de {{total}} está grabado y se ha expulsado de {{device}}. Etiquételo como disco {{burned}}, coloque un disco virgen en la unidad y confirme para grabar el disco {{next}}.",
+      "cancel": "Todavía no",
+      "confirm": "Grabar disco {{next}}",
+      "started": "Grabando disco {{disc}} de {{total}}.",
+      "error": "No se pudo iniciar el siguiente disco"
+    }
   },
   "airgapDevices": {
     "empty": "No se encontraron unidades elegibles. Inserte el medio y presione Rescan.",
@@ -538,7 +551,8 @@
     "status": "Estado",
     "unknownPackage": "(desconocido)",
     "violations": "Infracciones",
-    "violationsFor": "Infracciones -- {{name}}"
+    "violationsFor": "Infracciones -- {{name}}",
+    "scanTooltip": "Escanear contra el inventario en caché"
   },
   "configDrift": {
     "actions": "Acciones",
@@ -1393,7 +1407,6 @@
     "completedAt": "Completado el",
     "complianceTab": "Cumplimiento",
     "configurationFiles": "Archivos de Configuración",
-    "confirmDeleteInstallation": "¿Está seguro de que desea eliminar este registro de instalación?",
     "confirmDeleteInstallationMessage": "¿Está seguro de que desea eliminar este registro de instalación? Esta acción no se puede deshacer.",
     "confirmRequestPackages": "Solicitar paquetes disponibles",
     "confirmRequestPackagesMessage": "Esto activará la recopilación de paquetes en el host, lo cual puede consumir muchos recursos y tardar varios minutos en completarse. ¿Desea continuar?",
@@ -1711,7 +1724,7 @@
     "softwareTab": "Software",
     "speed": "Velocidad",
     "sshKeysDeployedError": "Error al desplegar claves SSH",
-    "sshKeysDeployedSuccess": "Claves SSH desplegadas con éxito",
+    "sshKeysDeployedSuccess": "Despliegue de claves SSH encolado correctamente",
     "start": "Iniciar",
     "startChildHost": "Iniciar",
     "status": "Estado",
@@ -1740,7 +1753,7 @@
     "ubuntuProAttachConfirm": "Vincular",
     "ubuntuProAttachDescription": "Ingrese su token de Ubuntu Pro para vincular este sistema a su suscripción.",
     "ubuntuProAttachError": "Error al vincular Ubuntu Pro",
-    "ubuntuProAttachSuccess": "Ubuntu Pro vinculado exitosamente",
+    "ubuntuProAttachSuccess": "Vinculación de Ubuntu Pro solicitada",
     "ubuntuProAttachTitle": "Vincular Ubuntu Pro",
     "ubuntuProAttaching": "Vinculando...",
     "ubuntuProDetach": "Desvincular",
@@ -1748,7 +1761,7 @@
     "ubuntuProDetachConfirmMessage": "¿Está seguro de que desea desvincular Ubuntu Pro de este sistema? Esto eliminará todos los beneficios y servicios de Ubuntu Pro para este host.",
     "ubuntuProDetachConfirmTitle": "Confirmar desvinculación de Ubuntu Pro",
     "ubuntuProDetachError": "Error al desvincular Ubuntu Pro",
-    "ubuntuProDetachSuccess": "Ubuntu Pro desvinculado exitosamente",
+    "ubuntuProDetachSuccess": "Desvinculación de Ubuntu Pro solicitada",
     "ubuntuProDetaching": "Desvinculando...",
     "ubuntuProInfo": "Información de Ubuntu Pro",
     "ubuntuProTab": "Ubuntu Pro",
@@ -2523,7 +2536,7 @@
     "queryPacks": "Paquetes de consultas",
     "reports": "Informes",
     "role": {
-      "collector": "Recolector Air-Gap",
+      "collector": "Recopilador aislado",
       "engineMissing": "Motor Pro+ requerido no cargado; verifique la licencia.",
       "repository": "Repositorio aislado"
     },
@@ -2668,7 +2681,8 @@
     "updated": "Perfil de cumplimiento guardado",
     "version": "Versión",
     "versionOp": "Op",
-    "versionOpAny": "(cualquiera)"
+    "versionOpAny": "(cualquiera)",
+    "loadOneError": "Error al cargar el perfil de cumplimiento"
   },
   "policies": {
     "actions": {
@@ -2833,7 +2847,8 @@
     },
     "title": "Paquetes de consultas",
     "validateFailed": "No se pudo verificar el paquete",
-    "version": "Version"
+    "version": "Version",
+    "livePollFailed": "No se pudieron leer los resultados de la consulta en vivo"
   },
   "queues": {
     "created": "Fecha de creación",
@@ -2894,7 +2909,8 @@
     "subtitle": "Diseños personalizados que el renderizador aplica sobre los tipos de informe integrados",
     "tabLabel": "Plantillas de informe",
     "title": "Plantillas de Informe",
-    "updated": "Plantilla guardada"
+    "updated": "Plantilla guardada",
+    "addDialogTitle": "Agregar plantilla de informe"
   },
   "reportViewer": {
     "iframeTitle": "Contenido del informe",
@@ -3185,7 +3201,8 @@
     "updateError": "Error al actualizar el secreto",
     "updateSuccess": "Secreto actualizado exitosamente",
     "updatedAt": "Actualizado en",
-    "viewSecret": "Ver Secreto"
+    "viewSecret": "Ver Secreto",
+    "loadOneError": "Error al cargar el secreto"
   },
   "security": {
     "addRole": "Agregar Rol",
@@ -3501,8 +3518,8 @@
     "opentelemetry": {
       "collectorUrl": "URL del recolector",
       "configuration": "Configuración",
-      "disabledMessage": "La instrumentación de OpenTelemetry está actualmente deshabilitada. Elimine OTEL_ENABLED=false o establezca OTEL_ENABLED=true para habilitar el rastreo distribuido y la recolección de métricas.",
-      "enableHint": "OpenTelemetry está habilitado por defecto. Para deshabilitarlo, establezca la variable de entorno OTEL_ENABLED=false y reinicie el servidor.",
+      "disabledMessage": "La instrumentación de OpenTelemetry está deshabilitada (valor predeterminado). Establezca la variable de entorno OTEL_ENABLED=true (o telemetry.enabled: true en sysmanage.yaml) y reinicie el servidor para habilitar el rastreo distribuido y la recolección de métricas.",
+      "enableHint": "Para deshabilitar OpenTelemetry, establezca la variable de entorno OTEL_ENABLED=false (o telemetry.enabled: false en sysmanage.yaml) y reinicie el servidor.",
       "fetchError": "No se pudo obtener el estado de OpenTelemetry",
       "instrumentation": "Instrumentación",
       "metricsCount": "Métricas",
@@ -3610,7 +3627,8 @@
     "windowsTypeHelp": "Elija Chocolatey o winget",
     "windowsUrl": "URL del repositorio",
     "windowsUrlHelp": "p. ej., https://mycompany.com/chocolatey",
-    "winget": "winget"
+    "winget": "winget",
+    "obsRepoUrl": "URL del repositorio OBS"
   },
   "ubuntuPro": {
     "actions": {
@@ -3761,7 +3779,8 @@
     "updated": "Perfil de actualización guardado",
     "window": "Ventana Escalonada (minutos)",
     "windowHelp": "Distribuir los envíos de agente en este número de minutos (0-720)",
-    "windowRange": "La ventana escalonada debe estar entre 0 y 720 minutos"
+    "windowRange": "La ventana escalonada debe estar entre 0 y 720 minutos",
+    "addDialogTitle": "Agregar Perfil de Actualización"
   },
   "userDetail": {
     "active": "Activo",

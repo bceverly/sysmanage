@@ -36,22 +36,16 @@ class TestAirGapBundlesAPI:
     def _mute_builder(self):
         # Patch the builder so the POST doesn't actually spawn a thread
         # that would try to docker-run.
-        # Also patch ``LicenseService.is_pro_plus_active`` (a property)
-        # to True -- endpoints are Pro+-gated and the test fixture has
-        # no license configured.  PropertyMock is required because a
-        # plain ``patch`` on a property has no deleter to restore.
+        # Also patch ``LicenseService.has_feature`` to True -- the
+        # endpoints are gated on the Enterprise airgap_build_iso feature
+        # and the test fixture has no license configured.
         # Also force the resource pre-flight to "sufficient" so the
         # build gate doesn't 409 on a low-RAM CI runner (it reads real
         # /proc/meminfo otherwise).  The gate itself is covered by its
         # own test below, which overrides this.
         with patch(
             "backend.api.airgap_bundles.airgap_bundle_builder.start_build"
-        ) as m, patch.object(
-            LicenseService,
-            "is_pro_plus_active",
-            new_callable=PropertyMock,
-            return_value=True,
-        ), patch(
+        ) as m, patch.object(LicenseService, "has_feature", return_value=True), patch(
             "backend.api.airgap_bundles._check_build_resources",
             return_value={
                 "ram_total_mb": 8000,
@@ -317,9 +311,23 @@ class TestAirGapBundlesAPI:
 
 
 class TestAirGapBundlesProPlusGate:
-    """The Pro+ gate must reject Community-tier access even when the
-    user is authenticated.  Separate class so we don't accidentally
-    inherit the autouse license bypass from TestAirGapBundlesAPI."""
+    """The Enterprise gate must reject Community AND Professional access
+    even when the user is authenticated.  Separate class so we don't
+    accidentally inherit the autouse license bypass from
+    TestAirGapBundlesAPI."""
+
+    def test_professional_license_gets_402(self, client, auth_headers):
+        # Air-gapped installs are Enterprise: a Professional license is
+        # Pro+ active but carries no airgap_build_iso feature.
+        with patch.object(
+            LicenseService,
+            "is_pro_plus_active",
+            new_callable=PropertyMock,
+            return_value=True,
+        ), patch.object(LicenseService, "has_feature", return_value=False):
+            resp = client.get("/api/v1/airgap-bundles", headers=auth_headers)
+            assert resp.status_code == 402
+            assert resp.json()["detail"]["feature"] == "airgap_build_iso"
 
     def test_post_returns_402_on_community(self, client, auth_headers):
         # No license patch -- license_service.is_pro_plus_active is

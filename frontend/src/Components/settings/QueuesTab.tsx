@@ -236,7 +236,7 @@ const QueuesTab: React.FC = () => {
                 <strong>{t('queues.messageId', 'Message ID')}:</strong> {selectedMessage.id}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.messageType', 'Type')}:</strong> {selectedMessage.type}
+                <strong>{t('queues.messageType', 'Message Type')}:</strong> {selectedMessage.type}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 <strong>{t('queues.direction', 'Direction')}:</strong> {selectedMessage.direction}

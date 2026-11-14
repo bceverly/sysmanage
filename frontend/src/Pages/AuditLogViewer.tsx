@@ -349,7 +349,7 @@ const AuditLogViewer: React.FC = () => {
                   {t('common.reset', 'Reset Filters')}
                 </Button>
                 <Button variant="contained" onClick={fetchAuditLogs}>
-                  {t('common.apply', 'Apply Filters')}
+                  {t('common.apply', 'Apply')}
                 </Button>
               </Box>
             </Grid>

@@ -98,7 +98,7 @@
         "totalPackages": "Pacchetti totali",
         "totalRepos": "Ripostigli totali"
       },
-      "endpointMissing": "L'endpoint list-all-repositories del backend non è disponibile; il dashboard non può popolare.",
+      "endpointMissing": "L'endpoint list-all-repositories del backend non è disponibile; impossibile popolare la dashboard.",
       "loadError": "Impossibile caricare i ripostigli:",
       "notApplicable": "Questa dashboard è significativa solo nelle distribuzioni con ruolo di repository.",
       "subtitle": "Statistiche per repository privato-side mirror, più freschezza aggregata.",
@@ -161,7 +161,8 @@
   "airgapCollections": {
     "actions": {
       "delete": "Elimina",
-      "download": "Scarica ISO"
+      "download": "Scarica ISO",
+      "nextDisc": "Disco successivo inserito"
     },
     "column": {
       "actions": "Azioni",
@@ -192,7 +193,7 @@
       "mediaSizeMb": "Dimensione del supporto (MB)",
       "mirrorPicker": "Seleziona i mirror",
       "mirrorsHelper": "Seleziona uno o più specchi configurati. Il pacchetto viene costruito da un nuovo snapshot di ogni albero di specchio preso alla creazione della sessione. Tutte le selezioni devono condividere lo stesso host.",
-      "mirrorsRequired": "Almeno un target di mirror è richiesto.",
+      "mirrorsRequired": "È richiesta almeno una destinazione di mirror.",
       "mirrorsTitle": "Mirror",
       "noMirrors": "Nessun mirror abilitato configurato. Vai a Impostazioni → Mirror Repository per aggiungerne uno, poi riprova.",
       "submit": "Esegui in coda",
@@ -210,11 +211,23 @@
     "multiDiscInfo": "Questa esecuzione ha prodotto {{count}} supporti. Scegli quelli da scaricare.",
     "newRun": "Nuova esecuzione di raccolta",
     "noIsoOnDisk": "Nessun file ISO trovato su disco ancora -- riprovare tra poco.",
-    "noManifestFound": "L'esecuzione non ha ancora un manifesto -- riprova una volta che lo stato sarà COMPLETO.",
+    "noManifestFound": "L'esecuzione non ha ancora una ISO scaricabile -- attendi che lo stato raggiunga ISO_BUILT o COMPLETE.",
     "notApplicable": "Questa pagina ha significato solo nelle distribuzioni con ruolo collector.",
     "refresh": "Aggiorna",
     "subtitle": "Avvia esecuzioni uniche delle raccolte che riflettono i repository configurati, costruisce un ISO firmato e scrive una manifestazione per l'ingestione dalla parte isolata.",
-    "title": "Esecuzioni di raccolta isolata"
+    "title": "Esecuzioni di raccolta isolata",
+    "burnSet": {
+      "awaitingMedia": "Disco {{burned}} di {{total}} masterizzato. Inserire un disco vuoto.",
+      "burning": "Disco {{disc}} di {{total}}"
+    },
+    "nextDisc": {
+      "title": "Inserire il disco successivo",
+      "body": "Il disco {{burned}} di {{total}} è masterizzato ed è stato espulso da {{device}}. Etichettarlo come disco {{burned}}, inserire un disco vuoto nell'unità, quindi confermare per masterizzare il disco {{next}}.",
+      "cancel": "Non ancora",
+      "confirm": "Masterizza disco {{next}}",
+      "started": "Masterizzazione del disco {{disc}} di {{total}}.",
+      "error": "Impossibile avviare il disco successivo"
+    }
   },
   "airgapDevices": {
     "empty": "Nessuno dei dischi eleggibili trovati. Inserisci il supporto e premi Rescan.",
@@ -538,7 +551,8 @@
     "status": "Stato",
     "unknownPackage": "(sconosciuto)",
     "violations": "Violazioni",
-    "violationsFor": "Violazioni -- {{name}}"
+    "violationsFor": "Violazioni -- {{name}}",
+    "scanTooltip": "Scansiona rispetto all'inventario in cache"
   },
   "configDrift": {
     "actions": "Azioni",
@@ -1393,7 +1407,6 @@
     "completedAt": "Completato il",
     "complianceTab": "Conformità",
     "configurationFiles": "File di Configurazione",
-    "confirmDeleteInstallation": "Sei sicuro di voler eliminare questo record di installazione?",
     "confirmDeleteInstallationMessage": "Sei sicuro di voler eliminare questo record di installazione? Questa azione non può essere annullata.",
     "confirmRequestPackages": "Richiedi pacchetti disponibili",
     "confirmRequestPackagesMessage": "Questo attiverà la raccolta dei pacchetti sull'host, che può richiedere molte risorse e impiegare diversi minuti. Vuoi continuare?",
@@ -1711,7 +1724,7 @@
     "softwareTab": "Software",
     "speed": "Velocità",
     "sshKeysDeployedError": "Errore nella distribuzione delle chiavi SSH",
-    "sshKeysDeployedSuccess": "Chiavi SSH distribuite con successo",
+    "sshKeysDeployedSuccess": "Distribuzione delle chiavi SSH messa in coda con successo",
     "start": "Avvia",
     "startChildHost": "Avvia",
     "status": "Stato",
@@ -1740,7 +1753,7 @@
     "ubuntuProAttachConfirm": "Collega",
     "ubuntuProAttachDescription": "Inserisci il tuo token Ubuntu Pro per collegare questo sistema al tuo abbonamento.",
     "ubuntuProAttachError": "Impossibile collegare Ubuntu Pro",
-    "ubuntuProAttachSuccess": "Ubuntu Pro collegato con successo",
+    "ubuntuProAttachSuccess": "Collegamento di Ubuntu Pro richiesto",
     "ubuntuProAttachTitle": "Collega Ubuntu Pro",
     "ubuntuProAttaching": "Collegamento in corso...",
     "ubuntuProDetach": "Scollega",
@@ -1748,7 +1761,7 @@
     "ubuntuProDetachConfirmMessage": "Sei sicuro di voler scollegare Ubuntu Pro da questo sistema? Questo rimuoverà tutti i benefici e i servizi Ubuntu Pro per questo host.",
     "ubuntuProDetachConfirmTitle": "Conferma scollegamento Ubuntu Pro",
     "ubuntuProDetachError": "Impossibile scollegare Ubuntu Pro",
-    "ubuntuProDetachSuccess": "Ubuntu Pro scollegato con successo",
+    "ubuntuProDetachSuccess": "Scollegamento di Ubuntu Pro richiesto",
     "ubuntuProDetaching": "Scollegamento in corso...",
     "ubuntuProInfo": "Informazioni Ubuntu Pro",
     "ubuntuProTab": "Ubuntu Pro",
@@ -2523,7 +2536,7 @@
     "queryPacks": "Pacchetti di Query",
     "reports": "Report",
     "role": {
-      "collector": "Collectore a Isolamento",
+      "collector": "Raccoglitore isolato",
       "engineMissing": "Motore Pro+ richiesto non caricato; verifica la licenza.",
       "repository": "Repository isolato"
     },
@@ -2668,7 +2681,8 @@
     "updated": "Profilo di conformità salvato",
     "version": "Versione",
     "versionOp": "Op",
-    "versionOpAny": "(qualsiasi)"
+    "versionOpAny": "(qualsiasi)",
+    "loadOneError": "Impossibile caricare il profilo di conformità"
   },
   "policies": {
     "actions": {
@@ -2833,7 +2847,8 @@
     },
     "title": "Pacchetti di Query",
     "validateFailed": "Non è stato possibile verificare il pacchetto",
-    "version": "Version"
+    "version": "Version",
+    "livePollFailed": "Impossibile leggere i risultati della query live"
   },
   "queues": {
     "created": "Data di creazione",
@@ -2894,7 +2909,8 @@
     "subtitle": "Layout personalizzati che il renderer applica sopra i tipi di report integrati",
     "tabLabel": "Modelli di report",
     "title": "Modelli di report",
-    "updated": "Modello salvato"
+    "updated": "Modello salvato",
+    "addDialogTitle": "Aggiungi modello di report"
   },
   "reportViewer": {
     "iframeTitle": "Contenuto del rapporto",
@@ -3185,7 +3201,8 @@
     "updateError": "Errore nell'aggiornamento del segreto",
     "updateSuccess": "Segreto aggiornato con successo",
     "updatedAt": "Aggiornato il",
-    "viewSecret": "Visualizza Segreto"
+    "viewSecret": "Visualizza Segreto",
+    "loadOneError": "Errore nel caricamento del segreto"
   },
   "security": {
     "addRole": "Aggiungi Ruolo",
@@ -3501,8 +3518,8 @@
     "opentelemetry": {
       "collectorUrl": "URL del collettore",
       "configuration": "Configurazione",
-      "disabledMessage": "La strumentazione OpenTelemetry è attualmente disabilitata. Rimuovi OTEL_ENABLED=false o imposta OTEL_ENABLED=true per abilitare il tracciamento distribuito e la raccolta delle metriche.",
-      "enableHint": "OpenTelemetry è abilitato per impostazione predefinita. Per disabilitarlo, imposta la variabile d'ambiente OTEL_ENABLED=false e riavvia il server.",
+      "disabledMessage": "La strumentazione OpenTelemetry è disabilitata (impostazione predefinita). Imposta la variabile d'ambiente OTEL_ENABLED=true (o telemetry.enabled: true in sysmanage.yaml) e riavvia il server per abilitare il tracciamento distribuito e la raccolta delle metriche.",
+      "enableHint": "Per disabilitare OpenTelemetry, imposta la variabile d'ambiente OTEL_ENABLED=false (o telemetry.enabled: false in sysmanage.yaml) e riavvia il server.",
       "fetchError": "Impossibile ottenere lo stato OpenTelemetry",
       "instrumentation": "Strumentazione",
       "metricsCount": "Metriche",
@@ -3610,7 +3627,8 @@
     "windowsTypeHelp": "Scegli Chocolatey o winget",
     "windowsUrl": "URL del repository",
     "windowsUrlHelp": "es. https://mycompany.com/chocolatey",
-    "winget": "winget"
+    "winget": "winget",
+    "obsRepoUrl": "URL del repository OBS"
   },
   "ubuntuPro": {
     "actions": {
@@ -3761,7 +3779,8 @@
     "updated": "Profilo di aggiornamento salvato",
     "window": "Finestra scaglionata (minuti)",
     "windowHelp": "Distribuisci i dispatch dell'agente su questi minuti (0-720)",
-    "windowRange": "La finestra scaglionata deve essere compresa tra 0 e 720 minuti"
+    "windowRange": "La finestra scaglionata deve essere compresa tra 0 e 720 minuti",
+    "addDialogTitle": "Aggiungi profilo di aggiornamento"
   },
   "userDetail": {
     "active": "Attivo",

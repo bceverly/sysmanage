@@ -161,7 +161,8 @@
   "airgapCollections": {
     "actions": {
       "delete": "Löschen",
-      "download": "ISO herunterladen"
+      "download": "ISO herunterladen",
+      "nextDisc": "Nächste Disc eingelegt"
     },
     "column": {
       "actions": "Aktionen",
@@ -210,11 +211,23 @@
     "multiDiscInfo": "Diese Ausführung hat {{count}} Discs erstellt. Wählen Sie welche zum Herunterladen.",
     "newRun": "Neuer Sammellauf",
     "noIsoOnDisk": "Bisher keine ISO-Datei auf dem Datenträger gefunden - bitte erneut abfragen.",
-    "noManifestFound": "Die Ausführung hat noch keine Manifestation - versuchen Sie es erneut, wenn der Status COMPLETE ist.",
+    "noManifestFound": "Für diese Ausführung ist noch kein herunterladbares ISO vorhanden -- warten Sie, bis der Status ISO_BUILT oder COMPLETE erreicht.",
     "notApplicable": "Diese Seite hat nur Bedeutung bei Deployments mit Collector-Rolle.",
     "refresh": "Aktualisieren",
     "subtitle": "Einmalige Sammelstarts auslösen, die konfigurierte Repositories spiegeln, ein signiertes ISO erstellen und eine Manifestdatei für die Eingabe auf der isolierten Seite schreiben.",
-    "title": "Air-Gap-Sammelläufe"
+    "title": "Air-Gap-Sammelläufe",
+    "burnSet": {
+      "awaitingMedia": "Disc {{burned}} von {{total}} gebrannt. Legen Sie eine leere Disc ein.",
+      "burning": "Disc {{disc}} von {{total}}"
+    },
+    "nextDisc": {
+      "title": "Nächste Disc einlegen",
+      "body": "Disc {{burned}} von {{total}} ist gebrannt und wurde aus {{device}} ausgeworfen. Beschriften Sie sie als Disc {{burned}}, legen Sie eine leere Disc in das Laufwerk ein und bestätigen Sie dann, um Disc {{next}} zu brennen.",
+      "cancel": "Noch nicht",
+      "confirm": "Disc {{next}} brennen",
+      "started": "Disc {{disc}} von {{total}} wird gebrannt.",
+      "error": "Die nächste Disc konnte nicht gestartet werden"
+    }
   },
   "airgapDevices": {
     "empty": "Keine zulässigen Laufwerke gefunden. Fügen Sie Medien hinzu und klicken Sie auf Rescan.",
@@ -538,7 +551,8 @@
     "status": "Status",
     "unknownPackage": "(unbekannt)",
     "violations": "Verstöße",
-    "violationsFor": "Verstöße -- {{name}}"
+    "violationsFor": "Verstöße -- {{name}}",
+    "scanTooltip": "Gegen das zwischengespeicherte Inventar scannen"
   },
   "configDrift": {
     "actions": "Aktionen",
@@ -1393,7 +1407,6 @@
     "completedAt": "Abgeschlossen am",
     "complianceTab": "Kompatibilität",
     "configurationFiles": "Konfigurationsdateien",
-    "confirmDeleteInstallation": "Sind Sie sicher, dass Sie diesen Installationsdatensatz löschen möchten?",
     "confirmDeleteInstallationMessage": "Möchten Sie diesen Installationsdatensatz wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
     "confirmRequestPackages": "Verfügbare Pakete anfordern",
     "confirmRequestPackagesMessage": "Dies löst eine Paketsammlung auf dem Host aus, die ressourcenintensiv sein kann und mehrere Minuten dauern kann. Möchten Sie fortfahren?",
@@ -1711,7 +1724,7 @@
     "softwareTab": "Software",
     "speed": "Geschwindigkeit",
     "sshKeysDeployedError": "Bereitstellung von SSH-Schlüsseln fehlgeschlagen",
-    "sshKeysDeployedSuccess": "SSH-Schlüssel erfolgreich bereitgestellt",
+    "sshKeysDeployedSuccess": "SSH-Schlüsselbereitstellung erfolgreich in die Warteschlange gestellt",
     "start": "Starten",
     "startChildHost": "Starten",
     "status": "Status",
@@ -1740,7 +1753,7 @@
     "ubuntuProAttachConfirm": "Anbinden",
     "ubuntuProAttachDescription": "Geben Sie Ihr Ubuntu Pro-Token ein, um dieses System an Ihr Abonnement anzubinden.",
     "ubuntuProAttachError": "Anbindung von Ubuntu Pro fehlgeschlagen",
-    "ubuntuProAttachSuccess": "Ubuntu Pro erfolgreich angebunden",
+    "ubuntuProAttachSuccess": "Anbindung von Ubuntu Pro angefordert",
     "ubuntuProAttachTitle": "Ubuntu Pro anbinden",
     "ubuntuProAttaching": "Wird angebunden...",
     "ubuntuProDetach": "Trennen",
@@ -1748,7 +1761,7 @@
     "ubuntuProDetachConfirmMessage": "Sind Sie sicher, dass Sie Ubuntu Pro von diesem System trennen möchten? Dadurch werden alle Ubuntu Pro-Vorteile und -Dienste für diesen Host entfernt.",
     "ubuntuProDetachConfirmTitle": "Ubuntu Pro-Trennung bestätigen",
     "ubuntuProDetachError": "Trennung von Ubuntu Pro fehlgeschlagen",
-    "ubuntuProDetachSuccess": "Ubuntu Pro erfolgreich getrennt",
+    "ubuntuProDetachSuccess": "Trennung von Ubuntu Pro angefordert",
     "ubuntuProDetaching": "Wird getrennt...",
     "ubuntuProInfo": "Ubuntu Pro Informationen",
     "ubuntuProTab": "Ubuntu Pro",
@@ -2523,7 +2536,7 @@
     "queryPacks": "Abfragepakete",
     "reports": "Berichte",
     "role": {
-      "collector": "Luftschicht-Sammelengine",
+      "collector": "Air-Gap-Sammler",
       "engineMissing": "Erforderliche Pro+-Engine nicht geladen; Lizenz prüfen.",
       "repository": "Air-Gap-Repository"
     },
@@ -2668,7 +2681,8 @@
     "updated": "Compliance-Profil gespeichert",
     "version": "Version",
     "versionOp": "Op",
-    "versionOpAny": "(beliebig)"
+    "versionOpAny": "(beliebig)",
+    "loadOneError": "Compliance-Profil konnte nicht geladen werden"
   },
   "policies": {
     "actions": {
@@ -2787,7 +2801,7 @@
     "failed": "Fehlgeschlagen",
     "failedCount": "{{count}} fehlgeschlagen",
     "intro": "Abfragepakete führen SQL-Abfragen gegen die Fakttabellen aus, die jeder Agent bereitstellt, sodass eine Abfrage auf jeder Plattform funktioniert.",
-    "liveFailed": "Könnte die Abfrage nicht ausführen",
+    "liveFailed": "Die Abfrage konnte nicht ausgeführt werden",
     "liveIntro": "Führe jetzt eine Abfrage über die ausgewählten Hosts durch. Die Ausführung ist begrenzt, daher werden die Hosts in Wellen angefragt anstatt alle auf einmal.",
     "liveStatus": {
       "canceled": "Abgebrochen",
@@ -2833,7 +2847,8 @@
     },
     "title": "Abfragepakete",
     "validateFailed": "Könnte die Packung nicht überprüfen",
-    "version": "Version"
+    "version": "Version",
+    "livePollFailed": "Die Ergebnisse der Live-Abfrage konnten nicht gelesen werden"
   },
   "queues": {
     "created": "Erstellt am",
@@ -2894,7 +2909,8 @@
     "subtitle": "Benutzerdefinierte Layouts, die der Bericht-Renderer auf die integrierten Berichtstypen anwendet",
     "tabLabel": "Berichtsvorlagen",
     "title": "Berichtsvorlagen",
-    "updated": "Vorlage gespeichert"
+    "updated": "Vorlage gespeichert",
+    "addDialogTitle": "Berichtsvorlage hinzufügen"
   },
   "reportViewer": {
     "iframeTitle": "Berichtsinhalt",
@@ -3185,7 +3201,8 @@
     "updateError": "Fehler beim Aktualisieren des Geheimnisses",
     "updateSuccess": "Geheimnis erfolgreich aktualisiert",
     "updatedAt": "Aktualisiert am",
-    "viewSecret": "Geheimnis anzeigen"
+    "viewSecret": "Geheimnis anzeigen",
+    "loadOneError": "Fehler beim Laden des Geheimnisses"
   },
   "security": {
     "addRole": "Rolle hinzufügen",
@@ -3501,8 +3518,8 @@
     "opentelemetry": {
       "collectorUrl": "Collector-URL",
       "configuration": "Konfiguration",
-      "disabledMessage": "Die OpenTelemetry-Instrumentierung ist derzeit deaktiviert. Entfernen Sie OTEL_ENABLED=false oder setzen Sie OTEL_ENABLED=true, um verteiltes Tracing und Metrikerfassung zu aktivieren.",
-      "enableHint": "OpenTelemetry ist standardmäßig aktiviert. Zum Deaktivieren setzen Sie die Umgebungsvariable OTEL_ENABLED=false und starten Sie den Server neu.",
+      "disabledMessage": "Die OpenTelemetry-Instrumentierung ist deaktiviert (Standard). Setzen Sie die Umgebungsvariable OTEL_ENABLED=true (oder telemetry.enabled: true in sysmanage.yaml) und starten Sie den Server neu, um verteiltes Tracing und Metrikerfassung zu aktivieren.",
+      "enableHint": "Um OpenTelemetry zu deaktivieren, setzen Sie die Umgebungsvariable OTEL_ENABLED=false (oder telemetry.enabled: false in sysmanage.yaml) und starten Sie den Server neu.",
       "fetchError": "Konnte den OpenTelemetry-Status nicht abrufen",
       "instrumentation": "Instrumentierung",
       "metricsCount": "Metriken",
@@ -3610,7 +3627,8 @@
     "windowsTypeHelp": "Chocolatey oder winget wählen",
     "windowsUrl": "Repository-URL",
     "windowsUrlHelp": "z. B. https://mycompany.com/chocolatey",
-    "winget": "winget"
+    "winget": "winget",
+    "obsRepoUrl": "OBS-Repository-URL"
   },
   "ubuntuPro": {
     "actions": {
@@ -3761,7 +3779,8 @@
     "updated": "Aktualisierungsprofil gespeichert",
     "window": "Gestaffeltes Fenster (Minuten)",
     "windowHelp": "Agent-Versand über diese Anzahl Minuten verteilen (0-720)",
-    "windowRange": "Gestaffeltes Fenster muss zwischen 0 und 720 Minuten liegen"
+    "windowRange": "Gestaffeltes Fenster muss zwischen 0 und 720 Minuten liegen",
+    "addDialogTitle": "Aktualisierungsprofil hinzufügen"
   },
   "userDetail": {
     "active": "Aktiv",

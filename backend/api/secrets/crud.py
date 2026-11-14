@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.licensing.feature_gate import refuse_unlicensed
 from backend.licensing.module_loader import module_loader
 from backend.persistence.db import get_db
 from backend.persistence.models.secret import Secret
@@ -57,7 +58,7 @@ async def list_secrets(
     """List all secrets (metadata only, no content)."""
     secrets_engine = module_loader.get_module("secrets_engine")
     if secrets_engine is None:
-        return {"licensed": False, "secrets": []}
+        raise refuse_unlicensed("secrets_engine")
     secrets = db.query(Secret).order_by(Secret.created_at.desc()).all()
     return [s.to_dict() for s in secrets]
 

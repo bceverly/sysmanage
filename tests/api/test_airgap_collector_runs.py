@@ -271,3 +271,116 @@ class TestRunDownload:
             )
         assert r.status_code == 409
         assert "not complete" in r.json()["detail"].lower()
+
+
+def _set_run_burn_state(test_db, run_id, status, disc_count, burned_disc_count):
+    """Move a created run to a lifecycle point only the tick and the result
+    handler reach (the engine that would get it there is mocked out)."""
+    from sqlalchemy import text as _text
+    from sqlalchemy.orm import sessionmaker
+
+    session_local = getattr(test_db, "_testing_sessionmaker", None) or sessionmaker(
+        bind=test_db
+    )
+    with session_local() as s:
+        updated = s.execute(
+            _text(
+                "UPDATE airgap_collection_run SET status = :status, "
+                "disc_count = :disc_count, burned_disc_count = :burned "
+                "WHERE id = :id"
+            ),
+            {
+                "id": run_id,
+                "status": status,
+                "disc_count": disc_count,
+                "burned": burned_disc_count,
+            },
+        )
+        assert updated.rowcount == 1
+        s.commit()
+
+
+class TestNextDisc:
+    """POST /runs/{id}/next-disc: the operator loaded a blank disc for the
+    next disc of a burned set."""
+
+    def _create(self, client, auth_headers):
+        r = client.post(
+            "/api/v1/airgap/collector/runs",
+            json={
+                "iso_label": "set",
+                "burn_device": "/dev/sr0",
+                "targets": _DUMMY_TARGETS,
+            },
+            headers=auth_headers,
+        )
+        assert r.status_code == 200, r.text
+        return r.json()["id"]
+
+    def test_a_new_run_reports_no_discs_burned(self, client, auth_headers):
+        with _engine():
+            run_id = self._create(client, auth_headers)
+            body = client.get(
+                f"/api/v1/airgap/collector/runs/{run_id}", headers=auth_headers
+            ).json()
+        assert body["burned_disc_count"] == 0
+        assert body["disc_count"] is None
+
+    def test_confirming_puts_the_run_back_for_the_next_burn(
+        self, client, auth_headers, test_db
+    ):
+        with _engine():
+            run_id = self._create(client, auth_headers)
+            _set_run_burn_state(test_db, run_id, "AWAITING_MEDIA", 3, 1)
+            with patch.object(runs_module.AuditService, "log") as audit:
+                r = client.post(
+                    f"/api/v1/airgap/collector/runs/{run_id}/next-disc",
+                    headers=auth_headers,
+                )
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["status"] == "ISO_BUILT"
+        assert body["disc_count"] == 3
+        assert body["burned_disc_count"] == 1
+        audit.assert_called_once()
+        assert "disc 2 of 3" in audit.call_args.kwargs["description"]
+
+    def test_a_run_not_waiting_for_media_is_refused(self, client, auth_headers):
+        # A double click (or a stale page) must not burn a disc twice.
+        with _engine():
+            run_id = self._create(client, auth_headers)
+            r = client.post(
+                f"/api/v1/airgap/collector/runs/{run_id}/next-disc",
+                headers=auth_headers,
+            )
+        assert r.status_code == 409
+        assert "QUEUED" in r.json()["detail"]
+
+    def test_unknown_and_malformed_runs(self, client, auth_headers):
+        with _engine():
+            missing = client.post(
+                "/api/v1/airgap/collector/runs/"
+                "00000000-0000-0000-0000-000000000000/next-disc",
+                headers=auth_headers,
+            )
+            bad = client.post(
+                "/api/v1/airgap/collector/runs/nope/next-disc", headers=auth_headers
+            )
+        assert missing.status_code == 404
+        assert bad.status_code == 400
+
+    def test_the_license_gate_applies(self, client, auth_headers):
+        with _engine(loaded=False):
+            r = client.post(
+                "/api/v1/airgap/collector/runs/"
+                "00000000-0000-0000-0000-000000000000/next-disc",
+                headers=auth_headers,
+            )
+        assert r.status_code == 402
+
+    def test_anonymous_is_rejected(self, client):
+        r = client.post(
+            "/api/v1/airgap/collector/runs/"
+            "00000000-0000-0000-0000-000000000000/next-disc"
+        )
+        assert r.status_code in (401, 403)

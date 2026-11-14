@@ -206,7 +206,7 @@ const OpenTelemetryStatusCard: React.FC = () => {
               <Divider />
               <Alert severity="info" variant="outlined">
                 <Typography variant="body2">
-                  {t('telemetry.opentelemetry.enableHint', 'To enable OpenTelemetry, set OTEL_ENABLED=true environment variable and restart the server.')}
+                  {t('telemetry.opentelemetry.enableHint', 'To disable OpenTelemetry, set the OTEL_ENABLED=false environment variable (or telemetry.enabled: false in sysmanage.yaml) and restart the server.')}
                 </Typography>
               </Alert>
             </>
@@ -215,7 +215,7 @@ const OpenTelemetryStatusCard: React.FC = () => {
           {!isEnabled && (
             <Alert severity="info" variant="outlined">
               <Typography variant="body2">
-                {t('telemetry.opentelemetry.disabledMessage', 'OpenTelemetry instrumentation is currently disabled. Set OTEL_ENABLED=true to enable distributed tracing and metrics collection.')}
+                {t('telemetry.opentelemetry.disabledMessage', 'OpenTelemetry instrumentation is disabled (the default). Set the OTEL_ENABLED=true environment variable (or telemetry.enabled: true in sysmanage.yaml) and restart the server to enable distributed tracing and metrics collection.')}
               </Typography>
             </Alert>
           )}

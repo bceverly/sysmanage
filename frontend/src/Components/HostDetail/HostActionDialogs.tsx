@@ -228,7 +228,7 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
         },
         {
             field: 'created_at',
-            headerName: t('secrets.createdAt', 'Created'),
+            headerName: t('secrets.createdAt', 'Created At'),
             width: 180,
             renderCell: (params) => (
                 <Typography variant="body2">
@@ -264,7 +264,7 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
         },
         {
             field: 'created_at',
-            headerName: t('secrets.createdAt', 'Created'),
+            headerName: t('secrets.createdAt', 'Created At'),
             width: 180,
             renderCell: (params) => (
                 <Typography variant="body2">
@@ -539,7 +539,7 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                 fullWidth
             >
                 <DialogTitle>
-                    {t('hostDetail.confirmDeleteInstallation', 'Delete Installation Record')}
+                    {t('hostDetail.deleteInstallation', 'Delete Installation Record')}
                 </DialogTitle>
                 <DialogContent>
                     <Typography>
@@ -771,7 +771,7 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                     <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
                         <TextField
                             fullWidth
-                            placeholder={t('hostDetail.searchCertificates', 'Search certificates by name or filename...')}
+                            placeholder={t('hostDetail.searchCertificates', 'Search certificates...')}
                             value={certificateDialogSearchTerm}
                             onChange={(e) => setCertificateDialogSearchTerm(e.target.value)}
                             size="small"

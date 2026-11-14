@@ -18,9 +18,12 @@ What each edition must see:
   (``detail.error == "pro_plus_required"``) is HTTP 402.  The shared gates
   answered 403 until this audit, so an unlicensed caller -- or a Professional
   license asking for an Enterprise feature -- read "forbidden".
-* **No write "succeeds" unlicensed.**  A stub may answer a READ
-  ``200 {"licensed": false}``; a write must not (it told a script that its
-  deploy or dispatch had worked).
+* **Nothing answers ``200 {"licensed": false}``.**  The stubs once did, for
+  reads and writes alike; a write so answered told a script its deploy or
+  dispatch had worked, and a read so answered hid the license behind a
+  success.  Both are 402 now, like every other license answer.  The only
+  exceptions are the reviewed Community reads below that carry a
+  ``licensed`` flag beside real data.
 * **Each tier opens exactly its own modules and features.**  Where a gate
   names the module or feature it needs, a license of that tier is refused
   (402) exactly when the tier does not include it; when it does, the answer
@@ -46,6 +49,16 @@ ENVIRONMENT_5XX = {
     ("GET", "/api/agent/server-identity"): (
         "503 tls_identity_unknown: this machine's nginx does not serve the "
         "agent TLS identity"
+    ),
+}
+
+# Community reads that answer 200 with a ``licensed`` flag among real data:
+# the page works unlicensed and the flag only says whether one licensed
+# extra is on offer.  Each is reviewed; a Pro+ read never belongs here.
+COMMUNITY_LICENSED_FLAG = {
+    ("GET", "/api/v1/hardware-health/smartmontools"): (
+        "Community host list; ``licensed`` says whether the automatic "
+        "install (Enterprise) can be offered"
     ),
 }
 
@@ -88,7 +101,7 @@ def _app():
 
 
 @pytest.fixture
-def edition(client, db_session):
+def edition(client, db_session, tmp_path):
     """``edition(tier)`` -> a context yielding a client of the walk's app
     with that tier's license cached and no engine loaded."""
     # pylint: disable=import-outside-toplevel
@@ -107,6 +120,19 @@ def edition(client, db_session):
     def run(tier):
         with ExitStack() as stack:
             tier_walk.no_side_effects(stack)
+            # The always-mounted federation identity routes create a key and a
+            # TLS certificate on first read under /var/lib/sysmanage, which a
+            # developer box can write and a CI runner cannot (500 there only).
+            # Keep them in the test's own directory.
+            fed = tmp_path / "federation"
+            for getter, path in (
+                ("get_federation_identity_key_file", fed / "identity-ed25519.pem"),
+                ("get_federation_tls_cert_file", fed / "identity-cert.pem"),
+                ("get_federation_peer_public_key_dir", fed / "peers"),
+            ):
+                stack.enter_context(
+                    patch(f"backend.config.config.{getter}", lambda p=path: str(p))
+                )
             stack.enter_context(
                 patch.object(
                     license_service, "_cached_license", tier_walk.tier_license(tier)
@@ -140,8 +166,10 @@ def _server_errors(answers, licensed=False):
     ]
 
 
-def _quiet_write(method, response):
-    if method == "GET" or response.status_code != 200:
+def _quiet_unlicensed(response):
+    """A 2xx that says "not licensed" -- the shape the stubs used before
+    every unlicensed read and write became a 402."""
+    if not 200 <= response.status_code < 300:
         return False
     try:
         body = response.json()
@@ -170,8 +198,11 @@ def test_unlicensed_every_license_answer_is_a_clean_402(edition):
             failures.append(
                 f"{method} {path} -> {response.status_code} for a missing license"
             )
-        if _quiet_write(method, response):
-            failures.append(f"{method} {path} -> 200 licensed:false for a write")
+        reviewed = (method, path) in COMMUNITY_LICENSED_FLAG
+        if _quiet_unlicensed(response) and not reviewed:
+            failures.append(
+                f"{method} {path} -> {response.status_code} licensed:false, want 402"
+            )
     assert not failures, "Unlicensed, these are not 402-clean:\n  " + "\n  ".join(
         failures
     )

@@ -10,7 +10,7 @@ GPG Key Management logic was relocated OUT of OSS into the licensed Pro+
 live under ``/api/v1/secrets/gpg-keys*`` and are served by the compiled engine on
 licensed boxes.  When the engine is NOT loaded (the default for OSS deployments
 and the test harness), ``proplus_routes`` mounts stub routes under
-``/api/v1/secrets/gpg-keys*`` that always return ``{"licensed": False}``.
+``/api/v1/secrets/gpg-keys*`` that always answer 402 (``pro_plus_required``).
 
 These tests verify the stubs are mounted and gated behind auth.  The real
 lifecycle / role-gate / no-material-leak tests live with the engine in the
@@ -33,62 +33,55 @@ class TestGpgKeysStubRoutes:
         # tests/conftest.py), so an unauthenticated call still resolves the stub
         # rather than 401ing -- the real auth/role gate is exercised engine-side.
         r = client.get("/api/v1/secrets/gpg-keys")
-        assert r.status_code in [200, 401, 403, 404]
+        assert r.status_code in [401, 402, 403, 404]
 
-    def test_list_returns_unlicensed(self, client, auth_headers):
+    def test_list_returns_402(self, client, auth_headers):
         r = client.get("/api/v1/secrets/gpg-keys", headers=auth_headers)
         # Stub or real engine -- engine isn't loaded in the test harness so the
-        # stub route serves: returns 200 + {"licensed": False}.
-        assert r.status_code in [200, 402, 403, 404]
-        if r.status_code == 200:
-            assert r.json().get("licensed") is False
+        # stub route serves: 402, like every unlicensed stub.
+        assert r.status_code == 402
+        assert r.json()["detail"]["error"] == "pro_plus_required"
 
-    def test_upload_returns_unlicensed(self, client, auth_headers):
+    def test_upload_returns_402(self, client, auth_headers):
         r = client.post(
             "/api/v1/secrets/gpg-keys",
             headers=auth_headers,
             json={"name": "x", "armored_key": "x", "key_type": "public"},
         )
-        assert r.status_code in [200, 402, 403, 404, 422]
-        if r.status_code == 200:
-            assert r.json().get("licensed") is False
+        assert r.status_code == 402
+        assert r.json()["detail"]["error"] == "pro_plus_required"
 
-    def test_get_returns_unlicensed(self, client, auth_headers):
+    def test_get_returns_402(self, client, auth_headers):
         r = client.get(f"/api/v1/secrets/gpg-keys/{_KEY_ID}", headers=auth_headers)
-        assert r.status_code in [200, 402, 403, 404]
-        if r.status_code == 200:
-            assert r.json().get("licensed") is False
+        assert r.status_code == 402
+        assert r.json()["detail"]["error"] == "pro_plus_required"
 
-    def test_delete_returns_unlicensed(self, client, auth_headers):
+    def test_delete_returns_402(self, client, auth_headers):
         r = client.delete(f"/api/v1/secrets/gpg-keys/{_KEY_ID}", headers=auth_headers)
-        assert r.status_code in [200, 402, 403, 404]
-        if r.status_code == 200:
-            assert r.json().get("licensed") is False
+        assert r.status_code == 402
+        assert r.json()["detail"]["error"] == "pro_plus_required"
 
-    def test_list_assignments_returns_unlicensed(self, client, auth_headers):
+    def test_list_assignments_returns_402(self, client, auth_headers):
         r = client.get(
             f"/api/v1/secrets/gpg-keys/{_KEY_ID}/assignments",
             headers=auth_headers,
         )
-        assert r.status_code in [200, 402, 403, 404]
-        if r.status_code == 200:
-            assert r.json().get("licensed") is False
+        assert r.status_code == 402
+        assert r.json()["detail"]["error"] == "pro_plus_required"
 
-    def test_create_assignment_returns_unlicensed(self, client, auth_headers):
+    def test_create_assignment_returns_402(self, client, auth_headers):
         r = client.post(
             f"/api/v1/secrets/gpg-keys/{_KEY_ID}/assignments",
             headers=auth_headers,
             json={"host_id": str(uuid.uuid4())},
         )
-        assert r.status_code in [200, 402, 403, 404, 422]
-        if r.status_code == 200:
-            assert r.json().get("licensed") is False
+        assert r.status_code == 402
+        assert r.json()["detail"]["error"] == "pro_plus_required"
 
-    def test_delete_assignment_returns_unlicensed(self, client, auth_headers):
+    def test_delete_assignment_returns_402(self, client, auth_headers):
         r = client.delete(
             f"/api/v1/secrets/gpg-keys/{_KEY_ID}/assignments/{_ASSIGNMENT_ID}",
             headers=auth_headers,
         )
-        assert r.status_code in [200, 402, 403, 404]
-        if r.status_code == 200:
-            assert r.json().get("licensed") is False
+        assert r.status_code == 402
+        assert r.json()["detail"]["error"] == "pro_plus_required"

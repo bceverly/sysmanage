@@ -161,7 +161,8 @@
   "airgapCollections": {
     "actions": {
       "delete": "Supprimer",
-      "download": "Télécharger ISO"
+      "download": "Télécharger ISO",
+      "nextDisc": "Disque suivant inséré"
     },
     "column": {
       "actions": "Actions",
@@ -210,11 +211,23 @@
     "multiDiscInfo": "Cette exécution a produit {{count}} disques. Choisissez ceux à télécharger.",
     "newRun": "Nouvelle exécution de collecte",
     "noIsoOnDisk": "Aucun fichier ISO trouvé sur le disque encore -- réinterrogez dans un instant.",
-    "noManifestFound": "Aucun manifeste n'est disponible pour cette exécution -- essayez de nouveau une fois que le statut est COMPLET.",
+    "noManifestFound": "Cette exécution n'a pas encore d'ISO téléchargeable -- attendez que le statut atteigne ISO_BUILT ou COMPLETE.",
     "notApplicable": "Cette page est uniquement significative pour les déploiements en tant que collecteur.",
     "refresh": "Actualiser",
     "subtitle": "Déclencher des exécutables uniques qui mirorent les répertoires configurés, construisent un ISO signé et écrivent un manifeste pour l'ingestion du côté hors ligne.",
-    "title": "Exécutions de collecte isolée"
+    "title": "Exécutions de collecte isolée",
+    "burnSet": {
+      "awaitingMedia": "Disque {{burned}} sur {{total}} gravé. Insérez un disque vierge.",
+      "burning": "Disque {{disc}} sur {{total}}"
+    },
+    "nextDisc": {
+      "title": "Insérer le disque suivant",
+      "body": "Le disque {{burned}} sur {{total}} est gravé et a été éjecté de {{device}}. Étiquetez-le comme disque {{burned}}, placez un disque vierge dans le lecteur, puis confirmez pour graver le disque {{next}}.",
+      "cancel": "Pas encore",
+      "confirm": "Graver le disque {{next}}",
+      "started": "Gravure du disque {{disc}} sur {{total}}.",
+      "error": "Impossible de démarrer le disque suivant"
+    }
   },
   "airgapDevices": {
     "empty": "Aucun disque éligible trouvé. Insérez un média et appuyez sur Recherche.",
@@ -538,7 +551,8 @@
     "status": "Statut",
     "unknownPackage": "(inconnu)",
     "violations": "Violations",
-    "violationsFor": "Violations -- {{name}}"
+    "violationsFor": "Violations -- {{name}}",
+    "scanTooltip": "Analyser par rapport à l'inventaire en cache"
   },
   "configDrift": {
     "actions": "Actions",
@@ -1393,7 +1407,6 @@
     "completedAt": "Terminé le",
     "complianceTab": "Conformité",
     "configurationFiles": "Fichiers de Configuration",
-    "confirmDeleteInstallation": "Êtes-vous sûr de vouloir supprimer cet enregistrement d'installation ?",
     "confirmDeleteInstallationMessage": "Êtes-vous sûr de vouloir supprimer cet enregistrement d'installation ? Cette action est irréversible.",
     "confirmRequestPackages": "Demander les paquets disponibles",
     "confirmRequestPackagesMessage": "Ceci déclenchera la collecte de paquets sur l'hôte, ce qui peut être gourmand en ressources et prendre plusieurs minutes. Voulez-vous continuer ?",
@@ -1711,7 +1724,7 @@
     "softwareTab": "Logiciels",
     "speed": "Vitesse",
     "sshKeysDeployedError": "Échec du déploiement des clés SSH",
-    "sshKeysDeployedSuccess": "Clés SSH déployées avec succès",
+    "sshKeysDeployedSuccess": "Déploiement des clés SSH mis en file d'attente avec succès",
     "start": "Démarrer",
     "startChildHost": "Démarrer",
     "status": "Statut",
@@ -1740,7 +1753,7 @@
     "ubuntuProAttachConfirm": "Associer",
     "ubuntuProAttachDescription": "Entrez votre jeton Ubuntu Pro pour associer ce système à votre abonnement.",
     "ubuntuProAttachError": "Échec de l'association d'Ubuntu Pro",
-    "ubuntuProAttachSuccess": "Ubuntu Pro associé avec succès",
+    "ubuntuProAttachSuccess": "Association d'Ubuntu Pro demandée",
     "ubuntuProAttachTitle": "Associer Ubuntu Pro",
     "ubuntuProAttaching": "Association en cours...",
     "ubuntuProDetach": "Détacher",
@@ -1748,7 +1761,7 @@
     "ubuntuProDetachConfirmMessage": "Êtes-vous sûr de vouloir détacher Ubuntu Pro de ce système ? Cela supprimera tous les avantages et services Ubuntu Pro pour cet hôte.",
     "ubuntuProDetachConfirmTitle": "Confirmer le détachement d'Ubuntu Pro",
     "ubuntuProDetachError": "Échec du détachement d'Ubuntu Pro",
-    "ubuntuProDetachSuccess": "Ubuntu Pro détaché avec succès",
+    "ubuntuProDetachSuccess": "Détachement d'Ubuntu Pro demandé",
     "ubuntuProDetaching": "Détachement en cours...",
     "ubuntuProInfo": "Informations Ubuntu Pro",
     "ubuntuProTab": "Ubuntu Pro",
@@ -2523,7 +2536,7 @@
     "queryPacks": "Paquets de requêtes",
     "reports": "Rapports",
     "role": {
-      "collector": "Collecteur en isolement",
+      "collector": "Collecteur isolé",
       "engineMissing": "Moteur Pro+ requis non chargé ; vérifiez la licence.",
       "repository": "Dépôt isolé"
     },
@@ -2668,7 +2681,8 @@
     "updated": "Profil de conformité enregistré",
     "version": "Version",
     "versionOp": "Op",
-    "versionOpAny": "(tout)"
+    "versionOpAny": "(tout)",
+    "loadOneError": "Échec du chargement du profil de conformité"
   },
   "policies": {
     "actions": {
@@ -2833,7 +2847,8 @@
     },
     "title": "Paquets de requêtes",
     "validateFailed": "Impossible de vérifier le paquet",
-    "version": "Version"
+    "version": "Version",
+    "livePollFailed": "Impossible de lire les résultats de la requête en direct"
   },
   "queues": {
     "created": "Créé le",
@@ -2894,7 +2909,8 @@
     "subtitle": "Mises en page personnalisées appliquées par le moteur de rendu sur les types de rapports intégrés",
     "tabLabel": "Modèles de rapports",
     "title": "Modèles de rapport",
-    "updated": "Modèle enregistré"
+    "updated": "Modèle enregistré",
+    "addDialogTitle": "Ajouter un modèle de rapport"
   },
   "reportViewer": {
     "iframeTitle": "Contenu du rapport",
@@ -3185,7 +3201,8 @@
     "updateError": "Échec de la mise à jour du secret",
     "updateSuccess": "Secret mis à jour avec succès",
     "updatedAt": "Mis à jour le",
-    "viewSecret": "Voir le Secret"
+    "viewSecret": "Voir le Secret",
+    "loadOneError": "Échec du chargement du secret"
   },
   "security": {
     "addRole": "Ajouter un Rôle",
@@ -3501,8 +3518,8 @@
     "opentelemetry": {
       "collectorUrl": "URL du collecteur",
       "configuration": "Configuration",
-      "disabledMessage": "L'instrumentation OpenTelemetry est actuellement désactivée. Supprimez OTEL_ENABLED=false ou définissez OTEL_ENABLED=true pour activer le traçage distribué et la collecte de métriques.",
-      "enableHint": "OpenTelemetry est activé par défaut. Pour le désactiver, définissez la variable d'environnement OTEL_ENABLED=false et redémarrez le serveur.",
+      "disabledMessage": "L'instrumentation OpenTelemetry est désactivée (par défaut). Définissez la variable d'environnement OTEL_ENABLED=true (ou telemetry.enabled: true dans sysmanage.yaml) et redémarrez le serveur pour activer le traçage distribué et la collecte de métriques.",
+      "enableHint": "Pour désactiver OpenTelemetry, définissez la variable d'environnement OTEL_ENABLED=false (ou telemetry.enabled: false dans sysmanage.yaml) et redémarrez le serveur.",
       "fetchError": "Impossible d'écarter l'êtat OpenTelemetry",
       "instrumentation": "Instrumentation",
       "metricsCount": "Métriques",
@@ -3610,7 +3627,8 @@
     "windowsTypeHelp": "Choisir Chocolatey ou winget",
     "windowsUrl": "URL du dépôt",
     "windowsUrlHelp": "p. ex., https://mycompany.com/chocolatey",
-    "winget": "winget"
+    "winget": "winget",
+    "obsRepoUrl": "URL du dépôt OBS"
   },
   "ubuntuPro": {
     "actions": {
@@ -3761,7 +3779,8 @@
     "updated": "Profil de mise à jour enregistré",
     "window": "Fenêtre échelonnée (minutes)",
     "windowHelp": "Répartir les envois d'agents sur ce nombre de minutes (0-720)",
-    "windowRange": "La fenêtre échelonnée doit être comprise entre 0 et 720 minutes"
+    "windowRange": "La fenêtre échelonnée doit être comprise entre 0 et 720 minutes",
+    "addDialogTitle": "Ajouter un profil de mise à jour"
   },
   "userDetail": {
     "active": "Actif",

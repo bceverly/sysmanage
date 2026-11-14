@@ -152,7 +152,7 @@ const DistributionsSettings: React.FC = () => {
         },
         {
             field: 'distribution_name',
-            headerName: t('distributions.distributionName', 'Distribution'),
+            headerName: t('distributions.distributionName', 'Distribution Name'),
             width: 150,
         },
         {
@@ -162,12 +162,12 @@ const DistributionsSettings: React.FC = () => {
         },
         {
             field: 'install_identifier',
-            headerName: t('distributions.installIdentifier', 'Install ID'),
+            headerName: t('distributions.installIdentifier', 'Install Identifier'),
             width: 180,
         },
         {
             field: 'agent_install_method',
-            headerName: t('distributions.installMethod', 'Install Method'),
+            headerName: t('distributions.installMethod', 'Agent Install Method'),
             width: 150,
         },
         {
@@ -186,9 +186,9 @@ const DistributionsSettings: React.FC = () => {
 
     const searchColumns = [
         { field: 'display_name', label: t('distributions.displayName', 'Display Name') },
-        { field: 'distribution_name', label: t('distributions.distributionName', 'Distribution') },
+        { field: 'distribution_name', label: t('distributions.distributionName', 'Distribution Name') },
         { field: 'child_type', label: t('distributions.childType', 'Type') },
-        { field: 'install_identifier', label: t('distributions.installIdentifier', 'Install ID') },
+        { field: 'install_identifier', label: t('distributions.installIdentifier', 'Install Identifier') },
     ];
 
     const allChildTypeOptions = [

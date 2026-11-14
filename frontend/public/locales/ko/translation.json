@@ -98,7 +98,7 @@
         "totalPackages": "총 패키지 수",
         "totalRepos": "총 리포지토리 수"
       },
-      "endpointMissing": "백엔드 list-all-repositories 엔드포인트가 사용할 수 없음; 대시보드를 채울 수 없습니다.",
+      "endpointMissing": "백엔드 list-all-repositories 엔드포인트를 사용할 수 없습니다. 대시보드를 채울 수 없습니다.",
       "loadError": "리포지토리를 로드하는데 실패했습니다:",
       "notApplicable": "이 대시보드는 리포지토리 역할 배포에서만 의미가 있습니다.",
       "subtitle": "이 프라이빗 사이드 미러의 각 저장소 통계 및 집계 신선도.",
@@ -134,7 +134,7 @@
     "deleteError": "패키지 삭제에 실패했습니다",
     "deleted": "패키지 삭제됨",
     "dockerInstallHint": "sysmanage 서버에서 sudo 권한을 가진 사용자로 이 명령을 실행:",
-    "dockerNoGroup": "{{user}} 사용자가 docker 그룹에 포함되어 있지 않아서 빌드 subprocess가 데몬 소켓에 접근할 수 없습니다.",
+    "dockerNoGroup": "Docker가 실행 중이지만 {{user}} 사용자가 docker 그룹에 속해 있지 않아 빌드 하위 프로세스가 데몬 소켓에 접근할 수 없습니다.",
     "dockerNotInstalled": "이 서버에는 Docker가 설치되어 있지 않습니다. 패키지 빌드를 위해서는 Docker가 필요합니다.",
     "dockerNotRunning": "Docker는 설치되어 있지만 데몬이 접근할 수 없습니다. 다음 명령을 사용하여 시작하세요: sudo systemctl enable --now docker.",
     "dockerPermissionDenied": "Docker 데몬은 실행 중이지만 {{user}} 사용자(현재 sysmanage 프로세스를 실행하는 사용자)는 /var/run/docker.sock을 읽을 수 없습니다. 사용자를 docker 그룹에 추가한 후, 새로운 그룹 설정이 적용되도록 sysmanage 프로세스를 다시 시작하세요.",
@@ -161,7 +161,8 @@
   "airgapCollections": {
     "actions": {
       "delete": "삭제",
-      "download": "ISO 다운로드"
+      "download": "ISO 다운로드",
+      "nextDisc": "다음 디스크 넣음"
     },
     "column": {
       "actions": "액션",
@@ -210,15 +211,27 @@
     "multiDiscInfo": "이 실행은 {{count}}개의 디스크를 생성했습니다. 다운로드하려는 것을 선택하세요.",
     "newRun": "새 수집 실행",
     "noIsoOnDisk": "디스크에 아직 ISO 파일이 없습니다 -- 잠시 후 다시 확인하세요.",
-    "noManifestFound": "실행이 아직 맨IFEST가 없음 -- 상태가 COMPLETE로 변경되면 다시 시도하세요.",
+    "noManifestFound": "이 실행에는 아직 다운로드할 수 있는 ISO가 없습니다 -- 상태가 ISO_BUILT 또는 COMPLETE가 될 때까지 기다리십시오.",
     "notApplicable": "이 페이지는 수집자 역할 배포에서만 의미가 있습니다.",
     "refresh": "새로고침",
     "subtitle": "구성된 저장소를 미러링하고, 서명된 ISO를 생성하며, 공기 격리 측에서 사용할 수 있도록 매니페스트를 작성하여 단발성 수집 작업을 트리거합니다.",
-    "title": "에어갭 수집 실행"
+    "title": "에어갭 수집 실행",
+    "burnSet": {
+      "awaitingMedia": "디스크 {{burned}}/{{total}} 굽기 완료. 빈 디스크를 넣으세요.",
+      "burning": "디스크 {{disc}}/{{total}}"
+    },
+    "nextDisc": {
+      "title": "다음 디스크 넣기",
+      "body": "디스크 {{burned}}/{{total}} 굽기가 완료되어 {{device}}에서 꺼내졌습니다. 디스크 {{burned}}(으)로 라벨을 붙이고 드라이브에 빈 디스크를 넣은 다음, 확인하여 디스크 {{next}}을(를) 구우세요.",
+      "cancel": "아직 아님",
+      "confirm": "디스크 {{next}} 굽기",
+      "started": "디스크 {{disc}}/{{total}} 굽는 중.",
+      "error": "다음 디스크를 시작하지 못했습니다"
+    }
   },
   "airgapDevices": {
     "empty": "적격 드라이브 없음. 미디어 삽입 후 재스캔을 눌러주세요.",
-    "help": "광학/USB 드라이브에서 수집 매체가 있는 드라이브를 선택합니다. Air-Gap 리포지토리 페이지의 Import 버튼은 이 드라이브에 읽을 수 있는 ISO가 삽입되면 사용 가능해집니다. 가져오기 동안 매디어 서명이 검증됩니다.",
+    "help": "수집기 미디어가 들어 있는 광학/USB 드라이브를 선택하십시오. 이 드라이브에 읽을 수 있는 ISO가 삽입되면 에어갭 리포지토리 페이지의 ISO 가져오기 버튼을 사용할 수 있게 됩니다. 미디어 서명은 가져오는 동안 검증됩니다.",
     "label": "블록 장치",
     "loadError": "드라이브를 열람할 수 없습니다.",
     "none": "(없음)",
@@ -538,7 +551,8 @@
     "status": "상태",
     "unknownPackage": "(알 수 없음)",
     "violations": "위반",
-    "violationsFor": "위반 -- {{name}}"
+    "violationsFor": "위반 -- {{name}}",
+    "scanTooltip": "캐시된 인벤토리를 기준으로 스캔"
   },
   "configDrift": {
     "actions": "행동",
@@ -950,7 +964,7 @@
       "coordUrl": "조정자 URL",
       "enrolled": "코디네이터와 등록됨",
       "error": "조정자와 등록할 수 없습니다.",
-      "help": "이 사이트를 그 코디네이터로 지정하고 코디네이터에서 발급한 일회용 등록 토큰을 붙여넣습니다 (그의 Sites 페이지). 이 사이트는 핸드셰이크를 완료하고 동기화를 시작하기 위해 콜백합니다.",
+      "help": "이 사이트가 자신의 코디네이터를 가리키도록 지정하고, 코디네이터가 발급한 일회용 등록 토큰(코디네이터의 사이트 페이지에서 발급)을 붙여넣으십시오. 이 사이트는 콜백하여 핸드셰이크를 완료하고 동기화를 시작합니다.",
       "notEnrolled": "협력자와 아직 등록되지 않았습니다.",
       "submit": "코디네이터와 등록",
       "submitting": "등록 중…",
@@ -1393,7 +1407,6 @@
     "completedAt": "완료일시",
     "complianceTab": "규정 준수",
     "configurationFiles": "구성 파일",
-    "confirmDeleteInstallation": "이 설치 기록을 삭제하시겠습니까?",
     "confirmDeleteInstallationMessage": "이 설치 기록을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
     "confirmRequestPackages": "사용 가능한 패키지 요청",
     "confirmRequestPackagesMessage": "이렇게 하면 호스트에서 패키지 수집이 트리거됩니다. 이 작업은 리소스가 많이 사용되며 완료되는 데 몇 분이 걸릴 수 있습니다. 계속하시겠습니까?",
@@ -1711,7 +1724,7 @@
     "softwareTab": "소프트웨어",
     "speed": "속도",
     "sshKeysDeployedError": "SSH 키 배포에 실패했습니다",
-    "sshKeysDeployedSuccess": "SSH 키가 성공적으로 배포되었습니다",
+    "sshKeysDeployedSuccess": "SSH 키 배포가 대기열에 추가되었습니다",
     "start": "시작",
     "startChildHost": "시작",
     "status": "상태",
@@ -1740,7 +1753,7 @@
     "ubuntuProAttachConfirm": "부착",
     "ubuntuProAttachDescription": "이 시스템을 구독에 연결하려면 Ubuntu Pro 토큰을 입력하십시오.",
     "ubuntuProAttachError": "Ubuntu Pro 연결에 실패했습니다",
-    "ubuntuProAttachSuccess": "Ubuntu Pro가 성공적으로 연결되었습니다",
+    "ubuntuProAttachSuccess": "Ubuntu Pro 연결을 요청했습니다",
     "ubuntuProAttachTitle": "Ubuntu Pro 연결",
     "ubuntuProAttaching": "연결 중...",
     "ubuntuProDetach": "분리",
@@ -1748,7 +1761,7 @@
     "ubuntuProDetachConfirmMessage": "이 시스템에서 Ubuntu Pro를 분리하시겠습니까? 이 호스트의 모든 Ubuntu Pro 혜택 및 서비스가 제거됩니다.",
     "ubuntuProDetachConfirmTitle": "Ubuntu Pro 분리 확인",
     "ubuntuProDetachError": "Ubuntu Pro 분리에 실패했습니다",
-    "ubuntuProDetachSuccess": "Ubuntu Pro가 성공적으로 분리되었습니다",
+    "ubuntuProDetachSuccess": "Ubuntu Pro 분리를 요청했습니다",
     "ubuntuProDetaching": "분리 중...",
     "ubuntuProInfo": "Ubuntu Pro 정보",
     "ubuntuProTab": "Ubuntu Pro",
@@ -2523,7 +2536,7 @@
     "queryPacks": "쿼리 팩",
     "reports": "보고서",
     "role": {
-      "collector": "공기 격리 수집 엔진",
+      "collector": "에어갭 수집기",
       "engineMissing": "필요한 Pro+ 엔진이 로드되지 않았습니다. 라이선스를 확인하세요.",
       "repository": "에어갭 리포지토리"
     },
@@ -2668,7 +2681,8 @@
     "updated": "규정 준수 프로필이 저장되었습니다",
     "version": "버전",
     "versionOp": "연산자",
-    "versionOpAny": "(임의)"
+    "versionOpAny": "(임의)",
+    "loadOneError": "규정 준수 프로필을 불러오지 못했습니다"
   },
   "policies": {
     "actions": {
@@ -2787,7 +2801,7 @@
     "failed": "실패했습니다",
     "failedCount": "{{count}} 실패함",
     "intro": "쿼리 팩은 모든 에이전트가 제공하는 사실 테이블에 SQL을 실행하므로 하나의 쿼리는 모든 플랫폼에서 작동합니다.",
-    "liveFailed": "쿼리를 실행할 수 없음",
+    "liveFailed": "쿼리를 실행할 수 없습니다",
     "liveIntro": "선택된 호스트에 지금 한 번 쿼리를 실행합니다. 배포는 제한적이므로 호스트는 한 번에 모두 요청되는 대신 파도에 따라 요청됩니다.",
     "liveStatus": {
       "canceled": "취소됨",
@@ -2833,7 +2847,8 @@
     },
     "title": "쿼리 팩",
     "validateFailed": "패키지 확인 불가",
-    "version": "버전"
+    "version": "버전",
+    "livePollFailed": "라이브 쿼리 결과를 읽을 수 없습니다"
   },
   "queues": {
     "created": "생성 시간",
@@ -2894,7 +2909,8 @@
     "subtitle": "보고서 렌더러가 내장 보고서 유형 위에 적용하는 사용자 지정 레이아웃",
     "tabLabel": "보고서 템플릿",
     "title": "보고서 템플릿",
-    "updated": "템플릿이 저장되었습니다"
+    "updated": "템플릿이 저장되었습니다",
+    "addDialogTitle": "보고서 템플릿 추가"
   },
   "reportViewer": {
     "iframeTitle": "보고서 내용",
@@ -3185,7 +3201,8 @@
     "updateError": "비밀 업데이트에 실패했습니다",
     "updateSuccess": "비밀이 성공적으로 업데이트되었습니다",
     "updatedAt": "업데이트일",
-    "viewSecret": "비밀 보기"
+    "viewSecret": "비밀 보기",
+    "loadOneError": "비밀을 로드하지 못했습니다"
   },
   "security": {
     "addRole": "역할 추가",
@@ -3501,8 +3518,8 @@
     "opentelemetry": {
       "collectorUrl": "수집기 URL",
       "configuration": "구성",
-      "disabledMessage": "OpenTelemetry 계측이 현재 비활성화되어 있습니다. 분산 추적 및 메트릭 수집을 활성화하려면 OTEL_ENABLED=false를 제거하거나 OTEL_ENABLED=true로 설정하십시오.",
-      "enableHint": "OpenTelemetry는 기본적으로 활성화되어 있습니다. 비활성화하려면 OTEL_ENABLED=false 환경 변수를 설정하고 서버를 재시작하십시오.",
+      "disabledMessage": "OpenTelemetry 계측이 비활성화되어 있습니다(기본값). 분산 추적 및 메트릭 수집을 활성화하려면 OTEL_ENABLED=true 환경 변수(또는 sysmanage.yaml의 telemetry.enabled: true)를 설정하고 서버를 재시작하십시오.",
+      "enableHint": "OpenTelemetry를 비활성화하려면 OTEL_ENABLED=false 환경 변수(또는 sysmanage.yaml의 telemetry.enabled: false)를 설정하고 서버를 재시작하십시오.",
       "fetchError": "OpenTelemetry 상태 가져오기 실패",
       "instrumentation": "계측",
       "metricsCount": "메트릭",
@@ -3610,7 +3627,8 @@
     "windowsTypeHelp": "Chocolatey 또는 winget 선택",
     "windowsUrl": "저장소 URL",
     "windowsUrlHelp": "예: https://mycompany.com/chocolatey",
-    "winget": "winget"
+    "winget": "winget",
+    "obsRepoUrl": "OBS 저장소 URL"
   },
   "ubuntuPro": {
     "actions": {
@@ -3761,7 +3779,8 @@
     "updated": "업데이트 프로필이 저장되었습니다",
     "window": "단계별 창 (분)",
     "windowHelp": "에이전트 전송을 이 분 수에 걸쳐 분산 (0-720)",
-    "windowRange": "단계별 창은 0 ~ 720분 사이여야 합니다"
+    "windowRange": "단계별 창은 0 ~ 720분 사이여야 합니다",
+    "addDialogTitle": "업데이트 프로필 추가"
   },
   "userDetail": {
     "active": "활성",

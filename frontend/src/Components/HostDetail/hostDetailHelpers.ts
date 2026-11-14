@@ -18,7 +18,7 @@ export const formatDate = (t: TFunction, dateString: string | null | undefined):
 export const formatTimestamp = (t: TFunction, timestamp: string | null | undefined) => {
     if (!timestamp) return t('hosts.never', 'never');
     const date = parseUTCTimestamp(timestamp);
-    if (!date) return t('hosts.invalidDate', 'invalid');
+    if (!date) return t('hosts.invalidDate', 'Invalid date');
 
     const now = new Date();
     const diffMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);

@@ -103,7 +103,7 @@ test("renders the site name and connection-health card", async () => {
   primeOk();
   renderPage();
   expect(await screen.findByText("Alpha")).toBeTruthy();
-  expect(screen.getByText(/Connection health/i)).toBeTruthy();
+  expect(screen.getByText("Connection")).toBeTruthy();
 });
 
 test("shows an open-alert card with an acknowledge action", async () => {

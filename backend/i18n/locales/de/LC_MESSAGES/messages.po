@@ -6802,6 +6802,16 @@ msgstr ""
 "macOS-Schwachstellen nach Betriebssystemversion, aus den Daten des NVD zu "
 "betroffenen Versionen"
 
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr "Diese Ausführung wartet nicht auf einen leeren Datenträger (Status: %s)."
+
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
+msgstr "Leerer Datenträger für Datenträger %(disc)d von %(count)d des Air-gap-Sammelauftrags '%(iso_label)s' eingelegt"
+
 #~ msgid ""
 #~ "Confirm that photos will be deleted from iCloud once they are downloaded"
 #~ msgstr ""

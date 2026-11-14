@@ -210,7 +210,7 @@ const AntivirusDefaultsSettings: React.FC = () => {
                 <SecurityIcon color="primary" fontSize="large" />
                 <Box>
                   <Typography variant="h5" component="h2">
-                    {t('antivirus.title', 'Antivirus Defaults')}
+                    {t('antivirus.title', 'Antivirus')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {t('antivirus.description', 'Configure default antivirus software for each operating system')}

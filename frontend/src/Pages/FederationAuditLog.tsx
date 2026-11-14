@@ -14,7 +14,8 @@
  * ``?site_id=<id>``).
  *
  * When the federation controller engine isn't loaded, the OSS stub
- * returns ``{licensed: false, entries: []}`` and this page renders
+ * answers 402, the service reads that as ``{licensed: false}``, and
+ * this page renders
  * the same Enterprise upsell every other federation page uses.
  */
 

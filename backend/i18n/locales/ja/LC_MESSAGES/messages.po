@@ -6680,6 +6680,16 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "OS バージョン別の macOS の脆弱性 (NVD の影響を受けるバージョンのデータより)"
 
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr "この実行は空のディスクを待っていません（状態：%s）。"
+
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
+msgstr "エアギャップ収集実行 '%(iso_label)s' のディスク %(disc)d / %(count)d 用に空のディスクをセットしました"
+
 #~ msgid ""
 #~ "Confirm that photos will be deleted from iCloud once they are downloaded"
 #~ msgstr "ダウンロード後に写真が iCloud から削除されることを確認してください"

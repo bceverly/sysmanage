@@ -6393,6 +6393,16 @@ msgstr "NetBSD pkgsrc 套件弱點（pkg_admin audit 讀取的資料）"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "依作業系統版本列出的 macOS 弱點（來自 NVD 的受影響版本資料）"
 
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr "此運行未在等待空白光碟（狀態：%s）。"
+
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
+msgstr "已為離線集合運行 '%(iso_label)s' 的第 %(disc)d 張光碟（共 %(count)d 張）放入空白光碟"
+
 #~ msgid ""
 #~ "Confirm that photos will be deleted from iCloud once they are downloaded"
 #~ msgstr "請確認照片下載後將從 iCloud 中刪除"

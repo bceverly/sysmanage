@@ -290,10 +290,10 @@ class TestTierModules:
         prof_modules = TIER_MODULES[LicenseTier.PROFESSIONAL]
         ent_modules = TIER_MODULES[LicenseTier.ENTERPRISE]
         # Check for enterprise-only modules
-        assert ModuleCode.PERFORMANCE_ANALYZER in ent_modules
-        assert ModuleCode.PERFORMANCE_ANALYZER not in prof_modules
-        assert ModuleCode.ANOMALY_DETECTOR in ent_modules
-        assert ModuleCode.ANOMALY_DETECTOR not in prof_modules
+        assert ModuleCode.AIRGAP_COLLECTOR_ENGINE in ent_modules
+        assert ModuleCode.AIRGAP_COLLECTOR_ENGINE not in prof_modules
+        assert ModuleCode.FEDERATION_CONTROLLER_ENGINE in ent_modules
+        assert ModuleCode.FEDERATION_CONTROLLER_ENGINE not in prof_modules
 
     def test_proplus_core_in_professional(self):
         """Test that PROPLUS_CORE is available in professional tier."""

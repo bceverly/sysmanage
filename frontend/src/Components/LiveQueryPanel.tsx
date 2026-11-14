@@ -43,7 +43,7 @@ const LIVE_STATUS_LABEL: Record<string, string> = {
     pending: 'Pending',
     running: 'Running',
     completed: 'Completed',
-    canceled: 'Cancelled',
+    canceled: 'Canceled',
 };
 
 const TARGET_STATUS_LABEL: Record<string, string> = {
@@ -124,7 +124,7 @@ const LiveQueryPanel: React.FC<Props> = ({ hostIds }) => {
                     setRunning(false);
                 }
             } catch (err) {
-                setError(messageFrom(err, t('queryPacks.liveFailed', 'Could not read the live query')));
+                setError(messageFrom(err, t('queryPacks.livePollFailed', 'Could not read the live query results')));
                 setRunning(false);
             }
         },
@@ -159,7 +159,7 @@ const LiveQueryPanel: React.FC<Props> = ({ hostIds }) => {
             setRunning(false);
             setLive(await getLiveQuery(live.id));
         } catch (err) {
-            setError(messageFrom(err, t('queryPacks.cancelFailed', 'Could not cancel')));
+            setError(messageFrom(err, t('queryPacks.cancelFailed', 'Could not cancel the query')));
         }
     };
 

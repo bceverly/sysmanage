@@ -127,16 +127,16 @@
     "completedAt": "تم الانتهاء منه",
     "confirmDelete": "هل تريد حذف هذا الحزمة وملف ISO الخاص به؟",
     "copied": "تم نسخ الأمر إلى لوحة الصلاحيات",
-    "copy": "نسخ إلىClipboard",
-    "copyError": "لا يمكن الوصول إلىclipboard",
+    "copy": "نسخ إلى الحافظة",
+    "copyError": "تعذر الوصول إلى الحافظة",
     "createdAt": "تم إنشاء",
     "delete": "حذف",
     "deleteError": "فشل في حذف الحزمة.",
     "deleted": "تم حذف الحزمة",
     "dockerInstallHint": "قم بتنفيذ الأمر التالي على خادم sysmanage كمستخدم لديه سلطة sudo:",
-    "dockerNoGroup": "يتم تشغيل Docker ولكن المستخدم {{user}} ليس في مجموعة docker، لذا لا يمكن للم subprocess الوصول إلى مقبس الشيط.",
+    "dockerNoGroup": "يعمل Docker لكن المستخدم {{user}} ليس ضمن مجموعة docker، لذا لا تستطيع عملية البناء الفرعية الوصول إلى مقبس الخدمة الخلفية (daemon).",
     "dockerNotInstalled": "لم يتم تثبيت Docker على هذا الخادم. تحتاج عمليات بناء الحزمة إلى Docker للحصول على حزم Linux لكل نظام تشغيل.",
-    "dockerNotRunning": "تمت تثبيت Docker ولكن لم يتمكن الوصول إلى الشيط. قم بتشغيله باستخدام: sudo systemctl enable --now docker.",
+    "dockerNotRunning": "Docker مثبت لكن لا يمكن الوصول إلى الخدمة الخلفية (daemon). شغّلها باستخدام: sudo systemctl enable --now docker.",
     "dockerPermissionDenied": "يقوم دايمون Docker بالعمل ولكن المستخدم {{user}} (المستخدم الذي يقوم بتشغيل عملية sysmanage) لا يمكنه قراءة /var/run/docker.sock. أضف المستخدم إلى مجموعة docker، ثم اعد تشغيل عملية sysmanage حتى تصبح المجموعة الجديدة سارية.",
     "dockerReady": "جاهز Docker",
     "dockerReadyHint": "تتراوح عمليات البناء عادة بين 5 و30 دقيقة اعتمادًا على عدد المنصات المفعلة.",
@@ -161,13 +161,14 @@
   "airgapCollections": {
     "actions": {
       "delete": "حذف",
-      "download": "تنزيل ISO"
+      "download": "تنزيل ISO",
+      "nextDisc": "تم تحميل القرص التالي"
     },
     "column": {
       "actions": "إجراءات",
       "completed": "تم الانتهاء منه",
       "created": "تم إنشاء",
-      "isoLabel": "étiquette ISO",
+      "isoLabel": "تسمية ISO",
       "size": "الحجم",
       "started": "بدأ",
       "status": "الحالة"
@@ -185,7 +186,7 @@
       "hostMismatchWarning": "المرآات التي قمت باختيارها تغطي عدة خوادم. يتم إرسال خطة التجميع إلى خادم واحد، لذا يجب أن يشارك جميع الاختيارات في واحد.",
       "includeCompliance": "أدخل حزمة التوافق",
       "includeCve": "أدخل نسخة لقطةCVE",
-      "isoLabel": "étiquette ISO",
+      "isoLabel": "تسمية ISO",
       "isoLabelHelper": "…مرجع قصير مدمج في ISO الناتجة (مثل \"monthly-2026-05\").",
       "isoLabelRequired": "الحقل ISO مطلوب",
       "mediaSizeHelper": "الحجم الأقصى لكل قرص بالmegabytes. القيمة الافتراضية هي 4700 (DVD-5).",
@@ -210,11 +211,23 @@
     "multiDiscInfo": "أنتجت هذه العملية {{count}} أقراص. حدد أيها تريد تحميلها.",
     "newRun": "عملية جمع جديدة",
     "noIsoOnDisk": "لم يتم العثور على ملف ISO على القرص بعد -- حاول مرة أخرى لاحقاً.",
-    "noManifestFound": "لا يوجد مانيفست بعد لتشغيل هذا -- حاول مرة أخرى عندما يكون الحالة COMPLETE.",
+    "noManifestFound": "لا يحتوي هذا التشغيل على ملف ISO قابل للتنزيل بعد -- انتظر حتى تصل الحالة إلى ISO_BUILT أو COMPLETE.",
     "notApplicable": "هذه الصفحة ذات معنى فقط في توزيعات الدور المجمع.",
     "refresh": "تحديث",
-    "subtitle": " kích hoạt các دورة جمع فورية تشبه المستودعات المحددة، وبناء ISO ký hiệu và viết một biểu đồ cho việc tiếp nhận trên phía không kết nối.",
-    "title": "عمليات جمع المحتوى للشبكة المعزولة"
+    "subtitle": "شغّل عمليات جمع لمرة واحدة تنسخ المستودعات المهيأة، وتبني ملف ISO موقّعًا، وتكتب بيانًا (manifest) لاستيعابه على الجانب المعزول.",
+    "title": "عمليات جمع المحتوى للشبكة المعزولة",
+    "burnSet": {
+      "awaitingMedia": "تم نسخ القرص {{burned}} من {{total}}. أدخل قرصا فارغا.",
+      "burning": "القرص {{disc}} من {{total}}"
+    },
+    "nextDisc": {
+      "title": "أدخل القرص التالي",
+      "body": "تم نسخ القرص {{burned}} من {{total}} وإخراجه من {{device}}. ضع عليه علامة القرص {{burned}}، وأدخل قرصا فارغا في المحرك، ثم أكد لنسخ القرص {{next}}.",
+      "cancel": "ليس بعد",
+      "confirm": "نسخ القرص {{next}}",
+      "started": "جار نسخ القرص {{disc}} من {{total}}.",
+      "error": "فشل بدء القرص التالي"
+    }
   },
   "airgapDevices": {
     "empty": "لم يتم العثور على أي أقراص مؤهلة. أدخل الوسائط واضغط على إعادة المسح.",
@@ -244,7 +257,7 @@
       "verified": "تم التحقق منه",
       "verifying": "تحقق من توقيع"
     },
-    "runDone": "تمported completely -- القائمة التالية للRepositories تم تحديثها.",
+    "runDone": "اكتمل الاستيراد -- تم تحديث قائمة المستودعات أدناه.",
     "runStats": "{{files}} ملفات · {{size}}",
     "runStatus": "حالة الاستيراد",
     "statusError": "لم يتم اختبار جهاز الاستيراد.",
@@ -270,7 +283,7 @@
       "importError": "لم يتم استيراد المفتاح.",
       "imported": "تم استيراد المفتاح {{fp}}",
       "loadError": "لم يتم تحميل المفاتيح المرتبطة بها.",
-      "nameLabel": "اسم Collector",
+      "nameLabel": "اسم المجمِّع",
       "pemLabel": "المفتاح العام (PEM)",
       "removeError": "لا يمكن إزالة المفتاح.",
       "required": "يجب توفير كل من الاسم والمفتاح العام.",
@@ -538,7 +551,8 @@
     "status": "الحالة",
     "unknownPackage": "(غير معروف)",
     "violations": "الانتهاكات",
-    "violationsFor": "الانتهاكات -- {{name}}"
+    "violationsFor": "الانتهاكات -- {{name}}",
+    "scanTooltip": "الفحص مقابل المخزون المخزّن مؤقتًا"
   },
   "configDrift": {
     "actions": "الإجراءات",
@@ -1393,7 +1407,6 @@
     "completedAt": "اكتمل في",
     "complianceTab": "الامتثال",
     "configurationFiles": "ملفات التكوين",
-    "confirmDeleteInstallation": "هل أنت متأكد من أنك تريد حذف سجل التثبيت هذا؟",
     "confirmDeleteInstallationMessage": "هل أنت متأكد من رغبتك في حذف سجل التثبيت هذا؟ لا يمكن التراجع عن هذا الإجراء.",
     "confirmRequestPackages": "طلب الحزم المتاحة",
     "confirmRequestPackagesMessage": "سيؤدي هذا إلى بدء جمع الحزم على المضيف، والذي قد يكون مكثفاً للموارد ويستغرق عدة دقائق لاكتماله. هل تريد المتابعة؟",
@@ -1711,7 +1724,7 @@
     "softwareTab": "البرامج",
     "speed": "السرعة",
     "sshKeysDeployedError": "فشل في نشر مفاتيح SSH",
-    "sshKeysDeployedSuccess": "تم نشر مفاتيح SSH بنجاح",
+    "sshKeysDeployedSuccess": "تمت إضافة نشر مفاتيح SSH إلى قائمة الانتظار بنجاح",
     "start": "ابدأ",
     "startChildHost": "ابدأ",
     "status": "الحالة",
@@ -1740,7 +1753,7 @@
     "ubuntuProAttachConfirm": "ربط",
     "ubuntuProAttachDescription": "أدخل رمز Ubuntu Pro الخاص بك لربط هذا النظام باشتراكك.",
     "ubuntuProAttachError": "فشل ربط Ubuntu Pro",
-    "ubuntuProAttachSuccess": "تم ربط Ubuntu Pro بنجاح",
+    "ubuntuProAttachSuccess": "تم طلب ربط Ubuntu Pro",
     "ubuntuProAttachTitle": "ربط Ubuntu Pro",
     "ubuntuProAttaching": "جارٍ الربط...",
     "ubuntuProDetach": "فصل",
@@ -1748,7 +1761,7 @@
     "ubuntuProDetachConfirmMessage": "هل أنت متأكد أنك تريد فصل Ubuntu Pro عن هذا النظام؟ سيؤدي ذلك إلى إزالة جميع مزايا وخدمات Ubuntu Pro لهذا المضيف.",
     "ubuntuProDetachConfirmTitle": "تأكيد فصل Ubuntu Pro",
     "ubuntuProDetachError": "فشل فصل Ubuntu Pro",
-    "ubuntuProDetachSuccess": "تم فصل Ubuntu Pro بنجاح",
+    "ubuntuProDetachSuccess": "تم طلب فصل Ubuntu Pro",
     "ubuntuProDetaching": "جارٍ الفصل...",
     "ubuntuProInfo": "معلومات Ubuntu Pro",
     "ubuntuProTab": "Ubuntu Pro",
@@ -2523,7 +2536,7 @@
     "queryPacks": "حزم الاستعلامات",
     "reports": "التقارير",
     "role": {
-      "collector": "مجمِّع الفجوة الهوائية",
+      "collector": "مجمِّع الشبكة المعزولة",
       "engineMissing": "محرك Pro+ المطلوب غير محمل؛ تحقق من الترخيص.",
       "repository": "مستودع معزول عن الشبكة"
     },
@@ -2668,7 +2681,8 @@
     "updated": "تم حفظ ملف الامتثال",
     "version": "الإصدار",
     "versionOp": "المعامل",
-    "versionOpAny": "(أي)"
+    "versionOpAny": "(أي)",
+    "loadOneError": "فشل تحميل ملف الامتثال"
   },
   "policies": {
     "actions": {
@@ -2787,7 +2801,7 @@
     "failed": "فشل",
     "failedCount": "{{count}} فشل",
     "intro": "تنفذ حزم الاستعلامات استعلامات SQL على جداول الحقائق التي يخدمها كل وكيل، لذا يعمل استعلام واحد عبر كل المنصات.",
-    "liveFailed": "لا يمكن تشغيل الاستعلام",
+    "liveFailed": "تعذر تشغيل الاستعلام",
     "liveIntro": "تشغيل استعلام واحد عبر المضيفين المحددين الآن. يتم إرسال الأوامر للمضيفين على دفعات بدلاً من إرسالها جميعاً في وقت واحد.",
     "liveStatus": {
       "canceled": "تم الإلغاء",
@@ -2833,7 +2847,8 @@
     },
     "title": "حزم الاستعلامات",
     "validateFailed": "تعذر التحقق من الحزمة",
-    "version": "الإصدار"
+    "version": "الإصدار",
+    "livePollFailed": "تعذرت قراءة نتائج الاستعلام المباشر"
   },
   "queues": {
     "created": "تاريخ الإنشاء",
@@ -2894,7 +2909,8 @@
     "subtitle": "تخطيطات مخصصة يطبقها المُولد على أنواع التقارير المضمنة",
     "tabLabel": "قوالب التقرير",
     "title": "قوالب التقارير",
-    "updated": "تم حفظ القالب"
+    "updated": "تم حفظ القالب",
+    "addDialogTitle": "إضافة قالب تقرير"
   },
   "reportViewer": {
     "iframeTitle": "محتوى التقرير",
@@ -3185,7 +3201,8 @@
     "updateError": "فشل في تحديث السر",
     "updateSuccess": "تم تحديث السر بنجاح",
     "updatedAt": "تم التحديث في",
-    "viewSecret": "عرض السر"
+    "viewSecret": "عرض السر",
+    "loadOneError": "فشل في تحميل السر"
   },
   "security": {
     "addRole": "إضافة دور",
@@ -3501,8 +3518,8 @@
     "opentelemetry": {
       "collectorUrl": "عنوان URL للمُجمّع",
       "configuration": "الإعدادات",
-      "disabledMessage": "أدوات OpenTelemetry معطلة حالياً. قم بإزالة OTEL_ENABLED=false أو اضبط OTEL_ENABLED=true لتفعيل التتبع الموزع وجمع المقاييس.",
-      "enableHint": "OpenTelemetry مفعّل افتراضياً. لتعطيله، اضبط متغير البيئة OTEL_ENABLED=false وأعد تشغيل الخادم.",
+      "disabledMessage": "أدوات OpenTelemetry معطلة (الإعداد الافتراضي). اضبط متغير البيئة OTEL_ENABLED=true (أو telemetry.enabled: true في sysmanage.yaml) وأعد تشغيل الخادم لتفعيل التتبع الموزع وجمع المقاييس.",
+      "enableHint": "لتعطيل OpenTelemetry، اضبط متغير البيئة OTEL_ENABLED=false (أو telemetry.enabled: false في sysmanage.yaml) وأعد تشغيل الخادم.",
       "fetchError": "فشل في الحصول على حالة OpenTelemetry",
       "instrumentation": "الأدوات",
       "metricsCount": "المقاييس",
@@ -3610,7 +3627,8 @@
     "windowsTypeHelp": "اختر Chocolatey أو winget",
     "windowsUrl": "عنوان URL للمستودع",
     "windowsUrlHelp": "مثل https://mycompany.com/chocolatey",
-    "winget": "winget"
+    "winget": "winget",
+    "obsRepoUrl": "عنوان URL لمستودع OBS"
   },
   "ubuntuPro": {
     "actions": {
@@ -3761,7 +3779,8 @@
     "updated": "تم حفظ ملف التحديث",
     "window": "نافذة متدرجة (بالدقائق)",
     "windowHelp": "نشر إرسال الوكلاء على مدى هذا العدد من الدقائق (0-720)",
-    "windowRange": "يجب أن تكون النافذة المتدرجة بين 0 و 720 دقيقة"
+    "windowRange": "يجب أن تكون النافذة المتدرجة بين 0 و 720 دقيقة",
+    "addDialogTitle": "إضافة ملف تحديث"
   },
   "userDetail": {
     "active": "نشط",

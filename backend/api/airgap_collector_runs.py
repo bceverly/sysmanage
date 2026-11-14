@@ -39,6 +39,11 @@ from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.services.airgap_run_tick import (
+    STATUS_AWAITING_MEDIA,
+    STATUS_ISO_BUILT,
+    run_disc_count,
+)
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
@@ -173,6 +178,10 @@ class RunResponse(BaseModel):
     # ``media_size_bytes`` (the configured per-disc capacity) so the UI can
     # show the REAL bundle size instead of the disc-size setting.
     iso_size_bytes: Optional[int] = None
+    # A burned disc set: how many discs the run made and how many the burn
+    # device has written.  ``disc_count`` is None until the run has built.
+    disc_count: Optional[int] = None
+    burned_disc_count: int = 0
     targets: List[RunTargetSpec] = Field(default_factory=list)
 
 
@@ -370,6 +379,7 @@ def _run_to_response(run: models.AirgapCollectionRun) -> RunResponse:
     # Real on-disk ISO size (sum across discs) so the UI shows the actual
     # bundle size, not the configured media-size setting.  None when no ISO
     # has been built yet, or if the files were cleaned off disk.
+    discs: List[str] = []
     try:
         discs = _list_run_discs(run.id)
         payload["iso_size_bytes"] = (
@@ -377,6 +387,8 @@ def _run_to_response(run: models.AirgapCollectionRun) -> RunResponse:
         )
     except OSError:
         payload["iso_size_bytes"] = None
+    payload["disc_count"] = run.disc_count or (len(discs) if discs else None)
+    payload["burned_disc_count"] = run.burned_disc_count or 0
     return RunResponse(**payload)
 
 
@@ -651,7 +663,7 @@ def _get_run_or_404(db: Session, rid: uuid.UUID) -> models.AirgapCollectionRun:
 def _assert_iso_ready(run: models.AirgapCollectionRun) -> List[str]:
     """409 if the run hasn't produced an ISO yet, 410 if the file(s) were
     cleaned off disk; otherwise return the list of available disc paths."""
-    if run.status not in ("ISO_BUILT", "BURNING", "COMPLETE"):
+    if run.status not in ("ISO_BUILT", "BURNING", "AWAITING_MEDIA", "COMPLETE"):
         raise HTTPException(
             status_code=409,
             detail=_(
@@ -791,6 +803,56 @@ async def download_run_iso_streamed(
         )
     run = _get_run_or_404(db, rid)
     return _iso_file_response(run, disc)
+
+
+@router.post("/runs/{run_id}/next-disc", response_model=RunResponse)
+async def confirm_next_disc(
+    run_id: str,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """The operator has loaded a blank disc for the next disc of a set.
+
+    One optical drive burns a set one disc at a time: after each disc but
+    the last the run waits at AWAITING_MEDIA.  This puts it back at
+    ISO_BUILT, from which ``airgap_run_tick`` burns the next disc.  409
+    when the run is not waiting for media (so a double click cannot burn
+    a disc twice).
+    """
+    _check_collector_module()
+    user = _get_user(db, current_user)
+    run = _get_run_or_404(db, _parse_run_uuid(run_id))
+    if run.status != STATUS_AWAITING_MEDIA:
+        raise HTTPException(
+            status_code=409,
+            detail=_("This run is not waiting for a blank disc (status: %s).")
+            % run.status,
+        )
+    next_disc = (run.burned_disc_count or 0) + 1
+    run.status = STATUS_ISO_BUILT
+    run.error_message = None
+    db.commit()
+    db.refresh(run)
+    AuditService.log(
+        db=db,
+        action_type=ActionType.UPDATE,
+        entity_type=EntityType.SETTING,
+        entity_id=str(run.id),
+        entity_name=run.iso_label,
+        description=_(
+            "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap "
+            "collection run '%(iso_label)s'"
+        )
+        % {
+            "disc": next_disc,
+            "count": run_disc_count(run),
+            "iso_label": run.iso_label,
+        },
+        user_id=user.id,
+        username=current_user,
+        result=Result.SUCCESS,
+    )
+    return _run_to_response(run)
 
 
 @router.delete("/runs/{run_id}", status_code=204)

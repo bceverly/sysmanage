@@ -43,12 +43,20 @@ from backend.auth.auth_handler import (
 )
 from backend.config import config
 from backend.i18n import N_, _
-from backend.licensing.feature_gate import requires_pro_plus
+from backend.licensing.feature_gate import requires_feature
+from backend.licensing.features import FeatureCode
 from backend.persistence import db, models
 from backend.services import airgap_bundle_builder
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.api.airgap_bundles")
+
+# Air-gapped installs are an Enterprise feature (the pricing page and the
+# bundle docs both say so), and the Pro+ bundle embeds the air-gap
+# collector's key.  ``requires_pro_plus`` let Professional build them; gate on
+# the collector's ISO feature instead, which only Enterprise carries.  The
+# Settings tab already hides on the same edition (airgap_collector_engine).
+_BUNDLE_FEATURE = FeatureCode.AIRGAP_BUILD_ISO
 
 router = APIRouter(
     prefix="/airgap-bundles",
@@ -309,7 +317,7 @@ def _resolve_caller_user_id(current_user: str) -> Optional[uuid.UUID]:
 
 
 @router.get("/docker-status")
-@requires_pro_plus()
+@requires_feature(_BUNDLE_FEATURE)
 async def docker_status(
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ) -> DockerStatusResponse:
@@ -446,7 +454,7 @@ def _user_in_docker_group() -> bool:
 
 
 @router.get("/resource-status")
-@requires_pro_plus()
+@requires_feature(_BUNDLE_FEATURE)
 async def resource_status(
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ) -> ResourceStatusResponse:
@@ -459,7 +467,7 @@ async def resource_status(
 
 
 @router.post("", status_code=202)
-@requires_pro_plus()
+@requires_feature(_BUNDLE_FEATURE)
 async def create_bundle(
     req: BundleCreateRequest, current_user: str = Depends(get_current_user)
 ) -> BundleResponse:
@@ -513,7 +521,7 @@ async def create_bundle(
 
 
 @router.get("")
-@requires_pro_plus()
+@requires_feature(_BUNDLE_FEATURE)
 async def list_bundles(
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ) -> List[BundleResponse]:
@@ -533,7 +541,7 @@ async def list_bundles(
 
 
 @router.get("/{bundle_id}")
-@requires_pro_plus()
+@requires_feature(_BUNDLE_FEATURE)
 async def get_bundle(
     bundle_id: uuid.UUID,
     current_user: str = Depends(get_current_user),  # noqa: ARG001
@@ -589,7 +597,7 @@ def _bundle_file_response(bundle_id: uuid.UUID) -> FileResponse:
 
 
 @router.get("/{bundle_id}/download")
-@requires_pro_plus()
+@requires_feature(_BUNDLE_FEATURE)
 async def download_bundle(
     bundle_id: uuid.UUID,
     current_user: str = Depends(get_current_user),  # noqa: ARG001
@@ -599,7 +607,7 @@ async def download_bundle(
 
 
 @router.post("/{bundle_id}/download-token")
-@requires_pro_plus()
+@requires_feature(_BUNDLE_FEATURE)
 async def mint_bundle_download_token(
     bundle_id: uuid.UUID,
     current_user: str = Depends(get_current_user),  # noqa: ARG001
@@ -616,7 +624,7 @@ async def mint_bundle_download_token(
 
 
 @download_router.get("/{bundle_id}/download-stream")
-@requires_pro_plus()
+@requires_feature(_BUNDLE_FEATURE)
 async def download_bundle_stream(bundle_id: uuid.UUID, token: str = ""):
     """Token-authed streaming bundle download (no Authorization header).
 
@@ -637,7 +645,7 @@ async def download_bundle_stream(bundle_id: uuid.UUID, token: str = ""):
 
 
 @router.delete("/{bundle_id}", status_code=204)
-@requires_pro_plus()
+@requires_feature(_BUNDLE_FEATURE)
 async def delete_bundle(
     bundle_id: uuid.UUID,
     current_user: str = Depends(get_current_user),  # noqa: ARG001

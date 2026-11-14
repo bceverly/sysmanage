@@ -267,7 +267,7 @@ export const useHostAccessManagement = ({
             const result = response.data;
             console.log('SSH key deployment queued:', result);
 
-            setSnackbarMessage(t('hostDetail.sshKeysDeployedSuccess', 'SSH keys deployment queued successfully'));
+            setSnackbarMessage(t('hostDetail.sshKeysDeployedSuccess', 'SSH key deployment queued successfully'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
 

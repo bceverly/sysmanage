@@ -7,10 +7,11 @@
  *
  * Every endpoint here returns either a real payload (when the Pro+
  * ``federation_controller_engine`` is loaded on the coordinator) or
- * a uniform ``{licensed: false, ...}`` stub (OSS / Community / unlicensed
- * Enterprise).  The page-level callers must check ``licensed`` before
- * trusting the rest of the payload -- see ``Pages/Sites.tsx`` for the
- * canonical pattern.
+ * HTTP 402 (OSS / Community / unlicensed Enterprise), which
+ * ``orUnlicensed`` turns into a uniform ``{licensed: false}`` envelope.
+ * The page-level callers must check ``licensed`` before trusting the
+ * rest of the payload -- see ``Pages/Sites.tsx`` for the canonical
+ * pattern.
  */
 
 import { useEffect, useState } from "react";
@@ -18,9 +19,9 @@ import { useEffect, useState } from "react";
 import axiosInstance from "./api";
 
 /**
- * A federation WRITE with the engine absent answers 402 (the stubs used to
- * answer ``200 {licensed: false}``, which told a script its dispatch had
- * worked).  Callers branch on ``licensed``, so a 402 becomes that envelope.
+ * Every federation call, read or write, answers 402 with the engine absent
+ * (the stubs used to answer ``200 {licensed: false}``).  Callers branch on
+ * ``licensed``, so a 402 becomes that envelope.
  */
 async function orUnlicensed<T>(request: Promise<{ data: T }>): Promise<T> {
   try {
@@ -131,10 +132,11 @@ export interface FederationActionResponse {
  * the usual axios rejection.
  */
 export async function doListFederationSites(): Promise<FederationListSitesResponse> {
-  const response = await axiosInstance.get<FederationListSitesResponse>(
-    "/api/v1/federation/sites",
+  return orUnlicensed(
+    axiosInstance.get<FederationListSitesResponse>(
+      "/api/v1/federation/sites",
+    ),
   );
-  return response.data;
 }
 
 /**
@@ -145,10 +147,11 @@ export async function doListFederationSites(): Promise<FederationListSitesRespon
 export async function doGetFederationSite(
   siteId: string,
 ): Promise<FederationSiteDetailResponse> {
-  const response = await axiosInstance.get<FederationSiteDetailResponse>(
-    `/api/v1/federation/sites/${encodeURIComponent(siteId)}`,
+  return orUnlicensed(
+    axiosInstance.get<FederationSiteDetailResponse>(
+      `/api/v1/federation/sites/${encodeURIComponent(siteId)}`,
+    ),
   );
-  return response.data;
 }
 
 /**
@@ -201,11 +204,11 @@ export async function doRemoveFederationSite(
 export async function doGetFederationSiteSyncStatus(
   siteId: string,
 ): Promise<FederationSiteSyncStatusResponse> {
-  const response =
-    await axiosInstance.get<FederationSiteSyncStatusResponse>(
+  return orUnlicensed(
+    axiosInstance.get<FederationSiteSyncStatusResponse>(
       `/api/v1/federation/sites/${encodeURIComponent(siteId)}/sync-status`,
-    );
-  return response.data;
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------
@@ -242,11 +245,12 @@ export async function doGetFederationSiteSyncTimeline(
   siteId: string,
   limit = 100,
 ): Promise<FederationSiteSyncTimeline> {
-  const response = await axiosInstance.get<FederationSiteSyncTimeline>(
-    `/api/v1/federation/sites/${encodeURIComponent(siteId)}/sync-timeline`,
-    { params: { limit } },
+  return orUnlicensed(
+    axiosInstance.get<FederationSiteSyncTimeline>(
+      `/api/v1/federation/sites/${encodeURIComponent(siteId)}/sync-timeline`,
+      { params: { limit } },
+    ),
   );
-  return response.data;
 }
 
 // ---------------------------------------------------------------------
@@ -297,11 +301,12 @@ export interface FederationAuditListParams {
 export async function doListFederationAuditLog(
   params: FederationAuditListParams = {},
 ): Promise<FederationAuditListResponse> {
-  const response = await axiosInstance.get<FederationAuditListResponse>(
-    "/api/v1/federation/audit",
-    { params },
+  return orUnlicensed(
+    axiosInstance.get<FederationAuditListResponse>(
+      "/api/v1/federation/audit",
+      { params },
+    ),
   );
-  return response.data;
 }
 
 // ---------------------------------------------------------------------
@@ -494,20 +499,22 @@ export interface FederationPolicyUpdateRequest {
 export async function doListFederationPolicies(
   params: { policy_type?: string; active_only?: boolean } = {},
 ): Promise<FederationPolicyListResponse> {
-  const response = await axiosInstance.get<FederationPolicyListResponse>(
-    "/api/v1/federation/policies",
-    { params },
+  return orUnlicensed(
+    axiosInstance.get<FederationPolicyListResponse>(
+      "/api/v1/federation/policies",
+      { params },
+    ),
   );
-  return response.data;
 }
 
 export async function doGetFederationPolicy(
   policyId: string,
 ): Promise<FederationPolicyDetailResponse> {
-  const response = await axiosInstance.get<FederationPolicyDetailResponse>(
-    `/api/v1/federation/policies/${encodeURIComponent(policyId)}`,
+  return orUnlicensed(
+    axiosInstance.get<FederationPolicyDetailResponse>(
+      `/api/v1/federation/policies/${encodeURIComponent(policyId)}`,
+    ),
   );
-  return response.data;
 }
 
 export async function doCreateFederationPolicy(
@@ -602,10 +609,11 @@ export interface FederationAlertConfigResponse {
 }
 
 export async function doGetFederationAlertConfig(): Promise<FederationAlertConfigResponse> {
-  const response = await axiosInstance.get<FederationAlertConfigResponse>(
-    `/api/v1/federation/alert-config`,
+  return orUnlicensed(
+    axiosInstance.get<FederationAlertConfigResponse>(
+      `/api/v1/federation/alert-config`,
+    ),
   );
-  return response.data;
 }
 
 export async function doUpdateFederationAlertConfig(
@@ -661,11 +669,12 @@ export async function doGetFederationCrossSiteReport(
     siteIds && siteIds.length > 0
       ? { site_ids: siteIds.join(",") }
       : undefined;
-  const response = await axiosInstance.get<FederationCrossSiteReport>(
-    `/api/v1/federation/reports/rollup`,
-    { params },
+  return orUnlicensed(
+    axiosInstance.get<FederationCrossSiteReport>(
+      `/api/v1/federation/reports/rollup`,
+      { params },
+    ),
   );
-  return response.data;
 }
 
 // ---------------------------------------------------------------------
@@ -718,10 +727,11 @@ export async function doListFederationCommands(params: {
   if (params.offset !== undefined) search.set("offset", String(params.offset));
   const qs = search.toString();
   const query = qs ? `?${qs}` : "";
-  const response = await axiosInstance.get<FederationCommandListResponse>(
-    `/api/v1/federation/commands${query}`,
+  return orUnlicensed(
+    axiosInstance.get<FederationCommandListResponse>(
+      `/api/v1/federation/commands${query}`,
+    ),
   );
-  return response.data;
 }
 
 // ---------------------------------------------------------------------
@@ -763,15 +773,16 @@ export interface FederationDashboardRollupResponse {
  * the federation-correct "cross-site compliance/vuln drill-down": the
  * coordinator serves the per-site AGGREGATE snapshots the site pushed up
  * (not per-host detail -- that lives on the site).  Returns
- * ``{licensed:false}`` on OSS.
+ * ``{licensed:false}`` on OSS (the stub's 402).
  */
 export async function doGetFederationDashboardRollup(
   siteId: string,
 ): Promise<FederationDashboardRollupResponse> {
-  const response = await axiosInstance.get<FederationDashboardRollupResponse>(
-    `/api/v1/federation/rollups/dashboard?site_id=${encodeURIComponent(siteId)}`,
+  return orUnlicensed(
+    axiosInstance.get<FederationDashboardRollupResponse>(
+      `/api/v1/federation/rollups/dashboard?site_id=${encodeURIComponent(siteId)}`,
+    ),
   );
-  return response.data;
 }
 
 // ---------------------------------------------------------------------
@@ -817,10 +828,11 @@ export async function doListFederationAlerts(params: {
   if (params.limit !== undefined) search.set("limit", String(params.limit));
   const qs = search.toString();
   const query = qs ? `?${qs}` : "";
-  const response = await axiosInstance.get<FederationAlertListResponse>(
-    `/api/v1/federation/alerts${query}`,
+  return orUnlicensed(
+    axiosInstance.get<FederationAlertListResponse>(
+      `/api/v1/federation/alerts${query}`,
+    ),
   );
-  return response.data;
 }
 
 /** Acknowledge an open alert. */
@@ -933,7 +945,8 @@ export interface FederationHostDetailResponse {
  * Paginated cross-site host search.  ``site_id`` narrows to one site
  * (drives the "See hosts at this site" link from SiteDetail); the other
  * filters compose with AND, and ``free_text`` ORs across fqdn / ipv4 /
- * public_ip for the search box.  Returns ``{licensed:false}`` on OSS.
+ * public_ip for the search box.  Returns ``{licensed:false}`` on OSS
+ * (the stub's 402).
  */
 export async function doSearchFederationHosts(params: {
   site_id?: string;
@@ -965,10 +978,11 @@ export async function doSearchFederationHosts(params: {
   set("offset", params.offset);
   const qs = search.toString();
   const query = qs ? `?${qs}` : "";
-  const response = await axiosInstance.get<FederationHostSearchResponse>(
-    `/api/v1/federation/hosts${query}`,
+  return orUnlicensed(
+    axiosInstance.get<FederationHostSearchResponse>(
+      `/api/v1/federation/hosts${query}`,
+    ),
   );
-  return response.data;
 }
 
 /**
@@ -978,8 +992,9 @@ export async function doSearchFederationHosts(params: {
 export async function doGetFederationHostDetail(
   hostId: string,
 ): Promise<FederationHostDetailResponse> {
-  const response = await axiosInstance.get<FederationHostDetailResponse>(
-    `/api/v1/federation/hosts/${encodeURIComponent(hostId)}`,
+  return orUnlicensed(
+    axiosInstance.get<FederationHostDetailResponse>(
+      `/api/v1/federation/hosts/${encodeURIComponent(hostId)}`,
+    ),
   );
-  return response.data;
 }

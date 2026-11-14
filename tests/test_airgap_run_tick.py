@@ -825,7 +825,12 @@ class TestDispatchRunAdvance:
 
     @pytest.mark.parametrize(
         "status",
-        [tick.STATUS_MIRRORING, tick.STATUS_BUILDING_ISO, tick.STATUS_BURNING],
+        [
+            tick.STATUS_MIRRORING,
+            tick.STATUS_BUILDING_ISO,
+            tick.STATUS_BURNING,
+            tick.STATUS_AWAITING_MEDIA,
+        ],
     )
     def test_in_flight_statuses_are_left_to_the_result_handler(self, status):
         run = _run(status=status)

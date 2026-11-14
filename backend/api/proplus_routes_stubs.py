@@ -11,17 +11,19 @@ line-count cap.  ``mount_proplus_stub_routes`` (the public entry re-exported by
 one (audit / secrets / container / reporting / av / firewall) and
 ``proplus_routes_stubs_extra._mount_stub_group_b`` (automation onward).
 
-When a Pro+ module isn't licensed/loaded, these stubs answer READS with
-``{"licensed": false}`` and HTTP 200 so the frontend shows a clean "license
-required" state instead of a 404.  WRITES (POST / PUT / PATCH / DELETE) answer
-402 through ``refuse_unlicensed_write`` -- a 200 told a script its deploy,
-delete or dispatch had worked (Phase 25 edition audit, 2026-11-14).
+When a Pro+ module isn't licensed/loaded, every stub -- read or write --
+answers 402 (503 when licensed but the engine is not loaded) through
+``refuse_unlicensed``, so the frontend shows a clean "license required" state
+instead of a 404.  Writes moved off ``200 {"licensed": false}`` first, because
+a 200 told a script its deploy, delete or dispatch had worked; reads followed
+(Phase 25 edition audit, 2026-11-14) so one status code means "unlicensed"
+everywhere.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.auth.auth_bearer import get_current_user
-from backend.licensing.feature_gate import refuse_unlicensed_write
+from backend.licensing.feature_gate import refuse_unlicensed
 from backend.i18n import _
 from backend.utils.verbosity_logger import get_logger
 
@@ -98,15 +100,11 @@ def _mount_backup_stubs(app, results: dict) -> int:
 def _mount_provisioning_stubs(app, results: dict) -> int:
     """Mount 402 stubs for the whole provisioning surface (Phase 18.1 + 18.2).
 
-    These answer 402 rather than the ``{"licensed": false}`` / HTTP 200 shape the
-    other stub groups use, and the difference is deliberate.  That shape exists
-    so an OSS-tier PAGE can render a clean "license required" state instead of a
-    404; the provisioning UI ships only in the Pro+ plugin, so nothing in the
-    open-source frontend ever calls these.  What does call them is a script or an
-    operator with curl -- and answering a POST that was meant to assign a machine
-    an OS with ``200 {"licensed": false}`` would tell them it worked.  402 with a
-    reason is the honest answer, and it matches the convention already used by
-    the OSS-side gates in child_host_crud.py and airgap_collector_runs.py.
+    These answer 402 like every other stub group.  The provisioning UI ships
+    only in the Pro+ plugin, so nothing in the open-source frontend calls
+    these; what does is a script or an operator with curl, and 402 with a
+    reason is the honest answer -- the convention also used by the OSS-side
+    gates in child_host_crud.py and airgap_collector_runs.py.
 
     Without these the endpoints simply are not mounted, so an unlicensed server
     answers 404 -- indistinguishable from a typo in the URL.
@@ -173,13 +171,13 @@ def _mount_stub_group_a(app, results: dict) -> int:
         async def audit_statistics_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("audit_engine")
 
         @router.post("/export")
         async def audit_export_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("audit_engine")
+            raise refuse_unlicensed("audit_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -192,69 +190,69 @@ def _mount_stub_group_a(app, results: dict) -> int:
         async def secrets_statistics_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("secrets_engine")
 
         @router.get("/access-logs")
         async def secrets_access_logs_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "access_logs": []}
+            raise refuse_unlicensed("secrets_engine")
 
         @router.get("/rotation-schedules")
         async def secrets_rotation_schedules_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "schedules": []}
+            raise refuse_unlicensed("secrets_engine")
 
         @router.get("/{secret_id}/versions")
         async def secrets_versions_stub(
             secret_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "versions": []}
+            raise refuse_unlicensed("secrets_engine")
 
         # GPG Key Management relocated into the licensed secrets_engine (Pro+
         # moat).  Without the engine, these sub-paths serve the licensed-stub so
-        # /api/v1/secrets/gpg-keys* returns {"licensed": False} rather than 404.
+        # /api/v1/secrets/gpg-keys* answers 402 rather than 404.
         @router.get("/gpg-keys")
         async def gpg_keys_list_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "gpg_keys": []}
+            raise refuse_unlicensed("secrets_engine")
 
         @router.post("/gpg-keys")
         async def gpg_keys_upload_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("secrets_engine")
+            raise refuse_unlicensed("secrets_engine")
 
         @router.get("/gpg-keys/{key_id}")
         async def gpg_keys_get_stub(
             key_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("secrets_engine")
 
         @router.delete("/gpg-keys/{key_id}")
         async def gpg_keys_delete_stub(
             key_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("secrets_engine")
+            raise refuse_unlicensed("secrets_engine")
 
         @router.get("/gpg-keys/{key_id}/assignments")
         async def gpg_keys_list_assignments_stub(
             key_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "assignments": []}
+            raise refuse_unlicensed("secrets_engine")
 
         @router.post("/gpg-keys/{key_id}/assignments")
         async def gpg_keys_create_assignment_stub(
             key_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("secrets_engine")
+            raise refuse_unlicensed("secrets_engine")
 
         @router.delete("/gpg-keys/{key_id}/assignments/{assignment_id}")
         async def gpg_keys_delete_assignment_stub(
@@ -262,7 +260,7 @@ def _mount_stub_group_a(app, results: dict) -> int:
             assignment_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("secrets_engine")
+            raise refuse_unlicensed("secrets_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -275,27 +273,27 @@ def _mount_stub_group_a(app, results: dict) -> int:
         async def containers_statistics_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("container_engine")
 
         @router.post("/create")
         async def containers_create_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("container_engine")
+            raise refuse_unlicensed("container_engine")
 
         @router.post("/{container_id}/action")
         async def containers_action_stub(
             container_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("container_engine")
+            raise refuse_unlicensed("container_engine")
 
         @router.post("/{container_id}/network")
         async def containers_network_stub(
             container_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("container_engine")
+            raise refuse_unlicensed("container_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -309,14 +307,14 @@ def _mount_stub_group_a(app, results: dict) -> int:
             report_type: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("reporting_engine")
 
         @router.get("/view/{report_type}")
         async def reports_view_stub(
             report_type: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("reporting_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -330,62 +328,50 @@ def _mount_stub_group_a(app, results: dict) -> int:
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {
-                "licensed": False,
-                "host_id": host_id,
-                "av_installed": False,
-                "commercial_av_detected": [],
-            }
+            raise refuse_unlicensed("av_management_engine")
 
         @router.post("/deploy")
         async def av_deploy_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("av_management_engine")
+            raise refuse_unlicensed("av_management_engine")
 
         @router.post("/uninstall")
         async def av_uninstall_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("av_management_engine")
+            raise refuse_unlicensed("av_management_engine")
 
         @router.post("/scan")
         async def av_scan_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("av_management_engine")
+            raise refuse_unlicensed("av_management_engine")
 
         @router.get("/commercial/fleet-report")
         async def av_commercial_fleet_report_stub(
             current_user=Depends(get_current_user),
         ):
-            return {
-                "licensed": False,
-                "total_hosts": 0,
-                "hosts_with_commercial_av": 0,
-                "by_product": {},
-                "realtime_protection_off_count": 0,
-                "entries": [],
-            }
+            raise refuse_unlicensed("av_management_engine")
 
         @router.get("/policies")
         async def av_list_policies_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "policies": []}
+            raise refuse_unlicensed("av_management_engine")
 
         @router.post("/policies")
         async def av_create_policy_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("av_management_engine")
+            raise refuse_unlicensed("av_management_engine")
 
         @router.post("/policies/{policy_id}/apply")
         async def av_apply_policy_stub(
             policy_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("av_management_engine")
+            raise refuse_unlicensed("av_management_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -399,54 +385,43 @@ def _mount_stub_group_a(app, results: dict) -> int:
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {
-                "licensed": False,
-                "host_id": host_id,
-                "firewall_type": None,
-                "applied_roles": [],
-            }
+            raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.post("/deploy")
         async def fw_deploy_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("firewall_orchestration_engine")
+            raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.get("/roles")
         async def fw_list_roles_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "roles": []}
+            raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.post("/roles")
         async def fw_create_role_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("firewall_orchestration_engine")
+            raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.post("/compliance-check")
         async def fw_compliance_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("firewall_orchestration_engine")
+            raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.post("/fleet/deploy")
         async def fw_fleet_deploy_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("firewall_orchestration_engine")
+            raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.get("/compliance/report")
         async def fw_compliance_report_stub(
             current_user=Depends(get_current_user),
         ):
-            return {
-                "licensed": False,
-                "total_hosts": 0,
-                "compliant_hosts": 0,
-                "noncompliant_hosts": 0,
-                "entries": [],
-            }
+            raise refuse_unlicensed("firewall_orchestration_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1

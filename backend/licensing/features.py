@@ -206,17 +206,11 @@ class ModuleCode(str, Enum):
 
     # Core Analysis Modules
     HEALTH_ENGINE = "health_engine"
-    SECURITY_SCANNER = "security_scanner"  # Legacy alias
-    VULN_ENGINE = "vuln_engine"  # Renamed from security_scanner
+    VULN_ENGINE = "vuln_engine"
     ADVISORY_ENGINE = "advisory_engine"  # Phase 14.1 errata/advisory
     LIFECYCLE_ENGINE = "lifecycle_engine"  # Phase 14.3 EOL + release upgrades
     BACKUP_ENGINE = "backup_engine"  # Phase 24.6 fleet backups (encryption, keys)
     COMPLIANCE_ENGINE = "compliance_engine"
-    PERFORMANCE_ANALYZER = "performance_analyzer"
-
-    # AI/ML Modules
-    ANOMALY_DETECTOR = "anomaly_detector"
-    PREDICTION_ENGINE = "prediction_engine"
 
     # Plugin-only Modules (no Cython)
     PROPLUS_CORE = "proplus_core"
@@ -279,10 +273,6 @@ class ModuleCode(str, Enum):
     # migration fan-out).  Slated for its own MULTITENANT_SAAS tier (Phase 4 of
     # the relocation); temporarily mapped under Enterprise below until then.
     MULTITENANCY_ENGINE = "multitenancy_engine"
-
-    # Data Processing Modules
-    LOG_ANALYZER = "log_analyzer"
-    METRICS_AGGREGATOR = "metrics_aggregator"
 
     # Phase 16 Enterprise module -- Content Lifecycle Management (Satellite-style
     # versioned/filtered content views promoted across lifecycle environments).
@@ -391,6 +381,10 @@ TIER_FEATURES = {
         # under Enterprise here, a Professional TENANT edition on a SaaS
         # server was refused its own reports (edition audit, 2026-11-14).
         FeatureCode.HEALTH_REPORTS,
+        # The generator issues "api" at Professional, so every license carries
+        # it there; nothing gates on it (the /api/v1 surface is Community).
+        # Listed here so the two repos agree (Bryan, 2026-11-14).
+        FeatureCode.API_EXTENDED,
     },
     LicenseTier.ENTERPRISE: {
         # All professional features
@@ -514,7 +508,6 @@ TIER_MODULES = {
     LicenseTier.COMMUNITY: set(),
     LicenseTier.PROFESSIONAL: {
         ModuleCode.HEALTH_ENGINE,
-        ModuleCode.SECURITY_SCANNER,
         ModuleCode.VULN_ENGINE,
         ModuleCode.ADVISORY_ENGINE,
         ModuleCode.LIFECYCLE_ENGINE,
@@ -534,7 +527,6 @@ TIER_MODULES = {
     },
     LicenseTier.ENTERPRISE: {
         ModuleCode.HEALTH_ENGINE,
-        ModuleCode.SECURITY_SCANNER,
         ModuleCode.VULN_ENGINE,
         ModuleCode.ADVISORY_ENGINE,
         ModuleCode.LIFECYCLE_ENGINE,
@@ -546,11 +538,6 @@ TIER_MODULES = {
         ModuleCode.SECRETS_ENGINE,
         ModuleCode.CONTAINER_ENGINE,
         ModuleCode.PROPLUS_CORE,
-        ModuleCode.PERFORMANCE_ANALYZER,
-        ModuleCode.ANOMALY_DETECTOR,
-        ModuleCode.PREDICTION_ENGINE,
-        ModuleCode.LOG_ANALYZER,
-        ModuleCode.METRICS_AGGREGATOR,
         # Phase 3
         ModuleCode.AV_MANAGEMENT_ENGINE,
         ModuleCode.FIREWALL_ORCHESTRATION_ENGINE,

@@ -200,6 +200,8 @@ class AirgapCollectionRun(TestBase):
     worker_message_id = Column(String(80), nullable=True)
     burn_device = Column(String(200), nullable=True)
     tools_manifest = Column(Text, nullable=True)
+    disc_count = Column(Integer, nullable=True)
+    burned_disc_count = Column(Integer, nullable=True, default=0, server_default="0")
 
 
 class AirgapCollectionSchedule(TestBase):

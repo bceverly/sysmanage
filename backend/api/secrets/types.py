@@ -12,6 +12,7 @@ When the secrets_engine module is not loaded, returns an unlicensed response.
 from fastapi import APIRouter, Depends
 
 from backend.auth.auth_bearer import JWTBearer
+from backend.licensing.feature_gate import refuse_unlicensed
 from backend.licensing.module_loader import module_loader
 
 router = APIRouter()
@@ -73,5 +74,5 @@ async def get_secret_types():
     """Get available secret types."""
     secrets_engine = module_loader.get_module("secrets_engine")
     if secrets_engine is None:
-        return {"licensed": False, "types": []}
+        raise refuse_unlicensed("secrets_engine")
     return {"types": SECRET_TYPES}

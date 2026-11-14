@@ -200,7 +200,7 @@ const Profile: React.FC = () => {
         if (password1 !== password2) {
             return {
                 isValid: false,
-                message: t('userProfile.passwordMismatch', 'Passwords do not match')
+                message: t('userProfile.passwordMismatch', 'New password and confirmation do not match')
             };
         }
         return {isValid: true, message: ''};
@@ -837,7 +837,7 @@ const Profile: React.FC = () => {
                             >
                                 {imageDeleting 
                                     ? t('userProfile.deleting', 'Deleting...') 
-                                    : t('userProfile.deleteImage', 'Delete Image')
+                                    : t('userProfile.deleteImage', 'Delete')
                                 }
                             </Button>
                         )}

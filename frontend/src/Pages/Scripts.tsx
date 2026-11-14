@@ -918,7 +918,7 @@ const Scripts: React.FC = () => {
             {t('common.cancel', 'Cancel')}
           </Button>
           <Button onClick={handleConfirmDelete} color="error" variant="contained">
-            {t('scripts.delete', 'Delete')}
+            {t('scripts.delete', 'Delete Script')}
           </Button>
         </DialogActions>
       </Dialog>

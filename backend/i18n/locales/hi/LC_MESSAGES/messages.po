@@ -6526,6 +6526,16 @@ msgstr "NetBSD pkgsrc पैकेज की भेद्यताएँ (जि
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS संस्करण के अनुसार macOS की भेद्यताएँ, NVD के प्रभावित-संस्करण डेटा से"
 
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr "यह रन किसी खाली डिस्क की प्रतीक्षा नहीं कर रहा है (स्थिति: %s)।"
+
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
+msgstr "एयर-गैप संग्रह रन '%(iso_label)s' की डिस्क %(disc)d (कुल %(count)d) के लिए खाली डिस्क लोड की गई"
+
 #~ msgid ""
 #~ "Confirm that photos will be deleted from iCloud once they are downloaded"
 #~ msgstr "पुष्टि करें कि डाउनलोड होने के बाद तस्वीरें iCloud से हटा दी जाएँगी"

@@ -23,6 +23,45 @@ from backend.persistence import db, models
 logger = logging.getLogger(__name__)
 
 
+def _burn_failure_prefix(run, stage: str) -> str:
+    """``"burn of disc K of N failed: "`` ahead of the error text when the
+    burn of one disc of a set failed, so the operator knows which disc to
+    re-burn; empty for every other stage."""
+    # pylint: disable-next=import-outside-toplevel
+    from backend.services.airgap_run_tick import parse_burn_stage, run_disc_count
+
+    disc = parse_burn_stage(stage)
+    if not disc:
+        return ""
+    return f"burn of disc {disc} of {run_disc_count(run)} failed: "
+
+
+def _apply_burn_success(run, disc: int, now) -> None:
+    """Record a burned disc and move the run on.
+
+    ``disc`` is 0 for plain ``burning`` (a single disc, or a plan from
+    before sets were burned disc by disc): the run is COMPLETE.  For disc N
+    of a set the run is COMPLETE after the last disc, and otherwise waits
+    at AWAITING_MEDIA until the operator loads the next blank disc.
+    """
+    # pylint: disable-next=import-outside-toplevel
+    from backend.services.airgap_run_tick import (
+        STATUS_AWAITING_MEDIA,
+        STATUS_COMPLETE,
+        run_disc_count,
+    )
+
+    total = run_disc_count(run)
+    burned = total if disc == 0 else disc
+    run.burned_disc_count = max(int(run.burned_disc_count or 0), burned)
+    run.error_message = None
+    if run.burned_disc_count >= total:
+        run.status = STATUS_COMPLETE
+        run.completed_at = now
+    else:
+        run.status = STATUS_AWAITING_MEDIA
+
+
 def _apply_airgap_run_result(
     primary_id: str, host_id: str, outcome: Dict[str, Any]
 ) -> None:
@@ -39,11 +78,16 @@ def _apply_airgap_run_result(
       building_iso  → BUILDING_ISO -> ISO_BUILT on success.
                                      airgap_run_tick then advances
                                      ISO_BUILT -> COMPLETE.
+      burning       → BURNING -> COMPLETE (one disc).
+      burning_disc_N→ BURNING -> AWAITING_MEDIA after disc N of a set,
+                                COMPLETE after its last disc.  A failed
+                                burn names the disc in error_message.
 
     Always clears ``worker_message_id`` so the orchestrator's "is a
     plan in flight on this row?" check resets correctly.
     """
     # pylint: disable=import-outside-toplevel
+    from backend.services.airgap_run_tick import parse_burn_stage
     from backend.services.proplus_dispatch import _best_failure_text, _now_naive
 
     _ = host_id  # not used in row update; logged elsewhere for audit
@@ -75,10 +119,14 @@ def _apply_airgap_run_result(
 
         if not succeeded:
             run.status = "FAILED"
-            run.error_message = _best_failure_text(outcome)[:8000]
+            run.error_message = (
+                _burn_failure_prefix(run, stage) + _best_failure_text(outcome)
+            )[:8000]
             run.completed_at = _now_naive()
             session.commit()
             return
+
+        burned_disc = parse_burn_stage(stage)
 
         if stage == "mirroring":
             run.status = "STAGING_COMPLETE"
@@ -91,13 +139,11 @@ def _apply_airgap_run_result(
             # the single-disc and multi-disc paths.
             run.status = "ISO_BUILT"
             run.error_message = None
-        elif stage == "burning":
-            # The burn plan is the last stage in the lifecycle when
-            # ``burn_device`` is set -- go straight to COMPLETE rather
-            # than detouring back through the tick.
-            run.status = "COMPLETE"
-            run.completed_at = _now_naive()
-            run.error_message = None
+        elif burned_disc is not None:
+            # The burn is the last stage when ``burn_device`` is set: one
+            # disc goes straight to COMPLETE; a set waits for the next
+            # blank disc between burns.
+            _apply_burn_success(run, burned_disc, _now_naive())
         else:
             logger.warning(
                 "airgap_run result with unknown stage %r (run_id=%s); leaving row at %s",

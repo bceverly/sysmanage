@@ -131,3 +131,52 @@ class TestRegisterExceptionHandlers:
         # Check that exception handlers were registered
         assert StarletteHTTPException in app.exception_handlers
         assert Exception in app.exception_handlers
+
+
+class TestExceptionLoggingHygiene:
+    """Credentials never reach the log, and a 4xx is not a warning."""
+
+    @staticmethod
+    def _client(exc):
+        from backend.startup.exception_handlers import register_exception_handlers
+
+        app = FastAPI()
+        register_exception_handlers(app, ["http://localhost:3000"])
+
+        @app.get("/boom")
+        async def boom():
+            raise exc
+
+        return TestClient(app, raise_server_exceptions=False)
+
+    def test_credentials_are_redacted_at_every_level(self, caplog):
+        caplog.set_level("DEBUG", logger="backend.startup.exceptions")
+        for exc in (
+            StarletteHTTPException(status_code=402, detail="pay"),
+            RuntimeError("crash"),
+        ):
+            self._client(exc).get(
+                "/boom",
+                headers={
+                    "Authorization": "Bearer sekret-token",
+                    "Cookie": "session=sekret-cookie",
+                },
+            )
+        assert "sekret" not in caplog.text
+        assert "[redacted]" in caplog.text
+
+    def test_4xx_without_origin_logs_no_warning(self, caplog):
+        caplog.set_level("DEBUG", logger="backend.startup.exceptions")
+        self._client(StarletteHTTPException(status_code=402, detail="pay")).get("/boom")
+        warnings = [r for r in caplog.records if r.levelname == "WARNING"]
+        assert not warnings, [r.getMessage() for r in warnings]
+        assert "402" in caplog.text
+
+    def test_5xx_http_exception_and_bad_origin_still_warn(self, caplog):
+        caplog.set_level("DEBUG", logger="backend.startup.exceptions")
+        self._client(StarletteHTTPException(status_code=503, detail="down")).get(
+            "/boom", headers={"origin": "http://evil.example"}
+        )
+        messages = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+        assert any("503" in m for m in messages)
+        assert any("evil.example" in m for m in messages)

@@ -161,7 +161,8 @@
   "airgapCollections": {
     "actions": {
       "delete": "删除",
-      "download": "下载ISO文件"
+      "download": "下载ISO文件",
+      "nextDisc": "已放入下一张光盘"
     },
     "column": {
       "actions": "操作",
@@ -184,7 +185,7 @@
       "hostMismatch": "所有选中的镜像必须位于同一主机上。",
       "hostMismatchWarning": "您选择的镜像跨越多个主机。收集计划仅调度到一个主机，因此所有选择必须共享一个主机。",
       "includeCompliance": "包含合规性包",
-      "includeCve": "包含CVE源快照",
+      "includeCve": "包含 CVE 数据源快照",
       "isoLabel": "ISO标签",
       "isoLabelHelper": "嵌入到生成 ISO 中的简短标识符（例如 \"monthly-2026-05\"）。",
       "isoLabelRequired": "ISO标签是必需的",
@@ -210,11 +211,23 @@
     "multiDiscInfo": "此次运行生成了 {{count}} 张光盘。请选择要下载的光盘。",
     "newRun": "新建收集运行",
     "noIsoOnDisk": "尚未在磁盘上找到ISO文件 -- 请稍后再试。",
-    "noManifestFound": "运行尚未有清单 -- 请在状态为 COMPLETE 后再试一次。",
+    "noManifestFound": "该运行尚无可下载的 ISO -- 请等待状态变为 ISO_BUILT 或 COMPLETE。",
     "notApplicable": "只有在收集器角色部署时才有意义的页面。",
     "refresh": "刷新",
     "subtitle": "启动一次性收集运行，以镜像配置的存储库，构建签名ISO，并为隔离网络侧生成一个清单文件。",
-    "title": "气隙收集运行"
+    "title": "气隙收集运行",
+    "burnSet": {
+      "awaitingMedia": "第 {{burned}} 张光盘（共 {{total}} 张）已刻录。请放入空白光盘。",
+      "burning": "第 {{disc}} 张光盘（共 {{total}} 张）"
+    },
+    "nextDisc": {
+      "title": "放入下一张光盘",
+      "body": "第 {{burned}} 张光盘（共 {{total}} 张）已刻录完成，并已从 {{device}} 弹出。请将其标记为第 {{burned}} 张光盘，在驱动器中放入一张空白光盘，然后确认以刻录第 {{next}} 张光盘。",
+      "cancel": "暂不",
+      "confirm": "刻录第 {{next}} 张光盘",
+      "started": "正在刻录第 {{disc}} 张光盘（共 {{total}} 张）。",
+      "error": "无法开始下一张光盘"
+    }
   },
   "airgapDevices": {
     "empty": "未找到符合条件的磁盘。插入介质并按重扫描键。",
@@ -538,7 +551,8 @@
     "status": "状态",
     "unknownPackage": "(未知)",
     "violations": "违规",
-    "violationsFor": "违规 -- {{name}}"
+    "violationsFor": "违规 -- {{name}}",
+    "scanTooltip": "根据缓存的软件清单进行扫描"
   },
   "configDrift": {
     "actions": "操作",
@@ -1393,7 +1407,6 @@
     "completedAt": "完成时间",
     "complianceTab": "合规",
     "configurationFiles": "配置文件",
-    "confirmDeleteInstallation": "您确定要删除这个安装记录吗？",
     "confirmDeleteInstallationMessage": "您确定要删除此安装记录吗?此操作无法撤消。",
     "confirmRequestPackages": "请求可用软件包",
     "confirmRequestPackagesMessage": "这将触发主机上的软件包收集,可能消耗大量资源且需要几分钟才能完成。要继续吗?",
@@ -1711,7 +1724,7 @@
     "softwareTab": "软件",
     "speed": "速度",
     "sshKeysDeployedError": "SSH密钥部署失败",
-    "sshKeysDeployedSuccess": "SSH密钥部署成功",
+    "sshKeysDeployedSuccess": "SSH 密钥部署已成功加入队列",
     "start": "启动",
     "startChildHost": "启动",
     "status": "状态",
@@ -1740,7 +1753,7 @@
     "ubuntuProAttachConfirm": "附加",
     "ubuntuProAttachDescription": "输入您的 Ubuntu Pro 令牌以将此系统附加到您的订阅。",
     "ubuntuProAttachError": "附加 Ubuntu Pro 失败",
-    "ubuntuProAttachSuccess": "Ubuntu Pro 附加成功",
+    "ubuntuProAttachSuccess": "已请求附加 Ubuntu Pro",
     "ubuntuProAttachTitle": "附加 Ubuntu Pro",
     "ubuntuProAttaching": "正在附加...",
     "ubuntuProDetach": "分离",
@@ -1748,7 +1761,7 @@
     "ubuntuProDetachConfirmMessage": "您确定要从此系统分离 Ubuntu Pro 吗？这将移除该主机的所有 Ubuntu Pro 权益和服务。",
     "ubuntuProDetachConfirmTitle": "确认分离 Ubuntu Pro",
     "ubuntuProDetachError": "分离 Ubuntu Pro 失败",
-    "ubuntuProDetachSuccess": "Ubuntu Pro 分离成功",
+    "ubuntuProDetachSuccess": "已请求分离 Ubuntu Pro",
     "ubuntuProDetaching": "正在分离...",
     "ubuntuProInfo": "Ubuntu Pro 信息",
     "ubuntuProTab": "Ubuntu Pro",
@@ -2523,7 +2536,7 @@
     "queryPacks": "查询包",
     "reports": "报表",
     "role": {
-      "collector": "空气隔断收集器",
+      "collector": "气隙收集器",
       "engineMissing": "未加载所需的Pro+引擎；请检查许可证。",
       "repository": "气隙仓库"
     },
@@ -2668,7 +2681,8 @@
     "updated": "合规配置文件已保存",
     "version": "版本",
     "versionOp": "操作",
-    "versionOpAny": "(任意)"
+    "versionOpAny": "(任意)",
+    "loadOneError": "加载合规配置文件失败"
   },
   "policies": {
     "actions": {
@@ -2833,7 +2847,8 @@
     },
     "title": "查询包",
     "validateFailed": "无法检查包",
-    "version": "版本"
+    "version": "版本",
+    "livePollFailed": "无法读取实时查询结果"
   },
   "queues": {
     "created": "创建时间",
@@ -2894,7 +2909,8 @@
     "subtitle": "渲染器在内置报告类型之上应用的自定义布局",
     "tabLabel": "报告模板",
     "title": "报告模板",
-    "updated": "模板已保存"
+    "updated": "模板已保存",
+    "addDialogTitle": "添加报告模板"
   },
   "reportViewer": {
     "iframeTitle": "报告内容",
@@ -3185,7 +3201,8 @@
     "updateError": "机密更新失败",
     "updateSuccess": "机密更新成功",
     "updatedAt": "更新于",
-    "viewSecret": "查看机密"
+    "viewSecret": "查看机密",
+    "loadOneError": "加载机密失败"
   },
   "security": {
     "addRole": "添加角色",
@@ -3501,8 +3518,8 @@
     "opentelemetry": {
       "collectorUrl": "收集器 URL",
       "configuration": "配置",
-      "disabledMessage": "OpenTelemetry 检测当前已禁用。移除 OTEL_ENABLED=false 或设置 OTEL_ENABLED=true 以启用分布式追踪和指标收集。",
-      "enableHint": "OpenTelemetry 默认启用。要禁用请设置 OTEL_ENABLED=false 环境变量并重启服务器。",
+      "disabledMessage": "OpenTelemetry 检测已禁用（默认）。要启用分布式追踪和指标收集，请设置 OTEL_ENABLED=true 环境变量（或在 sysmanage.yaml 中设置 telemetry.enabled: true）并重启服务器。",
+      "enableHint": "要禁用 OpenTelemetry，请设置 OTEL_ENABLED=false 环境变量（或在 sysmanage.yaml 中设置 telemetry.enabled: false）并重启服务器。",
       "fetchError": "无法获取OpenTelemetry状态",
       "instrumentation": "插桩",
       "metricsCount": "指标",
@@ -3610,7 +3627,8 @@
     "windowsTypeHelp": "选择 Chocolatey 或 winget",
     "windowsUrl": "仓库 URL",
     "windowsUrlHelp": "例如:https://mycompany.com/chocolatey",
-    "winget": "winget"
+    "winget": "winget",
+    "obsRepoUrl": "OBS 仓库 URL"
   },
   "ubuntuPro": {
     "actions": {
@@ -3761,7 +3779,8 @@
     "updated": "更新配置文件已保存",
     "window": "分阶段窗口 (分钟)",
     "windowHelp": "将代理调度分散在这么多分钟内 (0-720)",
-    "windowRange": "分阶段窗口必须在 0 至 720 分钟之间"
+    "windowRange": "分阶段窗口必须在 0 至 720 分钟之间",
+    "addDialogTitle": "添加更新配置文件"
   },
   "userDetail": {
     "active": "活跃",

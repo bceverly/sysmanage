@@ -314,126 +314,113 @@ def stub_app():
 
 
 def _refused(response):
-    """A stub WRITE is a 402 naming the module, never 200 {"licensed": false}
-    (Phase 25 edition audit, 2026-11-14)."""
+    """A stub call -- read or write -- is a 402 naming the module, never
+    200 {"licensed": false} (Phase 25 edition audit, 2026-11-14)."""
     assert response.status_code == 402, response.text
     assert response.json()["detail"]["error"] == "pro_plus_required"
 
 
+def _all_refused(stub_app, calls):
+    from fastapi.testclient import TestClient
+
+    with TestClient(stub_app) as c:
+        for method, path in calls:
+            _refused(c.request(method, path))
+
+
 class TestStubEndpoints:
     def test_audit_statistics_stub(self, stub_app):
-        from fastapi.testclient import TestClient
-
-        with TestClient(stub_app) as c:
-            assert c.get("/api/v1/audit/statistics").json() == {"licensed": False}
-            _refused(c.post("/api/v1/audit/export"))
+        _all_refused(
+            stub_app,
+            [("GET", "/api/v1/audit/statistics"), ("POST", "/api/v1/audit/export")],
+        )
 
     def test_secrets_stubs(self, stub_app):
-        from fastapi.testclient import TestClient
-
-        with TestClient(stub_app) as c:
-            assert c.get("/api/v1/secrets/statistics").json()["licensed"] is False
-            assert c.get("/api/v1/secrets/access-logs").json()["access_logs"] == []
-            assert c.get("/api/v1/secrets/rotation-schedules").json()["schedules"] == []
-            assert c.get("/api/v1/secrets/abc/versions").json()["versions"] == []
+        _all_refused(
+            stub_app,
+            [
+                ("GET", "/api/v1/secrets/statistics"),
+                ("GET", "/api/v1/secrets/access-logs"),
+                ("GET", "/api/v1/secrets/rotation-schedules"),
+                ("GET", "/api/v1/secrets/abc/versions"),
+            ],
+        )
 
     def test_container_stubs(self, stub_app):
-        from fastapi.testclient import TestClient
-
-        with TestClient(stub_app) as c:
-            assert c.get("/api/v1/containers/statistics").json() == {"licensed": False}
-            _refused(c.post("/api/v1/containers/create"))
-            _refused(c.post("/api/v1/containers/abc/action"))
-            _refused(c.post("/api/v1/containers/abc/network"))
+        _all_refused(
+            stub_app,
+            [
+                ("GET", "/api/v1/containers/statistics"),
+                ("POST", "/api/v1/containers/create"),
+                ("POST", "/api/v1/containers/abc/action"),
+                ("POST", "/api/v1/containers/abc/network"),
+            ],
+        )
 
     def test_reporting_stubs(self, stub_app):
-        from fastapi.testclient import TestClient
-
-        with TestClient(stub_app) as c:
-            assert c.get("/api/v1/reports/generate/foo").json() == {"licensed": False}
-            assert c.get("/api/v1/reports/view/foo").json() == {"licensed": False}
+        _all_refused(
+            stub_app,
+            [
+                ("GET", "/api/v1/reports/generate/foo"),
+                ("GET", "/api/v1/reports/view/foo"),
+            ],
+        )
 
     def test_av_stubs(self, stub_app):
-        from fastapi.testclient import TestClient
-
-        with TestClient(stub_app) as c:
-            body = c.get("/api/v1/av/status/host-1").json()
-            assert body["licensed"] is False
-            assert body["host_id"] == "host-1"
-            _refused(c.post("/api/v1/av/deploy"))
-            _refused(c.post("/api/v1/av/uninstall"))
-            _refused(c.post("/api/v1/av/scan"))
-            fleet = c.get("/api/v1/av/commercial/fleet-report").json()
-            assert fleet["licensed"] is False
-            assert fleet["entries"] == []
-            assert c.get("/api/v1/av/policies").json() == {
-                "licensed": False,
-                "policies": [],
-            }
-            _refused(c.post("/api/v1/av/policies"))
-            _refused(c.post("/api/v1/av/policies/p1/apply"))
+        _all_refused(
+            stub_app,
+            [
+                ("GET", "/api/v1/av/status/host-1"),
+                ("POST", "/api/v1/av/deploy"),
+                ("POST", "/api/v1/av/uninstall"),
+                ("POST", "/api/v1/av/scan"),
+                ("GET", "/api/v1/av/commercial/fleet-report"),
+                ("GET", "/api/v1/av/policies"),
+                ("POST", "/api/v1/av/policies"),
+                ("POST", "/api/v1/av/policies/p1/apply"),
+            ],
+        )
 
     def test_firewall_stubs(self, stub_app):
-        from fastapi.testclient import TestClient
-
-        with TestClient(stub_app) as c:
-            status_body = c.get("/api/v1/firewall/status/h1").json()
-            assert status_body["licensed"] is False
-            assert status_body["applied_roles"] == []
-            _refused(c.post("/api/v1/firewall/deploy"))
-            assert c.get("/api/v1/firewall/roles").json()["roles"] == []
-            _refused(c.post("/api/v1/firewall/roles"))
-            _refused(c.post("/api/v1/firewall/compliance-check"))
-            _refused(c.post("/api/v1/firewall/fleet/deploy"))
-            report = c.get("/api/v1/firewall/compliance/report").json()
-            assert report["total_hosts"] == 0
+        _all_refused(
+            stub_app,
+            [
+                ("GET", "/api/v1/firewall/status/h1"),
+                ("POST", "/api/v1/firewall/deploy"),
+                ("GET", "/api/v1/firewall/roles"),
+                ("POST", "/api/v1/firewall/roles"),
+                ("POST", "/api/v1/firewall/compliance-check"),
+                ("POST", "/api/v1/firewall/fleet/deploy"),
+                ("GET", "/api/v1/firewall/compliance/report"),
+            ],
+        )
 
     def test_automation_stubs(self, stub_app):
-        from fastapi.testclient import TestClient
-
-        with TestClient(stub_app) as c:
-            assert c.get("/api/v1/automation/scripts").json() == {
-                "licensed": False,
-                "scripts": [],
-            }
-            _refused(c.post("/api/v1/automation/scripts"))
-            assert c.get("/api/v1/automation/executions").json() == {
-                "licensed": False,
-                "executions": [],
-            }
-            assert c.get("/api/v1/automation/approvals").json() == {
-                "licensed": False,
-                "approvals": [],
-            }
-            assert c.get("/api/v1/automation/schedules").json() == {
-                "licensed": False,
-                "schedules": [],
-            }
+        _all_refused(
+            stub_app,
+            [
+                ("GET", "/api/v1/automation/scripts"),
+                ("POST", "/api/v1/automation/scripts"),
+                ("GET", "/api/v1/automation/executions"),
+                ("GET", "/api/v1/automation/approvals"),
+                ("GET", "/api/v1/automation/schedules"),
+            ],
+        )
 
     def test_fleet_stubs(self, stub_app):
-        from fastapi.testclient import TestClient
-
-        with TestClient(stub_app) as c:
-            assert c.get("/api/v1/fleet/groups").json() == {
-                "licensed": False,
-                "groups": [],
-            }
-            _refused(c.post("/api/v1/fleet/groups"))
-            _refused(c.post("/api/v1/fleet/select"))
-            _refused(c.post("/api/v1/fleet/bulk"))
-            assert c.get("/api/v1/fleet/bulk").json() == {
-                "licensed": False,
-                "operations": [],
-            }
-            _refused(c.post("/api/v1/fleet/rolling"))
-            assert c.get("/api/v1/fleet/rolling").json() == {
-                "licensed": False,
-                "deployments": [],
-            }
-            assert c.get("/api/v1/fleet/schedules").json() == {
-                "licensed": False,
-                "schedules": [],
-            }
+        _all_refused(
+            stub_app,
+            [
+                ("GET", "/api/v1/fleet/groups"),
+                ("POST", "/api/v1/fleet/groups"),
+                ("POST", "/api/v1/fleet/select"),
+                ("POST", "/api/v1/fleet/bulk"),
+                ("GET", "/api/v1/fleet/bulk"),
+                ("POST", "/api/v1/fleet/rolling"),
+                ("GET", "/api/v1/fleet/rolling"),
+                ("GET", "/api/v1/fleet/schedules"),
+            ],
+        )
 
 
 class TestStubsSkippedWhenModuleLoaded:

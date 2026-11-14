@@ -278,7 +278,7 @@ const Secrets: React.FC = () => {
       setShowAddSecretDialog(true);
     } catch (error) {
       console.error('Failed to load secret:', error);
-      showNotification(t('secrets.loadError', 'Failed to load secret'), 'error');
+      showNotification(t('secrets.loadOneError', 'Failed to load secret'), 'error');
     }
   };
 
@@ -572,7 +572,7 @@ const Secrets: React.FC = () => {
               disableRowSelectionOnClick
               localeText={{
                 MuiTablePagination: {
-                  labelRowsPerPage: t('common.rowsPerPage', 'Rows per page:'),
+                  labelRowsPerPage: t('common.rowsPerPage', 'Rows per page'),
                   labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
                     const countDisplay = count === -1 ? t('common.of', 'of') + ' ' + to : count;
                     return from + '-' + to + ' ' + t('common.of', 'of') + ' ' + countDisplay;

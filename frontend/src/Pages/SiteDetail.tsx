@@ -14,7 +14,8 @@
  *     cross-site federated Hosts page, scoped to this site)
  *
  * On OSS / Community / unlicensed Enterprise installs the backend
- * returns ``{licensed: false}`` and this page renders the Enterprise
+ * answers 402 (read by the service as ``{licensed: false}``) and this
+ * page renders the Enterprise
  * upsell, identical to the /sites grid behavior.  Network failures
  * surface as a generic error alert; "no such site" (engine returned
  * ``site: undefined``) shows a NotFound state.
@@ -542,7 +543,7 @@ const SiteDetail: React.FC = () => {
                     >
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Typography variant="h6">
-                          {t("sites.detail.connection", "Connection health")}
+                          {t("sites.detail.connection", "Connection")}
                         </Typography>
                         <Chip
                           label={healthLabel}

@@ -93,7 +93,7 @@ const ProcessesPanel: React.FC<ProcessesPanelProps> = ({
         setInfo(null);
         try {
             const resp = await doRefreshHostProcesses(hostId);
-            setInfo(resp.message || t('processes.refreshRequested', 'Refresh requested'));
+            setInfo(resp.message || t('processes.refreshRequested', 'Refresh requested. The list will update shortly.'));
         } catch (err) {
             console.error('Error refreshing processes:', err);
             setError(t('processes.refreshError', 'Failed to request refresh'));
@@ -109,7 +109,7 @@ const ProcessesPanel: React.FC<ProcessesPanelProps> = ({
                 force: killForce,
                 expectedName: killTarget.process_name,
             });
-            setInfo(resp.message || t('processes.killRequested', 'Termination requested'));
+            setInfo(resp.message || t('processes.killRequested', 'Termination requested. The list will update shortly.'));
         } catch (err) {
             console.error('Error killing process:', err);
             setError(t('processes.killError', 'Failed to request termination'));

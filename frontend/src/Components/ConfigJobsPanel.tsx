@@ -111,7 +111,7 @@ const ConfigJobsPanel: React.FC<Props> = ({ canCancel, refreshToken }) => {
         try {
             await cancelJob(
                 job.id,
-                t('configFleet.cancelledByOperator', 'Cancelled by an operator'),
+                t('configFleet.cancelledByOperator', 'Canceled by an operator'),
             );
             await load();
         } catch (err) {

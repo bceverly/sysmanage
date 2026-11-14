@@ -54,9 +54,9 @@ class AirgapCollectionRun(Base):
     include_compliance = Column(Boolean, nullable=False, default=True)
 
     # Lifecycle: QUEUED -> MIRRORING -> STAGING_COMPLETE -> BUILDING_ISO
-    #          -> ISO_BUILT -> COMPLETE | FAILED
-    # (BURNING is reserved for future operator-driven optical-burn flows
-    # -- the auto-orchestrator stops at ISO_BUILT.)
+    #          -> ISO_BUILT -> [BURNING (-> AWAITING_MEDIA -> ISO_BUILT
+    #          -> BURNING, once per further disc of a set)] -> COMPLETE
+    #          | FAILED.  BURNING only happens when ``burn_device`` is set.
     status = Column(String(40), nullable=False, default="QUEUED")
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
@@ -80,6 +80,13 @@ class AirgapCollectionRun(Base):
     # The SysManage tools fetched onto the media (q89airgaptools, 25.9): JSON
     # [{distro, version, files: [{name, sha256}]}], signed into its manifest.
     tools_manifest = Column(Text, nullable=True)
+    # A burned disc SET (q92airgapburnset): ``disc_count`` is how many discs
+    # the run's plan made (1 for a single ISO; NULL on rows from before the
+    # column, where the disc files on disk tell), and ``burned_disc_count``
+    # how many of them the burn device has written.  Between two discs the
+    # run waits at AWAITING_MEDIA for the operator to load a blank one.
+    disc_count = Column(Integer, nullable=True)
+    burned_disc_count = Column(Integer, nullable=True, default=0, server_default="0")
 
     created_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)

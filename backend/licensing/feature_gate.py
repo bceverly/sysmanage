@@ -130,14 +130,15 @@ def module_unavailable_error(module_code: ModuleCode) -> HTTPException:
     )
 
 
-def refuse_unlicensed_write(module: ModuleCode | str) -> HTTPException:
-    """What a write to a licensed stub answers (the engine is absent, which is
-    why its stub is mounted): 402 without the license, 503 with it.
+def refuse_unlicensed(module: ModuleCode | str) -> HTTPException:
+    """What any call to a licensed stub answers (the engine is absent, which
+    is why its stub is mounted): 402 without the license, 503 with it.
 
     The stubs used to answer every call ``200 {"licensed": false}``.  For a
-    read that is a usable "nothing here, and why"; for a write it told a
-    script that deploying, deleting or dispatching had worked (Phase 25
-    edition audit, 2026-11-14).
+    write that told a script that deploying, deleting or dispatching had
+    worked, so writes moved to 402 first; reads followed so that one status
+    code means "unlicensed" on every route (Phase 25 edition audit,
+    2026-11-14).  The frontend treats a 402 as the "license required" state.
     """
     module_code = ModuleCode(module) if isinstance(module, str) else module
     if not license_service.has_module(module_code):

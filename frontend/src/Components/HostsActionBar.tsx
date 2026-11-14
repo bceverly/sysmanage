@@ -108,7 +108,7 @@ const HostsActionBar: React.FC<HostsActionBarProps> = ({
         },
         {
             id: 'refresh-data',
-            label: t('hosts.refreshAllData', 'Refresh All Data'),
+            label: t('hosts.refreshAllData', 'Request Host Data'),
             icon: <SyncIcon />,
             color: 'info',
             primary: true,

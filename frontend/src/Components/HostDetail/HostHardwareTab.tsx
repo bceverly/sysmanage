@@ -149,7 +149,7 @@ const HostHardwareTab: React.FC<HostHardwareTabProps> = ({
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
                                                 <StorageIcon sx={{ mr: 1 }} />
-                                                {t('hostDetail.storageDetails', 'Storage Devices')}
+                                                {t('hostDetail.storageDetails', 'Storage Details')}
                                             </Typography>
                                             <ToggleButtonGroup
                                                 value={storageFilter}

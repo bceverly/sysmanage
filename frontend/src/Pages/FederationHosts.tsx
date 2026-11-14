@@ -18,7 +18,8 @@
  * architecture.
  *
  * When the federation controller engine isn't loaded the OSS stub
- * returns ``{licensed: false}`` and this page shows the same Enterprise
+ * answers 402 (read by the service as ``{licensed: false}``) and this
+ * page shows the same Enterprise
  * upsell as the rest of the federation surface.
  */
 

@@ -158,6 +158,8 @@ def enterprise_license(test_keypair):
             "health_engine",
             "vuln_engine",
             "compliance_engine",
+            # A code this server no longer knows (removed 2026-11-14): an old
+            # license that still lists one must validate and simply not match.
             "anomaly_detector",
         ],
     )
@@ -555,7 +557,7 @@ class TestLicenseService:
         )
 
         assert license_service_instance.has_module(ModuleCode.HEALTH_ENGINE) is True
-        assert license_service_instance.has_module(ModuleCode.ANOMALY_DETECTOR) is False
+        assert license_service_instance.has_module(ModuleCode.MALWARE_ENGINE) is False
 
     def test_get_license_info_with_license(self, license_service_instance):
         """Test get_license_info returns correct info with a license."""

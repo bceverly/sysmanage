@@ -6548,6 +6548,16 @@ msgstr "NetBSD pkgsrc package vulnerabilities (what pkg_admin audit reads)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
 
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr "This run is not waiting for a blank disc (status: %s)."
+
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
+msgstr "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
+
 #~ msgid ""
 #~ "Confirm that photos will be deleted from iCloud once they are downloaded"
 #~ msgstr ""

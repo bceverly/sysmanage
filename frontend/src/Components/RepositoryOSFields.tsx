@@ -120,7 +120,7 @@ const RepositoryOSFields: React.FC<RepositoryOSFieldsProps> = (props) => {
         <Stack spacing={2}>
           <TextField
             fullWidth
-            label={t('thirdPartyRepos.obsUrl', 'OBS Base URL')}
+            label={t('thirdPartyRepos.obsUrl', 'Base URL')}
             value={props.obsUrl}
             onChange={(e) => props.setObsUrl(e.target.value)}
             placeholder="https://download.opensuse.org/repositories/"
@@ -135,7 +135,7 @@ const RepositoryOSFields: React.FC<RepositoryOSFieldsProps> = (props) => {
           <Stack direction="row" spacing={2}>
             <TextField
               fullWidth
-              label={t('thirdPartyRepos.obsDistroVersion', 'Distribution/Version')}
+              label={t('thirdPartyRepos.obsDistroVersion', 'Distribution Version')}
               value={props.obsDistroVersion}
               onChange={(e) => props.setObsDistroVersion(e.target.value)}
               placeholder="openSUSE_Tumbleweed"

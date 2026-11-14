@@ -14,7 +14,7 @@ Tests cover:
 - Error handling during route mounting
 """
 
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import FastAPI
@@ -496,26 +496,19 @@ class TestMountFederationControllerRoutes:
 
 
 def _assert_stub_answers(app, endpoints):
-    """Reads: 200 ``{"licensed": false}``.  Writes: 402, never a 200."""
+    """Reads and writes alike: 402 naming the engine, never a 200."""
     from fastapi.testclient import TestClient
 
     client = TestClient(app)
     for method, path in endpoints:
         response = client.request(method, path, json={})
-        if method == "GET":
-            assert response.status_code == 200, (
-                f"{method} {path} returned {response.status_code} "
-                f"(body={response.text[:200]})"
-            )
-            assert response.json().get("licensed") is False, (method, path)
-        else:
-            assert response.status_code == 402, (method, path, response.text)
-            assert response.json()["detail"]["error"] == "pro_plus_required"
+        assert response.status_code == 402, (method, path, response.text[:200])
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
 
 class TestFederationControllerStubRoutes:
     """End-to-end via FastAPI TestClient: every federation endpoint
-    must respond 200 with ``{"licensed": False, ...}`` when the
+    must respond 402 (``pro_plus_required``) when the
     ``federation_controller_engine`` module is not loaded.  Frontend
     (12.3) and 12.4's access-groups migration both depend on this
     surface existing in OSS so they can probe for the engine without
@@ -568,8 +561,8 @@ class TestFederationControllerStubRoutes:
         ("POST", "/api/v1/federation/secret-leases/lease-1/revoke"),
         # Phase 12.6 -- sync ingest surface (site → coordinator).
         # These return 401 in the engine (no bearer token) but the
-        # OSS stub layer returns 200 ``{licensed: false}`` uniformly
-        # so callers can detect "module not licensed" without auth.
+        # OSS stub layer answers 402 uniformly so callers can detect
+        # "module not licensed" without auth.
         ("POST", "/api/v1/federation/sites/site-1/rollups/hosts"),
         ("POST", "/api/v1/federation/sites/site-1/rollups/compliance"),
         ("POST", "/api/v1/federation/sites/site-1/rollups/vulnerabilities"),
@@ -600,16 +593,15 @@ class TestFederationControllerStubRoutes:
         mount_proplus_stub_routes(app, {"federation_controller_engine": False})
         return app
 
-    def test_all_federation_stubs_respond_licensed_false(self, stub_only_app):
-        """Every stub READ returns 200 with ``licensed: False``; every stub
-        WRITE is a 402 naming the engine.
+    def test_all_federation_stubs_answer_402(self, stub_only_app):
+        """Every stub, read or write, is a 402 naming the engine.
 
-        The read shape is the contract for the frontend probe -- if any
-        endpoint regresses to a different shape (e.g. 404 from a
-        prefix typo), the federation UI's "is this licensed?"
-        detection breaks.  Writes answered the same 200 until the Phase 25
-        edition audit (2026-11-14), which told a script its dispatch had
-        worked; ``Services/federation.ts`` reads their 402 as unlicensed."""
+        That is the contract for the frontend probe -- if any endpoint
+        regresses to a different answer (e.g. 404 from a prefix typo),
+        the federation UI's "is this licensed?" detection breaks.  All of
+        them answered 200 ``{"licensed": false}`` until the Phase 25
+        edition audit (2026-11-14); ``Services/federation.ts`` reads the
+        402 as unlicensed."""
         _assert_stub_answers(stub_only_app, self.STUB_ENDPOINTS)
 
     def test_federation_stub_count_locked(self, stub_only_app):
@@ -838,7 +830,7 @@ class TestMountFederationSiteRoutes:
 
 
 class TestFederationSiteStubRoutes:
-    """Every site stub endpoint returns 200 with ``{licensed: false, ...}``.
+    """Every site stub endpoint answers 402 (``pro_plus_required``).
     Pinned so a future refactor that drops a stub gets caught."""
 
     STUB_ENDPOINTS = [
@@ -871,7 +863,7 @@ class TestFederationSiteStubRoutes:
         )
         return app
 
-    def test_all_site_stubs_respond_licensed_false(self, stub_only_app):
+    def test_all_site_stubs_answer_402(self, stub_only_app):
         _assert_stub_answers(stub_only_app, self.STUB_ENDPOINTS)
 
     def test_site_stub_count_locked(self, stub_only_app):

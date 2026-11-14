@@ -35,8 +35,10 @@ class TestSecretsRename:
             client.get(old).status_code == 404
         ), f"{old} alias retired (bridge removed)"
 
-    def test_new_canonical_is_200(self, client):
-        assert client.get("/api/v1/stored-secrets").status_code == 200
+    def test_new_canonical_is_mounted(self, client):
+        # Mounted (not 404): without the secrets engine it is the 402
+        # license answer, as every unlicensed Pro+ read is.
+        assert client.get("/api/v1/stored-secrets").status_code == 402
 
 
 class TestRenameInvariants:

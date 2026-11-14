@@ -168,6 +168,8 @@ def enterprise_license(test_keypair):
             "health_engine",
             "vuln_engine",
             "compliance_engine",
+            # A code this server no longer knows (removed 2026-11-14): an old
+            # license that still lists one must validate and simply not match.
             "anomaly_detector",
         ],
     )
@@ -634,6 +636,20 @@ class TestFullLicenseValidation:
         assert result.payload.license_id == "test-license-123"
         assert result.payload.tier == LicenseTier.PROFESSIONAL
 
+    def test_validate_license_with_removed_module_code(self, enterprise_license):
+        """A license listing a module code this server dropped still validates.
+
+        The six codes with no engine (anomaly_detector and friends) were
+        removed on 2026-11-14; an older license that lists one must load and
+        keep its real modules, with the unknown code simply never matching.
+        """
+        license_key, public_pem = enterprise_license
+        result = validate_license(license_key, public_pem)
+
+        assert result.valid is True, result.error
+        assert "anomaly_detector" in result.payload.modules
+        assert has_module(result.payload, ModuleCode.HEALTH_ENGINE) is True
+
     def test_validate_license_expired(self, expired_license):
         """Test validation of an expired license."""
         license_key, public_pem = expired_license
@@ -754,8 +770,8 @@ class TestFeatureAndModuleChecks:
 
     def test_has_module_absent(self, sample_payload):
         """Test has_module returns False for missing modules."""
-        assert has_module(sample_payload, ModuleCode.ANOMALY_DETECTOR) is False
-        assert has_module(sample_payload, ModuleCode.PREDICTION_ENGINE) is False
+        assert has_module(sample_payload, ModuleCode.MALWARE_ENGINE) is False
+        assert has_module(sample_payload, ModuleCode.ADVISOR_ENGINE) is False
 
 
 # ============================================================================
@@ -816,7 +832,7 @@ class TestTierFeaturesAndModules:
 
         enterprise_only = ent_modules - prof_modules
         assert len(enterprise_only) > 0
-        assert ModuleCode.ANOMALY_DETECTOR in enterprise_only
+        assert ModuleCode.AIRGAP_COLLECTOR_ENGINE in enterprise_only
 
     def test_feature_code_from_string(self):
         """Test FeatureCode.from_string conversion."""

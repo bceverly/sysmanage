@@ -786,7 +786,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                                 {constructedRepo && (
                                     <Box sx={{ mb: 2, p: 2, bgcolor: 'action.hover', border: 1, borderColor: 'divider', borderRadius: 1 }}>
                                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                                            {t('thirdPartyRepos.obsUrl', 'OBS Repository URL')}:
+                                            {t('thirdPartyRepos.obsRepoUrl', 'OBS Repository URL')}:
                                         </Typography>
                                         <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500, wordBreak: 'break-all' }}>
                                             {constructedRepo}
@@ -802,7 +802,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                                 <TextField
                                     autoFocus
                                     fullWidth
-                                    label={t('thirdPartyRepos.tapUser', 'Tap User/Org')}
+                                    label={t('thirdPartyRepos.tapUser', 'Tap User')}
                                     value={tapUser}
                                     onChange={(e) => setTapUser(e.target.value)}
                                     sx={{ mb: 2 }}
@@ -882,7 +882,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                                 />
                                 <TextField
                                     fullWidth
-                                    label={t('thirdPartyRepos.pkgsrcUrl', 'Git Repository URL')}
+                                    label={t('thirdPartyRepos.pkgsrcUrl', 'Repository URL')}
                                     value={pkgsrcUrl}
                                     onChange={(e) => setPkgsrcUrl(e.target.value)}
                                     sx={{ mb: 2 }}

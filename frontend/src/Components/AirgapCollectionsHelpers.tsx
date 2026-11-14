@@ -10,6 +10,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Box, Chip, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 export type RunStatus =
   | 'QUEUED'
@@ -18,9 +19,13 @@ export type RunStatus =
   | 'BUILDING_ISO'
   | 'ISO_BUILT'
   | 'BURNING'
+  | 'AWAITING_MEDIA'
   | 'COMPLETE'
   | 'FAILED';
 
+// AWAITING_MEDIA is deliberately absent: a disc of a set is burned and the
+// run waits on the operator (load a blank disc, confirm), not on a worker,
+// so there is nothing to poll for and no elapsed time to tick.
 export const IN_FLIGHT_STATUSES = new Set<RunStatus>([
   'QUEUED',
   'MIRRORING',
@@ -69,6 +74,10 @@ export interface CollectionRun {
   created_at: string | null;
   worker_message_id?: string | null;
   burn_device?: string | null;
+  // A burned disc set: how many discs the run made (null until built) and
+  // how many the burn device has written so far.
+  disc_count?: number | null;
+  burned_disc_count?: number;
   targets?: RunTarget[];
 }
 
@@ -99,7 +108,7 @@ export const RUNS_URL = '/api/v1/airgap/collector/runs';
 
 export const statusColor = (
   s: string,
-): 'default' | 'info' | 'success' | 'error' => {
+): 'default' | 'info' | 'success' | 'warning' | 'error' => {
   switch (s) {
     case 'QUEUED':
       return 'default';
@@ -109,6 +118,8 @@ export const statusColor = (
     case 'ISO_BUILT':
     case 'BURNING':
       return 'info';
+    case 'AWAITING_MEDIA':
+      return 'warning';
     case 'COMPLETE':
       return 'success';
     case 'FAILED':
@@ -146,6 +157,41 @@ export const formatElapsed = (since: Date): string => {
  * orchestrator isn't advancing it).  Self-tickers per in-flight row
  * avoid rebuilding the whole DataGrid column array every second.
  */
+/** True when a run is a set of two or more discs going to a burn device. */
+export const isBurnSet = (row: CollectionRun): boolean =>
+  !!row.burn_device && (row.disc_count ?? 0) > 1;
+
+/** The caption beside the chip for a disc set being burned: which disc is
+ * burning, or which disc is done and that a blank one is wanted. */
+const BurnSetCaption: React.FC<{ row: CollectionRun }> = ({ row }) => {
+  const { t } = useTranslation();
+  if (!isBurnSet(row)) return null;
+  const burned = row.burned_disc_count ?? 0;
+  const total = row.disc_count ?? 0;
+  if (row.status === 'AWAITING_MEDIA') {
+    return (
+      <Typography variant="caption" color="warning.main">
+        {t(
+          'airgapCollections.burnSet.awaitingMedia',
+          'Disc {{burned}} of {{total}} burned. Load a blank disc.',
+          { burned, total },
+        )}
+      </Typography>
+    );
+  }
+  if (row.status === 'BURNING') {
+    return (
+      <Typography variant="caption" color="text.secondary">
+        {t('airgapCollections.burnSet.burning', 'Disc {{disc}} of {{total}}', {
+          disc: burned + 1,
+          total,
+        })}
+      </Typography>
+    );
+  }
+  return null;
+};
+
 export const RunStatusCell: React.FC<{ row: CollectionRun }> = ({ row }) => {
   const inFlight = IN_FLIGHT_STATUSES.has(row.status as RunStatus);
   // Throwaway tick state forces a 1s re-render while in-flight; the
@@ -168,6 +214,7 @@ export const RunStatusCell: React.FC<{ row: CollectionRun }> = ({ row }) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
       <Chip size="small" label={row.status} color={statusColor(row.status)} />
+      <BurnSetCaption row={row} />
       {elapsed && (
         <Typography variant="caption" color="text.secondary">
           {elapsed}

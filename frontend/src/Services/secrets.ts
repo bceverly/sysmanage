@@ -45,17 +45,36 @@ export interface CreateSecretRequest {
 
 export type UpdateSecretRequest = CreateSecretRequest;
 
+/**
+ * Without the Pro+ secrets engine the list and type reads answer HTTP 402
+ * (they answered ``200 {licensed: false}`` until the Phase 25 edition
+ * audit).  The page branches on ``licensed``, so a 402 becomes that shape.
+ */
+function isPaymentRequired(err: unknown): boolean {
+  return (err as { response?: { status?: number } })?.response?.status === 402;
+}
+
 export const secretsService = {
   // Get all secrets
   async getSecrets(): Promise<SecretResponse[] | { licensed: false; secrets: never[] }> {
-    const response = await axiosInstance.get('/api/v1/stored-secrets');
-    return response.data;
+    try {
+      const response = await axiosInstance.get('/api/v1/stored-secrets');
+      return response.data;
+    } catch (err) {
+      if (isPaymentRequired(err)) return { licensed: false, secrets: [] };
+      throw err;
+    }
   },
 
   // Get secret types
   async getSecretTypes(): Promise<SecretTypesResponse | { licensed: false; types: never[] }> {
-    const response = await axiosInstance.get('/api/v1/stored-secrets/types');
-    return response.data;
+    try {
+      const response = await axiosInstance.get('/api/v1/stored-secrets/types');
+      return response.data;
+    } catch (err) {
+      if (isPaymentRequired(err)) return { licensed: false, types: [] };
+      throw err;
+    }
   },
 
   // Get secret by ID (metadata only)

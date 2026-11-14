@@ -161,7 +161,8 @@
   "airgapCollections": {
     "actions": {
       "delete": "Delete",
-      "download": "Download ISO"
+      "download": "Download ISO",
+      "nextDisc": "Next disc loaded"
     },
     "column": {
       "actions": "Actions",
@@ -210,11 +211,23 @@
     "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
     "newRun": "New Collection Run",
     "noIsoOnDisk": "No ISO file found on disk yet -- re-poll in a moment.",
-    "noManifestFound": "Run has no manifest yet -- try again once status is COMPLETE.",
+    "noManifestFound": "Run has no downloadable ISO yet -- wait until status reaches ISO_BUILT or COMPLETE.",
     "notApplicable": "This page is only meaningful on collector-role deployments.",
     "refresh": "Refresh",
     "subtitle": "Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
-    "title": "Air-Gap Collection Runs"
+    "title": "Air-Gap Collection Runs",
+    "burnSet": {
+      "awaitingMedia": "Disc {{burned}} of {{total}} burned. Load a blank disc.",
+      "burning": "Disc {{disc}} of {{total}}"
+    },
+    "nextDisc": {
+      "title": "Load the next disc",
+      "body": "Disc {{burned}} of {{total}} is burned and has been ejected from {{device}}. Label it as disc {{burned}}, put a blank disc in the drive, then confirm to burn disc {{next}}.",
+      "cancel": "Not yet",
+      "confirm": "Burn disc {{next}}",
+      "started": "Burning disc {{disc}} of {{total}}.",
+      "error": "Failed to start the next disc"
+    }
   },
   "airgapDevices": {
     "empty": "No eligible drives found. Insert media and press Rescan.",
@@ -538,7 +551,8 @@
     "status": "Status",
     "unknownPackage": "(unknown)",
     "violations": "Violations",
-    "violationsFor": "Violations -- {{name}}"
+    "violationsFor": "Violations -- {{name}}",
+    "scanTooltip": "Scan against cached inventory"
   },
   "configDrift": {
     "actions": "Actions",
@@ -579,7 +593,7 @@
     "atATime_other": "{{count}} hosts at once",
     "cancel": "Cancel",
     "cancelFailed": "Could not cancel this job",
-    "cancelledByOperator": "Cancelled by an operator",
+    "cancelledByOperator": "Canceled by an operator",
     "checkMode": "Dry run",
     "checkModeLabel": "Dry run -- report what would change, change nothing",
     "concurrency": "Hosts at a time",
@@ -1412,7 +1426,6 @@
     "completedAt": "Completed At",
     "complianceTab": "Compliance",
     "configurationFiles": "Configuration Files",
-    "confirmDeleteInstallation": "Are you sure you want to delete this installation record?",
     "confirmDeleteInstallationMessage": "Are you sure you want to delete this installation record? This action cannot be undone.",
     "confirmRequestPackages": "Request Available Packages",
     "confirmRequestPackagesMessage": "This will trigger package collection on the host, which can be resource-intensive and may take several minutes to complete. Do you want to proceed?",
@@ -1730,7 +1743,7 @@
     "softwareTab": "Software",
     "speed": "Speed",
     "sshKeysDeployedError": "Failed to deploy SSH keys",
-    "sshKeysDeployedSuccess": "SSH keys deployed successfully",
+    "sshKeysDeployedSuccess": "SSH key deployment queued successfully",
     "start": "Start",
     "startChildHost": "Start",
     "status": "Status",
@@ -1759,7 +1772,7 @@
     "ubuntuProAttachConfirm": "Attach",
     "ubuntuProAttachDescription": "Enter your Ubuntu Pro token to attach this system to your subscription.",
     "ubuntuProAttachError": "Failed to attach Ubuntu Pro",
-    "ubuntuProAttachSuccess": "Ubuntu Pro attached successfully",
+    "ubuntuProAttachSuccess": "Ubuntu Pro attach requested",
     "ubuntuProAttachTitle": "Attach Ubuntu Pro",
     "ubuntuProAttaching": "Attaching...",
     "ubuntuProDetach": "Detach",
@@ -1767,7 +1780,7 @@
     "ubuntuProDetachConfirmMessage": "Are you sure you want to detach Ubuntu Pro from this system? This will remove all Ubuntu Pro benefits and services for this host.",
     "ubuntuProDetachConfirmTitle": "Confirm Ubuntu Pro Detach",
     "ubuntuProDetachError": "Failed to detach Ubuntu Pro",
-    "ubuntuProDetachSuccess": "Ubuntu Pro detached successfully",
+    "ubuntuProDetachSuccess": "Ubuntu Pro detach requested",
     "ubuntuProDetaching": "Detaching...",
     "ubuntuProInfo": "Ubuntu Pro Information",
     "ubuntuProTab": "Ubuntu Pro",
@@ -1896,7 +1909,7 @@
     "ipv4": "IPv4 Address",
     "ipv6": "IPv6 Address",
     "justNow": "just now",
-    "lastCheckin": "Last Checkin",
+    "lastCheckin": "Last Check-in",
     "lastSeen": "Last seen {{minutes}} minutes ago",
     "minutesAgo": "{{minutes}}m ago",
     "never": "never",
@@ -2687,7 +2700,8 @@
     "updated": "Compliance profile saved",
     "version": "Version",
     "versionOp": "Op",
-    "versionOpAny": "(any)"
+    "versionOpAny": "(any)",
+    "loadOneError": "Failed to load compliance profile"
   },
   "policies": {
     "actions": {
@@ -2809,7 +2823,7 @@
     "liveFailed": "Could not run the query",
     "liveIntro": "Run one query across the selected hosts now. Dispatch is bounded, so hosts are asked in waves rather than all at once.",
     "liveStatus": {
-      "canceled": "Cancelled",
+      "canceled": "Canceled",
       "completed": "Completed",
       "pending": "Pending",
       "running": "Running"
@@ -2852,7 +2866,8 @@
     },
     "title": "Query Packs",
     "validateFailed": "Could not check the pack",
-    "version": "Version"
+    "version": "Version",
+    "livePollFailed": "Could not read the live query results"
   },
   "queues": {
     "created": "Created At",
@@ -2913,7 +2928,8 @@
     "subtitle": "Custom layouts the report renderer applies on top of the built-in report types",
     "tabLabel": "Report Templates",
     "title": "Report Templates",
-    "updated": "Template saved"
+    "updated": "Template saved",
+    "addDialogTitle": "Add Report Template"
   },
   "reportViewer": {
     "iframeTitle": "Report Content",
@@ -3204,7 +3220,8 @@
     "updateError": "Failed to update secret",
     "updateSuccess": "Secret updated successfully",
     "updatedAt": "Updated At",
-    "viewSecret": "View Secret"
+    "viewSecret": "View Secret",
+    "loadOneError": "Failed to load secret"
   },
   "security": {
     "addRole": "Add Role",
@@ -3520,8 +3537,8 @@
     "opentelemetry": {
       "collectorUrl": "Collector URL",
       "configuration": "Configuration",
-      "disabledMessage": "OpenTelemetry instrumentation is currently disabled. Remove OTEL_ENABLED=false or set OTEL_ENABLED=true to enable distributed tracing and metrics collection.",
-      "enableHint": "OpenTelemetry is enabled by default. To disable, set OTEL_ENABLED=false environment variable and restart the server.",
+      "disabledMessage": "OpenTelemetry instrumentation is disabled (the default). Set the OTEL_ENABLED=true environment variable (or telemetry.enabled: true in sysmanage.yaml) and restart the server to enable distributed tracing and metrics collection.",
+      "enableHint": "To disable OpenTelemetry, set the OTEL_ENABLED=false environment variable (or telemetry.enabled: false in sysmanage.yaml) and restart the server.",
       "fetchError": "Failed to fetch OpenTelemetry status",
       "instrumentation": "Instrumentation",
       "metricsCount": "Metrics",
@@ -3629,7 +3646,8 @@
     "windowsTypeHelp": "Choose Chocolatey or winget",
     "windowsUrl": "Repository URL",
     "windowsUrlHelp": "e.g., https://mycompany.com/chocolatey",
-    "winget": "winget"
+    "winget": "winget",
+    "obsRepoUrl": "OBS Repository URL"
   },
   "ubuntuPro": {
     "actions": {
@@ -3780,7 +3798,8 @@
     "updated": "Update profile saved",
     "window": "Staggered Window (minutes)",
     "windowHelp": "Spread agent dispatches over this many minutes (0-720)",
-    "windowRange": "Staggered window must be between 0 and 720 minutes"
+    "windowRange": "Staggered window must be between 0 and 720 minutes",
+    "addDialogTitle": "Add Update Profile"
   },
   "userDetail": {
     "active": "Active",

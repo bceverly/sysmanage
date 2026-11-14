@@ -72,6 +72,14 @@ describe('Secrets API Service', () => {
       vi.mocked(axiosInstance.get).mockRejectedValueOnce(new Error('boom'));
       await expect(secretsService.getSecrets()).rejects.toThrow('boom');
     });
+
+    it('reads a 402 (no secrets engine) as the unlicensed payload', async () => {
+      vi.mocked(axiosInstance.get).mockRejectedValueOnce({ response: { status: 402 } });
+      await expect(secretsService.getSecrets()).resolves.toEqual({
+        licensed: false,
+        secrets: [],
+      });
+    });
   });
 
   describe('getSecretTypes', () => {
@@ -90,6 +98,14 @@ describe('Secrets API Service', () => {
     it('rethrows on failure', async () => {
       vi.mocked(axiosInstance.get).mockRejectedValueOnce(new Error('e'));
       await expect(secretsService.getSecretTypes()).rejects.toThrow('e');
+    });
+
+    it('reads a 402 (no secrets engine) as the unlicensed payload', async () => {
+      vi.mocked(axiosInstance.get).mockRejectedValueOnce({ response: { status: 402 } });
+      await expect(secretsService.getSecretTypes()).resolves.toEqual({
+        licensed: false,
+        types: [],
+      });
     });
   });
 

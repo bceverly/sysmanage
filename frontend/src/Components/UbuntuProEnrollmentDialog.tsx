@@ -186,7 +186,7 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
         {hosts.length > 5 && (
           <ListItem>
             <ListItemText
-              primary={t('ubuntuPro.enrollment.andMore', 'And {count} more...', { count: hosts.length - 5 })}
+              primary={t('ubuntuPro.enrollment.andMore', 'And {{count}} more...', { count: hosts.length - 5 })}
               slotProps={{
                 primary: { fontSize: '0.875rem', fontStyle: 'italic' }
               }}
@@ -225,7 +225,7 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
                 <Box sx={{ ml: 4, mt: 1 }}>
                   <Chip
                     icon={<SecurityIcon />}
-                    label={t('ubuntuPro.enrollment.organization', 'Organization: {name}', { name: organizationName })}
+                    label={t('ubuntuPro.enrollment.organization', 'Organization: {{name}}', { name: organizationName })}
                     size="small"
                     color="primary"
                   />

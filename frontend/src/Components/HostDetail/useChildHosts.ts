@@ -778,7 +778,7 @@ export const useChildHosts = ({
         if (virtualizationStatus?.capabilities?.vmm?.available) {
             return t('hostDetail.childHostsEmptyVmmNotReady', 'Enable VMM to create virtual machines on this host.');
         }
-        return t('hostDetail.childHostsEmptyVmmNotAvailable', 'VMM is not available on this host.');
+        return t('hostDetail.childHostsEmptyVmmNotAvailable', 'VMM is not available on this host. OpenBSD with VMM kernel support is required.');
     };
 
     // Helper function to get empty state message for FreeBSD hosts (bhyve)
@@ -789,7 +789,7 @@ export const useChildHosts = ({
         if (virtualizationStatus?.capabilities?.bhyve?.available) {
             return t('hostDetail.childHostsEmptyBhyveNotReady', 'Enable bhyve to create virtual machines on this host.');
         }
-        return t('hostDetail.childHostsEmptyBhyveNotAvailable', 'bhyve is not available on this host.');
+        return t('hostDetail.childHostsEmptyBhyveNotAvailable', 'bhyve is not available on this host. FreeBSD with CPU virtualization support is required.');
     };
 
     // Helper function to get the create child host dialog title

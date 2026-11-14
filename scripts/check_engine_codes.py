@@ -156,11 +156,10 @@ def issued_feature_codes():
 
 
 # Feature codes whose tier deliberately differs between the generator and
-# TIER_FEATURES, each with the reason.  Nothing gates on them, so the
-# difference has no effect today; Bryan to decide which side is right.
-TIER_EXCEPTIONS = {
-    "api": "issued at Professional, API_EXTENDED is Enterprise here; ungated",
-}
+# TIER_FEATURES, each with the reason.  Empty since "api" moved to
+# Professional to match the generator (2026-11-14); add an entry only with a
+# reviewed reason.
+TIER_EXCEPTIONS: dict = {}
 
 _RANK = {"professional": 1, "enterprise": 2, "multitenant_saas": 3}
 _OSS_TIER = {

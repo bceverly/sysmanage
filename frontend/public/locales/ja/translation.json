@@ -161,7 +161,8 @@
   "airgapCollections": {
     "actions": {
       "delete": "削除",
-      "download": "ISOファイルをダウンロード"
+      "download": "ISOファイルをダウンロード",
+      "nextDisc": "次のディスクをセットしました"
     },
     "column": {
       "actions": "アクション",
@@ -210,11 +211,23 @@
     "multiDiscInfo": "この実行で{{count}}枚のディスクが生成されました。ダウンロードするものを選択してください。",
     "newRun": "新しい収集の実行",
     "noIsoOnDisk": "ディスク上にまだISOファイルが見つかりません -- 数秒後に再チェックしてください。",
-    "noManifestFound": "実行にはまだマニフェストがありません -- 状態が COMPLETE のときに再度試してください。",
+    "noManifestFound": "この実行にはダウンロード可能な ISO がまだありません -- ステータスが ISO_BUILT または COMPLETE になるまでお待ちください。",
     "notApplicable": "このページは収集役のデプロイメントでのみ意味があります。",
     "refresh": "更新する",
     "subtitle": "設定されたリポジトリをミラーリングし、署名付きISOを作成し、エアギャップ側でインジェスト可能なマニフェストを書き込む一発目収集ランをトリガーします。",
-    "title": "エアギャップ収集の実行"
+    "title": "エアギャップ収集の実行",
+    "burnSet": {
+      "awaitingMedia": "ディスク {{burned}} / {{total}} の書き込みが完了しました。空のディスクをセットしてください。",
+      "burning": "ディスク {{disc}} / {{total}}"
+    },
+    "nextDisc": {
+      "title": "次のディスクをセット",
+      "body": "ディスク {{burned}} / {{total}} の書き込みが完了し、{{device}} から取り出されました。ディスク {{burned}} とラベルを付け、ドライブに空のディスクをセットしてから、確認してディスク {{next}} を書き込んでください。",
+      "cancel": "まだ",
+      "confirm": "ディスク {{next}} を書き込む",
+      "started": "ディスク {{disc}} / {{total}} を書き込んでいます。",
+      "error": "次のディスクを開始できませんでした"
+    }
   },
   "airgapDevices": {
     "empty": "適格なドライブが見つかりません。メディアを挿入し、リスキャンを押してください。",
@@ -538,7 +551,8 @@
     "status": "ステータス",
     "unknownPackage": "(不明)",
     "violations": "違反",
-    "violationsFor": "違反 -- {{name}}"
+    "violationsFor": "違反 -- {{name}}",
+    "scanTooltip": "キャッシュされたインベントリに対してスキャン"
   },
   "configDrift": {
     "actions": "アクション",
@@ -968,7 +982,7 @@
     "intro": "このサーバーがマルチサイト連携にどのように参加するかを選択します。左側のエアギャップロールとは独立です -- サーバーは両方を設定できます。次の再起動後に効果があります。",
     "loadError": "連携ロールの読み込みに失敗しました。",
     "none": {
-      "description": "デフォルト。このサーバーはマルチサイト連携の一環でないものです。コordinatorまたは従属サイトを実行していない限り、これを選択します。",
+      "description": "デフォルト。このサーバーはマルチサイトフェデレーションに参加しません。コーディネーターまたは従属サイトを運用している場合を除き、これを選択してください。",
       "title": "連携されていません"
     },
     "peers": {
@@ -1393,7 +1407,6 @@
     "completedAt": "完了日時",
     "complianceTab": "コンプライアンス",
     "configurationFiles": "設定ファイル",
-    "confirmDeleteInstallation": "このインストール記録を削除してもよろしいですか？",
     "confirmDeleteInstallationMessage": "このインストール記録を削除してもよろしいですか?この操作は取り消せません。",
     "confirmRequestPackages": "利用可能なパッケージを要求",
     "confirmRequestPackagesMessage": "これによりホスト上でパッケージ収集がトリガーされます。リソース集約的で完了まで数分かかる場合があります。続行しますか?",
@@ -1711,7 +1724,7 @@
     "softwareTab": "ソフトウェア",
     "speed": "速度",
     "sshKeysDeployedError": "SSHキーのデプロイに失敗しました",
-    "sshKeysDeployedSuccess": "SSHキーのデプロイが成功しました",
+    "sshKeysDeployedSuccess": "SSHキーのデプロイがキューに追加されました",
     "start": "開始",
     "startChildHost": "起動",
     "status": "ステータス",
@@ -1740,7 +1753,7 @@
     "ubuntuProAttachConfirm": "アタッチ",
     "ubuntuProAttachDescription": "Ubuntu Proトークンを入力して、このシステムをサブスクリプションにアタッチします。",
     "ubuntuProAttachError": "Ubuntu Proのアタッチに失敗しました",
-    "ubuntuProAttachSuccess": "Ubuntu Proが正常にアタッチされました",
+    "ubuntuProAttachSuccess": "Ubuntu Pro のアタッチを要求しました",
     "ubuntuProAttachTitle": "Ubuntu Proをアタッチ",
     "ubuntuProAttaching": "アタッチ中...",
     "ubuntuProDetach": "デタッチ",
@@ -1748,7 +1761,7 @@
     "ubuntuProDetachConfirmMessage": "このシステムからUbuntu Proをデタッチしてもよろしいですか？このホストのUbuntu Proの特典とサービスがすべて削除されます。",
     "ubuntuProDetachConfirmTitle": "Ubuntu Proデタッチの確認",
     "ubuntuProDetachError": "Ubuntu Proのデタッチに失敗しました",
-    "ubuntuProDetachSuccess": "Ubuntu Proが正常にデタッチされました",
+    "ubuntuProDetachSuccess": "Ubuntu Pro のデタッチを要求しました",
     "ubuntuProDetaching": "デタッチ中...",
     "ubuntuProInfo": "Ubuntu Pro 情報",
     "ubuntuProTab": "Ubuntu Pro",
@@ -2523,7 +2536,7 @@
     "queryPacks": "クエリパック",
     "reports": "レポート",
     "role": {
-      "collector": "オフラインコレクター",
+      "collector": "エアギャップコレクター",
       "engineMissing": "必要なPro+エンジンが読み込まれていません。ライセンスを確認してください。",
       "repository": "エアギャップリポジトリ"
     },
@@ -2668,7 +2681,8 @@
     "updated": "コンプライアンスプロファイルを保存しました",
     "version": "バージョン",
     "versionOp": "op",
-    "versionOpAny": "(任意)"
+    "versionOpAny": "(任意)",
+    "loadOneError": "コンプライアンスプロファイルの読み込みに失敗しました"
   },
   "policies": {
     "actions": {
@@ -2787,8 +2801,8 @@
     "failed": "失敗しました",
     "failedCount": "{{count}} が失敗しました",
     "intro": "クエリパックは、各管理ホストが提供するファクトテーブルに対してSQLを実行するため、1つのクエリがすべてのプラットフォームで動作します。",
-    "liveFailed": "クエリの実行はできません",
-    "liveIntro": "選択したホストに今すぐ1つのクエリを実行します。送信は制限されているため、ホストは波状にではなく、一度にすべて要求されます。",
+    "liveFailed": "クエリを実行できませんでした",
+    "liveIntro": "選択したホストで今すぐ1つのクエリを実行します。送信数には上限があるため、ホストには一度にすべてではなく段階的に問い合わせます。",
     "liveStatus": {
       "canceled": "キャンセル",
       "completed": "完了",
@@ -2833,7 +2847,8 @@
     },
     "title": "クエリパック",
     "validateFailed": "パックを確認できませんでした",
-    "version": "バージョン"
+    "version": "バージョン",
+    "livePollFailed": "ライブクエリの結果を読み取れませんでした"
   },
   "queues": {
     "created": "作成日時",
@@ -2894,7 +2909,8 @@
     "subtitle": "レンダラーが組み込みレポートタイプに適用するカスタムレイアウト",
     "tabLabel": "レポートテンプレート",
     "title": "レポートテンプレート",
-    "updated": "テンプレートを保存しました"
+    "updated": "テンプレートを保存しました",
+    "addDialogTitle": "レポートテンプレートを追加"
   },
   "reportViewer": {
     "iframeTitle": "レポートの内容",
@@ -3185,7 +3201,8 @@
     "updateError": "シークレットの更新に失敗しました",
     "updateSuccess": "シークレットが正常に更新されました",
     "updatedAt": "更新日",
-    "viewSecret": "シークレットを表示"
+    "viewSecret": "シークレットを表示",
+    "loadOneError": "シークレットの読み込みに失敗しました"
   },
   "security": {
     "addRole": "ロールを追加",
@@ -3501,8 +3518,8 @@
     "opentelemetry": {
       "collectorUrl": "コレクターURL",
       "configuration": "設定",
-      "disabledMessage": "OpenTelemetryインストルメンテーションは現在無効です。分散トレースとメトリクス収集を有効にするには、OTEL_ENABLED=falseを削除するか、OTEL_ENABLED=trueを設定してください。",
-      "enableHint": "OpenTelemetryはデフォルトで有効です。無効にするには、OTEL_ENABLED=false環境変数を設定してサーバーを再起動してください。",
+      "disabledMessage": "OpenTelemetry インストルメンテーションは無効です (デフォルト)。分散トレースとメトリクス収集を有効にするには、環境変数 OTEL_ENABLED=true (または sysmanage.yaml の telemetry.enabled: true) を設定してサーバーを再起動してください。",
+      "enableHint": "OpenTelemetry を無効にするには、環境変数 OTEL_ENABLED=false (または sysmanage.yaml の telemetry.enabled: false) を設定してサーバーを再起動してください。",
       "fetchError": "OpenTelemetryステータスの取得に失敗しました",
       "instrumentation": "インストルメンテーション",
       "metricsCount": "メトリクス",
@@ -3610,7 +3627,8 @@
     "windowsTypeHelp": "Chocolateyまたはwingetを選択",
     "windowsUrl": "リポジトリURL",
     "windowsUrlHelp": "例: https://mycompany.com/chocolatey",
-    "winget": "winget"
+    "winget": "winget",
+    "obsRepoUrl": "OBS リポジトリ URL"
   },
   "ubuntuPro": {
     "actions": {
@@ -3761,7 +3779,8 @@
     "updated": "更新プロファイルを保存しました",
     "window": "段階的ウィンドウ (分)",
     "windowHelp": "エージェント配信をこの分数にわたって分散 (0-720)",
-    "windowRange": "段階的ウィンドウは 0 ～ 720 分の範囲である必要があります"
+    "windowRange": "段階的ウィンドウは 0 ～ 720 分の範囲である必要があります",
+    "addDialogTitle": "更新プロファイルを追加"
   },
   "userDetail": {
     "active": "アクティブ",

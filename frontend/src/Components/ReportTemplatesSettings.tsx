@@ -326,7 +326,7 @@ const ReportTemplatesSettings: React.FC = () => {
         <DialogTitle>
           {editing
             ? t('reportTemplates.edit', 'Edit Report Template')
-            : t('reportTemplates.add', 'Add Report Template')}
+            : t('reportTemplates.addDialogTitle', 'Add Report Template')}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>

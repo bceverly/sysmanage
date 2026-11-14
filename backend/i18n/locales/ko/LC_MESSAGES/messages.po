@@ -6550,6 +6550,16 @@ msgstr "NetBSD pkgsrc 패키지 취약점(pkg_admin audit가 읽는 데이터)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS 버전별 macOS 취약점(NVD의 영향받는 버전 데이터 기준)"
 
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr "이 실행은 빈 디스크를 기다리고 있지 않습니다 (상태: %s)."
+
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
+msgstr "오프라인 수집 실행 '%(iso_label)s'의 디스크 %(disc)d/%(count)d에 사용할 빈 디스크를 넣었습니다"
+
 #~ msgid ""
 #~ "Confirm that photos will be deleted from iCloud once they are downloaded"
 #~ msgstr "사진을 다운로드한 후 iCloud에서 삭제된다는 것을 확인하세요"

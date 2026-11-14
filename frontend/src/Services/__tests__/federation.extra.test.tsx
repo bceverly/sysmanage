@@ -478,3 +478,49 @@ describe("unlicensed federation writes", () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------
+// Unlicensed reads: they answer 402 like the writes do, and every read
+// helper turns that into the {licensed: false} envelope the pages render
+// their upsell from.  The navbar probe reads it as "not licensed".
+// ---------------------------------------------------------------------
+
+describe("unlicensed federation reads", () => {
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  test("a 402 on every read reads as licensed: false", async () => {
+    mockGet.mockRejectedValue({ response: { status: 402 } });
+    const reads = [
+      doListFederationSites(),
+      doGetFederationSite("s1"),
+      doGetFederationSiteSyncStatus("s1"),
+      doGetFederationSiteSyncTimeline("s1"),
+      doListFederationAuditLog(),
+      doListFederationPolicies(),
+      doGetFederationPolicy("p1"),
+      doGetFederationAlertConfig(),
+      doGetFederationCrossSiteReport(),
+      doListFederationCommands({}),
+    ];
+    for (const read of reads) {
+      await expect(read).resolves.toEqual({ licensed: false });
+    }
+  });
+
+  test("a read failing any other way still throws", async () => {
+    mockGet.mockRejectedValue({ response: { status: 500 } });
+    await expect(doListFederationSites()).rejects.toEqual({
+      response: { status: 500 },
+    });
+  });
+
+  test("the license probe reads a 402 as not licensed", async () => {
+    _resetFederationLicensedCacheForTests();
+    localStorage.setItem("bearer_token", "abc");
+    mockGet.mockRejectedValue({ response: { status: 402 } });
+    await expect(probeFederationLicensed()).resolves.toBe(false);
+    _resetFederationLicensedCacheForTests();
+  });
+});

@@ -208,7 +208,7 @@ const HostCertificatesTab: React.FC<HostCertificatesTabProps> = ({
         },
         {
             field: 'serial_number',
-            headerName: t('hostDetail.serialNumber', 'Serial'),
+            headerName: t('hostDetail.serialNumber', 'Serial Number'),
             minWidth: 120,
             renderCell: (params) => (
                 <Typography

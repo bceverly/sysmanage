@@ -29,7 +29,7 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
-from backend.licensing.feature_gate import refuse_unlicensed_write
+from backend.licensing.feature_gate import refuse_unlicensed
 from backend.licensing.features import ModuleCode
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
@@ -126,7 +126,7 @@ def ingest_from_device(db: Session = Depends(get_db)):
     the import looked accepted (Phase 25 edition audit, 2026-11-14).
     """
     if module_loader.get_module(ModuleCode.AIRGAP_REPOSITORY_ENGINE.value) is None:
-        raise refuse_unlicensed_write(ModuleCode.AIRGAP_REPOSITORY_ENGINE)
+        raise refuse_unlicensed(ModuleCode.AIRGAP_REPOSITORY_ENGINE)
     selected = server_config_service.get_import_device()
     if not selected:
         raise HTTPException(status_code=409, detail=_("No import device selected"))

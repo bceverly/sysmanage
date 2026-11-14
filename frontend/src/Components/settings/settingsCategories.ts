@@ -74,7 +74,7 @@ export const SETTINGS_TAB_DEFS: SettingsTabDef[] = [
   // Phase 23.3: clock offset bounds.  OSS, ungated; saving needs the Manage
   // Time Sync role (the page shows read-only without it).
   { id: 'time-sync', labelKey: 'timeSync.bounds.tabLabel', labelDefault: 'Time Sync' },
-  { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queues' },
+  { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queue Management' },
   {
     id: 'integrations',
     labelKey: 'integrations.title',
@@ -99,7 +99,7 @@ export const SETTINGS_TAB_DEFS: SettingsTabDef[] = [
     labelDefault: 'Firewall Roles',
     moduleRequired: 'firewall_orchestration_engine',
   },
-  { id: 'distributions', labelKey: 'distributions.title', labelDefault: 'Distributions' },
+  { id: 'distributions', labelKey: 'distributions.title', labelDefault: 'Child Host Distributions' },
   // Dynamic Secrets has no entry here on purpose: the fold-in landed, so Pro+
   // contributes it at runtime from ``plugin-src/entries/secrets-entry.ts`` with
   // ``moduleRequired: 'secrets_engine'``.  Only its CATEGORY placement lives in

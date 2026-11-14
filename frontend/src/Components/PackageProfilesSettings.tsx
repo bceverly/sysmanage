@@ -139,7 +139,7 @@ const PackageProfilesSettings: React.FC = () => {
       setDialogOpen(true);
     } catch (e) {
       console.error(e);
-      showError(t('packageProfiles.loadError', 'Failed to load compliance profile'));
+      showError(t('packageProfiles.loadOneError', 'Failed to load compliance profile'));
     }
   };
 
@@ -320,7 +320,7 @@ const PackageProfilesSettings: React.FC = () => {
           )}
           action={
             <Button startIcon={<AddIcon />} variant="contained" onClick={openCreate}>
-              {t('packageProfiles.add', 'Add Profile')}
+              {t('packageProfiles.add', 'Add Compliance Profile')}
             </Button>
           }
         />

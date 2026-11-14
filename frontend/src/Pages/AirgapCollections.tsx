@@ -37,6 +37,7 @@ import {
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
+  Album as AlbumIcon,
   Download as DownloadIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
@@ -59,6 +60,7 @@ import {
 import {
   DiscPickerDialog,
   NewRunDialog,
+  NextDiscDialog,
 } from '../Components/AirgapCollectionsDialogs';
 
 const AirgapCollections: React.FC = () => {
@@ -98,6 +100,10 @@ const AirgapCollections: React.FC = () => {
   // the picker calls handleDownload(run, disc_index) on selection.
   const [discPickerRun, setDiscPickerRun] = useState<CollectionRun | null>(null);
   const [discPickerEntries, setDiscPickerEntries] = useState<DiscInfo[]>([]);
+  // A burned disc set waiting at AWAITING_MEDIA: the run whose "next disc
+  // loaded" confirmation is open, and whether that POST is in flight.
+  const [nextDiscRun, setNextDiscRun] = useState<CollectionRun | null>(null);
+  const [nextDiscSubmitting, setNextDiscSubmitting] = useState(false);
 
   const showError = (m: string) => {
     setSnackbarMessage(m);
@@ -306,6 +312,32 @@ const AirgapCollections: React.FC = () => {
     }
   };
 
+  const handleNextDisc = async (run: CollectionRun) => {
+    // The operator swapped in a blank disc: the run goes back to ISO_BUILT
+    // and the orchestrator burns the next disc of the set.
+    setNextDiscSubmitting(true);
+    try {
+      await axiosInstance.post(`${RUNS_URL}/${run.id}/next-disc`);
+      setNextDiscRun(null);
+      showSuccess(
+        t('airgapCollections.nextDisc.started', 'Burning disc {{disc}} of {{total}}.', {
+          disc: (run.burned_disc_count ?? 0) + 1,
+          total: run.disc_count ?? 0,
+        }),
+      );
+      await refresh();
+    } catch (e: unknown) {
+      const detail = (e as { response?: { data?: { detail?: string } } })
+        ?.response?.data?.detail;
+      showError(
+        detail ||
+          t('airgapCollections.nextDisc.error', 'Failed to start the next disc'),
+      );
+    } finally {
+      setNextDiscSubmitting(false);
+    }
+  };
+
   const handleDownloadClick = async (run: CollectionRun) => {
     // Entry point from the Download icon.  Probes /discs first:
     //   * empty: surface "no ISO on disk" (rare; status said ready)
@@ -458,7 +490,8 @@ const AirgapCollections: React.FC = () => {
       {
         field: 'status',
         headerName: t('airgapCollections.column.status', 'Status'),
-        width: 180,
+        // Wide enough for a burned set's "disc K of N" caption.
+        width: 330,
         renderCell: (p: GridRenderCellParams<CollectionRun>) => (
           <RunStatusCell row={p.row} />
         ),
@@ -505,8 +538,22 @@ const AirgapCollections: React.FC = () => {
             {/* Show the download icon as soon as the ISO file exists
                 on disk (ISO_BUILT) -- operators shouldn't have to wait
                 through an optional BURNING stage to get the ISO. */}
+            {p.row.status === 'AWAITING_MEDIA' && (
+              <Tooltip
+                title={t('airgapCollections.actions.nextDisc', 'Next disc loaded')}
+              >
+                <IconButton
+                  size="small"
+                  color="warning"
+                  onClick={() => setNextDiscRun(p.row)}
+                >
+                  <AlbumIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
             {(p.row.status === 'ISO_BUILT' ||
               p.row.status === 'BURNING' ||
+              p.row.status === 'AWAITING_MEDIA' ||
               p.row.status === 'COMPLETE') && (
               <Tooltip
                 title={t('airgapCollections.actions.download', 'Download ISO')}
@@ -645,6 +692,14 @@ const AirgapCollections: React.FC = () => {
           setDiscPickerRun(null);
           void handleDownload(run, discIndex);
         }}
+      />
+
+      {/* A burned set between discs: confirm a blank disc is loaded. */}
+      <NextDiscDialog
+        run={nextDiscRun}
+        submitting={nextDiscSubmitting}
+        onClose={() => setNextDiscRun(null)}
+        onConfirm={(run) => void handleNextDisc(run)}
       />
 
       <Snackbar

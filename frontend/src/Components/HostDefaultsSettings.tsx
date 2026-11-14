@@ -464,13 +464,13 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
       // Reload enabled package managers
       await loadEnabledPMs();
 
-      setSnackbarMessage(t('hostDefaults.packageManagerDeleted', 'Enabled package manager removed successfully'));
+      setSnackbarMessage(t('hostDefaults.packageManagerDeleted', 'Enabled package manager deleted successfully'));
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
     } catch (err: unknown) {
       console.error('Error removing enabled package manager:', err);
       const errorMessage = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-        t('hostDefaults.errorDeletingPackageManager', 'Failed to remove enabled package manager');
+        t('hostDefaults.errorDeletingPackageManager', 'Failed to delete enabled package manager');
       setSnackbarMessage(errorMessage);
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
@@ -735,8 +735,8 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
         <Card sx={{ flex: '1 1 400px', maxWidth: { xs: '100%', lg: '49%' } }}>
           <CardHeader
             avatar={<SettingsIcon color="primary" />}
-            title={t('hostDefaults.packageManagersTitle', 'Package Managers')}
-            subheader={t('hostDefaults.packageManagersSubheader', 'Enable additional (non-default) package managers for specific operating systems')}
+            title={t('hostDefaults.packageManagersTitle', 'Enabled Package Managers')}
+            subheader={t('hostDefaults.packageManagersSubheader', 'Configure additional package managers to enable on hosts based on their operating system')}
           />
           <CardContent>
             {pmError && (
@@ -749,7 +749,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
             {canAddPM && (
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                  {t('hostDefaults.addNewPackageManager', 'Add New Package Manager')}
+                  {t('hostDefaults.addNewPackageManager', 'Add New Enabled Package Manager')}
                 </Typography>
                 <Stack spacing={2}>
                   <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="flex-start">
@@ -818,7 +818,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
 
             {/* Enabled Package Manager List */}
             <Typography variant="subtitle1" sx={{ mb: 2 }}>
-              {t('hostDefaults.configuredPackageManagers', 'Configured Package Managers')}
+              {t('hostDefaults.configuredPackageManagers', 'Configured Additional Package Managers')}
             </Typography>
 
             {(() => {
@@ -832,7 +832,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
               if (enabledPMs.length === 0) {
                 return (
                   <Alert severity="info">
-                    {t('hostDefaults.noPackageManagers', 'No additional package managers enabled. Each operating system uses its default package manager. Add optional package managers above to enable them.')}
+                    {t('hostDefaults.noPackageManagers', 'No additional package managers configured. Add package managers above to enable them on hosts.')}
                   </Alert>
                 );
               }

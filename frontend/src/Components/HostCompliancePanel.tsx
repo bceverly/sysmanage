@@ -249,7 +249,7 @@ const HostCompliancePanel: React.FC<HostCompliancePanelProps> = ({ hostId }) => 
         const isScanning = scanningProfileId === params.row.id;
         return (
           <Stack direction="row" spacing={0.5}>
-            <Tooltip title={t('compliance.scanNow', 'Scan against cached inventory')}>
+            <Tooltip title={t('compliance.scanTooltip', 'Scan against cached inventory')}>
               <span>
                 <Button
                   size="small"
@@ -261,7 +261,7 @@ const HostCompliancePanel: React.FC<HostCompliancePanelProps> = ({ hostId }) => 
                 </Button>
               </span>
             </Tooltip>
-            <Tooltip title={t('compliance.dispatchTooltip', 'Ask the agent for a live scan')}>
+            <Tooltip title={t('compliance.dispatchTooltip', 'Ask the agent for a live scan against current package state')}>
               <span>
                 <Button
                   size="small"

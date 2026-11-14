@@ -187,15 +187,15 @@ class TestDistributionCrudStubs:
 class TestSecretsStubs:
     """Test that secrets endpoints return 402 without Pro+ module."""
 
-    def test_list_secrets_returns_unlicensed(self, client):
-        """Test listing secrets returns licensed=false without secrets_engine."""
+    def test_list_secrets_returns_402(self, client):
+        """Test listing secrets is a 402 without secrets_engine."""
         with patch(
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
             response = client.get("/api/v1/stored-secrets")
-            assert response.status_code == 200
-            assert response.json()["licensed"] is False
+            assert response.status_code == 402
+            assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_get_secret_metadata_returns_402(self, client):
         """Test getting secret metadata returns 402 without secrets_engine."""
@@ -257,15 +257,15 @@ class TestSecretsStubs:
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
 
-    def test_get_secret_types_returns_unlicensed(self, client):
-        """Test getting secret types returns licensed=false without secrets_engine."""
+    def test_get_secret_types_returns_402(self, client):
+        """Test getting secret types is a 402 without secrets_engine."""
         with patch(
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
             response = client.get("/api/v1/stored-secrets/types")
-            assert response.status_code == 200
-            assert response.json()["licensed"] is False
+            assert response.status_code == 402
+            assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_deploy_ssh_keys_returns_402(self, client):
         """Test deploying SSH keys returns 402 without secrets_engine."""
@@ -337,13 +337,13 @@ class TestReportsStubs:
 
 
 class TestProPlusV1StubRoutes:
-    """Test that /api/v1 stub routes return licensed=false when modules aren't loaded."""
+    """Test that /api/v1 stub routes answer 402 when modules aren't loaded."""
 
     def test_audit_statistics_stub(self, client):
-        """Test audit statistics returns licensed=false without audit_engine."""
+        """Test audit statistics is a 402 without audit_engine."""
         response = client.get("/api/v1/audit/statistics")
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_audit_export_stub(self, client):
         """Test audit export is a 402, never 200 licensed=false, without audit_engine."""
@@ -352,36 +352,34 @@ class TestProPlusV1StubRoutes:
         assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_secrets_statistics_stub(self, client):
-        """Test secrets statistics returns licensed=false without secrets_engine."""
+        """Test secrets statistics is a 402 without secrets_engine."""
         response = client.get("/api/v1/secrets/statistics")
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_secrets_access_logs_stub(self, client):
-        """Test secrets access logs returns licensed=false without secrets_engine."""
+        """Test secrets access logs is a 402 without secrets_engine."""
         response = client.get("/api/v1/secrets/access-logs")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["licensed"] is False
-        assert data["access_logs"] == []
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_containers_statistics_stub(self, client):
-        """Test container statistics returns licensed=false without container_engine."""
+        """Test container statistics is a 402 without container_engine."""
         response = client.get("/api/v1/containers/statistics")
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_reports_generate_stub(self, client):
-        """Test report generation returns licensed=false without reporting_engine."""
+        """Test report generation is a 402 without reporting_engine."""
         response = client.get("/api/v1/reports/generate/registered-hosts")
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_reports_view_stub(self, client):
-        """Test report view returns licensed=false without reporting_engine."""
+        """Test report view is a 402 without reporting_engine."""
         response = client.get("/api/v1/reports/view/registered-hosts")
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
 
 class TestReadOnlyEndpointsStillWork:
@@ -404,27 +402,23 @@ class TestReadOnlyEndpointsStillWork:
 
 
 class TestSecretsRotationScheduleStubs:
-    """Test rotation schedule stub endpoints return licensed=false."""
+    """Test rotation schedule stub endpoints answer 402."""
 
     def test_rotation_schedules_list_stub(self, client):
-        """Test listing rotation schedules returns licensed=false without secrets_engine."""
+        """Test listing rotation schedules is a 402 without secrets_engine."""
         response = client.get("/api/v1/secrets/rotation-schedules")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["licensed"] is False
-        assert data["schedules"] == []
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_secret_versions_stub(self, client):
-        """Test listing secret versions returns licensed=false without secrets_engine."""
+        """Test listing secret versions is a 402 without secrets_engine."""
         response = client.get("/api/v1/secrets/test-secret-id/versions")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["licensed"] is False
-        assert data["versions"] == []
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
 
 class TestContainerActionStubs:
-    """Test container action stub endpoints return licensed=false."""
+    """Test container action stub endpoints answer 402."""
 
     def test_container_create_stub(self, client):
         """Test container create is a 402, never 200 licensed=false, without container_engine."""
@@ -446,16 +440,14 @@ class TestContainerActionStubs:
 
 
 class TestObservabilityCustomMetricsStubs:
-    """Test custom-metrics stub endpoints return licensed=false without the
+    """Test custom-metrics stub endpoints answer 402 without the
     observability_engine (Custom Metrics Slice 2)."""
 
     def test_custom_metrics_list_stub(self, client):
-        """Listing custom metrics returns licensed=false without the engine."""
+        """Listing custom metrics is a 402 without the engine."""
         response = client.get("/api/v1/observability/custom-metrics")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["licensed"] is False
-        assert data["custom_metrics"] == []
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_custom_metrics_create_stub(self, client):
         """Creating a custom metric is a 402, never 200 licensed=false, without the engine."""
@@ -472,10 +464,10 @@ class TestObservabilityCustomMetricsStubs:
         assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_custom_metrics_get_stub(self, client):
-        """Getting a custom metric returns licensed=false without the engine."""
+        """Getting a custom metric is a 402 without the engine."""
         response = client.get("/api/v1/observability/custom-metrics/test-id")
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_custom_metrics_update_stub(self, client):
         """Updating a custom metric is a 402, never 200 licensed=false, without the engine."""
@@ -502,12 +494,10 @@ class TestObservabilityCustomMetricsStubs:
         assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_custom_metrics_samples_stub(self, client):
-        """Reading samples returns licensed=false without the engine."""
+        """Reading samples is a 402 without the engine."""
         response = client.get("/api/v1/observability/custom-metrics/test-id/samples")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["licensed"] is False
-        assert data["samples"] == []
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
 
 class TestAuditIntegrityHash:

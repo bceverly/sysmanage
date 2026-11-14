@@ -13,7 +13,7 @@ the automation / fleet / virtualization / observability / federation engines.
 from fastapi import APIRouter, Depends
 
 from backend.auth.auth_bearer import get_current_user
-from backend.licensing.feature_gate import refuse_unlicensed_write
+from backend.licensing.feature_gate import refuse_unlicensed
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.api.proplus_routes")
@@ -32,31 +32,31 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def automation_list_scripts_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "scripts": []}
+            raise refuse_unlicensed("automation_engine")
 
         @router.post("/scripts")
         async def automation_create_script_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("automation_engine")
+            raise refuse_unlicensed("automation_engine")
 
         @router.get("/executions")
         async def automation_list_executions_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "executions": []}
+            raise refuse_unlicensed("automation_engine")
 
         @router.get("/approvals")
         async def automation_list_approvals_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "approvals": []}
+            raise refuse_unlicensed("automation_engine")
 
         @router.get("/schedules")
         async def automation_list_schedules_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "schedules": []}
+            raise refuse_unlicensed("automation_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -69,49 +69,49 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fleet_list_groups_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "groups": []}
+            raise refuse_unlicensed("fleet_engine")
 
         @router.post("/groups")
         async def fleet_create_group_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("fleet_engine")
+            raise refuse_unlicensed("fleet_engine")
 
         @router.post("/select")
         async def fleet_select_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("fleet_engine")
+            raise refuse_unlicensed("fleet_engine")
 
         @router.post("/bulk")
         async def fleet_bulk_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("fleet_engine")
+            raise refuse_unlicensed("fleet_engine")
 
         @router.get("/bulk")
         async def fleet_list_bulk_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "operations": []}
+            raise refuse_unlicensed("fleet_engine")
 
         @router.post("/rolling")
         async def fleet_rolling_stub(
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("fleet_engine")
+            raise refuse_unlicensed("fleet_engine")
 
         @router.get("/rolling")
         async def fleet_list_rolling_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "deployments": []}
+            raise refuse_unlicensed("fleet_engine")
 
         @router.get("/schedules")
         async def fleet_list_schedules_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "schedules": []}
+            raise refuse_unlicensed("fleet_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -127,14 +127,14 @@ def _mount_stub_group_b(app, results: dict) -> int:
             action: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/kvm/{host_id}/create")
         async def virt_kvm_create_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/kvm/{host_id}/{vm_name}/delete")
         async def virt_kvm_delete_stub(  # pylint: disable=unused-argument
@@ -142,21 +142,21 @@ def _mount_stub_group_b(app, results: dict) -> int:
             vm_name: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/kvm/{host_id}/storage/download")
         async def virt_kvm_storage_download_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/kvm/{host_id}/network/create")
         async def virt_kvm_network_create_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/kvm/{host_id}/network/{name}/delete")
         async def virt_kvm_network_delete_stub(  # pylint: disable=unused-argument
@@ -164,21 +164,21 @@ def _mount_stub_group_b(app, results: dict) -> int:
             name: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/kvm/{host_id}/network/list")
         async def virt_kvm_network_list_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/bhyve/{host_id}/create")
         async def virt_bhyve_create_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/bhyve/{host_id}/{vm_name}/delete")
         async def virt_bhyve_delete_stub(  # pylint: disable=unused-argument
@@ -186,21 +186,21 @@ def _mount_stub_group_b(app, results: dict) -> int:
             vm_name: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/bhyve/{host_id}/zvol/create")
         async def virt_bhyve_zvol_create_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/vmm/{host_id}/create")
         async def virt_vmm_create_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/vmm/{host_id}/{vm_name}/delete")
         async def virt_vmm_delete_stub(  # pylint: disable=unused-argument
@@ -208,7 +208,7 @@ def _mount_stub_group_b(app, results: dict) -> int:
             vm_name: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/provision/{host_id}/{distro}")
         async def virt_provision_stub(  # pylint: disable=unused-argument
@@ -216,14 +216,14 @@ def _mount_stub_group_b(app, results: dict) -> int:
             distro: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/safe-reboot/{host_id}/prepare")
         async def virt_safe_reboot_prepare_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/safe-reboot/{host_id}/{hypervisor}/restore")
         async def virt_safe_reboot_restore_stub(  # pylint: disable=unused-argument
@@ -231,7 +231,7 @@ def _mount_stub_group_b(app, results: dict) -> int:
             hypervisor: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/bhyve/{host_id}/{vm_name}/{action}")
         async def virt_bhyve_stub(  # pylint: disable=unused-argument
@@ -240,7 +240,7 @@ def _mount_stub_group_b(app, results: dict) -> int:
             action: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         @router.post("/vmm/{host_id}/{vm_name}/{action}")
         async def virt_vmm_stub(  # pylint: disable=unused-argument
@@ -249,7 +249,7 @@ def _mount_stub_group_b(app, results: dict) -> int:
             action: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("virtualization_engine")
+            raise refuse_unlicensed("virtualization_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -263,35 +263,35 @@ def _mount_stub_group_b(app, results: dict) -> int:
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.post("/otel/{host_id}/deploy")
         async def obs_otel_deploy_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.post("/otel/{host_id}/remove")
         async def obs_otel_remove_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.post("/graylog/{host_id}/status")
         async def obs_graylog_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.post("/graylog/{host_id}/deploy")
         async def obs_graylog_deploy_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.post("/graylog/{host_id}/{platform}/remove")
         async def obs_graylog_remove_stub(  # pylint: disable=unused-argument
@@ -299,80 +299,80 @@ def _mount_stub_group_b(app, results: dict) -> int:
             platform: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.post("/grafana/{host_id}/status")
         async def obs_grafana_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.post("/grafana/{host_id}/provision")
         async def obs_grafana_provision_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.post("/routing/{host_id}/apply")
         async def obs_routing_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         # Custom Metrics & Graphs relocated into the licensed
         # observability_engine (Pro+ moat -- Custom Metrics Slice 2).  Without
         # the engine, these sub-paths serve the licensed-stub so
-        # /api/v1/observability/custom-metrics* returns {"licensed": False}
-        # rather than 404.  Mirrors the gpg-keys stub template.
+        # /api/v1/observability/custom-metrics* answers 402 rather than
+        # 404.  Mirrors the gpg-keys stub template.
         @router.get("/custom-metrics")
         async def obs_custom_metrics_list_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "custom_metrics": []}
+            raise refuse_unlicensed("observability_engine")
 
         @router.post("/custom-metrics")
         async def obs_custom_metrics_create_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.get("/custom-metrics/{metric_id}")
         async def obs_custom_metrics_get_stub(  # pylint: disable=unused-argument
             metric_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("observability_engine")
 
         @router.put("/custom-metrics/{metric_id}")
         async def obs_custom_metrics_update_stub(  # pylint: disable=unused-argument
             metric_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.delete("/custom-metrics/{metric_id}")
         async def obs_custom_metrics_delete_stub(  # pylint: disable=unused-argument
             metric_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.put("/custom-metrics/{metric_id}/tags")
         async def obs_custom_metrics_tags_stub(  # pylint: disable=unused-argument
             metric_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("observability_engine")
+            raise refuse_unlicensed("observability_engine")
 
         @router.get("/custom-metrics/{metric_id}/samples")
         async def obs_custom_metrics_samples_stub(  # pylint: disable=unused-argument
             metric_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "samples": []}
+            raise refuse_unlicensed("observability_engine")
 
         # Built-in host metric graphs (Phase 21.5) -- the read side lives in
         # observability_engine; unlicensed, the paths answer "not licensed".
@@ -381,23 +381,22 @@ def _mount_stub_group_b(app, results: dict) -> int:
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "series": []}
+            raise refuse_unlicensed("observability_engine")
 
         @router.get("/host-metrics/fleet/{key}")
         async def obs_host_metrics_fleet_stub(  # pylint: disable=unused-argument
             key: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "series": []}
+            raise refuse_unlicensed("observability_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
         logger.debug("Mounted observability_engine stub routes")
 
     if not results.get("federation_controller_engine"):
-        # 12.1.A surface -- every endpoint here returns
-        # ``{"licensed": False}`` until the Pro+ controller engine is
-        # loaded.  Frontend (12.3) probes any of these to know whether
+        # 12.1.A surface -- every endpoint here answers 402 until the
+        # Pro+ controller engine is loaded.  Frontend (12.3) probes any of these to know whether
         # to render the federation UI.  When the engine loads, its own
         # router replaces these stubs (see ``mount_federation_controller_routes``).
         router = APIRouter(
@@ -410,13 +409,13 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fed_list_sites_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "sites": []}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/sites")
         async def fed_enroll_site_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/sites/enrollment/{token}/complete")
         async def fed_complete_enrollment_stub(  # pylint: disable=unused-argument
@@ -426,56 +425,56 @@ def _mount_stub_group_b(app, results: dict) -> int:
             # here -- the enrollment token IS the auth (chicken-and-egg
             # otherwise: site servers don't have JWT credentials with
             # the coordinator until enrollment completes).
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/sites/{site_id}")
         async def fed_site_detail_stub(  # pylint: disable=unused-argument
             site_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.patch("/sites/{site_id}")
         async def fed_site_update_stub(  # pylint: disable=unused-argument
             site_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/sites/{site_id}/suspend")
         async def fed_site_suspend_stub(  # pylint: disable=unused-argument
             site_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/sites/{site_id}/resume")
         async def fed_site_resume_stub(  # pylint: disable=unused-argument
             site_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.delete("/sites/{site_id}")
         async def fed_site_remove_stub(  # pylint: disable=unused-argument
             site_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/sites/{site_id}/sync-status")
         async def fed_site_sync_status_stub(  # pylint: disable=unused-argument
             site_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/sites/{site_id}/sync-timeline")
         async def fed_site_sync_timeline_stub(  # pylint: disable=unused-argument
             site_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "events": []}
+            raise refuse_unlicensed("federation_controller_engine")
 
         # --- Cross-site host directory ---------------------------------------
 
@@ -483,14 +482,14 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fed_hosts_search_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "hosts": []}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/hosts/{host_id}")
         async def fed_host_detail_stub(  # pylint: disable=unused-argument
             host_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("federation_controller_engine")
 
         # --- Rollups ---------------------------------------------------------
 
@@ -498,31 +497,31 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fed_rollup_dashboard_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/reports/rollup")
         async def fed_reports_rollup_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "sites": [], "totals": {}}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/rollups/hosts")
         async def fed_rollup_hosts_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "rollups": []}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/rollups/compliance")
         async def fed_rollup_compliance_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "rollups": []}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/rollups/vulnerabilities")
         async def fed_rollup_vulnerabilities_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "rollups": []}
+            raise refuse_unlicensed("federation_controller_engine")
 
         # --- Policies --------------------------------------------------------
 
@@ -530,55 +529,55 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fed_list_policies_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "policies": []}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/policies")
         async def fed_create_policy_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/policies/{policy_id}")
         async def fed_policy_detail_stub(  # pylint: disable=unused-argument
             policy_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.patch("/policies/{policy_id}")
         async def fed_policy_update_stub(  # pylint: disable=unused-argument
             policy_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.delete("/policies/{policy_id}")
         async def fed_policy_deactivate_stub(  # pylint: disable=unused-argument
             policy_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/policies/{policy_id}/assign")
         async def fed_policy_assign_stub(  # pylint: disable=unused-argument
             policy_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/policies/{policy_id}/push")
         async def fed_policy_push_stub(  # pylint: disable=unused-argument
             policy_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/sites/{site_id}/repush-policies")
         async def fed_site_repush_policies_stub(  # pylint: disable=unused-argument
             site_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         # --- Commands --------------------------------------------------------
 
@@ -586,20 +585,20 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fed_command_dispatch_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/commands")
         async def fed_command_list_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "commands": []}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/commands/{command_id}")
         async def fed_command_detail_stub(  # pylint: disable=unused-argument
             command_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("federation_controller_engine")
 
         # --- Audit -----------------------------------------------------------
 
@@ -607,14 +606,14 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fed_audit_list_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "entries": []}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/audit/{entry_id}")
         async def fed_audit_detail_stub(  # pylint: disable=unused-argument
             entry_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("federation_controller_engine")
 
         # --- Rollup alerts ---------------------------------------------------
 
@@ -622,41 +621,41 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fed_alerts_list_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "alerts": []}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/alerts/{alert_id}/acknowledge")
         async def fed_alert_ack_stub(  # pylint: disable=unused-argument
             alert_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.get("/alert-config")
         async def fed_alert_config_get_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.put("/alert-config")
         async def fed_alert_config_put_stub(  # pylint: disable=unused-argument
             body: dict = None,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         # Phase 12.5 -- federation-aware dynamic-secret leases.
         @router.get("/secret-leases")
         async def fed_secret_leases_list_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "leases": []}
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/secret-leases/{lease_id}/revoke")
         async def fed_secret_lease_revoke_stub(  # pylint: disable=unused-argument
             lease_id: str,
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         # Phase 12.6 ingest surface -- endpoints sites POST data INTO
         # the coordinator over the federation wire protocol.  These
@@ -669,43 +668,43 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fed_ingest_host_rollup_stub(  # pylint: disable=unused-argument
             site_id: str,
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/sites/{site_id}/rollups/compliance")
         async def fed_ingest_compliance_rollup_stub(  # pylint: disable=unused-argument
             site_id: str,
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/sites/{site_id}/rollups/vulnerabilities")
         async def fed_ingest_vuln_rollup_stub(  # pylint: disable=unused-argument
             site_id: str,
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/sites/{site_id}/host-directory")
         async def fed_ingest_host_directory_stub(  # pylint: disable=unused-argument
             site_id: str,
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/sites/{site_id}/command-results")
         async def fed_ingest_command_results_stub(  # pylint: disable=unused-argument
             site_id: str,
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/sites/{site_id}/metadata")
         async def fed_ingest_site_metadata_stub(  # pylint: disable=unused-argument
             site_id: str,
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         @router.post("/sites/{site_id}/secret-lease-requests")
         async def fed_ingest_secret_lease_request_stub(  # pylint: disable=unused-argument
             site_id: str,
         ):
-            raise refuse_unlicensed_write("federation_controller_engine")
+            raise refuse_unlicensed("federation_controller_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -728,13 +727,13 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fed_site_enroll_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_site_engine")
+            raise refuse_unlicensed("federation_site_engine")
 
         @router.get("/enrollment-status")
         async def fed_site_enrollment_status_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "status": "unknown"}
+            raise refuse_unlicensed("federation_site_engine")
 
         # --- Inbound: coordinator → site ---------------------------------
 
@@ -742,19 +741,19 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fed_site_receive_policy_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_site_engine")
+            raise refuse_unlicensed("federation_site_engine")
 
         @router.post("/commands")
         async def fed_site_receive_command_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_site_engine")
+            raise refuse_unlicensed("federation_site_engine")
 
         @router.post("/secret-leases")
         async def fed_site_receive_secret_lease_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            raise refuse_unlicensed_write("federation_site_engine")
+            raise refuse_unlicensed("federation_site_engine")
 
         # --- Site → operator: status surface -----------------------------
 
@@ -762,25 +761,25 @@ def _mount_stub_group_b(app, results: dict) -> int:
         async def fed_site_engine_sync_status_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed("federation_site_engine")
 
         @router.get("/sync-queue/depth")
         async def fed_site_queue_depth_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "depth": 0}
+            raise refuse_unlicensed("federation_site_engine")
 
         @router.get("/received-policies")
         async def fed_site_received_policies_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "policies": []}
+            raise refuse_unlicensed("federation_site_engine")
 
         @router.get("/received-commands")
         async def fed_site_received_commands_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "commands": []}
+            raise refuse_unlicensed("federation_site_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1

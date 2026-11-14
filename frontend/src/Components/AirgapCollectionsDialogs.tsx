@@ -4,8 +4,8 @@
 
 /**
  * Dialogs for the Air-Gap Collection Runs page: the "New Collection Run"
- * create dialog and the multi-disc download picker.  Both are purely
- * presentational -- the owning page holds all state and passes it in via
+ * create dialog, the multi-disc download picker and the "load the next
+ * disc" confirmation of a burned set.  All are purely presentational -- the owning page holds all state and passes it in via
  * props.  Extracted from AirgapCollections.tsx to keep the page under the
  * max-lines budget.
  */
@@ -295,6 +295,65 @@ export const DiscPickerDialog: React.FC<DiscPickerDialogProps> = ({
       <DialogActions>
         <Button onClick={onClose}>
           {t('airgapCollections.discPicker.cancel', 'Cancel')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+interface NextDiscDialogProps {
+  run: CollectionRun | null;
+  submitting: boolean;
+  onClose: () => void;
+  onConfirm: (run: CollectionRun) => void;
+}
+
+/** A disc of a burned set is done: one optical drive burns a set one disc
+ * at a time, so the operator swaps the burned disc for a blank one and
+ * confirms here before the next disc burns.  Open while ``run`` is set. */
+export const NextDiscDialog: React.FC<NextDiscDialogProps> = ({
+  run,
+  submitting,
+  onClose,
+  onConfirm,
+}) => {
+  const { t } = useTranslation();
+  const burned = run?.burned_disc_count ?? 0;
+  const total = run?.disc_count ?? 0;
+  return (
+    <Dialog open={run !== null} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>
+        {t('airgapCollections.nextDisc.title', 'Load the next disc')}
+      </DialogTitle>
+      <DialogContent>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          {t(
+            'airgapCollections.nextDisc.body',
+            'Disc {{burned}} of {{total}} is burned and has been ejected from {{device}}. Label it as disc {{burned}}, put a blank disc in the drive, then confirm to burn disc {{next}}.',
+            {
+              burned,
+              total,
+              next: burned + 1,
+              device: run?.burn_device ?? '',
+            },
+          )}
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} disabled={submitting}>
+          {t('airgapCollections.nextDisc.cancel', 'Not yet')}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => {
+            if (run) onConfirm(run);
+          }}
+          disabled={submitting}
+          startIcon={submitting ? <CircularProgress size={16} /> : undefined}
+        >
+          {t('airgapCollections.nextDisc.confirm', 'Burn disc {{next}}', {
+            next: burned + 1,
+          })}
         </Button>
       </DialogActions>
     </Dialog>

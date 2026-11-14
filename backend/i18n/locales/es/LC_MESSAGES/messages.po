@@ -6754,6 +6754,16 @@ msgstr ""
 "Vulnerabilidades de macOS por versión del sistema operativo, según los datos "
 "de versiones afectadas del NVD"
 
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr "Esta ejecución no está esperando un disco virgen (estado: %s)."
+
+#: backend/api/airgap_collector_runs.py
+#, python-format
+msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
+msgstr "Se cargó un disco virgen para el disco %(disc)d de %(count)d de la ejecución de recopilación sin conexión '%(iso_label)s'"
+
 #~ msgid ""
 #~ "Confirm that photos will be deleted from iCloud once they are downloaded"
 #~ msgstr "Confirme que las fotos se eliminarán de iCloud una vez descargadas"

@@ -98,7 +98,7 @@
         "totalPackages": "Totaal aantal pakketten",
         "totalRepos": "Totaal aantal repositories"
       },
-      "endpointMissing": "Backend list-all-repositories endpoint niet beschikbaar; dashboard kan niet bepalen.",
+      "endpointMissing": "Het backend-endpoint list-all-repositories is niet beschikbaar; het dashboard kan niet worden gevuld.",
       "loadError": "Kan repositories niet laden:",
       "notApplicable": "Dit dashboard is alleen betekenisvol bij implementaties met een repository-rol.",
       "subtitle": "Per-reposities statistieken voor deze privés-zijde spiegel, plus algemene versiebekendheid.",
@@ -161,7 +161,8 @@
   "airgapCollections": {
     "actions": {
       "delete": "Verwijderen",
-      "download": "ISO-bestand downloaden"
+      "download": "ISO-bestand downloaden",
+      "nextDisc": "Volgende schijf geplaatst"
     },
     "column": {
       "actions": "Acties",
@@ -210,11 +211,23 @@
     "multiDiscInfo": "Deze run produceerde {{count}} schijven. Kies welke te downloaden.",
     "newRun": "Nieuwe verzamelrun",
     "noIsoOnDisk": "Geen ISO-bestand gevonden op de schijf nog -- herprobeer over een moment.",
-    "noManifestFound": "Run heeft nog geen manifest -- probeer opnieuw wanneer status COMPLETE is.",
+    "noManifestFound": "De run heeft nog geen downloadbare ISO -- wacht tot de status ISO_BUILT of COMPLETE bereikt.",
     "notApplicable": "Deze pagina heeft alleen betekenis op collector-rol implementaties.",
     "refresh": "Vernieuwen",
     "subtitle": "Activeer éénmalige collectie uitvoeringen die gespiegelde geconfigureerde repositories weerspiegelen, een ondertekend ISO bouwen en een manifest genereren voor verwerking aan de luchtdichte kant.",
-    "title": "Air-gap-verzamelruns"
+    "title": "Air-gap-verzamelruns",
+    "burnSet": {
+      "awaitingMedia": "Schijf {{burned}} van {{total}} gebrand. Plaats een lege schijf.",
+      "burning": "Schijf {{disc}} van {{total}}"
+    },
+    "nextDisc": {
+      "title": "Plaats de volgende schijf",
+      "body": "Schijf {{burned}} van {{total}} is gebrand en uit {{device}} uitgeworpen. Label deze als schijf {{burned}}, plaats een lege schijf in het station en bevestig daarna om schijf {{next}} te branden.",
+      "cancel": "Nog niet",
+      "confirm": "Schijf {{next}} branden",
+      "started": "Schijf {{disc}} van {{total}} wordt gebrand.",
+      "error": "Kan de volgende schijf niet starten"
+    }
   },
   "airgapDevices": {
     "empty": "Geen geschikte schijven gevonden. Voeg media toe en klik op Rescan.",
@@ -538,7 +551,8 @@
     "status": "Status",
     "unknownPackage": "(onbekend)",
     "violations": "Overtredingen",
-    "violationsFor": "Overtredingen -- {{name}}"
+    "violationsFor": "Overtredingen -- {{name}}",
+    "scanTooltip": "Scannen tegen de gecachte inventaris"
   },
   "configDrift": {
     "actions": "Acties",
@@ -1393,7 +1407,6 @@
     "completedAt": "Voltooid op",
     "complianceTab": "Compliance",
     "configurationFiles": "Configuratiebestanden",
-    "confirmDeleteInstallation": "Weet u zeker dat u dit installatierecord wilt verwijderen?",
     "confirmDeleteInstallationMessage": "Weet u zeker dat u deze installatiegegevens wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
     "confirmRequestPackages": "Beschikbare pakketten opvragen",
     "confirmRequestPackagesMessage": "Dit start de pakketverzameling op de host, wat resource-intensief kan zijn en enkele minuten kan duren. Wilt u doorgaan?",
@@ -1711,7 +1724,7 @@
     "softwareTab": "Software",
     "speed": "Snelheid",
     "sshKeysDeployedError": "Uitrollen van SSH-sleutels mislukt",
-    "sshKeysDeployedSuccess": "SSH-sleutels succesvol uitgerold",
+    "sshKeysDeployedSuccess": "Implementatie van SSH-sleutels succesvol in wachtrij geplaatst",
     "start": "Starten",
     "startChildHost": "Starten",
     "status": "Status",
@@ -1740,7 +1753,7 @@
     "ubuntuProAttachConfirm": "Koppelen",
     "ubuntuProAttachDescription": "Voer uw Ubuntu Pro-token in om dit systeem aan uw abonnement te koppelen.",
     "ubuntuProAttachError": "Kan Ubuntu Pro niet koppelen",
-    "ubuntuProAttachSuccess": "Ubuntu Pro succesvol gekoppeld",
+    "ubuntuProAttachSuccess": "Koppelen van Ubuntu Pro aangevraagd",
     "ubuntuProAttachTitle": "Ubuntu Pro koppelen",
     "ubuntuProAttaching": "Koppelen...",
     "ubuntuProDetach": "Ontkoppelen",
@@ -1748,7 +1761,7 @@
     "ubuntuProDetachConfirmMessage": "Weet u zeker dat u Ubuntu Pro van dit systeem wilt ontkoppelen? Dit verwijdert alle Ubuntu Pro-voordelen en -services voor deze host.",
     "ubuntuProDetachConfirmTitle": "Bevestig ontkoppeling van Ubuntu Pro",
     "ubuntuProDetachError": "Kan Ubuntu Pro niet ontkoppelen",
-    "ubuntuProDetachSuccess": "Ubuntu Pro succesvol ontkoppeld",
+    "ubuntuProDetachSuccess": "Ontkoppelen van Ubuntu Pro aangevraagd",
     "ubuntuProDetaching": "Ontkoppelen...",
     "ubuntuProInfo": "Ubuntu Pro Informatie",
     "ubuntuProTab": "Ubuntu Pro",
@@ -2523,7 +2536,7 @@
     "queryPacks": "Querypakketten",
     "reports": "Rapporten",
     "role": {
-      "collector": "Luchtdichte collector",
+      "collector": "Air-gap-verzamelaar",
       "engineMissing": "Vereiste Pro+ engine niet geladen; controleer licentie.",
       "repository": "Air-gap-repository"
     },
@@ -2668,7 +2681,8 @@
     "updated": "Nalevingsprofiel opgeslagen",
     "version": "Versie",
     "versionOp": "Op",
-    "versionOpAny": "(alle)"
+    "versionOpAny": "(alle)",
+    "loadOneError": "Nalevingsprofiel laden mislukt"
   },
   "policies": {
     "actions": {
@@ -2833,7 +2847,8 @@
     },
     "title": "Querypakketten",
     "validateFailed": "Kon het pakket niet controleren",
-    "version": "Version"
+    "version": "Version",
+    "livePollFailed": "Kon de resultaten van de live-query niet lezen"
   },
   "queues": {
     "created": "Aangemaakt op",
@@ -2894,7 +2909,8 @@
     "subtitle": "Aangepaste lay-outs die de rapport-renderer bovenop de ingebouwde rapporttypen toepast",
     "tabLabel": "Rapportage sjablonen",
     "title": "Rapportsjablonen",
-    "updated": "Sjabloon opgeslagen"
+    "updated": "Sjabloon opgeslagen",
+    "addDialogTitle": "Rapportsjabloon toevoegen"
   },
   "reportViewer": {
     "iframeTitle": "Rapportinhoud",
@@ -3185,7 +3201,8 @@
     "updateError": "Fout bij bijwerken van geheim",
     "updateSuccess": "Geheim succesvol bijgewerkt",
     "updatedAt": "Bijgewerkt op",
-    "viewSecret": "Geheim Bekijken"
+    "viewSecret": "Geheim Bekijken",
+    "loadOneError": "Fout bij laden van geheim"
   },
   "security": {
     "addRole": "Rol Toevoegen",
@@ -3501,8 +3518,8 @@
     "opentelemetry": {
       "collectorUrl": "Collector-URL",
       "configuration": "Configuratie",
-      "disabledMessage": "OpenTelemetry-instrumentatie is momenteel uitgeschakeld. Verwijder OTEL_ENABLED=false of stel OTEL_ENABLED=true in om gedistribueerde tracing en metriekverzameling in te schakelen.",
-      "enableHint": "OpenTelemetry is standaard ingeschakeld. Om het uit te schakelen, stel de omgevingsvariabele OTEL_ENABLED=false in en herstart de server.",
+      "disabledMessage": "OpenTelemetry-instrumentatie is uitgeschakeld (standaard). Stel de omgevingsvariabele OTEL_ENABLED=true in (of telemetry.enabled: true in sysmanage.yaml) en herstart de server om gedistribueerde tracing en metriekverzameling in te schakelen.",
+      "enableHint": "Om OpenTelemetry uit te schakelen, stel de omgevingsvariabele OTEL_ENABLED=false in (of telemetry.enabled: false in sysmanage.yaml) en herstart de server.",
       "fetchError": "Kan OpenTelemetry-status niet ophalen",
       "instrumentation": "Instrumentatie",
       "metricsCount": "Metrieken",
@@ -3610,7 +3627,8 @@
     "windowsTypeHelp": "Kies Chocolatey of winget",
     "windowsUrl": "Repository-URL",
     "windowsUrlHelp": "bijv. https://mycompany.com/chocolatey",
-    "winget": "winget"
+    "winget": "winget",
+    "obsRepoUrl": "OBS-repository-URL"
   },
   "ubuntuPro": {
     "actions": {
@@ -3761,7 +3779,8 @@
     "updated": "Updateprofiel opgeslagen",
     "window": "Gespreid venster (minuten)",
     "windowHelp": "Agent-verzendingen over zoveel minuten verspreiden (0-720)",
-    "windowRange": "Gespreid venster moet tussen 0 en 720 minuten liggen"
+    "windowRange": "Gespreid venster moet tussen 0 en 720 minuten liggen",
+    "addDialogTitle": "Updateprofiel toevoegen"
   },
   "userDetail": {
     "active": "Actief",
