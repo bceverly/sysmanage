@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import re
 from typing import Dict, Optional
 from urllib.parse import urlsplit
 
@@ -348,21 +349,37 @@ def _agent_distro_hint(host) -> str:
     return " ".join(parts).lower()
 
 
-def _pick_repo(db, host) -> Optional["models.AirgapLocalRepository"]:
-    """Choose which mirror repo to point this agent at.
+def _names(text: str, word: str) -> bool:
+    """Is ``word`` in ``text`` as itself, not inside a longer name or number
+    ("3.22" in "alpine 3.22.2", not "3.2" in "3.22"; "9" in "rocky 9.4")?"""
+    return bool(
+        word and re.search(rf"(?<![\w.]){re.escape(word.lower())}(?![\w])", text)
+    )
 
-    Single repo → use it (the common single-distro air-gap enclave).
-    Multiple → match the agent's OS string against a repo's distro.
-    None match → None (skip; don't push a wrong-distro source).
+
+def _pick_repo(db, host) -> Optional["models.AirgapLocalRepository"]:
+    """Choose which mirror repo to point this agent at: one for the host's
+    own distribution AND release, or none.
+
+    The distribution is matched against the host's release string first
+    ("Ubuntu 26.04", "Alpine 3.22.2") -- its full OS details also carry
+    relatives (an Ubuntu host's ID_LIKE says "debian") -- and against the
+    full details only when the release string names none.  The version
+    must be in the release string too.  Until 2026-11-13 a lone repository
+    was pushed to every host whatever it ran: the lab's Ubuntu server was
+    handed an Alpine mirror, and one Ubuntu 22.04 mirror would have pointed
+    24.04 hosts at the wrong suite.  None match -> None (skip; never push a
+    wrong-distro or wrong-release source).
     """
     rows = db.query(models.AirgapLocalRepository).all()
     if not rows:
         return None
-    if len(rows) == 1:
-        return rows[0]
-    hint = _agent_distro_hint(host)
-    for row in rows:
-        if row.distro and row.distro.lower() in hint:
+    release = (getattr(host, "platform_release", "") or "").lower()
+    candidates = [r for r in rows if _names(release, r.distro or "")] or [
+        r for r in rows if _names(_agent_distro_hint(host), r.distro or "")
+    ]
+    for row in candidates:
+        if _names(release, str(row.version or "")):
             return row
     return None
 

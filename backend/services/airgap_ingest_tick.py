@@ -146,7 +146,12 @@ def _is_block_device_path(iso_path: str) -> bool:
     return bool(iso_path) and iso_path.startswith("/dev/")
 
 
-def _build_mount_plan(iso_path: str) -> dict:
+def _manifest_copy_dir(run_id) -> str:
+    """Where the mount plan leaves this ingest's manifest for the server."""
+    return os.path.join(os.path.dirname(REPO_ROOT), "airgap-ingest", str(run_id))
+
+
+def _build_mount_plan(iso_path: str, run_id=None) -> dict:
     """Mount the ingest media read-only and read its embedded manifest.
 
     Handles both sources:
@@ -162,6 +167,14 @@ def _build_mount_plan(iso_path: str) -> dict:
     handler verifies against the keyring.  ``cat`` runs WITHOUT sudo:
     the manifest is world-readable, so no privileged read is needed (and
     none is granted in sudoers).
+
+    Before it, the manifest is also copied off the disc into a folder of
+    this ingest's own (``_manifest_copy_dir``), because the agent returns
+    only the last 2,000 characters of output and a manifest listing the
+    SysManage tools for two targets is already longer.  The server cannot
+    read the disc itself: the agent's unit has a private mount namespace
+    (PrivateTmp), so its mount is invisible outside it, while
+    ``/var/lib/sysmanage`` is the same directory everywhere (2026-11-13).
     """
     mount_opts = "ro" if _is_block_device_path(iso_path) else "loop,ro"
     return {
@@ -187,6 +200,7 @@ def _build_mount_plan(iso_path: str) -> dict:
                 "mount ingest media read-only",
                 "engine.airgap_repository.cmd.mount_iso",
             ),
+            *_manifest_copy_commands(run_id),
             _cmd(
                 ["cat", MOUNT_POINT + "/manifest.json"],
                 60,
@@ -198,11 +212,51 @@ def _build_mount_plan(iso_path: str) -> dict:
     }
 
 
-def _build_copy_plan() -> dict:
+def _manifest_copy_commands(run_id) -> list:
+    """Copy the disc's manifest where the server can read it (best-effort:
+    the agent's output still carries a short one)."""
+    if run_id is None:
+        return []
+    folder = _manifest_copy_dir(run_id)
+    return [
+        _cmd(
+            ["sudo", "mkdir", "-p", folder],
+            60,
+            True,
+            "create the manifest folder",
+            "engine.airgap_repository.cmd.create_mount_point",
+        ),
+        _cmd(
+            ["sudo", "rsync", MOUNT_POINT + "/manifest.json", folder + "/"],
+            60,
+            True,
+            "copy the embedded manifest",
+            "engine.airgap_repository.cmd.read_manifest",
+        ),
+    ]
+
+
+def _disc_number(envelope, key: str):
+    """``disc_index`` / ``disc_count`` from the manifest envelope, or None."""
+    value = envelope.get(key) if isinstance(envelope, dict) else None
+    return value if isinstance(value, int) and value > 0 else None
+
+
+# A disc of a set carries whole ``<distro>/<version>`` trees (the collector
+# packs targets whole), so its copy protects every tree of those two levels
+# from deletion: what it carries is still mirrored exactly, inside, and what
+# the set's other discs brought stays.
+_SET_PROTECT = ["--filter=P /*", "--filter=P /*/*"]
+
+
+def _build_copy_plan(disc_count=None, run_id=None) -> dict:
     """rsync the verified payload into the local mirror tree, then unmount.
 
     ``--delete-after`` makes the local tree a faithful mirror of the
-    media (stale packages removed).  ``--stats`` lets the copy-result
+    media (stale packages removed).  A disc of a set of two or more
+    (``disc_count`` > 1) is merged instead: deletion stays inside the
+    ``<distro>/<version>`` trees it carries, so ingesting disc 2 never
+    removes disc 1's mirrors.  ``--stats`` lets the copy-result
     handler record file/byte counts.  The trailing ``umount`` is
     ignore-errors so a transient busy-unmount doesn't fail an otherwise
     successful ingest (the next mount's leading umount cleans up).
@@ -222,6 +276,7 @@ def _build_copy_plan() -> dict:
                     "rsync",
                     "-a",
                     "--delete-after",
+                    *(_SET_PROTECT if (disc_count or 1) > 1 else []),
                     "--stats",
                     MOUNT_POINT + "/",
                     REPO_ROOT + "/",
@@ -237,6 +292,19 @@ def _build_copy_plan() -> dict:
                 True,
                 "umount ingest ISO",
                 "engine.airgap_repository.cmd.umount_iso",
+            ),
+            *(
+                [
+                    _cmd(
+                        ["sudo", "rm", "-rf", _manifest_copy_dir(run_id)],
+                        60,
+                        True,
+                        "remove the manifest copy",
+                        "engine.airgap_repository.cmd.umount_iso",
+                    )
+                ]
+                if run_id is not None
+                else []
             ),
         ]
     }
@@ -342,7 +410,7 @@ def verify_envelope_against_keyring(engine, envelope, keyring_dir, strict) -> di
     )
 
 
-def _manifest_from_mount_outcome(outcome: dict):
+def _manifest_from_mount_outcome(outcome: dict, run_id=None):
     """Pull the embedded manifest envelope out of the mount plan result.
 
     Finds the ``cat .../manifest.json`` command in the per-command
@@ -355,13 +423,40 @@ def _manifest_from_mount_outcome(outcome: dict):
         argv = cmd.get("argv") or []
         if argv and str(argv[-1]).endswith("/manifest.json"):
             raw = (cmd.get("stdout") or "").strip()
-            if not raw:
-                return None
             try:
-                return json.loads(raw)
+                return json.loads(raw) if raw else _manifest_copy(run_id)
             except (ValueError, TypeError):
-                return None
+                return _manifest_copy(run_id)
     return None
+
+
+# Larger than any real manifest (one per target, a few hundred bytes per
+# tool file), small enough that a hostile disc cannot balloon the server.
+_MANIFEST_MAX_BYTES = 16 * 1024 * 1024
+
+
+def _manifest_copy(run_id):
+    """The manifest the mount plan copied off the disc, or None.
+
+    The agent returns only the last 2,000 characters of a command's
+    output, and a manifest listing the SysManage tools for two targets is
+    already longer (found 2026-11-13 ingesting a two-disc set: "could not
+    read /manifest.json").  The ingest is single-box by design -- its plans
+    run on this server's own host (``_find_repository_host``) -- so the
+    copy is on this machine.  The signature is verified on what this
+    returns exactly as on the agent's output.
+    """
+    if run_id is None:
+        return None
+    path = os.path.join(_manifest_copy_dir(run_id), "manifest.json")
+    try:
+        if os.path.getsize(path) > _MANIFEST_MAX_BYTES:
+            logger.error("manifest copied off the ingest media is too large: %s", path)
+            return None
+        with open(path, encoding="utf-8") as handle:
+            return json.load(handle)
+    except (OSError, ValueError):
+        return None
 
 
 def _parse_rsync_int(stdout, pattern):
@@ -407,7 +502,7 @@ def process_mount_result(_session, run, outcome) -> None:
         _fail(run, "airgap_repository_engine not loaded; cannot verify ingest media")
         return
 
-    envelope = _manifest_from_mount_outcome(outcome)
+    envelope = _manifest_from_mount_outcome(outcome, run.id)
     if envelope is None:
         _fail(
             run,
@@ -433,6 +528,8 @@ def process_mount_result(_session, run, outcome) -> None:
         envelope.get("format_version") if isinstance(envelope, dict) else None
     )
     run.collector_iso_label = manifest.get("iso_label")
+    run.disc_index = _disc_number(envelope, "disc_index")
+    run.disc_count = _disc_number(envelope, "disc_count")
     run.manifest_json = json.dumps(manifest, separators=(",", ":"))
     run.status = STATUS_VERIFIED
     run.error_message = None
@@ -472,19 +569,16 @@ def _mirror_base_url() -> str:
     """Base URL air-gapped agents use to reach this repository's mirror.
 
     Host is this server's own name (single-box air-gap deploy serves the
-    mirror from the same host that runs sysmanage); port is the webui
-    nginx port that serves ``/airgap-repo/`` (omitted when it's 80).
-    NOT ``localhost`` -- other air-gapped agents have to resolve it.
+    mirror from the same host that runs sysmanage); NOT ``localhost`` --
+    other air-gapped agents have to resolve it.  Port 80: nginx is the only
+    public listener and serves ``/airgap-repo/`` (and ``/airgap-tools/``)
+    over plain HTTP there, the one thing its port-80 server does besides
+    redirecting to TLS.  ``webui.port`` is the backend's own port behind
+    nginx (3000 by default) and was used here until 2026-11-13: every
+    repository's URL pointed at a port nothing outside could reach.
     """
     host = socket.getfqdn() or socket.gethostname()
-    port = 0
-    try:
-        webui = config_module.get_config().get("webui", {}) or {}
-        port = int(webui.get("port") or 0)
-    except (ValueError, TypeError, AttributeError):
-        port = 0
-    netloc = host if port in (0, 80) else f"{host}:{port}"
-    return f"http://{netloc}/airgap-repo"  # NOSONAR S5332 - air-gap LAN repo, no PKI in the enclave; agents fetch over http intentionally
+    return f"http://{host}/airgap-repo"  # NOSONAR S5332 - air-gap LAN repo, no PKI in the enclave; agents fetch over http intentionally
 
 
 def _discover_apt_root(distro: str, version: str):
@@ -590,7 +684,7 @@ def _advance_queued(db, run) -> None:
             "repository box must run a sysmanage agent registered to this server",
         )
         return
-    plan = _build_mount_plan(run.iso_path)
+    plan = _build_mount_plan(run.iso_path, run.id)
     try:
         from backend.services.proplus_dispatch import (  # pylint: disable=import-outside-toplevel
             enqueue_apply_plan,
@@ -614,7 +708,7 @@ def _advance_verified(db, run) -> None:
     if host is None:
         _fail(run, "repository host no longer registered between mount and copy")
         return
-    plan = _build_copy_plan()
+    plan = _build_copy_plan(run.disc_count, run.id)
     try:
         from backend.services.proplus_dispatch import (  # pylint: disable=import-outside-toplevel
             enqueue_apply_plan,

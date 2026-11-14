@@ -294,6 +294,11 @@ class AirgapIngestionRun(Base):
     # across a restart, and so the ingest is auditable after the fact.
     manifest_json = Column(Text, nullable=True)
 
+    # Which disc of a set this was (q91ingestdisc), from the manifest
+    # envelope; a disc of a set of two or more is merged, not mirrored.
+    disc_index = Column(Integer, nullable=True)
+    disc_count = Column(Integer, nullable=True)
+
     created_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )

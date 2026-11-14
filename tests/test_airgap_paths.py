@@ -62,3 +62,42 @@ def test_the_snap_writes_under_its_own_data_directory():
 
 def test_every_nginx_platform_is_covered():
     assert set(_nginx_table()) == set(SYSTEMS) | {"snap"}
+
+
+def _plain_http_server(config: str) -> str:
+    """The ``listen 80`` server block of a rendered config."""
+    start = config.index("listen 80;")
+    start = config.rindex("server {", 0, start)
+    depth, i = 0, start
+    while True:
+        if config[i] == "{":
+            depth += 1
+        elif config[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return config[start : i + 1]
+        i += 1
+
+
+@pytest.mark.parametrize("name", sorted(SYSTEMS) + ["snap"])
+def test_plain_http_serves_only_the_package_trees(name):
+    """2026-11-13: port 80 redirected everything, so no air-gapped host's
+    package manager could fetch the repository it was pointed at."""
+    path = REPO / "scripts" / "render_nginx_configs.py"
+    spec = importlib.util.spec_from_file_location("_render_nginx", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    block = _plain_http_server(module.render(name))
+    paths = module.PLATFORMS[name]
+    assert f"alias {paths['AIRGAP_ROOT']};" in block
+    assert f"alias {paths['AIRGAP_TOOLS_ROOT']};" in block
+    assert block.count("location") == 3  # the two trees, and the redirect
+    assert "return 301 https://$host$request_uri;" in block
+    assert "proxy_pass" not in block  # nothing of the application in clear
+
+
+def test_the_repository_url_is_port_80_never_the_backend_port(monkeypatch):
+    from backend.services import airgap_ingest_tick as tick
+
+    monkeypatch.setattr(tick.socket, "getfqdn", lambda: "repo.example.com")
+    assert tick._mirror_base_url() == "http://repo.example.com/airgap-repo"

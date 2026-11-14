@@ -136,6 +136,41 @@ def test_mount_plan_mounts_ro_and_reads_manifest():
     assert argvs[-1][0] == "cat"
 
 
+def test_a_manifest_longer_than_the_agent_returns_is_read_from_its_copy(
+    tmp_path, monkeypatch
+):
+    """The agent keeps the last 2,000 characters of output: a two-target
+    manifest came back cut, and the disc was refused (2026-11-13).  The
+    agent's mount is in its own namespace, so the plan copies the manifest
+    into a folder of the ingest's own, and the server reads that."""
+    monkeypatch.setattr(tick, "REPO_ROOT", str(tmp_path / "airgap-repo"))
+    envelope = {"manifest": {"tools": [{"name": "x" * 50}] * 100}, "signature": "s"}
+    whole = json.dumps(envelope, indent=2)
+    folder = tmp_path / "airgap-ingest" / "run-1"
+    folder.mkdir(parents=True)
+    (folder / "manifest.json").write_text(whole, encoding="utf-8")
+    cut = {"commands": [{"argv": ["cat", "/m/manifest.json"], "stdout": whole[-2000:]}]}
+    assert tick._manifest_from_mount_outcome(cut, "run-1") == envelope
+    # Another ingest never reads this one's copy.
+    assert tick._manifest_from_mount_outcome(cut, "run-2") is None
+
+
+def test_the_plans_copy_the_manifest_and_clean_up(monkeypatch):
+    monkeypatch.setattr(tick, "REPO_ROOT", "/var/lib/sysmanage/airgap-repo")
+    folder = "/var/lib/sysmanage/airgap-ingest/run-1"
+    mount = [c["argv"] for c in tick._build_mount_plan("/dev/sr0", "run-1")["commands"]]
+    assert ["sudo", "rsync", tick.MOUNT_POINT + "/manifest.json", folder + "/"] in mount
+    assert mount[-1] == ["cat", tick.MOUNT_POINT + "/manifest.json"]
+    copy = [c["argv"] for c in tick._build_copy_plan(1, "run-1")["commands"]]
+    assert copy[-1] == ["sudo", "rm", "-rf", folder]
+
+
+def test_no_manifest_anywhere_is_still_refused(tmp_path, monkeypatch):
+    monkeypatch.setattr(tick, "REPO_ROOT", str(tmp_path / "airgap-repo"))
+    cut = {"commands": [{"argv": ["cat", "/m/manifest.json"], "stdout": "}  ]"}]}
+    assert tick._manifest_from_mount_outcome(cut, "run-1") is None
+
+
 def test_copy_plan_rsyncs_then_unmounts():
     plan = tick._build_copy_plan()
     argvs = [c["argv"] for c in plan["commands"]]
@@ -143,6 +178,49 @@ def test_copy_plan_rsyncs_then_unmounts():
     assert any(a[:2] == ["sudo", "rsync"] and "--delete-after" in a for a in argvs)
     assert argvs[-1] == ["sudo", "umount", tick.MOUNT_POINT]
     assert plan["commands"][-1]["ignore_errors"] is True
+    rsync = next(a for a in argvs if a[:2] == ["sudo", "rsync"])
+    assert not any(a.startswith("--filter") for a in rsync)  # one disc: a mirror
+
+
+@pytest.mark.parametrize("count", [None, 1])
+def test_a_single_disc_still_replaces_the_repository(count):
+    rsync = next(
+        c["argv"]
+        for c in tick._build_copy_plan(count)["commands"]
+        if c["argv"][:2] == ["sudo", "rsync"]
+    )
+    assert "--delete-after" in rsync
+    assert not any(a.startswith("--filter") for a in rsync)
+
+
+def test_a_disc_of_a_set_keeps_what_the_other_discs_brought(tmp_path):
+    """Real rsync: disc 2 of a set must not delete disc 1's mirror, while a
+    package dropped from a tree disc 2 carries is still removed."""
+    import shutil
+    import subprocess
+
+    if shutil.which("rsync") is None:
+        pytest.skip("rsync not installed")
+    repo = tmp_path / "repo"
+    disc2 = tmp_path / "disc2"
+    for path in (
+        repo / "alpine" / "3.22" / "x86_64" / "restate.apk",  # from disc 1
+        repo / "alpine" / "3.21" / "x86_64" / "old.apk",  # dropped upstream
+        disc2 / "alpine" / "3.21" / "x86_64" / "new.apk",
+        disc2 / "manifest.json",
+    ):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("x", encoding="ascii")
+    rsync = next(
+        c["argv"]
+        for c in tick._build_copy_plan(2)["commands"]
+        if c["argv"][:2] == ["sudo", "rsync"]
+    )
+    argv = rsync[1:-2] + [str(disc2) + "/", str(repo) + "/"]
+    subprocess.run(argv, check=True, capture_output=True)  # nosec B603
+    assert (repo / "alpine" / "3.22" / "x86_64" / "restate.apk").exists()
+    assert (repo / "alpine" / "3.21" / "x86_64" / "new.apk").exists()
+    assert not (repo / "alpine" / "3.21" / "x86_64" / "old.apk").exists()
 
 
 # ---------------------------------------------------------------------------

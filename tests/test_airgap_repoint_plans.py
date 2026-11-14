@@ -7,6 +7,8 @@ package manager the collector mirrors (ROADMAP 25.9, 2026-11-13): before,
 only apt hosts were pointed there, so "Equip for backup" on any other host
 of an air-gapped site had nowhere to install restate from."""
 
+import types
+
 import pytest
 
 from backend.services import airgap_repoint_service as repoint
@@ -77,3 +79,65 @@ def test_upstream_repositories_are_switched_off():
 
 def test_an_unknown_distribution_is_left_alone():
     assert repoint.repoint_plan("plan9", URL, "") is None
+
+
+# --- which repository a host gets (2026-11-13) ------------------------------
+# The lab's Ubuntu repository server was handed its lone Alpine mirror: a
+# single repository went to every host whatever it ran.
+
+
+class _Rows:
+    def __init__(self, rows):
+        self.rows = rows
+
+    def query(self, _model):
+        return self
+
+    def all(self):
+        return self.rows
+
+
+def _repo(distro, version):
+    return types.SimpleNamespace(distro=distro, version=version, repo_url="u")
+
+
+def _host(release, details=""):
+    return types.SimpleNamespace(
+        platform="Linux",
+        platform_release=release,
+        platform_version="",
+        os_details=details,
+    )
+
+
+@pytest.mark.parametrize(
+    "release, repos, picked",
+    [
+        ("Alpine 3.22.2", [("alpine", "3.22")], ("alpine", "3.22")),
+        ("Ubuntu 26.04", [("alpine", "3.22")], None),  # the lab's server
+        ("Ubuntu 24.04", [("ubuntu", "22.04")], None),  # never the wrong suite
+        (
+            "Ubuntu 24.04",
+            [("ubuntu", "22.04"), ("ubuntu", "24.04")],
+            ("ubuntu", "24.04"),
+        ),
+        ("Alpine 3.2.1", [("alpine", "3.22")], None),  # 3.2 is not 3.22
+        ("Alpine 3.22.2", [("alpine", "3.2")], None),  # nor 3.22 3.2
+        ("Rocky Linux 9.4", [("rocky", "9")], ("rocky", "9")),
+    ],
+)
+def test_a_host_gets_its_own_distribution_and_release_or_nothing(
+    release, repos, picked
+):
+    rows = [_repo(*r) for r in repos]
+    found = repoint._pick_repo(_Rows(rows), _host(release))
+    if picked:
+        assert (found.distro, found.version) == picked
+    else:
+        assert found is None
+
+
+def test_an_ubuntu_host_is_not_given_a_debian_mirror_by_its_id_like():
+    rows = [_repo("debian", "12"), _repo("ubuntu", "24.04")]
+    host = _host("Ubuntu 24.04", details='{"ID_LIKE": "debian", "VERSION": "12"}')
+    assert repoint._pick_repo(_Rows(rows), host).distro == "ubuntu"

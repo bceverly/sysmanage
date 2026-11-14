@@ -101,10 +101,16 @@ def _dump_schema(db_url: str, out_path: Path) -> None:
         re.compile(r"^\\(?:un)?restrict .*"),
         re.compile(r"^\s*$"),
     ]
+    # pg_attver is a per-column version stamp newer pg_dump releases emit
+    # (``ALTER TABLE ... ALTER COLUMN c SET (pg_attver=N)``).  A downgrade
+    # drops a column and the upgrade adds it back, so N always changes
+    # across the round trip while the column itself is identical -- seen
+    # first on q90proautoattach, 2026-11-13.  Keep the line, mask the value.
+    attver = re.compile(r"pg_attver=\d+")
     for line in text.splitlines():
         if any(p.match(line) for p in skip_patterns):
             continue
-        cleaned.append(line)
+        cleaned.append(attver.sub("pg_attver=N", line))
     out_path.write_text("\n".join(cleaned) + "\n", encoding="utf-8")
 
 
@@ -132,7 +138,9 @@ def main() -> int:
             baseline_size = before.stat().st_size
             print(f"      schema-before.sql: {baseline_size} bytes")
 
-            print("\n[3/4] Round-tripping latest migration (downgrade -1 → upgrade head)...")
+            print(
+                "\n[3/4] Round-tripping latest migration (downgrade -1 → upgrade head)..."
+            )
             _alembic("downgrade", "-1")
             _alembic("upgrade", "head")
 
@@ -142,7 +150,10 @@ def main() -> int:
             print(f"      schema-after.sql:  {roundtrip_size} bytes")
 
         except subprocess.CalledProcessError as e:
-            print(f"\nFAIL: alembic / pg_dump command exited {e.returncode}", file=sys.stderr)
+            print(
+                f"\nFAIL: alembic / pg_dump command exited {e.returncode}",
+                file=sys.stderr,
+            )
             return 1
 
         # Diff the two snapshots.  Identical = round-trip works.
@@ -161,7 +172,9 @@ def main() -> int:
             print("\nPASS: schema is byte-identical after round-trip.")
             return 0
 
-        print("\nFAIL: schema drifted after downgrade -1 / upgrade head.", file=sys.stderr)
+        print(
+            "\nFAIL: schema drifted after downgrade -1 / upgrade head.", file=sys.stderr
+        )
         print("--- diff (truncated to 200 lines) ---", file=sys.stderr)
         for line in diff.stdout.splitlines()[:200]:
             print(line, file=sys.stderr)
