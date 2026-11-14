@@ -115,13 +115,13 @@
         "signerFingerprint": "签名指纹",
         "version": "版本"
       },
-      "title": "空气隔断的仓库"
+      "title": "气隙仓库"
     }
   },
   "airgapBundles": {
     "buildAgent": "构建代理包",
     "buildError": "排队构建失败。",
-    "buildProplus": "构建Pro+包",
+    "buildProplus": "构建 Pro+ 包",
     "buildServer": "构建服务器包",
     "bundle": "包",
     "completedAt": "已完成",
@@ -196,7 +196,7 @@
       "mirrorsTitle": "镜像",
       "noMirrors": "没有启用的镜像配置。前往设置 → 仓库镜像以添加一个，然后重试。",
       "submit": "队列运行",
-      "title": "新建集合运行"
+      "title": "新建收集运行"
     },
     "discPicker": {
       "cancel": "取消",
@@ -208,13 +208,13 @@
     "licenseRequired": "空气隔断收集引擎未加载；需要Pro+许可证。",
     "loadError": "加载运行失败。",
     "multiDiscInfo": "此次运行生成了 {{count}} 张光盘。请选择要下载的光盘。",
-    "newRun": "新建集合运行",
+    "newRun": "新建收集运行",
     "noIsoOnDisk": "尚未在磁盘上找到ISO文件 -- 请稍后再试。",
     "noManifestFound": "运行尚未有清单 -- 请在状态为 COMPLETE 后再试一次。",
     "notApplicable": "只有在收集器角色部署时才有意义的页面。",
     "refresh": "刷新",
     "subtitle": "启动一次性收集运行，以镜像配置的存储库，构建签名ISO，并为隔离网络侧生成一个清单文件。",
-    "title": "空气隙收集运行"
+    "title": "气隙收集运行"
   },
   "airgapDevices": {
     "empty": "未找到符合条件的磁盘。插入介质并按重扫描键。",
@@ -226,11 +226,11 @@
     "removable": "可移动的",
     "rescan": "重新扫描磁盘",
     "saveError": "无法保存设备。",
-    "title": "导入磁盘"
+    "title": "导入驱动器"
   },
   "airgapImport": {
     "device": "驱动器",
-    "import": "导入ISO",
+    "import": "导入 ISO",
     "importError": "无法启动导入。",
     "noDevice": "没有选择导入磁盘。在设置 → 服务器角色中选择一个。",
     "notReady": "尚未就绪",
@@ -255,7 +255,7 @@
       "copyKey": "复制公钥",
       "help": "复制此公钥并在空气隔断仓库服务器上导入它，以便它可以信任该收集器生成的签名媒体。仅显示公钥 -- 私钥永远不会离开此服务器。",
       "loadError": "无法加载收集器公钥。",
-      "title": "采集器公钥"
+      "title": "收集器公钥"
     },
     "copied": "已复制！",
     "copyError": "无法复制到剪贴板。",
@@ -274,7 +274,7 @@
       "pemLabel": "公钥（PEM）",
       "removeError": "无法移除密钥。",
       "required": "名称和公钥都是必需的。",
-      "title": "受信任的采集密钥"
+      "title": "受信任的收集器密钥"
     }
   },
   "antivirus": {
@@ -2491,7 +2491,7 @@
   },
   "nav": {
     "advisories": "安全公告",
-    "airgapCollections": "空气隙收集",
+    "airgapCollections": "气隙收集",
     "airgapRepositories": "空气隔断仓库",
     "alerts": "警报",
     "cat": {
@@ -2525,7 +2525,7 @@
     "role": {
       "collector": "空气隔断收集器",
       "engineMissing": "未加载所需的Pro+引擎；请检查许可证。",
-      "repository": "离网仓库"
+      "repository": "气隙仓库"
     },
     "scripts": "脚本",
     "scrollLeft": "向左滚动",
@@ -3323,7 +3323,7 @@
   "serverRole": {
     "collector": {
       "description": "互联网连接的空气隔断对的一半。它镜像上游软件包仓库，收集CVE和合规性信息，并将它们打包成签名ISO映像，以便物理携带跨越空气间隙。请在具有互联网访问权限并构建媒体的服务器上选择此项。",
-      "title": "空气隙收集器（在线侧）"
+      "title": "气隙收集器（联网侧）"
     },
     "currentTag": "(当前)",
     "heading": "空气隔断角色",
@@ -3332,7 +3332,7 @@
     "menuTitle": "服务器角色",
     "repository": {
       "description": "隔离的空气隔断对的一半，无互联网访问权限。它接收由采集器生成的ISO介质，验证其签名，并向私有网络上的托管主机提供软件包以进行正常更新。请在空气隔断区域内的服务器上选择此项。",
-      "title": "离网仓库（断开侧）"
+      "title": "气隙仓库（断网侧）"
     },
     "restartHint": "保存后重启SysManage服务器以使新角色生效。",
     "save": "Save Role",
@@ -5701,7 +5701,7 @@
     "equip": {
       "blockedAgent": "请升级代理，以便从此处配备此主机",
       "blockedPlatform": "请在此系统上手动安装 restate（从源代码构建）",
-      "button": "配备备份",
+      "button": "为备份做准备",
       "checking": "已询问代理；状态将在几秒钟内更新。",
       "error": "无法开始配备备份。",
       "failChecksum": "下载的软件包与其公布的校验和不一致，因此未安装",
@@ -6019,6 +6019,132 @@
       "again": "修复或升级",
       "button": "启用 iCloud 备份",
       "root": "照片保存在 {{path}} 下（准备于 {{when}}）。"
+    }
+  },
+  "securityRoles": {
+    "group": {
+      "ubuntu_pro": "Ubuntu Pro",
+      "host": "主机",
+      "host_account_management": "主机账户管理",
+      "integrations": "集成",
+      "package": "软件包",
+      "reports": "报告",
+      "scripts": "脚本",
+      "secrets": "密钥",
+      "security": "安全性",
+      "settings": "设置",
+      "user": "用户",
+      "virtualization": "虚拟化"
+    },
+    "role": {
+      "add_default_repository": "添加默认仓库",
+      "add_enabled_package_manager": "添加已启用包管理器",
+      "add_firewall_role": "添加防火墙角色",
+      "add_host_account": "添加主机账户",
+      "add_host_group": "添加主机组",
+      "add_package": "添加软件包",
+      "add_script": "添加脚本",
+      "add_secret": "添加密钥",
+      "add_third_party_repository": "添加第三方仓库",
+      "add_user": "添加用户",
+      "apply_host_os_upgrade": "应用主机操作系统升级",
+      "apply_software_update": "应用软件更新",
+      "approve_host_registration": "批准主机注册",
+      "assign_host_firewall_roles": "分配主机防火墙角色",
+      "attach_ubuntu_pro": "连接Ubuntu Pro",
+      "change_ubuntu_pro_master_key": "更改Ubuntu Pro主密钥",
+      "configure_child_host": "配置子主机",
+      "connect_host_to_graylog": "连接主机到Graylog",
+      "create_child_host": "创建子主机",
+      "delete_child_host": "删除子主机",
+      "delete_firewall_role": "删除防火墙角色",
+      "delete_host": "删除主机",
+      "delete_host_account": "删除主机账户",
+      "delete_host_group": "删除主机组",
+      "delete_queue_message": "删除队列消息",
+      "delete_script": "删除脚本",
+      "delete_script_execution": "删除脚本执行",
+      "delete_secret": "删除密钥",
+      "delete_third_party_repository": "删除第三方仓库",
+      "delete_user": "删除用户",
+      "deploy_antivirus": "部署防病毒软件",
+      "deploy_certificate": "部署证书",
+      "deploy_firewall": "部署防火墙",
+      "deploy_opentelemetry": "部署OpenTelemetry",
+      "deploy_ssh_key": "部署SSH密钥",
+      "detach_ubuntu_pro": "分离 Ubuntu Pro",
+      "disable_antivirus": "禁用防病毒软件",
+      "disable_firewall": "禁用防火墙",
+      "disable_third_party_repository": "禁用第三方仓库",
+      "edit_firewall_ports": "编辑防火墙端口",
+      "edit_firewall_role": "编辑防火墙角色",
+      "edit_host_account": "编辑主机账户",
+      "edit_host_group": "编辑主机组",
+      "edit_host_hostname": "编辑主机名",
+      "edit_script": "编辑脚本",
+      "edit_secret": "编辑密钥",
+      "edit_tags": "编辑标签",
+      "edit_user": "编辑用户",
+      "edit_user_security_roles": "编辑用户安全角色",
+      "enable_antivirus": "启用防病毒软件",
+      "enable_firewall": "启用防火墙",
+      "enable_grafana_integration": "启用Grafana集成",
+      "enable_graylog_integration": "启用 Graylog 集成",
+      "enable_kvm": "启用KVM",
+      "enable_lxd": "启用LXD",
+      "enable_third_party_repository": "启用第三方仓库",
+      "enable_vmm": "启用 VMM",
+      "enable_wsl": "启用WSL",
+      "enable_bhyve": "启用bhyve",
+      "export_audit_log": "导出审计日志",
+      "generate_pdf_report": "生成PDF报告",
+      "kill_host_process": "终止主机进程",
+      "lock_user": "锁定用户",
+      "manage_antivirus_defaults": "管理防病毒默认设置",
+      "manage_asset_tags": "管理资产标签",
+      "manage_backups": "管理备份",
+      "manage_cloud_backups": "管理云备份",
+      "manage_custom_metrics": "管理自定义指标",
+      "manage_gpg_keys": "管理GPG密钥",
+      "manage_hardware_health": "管理硬件运行状况",
+      "manage_network_discovery": "管理网络发现",
+      "manage_tenants": "管理租户",
+      "manage_time_sync": "管理时间同步",
+      "quarantine_malware": "隔离恶意软件",
+      "reboot_host": "重启主机",
+      "remove_antivirus": "移除防病毒软件",
+      "remove_default_repository": "移除默认仓库",
+      "remove_enabled_package_manager": "移除已启用包管理器",
+      "remove_firewall": "移除防火墙",
+      "remove_package": "移除软件包",
+      "reset_user_password": "重置用户密码",
+      "restart_child_host": "重启子主机",
+      "restart_firewall": "重启防火墙",
+      "restart_host_service": "重启主机服务",
+      "restart_opentelemetry_service": "重启OpenTelemetry服务",
+      "restore_files": "恢复文件",
+      "resync_host_clock": "重新同步主机时钟",
+      "run_malware_scans": "运行恶意软件扫描",
+      "run_script": "运行脚本",
+      "shutdown_host": "关闭主机",
+      "start_child_host": "启动子主机",
+      "start_host_service": "启动主机服务",
+      "start_opentelemetry_service": "启动OpenTelemetry服务",
+      "start_vault": "启动 Vault",
+      "stop_child_host": "停止子主机",
+      "stop_host_service": "停止主机服务",
+      "stop_opentelemetry_service": "停止OpenTelemetry服务",
+      "stop_vault": "停止 Vault",
+      "unlock_user": "解锁用户",
+      "update_agent": "更新代理",
+      "view_audit_log": "查看审计日志",
+      "view_child_host": "查看子主机",
+      "view_default_repositories": "查看默认仓库",
+      "view_enabled_package_managers": "查看已启用包管理器",
+      "view_firewall_roles": "查看防火墙角色",
+      "view_host_details": "查看主机详情",
+      "view_report": "查看报告",
+      "view_user_security_roles": "查看用户安全角色"
     }
   }
 }

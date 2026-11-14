@@ -115,14 +115,14 @@
         "signerFingerprint": "कंपाउन्डर फिंगरप्रिनट",
         "version": "संस्करण"
       },
-      "title": "एयर-गैप रिपोजिटरी"
+      "title": "एयर-गैप रिपॉजिटरी"
     }
   },
   "airgapBundles": {
-    "buildAgent": "बिल्ड एजेंट बंडल",
+    "buildAgent": "एजेंट बंडल बनाएँ",
     "buildError": "बिल्ड क्वे का विफल होना",
-    "buildProplus": "बिल्ड प्रो+ बंडल",
-    "buildServer": "बिल्ड सर्वर बंडल",
+    "buildProplus": "Pro+ बंडल बनाएँ",
+    "buildServer": "सर्वर बंडल बनाएँ",
     "bundle": "बंडल",
     "completedAt": "पूरा हुआ",
     "confirmDelete": "यह बंडल और इसकी ISO फ़ाइल को हटाएं?",
@@ -196,7 +196,7 @@
       "mirrorsTitle": "दर्पण",
       "noMirrors": "किसी भी सक्रिय माइरोर की कन्फगरेशन नहीं है। सेटिंग्स → रिपोज़िटरी माइरोरिंग पर जाकर एक जोड़े, फिर फिर से कोशिश करें।",
       "submit": "क्वीयू रन",
-      "title": "नई संकलन चलानी"
+      "title": "नया संग्रह रन"
     },
     "discPicker": {
       "cancel": "रद्द करें",
@@ -208,13 +208,13 @@
     "licenseRequired": "Air-gap collector engine लोड नहीं हुआ; Pro+ प्राइस की आवश्यकता है।",
     "loadError": "प्ररूप लोड करने में विफल हुए",
     "multiDiscInfo": "इस चलाने से {{count}} डिस्क प्राप्त हुए। जिसको डाउनलोड करें।",
-    "newRun": "नई संकलन चलानी",
+    "newRun": "नया संग्रह रन",
     "noIsoOnDisk": "डिस्क पर अभी तक कोई ISO फाइल नहीं मिली -- कुछ सेकंड बाद फिर से चेक करें।",
     "noManifestFound": "run को अभी तक manifest मिल नहीं चुका है -- status COMPLETE होने पर पुनः प्रयास करें।",
     "notApplicable": "यह पृष्ठ केवल संग्राहक-रोल इनस्टॉलेशन पर महत्वपूर्ण है।",
     "refresh": "अद्यतन करें",
     "subtitle": "एक बारी के लिए संग्रहण चलाने का त्रुटि, संस्थापित प्रतिष्ठानों को मिडर करने के लिए बनाया हुआ अपनी ISO और वहीं लैंडलॉक साइड पर आगमन के लिए एक मैनिफेस्ट लिखने का त्रुटि।",
-    "title": "वायु-गेप कलेक्शन चलने"
+    "title": "एयर-गैप संग्रह रन"
   },
   "airgapDevices": {
     "empty": "कोई लाभार्थी द्रव्यमय नहीं पाया गया। मीडिया इन्सर्ट करें और रिस्कैन दबाएँ।",
@@ -230,12 +230,12 @@
   },
   "airgapImport": {
     "device": "ड्राइव",
-    "import": "ISO इम्पोर्ट",
+    "import": "ISO आयात करें",
     "importError": "आयम्प्टर प्रारंभ करने में असफलता हुई।",
     "noDevice": "कोई आयम प्रविष्टिकरण ड्राइव नहीं चुना गया है। सेटिंग्स → सर्वर भूमिका में एक चुनें।",
     "notReady": "तैयार नहीं है",
     "ready": "तैयार{{label}}",
-    "rescan": "पुनर्अनुसरण करें",
+    "rescan": "पुनः स्कैन करें",
     "run": {
       "complete": "पूरा करें",
       "copying": "पैकेज को कॉपी करना",
@@ -248,14 +248,14 @@
     "runStats": "{{files}} फ़ाइलें · {{size}}",
     "runStatus": "आयात स्थिति",
     "statusError": "इम्पोर्ट डिवाइस को प्रोब नहीं कर सका।",
-    "title": "मीडिया से इम्पोर्ट"
+    "title": "मीडिया से आयात करें"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "पब्लिक कुंजी कॉपी करें",
+      "copyKey": "सार्वजनिक कुंजी कॉपी करें",
       "help": "इस पब्लिक कुंजी को कॉपी करें और Air-Gap रिपोज़िट्री सर्वर में इम्पोर्ट करें ताकि यह इस कलेक्टर द्वारा उत्पन्न किए गए हस्ताक्षरित मीडिया को संबोधित करे। केवल पब्लिक कुंजी ही दिखाई देती है -- गोपनीय हस्ताक्षरण कुंजी कभी भी इस सर्वर से बाहर नहीं आती।",
       "loadError": "कलेक्टर पब्लिक कुंजी को लोड नहीं कर सका।",
-      "title": "कलेक्टर पब्लिक की"
+      "title": "कलेक्टर की सार्वजनिक कुंजी"
     },
     "copied": "कॉपी किया!",
     "copyError": "क्लिपबोर्ड पर कॉपी करने में विफलता",
@@ -266,7 +266,7 @@
       "count": "{{n}} विश्वासपात्र",
       "empty": "कोई ट्रस्टेड कलेक्टर कुंजी नहीं है।",
       "help": "प्रत्येक एयर-गैप कलेक्टर से पब्लिक की आयात करें जिसके मीडिया इस रिपॉजिटरी द्वारा स्वीकार किए जाने चाहिए। अनट्रस्टेड की द्वारा हस्ताक्षरित मीडिया को इंजेस्ट करते समय अस्वीकार कर दिया जाएगा",
-      "import": "कुंजी इम्पोर्ट",
+      "import": "कुंजी आयात करें",
       "importError": "कुंजी को इम्पोर्ट नहीं कर सका।",
       "imported": "प्रविष्ट की गई सकारात्मक {{fp}}",
       "loadError": "विश्वसनीय कुंजी को लोड नहीं कर सका।",
@@ -274,7 +274,7 @@
       "pemLabel": "सार्वजनिक कुंजी (PEM)",
       "removeError": "कुंजी हटा नहीं पाई।",
       "required": "नाम और सार्वजनिक कुंजी दोनों आवश्यक हैं।",
-      "title": "\\u0926\\u094b\\u0932\\u094d\\u092f\\u0947 \\u0915\\u094b Collector Keys"
+      "title": "विश्वसनीय कलेक्टर कुंजियाँ"
     }
   },
   "antivirus": {
@@ -959,7 +959,7 @@
     },
     "heading": "फेडरेशन रोल",
     "identity": {
-      "copyKey": "पब्लिक कुंजी कॉपी करें",
+      "copyKey": "सार्वजनिक कुंजी कॉपी करें",
       "help": "इस पब्लिक कुंजी को कॉपी करें और पीयर के फ़ेडरेशन कार्ड में पेस्ट करें ताकि हर ओर दूसरे का अभिव्यक्ति फ़िंगरप्रिंट और इसकी बाहर से पुष्टि कर सके। गोपनीय कुंजी कभी भी इस सर्वर से बाहर नहीं आती।",
       "pending": "आयडेंटिटी कुंजी जनरेट करने में…",
       "title": "इस सर्वर की पहचान कुंजी"
@@ -2491,7 +2491,7 @@
   },
   "nav": {
     "advisories": "सुरक्षा परामर्श",
-    "airgapCollections": "वायु-गेप कॉलेक्शन्स",
+    "airgapCollections": "एयर-गैप संग्रह",
     "airgapRepositories": "एयर-गैप रिपोजिटरी",
     "alerts": "अलर्ट्स",
     "cat": {
@@ -2525,7 +2525,7 @@
     "role": {
       "collector": "एयर-गैप कलेक्टर",
       "engineMissing": "आवश्यक Pro+ इंजन लोड नहीं है; लाइसेंस जांचें।",
-      "repository": "वायु-अलग संस्थान"
+      "repository": "एयर-गैप रिपॉजिटरी"
     },
     "scripts": "स्क्रिप्ट",
     "scrollLeft": "बाएँ स्क्रॉल करें",
@@ -3323,7 +3323,7 @@
   "serverRole": {
     "collector": {
       "description": "इंटरनेट-संलग्न एयर गेप जोड़े का आधा भाग। यह अपवर्तक पैकेज रिपोज़िट्री मिडिया, सुरक्षा और पारितनीतिक फीड का दर्पण बनाता है और इसे एक अंकित ISO छवि में घुमाता है, जो आप वायरलेस गेप के पार भीतर ले जा सकते हैं। इसे उन सर्वरों पर चुनें, जिनमें इंटरनेट एक्सेस मौजूद है और मीडिया को बनाते हैं।",
-      "title": "एयर-गैप कल्ले (ऑनलाइन ओर)"
+      "title": "एयर-गैप कलेक्टर (ऑनलाइन साइड)"
     },
     "currentTag": "(वर्तमान)",
     "heading": "एयर-गैप रोल",
@@ -3332,7 +3332,7 @@
     "menuTitle": "सर्वर भूमिका",
     "repository": {
       "description": "एयर गेप जोड़े का अलग-अलग भाग, जिसमें इंटरनेट एक्सेस मौजूद नहीं है। यह संग्रहकार द्वारा बनाई गई ISO मीडिया को प्रवेश कराता है, इसके अंकन की पुष्टि करता है, और संगीठिकारित नेटवर्क पर मैनेजड होस्ट्स को पैकेज देता है ताकि वे आमतौर पर अपडेट कर सकें। इंटरनेट-लगामी एन्फ़्लोज़ में यह सर्वर पर चुनें।",
-      "title": "एयर-गैप रिपोजिटरी (डिसकनेक्टेड ओर)"
+      "title": "एयर-गैप रिपॉजिटरी (डिस्कनेक्टेड साइड)"
     },
     "restartHint": "SysManage सर्वर को बचाने के बाद पुनः सตาร्ट करें ताकि नई भूमिका पूरी तरह से प्रभावी हो जाए।",
     "save": "Save Role",
@@ -6019,6 +6019,132 @@
       "again": "मरम्मत या अपग्रेड करें",
       "button": "iCloud बैकअप सक्षम करें",
       "root": "तस्वीरें {{path}} के अंतर्गत रखी जाती हैं ({{when}} को तैयार)।"
+    }
+  },
+  "securityRoles": {
+    "group": {
+      "ubuntu_pro": "Ubuntu Pro",
+      "host": "होस्ट",
+      "host_account_management": "होस्ट अकाउंट प्रबंधन",
+      "integrations": "एकीकरण",
+      "package": "पैकेज",
+      "reports": "रिपोर्ट्स",
+      "scripts": "स्क्रिप्ट्स",
+      "secrets": "सीक्रेट्स",
+      "security": "सुरक्षा",
+      "settings": "सेटिंग्स",
+      "user": "उपयोगकर्ता",
+      "virtualization": "वर्चुअलाइज़ेशन"
+    },
+    "role": {
+      "add_default_repository": "डिफ़ॉल्ट रिपॉजिटरी जोड़ें",
+      "add_enabled_package_manager": "एनेबल्ड पैकेज मैनेजर जोड़ें",
+      "add_firewall_role": "फ़ायरवॉल रोल जोड़ें",
+      "add_host_account": "होस्ट अकाउंट जोड़ें",
+      "add_host_group": "होस्ट ग्रुप जोड़ें",
+      "add_package": "पैकेज जोड़ें",
+      "add_script": "स्क्रिप्ट जोड़ें",
+      "add_secret": "सीक्रेट जोड़ें",
+      "add_third_party_repository": "थर्ड-पार्टी रिपॉजिटरी जोड़ें",
+      "add_user": "उपयोगकर्ता जोड़ें",
+      "apply_host_os_upgrade": "होस्ट ओएस अपग्रेड लागू करें",
+      "apply_software_update": "सॉफ़्टवेयर अपडेट लागू करें",
+      "approve_host_registration": "होस्ट रजिस्ट्रेशन स्वीकार करें",
+      "assign_host_firewall_roles": "होस्ट फ़ायरवॉल रोल असाइन करें",
+      "attach_ubuntu_pro": "Ubuntu Pro अटैच करें",
+      "change_ubuntu_pro_master_key": "Ubuntu Pro मास्टर कुंजी बदलें",
+      "configure_child_host": "चाइल्ड होस्ट कॉन्फ़िगर करें",
+      "connect_host_to_graylog": "होस्ट को Graylog से कनेक्ट करें",
+      "create_child_host": "चाइल्ड होस्ट बनाएँ",
+      "delete_child_host": "चाइल्ड होस्ट डिलीट करें",
+      "delete_firewall_role": "फ़ायरवॉल रोल डिलीट करें",
+      "delete_host": "होस्ट डिलीट करें",
+      "delete_host_account": "होस्ट अकाउंट डिलीट करें",
+      "delete_host_group": "होस्ट ग्रुप डिलीट करें",
+      "delete_queue_message": "क्यू मैसेज डिलीट करें",
+      "delete_script": "स्क्रिप्ट डिलीट करें",
+      "delete_script_execution": "स्क्रिप्ट एक्सीक्यूशन डिलीट करें",
+      "delete_secret": "सीक्रेट डिलीट करें",
+      "delete_third_party_repository": "थर्ड-पार्टी रिपॉजिटरी डिलीट करें",
+      "delete_user": "उपयोगकर्ता डिलीट करें",
+      "deploy_antivirus": "एंटीवायरस तैनात करें",
+      "deploy_certificate": "सर्टिफ़िकेट तैनात करें",
+      "deploy_firewall": "फ़ायरवॉल तैनात करें",
+      "deploy_opentelemetry": "OpenTelemetry तैनात करें",
+      "deploy_ssh_key": "SSH कुंजी तैनात करें",
+      "detach_ubuntu_pro": "Ubuntu Pro डिटैच करें",
+      "disable_antivirus": "एंटीवायरस अक्षम करें",
+      "disable_firewall": "फ़ायरवॉल अक्षम करें",
+      "disable_third_party_repository": "थर्ड-पार्टी रिपॉजिटरी अक्षम करें",
+      "edit_firewall_ports": "फ़ायरवॉल पोर्ट संपादित करें",
+      "edit_firewall_role": "फ़ायरवॉल रोल संपादित करें",
+      "edit_host_account": "होस्ट अकाउंट को संपादित करें",
+      "edit_host_group": "होस्ट ग्रुप को संपादित करें",
+      "edit_host_hostname": "होस्ट नाम संपादित करें",
+      "edit_script": "स्क्रिप्ट संपादित करें",
+      "edit_secret": "सीक्रेट संपादित करें",
+      "edit_tags": "टैग्स को संपादित करें",
+      "edit_user": "उपयोगकर्ता संपादित करें",
+      "edit_user_security_roles": "उपयोगकर्ता सुरक्षा भूमिकाओं को संपादित करें",
+      "enable_antivirus": "एंटीवायरस सक्षम करें",
+      "enable_firewall": "फ़ायरवॉल सक्षम करें",
+      "enable_grafana_integration": "Grafana इंटीग्रेशन सक्षम करें",
+      "enable_graylog_integration": "Graylog इंटीग्रेशन सक्षम करें",
+      "enable_kvm": "KVM को सक्षम करें",
+      "enable_lxd": "LXD को सक्षम करें",
+      "enable_third_party_repository": "थर्ड-पार्टी रिपॉजिटरी सक्षम करें",
+      "enable_vmm": "VMM सक्षम करें",
+      "enable_wsl": "WSL सक्षम करें",
+      "enable_bhyve": "bhyve को सक्षम करें",
+      "export_audit_log": "ऑडिट लॉग निर्यात करें",
+      "generate_pdf_report": "PDF रिपोर्ट जनरेट करें",
+      "kill_host_process": "होस्ट प्रक्रिया को समाप्त करें",
+      "lock_user": "उपयोगकर्ता को लॉक करें",
+      "manage_antivirus_defaults": "एंटीवायरस डिफ़ॉल्ट का प्रबंधन",
+      "manage_asset_tags": "एसेट टैग्स का प्रबंधन",
+      "manage_backups": "बैकअप्स का प्रबंधन",
+      "manage_cloud_backups": "क्लाउड बैकअप का प्रबंधन",
+      "manage_custom_metrics": "कस्टम मेट्रिक्स का प्रबंधन करें",
+      "manage_gpg_keys": "GPG कुंजियों का प्रबंधन",
+      "manage_hardware_health": "हार्डवेयर हेल्थ का प्रबंधन",
+      "manage_network_discovery": "नेटवर्क डिस्कवरी का प्रबंधन",
+      "manage_tenants": "टेनेंट्स का प्रबंधन",
+      "manage_time_sync": "समय सिंक का प्रबंधन",
+      "quarantine_malware": "मैलवेयर को क्वारंटीन करें",
+      "reboot_host": "होस्ट को पुनः आरंभ करें",
+      "remove_antivirus": "एंटीवायरस को हटाएँ",
+      "remove_default_repository": "डिफ़ॉल्ट रिपॉजिटरी को हटाएँ",
+      "remove_enabled_package_manager": "सक्षम पैकेज मैनेजर को हटाएँ",
+      "remove_firewall": "फ़ायरवॉल हटाएँ",
+      "remove_package": "पैकेज हटाएँ",
+      "reset_user_password": "उपयोगकर्ता पासवर्ड रीसेट करें",
+      "restart_child_host": "चाइल्ड होस्ट फिर से शुरू करें",
+      "restart_firewall": "फ़ायरवॉल को फिर से शुरू करें",
+      "restart_host_service": "होस्ट सेवा को फिर से शुरू करें",
+      "restart_opentelemetry_service": "OpenTelemetry सेवा फिर से शुरू करें",
+      "restore_files": "फ़ाइलें बहाल करें",
+      "resync_host_clock": "होस्ट की घड़ी फिर से सिंक करें",
+      "run_malware_scans": "मैलवेयर स्कैन चलाएँ",
+      "run_script": "स्क्रिप्ट चलाएँ",
+      "shutdown_host": "होस्ट को बंद करें",
+      "start_child_host": "चाइल्ड होस्ट शुरू करें",
+      "start_host_service": "होस्ट सेवा शुरू करें",
+      "start_opentelemetry_service": "OpenTelemetry सेवा शुरू करें",
+      "start_vault": "Vault शुरू करें",
+      "stop_child_host": "चाइल्ड होस्ट रोकें",
+      "stop_host_service": "होस्ट सेवा को रोकें",
+      "stop_opentelemetry_service": "OpenTelemetry सेवा रोकें",
+      "stop_vault": "Vault रोकें",
+      "unlock_user": "उपयोगकर्ता को अनलॉक करें",
+      "update_agent": "एजेंट अपडेट करें",
+      "view_audit_log": "ऑडिट लॉग देखें",
+      "view_child_host": "चाइल्ड होस्ट देखें",
+      "view_default_repositories": "डिफ़ॉल्ट रिपॉजिटरीज़ देखें",
+      "view_enabled_package_managers": "सक्षम पैकेज मैनेजर देखें",
+      "view_firewall_roles": "फ़ायरवॉल भूमिकाओं को देखें",
+      "view_host_details": "होस्ट के विवरण देखें",
+      "view_report": "रिपोर्ट देखें",
+      "view_user_security_roles": "उपयोगकर्ता सुरक्षा भूमिकाओं को देखें"
     }
   }
 }

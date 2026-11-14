@@ -495,7 +495,7 @@ class TestRegistrationKeyModel:
 
 class TestAccessGroupsFederationGate:
     """Verify that both routers (``/api/v1/access-groups`` and
-    ``/api/v1/registration-keys``) return 403 (license missing) or 503
+    ``/api/v1/registration-keys``) return 402 (license missing) or 503
     (license OK but engine not loaded) when the federation controller
     engine isn't available.
 
@@ -505,11 +505,11 @@ class TestAccessGroupsFederationGate:
     mode we want to assert.
     """
 
-    def test_groups_list_returns_403_when_license_missing(self, client, auth_headers):
+    def test_groups_list_returns_402_when_license_missing(self, client, auth_headers):
         with patch("backend.licensing.feature_gate.license_service") as mock_license:
             mock_license.has_module.return_value = False
             r = client.get("/api/v1/access-groups", headers=auth_headers)
-        assert r.status_code == 403
+        assert r.status_code == 402
         body = r.json()
         assert body["detail"]["error"] == "pro_plus_required"
         assert body["detail"]["module"] == "federation_controller_engine"
@@ -537,7 +537,7 @@ class TestAccessGroupsFederationGate:
         with patch("backend.licensing.feature_gate.license_service") as mock_license:
             mock_license.has_module.return_value = False
             r = client.get("/api/v1/registration-keys", headers=auth_headers)
-        assert r.status_code == 403
+        assert r.status_code == 402
         body = r.json()
         assert body["detail"]["module"] == "federation_controller_engine"
 
@@ -552,4 +552,4 @@ class TestAccessGroupsFederationGate:
                 json={"name": "blocked-by-gate"},
                 headers=auth_headers,
             )
-        assert r.status_code == 403
+        assert r.status_code == 402

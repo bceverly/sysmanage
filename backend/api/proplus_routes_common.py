@@ -58,7 +58,7 @@ def _feature_dependency(feature):
 
     def _raise():
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail={
                 "error": "pro_plus_required",
                 "message": (
@@ -117,7 +117,7 @@ def _module_dependency(module):
 
     def _raise_license():
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail={
                 "error": "pro_plus_required",
                 "message": (

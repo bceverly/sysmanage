@@ -115,14 +115,14 @@
         "signerFingerprint": "簽章指紋",
         "version": "版本"
       },
-      "title": "隔離倉庫"
+      "title": "隔離儲存庫"
     }
   },
   "airgapBundles": {
-    "buildAgent": "建立代理組件包",
+    "buildAgent": "建立代理程式套件",
     "buildError": "無法排隊構建",
-    "buildProplus": "建立Pro+組件包",
-    "buildServer": "建立伺服器組件包",
+    "buildProplus": "建立 Pro+ 套件",
+    "buildServer": "建立伺服器套件",
     "bundle": "組件包",
     "completedAt": "已完成",
     "confirmDelete": "是否要刪除此捆綁及其 ISO 檔案？",
@@ -196,7 +196,7 @@
       "mirrorsTitle": "鏡像",
       "noMirrors": "未配置任何啟用的鏡像。請前往設定 → 存放庫鏡像以新增一個，然後再試一次。",
       "submit": "排隊運行",
-      "title": "新收集運行"
+      "title": "新增收集執行"
     },
     "discPicker": {
       "cancel": "取消",
@@ -208,13 +208,13 @@
     "licenseRequired": "隔離收集器引擎未加載；需要 Pro+ 許可證。",
     "loadError": "無法加載運行",
     "multiDiscInfo": "此次運行產生了 {{count}} 張光碟。選擇要下載的光碟。",
-    "newRun": "新收集運行",
+    "newRun": "新增收集執行",
     "noIsoOnDisk": "尚未在磁盤上找到 ISO 檔案 -- 請稍後再試。",
     "noManifestFound": "運行尚未有清單 -- 狀態為 COMPLETE 時再試一次。",
     "notApplicable": "此頁面僅在收集器角色部署中才有意義。",
     "refresh": "刷新",
     "subtitle": "觸發一次性收集運行，這些運行會鏡像配置的倉庫、建立一個簽名 ISO，並為空氣隔離側寫入一個清單以供攝取。",
-    "title": "隔離收集運行"
+    "title": "隔離收集執行"
   },
   "airgapDevices": {
     "empty": "未找到符合條件的磁盤。插入媒體並按下 Rescan。",
@@ -226,11 +226,11 @@
     "removable": "可移除",
     "rescan": "重新掃描磁盤",
     "saveError": "無法儲存裝置。",
-    "title": "導入磁碟"
+    "title": "匯入磁碟機"
   },
   "airgapImport": {
     "device": "磁碟機",
-    "import": "導入ISO",
+    "import": "匯入 ISO",
     "importError": "無法開始匯入。",
     "noDevice": "未選擇導入磁盤。在設置 → 伺服器角色中選擇一個。",
     "notReady": "尚未準備好",
@@ -248,14 +248,14 @@
     "runStats": "{{files}} 個檔案 · {{size}}",
     "runStatus": "導入狀態",
     "statusError": "無法探測導入裝置。",
-    "title": "從媒體導入"
+    "title": "從媒體匯入"
   },
   "airgapKeys": {
     "collector": {
       "copyKey": "複製公開金鑰",
       "help": "複製此公開金鑰並在隔離倉庫伺服器上導入它，以便它可以信任此收集器生成的簽名媒體。僅顯示公開金鑰----私鑰永遠不會離開此伺服器。",
       "loadError": "無法加載收集器公開金鑰。",
-      "title": "收集器公鑰"
+      "title": "收集器公開金鑰"
     },
     "copied": "已複製！",
     "copyError": "無法複製到剪貼板。",
@@ -266,7 +266,7 @@
       "count": "{{n}} 可信賴",
       "empty": "還沒有可信收集器金鑰。",
       "help": "從每個空氣隔離收集器導入公開金鑰，該存儲庫應接受其媒體。由不受信任的金鑰簽名的媒體在傳入時將被拒絕。",
-      "import": "導入金鑰",
+      "import": "匯入金鑰",
       "importError": "無法導入金鑰。",
       "imported": "導入金鑰 {{fp}}",
       "loadError": "無法加載可信金鑰。",
@@ -274,7 +274,7 @@
       "pemLabel": "公開金鑰 (PEM)",
       "removeError": "無法移除金鑰。",
       "required": "名稱和公開金鑰都是必填項。",
-      "title": "可信收集中金鑰"
+      "title": "受信任的收集器金鑰"
     }
   },
   "antivirus": {
@@ -2525,7 +2525,7 @@
     "role": {
       "collector": "隔離收集器",
       "engineMissing": "未載入所需的Pro+引擎；請檢查授權。",
-      "repository": "隔離存儲庫"
+      "repository": "隔離儲存庫"
     },
     "scripts": "腳本",
     "scrollLeft": "向左捲動",
@@ -3323,7 +3323,7 @@
   "serverRole": {
     "collector": {
       "description": "具有網際網路連接的空氣隔離對的一半。它鏡像上游套件倉庫，收集 CVE 和合規性 feed，並將其打包成已簽名的 ISO 影像，以便您物理地跨過空氣隔離傳遞。選擇此選項在具有網際網路存取權限並建立媒體的伺服器上。",
-      "title": "隔離收集器（線上側）"
+      "title": "隔離收集器（連線端）"
     },
     "currentTag": "(目前)",
     "heading": "空氣隔離角色",
@@ -3332,7 +3332,7 @@
     "menuTitle": "伺服器角色",
     "repository": {
       "description": "沒有網際網路連接的空氣隔離對的一半。它接收由 Collector 生產的 ISO 媒體，驗證其簽名，並將套件提供給私有網絡上的受管主機，使其可以正常更新。選擇此選項在空氣隔離區域內的伺服器上。",
-      "title": "隔離倉庫（斷開連接側）"
+      "title": "隔離儲存庫（離線端）"
     },
     "restartHint": "在儲存新角色後，重新啟動SysManage伺服器以使更改完全生效。",
     "save": "Save Role",
@@ -5701,7 +5701,7 @@
     "equip": {
       "blockedAgent": "請升級代理程式，才能從這裡讓此主機準備好備份",
       "blockedPlatform": "請在此系統上手動安裝 restate（從原始碼建置）",
-      "button": "準備備份",
+      "button": "為備份做準備",
       "checking": "已詢問代理程式；狀態將在幾秒內更新。",
       "error": "無法開始準備備份。",
       "failChecksum": "下載的套件與其公布的總和檢查碼不符，因此未安裝",
@@ -6019,6 +6019,132 @@
       "again": "修復或升級",
       "button": "啟用 iCloud 備份",
       "root": "照片保存在 {{path}} 下（準備於 {{when}}）。"
+    }
+  },
+  "securityRoles": {
+    "group": {
+      "ubuntu_pro": "Ubuntu Pro",
+      "host": "主機",
+      "host_account_management": "主機帳戶管理",
+      "integrations": "整合",
+      "package": "套件",
+      "reports": "報告",
+      "scripts": "腳本",
+      "secrets": "機密",
+      "security": "安全性",
+      "settings": "設定",
+      "user": "使用者",
+      "virtualization": "虛擬化"
+    },
+    "role": {
+      "add_default_repository": "新增預設儲存庫",
+      "add_enabled_package_manager": "新增已啟用的套件管理員",
+      "add_firewall_role": "新增防火牆角色",
+      "add_host_account": "新增主機帳戶",
+      "add_host_group": "新增主機群組",
+      "add_package": "新增套件",
+      "add_script": "新增腳本",
+      "add_secret": "新增機密",
+      "add_third_party_repository": "新增第三方儲存庫",
+      "add_user": "新增使用者",
+      "apply_host_os_upgrade": "套用主機作業系統升級",
+      "apply_software_update": "套用軟體更新",
+      "approve_host_registration": "批准主機註冊",
+      "assign_host_firewall_roles": "指派主機防火牆角色",
+      "attach_ubuntu_pro": "附加 Ubuntu Pro",
+      "change_ubuntu_pro_master_key": "變更 Ubuntu Pro 主金鑰",
+      "configure_child_host": "設定子主機",
+      "connect_host_to_graylog": "將主機連線至 Graylog",
+      "create_child_host": "建立子主機",
+      "delete_child_host": "刪除子主機",
+      "delete_firewall_role": "刪除防火牆角色",
+      "delete_host": "刪除主機",
+      "delete_host_account": "刪除主機帳戶",
+      "delete_host_group": "刪除主機群組",
+      "delete_queue_message": "刪除佇列訊息",
+      "delete_script": "刪除腳本",
+      "delete_script_execution": "刪除腳本執行",
+      "delete_secret": "刪除機密",
+      "delete_third_party_repository": "刪除第三方儲存庫",
+      "delete_user": "刪除使用者",
+      "deploy_antivirus": "部署防毒軟體",
+      "deploy_certificate": "部署憑證",
+      "deploy_firewall": "部署防火牆",
+      "deploy_opentelemetry": "部署 OpenTelemetry",
+      "deploy_ssh_key": "部署 SSH 金鑰",
+      "detach_ubuntu_pro": "卸離 Ubuntu Pro",
+      "disable_antivirus": "停用防毒軟體",
+      "disable_firewall": "停用防火牆",
+      "disable_third_party_repository": "停用第三方儲存庫",
+      "edit_firewall_ports": "編輯防火牆埠",
+      "edit_firewall_role": "編輯防火牆角色",
+      "edit_host_account": "編輯主機帳戶",
+      "edit_host_group": "編輯主機群組",
+      "edit_host_hostname": "編輯主機名稱",
+      "edit_script": "編輯腳本",
+      "edit_secret": "編輯機密",
+      "edit_tags": "編輯標籤",
+      "edit_user": "編輯使用者",
+      "edit_user_security_roles": "編輯使用者安全角色",
+      "enable_antivirus": "啟用防毒軟體",
+      "enable_firewall": "啟用防火牆",
+      "enable_grafana_integration": "啟用 Grafana 整合",
+      "enable_graylog_integration": "啟用 Graylog 整合",
+      "enable_kvm": "啟用 KVM",
+      "enable_lxd": "啟用 LXD",
+      "enable_third_party_repository": "啟用第三方儲存庫",
+      "enable_vmm": "啟用 VMM",
+      "enable_wsl": "啟用 WSL",
+      "enable_bhyve": "啟用 bhyve",
+      "export_audit_log": "匯出稽核記錄",
+      "generate_pdf_report": "產生 PDF 報告",
+      "kill_host_process": "結束主機處理程序",
+      "lock_user": "鎖定使用者",
+      "manage_antivirus_defaults": "管理防毒軟體預設值",
+      "manage_asset_tags": "管理資產標籤",
+      "manage_backups": "管理備份",
+      "manage_cloud_backups": "管理雲端備份",
+      "manage_custom_metrics": "管理自訂指標",
+      "manage_gpg_keys": "管理 GPG 金鑰",
+      "manage_hardware_health": "管理硬體健康狀態",
+      "manage_network_discovery": "管理網路發現",
+      "manage_tenants": "管理租戶",
+      "manage_time_sync": "管理時間同步",
+      "quarantine_malware": "隔離惡意軟體",
+      "reboot_host": "重新啟動主機",
+      "remove_antivirus": "移除防毒軟體",
+      "remove_default_repository": "移除預設儲存庫",
+      "remove_enabled_package_manager": "移除已啟用的套件管理員",
+      "remove_firewall": "移除防火牆",
+      "remove_package": "移除套件",
+      "reset_user_password": "重設使用者密碼",
+      "restart_child_host": "重新啟動子主機",
+      "restart_firewall": "重新啟動防火牆",
+      "restart_host_service": "重新啟動主機服務",
+      "restart_opentelemetry_service": "重新啟動 OpenTelemetry 服務",
+      "restore_files": "還原檔案",
+      "resync_host_clock": "重新同步主機時鐘",
+      "run_malware_scans": "執行惡意軟體掃描",
+      "run_script": "執行腳本",
+      "shutdown_host": "關閉主機",
+      "start_child_host": "啟動子主機",
+      "start_host_service": "啟動主機服務",
+      "start_opentelemetry_service": "啟動 OpenTelemetry 服務",
+      "start_vault": "啟動 Vault",
+      "stop_child_host": "停止子主機",
+      "stop_host_service": "停止主機服務",
+      "stop_opentelemetry_service": "停止 OpenTelemetry 服務",
+      "stop_vault": "停止 Vault",
+      "unlock_user": "解鎖使用者",
+      "update_agent": "更新代理程式",
+      "view_audit_log": "檢視稽核記錄",
+      "view_child_host": "檢視子主機",
+      "view_default_repositories": "檢視預設儲存庫",
+      "view_enabled_package_managers": "檢視已啟用的套件管理員",
+      "view_firewall_roles": "檢視防火牆角色",
+      "view_host_details": "檢視主機詳細資料",
+      "view_report": "檢視報告",
+      "view_user_security_roles": "檢視使用者安全角色"
     }
   }
 }

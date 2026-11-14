@@ -176,6 +176,34 @@ def test_alpine_and_freebsd_resolve_from_the_releases(monkeypatch):
         "restate-3.2-freebsd-14.5-amd64.pkg", "sysmanage-agent-3.13.pkg"}  # fmt: skip
 
 
+def test_debian_resolves_restate_and_the_agent_from_the_releases(monkeypatch):
+    def assets(repo):
+        names = ({"restate": ["restate-3.2-debian12-amd64.deb", "restate-3.2-debian12-arm64.deb",
+                              "restate-proxy-3.2-debian12-amd64.deb", "restate-3.2-debian13-amd64.deb",
+                              "restate-3.2-1.el9.x86_64.rpm"],
+                  "sysmanage-agent": ["sysmanage-agent_3.13_amd64.deb", "sysmanage-agent_3.13_arm64.deb",
+                                      "sysmanage-agent-3.13-1.x86_64.rpm"]})[repo.split("/")[1]]  # fmt: skip
+        return {n: {"url": f"https://x/{n}", "sha256": "a" * 64} for n in names}
+
+    monkeypatch.setattr(tools, "_github_assets", assets)
+    assert tools.family("debian") == "apt"
+    expected = {"restate-3.2-debian12-amd64.deb", "restate-3.2-debian12-arm64.deb",
+                "restate-proxy-3.2-debian12-amd64.deb",
+                "sysmanage-agent_3.13_amd64.deb", "sysmanage-agent_3.13_arm64.deb"}  # fmt: skip
+    assert {i["name"] for i in tools.resolve("debian", "12")} == expected
+    assert {i["name"] for i in tools.resolve("debian", "bookworm")} == expected
+
+
+def test_a_debian_host_has_its_own_internet_sources_switched_off():
+    _kind, plan = repoint.repoint_plan(
+        "debian", "http://r/airgap-repo/debian/13", "trixie"
+    )
+    argvs = [c["argv"] for c in plan["commands"]]
+    assert ["sudo", "sed", "-i", "s/^[^#]/#&/",
+            "/etc/apt/sources.list.d/debian.sources"] in argvs  # fmt: skip
+    assert argvs[-1] == ["sudo", "apt-get", "update"]
+
+
 KEY = "-----BEGIN PUBLIC KEY-----\nx\n-----END PUBLIC KEY-----\n"
 
 

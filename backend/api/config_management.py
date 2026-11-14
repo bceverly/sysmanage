@@ -185,6 +185,10 @@ async def push_configuration(
                 ),
             )
 
+    except HTTPException:
+        # A deliberate 4xx (bad request, host not found) is the answer, not
+        # a failure to wrap into a 500.
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Configuration push failed: {str(e)}"

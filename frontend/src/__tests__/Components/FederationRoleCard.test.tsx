@@ -163,3 +163,29 @@ test("importing a peer POSTs name + pem", async () => {
     ),
   );
 });
+
+test("an unlicensed enroll says so instead of rendering the gate's object", async () => {
+  // The site stub answers a write 402 with {error, message, module} as the
+  // detail (edition audit, 2026-11-14); rendering that object would crash.
+  primeGet("site");
+  m(api.post).mockRejectedValue({
+    response: {
+      status: 402,
+      data: { detail: { error: "pro_plus_required", module: "federation_site_engine" } },
+    },
+  });
+  render(<FederationRoleCard />);
+  fireEvent.change(await screen.findByTestId("federation-enroll-url"), {
+    target: { value: "http://10.70.0.1:8080" },
+  });
+  fireEvent.change(screen.getByTestId("federation-enroll-token"), {
+    target: { value: "TOK123" },
+  });
+  fireEvent.change(screen.getByTestId("federation-enroll-coord-identity-key"), {
+    target: { value: "COORD-ID-PEM" },
+  });
+  fireEvent.click(screen.getByTestId("federation-enroll-submit"));
+  expect(
+    await screen.findByText("Federation requires an Enterprise license."),
+  ).toBeTruthy();
+});

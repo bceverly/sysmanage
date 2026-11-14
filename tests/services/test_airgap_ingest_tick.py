@@ -8,6 +8,7 @@
 
 import base64
 import json
+import re
 import uuid
 from unittest.mock import MagicMock, patch
 
@@ -201,6 +202,13 @@ def test_a_disc_of_a_set_keeps_what_the_other_discs_brought(tmp_path):
 
     if shutil.which("rsync") is None:
         pytest.skip("rsync not installed")
+    # macOS's rsync is openrsync, which ignores the protect filters; the
+    # ingest runs on the agent's rsync (samba rsync 3.x on Linux and the BSDs).
+    version = subprocess.run(  # nosec B603 B607
+        ["rsync", "--version"], capture_output=True, text=True, check=False
+    ).stdout
+    if not re.match(r"rsync\s+version\s+v?3\.", version):
+        pytest.skip("not samba rsync 3.x: " + (version.splitlines() or ["?"])[0])
     repo = tmp_path / "repo"
     disc2 = tmp_path / "disc2"
     for path in (

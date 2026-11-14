@@ -70,6 +70,10 @@ async def report_updates(
                 "updates_stored": len(updates_report.available_updates),
             }
 
+    except HTTPException:
+        # A deliberate 4xx (bad request, host not found) is the answer, not
+        # a failure to wrap into a 500.
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=_("Failed to store updates: %s") % str(e)

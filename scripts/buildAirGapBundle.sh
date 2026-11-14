@@ -646,15 +646,26 @@ fi
 # dpkg or it'll error before installing anything.
 DEP_COUNT=\$(ls -1 apt-deps/*.deb 2>/dev/null | wc -l)
 echo "Installing \$MAIN_DEB + \$DEP_COUNT deps..."
-if [ "\$DEP_COUNT" -gt 0 ]; then
-  exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
-       SYSMANAGE_PYTHON_BUNDLE="\$(pwd)/python" \\
-       dpkg -i apt-deps/*.deb "\$MAIN_DEB"
-else
-  exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
-       SYSMANAGE_PYTHON_BUNDLE="\$(pwd)/python" \\
-       dpkg -i "\$MAIN_DEB"
+install_all() {
+  if [ "\$DEP_COUNT" -gt 0 ]; then
+    sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
+         SYSMANAGE_PYTHON_BUNDLE="\$(pwd)/python" \\
+         dpkg -i apt-deps/*.deb "\$MAIN_DEB"
+  else
+    sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
+         SYSMANAGE_PYTHON_BUNDLE="\$(pwd)/python" \\
+         dpkg -i "\$MAIN_DEB"
+  fi
+}
+# One dpkg pass installs in name order, so a package that PRE-depends on a
+# newer library later in the list is refused ("pre-dependency problem":
+# systemd before libsystemd-shared, the 26.04 server media, 2026-11-14).
+# The first pass configures that library; a second pass installs the rest.
+if ! install_all; then
+  echo "Some packages waited for others; installing again..."
+  install_all
 fi
+sudo dpkg --configure -a
 EOF
   chmod +x "$outdir/install.sh"
 }
@@ -722,30 +733,49 @@ _openbao_asset_url() {
     | head -1
 }
 
+# Put a downloaded file into a builder's output folder.  The Docker builders
+# leave their folders owned by root, so a plain write there failed ("curl:
+# (23) ... ERROR on write") and the server's media went out with no OpenBAO
+# (lab, 2026-11-14): copy it in through a container when the folder is not
+# ours.
+_place_file() {
+  local src="$1" dest="$2"
+  mkdir -p "$(dirname "$dest")" 2>/dev/null || true
+  install -m 0644 "$src" "$dest" 2>/dev/null && return 0
+  docker run --rm -v "$(dirname "$dest")":/work -v "$src":/src:ro alpine:3.20 \
+    sh -c "cp /src '/work/$(basename "$dest")' && chmod 0644 '/work/$(basename "$dest")'" \
+    >/dev/null 2>&1
+}
+
+# OpenBAO is required on a server's media: without it the offline install has
+# no secrets broker.  A server bundle that cannot stage it stops here, unless
+# ALLOW_PARTIAL_BUNDLE=1 says a partial bundle is wanted.
+_openbao_missing() {
+  if [[ "$PRODUCT" == "server" && "$ALLOW_PARTIAL_BUNDLE" != "1" ]]; then
+    die "[openbao] $1 -- a server bundle needs OpenBAO (ALLOW_PARTIAL_BUNDLE=1 to ship without it)"
+  fi
+  warn "[openbao] $1"
+}
+
 _stage_openbao() {
   local outdir="$1" kind="$2"
   case "$kind" in
-    deb)
-      local url; url=$(_openbao_asset_url "amd64\\\\.deb\$")
-      if [ -n "$url" ]; then
-        mkdir -p "$outdir/apt-deps"
-        curl -fsSL -o "$outdir/apt-deps/openbao_amd64.deb" "$url" \
-          && log "[openbao] staged .deb into $(basename "$outdir")/apt-deps" \
-          || warn "[openbao] .deb download failed for $(basename "$outdir")"
+    deb|rpm)
+      # The plain package: OpenBAO also publishes openbao-hsm_*, which the
+      # old pattern ("amd64\.deb$") picked first; and its RPMs are named
+      # _linux_amd64.rpm, which the old "x86_64\.rpm$" never matched.
+      local url; url=$(_openbao_asset_url "^openbao_[0-9.]+_linux_amd64\\\\.${kind}\$")
+      [ -n "$url" ] || { _openbao_missing "no .$kind asset found"; return; }
+      local tmp; tmp="$(mktemp)"
+      local dest="$outdir/${kind}-deps/openbao_amd64.$kind"
+      [[ "$kind" == "deb" ]] && dest="$outdir/apt-deps/openbao_amd64.deb"
+      [[ "$kind" == "rpm" ]] && dest="$outdir/rpm-deps/openbao_x86_64.rpm"
+      if curl -fsSL -o "$tmp" "$url" && _place_file "$tmp" "$dest"; then
+        log "[openbao] staged .$kind into $(basename "$outdir")/$(basename "$(dirname "$dest")")"
       else
-        warn "[openbao] no .deb asset found"
+        _openbao_missing ".$kind download or copy failed for $(basename "$outdir")"
       fi
-      ;;
-    rpm)
-      local url; url=$(_openbao_asset_url "x86_64\\\\.rpm\$")
-      if [ -n "$url" ]; then
-        mkdir -p "$outdir/rpm-deps"
-        curl -fsSL -o "$outdir/rpm-deps/openbao_x86_64.rpm" "$url" \
-          && log "[openbao] staged .rpm into $(basename "$outdir")/rpm-deps" \
-          || warn "[openbao] .rpm download failed for $(basename "$outdir")"
-      else
-        warn "[openbao] no .rpm asset found"
-      fi
+      rm -f "$tmp"
       ;;
     binary-*)
       local osname="${kind#binary-}" tok ext bin
@@ -1599,11 +1629,14 @@ build_openbsd() {
 # its own GitHub release's packages -- restate and restate-proxy -- go on
 # the ISO under <platform>/restate/, each checked against the release's
 # SHA256SUMS before it is kept.  Ubuntu and Fedora carry them in their
-# dependency walk (EXTRAS_DEB / EXTRAS_RPM).  Debian has none: restate
-# builds no .deb outside its Ubuntu PPA.  Agent bundles only.
+# dependency walk (EXTRAS_DEB / EXTRAS_RPM).  Debian's come from the
+# release too (restate-VERSION-debian12-amd64.deb): its apt has no restate,
+# so the dependency walk finds none.  Agent bundles only.
 _restate_pattern() {
   case "$1" in
     rhel-*)            echo "\\.el${1#rhel-}\\.[a-z0-9_]+\\.rpm$" ;;
+    debian-bookworm)   echo "-debian12-[a-z0-9]+\\.deb$" ;;
+    debian-trixie)     echo "-debian13-[a-z0-9]+\\.deb$" ;;
     opensuse-leap)     echo "\\.opensuseleap[0-9.]*\\.[a-z0-9_]+\\.rpm$" ;;
     alpine-*)          echo "-r0-alpine${1#alpine-}-[a-z0-9_]+\\.apk$" ;;
     freebsd)           echo "-freebsd-[0-9.]+-[a-z0-9_]+\\.pkg$" ;;

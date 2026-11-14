@@ -232,19 +232,20 @@ ifeq ($(OS),Windows_NT)
 	@$(PYTHON) -m pip install --upgrade pip
 else
 	@rm -rf $(VENV) 2>/dev/null || true
-	@if command -v python3 >/dev/null 2>&1; then \
-		python3 -m venv $(VENV); \
-	elif command -v python3.14 >/dev/null 2>&1; then \
-		python3.14 -m venv $(VENV); \
-	elif command -v python3.13 >/dev/null 2>&1; then \
-		python3.13 -m venv $(VENV); \
-	elif command -v python3.12 >/dev/null 2>&1; then \
-		python3.12 -m venv $(VENV); \
-	elif command -v python3.11 >/dev/null 2>&1; then \
-		python3.11 -m venv $(VENV); \
-	else \
-		echo "Error: No Python 3 found"; exit 1; \
-	fi
+	@# The server needs Python 3.11+.  python3 first when it is new enough, then
+	@# the newest versioned binary, then the bundled Python the server's helper
+	@# installs (Ubuntu 22.04's python3 is 3.10).
+	@py=""; for p in python3 python3.14 python3.13 python3.12 python3.11 /opt/sysmanage/python/bin/python3; do \
+		command -v $$p >/dev/null 2>&1 && $$p -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null && { py=$$p; break; }; \
+	done; \
+	if [ -z "$$py" ]; then \
+		echo "Error: the server needs Python 3.11 or newer, and none was found."; \
+		echo "  1. Run:  sudo sh installer/python/install-python-linux.sh"; \
+		echo "     (it installs a pinned Python 3.12 under /opt/sysmanage/python)"; \
+		echo "  2. Re-run this make command."; \
+		exit 1; \
+	fi; \
+	$$py -m venv $(VENV)
 	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
 		export TMPDIR=$$HOME/tmp && $(PYTHON) -m pip install --upgrade pip; \
 	else \

@@ -194,6 +194,10 @@ async def get_host_updates(
                 ),
             }
 
+    except HTTPException:
+        # A deliberate 4xx (bad request, host not found) is the answer, not
+        # a failure to wrap into a 500.
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=_("Failed to get host updates: %s") % str(e)

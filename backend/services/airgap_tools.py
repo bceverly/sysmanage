@@ -72,6 +72,7 @@ UBUNTU_CODENAMES = {
     "26.04": "resolute",
 }
 DEB_ARCHES = ("amd64", "arm64")
+DEBIAN_CODENAMES = {"bookworm": "12", "trixie": "13"}
 RPM_ARCHES = ("x86_64", "aarch64")
 _EL = ("rhel", "rocky", "alma", "almalinux", "centos")
 
@@ -80,7 +81,7 @@ def family(distro: str) -> Optional[str]:
     """``apt``, ``rpm``, ``apk`` or ``pkg`` where a tools repository is
     built, else None."""
     distro = (distro or "").lower()
-    if distro.startswith("ubuntu"):
+    if distro.startswith(("ubuntu", "debian")):
         return "apt"
     if distro.startswith("alpine"):
         return "apk"
@@ -228,6 +229,20 @@ def _ubuntu(version: str) -> List[Dict[str, str]]:
     return items
 
 
+def _debian(version: str) -> List[Dict[str, str]]:
+    """restate's and restate-proxy's packages for this Debian release (both
+    processors) from restate's GitHub release, and the agent's .deb."""
+    major = DEBIAN_CODENAMES.get(version, version).split(".")[0]
+    restate = _github_assets("bceverly/restate")
+    items = [{"name": n, **i} for n, i in sorted(restate.items())
+             if n.startswith(("restate-", "restate-proxy-"))
+             and any(n.endswith(f"-debian{major}-{arch}.deb") for arch in DEB_ARCHES)]  # fmt: skip
+    agent = _github_assets("bceverly/sysmanage-agent")
+    for arch in DEB_ARCHES:
+        items += _pick(agent, starts="sysmanage-agent_", ends=f"_{arch}.deb")
+    return items
+
+
 def _agent_rpm(arch: str, suffix: str = "-1") -> List[Dict[str, str]]:
     assets = _github_assets("bceverly/sysmanage-agent")
     return _pick(assets, starts="sysmanage-agent-", ends=f"{suffix}.{arch}.rpm")
@@ -310,6 +325,8 @@ def resolve(distro: str, version: str) -> List[Dict[str, str]]:
     are served or the sources cannot be read (logged, never raised)."""
     kind = family(distro)
     try:
+        if kind == "apt" and distro.lower().startswith("debian"):
+            return _debian(str(version))
         if kind == "apt":
             return _ubuntu(str(version))
         if kind == "rpm":

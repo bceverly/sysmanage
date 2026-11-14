@@ -65,6 +65,11 @@ DYNAMIC_KEY_PREFIXES = (
     "queryPacks.liveStatus.",
     "queryPacks.targetStatus.",
     "scripts.status.",
+    # Security role and group names come from the database in English;
+    # roleLabel()/roleGroupLabel() look them up as
+    # t(`securityRoles.role.${slug}`) / t(`securityRoles.group.${slug}`).
+    "securityRoles.group.",
+    "securityRoles.role.",
     "secrets.api_provider.",
     "secrets.certificate_type.",
     "secrets.cert_type.",

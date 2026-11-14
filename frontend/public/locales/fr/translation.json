@@ -115,14 +115,14 @@
         "signerFingerprint": "Empreinte digitale du signataire",
         "version": "Version"
       },
-      "title": "Repositoires hors connexion"
+      "title": "Dépôts isolés"
     }
   },
   "airgapBundles": {
-    "buildAgent": "Construire le paquet Agent Bundle",
+    "buildAgent": "Créer le paquet de l'agent",
     "buildError": "Impossible de mettre en file d'attente la construction.",
-    "buildProplus": "Construire le paquet Pro+ Bundle",
-    "buildServer": "Construire le paquet Serveur Bundle",
+    "buildProplus": "Créer le paquet Pro+",
+    "buildServer": "Créer le paquet du serveur",
     "bundle": "Paquet",
     "completedAt": "Complété",
     "confirmDelete": "Voulez-vous supprimer ce lot et son fichier ISO associé ?",
@@ -196,7 +196,7 @@
       "mirrorsTitle": "Miroirs",
       "noMirrors": "Aucun miroir activé configuré. Allez aux Paramètres → Miroitement des répertoires pour en ajouter un, puis essayez de nouveau.",
       "submit": "Exécution de la file d'attente",
-      "title": "Nouvelle exécution de collection"
+      "title": "Nouvelle exécution de collecte"
     },
     "discPicker": {
       "cancel": "Annuler",
@@ -208,13 +208,13 @@
     "licenseRequired": "Le moteur de collecteur en isolement n'est pas chargé ; une licence Pro+ est requise.",
     "loadError": "Impossible de charger les exécutions.",
     "multiDiscInfo": "Cette exécution a produit {{count}} disques. Choisissez ceux à télécharger.",
-    "newRun": "Nouvelle exécution de collection",
+    "newRun": "Nouvelle exécution de collecte",
     "noIsoOnDisk": "Aucun fichier ISO trouvé sur le disque encore -- réinterrogez dans un instant.",
     "noManifestFound": "Aucun manifeste n'est disponible pour cette exécution -- essayez de nouveau une fois que le statut est COMPLET.",
     "notApplicable": "Cette page est uniquement significative pour les déploiements en tant que collecteur.",
     "refresh": "Actualiser",
     "subtitle": "Déclencher des exécutables uniques qui mirorent les répertoires configurés, construisent un ISO signé et écrivent un manifeste pour l'ingestion du côté hors ligne.",
-    "title": "Collectes en isolement"
+    "title": "Exécutions de collecte isolée"
   },
   "airgapDevices": {
     "empty": "Aucun disque éligible trouvé. Insérez un média et appuyez sur Recherche.",
@@ -226,7 +226,7 @@
     "removable": "amovible",
     "rescan": "Vérifier les disques",
     "saveError": "Impossible d'enregistrer l'appareil.",
-    "title": "Importer le disque"
+    "title": "Lecteur d'importation"
   },
   "airgapImport": {
     "device": "Disque dur",
@@ -235,7 +235,7 @@
     "noDevice": "Aucune clé de disque d'importation n'a encore été sélectionnée. Choisissez-en une dans Paramétrage → Rôle du serveur.",
     "notReady": "Pas prêt",
     "ready": "Prêt{{label}}",
-    "rescan": "Re-scanner",
+    "rescan": "Analyser à nouveau",
     "run": {
       "complete": "Terminé",
       "copying": "Copie des paquets",
@@ -255,7 +255,7 @@
       "copyKey": "Copier la clé publique",
       "help": "Copiez cette clé publique et importez-la sur le serveur d'annexe du répositoire afin qu'il la considère comme faisant confiance aux fichiers signés produits par ce collecteur. Seule la clé publique est affichée -- la clé privée de signature ne quitte jamais ce serveur.",
       "loadError": "Impossible de charger la clé publique du collecteur.",
-      "title": "Clé publique du Collecteur"
+      "title": "Clé publique du collecteur"
     },
     "copied": "Copié!",
     "copyError": "Impossible de copier dans le presse-papiers.",
@@ -274,7 +274,7 @@
       "pemLabel": "Clé publique (PEM)",
       "removeError": "Impossible de supprimer la clé.",
       "required": "Le nom et la clé publique sont tous les deux requis.",
-      "title": "Clés de Collecteur fiable"
+      "title": "Clés de collecteurs de confiance"
     }
   },
   "antivirus": {
@@ -2491,7 +2491,7 @@
   },
   "nav": {
     "advisories": "Avis de sécurité",
-    "airgapCollections": "Collections air-gaps",
+    "airgapCollections": "Collectes isolées",
     "airgapRepositories": "Repositoires hors connexion",
     "alerts": "Alertes",
     "cat": {
@@ -2525,7 +2525,7 @@
     "role": {
       "collector": "Collecteur en isolement",
       "engineMissing": "Moteur Pro+ requis non chargé ; vérifiez la licence.",
-      "repository": "Repositoire en isolement"
+      "repository": "Dépôt isolé"
     },
     "scripts": "Scripts",
     "scrollLeft": "Faites défiler vers la gauche",
@@ -3323,7 +3323,7 @@
   "serverRole": {
     "collector": {
       "description": "La moitié connectée à Internet d'un couple d'interruption d'air. Il miroire les répositoires de paquets amont, rassemble les flux CVE et conformité et les encapsule dans des images ISO signées que vous transportez physiquement à travers l'interruption d'air. Choisissez ceci sur le serveur qui a un accès Internet et construit les médias.",
-      "title": "Collecteur en mode hors connexion (côte connectée)"
+      "title": "Collecteur isolé (côté connecté)"
     },
     "currentTag": "(actuel)",
     "heading": "Rôle air-gap",
@@ -3332,7 +3332,7 @@
     "menuTitle": "Rôle du serveur",
     "repository": {
       "description": "La moitié isolée d'un couple d'interruption d'air, sans accès à Internet. Il ingère les médias ISO produits par le Collecteur, vérifie leur signature et sert les paquets aux hôtes générés sur le réseau privé afin qu'ils puissent mettre à jour normalement. Choisissez ceci sur le serveur dans l'enclave d'interruption d'air.",
-      "title": "Reposiroire hors connexion (côte déconnectée)"
+      "title": "Dépôt isolé (côté déconnecté)"
     },
     "restartHint": "Redemarrer le serveur SysManage après l'enregistrement pour que le nouveau rôle prenne effet pleinement.",
     "save": "Save Role",
@@ -6019,6 +6019,132 @@
       "again": "Réparer ou mettre à niveau",
       "button": "Activer la sauvegarde iCloud",
       "root": "Les photos sont conservées sous {{path}} (préparé le {{when}})."
+    }
+  },
+  "securityRoles": {
+    "group": {
+      "scripts": "Scripts",
+      "secrets": "Secrets",
+      "ubuntu_pro": "Ubuntu Pro",
+      "host": "Hôte",
+      "host_account_management": "Gestion des comptes d'hôte",
+      "integrations": "Intégrations",
+      "package": "Paquet",
+      "reports": "Rapports",
+      "security": "Sécurité",
+      "settings": "Paramètres",
+      "user": "Utilisateur",
+      "virtualization": "Virtualisation"
+    },
+    "role": {
+      "add_default_repository": "Ajouter le dépôt par défaut",
+      "add_enabled_package_manager": "Ajouter un gestionnaire de paquets activé",
+      "add_firewall_role": "Ajouter un rôle de pare-feu",
+      "add_host_account": "Ajouter un compte hôte",
+      "add_host_group": "Ajouter un groupe d'hôtes",
+      "add_package": "Ajouter un paquet",
+      "add_script": "Ajouter un script",
+      "add_secret": "Ajouter un secret",
+      "add_third_party_repository": "Ajouter un dépôt tiers",
+      "add_user": "Ajouter un utilisateur",
+      "apply_host_os_upgrade": "Appliquer la mise à niveau du système d'exploitation de l'hôte",
+      "apply_software_update": "Appliquer la mise à jour logicielle",
+      "approve_host_registration": "Approuver l'enregistrement de l'hôte",
+      "assign_host_firewall_roles": "Attribuer les rôles de pare-feu à l'hôte",
+      "attach_ubuntu_pro": "Attacher Ubuntu Pro",
+      "change_ubuntu_pro_master_key": "Changer la clé maître Ubuntu Pro",
+      "configure_child_host": "Configurer un hôte enfant",
+      "connect_host_to_graylog": "Connecter l'hôte à Graylog",
+      "create_child_host": "Créer un hôte enfant",
+      "delete_child_host": "Supprimer un hôte enfant",
+      "delete_firewall_role": "Supprimer un rôle de pare-feu",
+      "delete_host": "Supprimer un hôte",
+      "delete_host_account": "Supprimer un compte hôte",
+      "delete_host_group": "Supprimer un groupe d'hôtes",
+      "delete_queue_message": "Supprimer un message de file d'attente",
+      "delete_script": "Supprimer un script",
+      "delete_script_execution": "Supprimer l'exécution d'un script",
+      "delete_secret": "Supprimer un secret",
+      "delete_third_party_repository": "Supprimer un dépôt tiers",
+      "delete_user": "Supprimer un utilisateur",
+      "deploy_antivirus": "Déployer un antivirus",
+      "deploy_certificate": "Déployer un certificat",
+      "deploy_firewall": "Déployer un pare-feu",
+      "deploy_opentelemetry": "Déployer OpenTelemetry",
+      "deploy_ssh_key": "Déployer une clé SSH",
+      "detach_ubuntu_pro": "Détacher Ubuntu Pro",
+      "disable_antivirus": "Désactiver l'antivirus",
+      "disable_firewall": "Désactiver le pare-feu",
+      "disable_third_party_repository": "Désactiver le dépôt tiers",
+      "edit_firewall_ports": "Modifier les ports du pare-feu",
+      "edit_firewall_role": "Modifier le rôle de pare-feu",
+      "edit_host_account": "Modifier le compte d'hôte",
+      "edit_host_group": "Modifier le groupe d'hôtes",
+      "edit_host_hostname": "Modifier le nom d'hôte",
+      "edit_script": "Modifier le script",
+      "edit_secret": "Modifier le secret",
+      "edit_tags": "Modifier les tags",
+      "edit_user": "Modifier l'utilisateur",
+      "edit_user_security_roles": "Modifier les rôles de sécurité de l'utilisateur",
+      "enable_antivirus": "Activer l'antivirus",
+      "enable_firewall": "Activer le pare-feu",
+      "enable_grafana_integration": "Activer l'intégration Grafana",
+      "enable_graylog_integration": "Activer l'intégration Graylog",
+      "enable_kvm": "Activer KVM",
+      "enable_lxd": "Activer LXD",
+      "enable_third_party_repository": "Activer un dépôt tiers",
+      "enable_vmm": "Activer le VMM",
+      "enable_wsl": "Activer WSL",
+      "enable_bhyve": "Activer bhyve",
+      "export_audit_log": "Exporter le journal d'audit",
+      "generate_pdf_report": "Générer le rapport PDF",
+      "kill_host_process": "Terminer un processus de l'hôte",
+      "lock_user": "Verrouiller l'utilisateur",
+      "manage_antivirus_defaults": "Gérer les paramètres par défaut de l'antivirus",
+      "manage_asset_tags": "Gérer les étiquettes d'actifs",
+      "manage_backups": "Gérer les sauvegardes",
+      "manage_cloud_backups": "Gérer les sauvegardes cloud",
+      "manage_custom_metrics": "Gérer les métriques personnalisées",
+      "manage_gpg_keys": "Gérer les clés GPG",
+      "manage_hardware_health": "Gérer l'état du matériel",
+      "manage_network_discovery": "Gérer la découverte réseau",
+      "manage_tenants": "Gérer les locataires",
+      "manage_time_sync": "Gérer la synchronisation de l'heure",
+      "quarantine_malware": "Mettre en quarantaine les logiciels malveillants",
+      "reboot_host": "Redémarrer l'hôte",
+      "remove_antivirus": "Retirer l'antivirus",
+      "remove_default_repository": "Supprimer le dépôt par défaut",
+      "remove_enabled_package_manager": "Désactiver le gestionnaire de paquets",
+      "remove_firewall": "Supprimer le pare-feu",
+      "remove_package": "Supprimer un paquet",
+      "reset_user_password": "Réinitialiser le mot de passe utilisateur",
+      "restart_child_host": "Redémarrer l'hôte enfant",
+      "restart_firewall": "Redémarrer le pare-feu",
+      "restart_host_service": "Redémarrer le service hôte",
+      "restart_opentelemetry_service": "Redémarrer le service OpenTelemetry",
+      "restore_files": "Restaurer les fichiers",
+      "resync_host_clock": "Resynchroniser l'horloge de l'hôte",
+      "run_malware_scans": "Exécuter des analyses de malware",
+      "run_script": "Exécuter un script",
+      "shutdown_host": "Arrêter l'hôte",
+      "start_child_host": "Démarrer l'hôte enfant",
+      "start_host_service": "Démarrer le service hôte",
+      "start_opentelemetry_service": "Démarrer le service OpenTelemetry",
+      "start_vault": "Démarrer Vault",
+      "stop_child_host": "Arrêter l'hôte enfant",
+      "stop_host_service": "Arrêter le service hôte",
+      "stop_opentelemetry_service": "Arrêter le service OpenTelemetry",
+      "stop_vault": "Arrêter Vault",
+      "unlock_user": "Déverrouiller l'utilisateur",
+      "update_agent": "Mettre à jour l'agent",
+      "view_audit_log": "Consulter le journal d'audit",
+      "view_child_host": "Voir l'hôte enfant",
+      "view_default_repositories": "Voir les dépôts par défaut",
+      "view_enabled_package_managers": "Voir les gestionnaires de paquets activés",
+      "view_firewall_roles": "Voir les rôles du pare-feu",
+      "view_host_details": "Voir les détails de l'hôte",
+      "view_report": "Voir le rapport",
+      "view_user_security_roles": "Voir les rôles de sécurité de l'utilisateur"
     }
   }
 }

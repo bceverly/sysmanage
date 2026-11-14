@@ -115,14 +115,14 @@
         "signerFingerprint": "서명자 지문",
         "version": "버전"
       },
-      "title": "공기 격리 리포지토리"
+      "title": "에어갭 리포지토리"
     }
   },
   "airgapBundles": {
-    "buildAgent": "빌드 에이전트 패키지",
+    "buildAgent": "에이전트 번들 빌드",
     "buildError": "빌드 큐에 추가 실패",
-    "buildProplus": "빌드 프로+ 패키지",
-    "buildServer": "빌드 서버 패키지",
+    "buildProplus": "Pro+ 번들 빌드",
+    "buildServer": "서버 번들 빌드",
     "bundle": "패키지",
     "completedAt": "완료됨",
     "confirmDelete": "이 패키지와 그 ISO 파일을 삭제하시겠습니까?",
@@ -226,7 +226,7 @@
     "removable": "제거 가능",
     "rescan": "드라이브 재스캔",
     "saveError": "장치 저장에 실패했습니다.",
-    "title": "드라이브 가져오기"
+    "title": "가져오기 드라이브"
   },
   "airgapImport": {
     "device": "드라이브",
@@ -248,14 +248,14 @@
     "runStats": "{{files}} 파일 · {{size}}",
     "runStatus": "가져오기 상태",
     "statusError": "임포트 장치를 탐색할 수 없습니다.",
-    "title": "매체에서 가져오기"
+    "title": "미디어에서 가져오기"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "공개키 복사",
+      "copyKey": "공개 키 복사",
       "help": "이 공개키를 복사하여 에어_GAP 저장소 서버에서 가져와서 이 콜렉터가 생성한 서명된 미디어를 신뢰하도록 하세요. 공개키만 표시되며, 개인 서명 키는 절대 이 서버 밖으로 나가지 않습니다.",
       "loadError": "콜렉터 공개 키를 불러올 수 없습니다.",
-      "title": "콜렉터 공개 키"
+      "title": "수집기 공개 키"
     },
     "copied": "복사됨!",
     "copyError": "클립보드로 복사할 수 없습니다.",
@@ -274,7 +274,7 @@
       "pemLabel": "공개 키 (PEM)",
       "removeError": "키를 제거할 수 없습니다.",
       "required": "이름과 공개 키 모두 필요합니다.",
-      "title": "신뢰한 수집자 키"
+      "title": "신뢰할 수 있는 수집기 키"
     }
   },
   "antivirus": {
@@ -959,7 +959,7 @@
     },
     "heading": "연방 역할",
     "identity": {
-      "copyKey": "공개키 복사",
+      "copyKey": "공개 키 복사",
       "help": "이 공개키를 복사하여 피어의 연방 카드에 붙여넣어 각 측에서 상대방의 식별 지문을 기록하고 외부에서 확인할 수 있도록 하세요. 개인 키는 절대 이 서버 밖으로 나가지 않습니다.",
       "pending": "아이덴티티 키 생성 중...",
       "title": "이 서버의 식별 키"
@@ -2491,7 +2491,7 @@
   },
   "nav": {
     "advisories": "권고 사항",
-    "airgapCollections": "공기 격리 수집",
+    "airgapCollections": "에어갭 수집",
     "airgapRepositories": "공기 격리 저장소",
     "alerts": "경고",
     "cat": {
@@ -2525,7 +2525,7 @@
     "role": {
       "collector": "공기 격리 수집 엔진",
       "engineMissing": "필요한 Pro+ 엔진이 로드되지 않았습니다. 라이선스를 확인하세요.",
-      "repository": "공기 격리 저장소"
+      "repository": "에어갭 리포지토리"
     },
     "scripts": "스크립트",
     "scrollLeft": "왼쪽으로 스크롤",
@@ -3323,7 +3323,7 @@
   "serverRole": {
     "collector": {
       "description": "인터넷에 연결된 공기 격리 쌍의 한쪽입니다. 이 서버는 상류 패키지 리포지토리를 미러링하고 CVE 및 규정 준수 피드를 수집하여 서명된 ISO 이미지를 생성합니다. 이를 물리적으로 공기 격리 구간으로 가져와야 합니다.",
-      "title": "공기 격리 수집기 (온라인 측)"
+      "title": "에어갭 수집기 (온라인 측)"
     },
     "currentTag": "(현재)",
     "heading": "공백 역할",
@@ -3332,7 +3332,7 @@
     "menuTitle": "서버 역할",
     "repository": {
       "description": "인터넷에 연결되지 않은 공기 격리 쌍의 다른 한쪽입니다. 이 서버는 컬렉터가 생성한 ISO 미디어를 인식하고 서명을 검증하여 패키지를 사내 네트워크에서 호스트에게 제공합니다.",
-      "title": "공기 격리 리포지토리 (연결되지 않은 측)"
+      "title": "에어갭 리포지토리 (연결 끊긴 측)"
     },
     "restartHint": "SysManage 서버를 저장한 후 재시작하여 새로운 역할이 완전히 적용되도록 하세요.",
     "save": "Save Role",
@@ -6019,6 +6019,132 @@
       "again": "복구 또는 업그레이드",
       "button": "iCloud 백업 활성화",
       "root": "사진은 {{path}} 아래에 보관됩니다({{when}}에 준비됨)."
+    }
+  },
+  "securityRoles": {
+    "group": {
+      "ubuntu_pro": "Ubuntu Pro",
+      "host": "호스트",
+      "host_account_management": "호스트 계정 관리",
+      "integrations": "통합",
+      "package": "패키지",
+      "reports": "보고서",
+      "scripts": "스크립트",
+      "secrets": "비밀",
+      "security": "보안",
+      "settings": "설정",
+      "user": "사용자",
+      "virtualization": "가상화"
+    },
+    "role": {
+      "add_default_repository": "기본 저장소 추가",
+      "add_enabled_package_manager": "활성화된 패키지 관리자 추가",
+      "add_firewall_role": "방화벽 역할 추가",
+      "add_host_account": "호스트 계정 추가",
+      "add_host_group": "호스트 그룹 추가",
+      "add_package": "패키지 추가",
+      "add_script": "스크립트 추가",
+      "add_secret": "비밀 추가",
+      "add_third_party_repository": "서드파티 저장소 추가",
+      "add_user": "사용자 추가",
+      "apply_host_os_upgrade": "호스트 OS 업그레이드 적용",
+      "apply_software_update": "소프트웨어 업데이트 적용",
+      "approve_host_registration": "호스트 등록 승인",
+      "assign_host_firewall_roles": "호스트 방화벽 역할 할당",
+      "attach_ubuntu_pro": "Ubuntu Pro 연결",
+      "change_ubuntu_pro_master_key": "Ubuntu Pro 마스터 키 변경",
+      "configure_child_host": "자식 호스트 구성",
+      "connect_host_to_graylog": "호스트를 Graylog에 연결",
+      "create_child_host": "자식 호스트 생성",
+      "delete_child_host": "자식 호스트 삭제",
+      "delete_firewall_role": "방화벽 역할 삭제",
+      "delete_host": "호스트 삭제",
+      "delete_host_account": "호스트 계정 삭제",
+      "delete_host_group": "호스트 그룹 삭제",
+      "delete_queue_message": "큐 메시지 삭제",
+      "delete_script": "스크립트 삭제",
+      "delete_script_execution": "스크립트 실행 삭제",
+      "delete_secret": "비밀 삭제",
+      "delete_third_party_repository": "서드파티 저장소 삭제",
+      "delete_user": "사용자 삭제",
+      "deploy_antivirus": "바이러스 백신 배포",
+      "deploy_certificate": "인증서 배포",
+      "deploy_firewall": "방화벽 배포",
+      "deploy_opentelemetry": "OpenTelemetry 배포",
+      "deploy_ssh_key": "SSH 키 배포",
+      "detach_ubuntu_pro": "Ubuntu Pro 분리",
+      "disable_antivirus": "바이러스 백신 비활성화",
+      "disable_firewall": "방화벽 비활성화",
+      "disable_third_party_repository": "서드파티 저장소 비활성화",
+      "edit_firewall_ports": "방화벽 포트 편집",
+      "edit_firewall_role": "방화벽 역할 편집",
+      "edit_host_account": "호스트 계정 편집",
+      "edit_host_group": "호스트 그룹 편집",
+      "edit_host_hostname": "호스트 이름 편집",
+      "edit_script": "스크립트 편집",
+      "edit_secret": "비밀 편집",
+      "edit_tags": "태그 편집",
+      "edit_user": "사용자 편집",
+      "edit_user_security_roles": "사용자 보안 역할 편집",
+      "enable_antivirus": "바이러스 백신 활성화",
+      "enable_firewall": "방화벽 활성화",
+      "enable_grafana_integration": "Grafana 통합 활성화",
+      "enable_graylog_integration": "Graylog 통합 활성화",
+      "enable_kvm": "KVM 활성화",
+      "enable_lxd": "LXD 활성화",
+      "enable_third_party_repository": "서드파티 저장소 활성화",
+      "enable_vmm": "VMM 활성화",
+      "enable_wsl": "WSL 활성화",
+      "enable_bhyve": "bhyve 활성화",
+      "export_audit_log": "감사 로그 내보내기",
+      "generate_pdf_report": "PDF 보고서 생성",
+      "kill_host_process": "호스트 프로세스 종료",
+      "lock_user": "사용자 잠금",
+      "manage_antivirus_defaults": "바이러스 백신 기본값 관리",
+      "manage_asset_tags": "자산 태그 관리",
+      "manage_backups": "백업 관리",
+      "manage_cloud_backups": "클라우드 백업 관리",
+      "manage_custom_metrics": "사용자 지정 메트릭 관리",
+      "manage_gpg_keys": "GPG 키 관리",
+      "manage_hardware_health": "하드웨어 상태 관리",
+      "manage_network_discovery": "네트워크 검색 관리",
+      "manage_tenants": "테넌트 관리",
+      "manage_time_sync": "시간 동기화 관리",
+      "quarantine_malware": "악성 코드 격리",
+      "reboot_host": "호스트 재시작",
+      "remove_antivirus": "바이러스 백신 제거",
+      "remove_default_repository": "기본 저장소 제거",
+      "remove_enabled_package_manager": "활성화된 패키지 관리자 제거",
+      "remove_firewall": "방화벽 제거",
+      "remove_package": "패키지 제거",
+      "reset_user_password": "사용자 비밀번호 재설정",
+      "restart_child_host": "자식 호스트 재시작",
+      "restart_firewall": "방화벽 재시작",
+      "restart_host_service": "호스트 서비스 재시작",
+      "restart_opentelemetry_service": "OpenTelemetry 서비스 재시작",
+      "restore_files": "파일 복원",
+      "resync_host_clock": "호스트 시계 재동기화",
+      "run_malware_scans": "악성 코드 스캔 실행",
+      "run_script": "스크립트 실행",
+      "shutdown_host": "호스트 종료",
+      "start_child_host": "자식 호스트 시작",
+      "start_host_service": "호스트 서비스 시작",
+      "start_opentelemetry_service": "OpenTelemetry 서비스 시작",
+      "start_vault": "Vault 시작",
+      "stop_child_host": "자식 호스트 중지",
+      "stop_host_service": "호스트 서비스 중지",
+      "stop_opentelemetry_service": "OpenTelemetry 서비스 중지",
+      "stop_vault": "Vault 중지",
+      "unlock_user": "사용자 잠금 해제",
+      "update_agent": "에이전트 업데이트",
+      "view_audit_log": "감사 로그 보기",
+      "view_child_host": "자식 호스트 보기",
+      "view_default_repositories": "기본 저장소 보기",
+      "view_enabled_package_managers": "활성화된 패키지 관리자 보기",
+      "view_firewall_roles": "방화벽 역할 보기",
+      "view_host_details": "호스트 세부 정보 보기",
+      "view_report": "보고서 보기",
+      "view_user_security_roles": "사용자 보안 역할 보기"
     }
   }
 }

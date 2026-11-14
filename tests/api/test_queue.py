@@ -124,7 +124,7 @@ class TestQueueAPI:
             headers={"Content-Type": "application/json"},
         )
 
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         data = response.json()
         assert "No message IDs provided" in data["detail"]
 

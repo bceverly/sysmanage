@@ -115,14 +115,14 @@
         "signerFingerprint": "署名者の指紋",
         "version": "バージョン"
       },
-      "title": "エアギャップ リポジトリ"
+      "title": "エアギャップリポジトリ"
     }
   },
   "airgapBundles": {
-    "buildAgent": "ビルドエージェントバンドル",
+    "buildAgent": "エージェントバンドルを作成",
     "buildError": "ビルドキューに追加できませんでした。",
-    "buildProplus": "Pro+バンドルを作成",
-    "buildServer": "ビルドサーバーバンドル",
+    "buildProplus": "Pro+ バンドルを作成",
+    "buildServer": "サーバーバンドルを作成",
     "bundle": "バンドル",
     "completedAt": "完了済み",
     "confirmDelete": "このバンドルとISOファイルを削除しますか？",
@@ -196,7 +196,7 @@
       "mirrorsTitle": "ミラーリング",
       "noMirrors": "アクティブなミラーリングが設定されていません。設定 → レポジトリミラーリングにミラーを追加してから、再度試行してください。",
       "submit": "キュー実行",
-      "title": "新しいコレクション実行"
+      "title": "新しい収集の実行"
     },
     "discPicker": {
       "cancel": "キャンセル",
@@ -208,13 +208,13 @@
     "licenseRequired": "オフラインコレクターエンジンが読み込まれていません；Pro+ ライセンスが必要です。",
     "loadError": "実行の読み込みに失敗しました。",
     "multiDiscInfo": "この実行で{{count}}枚のディスクが生成されました。ダウンロードするものを選択してください。",
-    "newRun": "新しいコレクション実行",
+    "newRun": "新しい収集の実行",
     "noIsoOnDisk": "ディスク上にまだISOファイルが見つかりません -- 数秒後に再チェックしてください。",
     "noManifestFound": "実行にはまだマニフェストがありません -- 状態が COMPLETE のときに再度試してください。",
     "notApplicable": "このページは収集役のデプロイメントでのみ意味があります。",
     "refresh": "更新する",
     "subtitle": "設定されたリポジトリをミラーリングし、署名付きISOを作成し、エアギャップ側でインジェスト可能なマニフェストを書き込む一発目収集ランをトリガーします。",
-    "title": "オフライン収集実行"
+    "title": "エアギャップ収集の実行"
   },
   "airgapDevices": {
     "empty": "適格なドライブが見つかりません。メディアを挿入し、リスキャンを押してください。",
@@ -226,7 +226,7 @@
     "removable": "取り外し可能",
     "rescan": "ドライブを再スキャンする",
     "saveError": "デバイスの保存に失敗しました。",
-    "title": "ドライブのインポート"
+    "title": "インポート用ドライブ"
   },
   "airgapImport": {
     "device": "ドライブ",
@@ -235,7 +235,7 @@
     "noDevice": "インポートドライブが選択されていません。設定 → サーバーロールで1つを選んでください。",
     "notReady": "準備ができていません",
     "ready": "準備完了{{label}}",
-    "rescan": "再スキャンする",
+    "rescan": "再スキャン",
     "run": {
       "complete": "完了",
       "copying": "パッケージをコピー中",
@@ -255,7 +255,7 @@
       "copyKey": "公開鍵をコピー",
       "help": "この公開鍵をコピーし、Air-Gap リポジトリ サーバーでインポートすることで、このコレクターが生成した署名付きメディアを信頼できるようにします。公開鍵のみが表示されます -- 秘密鍵はこのサーバーから決して漏れません。",
       "loadError": "コレクター公開鍵の読み込みに失敗しました。",
-      "title": "コレクタ公開キー"
+      "title": "コレクターの公開鍵"
     },
     "copied": "コピーしました！",
     "copyError": "クリップボードにコピーできませんでした。",
@@ -266,7 +266,7 @@
       "count": "{{n}} 信頼された",
       "empty": "信頼されたコレクターキーはまだありません。",
       "help": "各Air-Gap Collectorのメディアから、このリポジトリが受け入れるべきメディアを署名した公開キーをインポートしてください。信頼されていないキーで署名されたメディアはインGEST時に拒否されます。",
-      "import": "インポートキー",
+      "import": "キーをインポート",
       "importError": "キーのインポートに失敗しました。",
       "imported": "キーをインポートしました {{fp}}",
       "loadError": "信頼されたキーの読み込みに失敗しました。",
@@ -274,7 +274,7 @@
       "pemLabel": "公開鍵 (PEM)",
       "removeError": "キーを削除できませんでした。",
       "required": "名前と公開キーの両方が必要です。",
-      "title": "信頼されたコレクタキー"
+      "title": "信頼済みコレクターの鍵"
     }
   },
   "antivirus": {
@@ -2491,7 +2491,7 @@
   },
   "nav": {
     "advisories": "セキュリティ勧告",
-    "airgapCollections": "オフライン収集",
+    "airgapCollections": "エアギャップ収集",
     "airgapRepositories": "エアギャップ リポジトリ",
     "alerts": "アラート",
     "cat": {
@@ -2525,7 +2525,7 @@
     "role": {
       "collector": "オフラインコレクター",
       "engineMissing": "必要なPro+エンジンが読み込まれていません。ライセンスを確認してください。",
-      "repository": "オフラインリポジトリ"
+      "repository": "エアギャップリポジトリ"
     },
     "scripts": "スクリプト",
     "scrollLeft": "左にスクロール",
@@ -3323,7 +3323,7 @@
   "serverRole": {
     "collector": {
       "description": "インターネットに接続されているエアギャップペアの一方です。このサーバーはアップストリームパッケージリポジトリをミラーリングし、CVEとコンプライアンスフィードを集め、それらを署名付きISOイメージにバンドルして物理的にエアギャップを越えて運びます。インターネットアクセスがあるサーバーでこれを選択します。",
-      "title": "オフライン側のエアギャップ コレクター"
+      "title": "エアギャップコレクター（オンライン側）"
     },
     "currentTag": "(現在)",
     "heading": "エアギャップロール",
@@ -3332,7 +3332,7 @@
     "menuTitle": "サーバーロール",
     "repository": {
       "description": "インターネットアクセスがないエアギャップペアの一方です。このサーバーはコレクタによって生成されたISOメディアをインジェストし、その署名を検証してプライベートネットワーク上の管理ホストにパッケージを提供します。エアギャップ内にあるサーバーでこれを選択します。",
-      "title": "ディスコンNECTED サイドのエアギャップ リポジトリ"
+      "title": "エアギャップリポジトリ（切断側）"
     },
     "restartHint": "SysManageサーバーを保存後に再起動してください。新しい役割が完全に効果を発揮するように",
     "save": "Save Role",
@@ -6019,6 +6019,132 @@
       "again": "修復またはアップグレード",
       "button": "iCloud バックアップを有効にする",
       "root": "写真は {{path}} に保存されます (準備日時 {{when}})。"
+    }
+  },
+  "securityRoles": {
+    "group": {
+      "ubuntu_pro": "Ubuntu Pro",
+      "host": "ホスト",
+      "host_account_management": "ホスト アカウント管理",
+      "integrations": "統合",
+      "package": "パッケージ",
+      "reports": "レポート",
+      "scripts": "スクリプト",
+      "secrets": "シークレット",
+      "security": "セキュリティ",
+      "settings": "設定",
+      "user": "ユーザー",
+      "virtualization": "仮想化"
+    },
+    "role": {
+      "add_default_repository": "デフォルトリポジトリを追加する",
+      "add_enabled_package_manager": "有効なパッケージマネージャーを追加する",
+      "add_firewall_role": "ファイアウォールロールを追加する",
+      "add_host_account": "ホストアカウントを追加する",
+      "add_host_group": "ホストグループを追加する",
+      "add_package": "パッケージを追加する",
+      "add_script": "スクリプトを追加する",
+      "add_secret": "シークレットを追加する",
+      "add_third_party_repository": "サードパーティリポジトリを追加する",
+      "add_user": "ユーザーを追加する",
+      "apply_host_os_upgrade": "ホストOSアップグレードを適用する",
+      "apply_software_update": "ソフトウェアアップデートを適用する",
+      "approve_host_registration": "ホスト登録を承認する",
+      "assign_host_firewall_roles": "ホストファイアウォールロールを割り当てる",
+      "attach_ubuntu_pro": "Ubuntu Proをアタッチする",
+      "change_ubuntu_pro_master_key": "Ubuntu Proのマスターキーを変更する",
+      "configure_child_host": "子ホストを構成する",
+      "connect_host_to_graylog": "ホストをGraylogに接続する",
+      "create_child_host": "子ホストを作成する",
+      "delete_child_host": "子ホストを削除する",
+      "delete_firewall_role": "ファイアウォールロールを削除する",
+      "delete_host": "ホストを削除する",
+      "delete_host_account": "ホストアカウントを削除する",
+      "delete_host_group": "ホストグループを削除する",
+      "delete_queue_message": "キューのメッセージを削除する",
+      "delete_script": "スクリプトを削除する",
+      "delete_script_execution": "スクリプトの実行を削除する",
+      "delete_secret": "シークレットを削除する",
+      "delete_third_party_repository": "サードパーティリポジトリを削除する",
+      "delete_user": "ユーザーを削除する",
+      "deploy_antivirus": "アンチウイルスをデプロイする",
+      "deploy_certificate": "証明書をデプロイする",
+      "deploy_firewall": "ファイアウォールをデプロイする",
+      "deploy_opentelemetry": "OpenTelemetryをデプロイする",
+      "deploy_ssh_key": "SSHキーをデプロイする",
+      "detach_ubuntu_pro": "Ubuntu Proをデタッチする",
+      "disable_antivirus": "アンチウイルスを無効にする",
+      "disable_firewall": "ファイアウォールを無効にする",
+      "disable_third_party_repository": "サードパーティリポジトリを無効にする",
+      "edit_firewall_ports": "ファイアウォールポートを編集する",
+      "edit_firewall_role": "ファイアウォール ロールの編集",
+      "edit_host_account": "ホスト アカウントの編集",
+      "edit_host_group": "ホスト グループの編集",
+      "edit_host_hostname": "ホスト名の編集",
+      "edit_script": "スクリプトの編集",
+      "edit_secret": "シークレットの編集",
+      "edit_tags": "タグの編集",
+      "edit_user": "ユーザーの編集",
+      "edit_user_security_roles": "ユーザーのセキュリティ ロールの編集",
+      "enable_antivirus": "アンチウイルスを有効にする",
+      "enable_firewall": "ファイアウォールを有効にする",
+      "enable_grafana_integration": "Grafana 統合を有効にする",
+      "enable_graylog_integration": "Graylog 統合を有効にする",
+      "enable_kvm": "KVMを有効にする",
+      "enable_lxd": "LXDを有効にする",
+      "enable_third_party_repository": "サードパーティ リポジトリを有効にする",
+      "enable_vmm": "VMMを有効にする",
+      "enable_wsl": "WSLを有効にする",
+      "enable_bhyve": "bhyveを有効にする",
+      "export_audit_log": "監査ログのエクスポート",
+      "generate_pdf_report": "PDFレポートの生成",
+      "kill_host_process": "ホスト プロセスの終了",
+      "lock_user": "ユーザーをロック",
+      "manage_antivirus_defaults": "アンチウイルス デフォルトの管理",
+      "manage_asset_tags": "資産タグの管理",
+      "manage_backups": "バックアップの管理",
+      "manage_cloud_backups": "クラウド バックアップの管理",
+      "manage_custom_metrics": "カスタム メトリクスの管理",
+      "manage_gpg_keys": "GPGキーの管理",
+      "manage_hardware_health": "ハードウェアヘルスの管理",
+      "manage_network_discovery": "ネットワーク ディスカバリーの管理",
+      "manage_tenants": "テナントの管理",
+      "manage_time_sync": "タイム同期の管理",
+      "quarantine_malware": "マルウェアの隔離",
+      "reboot_host": "ホストの再起動",
+      "remove_antivirus": "アンチウイルスを削除",
+      "remove_default_repository": "デフォルトリポジトリの削除",
+      "remove_enabled_package_manager": "有効なパッケージマネージャーの削除",
+      "remove_firewall": "ファイアウォールの削除",
+      "remove_package": "パッケージの削除",
+      "reset_user_password": "ユーザーパスワードのリセット",
+      "restart_child_host": "子ホストの再起動",
+      "restart_firewall": "ファイアウォールの再起動",
+      "restart_host_service": "ホストサービスの再起動",
+      "restart_opentelemetry_service": "OpenTelemetryサービスの再起動",
+      "restore_files": "ファイルの復元",
+      "resync_host_clock": "ホストクロックの再同期",
+      "run_malware_scans": "マルウェアスキャンの実行",
+      "run_script": "スクリプトの実行",
+      "shutdown_host": "ホストのシャットダウン",
+      "start_child_host": "子ホストの起動",
+      "start_host_service": "ホストサービスを開始する",
+      "start_opentelemetry_service": "OpenTelemetryサービスを開始する",
+      "start_vault": "Vaultを開始する",
+      "stop_child_host": "子ホストを停止する",
+      "stop_host_service": "ホストサービスを停止する",
+      "stop_opentelemetry_service": "OpenTelemetryサービスを停止する",
+      "stop_vault": "Vaultを停止する",
+      "unlock_user": "ユーザーをアンロックする",
+      "update_agent": "エージェントを更新する",
+      "view_audit_log": "監査ログを表示する",
+      "view_child_host": "子ホストを表示する",
+      "view_default_repositories": "デフォルトリポジトリを表示する",
+      "view_enabled_package_managers": "有効なパッケージマネージャを表示する",
+      "view_firewall_roles": "ファイアウォールロールを表示する",
+      "view_host_details": "ホスト詳細を表示する",
+      "view_report": "レポートを表示する",
+      "view_user_security_roles": "ユーザーのセキュリティロールを表示する"
     }
   }
 }

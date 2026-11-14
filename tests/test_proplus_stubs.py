@@ -346,10 +346,10 @@ class TestProPlusV1StubRoutes:
         assert response.json()["licensed"] is False
 
     def test_audit_export_stub(self, client):
-        """Test audit export returns licensed=false without audit_engine."""
+        """Test audit export is a 402, never 200 licensed=false, without audit_engine."""
         response = client.post("/api/v1/audit/export")
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_secrets_statistics_stub(self, client):
         """Test secrets statistics returns licensed=false without secrets_engine."""
@@ -427,22 +427,22 @@ class TestContainerActionStubs:
     """Test container action stub endpoints return licensed=false."""
 
     def test_container_create_stub(self, client):
-        """Test container create returns licensed=false without container_engine."""
+        """Test container create is a 402, never 200 licensed=false, without container_engine."""
         response = client.post("/api/v1/containers/create")
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_container_action_stub(self, client):
-        """Test container action returns licensed=false without container_engine."""
+        """Test container action is a 402, never 200 licensed=false, without container_engine."""
         response = client.post("/api/v1/containers/test-id/action")
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_container_network_stub(self, client):
-        """Test container network returns licensed=false without container_engine."""
+        """Test container network is a 402, never 200 licensed=false, without container_engine."""
         response = client.post("/api/v1/containers/test-id/network")
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
 
 class TestObservabilityCustomMetricsStubs:
@@ -458,7 +458,7 @@ class TestObservabilityCustomMetricsStubs:
         assert data["custom_metrics"] == []
 
     def test_custom_metrics_create_stub(self, client):
-        """Creating a custom metric returns licensed=false without the engine."""
+        """Creating a custom metric is a 402, never 200 licensed=false, without the engine."""
         response = client.post(
             "/api/v1/observability/custom-metrics",
             json={
@@ -468,8 +468,8 @@ class TestObservabilityCustomMetricsStubs:
                 "tag_ids": [],
             },
         )
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_custom_metrics_get_stub(self, client):
         """Getting a custom metric returns licensed=false without the engine."""
@@ -478,28 +478,28 @@ class TestObservabilityCustomMetricsStubs:
         assert response.json()["licensed"] is False
 
     def test_custom_metrics_update_stub(self, client):
-        """Updating a custom metric returns licensed=false without the engine."""
+        """Updating a custom metric is a 402, never 200 licensed=false, without the engine."""
         response = client.put(
             "/api/v1/observability/custom-metrics/test-id",
             json={"enabled": False},
         )
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_custom_metrics_delete_stub(self, client):
-        """Deleting a custom metric returns licensed=false without the engine."""
+        """Deleting a custom metric is a 402, never 200 licensed=false, without the engine."""
         response = client.delete("/api/v1/observability/custom-metrics/test-id")
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_custom_metrics_tags_stub(self, client):
-        """Setting tags returns licensed=false without the engine."""
+        """Setting tags is a 402, never 200 licensed=false, without the engine."""
         response = client.put(
             "/api/v1/observability/custom-metrics/test-id/tags",
             json={"tag_ids": []},
         )
-        assert response.status_code == 200
-        assert response.json()["licensed"] is False
+        assert response.status_code == 402
+        assert response.json()["detail"]["error"] == "pro_plus_required"
 
     def test_custom_metrics_samples_stub(self, client):
         """Reading samples returns licensed=false without the engine."""

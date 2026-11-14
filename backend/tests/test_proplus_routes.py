@@ -495,6 +495,24 @@ class TestMountFederationControllerRoutes:
 # =============================================================================
 
 
+def _assert_stub_answers(app, endpoints):
+    """Reads: 200 ``{"licensed": false}``.  Writes: 402, never a 200."""
+    from fastapi.testclient import TestClient
+
+    client = TestClient(app)
+    for method, path in endpoints:
+        response = client.request(method, path, json={})
+        if method == "GET":
+            assert response.status_code == 200, (
+                f"{method} {path} returned {response.status_code} "
+                f"(body={response.text[:200]})"
+            )
+            assert response.json().get("licensed") is False, (method, path)
+        else:
+            assert response.status_code == 402, (method, path, response.text)
+            assert response.json()["detail"]["error"] == "pro_plus_required"
+
+
 class TestFederationControllerStubRoutes:
     """End-to-end via FastAPI TestClient: every federation endpoint
     must respond 200 with ``{"licensed": False, ...}`` when the
@@ -583,25 +601,16 @@ class TestFederationControllerStubRoutes:
         return app
 
     def test_all_federation_stubs_respond_licensed_false(self, stub_only_app):
-        """Every stub endpoint returns 200 with ``licensed: False``.
+        """Every stub READ returns 200 with ``licensed: False``; every stub
+        WRITE is a 402 naming the engine.
 
-        The shape is the contract for the frontend probe -- if any
+        The read shape is the contract for the frontend probe -- if any
         endpoint regresses to a different shape (e.g. 404 from a
         prefix typo), the federation UI's "is this licensed?"
-        detection breaks."""
-        from fastapi.testclient import TestClient
-
-        client = TestClient(stub_only_app)
-        for method, path in self.STUB_ENDPOINTS:
-            response = client.request(method, path, json={})
-            assert response.status_code == 200, (
-                f"{method} {path} returned {response.status_code} "
-                f"(body={response.text[:200]})"
-            )
-            body = response.json()
-            assert (
-                body.get("licensed") is False
-            ), f"{method} {path} body missing licensed=False: {body}"
+        detection breaks.  Writes answered the same 200 until the Phase 25
+        edition audit (2026-11-14), which told a script its dispatch had
+        worked; ``Services/federation.ts`` reads their 402 as unlicensed."""
+        _assert_stub_answers(stub_only_app, self.STUB_ENDPOINTS)
 
     def test_federation_stub_count_locked(self, stub_only_app):
         """A safety net: the federation stub surface matches
@@ -863,16 +872,7 @@ class TestFederationSiteStubRoutes:
         return app
 
     def test_all_site_stubs_respond_licensed_false(self, stub_only_app):
-        from fastapi.testclient import TestClient
-
-        client = TestClient(stub_only_app)
-        for method, path in self.STUB_ENDPOINTS:
-            response = client.request(method, path, json={})
-            assert response.status_code == 200, (
-                f"{method} {path} returned {response.status_code} "
-                f"(body={response.text[:200]})"
-            )
-            assert response.json().get("licensed") is False
+        _assert_stub_answers(stub_only_app, self.STUB_ENDPOINTS)
 
     def test_site_stub_count_locked(self, stub_only_app):
         """Trailing slash matters: the controller block's

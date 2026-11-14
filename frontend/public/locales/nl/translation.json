@@ -115,14 +115,14 @@
         "signerFingerprint": "Handtekening vingerafdruk",
         "version": "Versie"
       },
-      "title": "Luchtgaps-reposities"
+      "title": "Air-gap-repository's"
     }
   },
   "airgapBundles": {
-    "buildAgent": "Bouwagent Pakket",
+    "buildAgent": "Agentbundel maken",
     "buildError": "Kan build niet aan de rij plaatsen.",
-    "buildProplus": "Pro+ Bundel bouwen",
-    "buildServer": "Bouwserver Pakket",
+    "buildProplus": "Pro+-bundel maken",
+    "buildServer": "Serverbundel maken",
     "bundle": "Bundel",
     "completedAt": "Afgerond",
     "confirmDelete": "Bevestig: Pakket en ISO-bestand verwijderen?",
@@ -196,7 +196,7 @@
       "mirrorsTitle": "Spiegels",
       "noMirrors": "Er zijn geen ingeschakelde spiegels ingesteld. Ga naar Instellingen → Repository Spiegelen om er een toe te voegen, en probeer het dan opnieuw.",
       "submit": "Queue uitvoeren",
-      "title": "Nieuwe Collectierun"
+      "title": "Nieuwe verzamelrun"
     },
     "discPicker": {
       "cancel": "Annuleren",
@@ -208,13 +208,13 @@
     "licenseRequired": "Luchtdichte collector engine niet geladen; Pro+ licentie vereist.",
     "loadError": "Kan uitvoeringen niet laden.",
     "multiDiscInfo": "Deze run produceerde {{count}} schijven. Kies welke te downloaden.",
-    "newRun": "Nieuwe Collectierun",
+    "newRun": "Nieuwe verzamelrun",
     "noIsoOnDisk": "Geen ISO-bestand gevonden op de schijf nog -- herprobeer over een moment.",
     "noManifestFound": "Run heeft nog geen manifest -- probeer opnieuw wanneer status COMPLETE is.",
     "notApplicable": "Deze pagina heeft alleen betekenis op collector-rol implementaties.",
     "refresh": "Vernieuwen",
     "subtitle": "Activeer éénmalige collectie uitvoeringen die gespiegelde geconfigureerde repositories weerspiegelen, een ondertekend ISO bouwen en een manifest genereren voor verwerking aan de luchtdichte kant.",
-    "title": "Airgaps voor verzamelingen runs"
+    "title": "Air-gap-verzamelruns"
   },
   "airgapDevices": {
     "empty": "Geen geschikte schijven gevonden. Voeg media toe en klik op Rescan.",
@@ -226,7 +226,7 @@
     "removable": "verwijzelsbaar",
     "rescan": "Schijven opnieuw scannen",
     "saveError": "Kan apparaat niet opslaan.",
-    "title": "Schijf importeren"
+    "title": "Importstation"
   },
   "airgapImport": {
     "device": "Schijf",
@@ -235,7 +235,7 @@
     "noDevice": "Geen importschijf geselecteerd. Kies er een in Instellingen → Serverrol.",
     "notReady": "Niet gereed",
     "ready": "Klaar{{label}}",
-    "rescan": "Nieuwe scan",
+    "rescan": "Opnieuw scannen",
     "run": {
       "complete": "Voltooid",
       "copying": "Pakketten kopiëren",
@@ -248,14 +248,14 @@
     "runStats": "{{files}} bestanden · {{size}}",
     "runStatus": "Importstatus",
     "statusError": "Kon de importapparaat niet testen.",
-    "title": "Media importeren"
+    "title": "Importeren vanaf media"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "Openbare Sleutel Kopiëren",
+      "copyKey": "Openbare sleutel kopiëren",
       "help": "Kopiéer dit openbare sleutel en importeer deze op de Air-Gap Repository server zodat deze de gesigneerde media van deze collector vertrouwt. Alleen het openbare sleutel wordt weergegeven - het privé-sleutel verlaat nooit deze server.",
       "loadError": "Kon het openbare collector-sleutel niet laden.",
-      "title": "Collector Openbaar Sleutel"
+      "title": "Openbare sleutel van de verzamelaar"
     },
     "copied": "Gekopieerd!",
     "copyError": "Kon niet kopiëren naar klembord.",
@@ -274,7 +274,7 @@
       "pemLabel": "Openbare sleutel (PEM)",
       "removeError": "Kan sleutel niet verwijderen.",
       "required": "Naam en openbaar sleutel zijn beide vereist.",
-      "title": "Geverifieerde Collector Sleutels"
+      "title": "Vertrouwde verzamelaarsleutels"
     }
   },
   "antivirus": {
@@ -959,7 +959,7 @@
     },
     "heading": "Federatie Rol",
     "identity": {
-      "copyKey": "Openbare Sleutel Kopiëren",
+      "copyKey": "Openbare sleutel kopiëren",
       "help": "Kopiéer dit openbare sleutel en plak deze in de federatiekaart van de peer zodat elke kant de identiteitsvingerafdruk van de andere kant kan vastleggen en buiten band kan bevestigen. Het privé-sleutel verlaat nooit deze server.",
       "pending": "Identiteits sleutel aanmaken...",
       "title": "De identiteits sleutel van deze server"
@@ -2491,7 +2491,7 @@
   },
   "nav": {
     "advisories": "Beveiligingsadviezen",
-    "airgapCollections": "Luchtdichte collecties",
+    "airgapCollections": "Air-gap-verzamelingen",
     "airgapRepositories": "Luchtgapsieve repos",
     "alerts": "Waarschuwingen",
     "cat": {
@@ -2525,7 +2525,7 @@
     "role": {
       "collector": "Luchtdichte collector",
       "engineMissing": "Vereiste Pro+ engine niet geladen; controleer licentie.",
-      "repository": "Luchtdichte opslagplaats"
+      "repository": "Air-gap-repository"
     },
     "scripts": "Scripten",
     "scrollLeft": "Scroll naar links",
@@ -3323,7 +3323,7 @@
   "serverRole": {
     "collector": {
       "description": "Het internetverbonden deel van een luchtdichte paar. Het spiegelt upstream pakketarchieven, verzamelt CVE en compliance feeds, en bundelt ze in ondertekende ISO-afbeeldingen die je fysiek over de luchtdichte scheiding meeneemt. Kies dit op de server met internettoegang en bouw het media.",
-      "title": "Air-Gap Collector (online kant)"
+      "title": "Air-gap-verzamelaar (onlinekant)"
     },
     "currentTag": "(huidig)",
     "heading": "Airgap rol",
@@ -3332,7 +3332,7 @@
     "menuTitle": "Serverrol",
     "repository": {
       "description": "Het geïsoleerde deel van een luchtdichte paar, zonder internettoegang. Het verwerkt de ISO-afbeeldingen geproduceerd door de Collector, controleert hun ondertekening, en serveert de pakketten aan beheerde hosts op het privé-netwerk zodat ze normaal kunnen updaten. Kies dit op de server binnen de luchtdichte enclave.",
-      "title": "Air-Gap Repository (afgesloten kant)"
+      "title": "Air-gap-repository (losgekoppelde kant)"
     },
     "restartHint": "Herstart de SysManage-server na het opslaan om de nieuwe rol volledig effectief te maken.",
     "save": "Save Role",
@@ -5701,7 +5701,7 @@
     "equip": {
       "blockedAgent": "Werk de agent bij om deze host van hieruit uit te rusten",
       "blockedPlatform": "Installeer restate op dit systeem met de hand (bouw het vanuit de broncode)",
-      "button": "Uitrusten voor back-up",
+      "button": "Voorbereiden voor back-up",
       "checking": "Agent gevraagd; de status wordt over een paar seconden bijgewerkt.",
       "error": "Uitrusten voor back-up kon niet worden gestart.",
       "failChecksum": "Het gedownloade pakket kwam niet overeen met de gepubliceerde controlesom en is daarom niet geïnstalleerd",
@@ -6019,6 +6019,132 @@
       "again": "Herstellen of bijwerken",
       "button": "iCloud-back-up inschakelen",
       "root": "De foto's staan onder {{path}} (voorbereid {{when}})."
+    }
+  },
+  "securityRoles": {
+    "group": {
+      "host": "Host",
+      "scripts": "Scripts",
+      "ubuntu_pro": "Ubuntu Pro",
+      "host_account_management": "Beheer van hostaccounts",
+      "integrations": "Integraties",
+      "package": "Pakket",
+      "reports": "Rapporten",
+      "secrets": "Geheimen",
+      "security": "Beveiliging",
+      "settings": "Instellingen",
+      "user": "Gebruiker",
+      "virtualization": "Virtualisatie"
+    },
+    "role": {
+      "add_default_repository": "Standaardrepository toevoegen",
+      "add_enabled_package_manager": "Ingeschakelde pakketbeheerder toevoegen",
+      "add_firewall_role": "Firewallrol toevoegen",
+      "add_host_account": "Hostaccount toevoegen",
+      "add_host_group": "Hostgroep toevoegen",
+      "add_package": "Pakket toevoegen",
+      "add_script": "Script toevoegen",
+      "add_secret": "Geheim toevoegen",
+      "add_third_party_repository": "Repository van derden toevoegen",
+      "add_user": "Gebruiker toevoegen",
+      "apply_host_os_upgrade": "Hostbesturingssysteem upgraden",
+      "apply_software_update": "Software-update toepassen",
+      "approve_host_registration": "Hostregistratie goedkeuren",
+      "assign_host_firewall_roles": "Firewallrollen aan host toewijzen",
+      "attach_ubuntu_pro": "Ubuntu Pro koppelen",
+      "change_ubuntu_pro_master_key": "Ubuntu Pro-hoofdsleutel wijzigen",
+      "configure_child_host": "Child-host configureren",
+      "connect_host_to_graylog": "Host verbinden met Graylog",
+      "create_child_host": "Child-host aanmaken",
+      "delete_child_host": "Child-host verwijderen",
+      "delete_firewall_role": "Firewallrol verwijderen",
+      "delete_host": "Host verwijderen",
+      "delete_host_account": "Hostaccount verwijderen",
+      "delete_host_group": "Hostgroep verwijderen",
+      "delete_queue_message": "Bericht uit de wachtrij verwijderen",
+      "delete_script": "Script verwijderen",
+      "delete_script_execution": "Scriptuitvoering verwijderen",
+      "delete_secret": "Geheim verwijderen",
+      "delete_third_party_repository": "Repository van derden verwijderen",
+      "delete_user": "Gebruiker verwijderen",
+      "deploy_antivirus": "Antivirus implementeren",
+      "deploy_certificate": "Certificaat implementeren",
+      "deploy_firewall": "Firewall implementeren",
+      "deploy_opentelemetry": "OpenTelemetry implementeren",
+      "deploy_ssh_key": "SSH-sleutel implementeren",
+      "detach_ubuntu_pro": "Ubuntu Pro loskoppelen",
+      "disable_antivirus": "Antivirus uitschakelen",
+      "disable_firewall": "Firewall uitschakelen",
+      "disable_third_party_repository": "Repository van derden uitschakelen",
+      "edit_firewall_ports": "Firewallpoorten bewerken",
+      "edit_firewall_role": "Firewallrol bewerken",
+      "edit_host_account": "Hostaccount bewerken",
+      "edit_host_group": "Hostgroep bewerken",
+      "edit_host_hostname": "Hostnaam bewerken",
+      "edit_script": "Script bewerken",
+      "edit_secret": "Geheim bewerken",
+      "edit_tags": "Tags bewerken",
+      "edit_user": "Gebruiker bewerken",
+      "edit_user_security_roles": "Beveiligingsrollen van gebruiker bewerken",
+      "enable_antivirus": "Antivirus inschakelen",
+      "enable_firewall": "Firewall inschakelen",
+      "enable_grafana_integration": "Grafana-integratie inschakelen",
+      "enable_graylog_integration": "Graylog-integratie inschakelen",
+      "enable_kvm": "KVM inschakelen",
+      "enable_lxd": "LXD inschakelen",
+      "enable_third_party_repository": "Repository van derden inschakelen",
+      "enable_vmm": "VMM inschakelen",
+      "enable_wsl": "WSL inschakelen",
+      "enable_bhyve": "bhyve inschakelen",
+      "export_audit_log": "Auditlog exporteren",
+      "generate_pdf_report": "PDF-rapport genereren",
+      "kill_host_process": "Hostproces beëindigen",
+      "lock_user": "Gebruiker vergrendelen",
+      "manage_antivirus_defaults": "Antivirusstandaarden beheren",
+      "manage_asset_tags": "Asset-tags beheren",
+      "manage_backups": "Back-ups beheren",
+      "manage_cloud_backups": "Cloudback-ups beheren",
+      "manage_custom_metrics": "Aangepaste metrics beheren",
+      "manage_gpg_keys": "GPG-sleutels beheren",
+      "manage_hardware_health": "Hardwarestatus beheren",
+      "manage_network_discovery": "Netwerkdetectie beheren",
+      "manage_tenants": "Tenants beheren",
+      "manage_time_sync": "Tijdsynchronisatie beheren",
+      "quarantine_malware": "Malware in quarantaine plaatsen",
+      "reboot_host": "Host herstarten",
+      "remove_antivirus": "Antivirus verwijderen",
+      "remove_default_repository": "Standaardrepository verwijderen",
+      "remove_enabled_package_manager": "Ingeschakelde pakketbeheerder verwijderen",
+      "remove_firewall": "Firewall verwijderen",
+      "remove_package": "Pakket verwijderen",
+      "reset_user_password": "Wachtwoord van gebruiker resetten",
+      "restart_child_host": "Child-host herstarten",
+      "restart_firewall": "Firewall herstarten",
+      "restart_host_service": "Hostservice herstarten",
+      "restart_opentelemetry_service": "OpenTelemetry-service herstarten",
+      "restore_files": "Bestanden herstellen",
+      "resync_host_clock": "Hostklok opnieuw synchroniseren",
+      "run_malware_scans": "Malware scans uitvoeren",
+      "run_script": "Script uitvoeren",
+      "shutdown_host": "Host afsluiten",
+      "start_child_host": "Child-host starten",
+      "start_host_service": "Hostservice starten",
+      "start_opentelemetry_service": "OpenTelemetry-service starten",
+      "start_vault": "Vault starten",
+      "stop_child_host": "Child-host stoppen",
+      "stop_host_service": "Hostservice stoppen",
+      "stop_opentelemetry_service": "OpenTelemetry-service stoppen",
+      "stop_vault": "Vault stoppen",
+      "unlock_user": "Gebruiker ontgrendelen",
+      "view_audit_log": "Auditlog bekijken",
+      "view_child_host": "Child-host bekijken",
+      "view_default_repositories": "Standaardrepositories bekijken",
+      "view_enabled_package_managers": "Ingeschakelde pakketbeheerders bekijken",
+      "view_firewall_roles": "Firewallrollen bekijken",
+      "view_host_details": "Hostgegevens bekijken",
+      "view_report": "Rapport bekijken",
+      "view_user_security_roles": "Beveiligingsrollen van gebruiker bekijken",
+      "update_agent": "Agent bijwerken"
     }
   }
 }

@@ -310,6 +310,8 @@ class TestTierFeatures:
             FeatureCode.SECRETS_MANAGEMENT,
             FeatureCode.CONTAINER_MANAGEMENT,
             FeatureCode.MULTI_USER,
+            # The reporting engine's gate; issued at Professional (2026-11-14).
+            FeatureCode.HEALTH_REPORTS,
         }
         assert pro_features == expected
 

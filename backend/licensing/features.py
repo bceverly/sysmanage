@@ -107,6 +107,19 @@ class FeatureCode(str, Enum):
     CONTAINER_MANAGEMENT = "containers"
     MULTI_USER = "multiuser"
 
+    # The same story at Enterprise, found by the Phase 25 edition audit
+    # (2026-11-14): scripts/check_engine_codes.py read only the generator's
+    # PROFESSIONAL_FEATURES block, so these seven Enterprise-only strings the
+    # generator issues were never compared.  Nothing gates on them; they are
+    # named so a license carrying them is a license this server can read.
+    SSO = "sso"
+    RBAC = "rbac"
+    AUDIT_ADVANCED = "audit"
+    HIGH_AVAILABILITY = "ha"
+    CLUSTER = "cluster"
+    WHITELABEL = "whitelabel"
+    PRIORITY_SUPPORT = "priority"
+
     # Virtualization Engine (Phase 10.1)
     VIRTUALIZATION_KVM_LIFECYCLE = "virtualization_kvm_lifecycle"
     VIRTUALIZATION_KVM_CREATE = "virtualization_kvm_create"
@@ -373,6 +386,11 @@ TIER_FEATURES = {
         FeatureCode.SECRETS_MANAGEMENT,
         FeatureCode.CONTAINER_MANAGEMENT,
         FeatureCode.MULTI_USER,
+        # The reporting engine (a Professional module) gates every route on
+        # "reports", which the generator issues at Professional; listed only
+        # under Enterprise here, a Professional TENANT edition on a SaaS
+        # server was refused its own reports (edition audit, 2026-11-14).
+        FeatureCode.HEALTH_REPORTS,
     },
     LicenseTier.ENTERPRISE: {
         # All professional features
@@ -480,6 +498,14 @@ TIER_FEATURES = {
         FeatureCode.SECRETS_MANAGEMENT,
         FeatureCode.CONTAINER_MANAGEMENT,
         FeatureCode.MULTI_USER,
+        # Issued by the generator at Enterprise only; see the FeatureCode note.
+        FeatureCode.SSO,
+        FeatureCode.RBAC,
+        FeatureCode.AUDIT_ADVANCED,
+        FeatureCode.HIGH_AVAILABILITY,
+        FeatureCode.CLUSTER,
+        FeatureCode.WHITELABEL,
+        FeatureCode.PRIORITY_SUPPORT,
     },
 }
 

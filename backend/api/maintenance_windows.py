@@ -367,11 +367,17 @@ async def create_override(
         raise HTTPException(
             status_code=400, detail=_("Override duration must be positive.")
         )
+    try:
+        host_uuid = uuid.UUID(payload.host_id)
+    except ValueError as exc:  # a malformed id is the caller's error, not a 500
+        raise HTTPException(
+            status_code=400, detail=_("Invalid host ID format")
+        ) from exc
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     expires_at = now + timedelta(minutes=payload.duration_minutes)
     with _sessionmaker()() as session:
         override = MaintenanceOverride(
-            host_id=uuid.UUID(payload.host_id),
+            host_id=host_uuid,
             reason=payload.reason.strip(),
             created_by=getattr(current_user, "id", None),
             username=getattr(current_user, "userid", None),

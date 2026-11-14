@@ -61,6 +61,7 @@ import hashlib
 import json
 import logging
 import os
+import posixpath
 import re
 import socket
 from datetime import datetime, timezone
@@ -148,7 +149,7 @@ def _is_block_device_path(iso_path: str) -> bool:
 
 def _manifest_copy_dir(run_id) -> str:
     """Where the mount plan leaves this ingest's manifest for the server."""
-    return os.path.join(os.path.dirname(REPO_ROOT), "airgap-ingest", str(run_id))
+    return posixpath.join(posixpath.dirname(REPO_ROOT), "airgap-ingest", str(run_id))
 
 
 def _build_mount_plan(iso_path: str, run_id=None) -> dict:

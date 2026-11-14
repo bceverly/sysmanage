@@ -115,14 +115,14 @@
         "signerFingerprint": "Impressão digital do assinante",
         "version": "Versão"
       },
-      "title": "Repositórios Air-Gap"
+      "title": "Repositórios isolados"
     }
   },
   "airgapBundles": {
-    "buildAgent": "Construir Agente Bundle",
+    "buildAgent": "Criar pacote do agente",
     "buildError": "Falha ao enfileirar construção.",
-    "buildProplus": "Construir Pro+ Bundle",
-    "buildServer": "Construir Servidor Bundle",
+    "buildProplus": "Criar pacote Pro+",
+    "buildServer": "Criar pacote do servidor",
     "bundle": "Pacote",
     "completedAt": "Concluído",
     "confirmDelete": "Deseja excluir este pacote e seu arquivo ISO correspondente?",
@@ -196,7 +196,7 @@
       "mirrorsTitle": "Espelhos",
       "noMirrors": "Não há espelhos habilitados configurados. Vá para Configurações → Espelhamento de Repositório para adicionar um e, em seguida, tente novamente.",
       "submit": "Execução da Fila",
-      "title": "Nova Execução de Coleção"
+      "title": "Nova execução de coleta"
     },
     "discPicker": {
       "cancel": "Cancelar",
@@ -208,13 +208,13 @@
     "licenseRequired": "O motor do coleteur em isolamento não foi carregado; uma licença Pro+ é necessária.",
     "loadError": "Falha ao carregar execuções",
     "multiDiscInfo": "Esta execução produziu {{count}} discos. Escolha quais baixar.",
-    "newRun": "Nova Execução de Coleção",
+    "newRun": "Nova execução de coleta",
     "noIsoOnDisk": "Ainda não há nenhum arquivo ISO encontrado no disco -- tente novamente em alguns momentos.",
     "noManifestFound": "A execução não tem manifesto ainda -- tente novamente quando o status for COMPLETE.",
     "notApplicable": "Esta página só tem significado em implantações de função coletora.",
     "refresh": "Atualizar",
     "subtitle": "Disparar coleta em execução única que espelha repositórios configurados, construir um ISO assinado e escrever uma manifestação para ingestão no lado isolado.",
-    "title": "Execuções de Coleta em Isolamento"
+    "title": "Execuções de coleta isolada"
   },
   "airgapDevices": {
     "empty": "Nenhum disco elegível encontrado. Insira o média e pressione Rescan.",
@@ -226,7 +226,7 @@
     "removable": "removíveis",
     "rescan": "Revarificar discos",
     "saveError": "Não foi possível salvar o dispositivo.",
-    "title": "Importar Disco"
+    "title": "Unidade de importação"
   },
   "airgapImport": {
     "device": "Unidade de Armazenamento",
@@ -235,7 +235,7 @@
     "noDevice": "Nenhuma unidade de importação selecionada. Escolha uma em Configurações → Papel do Servidor.",
     "notReady": "Indisponível",
     "ready": "Pronto{{label}}",
-    "rescan": "Revarificar",
+    "rescan": "Verificar novamente",
     "run": {
       "complete": "Completo",
       "copying": "Copiando pacotes",
@@ -248,14 +248,14 @@
     "runStats": "{{files}} arquivos · {{size}}",
     "runStatus": "Status da importação",
     "statusError": "Não foi possível sondar o dispositivo de importação.",
-    "title": "Importar do Mídia"
+    "title": "Importar de mídia"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "Copiar Chave Pública",
+      "copyKey": "Copiar chave pública",
       "help": "Copie esta chave pública e importe-a no servidor de Repositório em Isolamento para que ele confie na mídia assinada produzida por este coletor. Apenas a chave pública é mostrada - a chave privada de assinatura nunca sai deste servidor.",
       "loadError": "Não foi possível carregar a chave pública do coletor.",
-      "title": "Chave Pública do Coleteur"
+      "title": "Chave pública do coletor"
     },
     "copied": "Copiado!",
     "copyError": "Não foi possível copiar para a area de transferência.",
@@ -266,7 +266,7 @@
       "count": "{{n}} confiável",
       "empty": "Ainda não há chaves de coletor confiadas.",
       "help": "Importe a chave pública de cada Air-Gap Collector cuja mídia este repositório deve aceitar. A mídia assinada por uma chave não confiável é rejeitada durante o carregamento.",
-      "import": "Importar Chave",
+      "import": "Importar chave",
       "importError": "Não foi possível importar chave.",
       "imported": "Chave importada {{fp}}",
       "loadError": "Não foi possível carregar chaves confiadas.",
@@ -274,7 +274,7 @@
       "pemLabel": "Chave pública (PEM)",
       "removeError": "Não foi possível remover a chave.",
       "required": "São necessários o nome e a chave pública.",
-      "title": "Chaves de Colecionador Confiáveis"
+      "title": "Chaves de coletores confiáveis"
     }
   },
   "antivirus": {
@@ -959,7 +959,7 @@
     },
     "heading": "Função de Federação",
     "identity": {
-      "copyKey": "Copiar Chave Pública",
+      "copyKey": "Copiar chave pública",
       "help": "Copie esta chave pública e cole-a na ficha federativa do par para que cada lado possa registrar a impressão digital da identidade do outro e verificar fora da banda. A chave privada não deixa este servidor.",
       "pending": "Criando chave de identidade...",
       "title": "Chave de identidade do servidor"
@@ -2491,7 +2491,7 @@
   },
   "nav": {
     "advisories": "Avisos",
-    "airgapCollections": "Coletas em Isolamento",
+    "airgapCollections": "Coletas isoladas",
     "airgapRepositories": "Repositórios Air-Gap",
     "alerts": "Alertas",
     "cat": {
@@ -2525,7 +2525,7 @@
     "role": {
       "collector": "Coleteur em Isolamento",
       "engineMissing": "Motor Pro+ necessário não carregado; verifique a licença.",
-      "repository": "Repositório em Isolamento"
+      "repository": "Repositório isolado"
     },
     "scripts": "Scripts",
     "scrollLeft": "Rolar para a esquerda",
@@ -3323,7 +3323,7 @@
   "serverRole": {
     "collector": {
       "description": "A parte conectada à internet de um par açaero. Ele espelha repositórios de pacotes upstream, coleta feeds de CVE e conformidade e os empacota em imagens ISO assinadas que você transporta fisicamente através da lacuna açaero. Escolha isso no servidor com acesso à internet e construa o média.",
-      "title": "Coletor de Ar-Azul (lado online)"
+      "title": "Coletor isolado (lado online)"
     },
     "currentTag": "(atual)",
     "heading": "Papel Air-Gap",
@@ -3332,7 +3332,7 @@
     "menuTitle": "Função do Servidor",
     "repository": {
       "description": "A parte isolada de um par açaero, sem acesso à internet. Ele consome o média ISO produzido pelo Coletor, verifica sua assinatura e serve os pacotes para hosts gerenciados na rede privada para que eles possam atualizar normalmente. Escolha isso no servidor dentro do enclave açaero.",
-      "title": "Repositório de Ar-Azul (lado desconectado)"
+      "title": "Repositório isolado (lado desconectado)"
     },
     "restartHint": "Reinicie o servidor SysManage após salvar para que a nova função tenha efeito completo.",
     "save": "Save Role",
@@ -6019,6 +6019,132 @@
       "again": "Reparar ou atualizar",
       "button": "Ativar backup do iCloud",
       "root": "As fotos ficam em {{path}} (preparado em {{when}})."
+    }
+  },
+  "securityRoles": {
+    "group": {
+      "host": "Host",
+      "scripts": "Scripts",
+      "ubuntu_pro": "Ubuntu Pro",
+      "host_account_management": "Gestão de Contas de Host",
+      "integrations": "Integrações",
+      "package": "Pacote",
+      "reports": "Relatórios",
+      "secrets": "Segredos",
+      "security": "Segurança",
+      "settings": "Configurações",
+      "user": "Usuário",
+      "virtualization": "Virtualização"
+    },
+    "role": {
+      "add_default_repository": "Adicionar Repositório Padrão",
+      "add_enabled_package_manager": "Adicionar Gerenciador de Pacotes Habilitado",
+      "add_firewall_role": "Adicionar Papel de Firewall",
+      "add_host_account": "Adicionar Conta de Host",
+      "add_host_group": "Adicionar Grupo de Hosts",
+      "add_package": "Adicionar Pacote",
+      "add_script": "Adicionar Script",
+      "add_secret": "Adicionar Segredo",
+      "add_third_party_repository": "Adicionar Repositório de Terceiros",
+      "add_user": "Adicionar Usuário",
+      "apply_host_os_upgrade": "Aplicar Atualização do Sistema Operacional do Host",
+      "apply_software_update": "Aplicar Atualização de Software",
+      "approve_host_registration": "Aprovar Registro do Host",
+      "assign_host_firewall_roles": "Atribuir Papéis de Firewall do Host",
+      "attach_ubuntu_pro": "Conectar Ubuntu Pro",
+      "change_ubuntu_pro_master_key": "Alterar Chave Mestra do Ubuntu Pro",
+      "configure_child_host": "Configurar Host Filho",
+      "connect_host_to_graylog": "Conectar Host ao Graylog",
+      "create_child_host": "Criar Host Filho",
+      "delete_child_host": "Excluir Host Filho",
+      "delete_firewall_role": "Excluir Papel de Firewall",
+      "delete_host": "Excluir Host",
+      "delete_host_account": "Excluir Conta de Host",
+      "delete_host_group": "Excluir Grupo de Hosts",
+      "delete_queue_message": "Excluir Mensagem da Fila",
+      "delete_script": "Excluir Script",
+      "delete_script_execution": "Excluir Execução de Script",
+      "delete_secret": "Excluir Segredo",
+      "delete_third_party_repository": "Excluir Repositório de Terceiros",
+      "delete_user": "Excluir Usuário",
+      "deploy_antivirus": "Implantar Antivírus",
+      "deploy_certificate": "Implantar Certificado",
+      "deploy_firewall": "Implantar Firewall",
+      "deploy_opentelemetry": "Implantar OpenTelemetry",
+      "deploy_ssh_key": "Implantar Chave SSH",
+      "detach_ubuntu_pro": "Desconectar Ubuntu Pro",
+      "disable_antivirus": "Desabilitar Antivírus",
+      "disable_firewall": "Desabilitar Firewall",
+      "disable_third_party_repository": "Desabilitar Repositório de Terceiros",
+      "edit_firewall_ports": "Editar Portas de Firewall",
+      "edit_firewall_role": "Editar Papel de Firewall",
+      "edit_host_account": "Editar Conta de Host",
+      "edit_host_group": "Editar Grupo de Hosts",
+      "edit_host_hostname": "Editar Nome do Host",
+      "edit_script": "Editar Script",
+      "edit_secret": "Editar Segredo",
+      "edit_tags": "Editar Tags",
+      "edit_user": "Editar Usuário",
+      "edit_user_security_roles": "Editar Papéis de Segurança do Usuário",
+      "enable_antivirus": "Habilitar Antivírus",
+      "enable_firewall": "Habilitar Firewall",
+      "enable_grafana_integration": "Habilitar Integração Grafana",
+      "enable_graylog_integration": "Habilitar Integração Graylog",
+      "enable_kvm": "Habilitar KVM",
+      "enable_lxd": "Habilitar LXD",
+      "enable_third_party_repository": "Habilitar Repositório de Terceiros",
+      "enable_vmm": "Habilitar VMM",
+      "enable_wsl": "Habilitar WSL",
+      "enable_bhyve": "Habilitar bhyve",
+      "export_audit_log": "Exportar Registro de Auditoria",
+      "generate_pdf_report": "Gerar Relatório em PDF",
+      "kill_host_process": "Terminar Processo do Host",
+      "lock_user": "Bloquear Usuário",
+      "manage_antivirus_defaults": "Gerenciar Padrões do Antivírus",
+      "manage_asset_tags": "Gerenciar Tags de Ativos",
+      "manage_backups": "Gerenciar Backups",
+      "manage_cloud_backups": "Gerenciar Backups em Nuvem",
+      "manage_custom_metrics": "Gerenciar Métricas Personalizadas",
+      "manage_gpg_keys": "Gerenciar Chaves GPG",
+      "manage_hardware_health": "Gerenciar Integridade do Hardware",
+      "manage_network_discovery": "Gerenciar Descoberta de Rede",
+      "manage_tenants": "Gerenciar Locatários",
+      "manage_time_sync": "Gerenciar Sincronização de Tempo",
+      "quarantine_malware": "Colocar Malware em Quarentena",
+      "reboot_host": "Reiniciar Host",
+      "remove_antivirus": "Remover Antivírus",
+      "remove_default_repository": "Remover Repositório Padrão",
+      "remove_enabled_package_manager": "Remover Gerenciador de Pacotes Habilitado",
+      "remove_firewall": "Remover Firewall",
+      "remove_package": "Remover Pacote",
+      "reset_user_password": "Redefinir Senha do Usuário",
+      "restart_child_host": "Reiniciar Host Filho",
+      "restart_firewall": "Reiniciar Firewall",
+      "restart_host_service": "Reiniciar Serviço do Host",
+      "restart_opentelemetry_service": "Reiniciar o Serviço OpenTelemetry",
+      "restore_files": "Restaurar Arquivos",
+      "resync_host_clock": "Sincronizar Relógio do Host",
+      "run_malware_scans": "Executar Verificações de Malware",
+      "run_script": "Executar Script",
+      "shutdown_host": "Desligar Host",
+      "start_child_host": "Iniciar Host Filho",
+      "start_host_service": "Iniciar Serviço de Host",
+      "start_opentelemetry_service": "Iniciar Serviço OpenTelemetry",
+      "start_vault": "Iniciar Vault",
+      "stop_child_host": "Parar Host Filho",
+      "stop_host_service": "Parar Serviço de Host",
+      "stop_opentelemetry_service": "Parar Serviço OpenTelemetry",
+      "stop_vault": "Parar Vault",
+      "unlock_user": "Desbloquear Usuário",
+      "update_agent": "Atualizar Agente",
+      "view_audit_log": "Visualizar Registro de Auditoria",
+      "view_child_host": "Visualizar Host Filho",
+      "view_default_repositories": "Visualizar Repositórios Padrão",
+      "view_enabled_package_managers": "Visualizar Gerenciadores de Pacotes Habilitados",
+      "view_firewall_roles": "Visualizar Papéis de Firewall",
+      "view_host_details": "Visualizar Detalhes do Host",
+      "view_report": "Visualizar Relatório",
+      "view_user_security_roles": "Visualizar Papéis de Segurança do Usuário"
     }
   }
 }

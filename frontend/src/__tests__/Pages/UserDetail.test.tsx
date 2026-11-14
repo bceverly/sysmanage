@@ -35,11 +35,16 @@ vi.mock("../../Services/users", () => ({
   doUnlockUser: vi.fn(),
 }));
 
-vi.mock("../../Services/securityRoles", () => ({
-  doGetAllRoleGroups: vi.fn(),
-  doGetUserRoles: vi.fn(),
-  doUpdateUserRoles: vi.fn(),
-}));
+vi.mock("../../Services/securityRoles", async (orig) => {
+  // Keep the real roleLabel/roleGroupLabel: they are pure lookups.
+  const actual = await orig<typeof import("../../Services/securityRoles")>();
+  return {
+    ...actual,
+    doGetAllRoleGroups: vi.fn(),
+    doGetUserRoles: vi.fn(),
+    doUpdateUserRoles: vi.fn(),
+  };
+});
 
 vi.mock("../../Services/permissions", async (orig) => {
   const actual = await orig<typeof import("../../Services/permissions")>();

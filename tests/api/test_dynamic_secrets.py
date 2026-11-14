@@ -263,16 +263,16 @@ class TestDynamicSecretsReconcile:
 
 
 class TestDynamicSecretsSecretsEngineGate:
-    """Verify ``/api/v1/dynamic-secrets/*`` returns 403 / 503 when the
+    """Verify ``/api/v1/dynamic-secrets/*`` returns 402 / 503 when the
     Pro+ ``secrets_engine`` module isn't available.  The autouse
     fixture at the top of the file is skipped for this class so the
     real license-service + module-loader calls fire."""
 
-    def test_list_returns_403_when_license_missing(self, client, auth_headers):
+    def test_list_returns_402_when_license_missing(self, client, auth_headers):
         with patch("backend.licensing.feature_gate.license_service") as mock_license:
             mock_license.has_module.return_value = False
             r = client.get("/api/v1/dynamic-secrets/leases", headers=auth_headers)
-        assert r.status_code == 403
+        assert r.status_code == 402
         body = r.json()
         assert body["detail"]["error"] == "pro_plus_required"
         assert body["detail"]["module"] == "secrets_engine"
@@ -302,4 +302,4 @@ class TestDynamicSecretsSecretsEngineGate:
                 json={"name": "blocked", "kind": "token"},
                 headers=auth_headers,
             )
-        assert r.status_code == 403
+        assert r.status_code == 402

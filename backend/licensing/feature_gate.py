@@ -6,6 +6,13 @@
 Feature and module gating decorators for Pro+ licensing.
 
 Provides decorators to restrict access to Pro+ features and modules.
+
+A missing license answers HTTP 402 (Payment Required), the same code every
+other licensed surface uses, with ``detail.error == "pro_plus_required"``.
+These gates answered 403 until the Phase 25 edition audit (2026-11-14), so an
+unlicensed caller -- or a Professional license asking for an Enterprise
+feature -- read "forbidden" instead of "needs a license"; the route walk in
+tests/test_tier_gates_walk.py now holds every route to 402.
 """
 
 import asyncio
@@ -14,7 +21,7 @@ from typing import Callable, Optional
 
 from fastapi import HTTPException, status
 
-from backend.licensing.features import FeatureCode, ModuleCode
+from backend.licensing.features import FeatureCode, LicenseTier, ModuleCode
 from backend.licensing.license_service import license_service
 from backend.utils.verbosity_logger import get_logger
 
@@ -48,7 +55,7 @@ def requires_feature(feature: FeatureCode | str) -> Callable:
         Decorated function that checks for the feature before execution
 
     Raises:
-        HTTPException: 403 if the feature is not available
+        HTTPException: 402 if the feature is not licensed
     """
     # Convert string to FeatureCode if needed
     if isinstance(feature, str):
@@ -68,7 +75,7 @@ def requires_feature(feature: FeatureCode | str) -> Callable:
                     feature_code.value,
                 )
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
+                    status_code=status.HTTP_402_PAYMENT_REQUIRED,
                     detail={
                         "error": "pro_plus_required",
                         "message": f"This feature requires a Pro+ license with '{feature_code.value}' enabled",
@@ -98,6 +105,46 @@ def requires_feature(feature: FeatureCode | str) -> Callable:
     return decorator
 
 
+def license_required_error(module_code: ModuleCode) -> HTTPException:
+    """402: the license does not include ``module_code``."""
+    return HTTPException(
+        status_code=status.HTTP_402_PAYMENT_REQUIRED,
+        detail={
+            "error": "pro_plus_required",
+            "message": f"This feature requires a Pro+ license with '{module_code.value}' module",
+            "module": module_code.value,
+        },
+    )
+
+
+def module_unavailable_error(module_code: ModuleCode) -> HTTPException:
+    """503: licensed, but the engine is not loaded -- an administrator's
+    problem, not a sales one."""
+    return HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail={
+            "error": "module_not_available",
+            "message": f"The '{module_code.value}' module is not currently available",
+            "module": module_code.value,
+        },
+    )
+
+
+def refuse_unlicensed_write(module: ModuleCode | str) -> HTTPException:
+    """What a write to a licensed stub answers (the engine is absent, which is
+    why its stub is mounted): 402 without the license, 503 with it.
+
+    The stubs used to answer every call ``200 {"licensed": false}``.  For a
+    read that is a usable "nothing here, and why"; for a write it told a
+    script that deploying, deleting or dispatching had worked (Phase 25
+    edition audit, 2026-11-14).
+    """
+    module_code = ModuleCode(module) if isinstance(module, str) else module
+    if not license_service.has_module(module_code):
+        return license_required_error(module_code)
+    return module_unavailable_error(module_code)
+
+
 def _check_module_licensed_http(module_code: ModuleCode) -> None:
     """Check if module is licensed, raising HTTPException if not."""
     if not license_service.has_module(module_code):
@@ -105,14 +152,7 @@ def _check_module_licensed_http(module_code: ModuleCode) -> None:
             "Access denied to module '%s' - Pro+ license required",
             module_code.value,
         )
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={
-                "error": "pro_plus_required",
-                "message": f"This feature requires a Pro+ license with '{module_code.value}' module",
-                "module": module_code.value,
-            },
-        )
+        raise license_required_error(module_code)
 
 
 def _check_module_loaded_http(module_code: ModuleCode) -> None:
@@ -124,14 +164,7 @@ def _check_module_loaded_http(module_code: ModuleCode) -> None:
             "Module '%s' is licensed but not loaded",
             module_code.value,
         )
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={
-                "error": "module_not_available",
-                "message": f"The '{module_code.value}' module is not currently available",
-                "module": module_code.value,
-            },
-        )
+        raise module_unavailable_error(module_code)
 
 
 def _check_module_licensed_sync(module_code: ModuleCode) -> None:
@@ -169,7 +202,7 @@ def require_module(module: ModuleCode | str) -> None:
     place instead of tempting callers into ``_check_module_*`` privates.
 
     Raises:
-        HTTPException: 403 if unlicensed, 503 if licensed but not loaded.
+        HTTPException: 402 if unlicensed, 503 if licensed but not loaded.
     """
     if isinstance(module, str):
         try:
@@ -202,7 +235,7 @@ def requires_module(module: ModuleCode | str) -> Callable:
         Decorated function that checks for the module before execution
 
     Raises:
-        HTTPException: 403 if the module is not available
+        HTTPException: 402 if the module is not licensed
     """
     # Convert string to ModuleCode if needed
     if isinstance(module, str):
@@ -242,7 +275,7 @@ def require_module_loaded(module: ModuleCode | str) -> Callable:
     lets a whole router (e.g. access groups, registration keys) be
     gated in one place instead of decorating every handler.
 
-    Raises HTTP 403 when the calling license doesn't include the
+    Raises HTTP 402 when the calling license doesn't include the
     module, or 503 when the license has it but the Cython engine
     isn't loaded -- same response shape as the decorator path so
     clients can branch on ``detail.error`` uniformly.
@@ -277,6 +310,23 @@ def require_module_loaded(module: ModuleCode | str) -> Callable:
     return _check_module_gate
 
 
+def _pro_plus_for_caller() -> bool:
+    """Any paid license -- and, on a multi-tenant server, a paid edition for
+    the tenant in scope.  ``is_pro_plus_active`` alone let a Community tenant
+    of a SaaS-licensed server through every "any Pro+ license" gate, which
+    the module and feature gates already narrow by edition (13.1.J; found by
+    the edition route walk, 2026-11-14)."""
+    if not license_service.is_pro_plus_active:
+        return False
+    # Local import: the seam reaches the multitenancy engine (see
+    # LicenseService._allowed_for_active_tenant_edition).
+    from backend.services.tenant_edition import (  # noqa: PLC0415
+        edition_for_active_tenant,
+    )
+
+    return edition_for_active_tenant() != LicenseTier.COMMUNITY.value
+
+
 def requires_pro_plus() -> Callable:
     """
     Decorator to require any active Pro+ license.
@@ -293,16 +343,16 @@ def requires_pro_plus() -> Callable:
         Decorated function that checks for Pro+ license
 
     Raises:
-        HTTPException: 403 if Pro+ is not active
+        HTTPException: 402 if Pro+ is not active
     """
 
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def async_wrapper(*args, **kwargs):
-            if not license_service.is_pro_plus_active:
+            if not _pro_plus_for_caller():
                 logger.warning("Access denied - Pro+ license required")
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
+                    status_code=status.HTTP_402_PAYMENT_REQUIRED,
                     detail={
                         "error": "pro_plus_required",
                         "message": "This feature requires a Pro+ license",
@@ -312,7 +362,7 @@ def requires_pro_plus() -> Callable:
 
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
-            if not license_service.is_pro_plus_active:
+            if not _pro_plus_for_caller():
                 logger.warning("Access denied - Pro+ license required")
                 raise LicenseRequiredError("This feature requires a Pro+ license")
             return func(*args, **kwargs)

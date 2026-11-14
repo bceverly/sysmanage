@@ -248,7 +248,7 @@ class TestRequiresFeatureDecorator:
         with pytest.raises(HTTPException) as exc_info:
             await protected_function()
 
-        assert exc_info.value.status_code == 403
+        assert exc_info.value.status_code == 402
         assert "pro_plus_required" in exc_info.value.detail["error"]
         assert FeatureCode.HEALTH_ANALYSIS.value in exc_info.value.detail["feature"]
 
@@ -362,7 +362,7 @@ class TestRequiresModuleDecorator:
         with pytest.raises(HTTPException) as exc_info:
             await protected_function()
 
-        assert exc_info.value.status_code == 403
+        assert exc_info.value.status_code == 402
         assert "pro_plus_required" in exc_info.value.detail["error"]
 
     @pytest.mark.asyncio
@@ -464,7 +464,7 @@ class TestRequiresProPlusDecorator:
         with pytest.raises(HTTPException) as exc_info:
             await protected_function()
 
-        assert exc_info.value.status_code == 403
+        assert exc_info.value.status_code == 402
         assert "pro_plus_required" in exc_info.value.detail["error"]
 
     def test_requires_pro_plus_sync_active(self, mock_pro_plus_active):

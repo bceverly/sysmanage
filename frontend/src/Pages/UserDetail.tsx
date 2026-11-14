@@ -43,6 +43,8 @@ import {
     SecurityRole,
     SecurityRoleGroup,
     doGetAllRoleGroups,
+    roleGroupLabel,
+    roleLabel,
     doGetUserRoles,
     doUpdateUserRoles
 } from '../Services/securityRoles';
@@ -338,7 +340,7 @@ const UserDetail = () => { // NOSONAR
                         disabled={!rolesEditMode || rolesSaving}
                     />
                 }
-                label={role.name}
+                label={roleLabel(t, role.name)}
             />
         </Grid>
     );
@@ -579,7 +581,7 @@ const UserDetail = () => { // NOSONAR
                                         {roleGroups.map((group, index) => (
                                             <Box key={group.id}>
                                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, textDecoration: 'underline' }}>
-                                                    {group.name}
+                                                    {roleGroupLabel(t, group.name)}
                                                 </Typography>
                                                 <FormGroup>
                                                     <Grid container spacing={1}>

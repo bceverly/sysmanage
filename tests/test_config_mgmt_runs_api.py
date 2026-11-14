@@ -465,7 +465,7 @@ class TestApplyLicensing:
         session = _Session(Host=[_host()])
         with _Env() as env, patch(
             "backend.api.config_mgmt_runs.require_module",
-            side_effect=HTTPException(status_code=403, detail="pro_plus_required"),
+            side_effect=HTTPException(status_code=402, detail="pro_plus_required"),
         ):
             with pytest.raises(HTTPException) as exc:
                 await api.apply_config_profile(
@@ -474,7 +474,7 @@ class TestApplyLicensing:
                     session,
                     _user(SecurityRoles.RUN_SCRIPT),
                 )
-        assert exc.value.status_code == 403
+        assert exc.value.status_code == 402
         assert env.enqueued == [], "nothing may be dispatched when unlicensed"
 
     @pytest.mark.asyncio
@@ -536,7 +536,7 @@ class TestApplySpecDispatch:
 
     The agent deliberately cannot drive Puppet/Salt/Chef itself, so without a
     spec there is nothing to send. The two failure modes must stay distinct:
-    403 means the customer is unlicensed, 503 means the module is licensed but
+    402 means the customer is unlicensed, 503 means the module is licensed but
     absent -- an administrator problem, not a sales one.
     """
 
@@ -560,8 +560,8 @@ class TestApplySpecDispatch:
         assert params["spec"] is spec
 
     @pytest.mark.asyncio
-    async def test_a_licensed_but_unloaded_module_is_a_503_not_a_403(self):
-        # 403 would tell a paying customer to buy something they already have.
+    async def test_a_licensed_but_unloaded_module_is_a_503_not_a_402(self):
+        # 402 would tell a paying customer to buy something they already have.
         session = _Session(Host=[_host()])
         with _Env() as env, patch(
             "backend.api.config_mgmt_runs.require_module", return_value=None

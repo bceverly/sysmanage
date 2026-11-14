@@ -83,7 +83,7 @@ def _build_apt_repoint_plan(repo_url: str, suite: str, components: str) -> dict:
     ``files`` are deployed before ``commands`` run.
 
     Online sources are then disabled with ``sed`` (an authorized
-    binary): comment the deb822 ``ubuntu.sources`` keys and any legacy
+    binary): comment the deb822 ``ubuntu.sources`` / ``debian.sources`` keys and any legacy
     ``sources.list`` deb lines.  Both steps ignore errors so a host that
     has only one of the two source styles still succeeds.  Finally
     ``apt-get update`` refreshes against the mirror; its Ubuntu-signed
@@ -121,6 +121,20 @@ def _build_apt_repoint_plan(repo_url: str, suite: str, components: str) -> dict:
                 30,
                 True,
                 "disable upstream ubuntu.sources (comment all lines)",
+            ),
+            # Debian 12+'s deb822 sources, the same way (Debian 13 ships
+            # only this file; ubuntu.sources is Ubuntu's).
+            _cmd(
+                [
+                    "sudo",
+                    "sed",
+                    "-i",
+                    "s/^[^#]/#&/",
+                    "/etc/apt/sources.list.d/debian.sources",
+                ],
+                30,
+                True,
+                "disable upstream debian.sources (comment all lines)",
             ),
             # Comment out any active deb lines in the legacy sources.list.
             _cmd(

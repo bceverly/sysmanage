@@ -11,14 +11,17 @@ line-count cap.  ``mount_proplus_stub_routes`` (the public entry re-exported by
 one (audit / secrets / container / reporting / av / firewall) and
 ``proplus_routes_stubs_extra._mount_stub_group_b`` (automation onward).
 
-When a Pro+ module isn't licensed/loaded, these stubs answer with
-``{"licensed": false}`` and HTTP 200 so the frontend plugin shows a clean
-"license required" message instead of a 404.
+When a Pro+ module isn't licensed/loaded, these stubs answer READS with
+``{"licensed": false}`` and HTTP 200 so the frontend shows a clean "license
+required" state instead of a 404.  WRITES (POST / PUT / PATCH / DELETE) answer
+402 through ``refuse_unlicensed_write`` -- a 200 told a script its deploy,
+delete or dispatch had worked (Phase 25 edition audit, 2026-11-14).
 """
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.auth.auth_bearer import get_current_user
+from backend.licensing.feature_gate import refuse_unlicensed_write
 from backend.i18n import _
 from backend.utils.verbosity_logger import get_logger
 
@@ -176,7 +179,7 @@ def _mount_stub_group_a(app, results: dict) -> int:
         async def audit_export_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("audit_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -223,7 +226,7 @@ def _mount_stub_group_a(app, results: dict) -> int:
         async def gpg_keys_upload_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("secrets_engine")
 
         @router.get("/gpg-keys/{key_id}")
         async def gpg_keys_get_stub(
@@ -237,7 +240,7 @@ def _mount_stub_group_a(app, results: dict) -> int:
             key_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("secrets_engine")
 
         @router.get("/gpg-keys/{key_id}/assignments")
         async def gpg_keys_list_assignments_stub(
@@ -251,7 +254,7 @@ def _mount_stub_group_a(app, results: dict) -> int:
             key_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("secrets_engine")
 
         @router.delete("/gpg-keys/{key_id}/assignments/{assignment_id}")
         async def gpg_keys_delete_assignment_stub(
@@ -259,7 +262,7 @@ def _mount_stub_group_a(app, results: dict) -> int:
             assignment_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("secrets_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -278,21 +281,21 @@ def _mount_stub_group_a(app, results: dict) -> int:
         async def containers_create_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("container_engine")
 
         @router.post("/{container_id}/action")
         async def containers_action_stub(
             container_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("container_engine")
 
         @router.post("/{container_id}/network")
         async def containers_network_stub(
             container_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("container_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -338,19 +341,19 @@ def _mount_stub_group_a(app, results: dict) -> int:
         async def av_deploy_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("av_management_engine")
 
         @router.post("/uninstall")
         async def av_uninstall_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("av_management_engine")
 
         @router.post("/scan")
         async def av_scan_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("av_management_engine")
 
         @router.get("/commercial/fleet-report")
         async def av_commercial_fleet_report_stub(
@@ -375,14 +378,14 @@ def _mount_stub_group_a(app, results: dict) -> int:
         async def av_create_policy_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("av_management_engine")
 
         @router.post("/policies/{policy_id}/apply")
         async def av_apply_policy_stub(
             policy_id: str,
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False, "policy_id": policy_id}
+            raise refuse_unlicensed_write("av_management_engine")
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
@@ -407,7 +410,7 @@ def _mount_stub_group_a(app, results: dict) -> int:
         async def fw_deploy_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("firewall_orchestration_engine")
 
         @router.get("/roles")
         async def fw_list_roles_stub(
@@ -419,24 +422,19 @@ def _mount_stub_group_a(app, results: dict) -> int:
         async def fw_create_role_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("firewall_orchestration_engine")
 
         @router.post("/compliance-check")
         async def fw_compliance_stub(
             current_user=Depends(get_current_user),
         ):
-            return {"licensed": False}
+            raise refuse_unlicensed_write("firewall_orchestration_engine")
 
         @router.post("/fleet/deploy")
         async def fw_fleet_deploy_stub(
             current_user=Depends(get_current_user),
         ):
-            return {
-                "licensed": False,
-                "role_names": [],
-                "queued_hosts": [],
-                "skipped_hosts": [],
-            }
+            raise refuse_unlicensed_write("firewall_orchestration_engine")
 
         @router.get("/compliance/report")
         async def fw_compliance_report_stub(

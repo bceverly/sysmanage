@@ -119,10 +119,10 @@
     }
   },
   "airgapBundles": {
-    "buildAgent": "Сборка пакета Build Agent Bundle",
+    "buildAgent": "Собрать пакет агента",
     "buildError": "Не удалось добавить сборку в очередь.",
-    "buildProplus": "Сборка пакета Build Pro+ Bundle",
-    "buildServer": "Сборка пакета Build Server Bundle",
+    "buildProplus": "Собрать пакет Pro+",
+    "buildServer": "Собрать пакет сервера",
     "bundle": "Пакет",
     "completedAt": "Завершено",
     "confirmDelete": "Вы действительно хотите удалить этот пакет и его ISO-файл?",
@@ -196,7 +196,7 @@
       "mirrorsTitle": "Зеркала",
       "noMirrors": "Нет активных зеркал. Перейдите в Настройки → Зеркальное отображение репозиториев, чтобы добавить одно, затем повторите попытку.",
       "submit": "Поставить запуск в очередь",
-      "title": "Новый запуск сбора данных"
+      "title": "Новый запуск сбора"
     },
     "discPicker": {
       "cancel": "Отмена",
@@ -208,13 +208,13 @@
     "licenseRequired": "Движок сборщика данных не загружен; требуется лицензия Pro+",
     "loadError": "Не удалось загрузить запуски.",
     "multiDiscInfo": "Эта проверка выдала {{count}} дисков. Выберите, какие скачать.",
-    "newRun": "Новый запуск сбора данных",
+    "newRun": "Новый запуск сбора",
     "noIsoOnDisk": "На диске еще нет файла ISO -- попробуйте снова через минуту.",
     "noManifestFound": "Запуск еще не имеет манифеста -- попробуйте снова после завершения статуса COMPLETE.",
     "notApplicable": "Эта страница имеет смысл только при развертывании роли collector.",
     "refresh": "Обновить",
     "subtitle": "Вызвать одноразовые сборки, которые зеркалируют конфигурированные репозитории, создают подписанную ISO и записывают манифест для загрузки в изолированной среде.",
-    "title": "Сборки в режиме air-gap"
+    "title": "Запуски сбора для изолированной сети"
   },
   "airgapDevices": {
     "empty": "Не найдено подходящих накопителей. Вставьте носитель и нажмите Пересканирование.",
@@ -226,7 +226,7 @@
     "removable": "удаленные носители",
     "rescan": "Перепроверить жесткие диски",
     "saveError": "Не удалось сохранить устройство.",
-    "title": "Импорт диска"
+    "title": "Привод импорта"
   },
   "airgapImport": {
     "device": "Диск",
@@ -235,7 +235,7 @@
     "noDevice": "Выберите накопитель импорта. Выберите один в Настройки → Роль сервера.",
     "notReady": "Не готово",
     "ready": "Готово{{label}}",
-    "rescan": "Перепроверить",
+    "rescan": "Пересканировать",
     "run": {
       "complete": "Завершить",
       "copying": "Копирование пакетов",
@@ -248,7 +248,7 @@
     "runStats": "{{files}} файлов · {{size}}",
     "runStatus": "Статус импорта",
     "statusError": "Не удалось проверить устройство импорта.",
-    "title": "Импорт из носителя"
+    "title": "Импорт с носителя"
   },
   "airgapKeys": {
     "collector": {
@@ -266,7 +266,7 @@
       "count": "{{n}} доверенных",
       "empty": "Ключей доверенного собирающего еще нет.",
       "help": "Импортируйте открытый ключ с каждого автономного собирающего устройства, чей носитель должен быть принят этим репозиторием. Носители, подписанные неконтролируемым ключом, отклоняются при загрузке.",
-      "import": "Импорт ключа",
+      "import": "Импортировать ключ",
       "importError": "Не удалось импортировать ключ.",
       "imported": "Импортированный ключ {{fp}}",
       "loadError": "Не удалось загрузить доверенные ключи.",
@@ -274,7 +274,7 @@
       "pemLabel": "Публичный ключ (PEM)",
       "removeError": "Не удалось удалить ключ.",
       "required": "Требуется имя и публичный ключ.",
-      "title": "Доверенные ключи собирающих агентов"
+      "title": "Доверенные ключи сборщиков"
     }
   },
   "antivirus": {
@@ -2491,7 +2491,7 @@
   },
   "nav": {
     "advisories": "Бюллетени безопасности",
-    "airgapCollections": "Сборки в режиме air-gap",
+    "airgapCollections": "Сбор для изолированной сети",
     "airgapRepositories": "Изолированные репозитории",
     "alerts": "Оповещения",
     "cat": {
@@ -2525,7 +2525,7 @@
     "role": {
       "collector": "Сборщик air-gap",
       "engineMissing": "Требуемый движок Pro+ не загружен; проверьте лицензию.",
-      "repository": "Репозиторий в изолированном режиме"
+      "repository": "Изолированный репозиторий"
     },
     "scripts": "Скрипты",
     "scrollLeft": "Прокрутить влево",
@@ -3323,7 +3323,7 @@
   "serverRole": {
     "collector": {
       "description": "Интернет-соединенная половина пары с воздушным зазором. Она отражает репозитории пакетов из верхнего уровня, собирает CVE и данные о соответствиям требованиям безопасности, и упаковывает их в подписанное ISO-изображение, которое вы физически переносите через воздушный зазор. Выберите это на сервере с доступом к интернету для сборки медиа.",
-      "title": "Коллектор в изолированной среде (онлайн сторона)"
+      "title": "Сборщик для изолированной сети (подключенная сторона)"
     },
     "currentTag": "(текущий)",
     "heading": "Роль air-gap",
@@ -6023,6 +6023,132 @@
       "again": "Исправить или обновить",
       "button": "Включить резервное копирование iCloud",
       "root": "Фотографии хранятся в {{path}} (подготовлено {{when}})."
+    }
+  },
+  "securityRoles": {
+    "group": {
+      "ubuntu_pro": "Ubuntu Pro",
+      "host": "Хост",
+      "host_account_management": "Управление учетными записями хостов",
+      "integrations": "Интеграции",
+      "package": "Пакет",
+      "reports": "Отчеты",
+      "scripts": "Скрипты",
+      "secrets": "Секреты",
+      "security": "Безопасность",
+      "settings": "Настройки",
+      "user": "Пользователь",
+      "virtualization": "Виртуализация"
+    },
+    "role": {
+      "add_default_repository": "Добавить стандартный репозиторий",
+      "add_enabled_package_manager": "Добавить включенный менеджер пакетов",
+      "add_firewall_role": "Добавить роль брандмауэра",
+      "add_host_account": "Добавить учетную запись хоста",
+      "add_host_group": "Добавить группу хостов",
+      "add_package": "Добавить пакет",
+      "add_script": "Добавить скрипт",
+      "add_secret": "Добавить секрет",
+      "add_third_party_repository": "Добавить сторонний репозиторий",
+      "add_user": "Добавить пользователя",
+      "apply_host_os_upgrade": "Применить обновление операционной системы хоста",
+      "apply_software_update": "Применить обновление программного обеспечения",
+      "approve_host_registration": "Утвердить регистрацию хоста",
+      "assign_host_firewall_roles": "Назначить хосту роли брандмауэра",
+      "attach_ubuntu_pro": "Прикрепить Ubuntu Pro",
+      "change_ubuntu_pro_master_key": "Изменить основной ключ Ubuntu Pro",
+      "configure_child_host": "Настроить дочерний хост",
+      "connect_host_to_graylog": "Подключить хост к Graylog",
+      "create_child_host": "Создать дочерний хост",
+      "delete_child_host": "Удалить дочерний хост",
+      "delete_firewall_role": "Удалить роль брандмауэра",
+      "delete_host": "Удалить хост",
+      "delete_host_account": "Удалить учетную запись хоста",
+      "delete_host_group": "Удалить группу хостов",
+      "delete_queue_message": "Удалить сообщение из очереди",
+      "delete_script": "Удалить скрипт",
+      "delete_script_execution": "Удалить выполнение скрипта",
+      "delete_secret": "Удалить секрет",
+      "delete_third_party_repository": "Удалить сторонний репозиторий",
+      "delete_user": "Удалить пользователя",
+      "deploy_antivirus": "Развернуть антивирус",
+      "deploy_certificate": "Развернуть сертификат",
+      "deploy_firewall": "Развернуть брандмауэр",
+      "deploy_opentelemetry": "Развернуть OpenTelemetry",
+      "deploy_ssh_key": "Развернуть ключ SSH",
+      "detach_ubuntu_pro": "Отключить Ubuntu Pro",
+      "disable_antivirus": "Отключить антивирус",
+      "disable_firewall": "Отключить брандмауэр",
+      "disable_third_party_repository": "Отключить сторонний репозиторий",
+      "edit_firewall_ports": "Редактировать порты брандмауэра",
+      "edit_firewall_role": "Редактировать роль брандмауэра",
+      "edit_host_account": "Редактировать учетную запись хоста",
+      "edit_host_group": "Редактировать группу хостов",
+      "edit_host_hostname": "Редактировать имя хоста",
+      "edit_script": "Редактировать скрипт",
+      "edit_secret": "Редактировать секрет",
+      "edit_tags": "Редактировать теги",
+      "edit_user": "Редактировать пользователя",
+      "edit_user_security_roles": "Редактировать роли безопасности пользователя",
+      "enable_antivirus": "Включить антивирус",
+      "enable_firewall": "Включить брандмауэр",
+      "enable_grafana_integration": "Включить интеграцию Grafana",
+      "enable_graylog_integration": "Включить интеграцию Graylog",
+      "enable_kvm": "Включить KVM",
+      "enable_lxd": "Включить LXD",
+      "enable_third_party_repository": "Включить сторонний репозиторий",
+      "enable_vmm": "Включить VMM",
+      "enable_wsl": "Включить WSL",
+      "enable_bhyve": "Включить bhyve",
+      "export_audit_log": "Экспорт журнала аудита",
+      "generate_pdf_report": "Создать отчет в формате PDF",
+      "kill_host_process": "Завершить процесс на хосте",
+      "lock_user": "Заблокировать пользователя",
+      "manage_antivirus_defaults": "Управление настройками антивируса по умолчанию",
+      "manage_asset_tags": "Управление тегами активов",
+      "manage_backups": "Управление резервными копиями",
+      "manage_cloud_backups": "Управление облачными резервными копиями",
+      "manage_custom_metrics": "Управление пользовательскими метриками",
+      "manage_gpg_keys": "Управление ключами GPG",
+      "manage_hardware_health": "Управление состоянием оборудования",
+      "manage_network_discovery": "Управление обнаружением сети",
+      "manage_tenants": "Управление арендаторами",
+      "manage_time_sync": "Управление синхронизацией времени",
+      "quarantine_malware": "Помещать вредоносное ПО в карантин",
+      "reboot_host": "Перезагрузить хост",
+      "remove_antivirus": "Удалить антивирус",
+      "remove_default_repository": "Удалить стандартный репозиторий",
+      "remove_enabled_package_manager": "Удалить включенный менеджер пакетов",
+      "remove_firewall": "Удалить брандмауэр",
+      "remove_package": "Удалить пакет",
+      "reset_user_password": "Сбросить пароль пользователя",
+      "restart_child_host": "Перезапустить дочерний хост",
+      "restart_firewall": "Перезапустить брандмауэр",
+      "restart_host_service": "Перезапустить службу хоста",
+      "restart_opentelemetry_service": "Перезапустить службу OpenTelemetry",
+      "restore_files": "Восстановить файлы",
+      "resync_host_clock": "Повторно синхронизировать часы хоста",
+      "run_malware_scans": "Запускать проверку на вредоносное ПО",
+      "run_script": "Запустить скрипт",
+      "shutdown_host": "Выключить хост",
+      "start_child_host": "Запустить дочерний хост",
+      "start_host_service": "Запустить службу хоста",
+      "start_opentelemetry_service": "Запустить службу OpenTelemetry",
+      "start_vault": "Запустить Vault",
+      "stop_child_host": "Остановить дочерний хост",
+      "stop_host_service": "Остановить службу хоста",
+      "stop_opentelemetry_service": "Остановить службу OpenTelemetry",
+      "stop_vault": "Остановить Vault",
+      "unlock_user": "Разблокировать пользователя",
+      "update_agent": "Обновить агент",
+      "view_audit_log": "Просмотр журнала аудита",
+      "view_child_host": "Просмотр дочернего хоста",
+      "view_default_repositories": "Просмотр стандартных репозиториев",
+      "view_enabled_package_managers": "Просмотр включенных менеджеров пакетов",
+      "view_firewall_roles": "Просмотр ролей брандмауэра",
+      "view_host_details": "Просмотр деталей хоста",
+      "view_report": "Просмотр отчета",
+      "view_user_security_roles": "Просмотр ролей безопасности пользователя"
     }
   }
 }

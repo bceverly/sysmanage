@@ -85,7 +85,7 @@ class TestRequiresFeature:
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(test_func())
 
-        assert exc_info.value.status_code == 403
+        assert exc_info.value.status_code == 402
         assert exc_info.value.detail["error"] == "pro_plus_required"
         assert "health" in exc_info.value.detail["message"]
 
@@ -159,7 +159,7 @@ class TestCheckModuleLicensedHttp:
         with pytest.raises(HTTPException) as exc_info:
             _check_module_licensed_http(ModuleCode.HEALTH_ENGINE)
 
-        assert exc_info.value.status_code == 403
+        assert exc_info.value.status_code == 402
         assert exc_info.value.detail["error"] == "pro_plus_required"
         assert "health_engine" in exc_info.value.detail["message"]
 
@@ -257,7 +257,7 @@ class TestRequiresModule:
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(test_func())
 
-        assert exc_info.value.status_code == 403
+        assert exc_info.value.status_code == 402
 
     @patch("backend.licensing.module_loader.module_loader")
     @patch("backend.licensing.feature_gate.license_service")
@@ -367,7 +367,7 @@ class TestRequiresProPlus:
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(test_func())
 
-        assert exc_info.value.status_code == 403
+        assert exc_info.value.status_code == 402
         assert exc_info.value.detail["error"] == "pro_plus_required"
 
     @patch("backend.licensing.feature_gate.license_service")

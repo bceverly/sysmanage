@@ -17,6 +17,22 @@ import { useEffect, useState } from "react";
 
 import axiosInstance from "./api";
 
+/**
+ * A federation WRITE with the engine absent answers 402 (the stubs used to
+ * answer ``200 {licensed: false}``, which told a script its dispatch had
+ * worked).  Callers branch on ``licensed``, so a 402 becomes that envelope.
+ */
+async function orUnlicensed<T>(request: Promise<{ data: T }>): Promise<T> {
+  try {
+    return (await request).data;
+  } catch (err) {
+    if ((err as { response?: { status?: number } })?.response?.status === 402) {
+      return { licensed: false } as T;
+    }
+    throw err;
+  }
+}
+
 // Wire-shape contracts.  These match the OSS stub responses in
 // ``backend/api/proplus_routes.py`` and what the future Pro+ engine
 // will produce for the same routes.
@@ -144,38 +160,42 @@ export async function doGetFederationSite(
 export async function doEnrollFederationSite(
   body: FederationEnrollSiteRequest,
 ): Promise<FederationEnrollSiteResponse> {
-  const response = await axiosInstance.post<FederationEnrollSiteResponse>(
-    "/api/v1/federation/sites",
-    body,
+  return orUnlicensed(
+    axiosInstance.post<FederationEnrollSiteResponse>(
+      "/api/v1/federation/sites",
+      body,
+    ),
   );
-  return response.data;
 }
 
 export async function doSuspendFederationSite(
   siteId: string,
 ): Promise<FederationActionResponse> {
-  const response = await axiosInstance.post<FederationActionResponse>(
-    `/api/v1/federation/sites/${encodeURIComponent(siteId)}/suspend`,
+  return orUnlicensed(
+    axiosInstance.post<FederationActionResponse>(
+      `/api/v1/federation/sites/${encodeURIComponent(siteId)}/suspend`,
+    ),
   );
-  return response.data;
 }
 
 export async function doResumeFederationSite(
   siteId: string,
 ): Promise<FederationActionResponse> {
-  const response = await axiosInstance.post<FederationActionResponse>(
-    `/api/v1/federation/sites/${encodeURIComponent(siteId)}/resume`,
+  return orUnlicensed(
+    axiosInstance.post<FederationActionResponse>(
+      `/api/v1/federation/sites/${encodeURIComponent(siteId)}/resume`,
+    ),
   );
-  return response.data;
 }
 
 export async function doRemoveFederationSite(
   siteId: string,
 ): Promise<FederationActionResponse> {
-  const response = await axiosInstance.delete<FederationActionResponse>(
-    `/api/v1/federation/sites/${encodeURIComponent(siteId)}`,
+  return orUnlicensed(
+    axiosInstance.delete<FederationActionResponse>(
+      `/api/v1/federation/sites/${encodeURIComponent(siteId)}`,
+    ),
   );
-  return response.data;
 }
 
 export async function doGetFederationSiteSyncStatus(
@@ -493,52 +513,56 @@ export async function doGetFederationPolicy(
 export async function doCreateFederationPolicy(
   body: FederationPolicyCreateRequest,
 ): Promise<FederationPolicyActionResponse> {
-  const response = await axiosInstance.post<FederationPolicyActionResponse>(
-    "/api/v1/federation/policies",
-    body,
+  return orUnlicensed(
+    axiosInstance.post<FederationPolicyActionResponse>(
+      "/api/v1/federation/policies",
+      body,
+    ),
   );
-  return response.data;
 }
 
 export async function doUpdateFederationPolicy(
   policyId: string,
   body: FederationPolicyUpdateRequest,
 ): Promise<FederationPolicyActionResponse> {
-  const response = await axiosInstance.patch<FederationPolicyActionResponse>(
-    `/api/v1/federation/policies/${encodeURIComponent(policyId)}`,
-    body,
+  return orUnlicensed(
+    axiosInstance.patch<FederationPolicyActionResponse>(
+      `/api/v1/federation/policies/${encodeURIComponent(policyId)}`,
+      body,
+    ),
   );
-  return response.data;
 }
 
 export async function doDeactivateFederationPolicy(
   policyId: string,
 ): Promise<FederationPolicyActionResponse> {
-  const response =
-    await axiosInstance.delete<FederationPolicyActionResponse>(
+  return orUnlicensed(
+    axiosInstance.delete<FederationPolicyActionResponse>(
       `/api/v1/federation/policies/${encodeURIComponent(policyId)}`,
-    );
-  return response.data;
+    ),
+  );
 }
 
 export async function doAssignFederationPolicy(
   policyId: string,
   siteIds: string[],
 ): Promise<FederationPolicyActionResponse> {
-  const response = await axiosInstance.post<FederationPolicyActionResponse>(
-    `/api/v1/federation/policies/${encodeURIComponent(policyId)}/assign`,
-    { site_ids: siteIds },
+  return orUnlicensed(
+    axiosInstance.post<FederationPolicyActionResponse>(
+      `/api/v1/federation/policies/${encodeURIComponent(policyId)}/assign`,
+      { site_ids: siteIds },
+    ),
   );
-  return response.data;
 }
 
 export async function doPushFederationPolicy(
   policyId: string,
 ): Promise<FederationPolicyActionResponse> {
-  const response = await axiosInstance.post<FederationPolicyActionResponse>(
-    `/api/v1/federation/policies/${encodeURIComponent(policyId)}/push`,
+  return orUnlicensed(
+    axiosInstance.post<FederationPolicyActionResponse>(
+      `/api/v1/federation/policies/${encodeURIComponent(policyId)}/push`,
+    ),
   );
-  return response.data;
 }
 
 /** Per-site "Push policies now": requeues every policy assigned to the
@@ -551,10 +575,11 @@ export interface FederationRepushResponse {
 export async function doRepushSitePolicies(
   siteId: string,
 ): Promise<FederationRepushResponse> {
-  const response = await axiosInstance.post<FederationRepushResponse>(
-    `/api/v1/federation/sites/${encodeURIComponent(siteId)}/repush-policies`,
+  return orUnlicensed(
+    axiosInstance.post<FederationRepushResponse>(
+      `/api/v1/federation/sites/${encodeURIComponent(siteId)}/repush-policies`,
+    ),
   );
-  return response.data;
 }
 
 // ---------------------------------------------------------------------
@@ -586,11 +611,12 @@ export async function doGetFederationAlertConfig(): Promise<FederationAlertConfi
 export async function doUpdateFederationAlertConfig(
   overrides: Partial<FederationAlertThresholds>,
 ): Promise<FederationAlertConfigResponse> {
-  const response = await axiosInstance.put<FederationAlertConfigResponse>(
-    `/api/v1/federation/alert-config`,
-    overrides,
+  return orUnlicensed(
+    axiosInstance.put<FederationAlertConfigResponse>(
+      `/api/v1/federation/alert-config`,
+      overrides,
+    ),
   );
-  return response.data;
 }
 
 // ---------------------------------------------------------------------
@@ -801,11 +827,12 @@ export async function doListFederationAlerts(params: {
 export async function doAcknowledgeFederationAlert(
   alertId: string,
 ): Promise<FederationAlertAckResponse> {
-  const response = await axiosInstance.post<FederationAlertAckResponse>(
-    `/api/v1/federation/alerts/${encodeURIComponent(alertId)}/acknowledge`,
-    {},
+  return orUnlicensed(
+    axiosInstance.post<FederationAlertAckResponse>(
+      `/api/v1/federation/alerts/${encodeURIComponent(alertId)}/acknowledge`,
+      {},
+    ),
   );
-  return response.data;
 }
 
 export interface FederationDispatchCommandRequest {
@@ -832,11 +859,12 @@ export interface FederationDispatchCommandResponse {
 export async function doDispatchFederationCommand(
   body: FederationDispatchCommandRequest,
 ): Promise<FederationDispatchCommandResponse> {
-  const response = await axiosInstance.post<FederationDispatchCommandResponse>(
-    `/api/v1/federation/commands/dispatch`,
-    body,
+  return orUnlicensed(
+    axiosInstance.post<FederationDispatchCommandResponse>(
+      `/api/v1/federation/commands/dispatch`,
+      body,
+    ),
   );
-  return response.data;
 }
 
 // ---------------------------------------------------------------------

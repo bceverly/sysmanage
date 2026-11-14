@@ -119,10 +119,10 @@
     }
   },
   "airgapBundles": {
-    "buildAgent": "Bau-Agenten-Bundle",
+    "buildAgent": "Agent-Bundle erstellen",
     "buildError": "Build in die Warteschlange legen fehlgeschlagen.",
-    "buildProplus": "Pro+ Bundle erstellen",
-    "buildServer": "Bau-Server-Bundle",
+    "buildProplus": "Pro+-Bundle erstellen",
+    "buildServer": "Server-Bundle erstellen",
     "bundle": "Bündel",
     "completedAt": "Abgeschlossen",
     "confirmDelete": "Soll diese Anwendung und ihre ISO-Datei löschen werden?",
@@ -196,7 +196,7 @@
       "mirrorsTitle": "Spiegelungen",
       "noMirrors": "Keine aktivierten Spiegelungen konfiguriert. Gehen Sie zu Einstellungen → Repository-Spiegelung, um eine hinzuzufügen und versuchen Sie es dann noch einmal.",
       "submit": "Warteschlange starten",
-      "title": "Neue Sammlungsaufgabe"
+      "title": "Neuer Sammellauf"
     },
     "discPicker": {
       "cancel": "Abbrechen",
@@ -208,13 +208,13 @@
     "licenseRequired": "Luftschicht-Sammelengine nicht geladen; Pro+ Lizenz erforderlich.",
     "loadError": "Ausführungen laden fehlgeschlagen.",
     "multiDiscInfo": "Diese Ausführung hat {{count}} Discs erstellt. Wählen Sie welche zum Herunterladen.",
-    "newRun": "Neue Sammlungsaufgabe",
+    "newRun": "Neuer Sammellauf",
     "noIsoOnDisk": "Bisher keine ISO-Datei auf dem Datenträger gefunden - bitte erneut abfragen.",
     "noManifestFound": "Die Ausführung hat noch keine Manifestation - versuchen Sie es erneut, wenn der Status COMPLETE ist.",
     "notApplicable": "Diese Seite hat nur Bedeutung bei Deployments mit Collector-Rolle.",
     "refresh": "Aktualisieren",
     "subtitle": "Einmalige Sammelstarts auslösen, die konfigurierte Repositories spiegeln, ein signiertes ISO erstellen und eine Manifestdatei für die Eingabe auf der isolierten Seite schreiben.",
-    "title": "Luftschicht-Sammlungsabläufe"
+    "title": "Air-Gap-Sammelläufe"
   },
   "airgapDevices": {
     "empty": "Keine zulässigen Laufwerke gefunden. Fügen Sie Medien hinzu und klicken Sie auf Rescan.",
@@ -226,11 +226,11 @@
     "removable": "entfernungsfähig",
     "rescan": "Festplatten neu scannen",
     "saveError": "Gerät konnte nicht gespeichert werden.",
-    "title": "Festplattenimport"
+    "title": "Importlaufwerk"
   },
   "airgapImport": {
     "device": "Laufwerk",
-    "import": "ISO-Import",
+    "import": "ISO importieren",
     "importError": "Import starten war nicht möglich.",
     "noDevice": "Kein Import-Laufwerk ausgewählt. Wählen Sie eines in Einstellungen → Server-Rolle aus.",
     "notReady": "Nicht bereit",
@@ -248,14 +248,14 @@
     "runStats": "{{files}} Dateien · {{size}}",
     "runStatus": "Importstatus",
     "statusError": "Import-Gerät konnte nicht ermittelt werden.",
-    "title": "Import aus Medium"
+    "title": "Von Medium importieren"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "Public Key kopieren",
+      "copyKey": "Öffentlichen Schlüssel kopieren",
       "help": "Diesen Public-Key kopieren und auf dem Air-Gap Repository Server importieren, damit er den von diesem Collector produzierten signierten Medien vertraut. Nur der Public-Key wird angezeigt - der private Signierungskey verlässt diesen Server nie.",
       "loadError": "Koordinator-Identitätspublic-Key konnte nicht geladen werden.",
-      "title": "Sammelnde Öffentlicher Schlüssel"
+      "title": "Öffentlicher Schlüssel des Sammlers"
     },
     "copied": "Gekopiert!",
     "copyError": "Kopieren in die Zwischenablage nicht möglich.",
@@ -274,7 +274,7 @@
       "pemLabel": "Öffentlicher Schlüssel (PEM)",
       "removeError": "Schlüssel konnte nicht entfernt werden.",
       "required": "Name und öffentlicher Schlüssel sind beide erforderlich.",
-      "title": "Vertrauenswürdige Collector-Schlüssel"
+      "title": "Vertrauenswürdige Sammler-Schlüssel"
     }
   },
   "antivirus": {
@@ -959,7 +959,7 @@
     },
     "heading": "Federation-Rolle",
     "identity": {
-      "copyKey": "Public Key kopieren",
+      "copyKey": "Öffentlichen Schlüssel kopieren",
       "help": "Diesen Public-Key kopieren und in die Peer-Federation-Karte eintragen, damit jeder Seite das Identitätsfingerprint des anderen aufzeichnen kann und es außenhalb der Kommunikation bestätigen kann. Der private Key verlässt diesen Server nie.",
       "pending": "Identitäts-Schlüssel erzeugen…",
       "title": "Dieser Servers Identitätsschlüssel"
@@ -2491,7 +2491,7 @@
   },
   "nav": {
     "advisories": "Sicherheitshinweise",
-    "airgapCollections": "Luftschicht-Sammlungen",
+    "airgapCollections": "Air-Gap-Sammlungen",
     "airgapRepositories": "Air-Gap-Repositorys",
     "alerts": "Warnungen",
     "cat": {
@@ -2525,7 +2525,7 @@
     "role": {
       "collector": "Luftschicht-Sammelengine",
       "engineMissing": "Erforderliche Pro+-Engine nicht geladen; Lizenz prüfen.",
-      "repository": "Luftschicht-Repository"
+      "repository": "Air-Gap-Repository"
     },
     "scripts": "Skripte",
     "scrollLeft": "Nach links scrollen",
@@ -3332,7 +3332,7 @@
     "menuTitle": "Serverrolle",
     "repository": {
       "description": "Das isolierte Teil eines Luftspaltpaares ohne Internetzugang. Es nimmt ISO-Medien an, die vom Collector produziert wurden, überprüft deren Signatur und dient Paketen an verwaltete Hosts in der privaten Netzwerkumgebung, damit diese normal aktualisiert werden können. Wählen Sie dies auf dem Server innerhalb des Luftspalts.",
-      "title": "Air-Gap-Repository (Offline-Seite)"
+      "title": "Air-Gap-Repository (getrennte Seite)"
     },
     "restartHint": "Starten Sie den SysManage-Server neu nach dem Speichern, damit die neue Rolle vollständig wirksam wird.",
     "save": "Save Role",
@@ -5701,7 +5701,7 @@
     "equip": {
       "blockedAgent": "Aktualisieren Sie den Agenten, um diesen Host von hier aus auszustatten",
       "blockedPlatform": "Installieren Sie restate auf diesem System von Hand (aus dem Quellcode bauen)",
-      "button": "Für Backup ausstatten",
+      "button": "Für Backups einrichten",
       "checking": "Agent angefragt; der Status wird in wenigen Sekunden aktualisiert.",
       "error": "„Für Backup ausstatten“ konnte nicht gestartet werden.",
       "failChecksum": "Das heruntergeladene Paket stimmte nicht mit seiner veröffentlichten Prüfsumme überein und wurde daher nicht installiert",
@@ -6019,6 +6019,132 @@
       "again": "Reparieren oder aktualisieren",
       "button": "iCloud-Sicherung aktivieren",
       "root": "Die Fotos liegen unter {{path}} (vorbereitet {{when}})."
+    }
+  },
+  "securityRoles": {
+    "group": {
+      "host": "Host",
+      "ubuntu_pro": "Ubuntu Pro",
+      "host_account_management": "Host-Kontenverwaltung",
+      "integrations": "Integrationen",
+      "package": "Paket",
+      "reports": "Berichte",
+      "scripts": "Skripte",
+      "secrets": "Geheimnisse",
+      "security": "Sicherheit",
+      "settings": "Einstellungen",
+      "user": "Benutzer",
+      "virtualization": "Virtualisierung"
+    },
+    "role": {
+      "add_default_repository": "Standard-Repository hinzufügen",
+      "add_enabled_package_manager": "Aktivierten Paketmanager hinzufügen",
+      "add_firewall_role": "Firewall-Rolle hinzufügen",
+      "add_host_account": "Host-Konto hinzufügen",
+      "add_host_group": "Hostgruppe hinzufügen",
+      "add_package": "Paket hinzufügen",
+      "add_script": "Skript hinzufügen",
+      "add_secret": "Geheimnis hinzufügen",
+      "add_third_party_repository": "Drittanbieter-Repository hinzufügen",
+      "add_user": "Benutzer hinzufügen",
+      "apply_host_os_upgrade": "Betriebssystem-Upgrade auf Host anwenden",
+      "apply_software_update": "Software-Update anwenden",
+      "approve_host_registration": "Registrierung des Hosts genehmigen",
+      "assign_host_firewall_roles": "Host-Firewall-Rollen zuweisen",
+      "attach_ubuntu_pro": "Ubuntu Pro anhängen",
+      "change_ubuntu_pro_master_key": "Ubuntu Pro-Master-Schlüssel ändern",
+      "configure_child_host": "Child-Host konfigurieren",
+      "connect_host_to_graylog": "Host mit Graylog verbinden",
+      "create_child_host": "Child-Host erstellen",
+      "delete_child_host": "Child-Host löschen",
+      "delete_firewall_role": "Firewall-Rolle löschen",
+      "delete_host": "Host löschen",
+      "delete_host_account": "Host-Konto löschen",
+      "delete_host_group": "Hostgruppe löschen",
+      "delete_queue_message": "Nachricht aus der Warteschlange löschen",
+      "delete_script": "Skript löschen",
+      "delete_script_execution": "Skriptausführung löschen",
+      "delete_secret": "Geheimnis löschen",
+      "delete_third_party_repository": "Drittanbieter-Repository löschen",
+      "delete_user": "Benutzer löschen",
+      "deploy_antivirus": "Antiviren-Software bereitstellen",
+      "deploy_certificate": "Zertifikat bereitstellen",
+      "deploy_firewall": "Firewall bereitstellen",
+      "deploy_opentelemetry": "OpenTelemetry bereitstellen",
+      "deploy_ssh_key": "SSH-Schlüssel bereitstellen",
+      "detach_ubuntu_pro": "Ubuntu Pro trennen",
+      "disable_antivirus": "Antiviren-Software deaktivieren",
+      "disable_firewall": "Firewall deaktivieren",
+      "disable_third_party_repository": "Drittanbieter-Repository deaktivieren",
+      "edit_firewall_ports": "Firewall-Ports bearbeiten",
+      "edit_firewall_role": "Firewall-Rolle bearbeiten",
+      "edit_host_account": "Host-Konto bearbeiten",
+      "edit_host_group": "Hostgruppe bearbeiten",
+      "edit_host_hostname": "Hostnamen bearbeiten",
+      "edit_script": "Skript bearbeiten",
+      "edit_secret": "Geheimnis bearbeiten",
+      "edit_tags": "Tags bearbeiten",
+      "edit_user": "Benutzer bearbeiten",
+      "edit_user_security_roles": "Benutzer-Sicherheitsrollen bearbeiten",
+      "enable_antivirus": "Antiviren-Software aktivieren",
+      "enable_firewall": "Firewall aktivieren",
+      "enable_grafana_integration": "Grafana-Integration aktivieren",
+      "enable_graylog_integration": "Graylog-Integration aktivieren",
+      "enable_kvm": "KVM aktivieren",
+      "enable_lxd": "LXD aktivieren",
+      "enable_third_party_repository": "Drittanbieter-Repository aktivieren",
+      "enable_vmm": "VMM aktivieren",
+      "enable_wsl": "WSL aktivieren",
+      "enable_bhyve": "bhyve aktivieren",
+      "export_audit_log": "Audit-Protokoll exportieren",
+      "generate_pdf_report": "PDF-Bericht generieren",
+      "kill_host_process": "Hostprozess beenden",
+      "lock_user": "Benutzer sperren",
+      "manage_antivirus_defaults": "Antivirus-Standardeinstellungen verwalten",
+      "manage_asset_tags": "Asset-Tags verwalten",
+      "manage_backups": "Backups verwalten",
+      "manage_cloud_backups": "Cloud-Backups verwalten",
+      "manage_custom_metrics": "Benutzerdefinierte Metriken verwalten",
+      "manage_gpg_keys": "GPG-Schlüssel verwalten",
+      "manage_hardware_health": "Hardwarezustand verwalten",
+      "manage_network_discovery": "Netzwerkerkennung verwalten",
+      "manage_tenants": "Mandanten verwalten",
+      "manage_time_sync": "Zeitsynchronisierung verwalten",
+      "quarantine_malware": "Malware unter Quarantäne stellen",
+      "reboot_host": "Host neu starten",
+      "remove_antivirus": "Antiviren-Software entfernen",
+      "remove_default_repository": "Standard-Repository entfernen",
+      "remove_enabled_package_manager": "Aktivierten Paketmanager entfernen",
+      "remove_firewall": "Firewall entfernen",
+      "remove_package": "Paket entfernen",
+      "reset_user_password": "Benutzerpasswort zurücksetzen",
+      "restart_child_host": "Child-Host neu starten",
+      "restart_firewall": "Firewall neu starten",
+      "restart_host_service": "Host-Dienst neu starten",
+      "restart_opentelemetry_service": "OpenTelemetry-Dienst neu starten",
+      "restore_files": "Dateien wiederherstellen",
+      "resync_host_clock": "Hostuhr neu synchronisieren",
+      "run_malware_scans": "Malware-Scans ausführen",
+      "run_script": "Skript ausführen",
+      "shutdown_host": "Host herunterfahren",
+      "start_child_host": "Child-Host starten",
+      "start_host_service": "Host-Dienst starten",
+      "start_opentelemetry_service": "OpenTelemetry-Dienst starten",
+      "start_vault": "Vault starten",
+      "stop_child_host": "Child-Host stoppen",
+      "stop_host_service": "Host-Dienst stoppen",
+      "stop_opentelemetry_service": "OpenTelemetry-Dienst stoppen",
+      "stop_vault": "Vault stoppen",
+      "unlock_user": "Benutzer entsperren",
+      "update_agent": "Agent aktualisieren",
+      "view_audit_log": "Audit-Protokoll anzeigen",
+      "view_child_host": "Child-Host anzeigen",
+      "view_default_repositories": "Standard-Repositories anzeigen",
+      "view_enabled_package_managers": "Aktivierte Paketmanager anzeigen",
+      "view_firewall_roles": "Firewall-Rollen anzeigen",
+      "view_host_details": "Details des Hosts anzeigen",
+      "view_report": "Bericht anzeigen",
+      "view_user_security_roles": "Benutzer-Sicherheitsrollen anzeigen"
     }
   }
 }

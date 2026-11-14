@@ -70,7 +70,7 @@ def _get_host_certificates_sync(host_id: str, tenant_id=None):
         # Get certificates for this host
         certificates = (
             session.query(models.HostCertificate)
-            .filter(models.HostCertificate.host_id == host_id)
+            .filter(models.HostCertificate.host_id == host.id)
             .order_by(
                 models.HostCertificate.not_after.asc()
             )  # Order by expiration date

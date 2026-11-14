@@ -45,7 +45,7 @@ class TestFeatureDependency:
             gate = proplus_routes._feature_dependency(FeatureCode.HEALTH_ANALYSIS)
             with pytest.raises(HTTPException) as exc:
                 gate()
-            assert exc.value.status_code == 403
+            assert exc.value.status_code == 402
             assert exc.value.detail["error"] == "pro_plus_required"
 
     def test_decorator_mode_wraps_sync_function(self):
@@ -132,7 +132,7 @@ class TestModuleDependency:
             gate = proplus_routes._module_dependency("health_engine")
             with pytest.raises(HTTPException) as exc:
                 gate()
-            assert exc.value.status_code == 403
+            assert exc.value.status_code == 402
 
     def test_raises_when_module_licensed_but_not_loaded(self):
         with patch.object(
@@ -313,13 +313,20 @@ def stub_app():
     return app
 
 
+def _refused(response):
+    """A stub WRITE is a 402 naming the module, never 200 {"licensed": false}
+    (Phase 25 edition audit, 2026-11-14)."""
+    assert response.status_code == 402, response.text
+    assert response.json()["detail"]["error"] == "pro_plus_required"
+
+
 class TestStubEndpoints:
     def test_audit_statistics_stub(self, stub_app):
         from fastapi.testclient import TestClient
 
         with TestClient(stub_app) as c:
             assert c.get("/api/v1/audit/statistics").json() == {"licensed": False}
-            assert c.post("/api/v1/audit/export").json() == {"licensed": False}
+            _refused(c.post("/api/v1/audit/export"))
 
     def test_secrets_stubs(self, stub_app):
         from fastapi.testclient import TestClient
@@ -335,11 +342,9 @@ class TestStubEndpoints:
 
         with TestClient(stub_app) as c:
             assert c.get("/api/v1/containers/statistics").json() == {"licensed": False}
-            assert c.post("/api/v1/containers/create").json() == {"licensed": False}
-            assert c.post("/api/v1/containers/abc/action").json() == {"licensed": False}
-            assert c.post("/api/v1/containers/abc/network").json() == {
-                "licensed": False
-            }
+            _refused(c.post("/api/v1/containers/create"))
+            _refused(c.post("/api/v1/containers/abc/action"))
+            _refused(c.post("/api/v1/containers/abc/network"))
 
     def test_reporting_stubs(self, stub_app):
         from fastapi.testclient import TestClient
@@ -355,9 +360,9 @@ class TestStubEndpoints:
             body = c.get("/api/v1/av/status/host-1").json()
             assert body["licensed"] is False
             assert body["host_id"] == "host-1"
-            assert c.post("/api/v1/av/deploy").json() == {"licensed": False}
-            assert c.post("/api/v1/av/uninstall").json() == {"licensed": False}
-            assert c.post("/api/v1/av/scan").json() == {"licensed": False}
+            _refused(c.post("/api/v1/av/deploy"))
+            _refused(c.post("/api/v1/av/uninstall"))
+            _refused(c.post("/api/v1/av/scan"))
             fleet = c.get("/api/v1/av/commercial/fleet-report").json()
             assert fleet["licensed"] is False
             assert fleet["entries"] == []
@@ -365,9 +370,8 @@ class TestStubEndpoints:
                 "licensed": False,
                 "policies": [],
             }
-            assert c.post("/api/v1/av/policies").json() == {"licensed": False}
-            apply_resp = c.post("/api/v1/av/policies/p1/apply").json()
-            assert apply_resp == {"licensed": False, "policy_id": "p1"}
+            _refused(c.post("/api/v1/av/policies"))
+            _refused(c.post("/api/v1/av/policies/p1/apply"))
 
     def test_firewall_stubs(self, stub_app):
         from fastapi.testclient import TestClient
@@ -376,15 +380,11 @@ class TestStubEndpoints:
             status_body = c.get("/api/v1/firewall/status/h1").json()
             assert status_body["licensed"] is False
             assert status_body["applied_roles"] == []
-            assert c.post("/api/v1/firewall/deploy").json() == {"licensed": False}
+            _refused(c.post("/api/v1/firewall/deploy"))
             assert c.get("/api/v1/firewall/roles").json()["roles"] == []
-            assert c.post("/api/v1/firewall/roles").json() == {"licensed": False}
-            assert c.post("/api/v1/firewall/compliance-check").json() == {
-                "licensed": False
-            }
-            fleet = c.post("/api/v1/firewall/fleet/deploy").json()
-            assert fleet["licensed"] is False
-            assert fleet["queued_hosts"] == []
+            _refused(c.post("/api/v1/firewall/roles"))
+            _refused(c.post("/api/v1/firewall/compliance-check"))
+            _refused(c.post("/api/v1/firewall/fleet/deploy"))
             report = c.get("/api/v1/firewall/compliance/report").json()
             assert report["total_hosts"] == 0
 
@@ -396,7 +396,7 @@ class TestStubEndpoints:
                 "licensed": False,
                 "scripts": [],
             }
-            assert c.post("/api/v1/automation/scripts").json() == {"licensed": False}
+            _refused(c.post("/api/v1/automation/scripts"))
             assert c.get("/api/v1/automation/executions").json() == {
                 "licensed": False,
                 "executions": [],
@@ -418,18 +418,14 @@ class TestStubEndpoints:
                 "licensed": False,
                 "groups": [],
             }
-            assert c.post("/api/v1/fleet/groups").json() == {"licensed": False}
-            assert c.post("/api/v1/fleet/select").json() == {
-                "licensed": False,
-                "host_ids": [],
-                "count": 0,
-            }
-            assert c.post("/api/v1/fleet/bulk").json() == {"licensed": False}
+            _refused(c.post("/api/v1/fleet/groups"))
+            _refused(c.post("/api/v1/fleet/select"))
+            _refused(c.post("/api/v1/fleet/bulk"))
             assert c.get("/api/v1/fleet/bulk").json() == {
                 "licensed": False,
                 "operations": [],
             }
-            assert c.post("/api/v1/fleet/rolling").json() == {"licensed": False}
+            _refused(c.post("/api/v1/fleet/rolling"))
             assert c.get("/api/v1/fleet/rolling").json() == {
                 "licensed": False,
                 "deployments": [],

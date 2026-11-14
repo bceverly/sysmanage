@@ -115,14 +115,14 @@
         "signerFingerprint": "بصمة الموقّع",
         "version": "الإصدار"
       },
-      "title": "مخازن محصورة جواً"
+      "title": "مستودعات معزولة عن الشبكة"
     }
   },
   "airgapBundles": {
-    "buildAgent": "إنشاء حزمة وكيل البناء",
+    "buildAgent": "إنشاء حزمة الوكيل",
     "buildError": "فشل في إدراج بناء.",
-    "buildProplus": "إنشاء حزمة Pro+ ",
-    "buildServer": "إنشاء حزمة خادم البناء",
+    "buildProplus": "إنشاء حزمة Pro+",
+    "buildServer": "إنشاء حزمة الخادم",
     "bundle": "حزمة",
     "completedAt": "تم الانتهاء منه",
     "confirmDelete": "هل تريد حذف هذا الحزمة وملف ISO الخاص به؟",
@@ -214,7 +214,7 @@
     "notApplicable": "هذه الصفحة ذات معنى فقط في توزيعات الدور المجمع.",
     "refresh": "تحديث",
     "subtitle": " kích hoạt các دورة جمع فورية تشبه المستودعات المحددة، وبناء ISO ký hiệu và viết một biểu đồ cho việc tiếp nhận trên phía không kết nối.",
-    "title": "عمليات الجمع للبيئات المعزولة عن الشبكة"
+    "title": "عمليات جمع المحتوى للشبكة المعزولة"
   },
   "airgapDevices": {
     "empty": "لم يتم العثور على أي أقراص مؤهلة. أدخل الوسائط واضغط على إعادة المسح.",
@@ -226,7 +226,7 @@
     "removable": "قابل للإزالة",
     "rescan": "إعادة فحص الأقراص",
     "saveError": "لا يمكن حفظ الجهاز.",
-    "title": "استيراد القرص"
+    "title": "محرك الاستيراد"
   },
   "airgapImport": {
     "device": "المحرك",
@@ -255,7 +255,7 @@
       "copyKey": "نسخ المفتاح العام",
       "help": "انسخ هذا المفتاح العام واستوردته على خادم مستودع الفراغ حتى يثق بالمEDIA الموقعة التي ينتجها هذا المجمع. يتم عرض المفتاح العام فقط -- لم يغادر مفتاح التوقيع الخاص الخادم أبداً.",
       "loadError": "لم يتم تحميل مفتاح المجمع العام.",
-      "title": "مفتاح العلامة العامة للCollector"
+      "title": "المفتاح العام للمجمِّع"
     },
     "copied": "تم النسخ!",
     "copyError": "لم يتم نسخclipboard.",
@@ -274,7 +274,7 @@
       "pemLabel": "المفتاح العام (PEM)",
       "removeError": "لا يمكن إزالة المفتاح.",
       "required": "يجب توفير كل من الاسم والمفتاح العام.",
-      "title": "مفاتيح مجمّع موثوق"
+      "title": "مفاتيح المجمِّعات الموثوقة"
     }
   },
   "antivirus": {
@@ -2491,7 +2491,7 @@
   },
   "nav": {
     "advisories": "النشرات الأمنية",
-    "airgapCollections": "جمعات الفجوة الهوائية",
+    "airgapCollections": "جمع المحتوى للشبكة المعزولة",
     "airgapRepositories": "مخازن محصورة جواً",
     "alerts": "التحذيرات",
     "cat": {
@@ -2525,7 +2525,7 @@
     "role": {
       "collector": "مجمِّع الفجوة الهوائية",
       "engineMissing": "محرك Pro+ المطلوب غير محمل؛ تحقق من الترخيص.",
-      "repository": "مستودع منفصل عن الهواء"
+      "repository": "مستودع معزول عن الشبكة"
     },
     "scripts": "البرامج النصية",
     "scrollLeft": "انقل يميناً",
@@ -3323,7 +3323,7 @@
   "serverRole": {
     "collector": {
       "description": "النصف المتصل بالإنترنت من زوج air-gap. يقوم بتقليد مستودعات الحزم الواردة، جمع رسائل CVE والتوافقية، وتعبئة كل ذلك في صور ISO موقعة يمكنك نقلها عبر الفجوة الهوائية. اختر هذا على الخادم الذي لديه إمكانية الوصول إلى الإنترنت ويقوم ببناء الوسائط.",
-      "title": "محصورة جواً (الجانب المتصل بالإنترنت)"
+      "title": "مجمِّع الشبكة المعزولة (الجانب المتصل بالإنترنت)"
     },
     "currentTag": "(حالي)",
     "heading": "دور الفصل الجوي",
@@ -3332,7 +3332,7 @@
     "menuTitle": "دور الخادم",
     "repository": {
       "description": "النصف المعزول من زوج air-gap بدون إمكانية الوصول إلى الإنترنت. يقوم بتلقي الصور ISO التي تم إنتاجها بواسطة المجموعة، التحقق من توقيعها، وتقديم الحزم للخوادم المدارة في الشبكة الخاصة حتى يمكن لها تحديث نفسها بشكل طبيعي. اختر هذا على الخادم داخل المنطقة المعزولة.",
-      "title": "مخزن محصور جواً (الجانب المقاطع)"
+      "title": "مستودع معزول عن الشبكة (الجانب غير المتصل)"
     },
     "restartHint": "قم بإعادة تشغيل خادم SysManage بعد الحفظ لتطبيق الدور الجديد بشكل كامل.",
     "save": "Save Role",
@@ -6019,6 +6019,132 @@
       "again": "إصلاح أو ترقية",
       "button": "تفعيل النسخ الاحتياطي لـ iCloud",
       "root": "تُحفظ الصور تحت {{path}} (جُهّز في {{when}})."
+    }
+  },
+  "securityRoles": {
+    "group": {
+      "ubuntu_pro": "Ubuntu Pro",
+      "host": "المضيف",
+      "host_account_management": "إدارة حسابات المضيفين",
+      "integrations": "عمليات التكامل",
+      "package": "الحزمة",
+      "reports": "تقارير",
+      "scripts": "النصوص البرمجية",
+      "secrets": "الأسرار",
+      "security": "الأمان",
+      "settings": "الإعدادات",
+      "user": "المستخدم",
+      "virtualization": "المحاكاة الافتراضية"
+    },
+    "role": {
+      "add_default_repository": "إضافة مستودع افتراضي",
+      "add_enabled_package_manager": "إضافة مدير حزم مُفعّل",
+      "add_firewall_role": "إضافة دور جدار الحماية",
+      "add_host_account": "إضافة حساب مضيف",
+      "add_host_group": "إضافة مجموعة مضيفين",
+      "add_package": "إضافة حزمة",
+      "add_script": "إضافة نص برمجي",
+      "add_secret": "إضافة سر",
+      "add_third_party_repository": "إضافة مستودع طرف ثالث",
+      "add_user": "إضافة مستخدم",
+      "apply_host_os_upgrade": "تطبيق ترقية نظام التشغيل للمضيف",
+      "apply_software_update": "تطبيق تحديث البرمجيات",
+      "approve_host_registration": "الموافقة على تسجيل المضيف",
+      "assign_host_firewall_roles": "تعيين أدوار جدار الحماية للمضيفين",
+      "attach_ubuntu_pro": "ربط Ubuntu Pro",
+      "change_ubuntu_pro_master_key": "تغيير مفتاح Ubuntu Pro الرئيسي",
+      "configure_child_host": "تكوين مضيف فرعي",
+      "connect_host_to_graylog": "ربط المضيف بـ Graylog",
+      "create_child_host": "إنشاء مضيف فرعي",
+      "delete_child_host": "حذف المضيف الفرعي",
+      "delete_firewall_role": "حذف دور جدار الحماية",
+      "delete_host": "حذف المضيف",
+      "delete_host_account": "حذف حساب المضيف",
+      "delete_host_group": "حذف مجموعة المضيفين",
+      "delete_queue_message": "حذف رسالة من قائمة الانتظار",
+      "delete_script": "حذف النص البرمجي",
+      "delete_script_execution": "حذف تنفيذ النص البرمجي",
+      "delete_secret": "حذف السر",
+      "delete_third_party_repository": "حذف مستودع الطرف الثالث",
+      "delete_user": "حذف المستخدم",
+      "deploy_antivirus": "نشر برنامج حماية من الفيروسات",
+      "deploy_certificate": "نشر الشهادة",
+      "deploy_firewall": "نشر جدار الحماية",
+      "deploy_opentelemetry": "نشر OpenTelemetry",
+      "deploy_ssh_key": "نشر مفتاح SSH",
+      "detach_ubuntu_pro": "فصل Ubuntu Pro",
+      "disable_antivirus": "تعطيل برنامج حماية الفيروسات",
+      "disable_firewall": "تعطيل جدار الحماية",
+      "disable_third_party_repository": "تعطيل مستودع الطرف الثالث",
+      "edit_firewall_ports": "تعديل منافذ جدار الحماية",
+      "edit_firewall_role": "تعديل دور جدار الحماية",
+      "edit_host_account": "تعديل حساب المضيف",
+      "edit_host_group": "تعديل مجموعة المضيفين",
+      "edit_host_hostname": "تعديل اسم المضيف",
+      "edit_script": "تعديل النص البرمجي",
+      "edit_secret": "تعديل السر",
+      "edit_tags": "تعديل العلامات",
+      "edit_user": "تعديل المستخدم",
+      "edit_user_security_roles": "تعديل أدوار أمان المستخدم",
+      "enable_antivirus": "تمكين مكافحة الفيروسات",
+      "enable_firewall": "تمكين جدار الحماية",
+      "enable_grafana_integration": "تمكين تكامل Grafana",
+      "enable_graylog_integration": "تمكين تكامل Graylog",
+      "enable_kvm": "تمكين KVM",
+      "enable_lxd": "تمكين LXD",
+      "enable_third_party_repository": "تمكين مستودع الطرف الثالث",
+      "enable_vmm": "تمكين VMM",
+      "enable_wsl": "تمكين WSL",
+      "enable_bhyve": "تمكين bhyve",
+      "export_audit_log": "تصدير سجل التدقيق",
+      "generate_pdf_report": "إنشاء تقرير PDF",
+      "kill_host_process": "إنهاء عملية على المضيف",
+      "lock_user": "قفل المستخدم",
+      "manage_antivirus_defaults": "إدارة الإعدادات الافتراضية لمكافحة الفيروسات",
+      "manage_asset_tags": "إدارة علامات الأصول",
+      "manage_backups": "إدارة النسخ الاحتياطية",
+      "manage_cloud_backups": "إدارة النسخ الاحتياطية السحابية",
+      "manage_custom_metrics": "إدارة المقاييس المخصصة",
+      "manage_gpg_keys": "إدارة مفاتيح GPG",
+      "manage_hardware_health": "إدارة سلامة الأجهزة",
+      "manage_network_discovery": "إدارة اكتشاف الشبكة",
+      "manage_tenants": "إدارة المستأجرين",
+      "manage_time_sync": "إدارة تزامن الوقت",
+      "quarantine_malware": "عزل البرمجيات الخبيثة",
+      "reboot_host": "إعادة تشغيل المضيف",
+      "remove_antivirus": "إزالة مكافحة الفيروسات",
+      "remove_default_repository": "إزالة المستودع الافتراضي",
+      "remove_enabled_package_manager": "إزالة مدير الحزم المُفعّل",
+      "remove_firewall": "إزالة جدار الحماية",
+      "remove_package": "إزالة الحزمة",
+      "reset_user_password": "إعادة تعيين كلمة مرور المستخدم",
+      "restart_child_host": "إعادة تشغيل المضيف الفرعي",
+      "restart_firewall": "إعادة تشغيل جدار الحماية",
+      "restart_host_service": "إعادة تشغيل خدمة المضيف",
+      "restart_opentelemetry_service": "إعادة تشغيل خدمة OpenTelemetry",
+      "restore_files": "استعادة الملفات",
+      "resync_host_clock": "إعادة مزامنة ساعة المضيف",
+      "run_malware_scans": "تشغيل فحوصات البرمجيات الخبيثة",
+      "run_script": "تشغيل النص البرمجي",
+      "shutdown_host": "إيقاف تشغيل المضيف",
+      "start_child_host": "بدء المضيف الفرعي",
+      "start_host_service": "بدء خدمة المضيف",
+      "start_opentelemetry_service": "بدء خدمة OpenTelemetry",
+      "start_vault": "تشغيل Vault",
+      "stop_child_host": "إيقاف المضيف الفرعي",
+      "stop_host_service": "إيقاف خدمة المضيف",
+      "stop_opentelemetry_service": "إيقاف خدمة OpenTelemetry",
+      "stop_vault": "إيقاف Vault",
+      "unlock_user": "فك قفل المستخدم",
+      "update_agent": "تحديث الوكيل",
+      "view_audit_log": "عرض سجل التدقيق",
+      "view_child_host": "عرض مضيف فرعي",
+      "view_default_repositories": "عرض المستودعات الافتراضية",
+      "view_enabled_package_managers": "عرض مديري الحزم المفعّلين",
+      "view_firewall_roles": "عرض أدوار جدار الحماية",
+      "view_host_details": "عرض تفاصيل المضيف",
+      "view_report": "عرض التقرير",
+      "view_user_security_roles": "عرض أدوار أمان المستخدمين"
     }
   }
 }

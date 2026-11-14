@@ -140,7 +140,7 @@ class TestConfigPush:
 
         # Check response status - should be error code
 
-        assert response.status_code == 500  # API wraps validation errors in 500s
+        assert response.status_code == 400  # a 4xx is re-raised, not wrapped in a 500
         data = response.json()
         assert "target" in data["detail"].lower()
 
@@ -259,7 +259,7 @@ class TestLoggingConfig:
             "/api/v1/config/logging", json=logging_data, headers=auth_headers
         )
         # API wraps validation errors in 500s
-        assert response.status_code == 500
+        assert response.status_code == 404  # unknown target host, not a 500
 
     @patch("backend.api.config_management.config_push_manager")
     def test_update_logging_config_no_target(
@@ -277,7 +277,7 @@ class TestLoggingConfig:
             "/api/v1/config/logging", json=logging_data, headers=auth_headers
         )
 
-        assert response.status_code == 500  # API wraps validation errors in 500s
+        assert response.status_code == 400  # a 4xx is re-raised, not wrapped in a 500
         data = response.json()
         assert "target" in data["detail"].lower()
 
@@ -387,7 +387,7 @@ class TestWebSocketConfig:
         response = client.post(
             "/api/v1/config/websocket", json=ws_config_data, headers=auth_headers
         )
-        assert response.status_code == 500  # API wraps validation errors in 500s
+        assert response.status_code == 404  # unknown target host, not a 500
 
     def test_update_websocket_config_unauthorized(self, client):
         """Test updating WebSocket config without authentication."""
@@ -499,7 +499,7 @@ class TestServerConfig:
         response = client.post(
             "/api/v1/config/server", json=server_config_data, headers=auth_headers
         )
-        assert response.status_code == 500  # API wraps validation errors in 500s
+        assert response.status_code == 404  # unknown target host, not a 500
 
     def test_update_server_config_unauthorized(self, client):
         """Test updating server config without authentication."""

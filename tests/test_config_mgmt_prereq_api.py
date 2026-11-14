@@ -386,7 +386,7 @@ class TestEngineAwareInstall:
         session = _FakeSession(Host=[_host()])
         with _Env() as env, patch(
             "backend.api.config_mgmt_prereq.require_module",
-            side_effect=HTTPException(status_code=403, detail="pro_plus_required"),
+            side_effect=HTTPException(status_code=402, detail="pro_plus_required"),
         ):
             with pytest.raises(HTTPException) as exc:
                 await api.install_config_mgmt_prerequisite(
@@ -395,7 +395,7 @@ class TestEngineAwareInstall:
                     _user(SecurityRoles.ADD_PACKAGE),
                     engine="chef",
                 )
-        assert exc.value.status_code == 403
+        assert exc.value.status_code == 402
         assert env.enqueued == []
 
     @pytest.mark.asyncio

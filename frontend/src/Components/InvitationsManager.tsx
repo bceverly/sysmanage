@@ -34,7 +34,7 @@ import {
     doRevokeInvitation,
     doResendInvitation
 } from '../Services/invitations';
-import { SecurityRole, doGetAllRoleGroups } from '../Services/securityRoles';
+import { SecurityRole, doGetAllRoleGroups, roleLabel } from '../Services/securityRoles';
 import { appLocale } from '../utils/locale';
 
 const InvitationsManager: React.FC = () => {
@@ -250,7 +250,7 @@ const InvitationsManager: React.FC = () => {
                                 options={roles}
                                 value={selectedRoles}
                                 onChange={(_e, value) => setSelectedRoles(value)}
-                                getOptionLabel={(option) => option.name}
+                                getOptionLabel={(option) => roleLabel(t, option.name)}
                                 isOptionEqualToValue={(option, value) => option.id === value.id}
                                 renderInput={(params) => (
                                     <TextField

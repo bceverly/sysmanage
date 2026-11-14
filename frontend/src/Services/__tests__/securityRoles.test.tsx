@@ -11,6 +11,8 @@ import {
     doGetAllRoleGroups,
     doGetUserRoles,
     doUpdateUserRoles,
+    roleGroupLabel,
+    roleLabel,
 } from '../securityRoles';
 import axiosInstance from '../api';
 
@@ -77,6 +79,25 @@ describe('Security Roles API Service', () => {
         it('rethrows on error', async () => {
             vi.mocked(axiosInstance.put).mockRejectedValueOnce(new Error('nope'));
             await expect(doUpdateUserRoles('u1', [])).rejects.toThrow('nope');
+        });
+    });
+
+    describe('roleLabel / roleGroupLabel', () => {
+        const t = vi.fn((key: string, fallback: string) => `${key}|${fallback}`);
+
+        it('looks a role name up by its slug, falling back to the English name', () => {
+            expect(roleLabel(t as never, 'Add Third-Party Repository')).toBe(
+                'securityRoles.role.add_third_party_repository|Add Third-Party Repository'
+            );
+            expect(roleLabel(t as never, 'Deploy SSH Key')).toBe(
+                'securityRoles.role.deploy_ssh_key|Deploy SSH Key'
+            );
+        });
+
+        it('looks a group name up under securityRoles.group', () => {
+            expect(roleGroupLabel(t as never, 'Ubuntu Pro')).toBe(
+                'securityRoles.group.ubuntu_pro|Ubuntu Pro'
+            );
         });
     });
 });

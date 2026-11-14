@@ -84,6 +84,28 @@ async def execute_script(  # NOSONAR
                     ),
                 )
 
+            # The model's validators skip fields left out entirely, so a body
+            # naming neither a saved script nor content reached the database
+            # and failed there as a 500 (edition route walk, 2026-11-14).
+            if (
+                not execution_request.saved_script_id
+                and not (execution_request.script_content or "").strip()
+            ):
+                raise HTTPException(
+                    status_code=422,
+                    detail=_(
+                        "Either saved_script_id or script_content must be provided"
+                    ),
+                )
+            if (
+                not execution_request.saved_script_id
+                and not execution_request.shell_type
+            ):
+                raise HTTPException(
+                    status_code=422,
+                    detail=_("shell_type is required for ad-hoc scripts"),
+                )
+
             # Prepare script execution data
             execution_id = str(uuid.uuid4())
             execution_uuid = str(uuid.uuid4())  # Separate UUID for agent tracking

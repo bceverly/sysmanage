@@ -152,6 +152,10 @@ async def delete_failed_messages(
             "deleted_count": deleted_count,
             "message": f"Successfully deleted {deleted_count} expired messages",
         }
+    except HTTPException:
+        # A deliberate 4xx (bad request, host not found) is the answer, not
+        # a failure to wrap into a 500.
+        raise
     except Exception as e:
         db_session.rollback()
         raise HTTPException(

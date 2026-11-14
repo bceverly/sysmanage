@@ -205,12 +205,21 @@ const FederationRoleCard: React.FC = () => {
       setEnrollToken("");
       await fetchEnrollmentStatus();
     } catch (e: unknown) {
-      const detail = (e as { response?: { data?: { detail?: string } } })
-        ?.response?.data?.detail;
-      setEnrollError(
-        detail ||
-          t("federationRole.enroll.error", "Could not enroll with the coordinator."),
-      );
+      const response = (e as {
+        response?: { status?: number; data?: { detail?: unknown } };
+      })?.response;
+      const detail = response?.data?.detail;
+      if (response?.status === 402) {
+        // Unlicensed: the detail is the license gate's object, not prose.
+        setEnrollError(
+          t("federationDispatch.errors.unlicensed", "Federation requires an Enterprise license."),
+        );
+      } else {
+        setEnrollError(
+          (typeof detail === "string" && detail) ||
+            t("federationRole.enroll.error", "Could not enroll with the coordinator."),
+        );
+      }
     } finally {
       setEnrolling(false);
     }

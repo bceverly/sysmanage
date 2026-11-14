@@ -452,3 +452,29 @@ describe("_resetFederationLicensedCacheForTests", () => {
     expect(mockGet).toHaveBeenCalledTimes(2);
   });
 });
+
+// ---------------------------------------------------------------------
+// Unlicensed writes (Phase 25 edition audit, 2026-11-14): the stubs answer
+// a write 402 instead of 200 {licensed: false}; callers still read the
+// envelope, and any other failure still throws.
+// ---------------------------------------------------------------------
+
+describe("unlicensed federation writes", () => {
+  test("a 402 reads as licensed: false", async () => {
+    mockPost.mockRejectedValue({ response: { status: 402 } });
+    await expect(doSuspendFederationSite("s1")).resolves.toEqual({
+      licensed: false,
+    });
+    mockDelete.mockRejectedValue({ response: { status: 402 } });
+    await expect(doRemoveFederationSite("s1")).resolves.toEqual({
+      licensed: false,
+    });
+  });
+
+  test("any other failure still throws", async () => {
+    mockPost.mockRejectedValue({ response: { status: 500 } });
+    await expect(doSuspendFederationSite("s1")).rejects.toEqual({
+      response: { status: 500 },
+    });
+  });
+});

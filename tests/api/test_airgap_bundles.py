@@ -321,7 +321,7 @@ class TestAirGapBundlesProPlusGate:
     user is authenticated.  Separate class so we don't accidentally
     inherit the autouse license bypass from TestAirGapBundlesAPI."""
 
-    def test_post_returns_403_on_community(self, client, auth_headers):
+    def test_post_returns_402_on_community(self, client, auth_headers):
         # No license patch -- license_service.is_pro_plus_active is
         # whatever the test fixture's default is (False on Community).
         with patch.object(
@@ -335,10 +335,10 @@ class TestAirGapBundlesProPlusGate:
                 json={"product": "server"},
                 headers=auth_headers,
             )
-            assert resp.status_code == 403
+            assert resp.status_code == 402
             assert "pro_plus" in str(resp.json()).lower()
 
-    def test_list_returns_403_on_community(self, client, auth_headers):
+    def test_list_returns_402_on_community(self, client, auth_headers):
         with patch.object(
             LicenseService,
             "is_pro_plus_active",
@@ -346,4 +346,4 @@ class TestAirGapBundlesProPlusGate:
             return_value=False,
         ):
             resp = client.get("/api/v1/airgap-bundles", headers=auth_headers)
-            assert resp.status_code == 403
+            assert resp.status_code == 402
