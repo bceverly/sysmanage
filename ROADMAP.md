@@ -687,7 +687,7 @@ the explicit bullet is added to the in-progress and future phases.)
 
 ### Release Versioning
 
-**Current Version:** v3.13.0.0
+**Current Version:** v3.14.0.0
 
 *(Derived from this file, not from git: the Target Release of the first
 phase whose "Phase exit gate" item is still unticked -- the release the phase
