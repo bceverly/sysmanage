@@ -388,6 +388,17 @@ const Dashboard = () => {
         void navigate('/hosts');
     };
 
+    // The backups card's note: the most pressing problem first.
+    const backupsNote = (): string | null => {
+        if (serverUnprotected) {
+            return t('dashboard.backupsServerUnprotected', 'This SysManage server has no good backup');
+        }
+        if (backupsEscrowStale) {
+            return t('dashboard.backupsEscrowStale', 'Break-glass key export out of date');
+        }
+        return dashboardNote(t, cloudSummary);
+    };
+
     const handleSaveSettings = (cards: { identifier: string; visible: boolean }[]) => {
         const visibilityMap: Record<string, boolean> = {};
         cards.forEach((card) => {
@@ -514,11 +525,7 @@ const Dashboard = () => {
                             color={backupsColor}
                             onClick={() => void navigate('/backups')}
                             loading={loading}
-                            note={serverUnprotected
-                                ? t('dashboard.backupsServerUnprotected', 'This SysManage server has no good backup')
-                                : backupsEscrowStale
-                                ? t('dashboard.backupsEscrowStale', 'Break-glass key export out of date')
-                                : dashboardNote(t, cloudSummary)}
+                            note={backupsNote()}
                         />
                     </Grid>
                 )}

@@ -88,7 +88,8 @@ def _current(target: models.BackupTarget, now: Optional[datetime] = None) -> boo
         cert = x509.load_pem_x509_certificate(target.proxy_cert_pem.encode("ascii"))
         ca = x509.load_pem_x509_certificate(_ca_pem().encode("ascii"))
         cert.verify_directly_issued_by(ca)
-    except (ValueError, TypeError, InvalidSignature, UnicodeEncodeError):
+    # UnicodeEncodeError (non-ASCII text) is a ValueError too.
+    except (ValueError, TypeError, InvalidSignature):
         return False
     now = now or datetime.now(timezone.utc)
     if cert.not_valid_after_utc - timedelta(days=RENEW_DAYS) <= now:
@@ -124,7 +125,7 @@ def _public_key(csr_pem: Any):
         raise CsrRefused("The proxy certificate request is not a PEM request")
     try:
         csr = x509.load_pem_x509_csr(csr_pem.encode("ascii"))
-    except (ValueError, UnicodeEncodeError) as error:
+    except ValueError as error:  # UnicodeEncodeError included
         raise CsrRefused("The proxy certificate request could not be read") from error
     if not csr.is_signature_valid:
         raise CsrRefused("The proxy certificate request's signature is not valid")

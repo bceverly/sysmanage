@@ -13,7 +13,7 @@ click>=8.1.8
 cryptography==50.0.0  # PKCS#7 EnvelopedData Bleichenbacher oracle (GHSA, Aug 2026); 49.0.0 was still affected. Earlier: CVE-2026-34073, CVE-2026-39892 (46.0.7->49.0.0)
 dill==0.4.0
 defusedxml>=0.7.1
-dnspython>=2.9.0  # CVE-2026-114605
+dnspython>=2.9.2  # CVE-2026-128089 (memory/CPU exhaustion, fixed 2.9.2); earlier CVE-2026-114605
 email_validator==2.1.1
 fastapi==0.136.3  # drops the starlette<1.0 cap so the CVE-2026-48710 fix can land
 gevent==25.9.1
@@ -107,8 +107,8 @@ pyasn1>=0.6.5  # transitive (ldap3); 0.6.5 fixes four advisories open on 0.6.4
 # OpenTelemetry for observability
 # Note: Using minimum versions to allow pip to resolve compatible version sets
 # Instrumentation packages and exporters must be compatible with the resolved API/SDK version
-opentelemetry-api>=1.45.1  # fixes CVE-2026-114603; the SDK moves with the API
-opentelemetry-sdk>=1.45.1
+opentelemetry-api>=1.45.2  # CVE-2026-126360 quadratic traceparent parsing (fixed 1.45.2); earlier CVE-2026-114603; the SDK moves with the API
+opentelemetry-sdk>=1.45.2
 opentelemetry-instrumentation>=0.48b0
 opentelemetry-instrumentation-fastapi>=0.48b0
 opentelemetry-instrumentation-sqlalchemy>=0.48b0

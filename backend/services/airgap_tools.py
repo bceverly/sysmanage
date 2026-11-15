@@ -47,9 +47,9 @@ import posixpath
 import shutil
 import subprocess  # nosec B404
 import time
-import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
 
+import httpx
 from defusedxml import ElementTree
 
 logger = logging.getLogger(__name__)
@@ -62,6 +62,8 @@ INDEX_LIMIT = 32 << 20
 GITHUB_API = "https://api.github.com/repos"
 PPA_BASE = "https://ppa.launchpadcontent.net/bceverly"
 COPR_BASE = "https://download.copr.fedorainfracloud.org/results/bceverly"
+RESTATE_REPO = "bceverly/restate"
+AGENT_REPO = "bceverly/sysmanage-agent"
 _CACHE_SECONDS = 600
 _cache: Dict[str, Tuple[float, Any]] = {}
 
@@ -96,16 +98,24 @@ def family(distro: str) -> Optional[str]:
 
 
 def _get(url: str, limit: int = INDEX_LIMIT) -> bytes:
+    """GET an https URL (httpx: no file:// or other local scheme), at most
+    ``limit`` bytes."""
     if not url.startswith("https://"):
         raise ValueError(f"not https: {url}")
-    request = urllib.request.Request(
-        url, headers={"User-Agent": "sysmanage-airgap-collector"}
-    )
-    with urllib.request.urlopen(request, timeout=60) as response:  # nosec B310
-        data = response.read(limit + 1)
-    if len(data) > limit:
-        raise ValueError(f"{url}: larger than {limit} bytes")
-    return data
+    data = bytearray()
+    with httpx.stream(
+        "GET",
+        url,
+        headers={"User-Agent": "sysmanage-airgap-collector"},
+        timeout=60,
+        follow_redirects=True,
+    ) as response:
+        response.raise_for_status()
+        for chunk in response.iter_bytes():
+            data += chunk
+            if len(data) > limit:
+                raise ValueError(f"{url}: larger than {limit} bytes")
+    return bytes(data)
 
 
 def _cached(key: str, load):
@@ -166,8 +176,36 @@ def _ppa_packages(ppa: str, codename: str, arch: str) -> Dict[str, Dict[str, str
     return _cached(f"ppa:{ppa}:{codename}:{arch}", load)
 
 
-_RPM_NS = {"repo": "http://linux.duke.edu/metadata/repo",
-           "common": "http://linux.duke.edu/metadata/common"}  # fmt: skip
+# XML namespace names fixed by the rpm-md format: identifiers, never fetched.
+_RPM_NS = {
+    "repo": "http://linux.duke.edu/metadata/repo",  # NOSONAR - namespace name, not fetched
+    "common": "http://linux.duke.edu/metadata/common",  # NOSONAR - namespace name, not fetched
+}
+
+
+def _primary_href(repomd) -> Optional[str]:
+    """The location of the ``primary`` metadata a ``repomd.xml`` names."""
+    href = None
+    for data in repomd.findall("repo:data", _RPM_NS):
+        if data.get("type") == "primary":
+            location = data.find("repo:location", _RPM_NS)
+            href = location.get("href") if location is not None else None
+    return href
+
+
+def _copr_entry(package, base: str) -> Optional[Tuple[str, Dict[str, str]]]:
+    """``(name, {url, sha256})`` of one binary package in ``primary``, or
+    None for a source package or one without a SHA-256."""
+    name = package.findtext("common:name", default="", namespaces=_RPM_NS)
+    if package.findtext("common:arch", default="", namespaces=_RPM_NS) == "src":
+        return None
+    checksum = package.find("common:checksum", _RPM_NS)
+    location = package.find("common:location", _RPM_NS)
+    if not name or checksum is None or location is None:
+        return None
+    if checksum.get("type") != "sha256":
+        return None
+    return name, {"url": f"{base}/{location.get('href')}", "sha256": checksum.text}
 
 
 def _copr_packages(project: str, chroot: str) -> Dict[str, Dict[str, str]]:
@@ -176,30 +214,17 @@ def _copr_packages(project: str, chroot: str) -> Dict[str, Dict[str, str]]:
 
     def load():
         base = f"{COPR_BASE}/{project}/{chroot}"
-        repomd = ElementTree.fromstring(_get(f"{base}/repodata/repomd.xml"))
-        href = None
-        for data in repomd.findall("repo:data", _RPM_NS):
-            if data.get("type") == "primary":
-                location = data.find("repo:location", _RPM_NS)
-                href = location.get("href") if location is not None else None
+        href = _primary_href(
+            ElementTree.fromstring(_get(f"{base}/repodata/repomd.xml"))
+        )
         if not href:
             return {}
         primary = ElementTree.fromstring(gzip.decompress(_get(f"{base}/{href}")))
         found = {}
         for package in primary.findall("common:package", _RPM_NS):
-            name = package.findtext("common:name", default="", namespaces=_RPM_NS)
-            if package.findtext("common:arch", default="", namespaces=_RPM_NS) == "src":
-                continue
-            checksum = package.find("common:checksum", _RPM_NS)
-            location = package.find("common:location", _RPM_NS)
-            if not name or checksum is None or location is None:
-                continue
-            if checksum.get("type") != "sha256":
-                continue
-            found[name] = {
-                "url": f"{base}/{location.get('href')}",
-                "sha256": checksum.text,
-            }
+            entry = _copr_entry(package, base)
+            if entry:
+                found[entry[0]] = entry[1]
         return found
 
     return _cached(f"copr:{project}:{chroot}", load)
@@ -233,26 +258,26 @@ def _debian(version: str) -> List[Dict[str, str]]:
     """restate's and restate-proxy's packages for this Debian release (both
     processors) from restate's GitHub release, and the agent's .deb."""
     major = DEBIAN_CODENAMES.get(version, version).split(".")[0]
-    restate = _github_assets("bceverly/restate")
+    restate = _github_assets(RESTATE_REPO)
     items = [{"name": n, **i} for n, i in sorted(restate.items())
              if n.startswith(("restate-", "restate-proxy-"))
              and any(n.endswith(f"-debian{major}-{arch}.deb") for arch in DEB_ARCHES)]  # fmt: skip
-    agent = _github_assets("bceverly/sysmanage-agent")
+    agent = _github_assets(AGENT_REPO)
     for arch in DEB_ARCHES:
         items += _pick(agent, starts="sysmanage-agent_", ends=f"_{arch}.deb")
     return items
 
 
 def _agent_rpm(arch: str, suffix: str = "-1") -> List[Dict[str, str]]:
-    assets = _github_assets("bceverly/sysmanage-agent")
+    assets = _github_assets(AGENT_REPO)
     return _pick(assets, starts="sysmanage-agent-", ends=f"{suffix}.{arch}.rpm")
 
 
 def _rpm_family(distro: str, version: str) -> List[Dict[str, str]]:
     distro = distro.lower()
-    restate = _github_assets("bceverly/restate")
+    restate = _github_assets(RESTATE_REPO)
     items: List[Dict[str, str]] = []
-    if distro.startswith("opensuse") or distro.startswith("sles"):
+    if distro.startswith(("opensuse", "sles")):
         items += [
             i
             for i in _pick(restate, starts="restate", ends=".rpm")
@@ -277,7 +302,7 @@ def _rpm_family(distro: str, version: str) -> List[Dict[str, str]]:
 def _alpine(version: str) -> List[Dict[str, str]]:
     """restate's packages for this Alpine release (both processors), and the
     agent's (noarch, one per release: ``alpine322`` for 3.22)."""
-    restate = _github_assets("bceverly/restate")
+    restate = _github_assets(RESTATE_REPO)
     items = [
         {"name": name, **info}
         for name, info in sorted(restate.items())
@@ -286,7 +311,7 @@ def _alpine(version: str) -> List[Dict[str, str]]:
         and f"-r0-alpine{version}-" in name
         and name.endswith(".apk")
     ]
-    agent = _github_assets("bceverly/sysmanage-agent")
+    agent = _github_assets(AGENT_REPO)
     items += _pick(
         agent, starts="sysmanage-agent-", ends=f"-alpine{version.replace('.', '')}.apk"
     )
@@ -297,7 +322,7 @@ def _freebsd(version: str) -> List[Dict[str, str]]:
     """restate's packages for the newest point release of this FreeBSD major
     (all of a major share pkg's ABI), and the agent's FreeBSD package."""
     major = version.split(".")[0]
-    restate = _github_assets("bceverly/restate")
+    restate = _github_assets(RESTATE_REPO)
     marker = f"-freebsd-{major}."
     releases = sorted(
         {
@@ -312,7 +337,7 @@ def _freebsd(version: str) -> List[Dict[str, str]]:
         tail = f"-freebsd-{major}.{releases[-1]}-"
         items = [{"name": n, **i} for n, i in sorted(restate.items())
                  if tail in n and n.endswith(".pkg")]  # fmt: skip
-    agent = _github_assets("bceverly/sysmanage-agent")
+    agent = _github_assets(AGENT_REPO)
     # The FreeBSD package is the bare one (macOS's is ``-macos.pkg``).
     items += [{"name": n, **i} for n, i in agent.items()
               if n.startswith("sysmanage-agent-") and n.endswith(".pkg")
@@ -531,6 +556,31 @@ def _index(kind: str, folder: str, env: Dict[str, str], root: str) -> Optional[s
     return formats.build_pkg_repository(folder, key)
 
 
+def _build_target(entry: Any) -> Optional[Tuple[str, str, str]]:
+    """``(distro, version, kind)`` of one manifest ``tools`` entry, or None
+    when it is malformed, unsafe as a path or not a served family."""
+    if not isinstance(entry, dict):
+        return None
+    distro = str(entry.get("distro") or "")
+    version = str(entry.get("version") or "")
+    kind = family(distro)
+    joined = distro + version
+    if not kind or not distro or not version or "/" in joined or ".." in joined:
+        return None
+    return distro, version, kind
+
+
+def _build_one(
+    kind: str, dest: str, kept: List[str], public: Optional[str], env, root: str
+) -> Optional[str]:
+    """Index and sign one copied tools repository: None, or why not."""
+    if not kept:
+        return "no package matched the signed manifest"
+    if public is None and kind in ("apt", "rpm"):
+        return "no signing key (gpg missing)"
+    return _index(kind, dest, env, root)
+
+
 def build(repo_root: str, manifest: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Build and sign a tools repository per target the signed manifest
     lists (``tools``).  ``[{distro, version, kept, error}]``."""
@@ -542,20 +592,10 @@ def build(repo_root: str, manifest: Dict[str, Any]) -> List[Dict[str, Any]]:
     env = {**os.environ, "GNUPGHOME": _gnupg_home(root)}
     results = []
     for entry in entries:
-        if not isinstance(entry, dict):
+        target = _build_target(entry)
+        if target is None:
             continue
-        distro, version = str(entry.get("distro") or ""), str(
-            entry.get("version") or ""
-        )
-        kind = family(distro)
-        if (
-            not kind
-            or not distro
-            or not version
-            or "/" in distro + version
-            or ".." in distro + version
-        ):
-            continue
+        distro, version, kind = target
         source = os.path.join(repo_root, target_dir(distro, version))
         if not os.path.isdir(source):
             # Not on this disc (a multi-disc set carries the tools on disc 1
@@ -563,15 +603,8 @@ def build(repo_root: str, manifest: Dict[str, Any]) -> List[Dict[str, Any]]:
             continue
         dest = os.path.join(root, distro, version)
         shutil.rmtree(dest, ignore_errors=True)
-        kept = _verified_copy(source, dest,
-                              entry.get("files") or [])  # fmt: skip
-        error = None
-        if not kept:
-            error = "no package matched the signed manifest"
-        elif public is None and kind in ("apt", "rpm"):
-            error = "no signing key (gpg missing)"
-        else:
-            error = _index(kind, dest, env, root)
+        kept = _verified_copy(source, dest, entry.get("files") or [])
+        error = _build_one(kind, dest, kept, public, env, root)
         if error:
             shutil.rmtree(dest, ignore_errors=True)
             logger.error(

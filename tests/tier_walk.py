@@ -18,6 +18,7 @@ import os
 import re
 import socket
 import subprocess  # nosec B404  # only patched out here, never run
+import threading
 from contextlib import ExitStack, asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
@@ -89,6 +90,29 @@ def _refuse(*_args, **_kwargs):
     raise OSError("the tier walk never starts a process or opens a connection")
 
 
+# On Windows socket.socketpair() is built from a loopback listen + connect,
+# and every asyncio event loop there makes one for its self-pipe, so a bare
+# connect refusal broke the loop itself (CI, 2026-11-14).  Only a connect made
+# from inside socketpair() is let through.
+_REAL_CONNECT = socket.socket.connect
+_REAL_SOCKETPAIR = socket.socketpair
+_IN_SOCKETPAIR = threading.local()
+
+
+def _socketpair(*args, **kwargs):
+    _IN_SOCKETPAIR.active = True
+    try:
+        return _REAL_SOCKETPAIR(*args, **kwargs)
+    finally:
+        _IN_SOCKETPAIR.active = False
+
+
+def _connect(sock, *args, **kwargs):
+    if getattr(_IN_SOCKETPAIR, "active", False):
+        return _REAL_CONNECT(sock, *args, **kwargs)
+    return _refuse()
+
+
 def _every_role_cache(_db, user_id):
     # pylint: disable=import-outside-toplevel
     from backend.security.roles import SecurityRoles, UserRoleCache
@@ -120,7 +144,8 @@ def no_side_effects(stack: ExitStack):
     # No network either: the TestClient needs none (ASGI in process), and a
     # route that reached the developer's OpenBAO, SMTP or a monitoring
     # server would act on it.
-    stack.enter_context(patch.object(socket.socket, "connect", _refuse))
+    stack.enter_context(patch.object(socket, "socketpair", _socketpair))
+    stack.enter_context(patch.object(socket.socket, "connect", _connect))
     stack.enter_context(patch.object(socket.socket, "connect_ex", _refuse))
     stack.enter_context(patch.object(socket, "create_connection", _refuse))
     _keep_process_state(stack)

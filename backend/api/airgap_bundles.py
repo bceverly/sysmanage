@@ -298,8 +298,10 @@ def _resolve_caller_user_id(current_user: str) -> Optional[uuid.UUID]:
     admin_userid = the_config.get("security", {}).get("admin_userid")
     if admin_userid and current_user == admin_userid:
         return None
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
-    with SessionLocal() as session:
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+    with session_local() as session:
         user = (
             session.query(models.User)
             .filter(models.User.userid == current_user)
@@ -492,8 +494,10 @@ async def create_bundle(
                 + (res["reason"] or ""),
             )
 
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
-    with SessionLocal() as session:
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+    with session_local() as session:
         row = models.AirGapBundle(
             product=req.product,
             status=models.BUNDLE_STATUS_QUEUED,
@@ -525,8 +529,10 @@ async def create_bundle(
 async def list_bundles(
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ) -> List[BundleResponse]:
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
-    with SessionLocal() as session:
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+    with session_local() as session:
         rows = (
             session.query(models.AirGapBundle)
             .order_by(models.AirGapBundle.created_at.desc())
@@ -546,8 +552,10 @@ async def get_bundle(
     bundle_id: uuid.UUID,
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ) -> BundleResponse:
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
-    with SessionLocal() as session:
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+    with session_local() as session:
         row = (
             session.query(models.AirGapBundle)
             .filter(models.AirGapBundle.id == bundle_id)
@@ -571,8 +579,10 @@ def _bundle_file_response(bundle_id: uuid.UUID) -> FileResponse:
     by the header-authed ``/download`` route and the token-authed
     ``/download-stream`` route.
     """
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
-    with SessionLocal() as session:
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+    with session_local() as session:
         row = (
             session.query(models.AirGapBundle)
             .filter(models.AirGapBundle.id == bundle_id)
@@ -650,8 +660,10 @@ async def delete_bundle(
     bundle_id: uuid.UUID,
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ):
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
-    with SessionLocal() as session:
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+    with session_local() as session:
         row = (
             session.query(models.AirGapBundle)
             .filter(models.AirGapBundle.id == bundle_id)

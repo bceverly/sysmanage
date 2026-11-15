@@ -86,6 +86,38 @@ def check_host(value: Any) -> str:
     return text.lower()
 
 
+def _check_port(port: Optional[int]) -> int:
+    port = DEFAULT_PORT if port is None else port
+    if not isinstance(port, int) or not 1 <= port <= 65535:
+        raise ProxySettingsRefused("The proxy port must be between 1 and 65535")
+    return port
+
+
+def _check_pin(pin: Optional[str]) -> Optional[str]:
+    pin = (pin or "").strip().lower() or None
+    if pin is not None and not _SHA256.match(pin):
+        raise ProxySettingsRefused(
+            "The pinned key must be a SHA-256 in hex (64 characters)"
+        )
+    return pin
+
+
+def _check_ca(ca_pem: Optional[str]) -> Optional[str]:
+    ca_pem = (ca_pem or "").strip() or None
+    if ca_pem is None:
+        return None
+    if len(ca_pem) > MAX_CA_BYTES or not ca_pem.startswith(_CERT):
+        raise ProxySettingsRefused("The proxy's CA must be a PEM certificate")
+    try:
+        # UnicodeEncodeError (non-ASCII text) is a ValueError too.
+        x509.load_pem_x509_certificate(ca_pem.encode("ascii"))
+    except ValueError as error:
+        raise ProxySettingsRefused(
+            "The proxy's CA must be a PEM certificate"
+        ) from error
+    return ca_pem + "\n"
+
+
 def check_settings(
     transport: str,
     host: Optional[str],
@@ -99,25 +131,9 @@ def check_settings(
     if transport == NFS:
         return {"transport": NFS, "proxy_host": None, "proxy_port": None,
                 "proxy_pin_sha256": None, "proxy_ca_pem": None}  # fmt: skip
-    port = DEFAULT_PORT if port is None else port
-    if not isinstance(port, int) or not 1 <= port <= 65535:
-        raise ProxySettingsRefused("The proxy port must be between 1 and 65535")
-    pin = (pin or "").strip().lower() or None
-    if pin is not None and not _SHA256.match(pin):
-        raise ProxySettingsRefused(
-            "The pinned key must be a SHA-256 in hex (64 characters)"
-        )
-    ca_pem = (ca_pem or "").strip() or None
-    if ca_pem is not None:
-        if len(ca_pem) > MAX_CA_BYTES or not ca_pem.startswith(_CERT):
-            raise ProxySettingsRefused("The proxy's CA must be a PEM certificate")
-        try:
-            x509.load_pem_x509_certificate(ca_pem.encode("ascii"))
-        except (ValueError, UnicodeEncodeError) as error:
-            raise ProxySettingsRefused(
-                "The proxy's CA must be a PEM certificate"
-            ) from error
-        ca_pem += "\n"
+    port = _check_port(port)
+    pin = _check_pin(pin)
+    ca_pem = _check_ca(ca_pem)
     return {"transport": PROXY, "proxy_host": check_host(host), "proxy_port": port,
             "proxy_pin_sha256": pin, "proxy_ca_pem": ca_pem}  # fmt: skip
 
@@ -247,25 +263,35 @@ def _configure_runs(policy: models.BackupPolicy):
     )
 
 
+def _storage_params(run) -> Optional[Dict[str, Any]]:
+    """A configure run's parameters when it was the storage host's, else None."""
+    try:
+        params = json.loads(run.parameters or "{}")
+    except ValueError:
+        return None
+    if not isinstance(params, dict) or params.get("role") != "storage":
+        return None
+    return params
+
+
+def _grant_hashes(params: Dict[str, Any], client: str) -> List[str]:
+    """The token hashes of ``client``'s grant in a storage configure."""
+    grants = ((params.get("target") or {}).get("proxy") or {}).get("grants") or []
+    for grant in grants:
+        if isinstance(grant, dict) and grant.get("client") == client:
+            return [h for h in grant.get("token_sha256") or [] if isinstance(h, str)]
+    return []
+
+
 def storage_granted(policy: models.BackupPolicy, host: models.Host) -> List[str]:
     """The token hashes the storage host's grant for this host holds: those
     of the newest storage configure it acknowledged.  A host switches to its
     next token only once that is in it (token rotation, 2026-11-13)."""
     client = client_name(host)
     for run in _configure_runs(policy):
-        try:
-            params = json.loads(run.parameters or "{}")
-        except ValueError:
-            continue
-        if params.get("role") != "storage":
-            continue
-        grants = ((params.get("target") or {}).get("proxy") or {}).get("grants") or []
-        for grant in grants:
-            if isinstance(grant, dict) and grant.get("client") == client:
-                return [
-                    h for h in grant.get("token_sha256") or [] if isinstance(h, str)
-                ]
-        return []
+        params = _storage_params(run)
+        if params is not None:
+            return _grant_hashes(params, client)
     return []
 
 

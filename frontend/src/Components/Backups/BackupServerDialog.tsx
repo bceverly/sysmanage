@@ -30,6 +30,37 @@ const PathList: React.FC<{ title: string; paths: string[]; help?: string }> = ({
     </Box>
 );
 
+// What the server's backup is encrypted to: the escrow key (Pro+), a
+// missing escrow key, or nothing (Community).
+const EncryptionNote: React.FC<{ encryption: ServerBackupEncryption | null; needsEscrow: boolean }> = (
+    { encryption, needsEscrow },
+) => {
+    const { t } = useTranslation();
+    if (!encryption?.available) {
+        return (
+            <Alert severity="warning">
+                {t('backups.server.unencrypted',
+                    'This backup is not encrypted, and it holds the database password from the configuration. Keep the backup storage as safe as the server itself.')}
+            </Alert>
+        );
+    }
+    if (needsEscrow) {
+        return (
+            <Alert severity="error">
+                {t('backups.server.needsEscrow',
+                    "Save a break-glass escrow key first, in a host's Encryption panel. The SysManage server's own backup is encrypted to it, so restoring OpenBAO never needs a key kept inside OpenBAO.")}
+            </Alert>
+        );
+    }
+    return (
+        <Alert severity="success">
+            {t('backups.server.escrowEncrypted',
+                'Encrypted to your break-glass escrow key ({{fingerprint}}). SysManage never holds its secret half, so this backup is restored by hand with that key, as the server recovery runbook describes.',
+                { fingerprint: encryption.escrow_fingerprint })}
+        </Alert>
+    );
+};
+
 const BackupServerDialog: React.FC<{
     open: boolean;
     hostId: string | null;
@@ -125,25 +156,7 @@ const BackupServerDialog: React.FC<{
                         {t('backups.server.pauseNote',
                             'PostgreSQL is stopped while its own files are copied, so SysManage may show errors for that time. Pick a quiet start hour.')}
                     </Alert>
-                    {encryption?.available ? (
-                        needsEscrow ? (
-                            <Alert severity="error">
-                                {t('backups.server.needsEscrow',
-                                    "Save a break-glass escrow key first, in a host's Encryption panel. The SysManage server's own backup is encrypted to it, so restoring OpenBAO never needs a key kept inside OpenBAO.")}
-                            </Alert>
-                        ) : (
-                            <Alert severity="success">
-                                {t('backups.server.escrowEncrypted',
-                                    'Encrypted to your break-glass escrow key ({{fingerprint}}). SysManage never holds its secret half, so this backup is restored by hand with that key, as the server recovery runbook describes.',
-                                    { fingerprint: encryption.escrow_fingerprint })}
-                            </Alert>
-                        )
-                    ) : (
-                        <Alert severity="warning">
-                            {t('backups.server.unencrypted',
-                                'This backup is not encrypted, and it holds the database password from the configuration. Keep the backup storage as safe as the server itself.')}
-                        </Alert>
-                    )}
+                    <EncryptionNote encryption={encryption} needsEscrow={needsEscrow} />
                     <TextField type="number" label={t('backups.policy.intervalHours', 'Every (hours)')}
                         value={every} slotProps={{ htmlInput: { min: 1, max: 720 } }}
                         onChange={e => setEvery(Number(e.target.value) || 0)} />

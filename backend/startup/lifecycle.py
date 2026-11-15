@@ -835,10 +835,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         logger.info("=== ALL STARTUP TASKS COMPLETED SUCCESSFULLY ===")
         logger.info("Server is ready to accept requests")
 
-        yield
-
-        logger.info("=== FASTAPI LIFESPAN SHUTDOWN BEGIN ===")
-
     except Exception as e:
         logger.exception("=== EXCEPTION IN LIFESPAN STARTUP ===")
         logger.exception("Exception in lifespan startup: %s", e, exc_info=True)
@@ -846,122 +842,130 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         logger.exception("Exception args: %s", e.args)
         raise
 
-    # Shutdown: Stop the license service
-    logger.info("Stopping license service")
     try:
-        await license_service.shutdown()
-        logger.info("License service stopped")
-    except Exception as e:
-        logger.exception("Error stopping license service: %s", e)
-
-    # Shutdown: Stop the discovery beacon service
-    logger.info("Stopping discovery beacon service")
-    try:
-        await discovery_beacon.stop_beacon_service()
-        logger.info("Discovery beacon service stopped")
-    except Exception as e:
-        logger.exception("Error stopping discovery beacon: %s", e)
-
-    # Shutdown: Stop the message processor service
-    logger.info("Stopping message processor service")
-    try:
-        message_processor.stop()
-        if message_processor_task:
-            await _stop_task(message_processor_task, "Message processor task")
-        logger.info("Message processor service stopped")
-    except Exception as e:
-        logger.exception("Error stopping message processor: %s", e)
-
-    # Shutdown: Cancel the Graylog health monitor service
-    logger.info("Stopping Graylog health monitor service")
-    try:
-        if graylog_health_task:
-            await _stop_task(graylog_health_task, "Graylog health monitor task")
-        logger.info("Graylog health monitor service stopped")
-    except Exception as e:
-        logger.exception("Error stopping Graylog health monitor: %s", e)
-
-    # Shutdown: Cancel the alerting engine background task
-    if alerting_task:
-        logger.info("Stopping alerting engine background task")
+        yield
+    finally:
+        # Shutdown runs however the server stops: a normal exit, a
+        # cancellation, or an exception thrown into the lifespan.
+        logger.info("=== FASTAPI LIFESPAN SHUTDOWN BEGIN ===")
+        # Shutdown: Stop the license service
+        logger.info("Stopping license service")
         try:
-            await _stop_task(alerting_task, "Alerting engine task")
-            logger.info("Alerting engine background task stopped")
+            await license_service.shutdown()
+            logger.info("License service stopped")
         except Exception as e:
-            logger.exception("Error stopping alerting engine task: %s", e)
+            logger.exception("Error stopping license service: %s", e)
 
-    # Shutdown: Cancel the reporting engine background task
-    if reporting_task:
-        logger.info("Stopping reporting engine background task")
+        # Shutdown: Stop the discovery beacon service
+        logger.info("Stopping discovery beacon service")
         try:
-            await _stop_task(reporting_task, "Reporting engine task")
-            logger.info("Reporting engine background task stopped")
+            await discovery_beacon.stop_beacon_service()
+            logger.info("Discovery beacon service stopped")
         except Exception as e:
-            logger.exception("Error stopping reporting engine task: %s", e)
+            logger.exception("Error stopping discovery beacon: %s", e)
 
-    # Shutdown: Cancel the audit engine retention background task
-    if audit_retention_task:
-        logger.info("Stopping audit engine retention background task")
+        # Shutdown: Stop the message processor service
+        logger.info("Stopping message processor service")
         try:
-            await _stop_task(audit_retention_task, "Audit engine retention task")
-            logger.info("Audit engine retention background task stopped")
+            message_processor.stop()
+            if message_processor_task:
+                await _stop_task(message_processor_task, "Message processor task")
+            logger.info("Message processor service stopped")
         except Exception as e:
-            logger.exception("Error stopping audit engine retention task: %s", e)
+            logger.exception("Error stopping message processor: %s", e)
 
-    # Shutdown: Cancel the secrets engine rotation background task
-    if secrets_rotation_task:
-        logger.info("Stopping secrets engine rotation background task")
+        # Shutdown: Cancel the Graylog health monitor service
+        logger.info("Stopping Graylog health monitor service")
         try:
-            await _stop_task(secrets_rotation_task, "Secrets engine rotation task")
-            logger.info("Secrets engine rotation background task stopped")
+            if graylog_health_task:
+                await _stop_task(graylog_health_task, "Graylog health monitor task")
+            logger.info("Graylog health monitor service stopped")
         except Exception as e:
-            logger.exception(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-                "Error stopping secrets engine rotation task (%s)", type(e).__name__
-            )
+            logger.exception("Error stopping Graylog health monitor: %s", e)
 
-    # Shutdown: Cancel the CVE refresh background task
-    if cve_refresh_task:
-        logger.info("Stopping CVE refresh background task")
+        # Shutdown: Cancel the alerting engine background task
+        if alerting_task:
+            logger.info("Stopping alerting engine background task")
+            try:
+                await _stop_task(alerting_task, "Alerting engine task")
+                logger.info("Alerting engine background task stopped")
+            except Exception as e:
+                logger.exception("Error stopping alerting engine task: %s", e)
+
+        # Shutdown: Cancel the reporting engine background task
+        if reporting_task:
+            logger.info("Stopping reporting engine background task")
+            try:
+                await _stop_task(reporting_task, "Reporting engine task")
+                logger.info("Reporting engine background task stopped")
+            except Exception as e:
+                logger.exception("Error stopping reporting engine task: %s", e)
+
+        # Shutdown: Cancel the audit engine retention background task
+        if audit_retention_task:
+            logger.info("Stopping audit engine retention background task")
+            try:
+                await _stop_task(audit_retention_task, "Audit engine retention task")
+                logger.info("Audit engine retention background task stopped")
+            except Exception as e:
+                logger.exception("Error stopping audit engine retention task: %s", e)
+
+        # Shutdown: Cancel the secrets engine rotation background task
+        if secrets_rotation_task:
+            logger.info("Stopping secrets engine rotation background task")
+            try:
+                await _stop_task(secrets_rotation_task, "Secrets engine rotation task")
+                logger.info("Secrets engine rotation background task stopped")
+            except Exception as e:
+                logger.exception(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+                    "Error stopping secrets engine rotation task (%s)", type(e).__name__
+                )
+
+        # Shutdown: Cancel the CVE refresh background task
+        if cve_refresh_task:
+            logger.info("Stopping CVE refresh background task")
+            try:
+                await _stop_task(cve_refresh_task, "CVE refresh task")
+                logger.info("CVE refresh background task stopped")
+            except Exception as e:
+                logger.exception("Error stopping CVE refresh task: %s", e)
+
+        # Shutdown: Cancel the automation engine schedule dispatcher (Phase 5)
+        if automation_sched_task:
+            logger.info("Stopping automation engine schedule dispatcher")
+            try:
+                await _stop_task(
+                    automation_sched_task, "Automation schedule dispatcher"
+                )
+            except Exception as e:
+                logger.exception("Error stopping automation schedule dispatcher: %s", e)
+
+        # Shutdown: Cancel the fleet engine schedule dispatcher (Phase 5)
+        if fleet_sched_task:
+            logger.info("Stopping fleet engine schedule dispatcher")
+            try:
+                await _stop_task(fleet_sched_task, "Fleet schedule dispatcher")
+            except Exception as e:
+                logger.exception("Error stopping fleet schedule dispatcher: %s", e)
+
+        # Shutdown: Stop the CVE refresh scheduler
         try:
-            await _stop_task(cve_refresh_task, "CVE refresh task")
-            logger.info("CVE refresh background task stopped")
-        except Exception as e:
-            logger.exception("Error stopping CVE refresh task: %s", e)
+            from backend.vulnerability.cve_refresh_service import cve_refresh_service
 
-    # Shutdown: Cancel the automation engine schedule dispatcher (Phase 5)
-    if automation_sched_task:
-        logger.info("Stopping automation engine schedule dispatcher")
+            await cve_refresh_service.stop_scheduler()
+            logger.info("CVE refresh scheduler stopped")
+        except Exception as e:
+            logger.exception("Error stopping CVE refresh scheduler: %s", e)
+
+        # Shutdown: Cancel the heartbeat monitor service
+        logger.info("Stopping heartbeat monitor service")
         try:
-            await _stop_task(automation_sched_task, "Automation schedule dispatcher")
+            if heartbeat_task:
+                await _stop_task(heartbeat_task, "Heartbeat monitor task")
+            logger.info("Heartbeat monitor service stopped")
         except Exception as e:
-            logger.exception("Error stopping automation schedule dispatcher: %s", e)
+            logger.exception("Error stopping heartbeat monitor: %s", e)
 
-    # Shutdown: Cancel the fleet engine schedule dispatcher (Phase 5)
-    if fleet_sched_task:
-        logger.info("Stopping fleet engine schedule dispatcher")
-        try:
-            await _stop_task(fleet_sched_task, "Fleet schedule dispatcher")
-        except Exception as e:
-            logger.exception("Error stopping fleet schedule dispatcher: %s", e)
-
-    # Shutdown: Stop the CVE refresh scheduler
-    try:
-        from backend.vulnerability.cve_refresh_service import cve_refresh_service
-
-        await cve_refresh_service.stop_scheduler()
-        logger.info("CVE refresh scheduler stopped")
-    except Exception as e:
-        logger.exception("Error stopping CVE refresh scheduler: %s", e)
-
-    # Shutdown: Cancel the heartbeat monitor service
-    logger.info("Stopping heartbeat monitor service")
-    try:
-        if heartbeat_task:
-            await _stop_task(heartbeat_task, "Heartbeat monitor task")
-        logger.info("Heartbeat monitor service stopped")
-    except Exception as e:
-        logger.exception("Error stopping heartbeat monitor: %s", e)
-
-    heartbeat_batch.flush()  # heartbeats recorded since the last flush (22.2)
-    await leadership.stop()  # releases the leader lock for the next worker
-    logger.info("=== FASTAPI LIFESPAN SHUTDOWN COMPLETE ===")
+        heartbeat_batch.flush()  # heartbeats recorded since the last flush (22.2)
+        await leadership.stop()  # releases the leader lock for the next worker
+        logger.info("=== FASTAPI LIFESPAN SHUTDOWN COMPLETE ===")

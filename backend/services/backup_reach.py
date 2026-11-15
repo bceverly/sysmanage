@@ -220,10 +220,10 @@ def start(db: Session, host: models.Host, force: bool = False) -> Optional[str]:
     return command_id
 
 
-def record_result(db: Session, host_id: Any, message_data: Dict[str, Any]) -> bool:
-    """The agent's answer.  False when it answers none of ours, or is not an
-    answer (an invalid address the agent refused).  The caller commits."""
-    command_id = message_data.get("command_id")
+def _pending_row(
+    db: Session, host_id: Any, command_id: Any
+) -> Optional[models.BackupReach]:
+    """The check this answer is for, when it is one of ours for this host."""
     row = (
         db.query(models.BackupReach)
         .filter(models.BackupReach.command_id == str(command_id))
@@ -237,7 +237,14 @@ def record_result(db: Session, host_id: Any, message_data: Dict[str, Any]) -> bo
             host_id,
             command_id,
         )
-        return False
+        return None
+    return row
+
+
+def _answer(
+    host_id: Any, row: models.BackupReach, message_data: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    """The agent's answer to ``row``'s check, or None when it is none."""
     outcome = message_data.get("result") or {}
     if isinstance(outcome.get("result"), dict):
         outcome = outcome["result"]  # the agent wraps its handler's answer
@@ -247,7 +254,7 @@ def record_result(db: Session, host_id: Any, message_data: Dict[str, Any]) -> bo
             host_id,
             outcome.get("error") or message_data.get("error"),
         )
-        return False
+        return None
     if outcome.get("port") not in (None, row.port):
         # An agent too old to check a proxy answered for NFS's port.
         logger.info(
@@ -256,7 +263,13 @@ def record_result(db: Session, host_id: Any, message_data: Dict[str, Any]) -> bo
             outcome.get("port"),
             row.port,
         )
-        return False
+        return None
+    return outcome
+
+
+def _apply_answer(
+    db: Session, row: models.BackupReach, outcome: Dict[str, Any]
+) -> None:
     row.reachable = outcome["reachable"]
     row.error = str(outcome.get("error") or "")[:255] or None
     tls = outcome.get("tls")
@@ -271,6 +284,18 @@ def record_result(db: Session, host_id: Any, message_data: Dict[str, Any]) -> bo
     if row.reachable and isinstance(port, int) and not isinstance(port, bool):
         row.local_port = port
         _ask_storage_for_peers(db, row)
+
+
+def record_result(db: Session, host_id: Any, message_data: Dict[str, Any]) -> bool:
+    """The agent's answer.  False when it answers none of ours, or is not an
+    answer (an invalid address the agent refused).  The caller commits."""
+    row = _pending_row(db, host_id, message_data.get("command_id"))
+    if row is None:
+        return False
+    outcome = _answer(host_id, row, message_data)
+    if outcome is None:
+        return False
+    _apply_answer(db, row, outcome)
     if not row.reachable:
         logger.info(
             "Host %s cannot reach its backup storage at %s:%s (%s)",

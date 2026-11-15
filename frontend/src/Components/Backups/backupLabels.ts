@@ -242,18 +242,21 @@ export const unreachable = (row: { reach?: BackupReach | null }): boolean =>
     row.reach?.reachable === false || behindNat(row.reach);
 
 /** Why backups are not offered to a host that cannot reach the storage. */
-export const reachMessage = (t: TFunction, reach: BackupReach): string =>
-    reach.proxy
-        ? t('backups.reach.proxyUnreachable',
+export const reachMessage = (t: TFunction, reach: BackupReach): string => {
+    if (reach.proxy) {
+        return t('backups.reach.proxyUnreachable',
             'This host cannot reach the backup storage\'s restate-proxy ({{address}}, port {{port}}): {{error}}. Backups need a network path to it, and a certificate this host trusts.',
-            { address: reach.address, port: reach.port, error: reach.error ?? '' })
-        : behindNat(reach)
-        ? t('backups.reach.behindNat',
+            { address: reach.address, port: reach.port, error: reach.error ?? '' });
+    }
+    if (behindNat(reach)) {
+        return t('backups.reach.behindNat',
             'This host is behind NAT: the backup storage ({{storage}}) sees it as {{seen}}, not {{address}}, so it refuses the mount. Put the host on the storage host\'s network (a bridged network for a virtual machine) instead of behind its NAT.',
-            { storage: reach.storage_fqdn ?? '', seen: reach.seen_as ?? '', address: reach.host_address ?? '' })
-        : t('backups.reach.unreachable',
-            'This host cannot reach the backup storage ({{storage}}, {{address}}, NFS port {{port}}). Backups need a network path to it.',
-            { storage: reach.storage_fqdn ?? '', address: reach.address, port: reach.port });
+            { storage: reach.storage_fqdn ?? '', seen: reach.seen_as ?? '', address: reach.host_address ?? '' });
+    }
+    return t('backups.reach.unreachable',
+        'This host cannot reach the backup storage ({{storage}}, {{address}}, NFS port {{port}}). Backups need a network path to it.',
+        { storage: reach.storage_fqdn ?? '', address: reach.address, port: reach.port });
+};
 
 /** The short line for a host that is not offered backups for its network. */
 export const reachLabel = (t: TFunction, reach: BackupReach): string =>

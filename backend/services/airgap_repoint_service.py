@@ -213,12 +213,15 @@ def _build_zypper_repoint_plan(repo_url: str) -> dict:
     }
 
 
+APK_REPOSITORIES = "/etc/apk/repositories"
+
+
 def _build_apk_repoint_plan(repo_url: str) -> dict:
     """Point apk at the local mirror (Alpine): the mirror becomes the only
     line of /etc/apk/repositories, which every apk reads; the mirror keeps
     Alpine's signed indexes, checked against the keys the host has."""
     return {
-        "files": [_file("/etc/apk/repositories", f"{repo_url}\n")],
+        "files": [_file(APK_REPOSITORIES, f"{repo_url}\n")],
         "commands": [
             _cmd(["sudo", "apk", "update"], 600, False,
                  "refresh apk against the local mirror"),  # fmt: skip
@@ -265,6 +268,62 @@ def tools_url(repo_url: str, distro: str, version: str) -> str:
     return f"{parts.scheme}://{parts.netloc}/airgap-tools/{distro}/{version}"
 
 
+def _tools_apt(files: list, url: str, key: str) -> None:
+    files += [_file(TOOLS_APT_KEY, key), _file(
+        "/etc/apt/sources.list.d/sysmanage-tools.list",
+        f"deb [signed-by={TOOLS_APT_KEY}] {url} ./\n")]  # fmt: skip
+
+
+def _tools_rpm(kind: str, files: list, commands: list, url: str, key: str) -> None:
+    repo = ("[sysmanage-tools]\nname=SysManage tools\n"
+            f"baseurl={url}\nenabled=1\ngpgcheck=0\nrepo_gpgcheck=1\n"
+            f"gpgkey=file://{TOOLS_RPM_KEY}\n")  # fmt: skip
+    folder = "/etc/yum.repos.d" if kind == "dnf" else "/etc/zypp/repos.d"
+    files += [
+        _file(TOOLS_RPM_KEY, key),
+        _file(f"{folder}/sysmanage-tools.repo", repo),
+    ]
+    refresh = commands.pop() if commands else None
+    if kind == "dnf":
+        commands += [
+            _cmd(["sudo", "dnf", "config-manager", "--set-enabled", "sysmanage-tools"],
+                 60, True, "enable the SysManage tools repository (dnf 4)"),
+            _cmd(["sudo", "dnf", "config-manager", "setopt", "sysmanage-tools.enabled=1"],
+                 60, True, "enable the SysManage tools repository (dnf 5)"),
+        ]  # fmt: skip
+    else:
+        commands += [
+            _cmd(["sudo", "zypper", "--non-interactive", "modifyrepo", "--enable",
+                  "sysmanage-tools"], 60, False, "enable the SysManage tools repository"),
+        ]  # fmt: skip
+        # zypper takes the key from the repository's own gpgkey= (the
+        # file deployed above): sudoers grants it no ``rpm --import``.
+        refresh = _cmd(["sudo", "zypper", "--non-interactive", "--gpg-auto-import-keys",
+                        "refresh"], 600, False, "refresh zypper against the local mirror")  # fmt: skip
+    if refresh:
+        commands.append(refresh)
+
+
+def _tools_apk(files: list, plan: dict, url: str, key: str) -> list:
+    # apk reads one repositories file: the mirror's line, then ours; the
+    # key goes by the name the index's signature names.
+    name = _apk_key_name(key)
+    kept = [f for f in files if f["path"] != APK_REPOSITORIES]
+    mirror = next(f["content"] for f in plan["files"] if f["path"] == APK_REPOSITORIES)
+    return kept + [_file(f"/etc/apk/keys/{name}.rsa.pub", key),
+                   _file(APK_REPOSITORIES, mirror + f"{url}\n")]  # fmt: skip
+
+
+def _tools_pkg(files: list, url: str, key: str) -> None:
+    conf = ("sysmanage-tools: {\n"
+            f'  url: "{url}",\n'
+            '  signature_type: "pubkey",\n'
+            f'  pubkey: "{TOOLS_PKG_KEY}",\n'
+            "  enabled: yes\n}\n")  # fmt: skip
+    files += [_file(TOOLS_PKG_KEY, key),
+              _file("/usr/local/etc/pkg/repos/sysmanage-tools.conf", conf)]  # fmt: skip
+
+
 def _with_tools(kind: str, plan: dict, url: str, key: str) -> dict:
     """``plan`` with the tools repository added beside the mirror: its key
     installed as a file, the repository checked against it (apt signed-by;
@@ -274,55 +333,13 @@ def _with_tools(kind: str, plan: dict, url: str, key: str) -> dict:
     files = list(plan.get("files") or [])
     commands = list(plan.get("commands") or [])
     if kind == "apt":
-        files += [_file(TOOLS_APT_KEY, key), _file(
-            "/etc/apt/sources.list.d/sysmanage-tools.list",
-            f"deb [signed-by={TOOLS_APT_KEY}] {url} ./\n")]  # fmt: skip
+        _tools_apt(files, url, key)
     elif kind in ("dnf", "zypper"):
-        repo = ("[sysmanage-tools]\nname=SysManage tools\n"
-                f"baseurl={url}\nenabled=1\ngpgcheck=0\nrepo_gpgcheck=1\n"
-                f"gpgkey=file://{TOOLS_RPM_KEY}\n")  # fmt: skip
-        folder = "/etc/yum.repos.d" if kind == "dnf" else "/etc/zypp/repos.d"
-        files += [
-            _file(TOOLS_RPM_KEY, key),
-            _file(f"{folder}/sysmanage-tools.repo", repo),
-        ]
-        refresh = commands.pop() if commands else None
-        if kind == "dnf":
-            commands += [
-                _cmd(["sudo", "dnf", "config-manager", "--set-enabled", "sysmanage-tools"],
-                     60, True, "enable the SysManage tools repository (dnf 4)"),
-                _cmd(["sudo", "dnf", "config-manager", "setopt", "sysmanage-tools.enabled=1"],
-                     60, True, "enable the SysManage tools repository (dnf 5)"),
-            ]  # fmt: skip
-        else:
-            commands += [
-                _cmd(["sudo", "zypper", "--non-interactive", "modifyrepo", "--enable",
-                      "sysmanage-tools"], 60, False, "enable the SysManage tools repository"),
-            ]  # fmt: skip
-            # zypper takes the key from the repository's own gpgkey= (the
-            # file deployed above): sudoers grants it no ``rpm --import``.
-            refresh = _cmd(["sudo", "zypper", "--non-interactive", "--gpg-auto-import-keys",
-                            "refresh"], 600, False, "refresh zypper against the local mirror")  # fmt: skip
-        if refresh:
-            commands.append(refresh)
+        _tools_rpm(kind, files, commands, url, key)
     elif kind == "apk":
-        # apk reads one repositories file: the mirror's line, then ours; the
-        # key goes by the name the index's signature names.
-        name = _apk_key_name(key)
-        files = [f for f in files if f["path"] != "/etc/apk/repositories"]
-        mirror = next(
-            f["content"] for f in plan["files"] if f["path"] == "/etc/apk/repositories"
-        )
-        files += [_file(f"/etc/apk/keys/{name}.rsa.pub", key),
-                  _file("/etc/apk/repositories", mirror + f"{url}\n")]  # fmt: skip
+        files = _tools_apk(files, plan, url, key)
     elif kind == "pkg":
-        conf = ("sysmanage-tools: {\n"
-                f'  url: "{url}",\n'
-                '  signature_type: "pubkey",\n'
-                f'  pubkey: "{TOOLS_PKG_KEY}",\n'
-                "  enabled: yes\n}\n")  # fmt: skip
-        files += [_file(TOOLS_PKG_KEY, key),
-                  _file("/usr/local/etc/pkg/repos/sysmanage-tools.conf", conf)]  # fmt: skip
+        _tools_pkg(files, url, key)
     else:
         return plan
     return {**plan, "files": files, "commands": commands}

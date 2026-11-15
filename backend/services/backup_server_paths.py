@@ -63,7 +63,7 @@ OPENBAO_HOOK = "openbao"
 HOOK_OPTION_ABILITY = "hook_option"
 POSTGRESQL_LIVE = "postgresql.stop=never"
 OPENBAO_UNSEAL = "openbao.unseal_unit=sysmanage-openbao-init"
-_LOOPBACK = re.compile(r"^https?://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{1,5}$")
+_LOOPBACK = re.compile(r"^https?://(127\.0\.0\.1|localhost|\[::1\]):\d{1,5}$", re.ASCII)
 
 
 def _literal(path: str) -> str:

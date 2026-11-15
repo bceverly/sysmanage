@@ -51,6 +51,32 @@ def _hours(start: int, end: int) -> int:
     return mask
 
 
+def _parse_rule(rule: Any):
+    """``(rule text, start, end)`` of one checked rule (``start`` None for
+    the rate of every other hour)."""
+    rule = rule.strip() if isinstance(rule, str) else rule
+    match = _RULE.match(rule) if isinstance(rule, str) else None
+    if not match:
+        raise BandwidthRefused(
+            "A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or "
+            "unlimited), or hours and a rate (08-18 2MiB/s)"
+        )
+    start, end, _rate, number, unit = match.groups()
+    if number and int(number) * _SCALE[unit] < MIN_RATE:
+        raise BandwidthRefused("A bandwidth rate must be at least 64KiB/s")
+    return rule, start, end
+
+
+def _range_hours(start: str, end: str) -> int:
+    """The hour mask of an ``HH-HH`` range, checked."""
+    first, last = int(start), int(end)
+    if first > 23 or last > 24 or first == last:
+        raise BandwidthRefused(
+            "Bandwidth hours run from 00 to 24, from one hour to another"
+        )
+    return _hours(first, last)
+
+
 def check_rules(value: Any) -> List[str]:
     """The rules, checked as restate-proxy checks a grant's ``bandwidth``
     lines: each ``RATE`` or ``HH-HH RATE``, a rate of at least 64KiB/s (or
@@ -61,28 +87,14 @@ def check_rules(value: Any) -> List[str]:
         raise BandwidthRefused("Give at most 25 bandwidth rules")
     out: List[str] = []
     taken, default = 0, False
-    for rule in value:
-        rule = rule.strip() if isinstance(rule, str) else rule
-        match = _RULE.match(rule) if isinstance(rule, str) else None
-        if not match:
-            raise BandwidthRefused(
-                "A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or "
-                "unlimited), or hours and a rate (08-18 2MiB/s)"
-            )
-        start, end, _rate, number, unit = match.groups()
-        if number and int(number) * _SCALE[unit] < MIN_RATE:
-            raise BandwidthRefused("A bandwidth rate must be at least 64KiB/s")
+    for item in value:
+        rule, start, end = _parse_rule(item)
         if start is None:
             if default:
                 raise BandwidthRefused("Give one rate for every other hour, not two")
             default = True
         else:
-            first, last = int(start), int(end)
-            if first > 23 or last > 24 or first == last:
-                raise BandwidthRefused(
-                    "Bandwidth hours run from 00 to 24, from one hour to another"
-                )
-            hours = _hours(first, last)
+            hours = _range_hours(start, end)
             if hours & taken:
                 raise BandwidthRefused("An hour is in two bandwidth rules")
             taken |= hours

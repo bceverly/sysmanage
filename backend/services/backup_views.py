@@ -338,6 +338,15 @@ def host_status(
     if policy is None:
         entry["status"] = "no_policy" if ready else "not_equipped"
         return entry
+    _policy_status(db, entry, policy, ready, now)
+    return entry
+
+
+def _policy_status(
+    db: Session, entry: Dict[str, Any], policy, ready: bool, now
+) -> None:
+    """Fill ``entry`` for a host that has a policy: its runs, schedule,
+    snapshots and status."""
     last_capture = jobs.latest_run(db, policy.id, "capture", statuses=jobs.FINAL)
     running = _running(db, policy)
     entry.update(_recent_runs(db, policy, last_capture, running))
@@ -368,7 +377,6 @@ def host_status(
         entry["status"] = "disabled"
     else:
         entry["status"] = _status(db, policy, last_capture, now)
-    return entry
 
 
 def _held(db: Session, run: models.BackupRun) -> bool:

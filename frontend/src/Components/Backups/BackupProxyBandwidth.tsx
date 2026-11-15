@@ -36,6 +36,12 @@ interface Row {
     rate: string;
 }
 
+// A form row with a stable React key: rows are added and removed anywhere,
+// so their position cannot be the key.
+type KeyedRow = Row & { key: number };
+let rowKeys = 0;
+const keyed = (row: Row): KeyedRow => ({ ...row, key: rowKeys++ });
+
 const HOURS = Array.from({ length: 25 }, (_v, i) => String(i).padStart(2, '0'));
 const RANGED = /^(\d{2})-(\d{2}) (.+)$/;
 
@@ -65,13 +71,13 @@ export const BandwidthDialog: React.FC<{
     onSaved: () => void;
 }> = ({ open, target, onClose, onSaved }) => {
     const { t } = useTranslation();
-    const [rows, setRows] = useState<Row[]>([]);
+    const [rows, setRows] = useState<KeyedRow[]>([]);
     const [rest, setRest] = useState('');
     const [error, setError] = useState<string | null>(null);
     useEffect(() => {
         if (open) {
             const form = toForm(target.proxy_bandwidth?.rules ?? []);
-            setRows(form.rows);
+            setRows(form.rows.map(keyed));
             setRest(form.rest);
             setError(null);
         }
@@ -99,7 +105,7 @@ export const BandwidthDialog: React.FC<{
                             'Hold each host to a rate during the hours you name, by the storage host\'s own clock: for example 2MiB/s from 08 to 18, so a backup that runs late stays out of the working day\'s link. Rates are 512KiB/s, 2MiB/s, 1GiB/s or unlimited, and 64KiB/s at the least.')}
                     </Typography>
                     {rows.map((row, index) => (
-                        <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <Box key={row.key} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                             <TextField select size="small" label={t('backups.bandwidth.from', 'From')} value={row.from}
                                 onChange={e => change(index, { from: e.target.value })} sx={{ width: 96 }}>
                                 {HOURS.slice(0, 24).map(h => <MenuItem key={h} value={h}>{h}:00</MenuItem>)}
@@ -118,7 +124,7 @@ export const BandwidthDialog: React.FC<{
                         </Box>
                     ))}
                     <Box>
-                        <Button size="small" onClick={() => setRows(current => [...current, { from: '08', to: '18', rate: '' }])}>
+                        <Button size="small" onClick={() => setRows(current => [...current, keyed({ from: '08', to: '18', rate: '' })])}>
                             {t('backups.bandwidth.addRule', 'Add hours')}
                         </Button>
                     </Box>

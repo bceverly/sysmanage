@@ -36,6 +36,17 @@ def _safe_headers(request: Request) -> dict:
     }
 
 
+def _allow_origin(response: JSONResponse, request_origin, origins: list) -> bool:
+    """Add the CORS headers to an error response when ``request_origin`` is
+    an allowed one; True when it was."""
+    if not request_origin or request_origin not in origins:
+        return False
+    response.headers["Access-Control-Allow-Origin"] = request_origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Expose-Headers"] = "Authorization"
+    return True
+
+
 def register_exception_handlers(app: FastAPI, origins: list):
     """
     Register exception handlers for the FastAPI application.
@@ -74,11 +85,7 @@ def register_exception_handlers(app: FastAPI, origins: list):
         # Same manual CORS treatment as the other error handlers -- a browser
         # cannot read the explanation without it, which would turn a clear
         # "not supported on this agent" into an opaque network error.
-        request_origin = request.headers.get("origin")
-        if request_origin and request_origin in origins:
-            response.headers["Access-Control-Allow-Origin"] = request_origin
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Expose-Headers"] = "Authorization"
+        _allow_origin(response, request.headers.get("origin"), origins)
         return response
 
     @app.exception_handler(StarletteHTTPException)
@@ -107,11 +114,8 @@ def register_exception_handlers(app: FastAPI, origins: list):
         # Add CORS headers manually for error responses
         request_origin = request.headers.get("origin")
         logger.debug("Request origin: %s", request_origin)
-        if request_origin and request_origin in origins:
+        if _allow_origin(response, request_origin, origins):
             logger.debug("Adding CORS headers for origin: %s", request_origin)
-            response.headers["Access-Control-Allow-Origin"] = request_origin
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Expose-Headers"] = "Authorization"
         elif request_origin:
             # No Origin at all is a same-origin or non-browser call: normal.
             logger.warning("Origin %s not in allowed origins", request_origin)
@@ -142,11 +146,8 @@ def register_exception_handlers(app: FastAPI, origins: list):
         # Add CORS headers manually for error responses
         request_origin = request.headers.get("origin")
         logger.debug("Request origin for 500 error: %s", request_origin)
-        if request_origin and request_origin in origins:
+        if _allow_origin(response, request_origin, origins):
             logger.debug("Adding CORS headers for 500 error origin: %s", request_origin)
-            response.headers["Access-Control-Allow-Origin"] = request_origin
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Expose-Headers"] = "Authorization"
         elif request_origin:
             logger.warning(
                 "Origin %s not in allowed origins for 500 error", request_origin
@@ -179,13 +180,10 @@ def register_exception_handlers(app: FastAPI, origins: list):
         # Add CORS headers manually for error responses
         request_origin = request.headers.get("origin")
         logger.debug("Request origin for general exception: %s", request_origin)
-        if request_origin and request_origin in origins:
+        if _allow_origin(response, request_origin, origins):
             logger.debug(
                 "Adding CORS headers for general exception origin: %s", request_origin
             )
-            response.headers["Access-Control-Allow-Origin"] = request_origin
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Expose-Headers"] = "Authorization"
 
         return response
 

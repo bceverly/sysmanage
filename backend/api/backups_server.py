@@ -92,7 +92,7 @@ async def put_server_policy(
             PolicyBody(**body.model_dump(exclude={"host_id"})),
             mark,
         )
-    except Exception as refused:  # pylint: disable=broad-exception-caught
+    except backup_server.refusal_errors() as refused:
         raise backup_server.refusal(refused) from refused
     if moved:
         _audit(

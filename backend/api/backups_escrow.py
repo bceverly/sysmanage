@@ -76,7 +76,7 @@ async def save_escrow_key(
     # The SysManage server's own backup (25.9) moves to the new key.
     try:
         rekeyed = backup_server.rekey_to_escrow(db, target)
-    except Exception as refused:  # pylint: disable=broad-exception-caught
+    except backup_server.refusal_errors() as refused:
         raise backup_server.refusal(refused) from refused
     if rekeyed is not None:
         _audit(

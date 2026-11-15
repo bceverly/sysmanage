@@ -9,8 +9,10 @@ import axiosInstance from './api';
 // Role and group names come from the database in English.  Each one has a
 // translation under securityRoles.role.<slug> / securityRoles.group.<slug>;
 // a name with no key yet (a new role) falls back to its English name.
+// Runs collapse to a single '_' first, so at most one '_' is left at each
+// end: trimming it needs no '+' (which would backtrack super-linearly).
 const slug = (name: string): string =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
 
 export const roleLabel = (t: TFunction, name: string): string =>
     t(`securityRoles.role.${slug(name)}`, name);

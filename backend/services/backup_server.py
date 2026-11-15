@@ -20,7 +20,7 @@ warned ("unknown").
 """
 
 import socket
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -116,32 +116,43 @@ def _multitenant() -> bool:
     return bool((config.get_multitenancy_config() or {}).get("enabled"))
 
 
+def _marked_status(policy, by_id: Dict[str, Any]) -> Dict[str, Any]:
+    """The status of the server's marked policy."""
+    row = by_id.get(str(policy.host_id))
+    good = bool(row and row["last_good_capture"] and row["status"] in GOOD_STATES)
+    return {
+        "host_id": str(policy.host_id),
+        "fqdn": row["fqdn"] if row else None,
+        "host_status": row["status"] if row else None,
+        "status": "ok" if good else "no_good_backup",
+    }
+
+
+def _unmarked_status(db: Session, by_id: Dict[str, Any]) -> Dict[str, Any]:
+    """The status when no policy is marked as the server's."""
+    found: Dict[str, Any] = {"host_id": None, "fqdn": None, "host_status": None}
+    hosts = candidates(db)
+    found["status"] = "no_policy" if hosts else "unknown"
+    if len(hosts) == 1:
+        found.update(host_id=str(hosts[0].id), fqdn=hosts[0].fqdn)
+        row = by_id.get(str(hosts[0].id))
+        if row and row.get("policy"):
+            # Backed up, but as an ordinary host (production, 2026-11-12).
+            found["status"] = "ordinary_policy"
+            found["host_status"] = row["status"]
+    return found
+
+
 def status(db: Session, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     """``{"status", "host_id", "fqdn", "warn", "host_status"}``; status is
     ``ok``, ``no_good_backup`` (a marked policy, no good capture in time),
     ``no_policy`` (the server's host found, nothing marked) or ``unknown``."""
     by_id = {row["host_id"]: row for row in rows}
     policy = marked(db)
-    found: Dict[str, Any] = {"host_id": None, "fqdn": None, "host_status": None}
     if policy is not None:
-        row = by_id.get(str(policy.host_id))
-        good = bool(row and row["last_good_capture"] and row["status"] in GOOD_STATES)
-        found.update(
-            host_id=str(policy.host_id),
-            fqdn=row["fqdn"] if row else None,
-            host_status=row["status"] if row else None,
-            status="ok" if good else "no_good_backup",
-        )
+        found = _marked_status(policy, by_id)
     else:
-        hosts = candidates(db)
-        found["status"] = "no_policy" if hosts else "unknown"
-        if len(hosts) == 1:
-            found.update(host_id=str(hosts[0].id), fqdn=hosts[0].fqdn)
-            row = by_id.get(str(hosts[0].id))
-            if row and row.get("policy"):
-                # Backed up, but as an ordinary host (production, 2026-11-12).
-                found["status"] = "ordinary_policy"
-                found["host_status"] = row["status"]
+        found = _unmarked_status(db, by_id)
     found["warn"] = found["status"] in (
         "no_good_backup",
         "no_policy",
@@ -210,6 +221,23 @@ def encryption(db: Session) -> Dict[str, Any]:
             and policy.encrypt_fingerprint == escrow
         ),
     }
+
+
+_ENGINE_REFUSALS = ("EncryptionRefused", "BackupKeyError")
+
+
+def refusal_errors() -> Tuple[type, ...]:
+    """The backup engine's refusals (:func:`refusal` answers them), for an
+    ``except`` clause; none on Community, where nothing raises them."""
+    engine = backup_escrow.backup_engine()
+    if engine is None:
+        return ()
+    found = []
+    for name in _ENGINE_REFUSALS:
+        error_class = getattr(engine, name, None)
+        if isinstance(error_class, type) and issubclass(error_class, Exception):
+            found.append(error_class)
+    return tuple(found)
 
 
 def refusal(error: Exception) -> Exception:

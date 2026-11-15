@@ -91,6 +91,8 @@ STATUS_FAILED = "FAILED"
 # rsynced.  Match the constants the engine's ``build_ingestion_plan``
 # baked in so a repository configured by either path lines up.
 MOUNT_POINT = "/mnt/sysmanage-airgap-ingest"
+MANIFEST_NAME = "/manifest.json"
+UMOUNT_ISO_KEY = "engine.airgap_repository.cmd.umount_iso"
 # Per platform, the tree that platform's nginx serves at /airgap-repo/.
 REPO_ROOT = airgap_paths.repo_root()
 
@@ -185,7 +187,7 @@ def _build_mount_plan(iso_path: str, run_id=None) -> dict:
                 60,
                 True,
                 "unmount any stale ingest media",
-                "engine.airgap_repository.cmd.umount_iso",
+                UMOUNT_ISO_KEY,
             ),
             _cmd(
                 ["sudo", "mkdir", "-p", MOUNT_POINT],
@@ -203,7 +205,7 @@ def _build_mount_plan(iso_path: str, run_id=None) -> dict:
             ),
             *_manifest_copy_commands(run_id),
             _cmd(
-                ["cat", MOUNT_POINT + "/manifest.json"],
+                ["cat", MOUNT_POINT + MANIFEST_NAME],
                 60,
                 False,
                 "read embedded manifest",
@@ -228,7 +230,7 @@ def _manifest_copy_commands(run_id) -> list:
             "engine.airgap_repository.cmd.create_mount_point",
         ),
         _cmd(
-            ["sudo", "rsync", MOUNT_POINT + "/manifest.json", folder + "/"],
+            ["sudo", "rsync", MOUNT_POINT + MANIFEST_NAME, folder + "/"],
             60,
             True,
             "copy the embedded manifest",
@@ -292,7 +294,7 @@ def _build_copy_plan(disc_count=None, run_id=None) -> dict:
                 60,
                 True,
                 "umount ingest ISO",
-                "engine.airgap_repository.cmd.umount_iso",
+                UMOUNT_ISO_KEY,
             ),
             *(
                 [
@@ -301,7 +303,7 @@ def _build_copy_plan(disc_count=None, run_id=None) -> dict:
                         60,
                         True,
                         "remove the manifest copy",
-                        "engine.airgap_repository.cmd.umount_iso",
+                        UMOUNT_ISO_KEY,
                     )
                 ]
                 if run_id is not None
@@ -449,7 +451,11 @@ def _manifest_copy(run_id):
     """
     if run_id is None:
         return None
-    path = os.path.join(_manifest_copy_dir(run_id), "manifest.json")
+    # The plan's path is POSIX (it runs on the agent); this read is on the
+    # server, so the same folder is built with the server's own path rules.
+    path = os.path.join(
+        os.path.dirname(REPO_ROOT), "airgap-ingest", str(run_id), "manifest.json"
+    )
     try:
         if os.path.getsize(path) > _MANIFEST_MAX_BYTES:
             logger.error("manifest copied off the ingest media is too large: %s", path)

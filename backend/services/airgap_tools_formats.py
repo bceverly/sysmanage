@@ -85,6 +85,9 @@ def key_name(public_pem: bytes) -> str:
 
 
 def _sign(key, data: bytes, algorithm) -> bytes:
+    # apk and pkg verify only RSA PKCS#1 v1.5 signatures (RSA_verify / EVP
+    # with RSA_PKCS1_PADDING); a PSS signature would be refused by every client.
+    # nosemgrep: cryptography-rsa-pkcs1-signature -- the apk/pkg formats mandate it
     return key.sign(data, padding.PKCS1v15(), algorithm)
 
 
@@ -134,46 +137,61 @@ _APK_FIELDS = (
 _APK_LISTS = (("depend", "D"), ("provides", "p"), ("install_if", "i"))
 
 
-def apk_entry(path: str) -> Optional[Dict[str, str]]:
-    """The index entry of one .apk: ``{"arch", "text"}``, or None when it is
-    not one."""
-    with open(path, "rb") as handle:
-        data = handle.read()
-    members = _gzip_members(data)
-    control = None
+def _apk_control(members: List[bytes]) -> Optional[Tuple[bytes, str]]:
+    """``(compressed control stream, .PKGINFO text)`` of an .apk: the first
+    of its first two gzip members that holds ``.PKGINFO``."""
     for member in members[:2]:
         raw = gzip.decompress(member)
         with tarfile.open(fileobj=io.BytesIO(raw + b"\0" * 1024)) as tar:
             if ".PKGINFO" in tar.getnames():
                 pkginfo = tar.extractfile(".PKGINFO").read()
-                control = (member, pkginfo.decode("utf-8", "replace"))
-                break
-    if control is None:
-        return None
+                return member, pkginfo.decode("utf-8", "replace")
+    return None
+
+
+def _pkginfo_fields(text: str) -> Dict[str, List[str]]:
+    """``.PKGINFO``'s ``key = value`` lines, each key's values in order."""
     info: Dict[str, List[str]] = {}
-    for line in control[1].splitlines():
+    for line in text.splitlines():
         if " = " in line and not line.startswith("#"):
             key, value = line.split(" = ", 1)
             info.setdefault(key.strip(), []).append(value.strip())
-    lines = [
-        # apk's own checksum format, not a security choice of ours.
-        "C:Q1"
-        + base64.b64encode(
-            hashlib.sha1(control[0], usedforsecurity=False).digest()
-        ).decode()
-    ]
+    return info
+
+
+def _apk_checksum(control: bytes) -> str:
+    """apk's ``C:Q1...``: base64 of the SHA-1 of the control stream."""
+    # The apk index format fixes SHA-1 here (the ``Q1`` prefix names it) and
+    # apk compares it as an identifier; not a security choice of ours.
+    # nosemgrep: insecure-hash-algorithm-sha1 -- the apk index format mandates it
+    digest = hashlib.sha1(control, usedforsecurity=False).digest()
+    return "C:Q1" + base64.b64encode(digest).decode()
+
+
+def _first(info: Dict[str, List[str]], key: str, default=None):
+    return (info.get(key) or [default])[0]
+
+
+def apk_entry(path: str) -> Optional[Dict[str, str]]:
+    """The index entry of one .apk: ``{"arch", "text"}``, or None when it is
+    not one."""
+    with open(path, "rb") as handle:
+        data = handle.read()
+    control = _apk_control(_gzip_members(data))
+    if control is None:
+        return None
+    info = _pkginfo_fields(control[1])
+    lines = [_apk_checksum(control[0])]
     for key, letter in _APK_FIELDS:
-        value = str(len(data)) if key is None else (info.get(key) or [None])[0]
+        value = str(len(data)) if key is None else _first(info, key)
         if value:
             lines.append(f"{letter}:{value}")
     for key, letter in _APK_LISTS:
         if info.get(key):
             lines.append(f"{letter}:{' '.join(info[key])}")
     # apk fetches ``<arch>/<name>-<version>.apk``, whatever the file was called.
-    stored = (
-        f"{(info.get('pkgname') or ['?'])[0]}-{(info.get('pkgver') or ['?'])[0]}.apk"
-    )
-    return {"arch": (info.get("arch") or ["noarch"])[0], "text": "\n".join(lines) + "\n",
+    stored = f"{_first(info, 'pkgname', '?')}-{_first(info, 'pkgver', '?')}.apk"
+    return {"arch": _first(info, "arch", "noarch"), "text": "\n".join(lines) + "\n",
             "stored": stored}  # fmt: skip
 
 

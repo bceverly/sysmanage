@@ -384,15 +384,18 @@ def _probe_tls_spki() -> List[str]:
     if target is None:
         return []
     address, port, server_name = target
-    context = ssl.create_default_context()
+    # Reading our OWN front door's certificate (often self-signed) to publish
+    # its SPKI pin, never trusting it: agents verify by that pin instead of a
+    # CA chain + hostname, so no verification here is possible or needed.
+    context = ssl.create_default_context()  # NOSONAR - unverified by design, see above
     context.minimum_version = ssl.TLSVersion.TLSv1_2
-    # Reading our OWN front door's certificate to publish it, not trusting it.
-    context.check_hostname = False  # NOSONAR
-    context.verify_mode = ssl.CERT_NONE  # NOSONAR
+    context.check_hostname = False  # NOSONAR - see above
+    context.verify_mode = ssl.CERT_NONE  # NOSONAR - see above
     try:
-        with socket.create_connection((address, port), timeout=5) as sock:
-            with context.wrap_socket(sock, server_hostname=server_name) as tls:
-                der = tls.getpeercert(binary_form=True)
+        with socket.create_connection(
+            (address, port), timeout=5
+        ) as sock, context.wrap_socket(sock, server_hostname=server_name) as tls:
+            der = tls.getpeercert(binary_form=True)
     except OSError as exc:
         logger.warning(
             "Could not read the TLS certificate served on %s:%s for %s: %s",
