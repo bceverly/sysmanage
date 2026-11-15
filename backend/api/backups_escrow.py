@@ -77,7 +77,7 @@ async def save_escrow_key(
     try:
         rekeyed = backup_server.rekey_to_escrow(db, target)
     except backup_server.refusal_errors() as refused:
-        raise backup_server.refusal(refused) from refused
+        backup_server.raise_refusal(refused)
     if rekeyed is not None:
         _audit(
             db, current_user, EntityType.HOST, rekeyed.host_id, None,

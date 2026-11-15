@@ -93,7 +93,7 @@ async def put_server_policy(
             mark,
         )
     except backup_server.refusal_errors() as refused:
-        raise backup_server.refusal(refused) from refused
+        backup_server.raise_refusal(refused)
     if moved:
         _audit(
             db,

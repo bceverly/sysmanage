@@ -20,7 +20,7 @@ warned ("unknown").
 """
 
 import socket
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, NoReturn, Optional, Tuple
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -240,12 +240,12 @@ def refusal_errors() -> Tuple[type, ...]:
     return tuple(found)
 
 
-def refusal(error: Exception) -> Exception:
-    """An engine refusal or key failure as the HTTP answer; anything else
-    (an HTTPException from the policy checks included) as it was."""
+def raise_refusal(error: Exception) -> NoReturn:
+    """Raise an engine refusal or key failure as the HTTP answer; anything
+    else (an HTTPException from the policy checks included) as it was."""
     name = type(error).__name__
     if name == "EncryptionRefused":
-        return HTTPException(status_code=409, detail=str(error))
+        raise HTTPException(status_code=409, detail=str(error)) from error
     if name == "BackupKeyError":
-        return HTTPException(status_code=503, detail=str(error))
-    return error
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    raise error

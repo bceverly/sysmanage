@@ -32,6 +32,11 @@ MarkupSafe==3.0.2
 mccabe==0.7.0
 orjson==3.11.6  # CVE-2025-67221 (no recursion limit on deeply nested JSON)
 packaging>=24.0
+# Semgrep ssc-bac23567 (Brotli 1.0.3-1.2.0 decoder out-of-bounds write) flags
+# 13.0.0: its wheels bundle libbrotlidec 1.2.0, and no Pillow release ships a
+# fixed Brotli yet (2026-11-15).  Pillow reaches that decoder only through
+# FreeType reading WOFF2 fonts; sysmanage never loads a font with Pillow
+# (no ImageFont anywhere in backend/).  Bump when a fixed Pillow is released.
 Pillow>=13.0.0  # the image-parser advisories reported on 12.x (2026-11-10)
 platformdirs>=4.0.0
 pluggy>=1.0.0

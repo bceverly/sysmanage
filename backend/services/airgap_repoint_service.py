@@ -269,9 +269,9 @@ def tools_url(repo_url: str, distro: str, version: str) -> str:
 
 
 def _tools_apt(files: list, url: str, key: str) -> None:
-    files += [_file(TOOLS_APT_KEY, key), _file(
+    files.extend([_file(TOOLS_APT_KEY, key), _file(
         "/etc/apt/sources.list.d/sysmanage-tools.list",
-        f"deb [signed-by={TOOLS_APT_KEY}] {url} ./\n")]  # fmt: skip
+        f"deb [signed-by={TOOLS_APT_KEY}] {url} ./\n")])  # fmt: skip
 
 
 def _tools_rpm(kind: str, files: list, commands: list, url: str, key: str) -> None:
@@ -279,23 +279,25 @@ def _tools_rpm(kind: str, files: list, commands: list, url: str, key: str) -> No
             f"baseurl={url}\nenabled=1\ngpgcheck=0\nrepo_gpgcheck=1\n"
             f"gpgkey=file://{TOOLS_RPM_KEY}\n")  # fmt: skip
     folder = "/etc/yum.repos.d" if kind == "dnf" else "/etc/zypp/repos.d"
-    files += [
-        _file(TOOLS_RPM_KEY, key),
-        _file(f"{folder}/sysmanage-tools.repo", repo),
-    ]
+    files.extend(
+        [
+            _file(TOOLS_RPM_KEY, key),
+            _file(f"{folder}/sysmanage-tools.repo", repo),
+        ]
+    )
     refresh = commands.pop() if commands else None
     if kind == "dnf":
-        commands += [
+        commands.extend([
             _cmd(["sudo", "dnf", "config-manager", "--set-enabled", "sysmanage-tools"],
                  60, True, "enable the SysManage tools repository (dnf 4)"),
             _cmd(["sudo", "dnf", "config-manager", "setopt", "sysmanage-tools.enabled=1"],
                  60, True, "enable the SysManage tools repository (dnf 5)"),
-        ]  # fmt: skip
+        ])  # fmt: skip
     else:
-        commands += [
+        commands.append(
             _cmd(["sudo", "zypper", "--non-interactive", "modifyrepo", "--enable",
                   "sysmanage-tools"], 60, False, "enable the SysManage tools repository"),
-        ]  # fmt: skip
+        )  # fmt: skip
         # zypper takes the key from the repository's own gpgkey= (the
         # file deployed above): sudoers grants it no ``rpm --import``.
         refresh = _cmd(["sudo", "zypper", "--non-interactive", "--gpg-auto-import-keys",
@@ -320,8 +322,8 @@ def _tools_pkg(files: list, url: str, key: str) -> None:
             '  signature_type: "pubkey",\n'
             f'  pubkey: "{TOOLS_PKG_KEY}",\n'
             "  enabled: yes\n}\n")  # fmt: skip
-    files += [_file(TOOLS_PKG_KEY, key),
-              _file("/usr/local/etc/pkg/repos/sysmanage-tools.conf", conf)]  # fmt: skip
+    files.extend([_file(TOOLS_PKG_KEY, key),
+                  _file("/usr/local/etc/pkg/repos/sysmanage-tools.conf", conf)])  # fmt: skip
 
 
 def _with_tools(kind: str, plan: dict, url: str, key: str) -> dict:
