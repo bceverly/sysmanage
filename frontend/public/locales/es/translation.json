@@ -1811,7 +1811,14 @@
     "heldCommands_other": "{{count}} comandos esperan la ventana de mantenimiento «{{name}}», que se abre a las {{time}}.",
     "heldCommandsBlackout": "{{count}} comandos esperan a que termine el bloqueo «{{name}}».",
     "heldCommandsBlackout_one": "{{count}} comando espera a que termine el bloqueo «{{name}}».",
-    "heldCommandsBlackout_other": "{{count}} comandos esperan a que termine el bloqueo «{{name}}»."
+    "heldCommandsBlackout_other": "{{count}} comandos esperan a que termine el bloqueo «{{name}}».",
+    "agentLost": {
+      "clears": "Este aviso desaparece en cuanto el agente vuelva a comunicarse.",
+      "explanation": "Se envió a este host a las {{time}} una actualización que incluía el paquete del agente, y el agente no se ha comunicado desde entonces. La actualización del paquete detuvo al agente antes de que el gestor de paquetes terminara, por lo que es probable que el paquete esté instalado a medias. El servidor no puede reparar este host, porque no hay ningún agente en ejecución que reciba el comando.",
+      "generic": "Inicie sesión en el host, vuelva a instalar el paquete del agente con el administrador de paquetes del host, y luego inicie el servicio del agente.",
+      "runCommands": "Inicie sesión en el host y ejecute estos comandos para terminar la actualización e iniciar el agente:",
+      "title": "El agente se perdió durante su propia actualización"
+    }
   },
   "hostGroup": {
     "add": "Agregar",
@@ -1978,7 +1985,9 @@
     "requiresRepairHost": "Seleccione un host cuyo gestor de paquetes necesite reparación",
     "repairStarted": "Reparación del gestor de paquetes iniciada en {{count}} host(s).",
     "repairStarted_one": "Reparación del gestor de paquetes iniciada en {{count}} host(s).",
-    "repairStarted_other": "Reparación del gestor de paquetes iniciada en {{count}} host(s)."
+    "repairStarted_other": "Reparación del gestor de paquetes iniciada en {{count}} host(s).",
+    "lostInAgentUpgrade": "Perdido durante la actualización del agente",
+    "lostInAgentUpgradeTip": "Este host se apagó mientras actualizaba su propio paquete del agente. Abra el host para los comandos que lo reparan manualmente."
   },
   "idp": {
     "action": {

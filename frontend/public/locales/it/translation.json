@@ -1811,7 +1811,14 @@
     "heldCommands_other": "{{count}} comandi attendono la finestra di manutenzione «{{name}}», che si apre alle {{time}}.",
     "heldCommandsBlackout": "{{count}} comandi attendono la fine del blocco «{{name}}».",
     "heldCommandsBlackout_one": "{{count}} comando attende la fine del blocco «{{name}}».",
-    "heldCommandsBlackout_other": "{{count}} comandi attendono la fine del blocco «{{name}}»."
+    "heldCommandsBlackout_other": "{{count}} comandi attendono la fine del blocco «{{name}}».",
+    "agentLost": {
+      "clears": "Questa notifica viene rimossa non appena l'agente si connette nuovamente.",
+      "explanation": "Un aggiornamento che includeva il pacchetto dell'agente è stato inviato a questo host alle {{time}}, e da allora l'agente non si è più fatto sentire. L'aggiornamento del pacchetto ha arrestato l'agente prima che il gestore dei pacchetti finisse, quindi il pacchetto è probabilmente installato solo in parte. Il server non può riparare questo host, perché non c'è alcun agente in esecuzione che possa ricevere il comando.",
+      "generic": "Accedi all'host, reinstalla il pacchetto dell'agente con il gestore dei pacchetti dell'host, quindi avvia il servizio dell'agente.",
+      "runCommands": "Accedi all'host ed esegui questi comandi per completare l'aggiornamento e avviare l'agente:",
+      "title": "Agente perso durante il proprio aggiornamento"
+    }
   },
   "hostGroup": {
     "add": "Aggiungi",
@@ -1978,7 +1985,9 @@
     "requiresRepairHost": "Seleziona un host il cui gestore dei pacchetti va riparato",
     "repairStarted": "Riparazione del gestore dei pacchetti avviata su {{count}} host.",
     "repairStarted_one": "Riparazione del gestore dei pacchetti avviata su {{count}} host.",
-    "repairStarted_other": "Riparazione del gestore dei pacchetti avviata su {{count}} host."
+    "repairStarted_other": "Riparazione del gestore dei pacchetti avviata su {{count}} host.",
+    "lostInAgentUpgrade": "Perduto durante l'aggiornamento dell'agente",
+    "lostInAgentUpgradeTip": "Questo host si è spento durante l'aggiornamento del proprio pacchetto dell'agente. Apri l'host per i comandi che lo riparano manualmente."
   },
   "idp": {
     "action": {

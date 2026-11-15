@@ -34,6 +34,7 @@ import { usePlugins } from '../plugins';
 
 import HostDetailHeader from '../Components/HostDetail/HostDetailHeader';
 import HeldCommandsBanner from '../Components/HostDetail/HeldCommandsBanner';
+import AgentLostInSelfUpdateAlert from '../Components/HostDetail/AgentLostInSelfUpdateAlert';
 import { useHeldAwareNotices, useHeldCommands } from '../Components/HostDetail/useHeldCommands';
 import HostDetailNavRail from '../Components/HostDetail/HostDetailNavRail';
 import HostDetailTabContent from '../Components/HostDetail/HostDetailTabContent';
@@ -621,6 +622,7 @@ const HostDetail = () => { // NOSONAR
                 handleUpdateAgent={handleUpdateAgent}
             />
 
+            <AgentLostInSelfUpdateAlert host={host} />
             <HeldCommandsBanner hostId={hostId || ''} status={heldStatus} onReleased={() => { void refreshHeld(); }} />
 
             {/* Two-pane layout: grouped category rail on the left, content on the

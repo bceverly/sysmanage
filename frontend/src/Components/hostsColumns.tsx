@@ -42,6 +42,31 @@ export function certificateStatus(t: TFunction, status: string):
     }
 }
 
+/** The up/down chip.  A host lost during its own agent upgrade (2026-11-15)
+ *  says so instead of a bare "down": nothing on the server can bring it back. */
+function statusChip(t: TFunction, row: SysManageHost, displayStatus: string, diffMinutes: number) {
+    if (displayStatus !== 'up' && row.agent_lost_in_self_update) {
+        return (
+            <Tooltip title={t('hosts.lostInAgentUpgradeTip', 'This host went down while it was upgrading its own agent package. Open the host for the commands that repair it by hand.')}>
+                <Chip
+                    label={t('hosts.lostInAgentUpgrade', 'Lost during agent upgrade')}
+                    color="error"
+                    size="small"
+                    data-testid="lost-in-agent-upgrade"
+                />
+            </Tooltip>
+        );
+    }
+    return (
+        <Chip
+            label={displayStatus === 'up' ? t('hosts.up') : t('hosts.down')}
+            color={displayStatus === 'up' ? 'success' : 'error'}
+            size="small"
+            title={t('hosts.lastSeen', 'Last seen {{minutes}} minutes ago', { minutes: diffMinutes })}
+        />
+    );
+}
+
 interface BuildHostColumnsArgs {
     t: TFunction;
     navigate: (path: string) => void;
@@ -119,12 +144,7 @@ export function buildHostColumns({
 
                 return (
                     <Box component="span" sx={{ display: 'inline-flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
-                        <Chip
-                            label={displayStatus === 'up' ? t('hosts.up') : t('hosts.down')}
-                            color={displayStatus === 'up' ? 'success' : 'error'}
-                            size="small"
-                            title={t('hosts.lastSeen', 'Last seen {{minutes}} minutes ago', { minutes: diffMinutes })}
-                        />
+                        {statusChip(t, row, displayStatus, diffMinutes)}
                         {(row.held_commands ?? 0) > 0 && (
                             <Chip
                                 label={t('hosts.heldCount', 'Held: {{count}}', { count: row.held_commands })}

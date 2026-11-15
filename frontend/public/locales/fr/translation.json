@@ -1811,7 +1811,14 @@
     "heldCommands_other": "{{count}} commandes attendent la fenêtre de maintenance « {{name}} », qui s'ouvre à {{time}}.",
     "heldCommandsBlackout": "{{count}} commandes attendent la fin de la période de blocage « {{name}} ».",
     "heldCommandsBlackout_one": "{{count}} commande attend la fin de la période de blocage « {{name}} ».",
-    "heldCommandsBlackout_other": "{{count}} commandes attendent la fin de la période de blocage « {{name}} »."
+    "heldCommandsBlackout_other": "{{count}} commandes attendent la fin de la période de blocage « {{name}} ».",
+    "agentLost": {
+      "clears": "Cet avertissement disparaît dès que l'agent se signale de nouveau.",
+      "explanation": "Une mise à jour incluant le paquet d'agent a été envoyée à cet hôte à {{time}}, et l'agent n'a pas effectué de vérification depuis. La mise à niveau du paquet a arrêté l'agent avant que le gestionnaire de paquets ne termine, donc le paquet est probablement partiellement installé. Le serveur ne peut pas réparer cet hôte, car aucun agent n'est en cours d'exécution pour recevoir la commande.",
+      "generic": "Connectez-vous à l'hôte, réinstallez le paquet de l'agent avec le gestionnaire de paquets de l'hôte, puis démarrez le service de l'agent.",
+      "runCommands": "Connectez-vous à l'hôte et exécutez ces commandes pour terminer la mise à niveau et démarrer l'agent :",
+      "title": "Agent perdu pendant sa propre mise à niveau"
+    }
   },
   "hostGroup": {
     "add": "Ajouter",
@@ -1978,7 +1985,9 @@
     "requiresRepairHost": "Sélectionnez un hôte dont le gestionnaire de paquets doit être réparé",
     "repairStarted": "Réparation du gestionnaire de paquets lancée sur {{count}} hôte(s).",
     "repairStarted_one": "Réparation du gestionnaire de paquets lancée sur {{count}} hôte(s).",
-    "repairStarted_other": "Réparation du gestionnaire de paquets lancée sur {{count}} hôte(s)."
+    "repairStarted_other": "Réparation du gestionnaire de paquets lancée sur {{count}} hôte(s).",
+    "lostInAgentUpgrade": "Perdu pendant la mise à niveau de l'agent",
+    "lostInAgentUpgradeTip": "Cet hôte est tombé pendant la mise à niveau de son propre paquet d'agent. Ouvrez l'hôte pour voir les commandes qui le réparent manuellement."
   },
   "idp": {
     "action": {

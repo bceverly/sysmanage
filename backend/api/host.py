@@ -50,7 +50,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security import agent_identity, agent_mtls
 from backend.security.roles import SecurityRoles
-from backend.services import maintenance_window_service
+from backend.services import agent_self_update_loss, maintenance_window_service
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.queue_operations import QueueOperations
@@ -161,6 +161,12 @@ def _hardware_fields(host) -> dict:
             getattr(host, "package_manager_repairable", False)
         ),
     }
+
+
+def _self_update_fields(session, host) -> dict:
+    """Whether the agent was lost during its own upgrade (2026-11-15)."""
+    lost = agent_self_update_loss.lost_hosts(session, [host])
+    return agent_self_update_loss.fields(lost.get(host.id))
 
 
 def _limited_flag(host):
@@ -296,14 +302,12 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
         if not host:
             raise HTTPException(status_code=404, detail=error_host_not_found())
 
-        # Get tags using the dynamic relationship
         host_tags = host.tags.all()
 
         security_updates_count, system_updates_count, total_updates_count = (
             update_counts_by_host(session, [host.id]).get(host.id, _NO_UPDATES)
         )
 
-        # Return as dictionary with all fields
         return {
             "id": str(host.id),
             "active": host.active,
@@ -318,6 +322,7 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
             "status": host.status,
             "approval_status": host.approval_status,
             **_hardware_fields(host),
+            **_self_update_fields(session, host),
             "timezone": getattr(host, "timezone", None),
             "is_agent_privileged": host.is_agent_privileged,
             "agent_version": host.agent_version,
@@ -342,11 +347,9 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
                 if getattr(host, "parent_host_id", None)
                 else None
             ),
-            # Include update counts
             "security_updates_count": security_updates_count,
             "system_updates_count": system_updates_count,
             "total_updates_count": total_updates_count,
-            # Include tags
             "tags": [
                 {"id": str(tag.id), "name": tag.name, "description": tag.description}
                 for tag in host_tags
@@ -381,14 +384,12 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
         if not host:
             raise HTTPException(status_code=404, detail=error_host_not_found())
 
-        # Get tags using the dynamic relationship
         host_tags = host.tags.all()
 
         security_updates_count, system_updates_count, total_updates_count = (
             update_counts_by_host(session, [host.id]).get(host.id, _NO_UPDATES)
         )
 
-        # Return as dictionary with all fields
         return {
             "id": str(host.id),
             "active": host.active,
@@ -403,6 +404,7 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
             "status": host.status,
             "approval_status": host.approval_status,
             **_hardware_fields(host),
+            **_self_update_fields(session, host),
             "timezone": getattr(host, "timezone", None),
             "is_agent_privileged": host.is_agent_privileged,
             "agent_version": host.agent_version,
@@ -421,11 +423,9 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
                 host, "script_approval_required", False
             ),
             "enabled_shells": getattr(host, "enabled_shells", None),
-            # Include update counts
             "security_updates_count": security_updates_count,
             "system_updates_count": system_updates_count,
             "total_updates_count": total_updates_count,
-            # Include tags
             "tags": [
                 {"id": str(tag.id), "name": tag.name, "description": tag.description}
                 for tag in host_tags
@@ -490,6 +490,7 @@ def _get_all_hosts_sync(tenant_id=None):
 
         # Commands a maintenance window is holding, one grouped query.
         held = maintenance_window_service.held_counts(session, host_ids)
+        lost = agent_self_update_loss.lost_hosts(session, hosts)
 
         # Convert to dictionaries with tags included
         result = []
@@ -516,6 +517,7 @@ def _get_all_hosts_sync(tenant_id=None):
                 "certificate_status": agent_mtls.certificate_status(host),
                 "held_commands": held.get(str(host.id), 0),
                 **_hardware_fields(host),
+                **agent_self_update_loss.fields(lost.get(host.id)),
                 "is_agent_privileged": host.is_agent_privileged,
                 "agent_version": host.agent_version,
                 # Phase 19 agent capability advertisement.
@@ -533,11 +535,9 @@ def _get_all_hosts_sync(tenant_id=None):
                     if getattr(host, "parent_host_id", None)
                     else None
                 ),
-                # Include update counts
                 "security_updates_count": security_updates_count,
                 "system_updates_count": system_updates_count,
                 "total_updates_count": total_updates_count,
-                # Include tags
                 "tags": [
                     {
                         "id": str(tag.id),

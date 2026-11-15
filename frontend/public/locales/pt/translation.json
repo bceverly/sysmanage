@@ -1811,7 +1811,14 @@
     "heldCommands_other": "{{count}} comandos estão aguardando a janela de manutenção \"{{name}}\", que abre às {{time}}.",
     "heldCommandsBlackout": "{{count}} comandos estão aguardando o fim do bloqueio \"{{name}}\".",
     "heldCommandsBlackout_one": "{{count}} comando está aguardando o fim do bloqueio \"{{name}}\".",
-    "heldCommandsBlackout_other": "{{count}} comandos estão aguardando o fim do bloqueio \"{{name}}\"."
+    "heldCommandsBlackout_other": "{{count}} comandos estão aguardando o fim do bloqueio \"{{name}}\".",
+    "agentLost": {
+      "clears": "Esta notificação é removida assim que o agente fizer check-in novamente.",
+      "explanation": "Uma atualização que incluía o pacote do agente foi enviada a este host em {{time}}, e o agente não fez check-in desde então. A atualização do pacote parou o agente antes que o gerenciador de pacotes terminasse, então o pacote provavelmente está parcialmente instalado. O servidor não pode consertar este host, porque nenhum agente está rodando para receber o comando.",
+      "generic": "Faça login no host, reinstale o pacote do agente com o gerenciador de pacotes do host e, em seguida, inicie o serviço do agente.",
+      "runCommands": "Faça login no host e execute esses comandos para finalizar a atualização e iniciar o agente:",
+      "title": "Agente perdido durante sua própria atualização"
+    }
   },
   "hostGroup": {
     "add": "Adicionar",
@@ -1978,7 +1985,9 @@
     "requiresRepairHost": "Selecione um host cujo gerenciador de pacotes precise de reparo",
     "repairStarted": "Reparo do gerenciador de pacotes iniciado em {{count}} host(s).",
     "repairStarted_one": "Reparo do gerenciador de pacotes iniciado em {{count}} host(s).",
-    "repairStarted_other": "Reparo do gerenciador de pacotes iniciado em {{count}} host(s)."
+    "repairStarted_other": "Reparo do gerenciador de pacotes iniciado em {{count}} host(s).",
+    "lostInAgentUpgrade": "Perdido durante a atualização do agente",
+    "lostInAgentUpgradeTip": "Este host caiu enquanto atualizava seu próprio pacote do agente. Abra o host para os comandos que consertam manualmente."
   },
   "idp": {
     "action": {

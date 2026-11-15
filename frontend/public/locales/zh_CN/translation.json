@@ -1811,7 +1811,14 @@
     "heldCommands_other": "有 {{count}} 条命令正在等待将于 {{time}} 开始的维护时段“{{name}}”。",
     "heldCommandsBlackout": "有 {{count}} 条命令正在等待“{{name}}”禁止时段结束。",
     "heldCommandsBlackout_one": "有 {{count}} 条命令正在等待“{{name}}”禁止时段结束。",
-    "heldCommandsBlackout_other": "有 {{count}} 条命令正在等待“{{name}}”禁止时段结束。"
+    "heldCommandsBlackout_other": "有 {{count}} 条命令正在等待“{{name}}”禁止时段结束。",
+    "agentLost": {
+      "clears": "代理再次上报后，此通知会立即消失。",
+      "explanation": "一个包含代理软件包的更新已于 {{time}} 发送到此主机，此后代理再未上报。升级该软件包时，代理在包管理器完成之前就被停止，因此该软件包可能只安装了一半。服务器无法修复此主机，因为没有正在运行的代理来接收命令。",
+      "generic": "请登录到主机，使用主机的包管理器重新安装代理包，然后启动代理服务。",
+      "runCommands": "请登录到主机并运行以下命令以完成升级并启动代理：",
+      "title": "代理在自身升级过程中丢失"
+    }
   },
   "hostGroup": {
     "add": "添加",
@@ -1978,7 +1985,9 @@
     "requiresRepairHost": "选择包管理器需要修复的主机",
     "repairStarted": "已在 {{count}} 台主机上开始修复包管理器。",
     "repairStarted_one": "已在 {{count}} 台主机上开始修复包管理器。",
-    "repairStarted_other": "已在 {{count}} 台主机上开始修复包管理器。"
+    "repairStarted_other": "已在 {{count}} 台主机上开始修复包管理器。",
+    "lostInAgentUpgrade": "在代理升级过程中丢失",
+    "lostInAgentUpgradeTip": "此主机在升级自身代理软件包时宕机。打开该主机即可查看手动修复它的命令。"
   },
   "idp": {
     "action": {

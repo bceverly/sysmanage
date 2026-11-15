@@ -1811,7 +1811,14 @@
     "heldCommands_other": "{{count}} opdrachten wachten op het onderhoudsvenster '{{name}}', dat om {{time}} opent.",
     "heldCommandsBlackout": "{{count}} opdrachten wachten tot de blokkade '{{name}}' voorbij is.",
     "heldCommandsBlackout_one": "{{count}} opdracht wacht tot de blokkade '{{name}}' voorbij is.",
-    "heldCommandsBlackout_other": "{{count}} opdrachten wachten tot de blokkade '{{name}}' voorbij is."
+    "heldCommandsBlackout_other": "{{count}} opdrachten wachten tot de blokkade '{{name}}' voorbij is.",
+    "agentLost": {
+      "clears": "Deze melding verdwijnt zodra de agent zich weer meldt.",
+      "explanation": "Om {{time}} is een update met het agentpakket naar deze host gestuurd, en de agent heeft zich sindsdien niet meer gemeld. Het upgraden van het pakket stopte de agent voordat de pakketbeheerder klaar was, dus het pakket is waarschijnlijk half geïnstalleerd. De server kan deze host niet herstellen, omdat er geen agent draait die de opdracht kan ontvangen.",
+      "generic": "Meld je aan bij de host, installeer het agentpakket opnieuw met behulp van het pakketbeheersysteem van de host, en start vervolgens de agentservice.",
+      "runCommands": "Meld je aan bij de host en voer deze opdrachten uit om de upgrade af te ronden en de agent te starten:",
+      "title": "Agent verloren tijdens zijn eigen upgrade"
+    }
   },
   "hostGroup": {
     "add": "Toevoegen",
@@ -1978,7 +1985,9 @@
     "requiresRepairHost": "Selecteer een host waarvan de pakketbeheerder moet worden hersteld",
     "repairStarted": "Herstel van de pakketbeheerder gestart op {{count}} host(s).",
     "repairStarted_one": "Herstel van de pakketbeheerder gestart op {{count}} host(s).",
-    "repairStarted_other": "Herstel van de pakketbeheerder gestart op {{count}} host(s)."
+    "repairStarted_other": "Herstel van de pakketbeheerder gestart op {{count}} host(s).",
+    "lostInAgentUpgrade": "Verloren tijdens agent-upgrade",
+    "lostInAgentUpgradeTip": "Deze host is uitgevallen tijdens het upgraden van zijn eigen agentpakket. Open de host voor de opdrachten om hem handmatig te herstellen."
   },
   "idp": {
     "action": {

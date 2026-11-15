@@ -1811,7 +1811,14 @@
     "heldCommands_other": "有 {{count}} 個命令正在等待將於 {{time}} 開始的維護時段「{{name}}」。",
     "heldCommandsBlackout": "有 {{count}} 個命令正在等待「{{name}}」禁止時段結束。",
     "heldCommandsBlackout_one": "有 {{count}} 個命令正在等待「{{name}}」禁止時段結束。",
-    "heldCommandsBlackout_other": "有 {{count}} 個命令正在等待「{{name}}」禁止時段結束。"
+    "heldCommandsBlackout_other": "有 {{count}} 個命令正在等待「{{name}}」禁止時段結束。",
+    "agentLost": {
+      "clears": "代理程式再次簽到後，此通知會立即消失。",
+      "explanation": "一個包含代理程式套件的更新已於 {{time}} 傳送到此主機，此後代理程式再未簽到。升級該套件時，代理程式在套件管理員完成之前就被停止，因此該套件可能只安裝了一半。伺服器無法修復此主機，因為沒有正在執行的代理程式來接收命令。",
+      "generic": "請登入主機，使用主機的套件管理員重新安裝代理程式套件，然後啟動代理程式服務。",
+      "runCommands": "請登入主機並執行以下命令，以完成升級並啟動代理程式：",
+      "title": "代理程式在自身升級過程中遺失"
+    }
   },
   "hostGroup": {
     "add": "新增",
@@ -1978,7 +1985,9 @@
     "requiresRepairHost": "選取套件管理員需要修復的主機",
     "repairStarted": "已在 {{count}} 台主機上開始修復套件管理員。",
     "repairStarted_one": "已在 {{count}} 台主機上開始修復套件管理員。",
-    "repairStarted_other": "已在 {{count}} 台主機上開始修復套件管理員。"
+    "repairStarted_other": "已在 {{count}} 台主機上開始修復套件管理員。",
+    "lostInAgentUpgrade": "在代理程式升級過程中遺失",
+    "lostInAgentUpgradeTip": "此主機在升級自身代理程式套件時當機。開啟該主機即可查看手動修復它的命令。"
   },
   "idp": {
     "action": {

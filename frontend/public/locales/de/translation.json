@@ -1811,7 +1811,14 @@
     "heldCommands_other": "{{count}} Befehle warten auf das Wartungsfenster „{{name}}“, das um {{time}} öffnet.",
     "heldCommandsBlackout": "{{count}} Befehle warten auf das Ende der Sperrzeit „{{name}}“.",
     "heldCommandsBlackout_one": "{{count}} Befehl wartet auf das Ende der Sperrzeit „{{name}}“.",
-    "heldCommandsBlackout_other": "{{count}} Befehle warten auf das Ende der Sperrzeit „{{name}}“."
+    "heldCommandsBlackout_other": "{{count}} Befehle warten auf das Ende der Sperrzeit „{{name}}“.",
+    "agentLost": {
+      "clears": "Dieser Hinweis verschwindet, sobald sich der Agent wieder meldet.",
+      "explanation": "Ein Update, das das Agenten-Paket enthielt, wurde um {{time}} an diesen Host gesendet, und der Agent hat sich seitdem nicht mehr gemeldet. Das Upgrade des Pakets hat den Agenten gestoppt, bevor der Paketmanager fertig war, daher ist das Paket wahrscheinlich nur halb installiert. Der Server kann diesen Host nicht reparieren, weil kein Agent läuft, der den Befehl empfangen könnte.",
+      "generic": "Melden Sie sich beim Host an, installieren Sie das Agenten-Paket erneut mit dem Paketmanager des Hosts und starten Sie dann den Agenten-Dienst.",
+      "runCommands": "Melden Sie sich beim Host an und führen Sie diese Befehle aus, um das Upgrade abzuschließen und den Agenten zu starten:",
+      "title": "Der Agent wurde während seines eigenen Upgrades verloren"
+    }
   },
   "hostGroup": {
     "add": "Hinzufügen",
@@ -1978,7 +1985,9 @@
     "requiresRepairHost": "Wählen Sie einen Host, dessen Paketverwaltung repariert werden muss",
     "repairStarted": "Reparatur der Paketverwaltung auf {{count}} Host(s) gestartet.",
     "repairStarted_one": "Reparatur der Paketverwaltung auf {{count}} Host(s) gestartet.",
-    "repairStarted_other": "Reparatur der Paketverwaltung auf {{count}} Host(s) gestartet."
+    "repairStarted_other": "Reparatur der Paketverwaltung auf {{count}} Host(s) gestartet.",
+    "lostInAgentUpgrade": "Verloren während Agent-Upgrade",
+    "lostInAgentUpgradeTip": "Dieser Host ist während eines Upgrades seines eigenen Agenten-Pakets ausgefallen. Öffnen Sie den Host für die Befehle, um ihn manuell zu reparieren."
   },
   "idp": {
     "action": {

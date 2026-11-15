@@ -1830,7 +1830,14 @@
     "heldCommands_other": "{{count}} commands are waiting for the '{{name}}' maintenance window, which opens at {{time}}.",
     "heldCommandsBlackout": "{{count}} commands are waiting for the '{{name}}' blackout to end.",
     "heldCommandsBlackout_one": "{{count}} command is waiting for the '{{name}}' blackout to end.",
-    "heldCommandsBlackout_other": "{{count}} commands are waiting for the '{{name}}' blackout to end."
+    "heldCommandsBlackout_other": "{{count}} commands are waiting for the '{{name}}' blackout to end.",
+    "agentLost": {
+      "clears": "This notice clears as soon as the agent checks in again.",
+      "explanation": "An update that included the agent package was sent to this host at {{time}}, and the agent has not checked in since. Upgrading the package stopped the agent before the package manager finished, so the package is probably half-installed. The server cannot repair this host, because no agent is running to receive the command.",
+      "generic": "Sign in to the host, reinstall the agent package with the host's package manager, and then start the agent service.",
+      "runCommands": "Sign in to the host and run these commands to finish the upgrade and start the agent:",
+      "title": "Agent lost during its own upgrade"
+    }
   },
   "hostGroup": {
     "add": "Add",
@@ -1997,7 +2004,9 @@
     "requiresRepairHost": "Select a host whose package manager needs repair",
     "repairStarted": "Package manager repair started on {{count}} host(s).",
     "repairStarted_one": "Package manager repair started on {{count}} host(s).",
-    "repairStarted_other": "Package manager repair started on {{count}} host(s)."
+    "repairStarted_other": "Package manager repair started on {{count}} host(s).",
+    "lostInAgentUpgrade": "Lost during agent upgrade",
+    "lostInAgentUpgradeTip": "This host went down while it was upgrading its own agent package. Open the host for the commands that repair it by hand."
   },
   "idp": {
     "action": {

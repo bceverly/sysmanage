@@ -98,6 +98,11 @@ type SysManageHost = {
     package_manager_needs_repair?: boolean;
     package_manager_repair_reason?: string | null;
     package_manager_repairable?: boolean;
+    /** Agent lost during its own upgrade (2026-11-15): down, and silent since
+     *  an update that included the agent's own package was sent to it. */
+    agent_lost_in_self_update?: boolean;
+    agent_self_update_dispatched_at?: string | null;
+    agent_self_update_package_manager?: string | null;
     // Diagnostics request tracking fields
     diagnostics_requested_at?: string;
     diagnostics_request_status?: string;
