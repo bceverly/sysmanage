@@ -77,21 +77,13 @@ jobs:
     - name: Filter suppressed findings from SARIF
       if: always()
       run: |
-        # GitHub Code Scanning doesn't recognize SARIF suppressions property,
-        # so we need to filter out nosemgrep-suppressed findings manually.
-        # See: https://github.com/semgrep/semgrep/issues/6658
+        # Drops nosemgrep-suppressed findings (Code Scanning ignores SARIF's
+        # suppressions property) and the lockfile findings accepted in
+        # .semgrep-accepted.json -- matched on rule, file, package AND locked
+        # version, so nothing else on the lockfiles is hidden.  The semgrep
+        # image ships Python, so no extra tools are installed.
         if [ -f "semgrep-raw.sarif" ]; then
-          # Install jq if not available (semgrep container may not have it)
-          which jq || apk add --no-cache jq 2>/dev/null || apt-get update && apt-get install -y jq 2>/dev/null || true
-          # Filter out results that have suppressions
-          if which jq >/dev/null 2>&1; then
-            jq 'del(.runs[].results[] | select(.suppressions))' semgrep-raw.sarif > semgrep.sarif
-            echo "Filtered suppressed findings from SARIF output"
-          else
-            # Fallback: use raw file if jq is not available
-            cp semgrep-raw.sarif semgrep.sarif
-            echo "Warning: jq not available, using raw SARIF output"
-          fi
+          python3 scripts/filter_semgrep_sarif.py semgrep-raw.sarif semgrep.sarif .semgrep-accepted.json
         fi
 
     - name: Check if Semgrep SARIF file exists

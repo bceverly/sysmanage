@@ -1,0 +1,25 @@
+{
+  "_comment": [
+    "Semgrep findings we accept on purpose, which nosemgrep cannot reach",
+    "(lockfiles are JSON, so they cannot carry a comment).  The Semgrep job's",
+    "SARIF filter (scripts/filter_semgrep_sarif.py) drops a finding ONLY when",
+    "its rule, its file, the package it names AND that package's locked",
+    "version all match an entry.  Anything else on these files still reaches",
+    "Code Scanning, and so does this finding once the locked version changes.",
+    "The filter logs every entry that matched nothing: delete those."
+  ],
+  "accepted": [
+    {
+      "rule": "ssc-9c34c675-756b-44e8-9512-28718930fef2",
+      "package": "playwright-core",
+      "version": "1.65.1",
+      "paths": [
+        "frontend/package-lock.json",
+        "packaging/freebsd-ports/sysutils/sysmanage/files/packagejsons/frontend/package-lock.json"
+      ],
+      "added": "2026-11-16",
+      "reason": "Bundled Brotli 1.0.3-1.2.0 decoder out-of-bounds write. Playwright is a devDependency used only by the E2E tests against our own dev server; it is never shipped or run in production or by the FreeBSD port. 1.65.1 is the newest stable release (1.66 is still alpha).",
+      "revisit": "Upgrade @playwright/test once a stable release with a fixed Brotli ships; the version pin then stops matching and this entry is reported as stale."
+    }
+  ]
+}
