@@ -244,6 +244,7 @@ async def handle_package_updates_update(  # NOSONAR
                 update_type=update_type,
                 size_bytes=package_update.get("update_size"),
                 requires_reboot=False,  # Default, could be enhanced later
+                held=bool(package_update.get("held")),  # pinned (26.1)
                 # Required timestamp fields
                 discovered_at=now,
                 created_at=now,

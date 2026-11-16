@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from backend.i18n import _
 from backend.persistence.models import Host, PackageUpdate, UpdateExecutionLog
+from backend.services import auto_update_results
 
 # Use standard logger that respects /etc/sysmanage.yaml configuration
 logger = logging.getLogger(__name__)
@@ -176,14 +177,35 @@ async def handle_update_apply_result(  # NOSONAR
                     exec_result.error_log = error
                     logger.info("Updated execution log for %s to failed", package_name)
 
-        # Update host reboot requirement
+        # The host needs a reboot when the agent says so for the whole run
+        # (macOS, the BSDs) or for any package it applied (fwupd).  The
+        # column is ``reboot_required``: this wrote ``requires_reboot``,
+        # which does not exist, so every result that needed a reboot was
+        # rolled back whole and its packages stayed "updating" (production,
+        # nextcloud, 2026-11-02: "Unconsumed column names: requires_reboot").
+        requires_reboot = bool(requires_reboot) or any(
+            p.get("requires_reboot") for p in updated_packages
+        )
         if requires_reboot:
-            stmt = (
+            db.execute(
                 update(Host)
                 .where(Host.id == connection.host_id)
-                .values(requires_reboot=True)
+                .values(
+                    reboot_required=True,
+                    reboot_required_updated_at=datetime.now(timezone.utc).replace(
+                        tzinfo=None
+                    ),
+                )
             )
-            db.execute(stmt)
+
+        # 26.1: close the automatic runs these results finished.
+        auto_update_results.note_results(
+            db,
+            connection.host_id,
+            {log.run_id for log in latest_pending_log_by_pkg.values()},
+            requires_reboot,
+            datetime.now(timezone.utc).replace(tzinfo=None),
+        )
 
         db.commit()
 

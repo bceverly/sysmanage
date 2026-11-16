@@ -163,6 +163,15 @@ class UpgradeProfile(TestBase):
     )
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
+    # 26.1 automatic updates (q94autoupdate)
+    auto_apply = Column(Boolean, nullable=False, default=False, server_default="0")
+    reboot_mode = Column(String(16), nullable=False, default="never")
+    excluded_packages = Column(Text, nullable=True)
+    require_backup_hours = Column(Integer, nullable=True)
+    held = Column(Boolean, nullable=False, default=False, server_default="0")
+    hold_reason = Column(String(1000), nullable=True)
+    hold_by = Column(String(255), nullable=True)
+    hold_at = Column(DateTime, nullable=True)
 
 
 # Phase 11 -- air-gap tables (test-side mirrors).  These mirror the

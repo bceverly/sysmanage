@@ -791,7 +791,8 @@
     "hardwareNeedsAttention": "Hardware needing attention",
     "backupsAttention": "Backups needing attention",
     "backupsEscrowStale": "Break-glass key export out of date",
-    "backupsServerUnprotected": "This SysManage server has no good backup"
+    "backupsServerUnprotected": "This SysManage server has no good backup",
+    "autoUpdateProblems": "Automatic update problems"
   },
   "dataGrid": {
     "columnVisibility": "Column Visibility",
@@ -3803,12 +3804,28 @@
     "title": "Update Profiles",
     "trigger": "Trigger Now",
     "triggerError": "Failed to trigger profile",
-    "triggered": "Triggered against {{count}} host(s) -- {{enqueued}} dispatched",
     "updated": "Update profile saved",
     "window": "Staggered Window (minutes)",
     "windowHelp": "Spread agent dispatches over this many minutes (0-720)",
     "windowRange": "Staggered window must be between 0 and 720 minutes",
-    "addDialogTitle": "Add Update Profile"
+    "addDialogTitle": "Add Update Profile",
+    "autoApply": "Apply automatically on this schedule",
+    "automatic": "Automatic",
+    "backupHelp": "Blank: do not check backups",
+    "backupHours": "Only after a good backup within (hours)",
+    "excluded": "Never apply these packages",
+    "excludedHelp": "Comma-separated names; * matches anything (linux-image-*, postgresql*)",
+    "held": "On hold",
+    "hold": "Hold this policy",
+    "holdReason": "Why hold \"{{name}}\"?",
+    "listedHosts": "{{count}} listed host(s)",
+    "listedHostsHelp": "Listed hosts take precedence over the tag. A host covered by several policies follows the most specific one.",
+    "listedHostsLabel": "Only these hosts",
+    "ranNow": "Updating {{queued}}, skipped {{skipped}}, nothing to do on {{nothing}}",
+    "reboot": "Reboots",
+    "rebootNever": "Never (the host shows \"reboot required\")",
+    "rebootWhenNeeded": "Reboot when the update needs it",
+    "release": "Release the hold"
   },
   "userDetail": {
     "active": "Active",
@@ -6174,5 +6191,67 @@
       "user": "User",
       "virtualization": "Virtualization"
     }
+  },
+  "autoUpdates": {
+    "acknowledge": "Acknowledge",
+    "allHeld": "Every automatic update policy is on hold.",
+    "appliedOf": "{{applied}} of {{total}} applied",
+    "details": "Details",
+    "followsPolicy": "Follows \"{{name}}\": {{rule}}.",
+    "heldBy": "On hold since {{when}} by {{who}}: {{reason}}",
+    "holdAll": "Hold every policy",
+    "holdReason": "Why hold every automatic update?",
+    "hostTitle": "Automatic updates",
+    "noPolicy": "No automatic update policy covers this host.",
+    "noProblems": "No automatic run needs attention.",
+    "optOut": "Never update automatically",
+    "optOutReason": "Why must this host never be updated automatically?",
+    "optedOut": "Never updated automatically: {{reason}}",
+    "pkg": {
+      "agent": "the agent updates through Update Agent",
+      "busy": "already being updated",
+      "excluded": "excluded by the policy",
+      "firmware": "firmware only when the policy names fwupd",
+      "held": "held on the host",
+      "manager": "package manager not in the policy",
+      "notSecurity": "not a security update",
+      "osUpgrade": "an OS upgrade is never automatic"
+    },
+    "policy": "Policy",
+    "reboot": {
+      "back": "Rebooted and back",
+      "notBack": "Did not come back from its reboot",
+      "queued": "Rebooting"
+    },
+    "result": "Result",
+    "rule": {
+      "moreConservative": "the more conservative of equally specific policies",
+      "moreSpecific": "the most specific policy that covers it",
+      "only": "the only policy that covers this host"
+    },
+    "saveError": "Could not save the change",
+    "skip": {
+      "failedRecently": "its previous run failed; it waits until someone acknowledges it or the retry hours pass",
+      "imageMode": "an image-mode host updates its image instead",
+      "inactive": "the host is inactive",
+      "needsRepair": "the package manager needs repair",
+      "noBackup": "it has no recent good backup",
+      "notApproved": "the host is not approved",
+      "optedOut": "the host never updates automatically",
+      "pending": "its previous run has not finished",
+      "agentCannotApply": "its agent cannot apply updates; update the agent"
+    },
+    "status": {
+      "failed": "Failed",
+      "nothingToDo": "Nothing to do",
+      "partial": "Partly failed",
+      "queued": "Running",
+      "skipped": "Skipped",
+      "succeeded": "Succeeded",
+      "timedOut": "No result"
+    },
+    "subtitle": "Profiles with \"Apply automatically\" on update their hosts on schedule.",
+    "title": "Automatic updates",
+    "when": "When"
   }
 }

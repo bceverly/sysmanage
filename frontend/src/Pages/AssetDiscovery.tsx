@@ -28,6 +28,7 @@ import {
     Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router';
 import {
     assetDiscoveryService,
     type DeviceStatus,
@@ -121,7 +122,10 @@ const AssetDiscovery: React.FC = () => {
     const [sweeps, setSweeps] = useState<SweepRun[]>([]);
     const [showRevoked, setShowRevoked] = useState(false);
     const [network, setNetwork] = useState('');
-    const [search, setSearch] = useState('');
+    // ?search= opens the page on one device -- the link a new-device alert
+    // email carries (ROADMAP 26.9).
+    const [searchParams] = useSearchParams();
+    const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [excluding, setExcluding] = useState(false);
     const [canManage, setCanManage] = useState(false);

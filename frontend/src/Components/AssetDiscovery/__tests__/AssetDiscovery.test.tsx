@@ -50,6 +50,14 @@ import { assetDiscoveryService } from '../../../Services/assetDiscoveryService';
 import type { DiscoveredDevice, DiscoverySummary } from '../../../Services/assetDiscoveryService';
 import { hasPermission } from '../../../Services/permissions';
 import AssetDiscovery from '../../../Pages/AssetDiscovery';
+import { MemoryRouter } from 'react-router';
+
+const renderPage = (url = '/asset-discovery') =>
+    render(
+        <MemoryRouter initialEntries={[url]}>
+            <AssetDiscovery />
+        </MemoryRouter>,
+    );
 
 const svc = assetDiscoveryService as unknown as Record<string, ReturnType<typeof vi.fn>>;
 
@@ -107,8 +115,18 @@ beforeEach(() => {
 });
 
 describe('AssetDiscovery page', () => {
+    test('a new-device alert link opens the page searched for that device', async () => {
+        // ROADMAP 26.9: the email links to /asset-discovery?search=<mac>.
+        renderPage('/asset-discovery?search=24%3A0a%3Ac4%3A11%3A22%3A33');
+        await waitFor(() =>
+            expect(svc.listDevices).toHaveBeenCalledWith(
+                expect.objectContaining({ search: '24:0a:c4:11:22:33' }),
+            ),
+        );
+    });
+
     test('the blind spots are shown beside the list', async () => {
-        render(<AssetDiscovery />);
+        renderPage();
         await screen.findByText('00:1a:2b:00:00:01');
         expect(screen.getByText(/Agents only listen/)).toBeTruthy();
         // Anchored, dots escaped: the observer's line starts with its hostname.
@@ -121,18 +139,18 @@ describe('AssetDiscovery page', () => {
 
     test('says so when discovery is off', async () => {
         svc.getSummary.mockResolvedValue(summary({ policy: { enabled: false, report_interval_seconds: 300, sweep_enabled: false, updated_by: null, updated_at: null } }));
-        render(<AssetDiscovery />);
+        renderPage();
         expect(await screen.findByText(/Discovery is turned off/)).toBeTruthy();
     });
 
     test('a locally administered address is labeled', async () => {
-        render(<AssetDiscovery />);
+        renderPage();
         expect(await screen.findByText('Address may change')).toBeTruthy();
     });
 
     test('bulk exclude sends the selection with a category and a reason', async () => {
         svc.exclude.mockResolvedValue({ excluded: 2, already_excluded: 0, skipped_managed: 0, not_found: 0, exclusions: [] });
-        render(<AssetDiscovery />);
+        renderPage();
         await screen.findByText('00:1a:2b:00:00:01');
         fireEvent.click(await screen.findByLabelText('Select all'));
         fireEvent.click(screen.getByText('Mark 2 as known and fine'));
@@ -147,7 +165,7 @@ describe('AssetDiscovery page', () => {
 
     test('without the role there is nothing to select and no exclude button', async () => {
         (hasPermission as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(false);
-        render(<AssetDiscovery />);
+        renderPage();
         await screen.findByText('00:1a:2b:00:00:01');
         expect(screen.queryByLabelText('Select all')).toBeNull();
         expect(screen.queryByText(/as known and fine/)).toBeNull();
@@ -162,7 +180,7 @@ describe('AssetDiscovery page', () => {
             },
         ]);
         svc.revoke.mockResolvedValue({});
-        render(<AssetDiscovery />);
+        renderPage();
         await screen.findByText('00:1a:2b:00:00:01');
         fireEvent.click(screen.getByText('Known and fine'));
         expect(await screen.findByText('Front office')).toBeTruthy();
@@ -175,12 +193,12 @@ describe('AssetDiscovery page', () => {
 
     test('a load failure is reported', async () => {
         svc.getSummary.mockRejectedValue(new Error('boom'));
-        render(<AssetDiscovery />);
+        renderPage();
         expect(await screen.findByText('Discovered devices could not be loaded.')).toBeTruthy();
     });
 
     test('the networks not swept recently are named', async () => {
-        render(<AssetDiscovery />);
+        renderPage();
         expect(await screen.findByText('Not swept in the last 7 days: 192.168.4.0/24')).toBeTruthy();
     });
 
@@ -193,7 +211,7 @@ describe('AssetDiscovery page', () => {
             },
         ]);
         svc.requestSweep.mockResolvedValue({});
-        render(<AssetDiscovery />);
+        renderPage();
         await screen.findByText('00:1a:2b:00:00:01');
         fireEvent.click(screen.getByText('Sweeps'));
         expect(await screen.findByText('26 of 253 addresses')).toBeTruthy();
@@ -207,7 +225,7 @@ describe('AssetDiscovery page', () => {
     test('a refused sweep shows the server reason', async () => {
         svc.listSweeps.mockResolvedValue([]);
         svc.requestSweep.mockRejectedValue({ response: { data: { detail: { code: 'not_on_link', message: 'No agent is on that network' } } } });
-        render(<AssetDiscovery />);
+        renderPage();
         await screen.findByText('00:1a:2b:00:00:01');
         fireEvent.click(screen.getByText('Sweeps'));
         fireEvent.click(await screen.findByText('Sweep a network'));
@@ -219,7 +237,7 @@ describe('AssetDiscovery page', () => {
     test('with sweeps off there is no sweep button, only the reason', async () => {
         svc.getSummary.mockResolvedValue(summary({ policy: { enabled: true, report_interval_seconds: 300, sweep_enabled: false, updated_by: null, updated_at: null } }));
         svc.listSweeps.mockResolvedValue([]);
-        render(<AssetDiscovery />);
+        renderPage();
         await screen.findByText('00:1a:2b:00:00:01');
         fireEvent.click(screen.getByText('Sweeps'));
         expect(await screen.findByText(/Active sweeps are turned off/)).toBeTruthy();
@@ -235,7 +253,7 @@ describe('AssetDiscovery page', () => {
             ],
         });
         svc.getSummary.mockResolvedValue(summary({ types: { printer: 1, phone_or_tablet: 1 } }));
-        render(<AssetDiscovery />);
+        renderPage();
         expect(await screen.findByText('Brother Industries, LTD.')).toBeTruthy();
         expect(screen.getByText('Maybe: Phone or tablet')).toBeTruthy();
         expect(screen.getByText('Printer: 1')).toBeTruthy();
@@ -247,7 +265,7 @@ describe('AssetDiscovery page', () => {
             devices: [device('1', { device_type: 'iot', classification: { confidence: 'high', reasons: ['mdns:_hap'] } })],
         });
         svc.exclude.mockResolvedValue({ excluded: 1, already_excluded: 0, skipped_managed: 0, not_found: 0, exclusions: [] });
-        render(<AssetDiscovery />);
+        renderPage();
         fireEvent.click(await screen.findByLabelText('00:1a:2b:00:00:01'));
         fireEvent.click(screen.getByText('Mark 1 as known and fine'));
         const dialog = await screen.findByRole('dialog');
@@ -258,7 +276,7 @@ describe('AssetDiscovery page', () => {
 
     test('a static address is registered with its warning shown', async () => {
         svc.excludeAddress.mockResolvedValue({});
-        render(<AssetDiscovery />);
+        renderPage();
         await screen.findByText('00:1a:2b:00:00:01');
         fireEvent.click(screen.getByText('Known and fine'));
         fireEvent.click(await screen.findByText('Register a static address'));
@@ -272,7 +290,7 @@ describe('AssetDiscovery page', () => {
 
     test('a refused static address shows the server reason', async () => {
         svc.excludeAddress.mockRejectedValue({ response: { data: { detail: 'That address is already registered as known' } } });
-        render(<AssetDiscovery />);
+        renderPage();
         await screen.findByText('00:1a:2b:00:00:01');
         fireEvent.click(screen.getByText('Known and fine'));
         fireEvent.click(await screen.findByText('Register a static address'));

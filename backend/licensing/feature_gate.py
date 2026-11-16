@@ -143,7 +143,45 @@ def refuse_unlicensed(module: ModuleCode | str) -> HTTPException:
     module_code = ModuleCode(module) if isinstance(module, str) else module
     if not license_service.has_module(module_code):
         return license_required_error(module_code)
+    role_needed = _ROLE_GATED.get(module_code.value)
+    if role_needed and _engine_loaded(module_code.value):
+        return role_mismatch_error(module_code, role_needed)
     return module_unavailable_error(module_code)
+
+
+# Engines that load on every licensed server but serve their routes only in
+# one federation role; anywhere else their stubs stay mounted.  That is not
+# an outage: the navbar's federation probe hit a 503 on every page load of
+# every licensed server with the role "none" (e2e, 2026-11-16).
+_ROLE_GATED = {
+    "federation_controller_engine": "coordinator",
+    "federation_site_engine": "site",
+}
+
+
+def _engine_loaded(code: str) -> bool:
+    from backend.licensing.module_loader import (  # pylint: disable=import-outside-toplevel
+        module_loader,
+    )
+
+    return module_loader.get_module(code) is not None
+
+
+def role_mismatch_error(module_code: ModuleCode, role_needed: str) -> HTTPException:
+    """409: licensed and loaded, but this server's federation role is not the
+    one the engine serves -- a setting, not a fault."""
+    return HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail={
+            "error": "federation_role",
+            "message": (
+                f"The '{module_code.value}' module serves only a server whose "
+                f"federation role is '{role_needed}' (Settings, Server Role)"
+            ),
+            "module": module_code.value,
+            "role_needed": role_needed,
+        },
+    )
 
 
 def _check_module_licensed_http(module_code: ModuleCode) -> None:

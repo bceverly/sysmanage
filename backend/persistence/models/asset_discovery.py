@@ -363,3 +363,34 @@ class NetworkSweepRun(Base):
             "probed": self.probed,
             "devices_found": self.devices_found,
         }
+
+
+class NewDeviceAlertMark(Base):
+    """A device the ``new_network_device`` alert rule has already decided on
+    (ROADMAP 26.9).
+
+    A device is new ONCE: the first pass that sees it settled either alerts
+    on it or leaves it out (the devices present when the rule was made, a
+    type the rule does not want, one a person already excluded), and either
+    way it gets a mark, so it is never considered again.  ``ips`` holds every
+    address the device has been seen on since, for the rule's optional "a
+    known device on an address it never used" alert.  One row per rule and
+    device; deleting the rule deletes its marks.
+    """
+
+    __tablename__ = "new_device_alert_mark"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    rule_id = Column(
+        GUID(), ForeignKey("alert_rule.id", ondelete="CASCADE"), nullable=False
+    )
+    identity = Column(String(64), nullable=False)
+    ips = Column(JSON, nullable=True)
+    # "alerted", "baseline" (present when the rule was made, or in a new
+    # observer's first hour) or "filtered" (left out by the rule's settings).
+    outcome = Column(String(16), nullable=False)
+    marked_at = Column(DateTime, nullable=False, default=_utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("rule_id", "identity", name="uq_new_device_alert_mark"),
+    )

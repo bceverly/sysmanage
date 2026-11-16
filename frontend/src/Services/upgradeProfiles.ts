@@ -19,6 +19,16 @@ export interface UpgradeProfile {
   next_run: string | null;
   created_at: string | null;
   updated_at: string | null;
+  // 26.1 automatic application (Enterprise)
+  auto_apply: boolean;
+  reboot_mode: 'never' | 'when_needed';
+  excluded_packages: string;
+  require_backup_hours: number | null;
+  held: boolean;
+  hold_reason: string | null;
+  hold_by: string | null;
+  hold_at: string | null;
+  host_ids: string[];
 }
 
 export interface UpgradeProfileCreate {
@@ -30,6 +40,11 @@ export interface UpgradeProfileCreate {
   package_managers?: string[] | null;
   staggered_window_min?: number;
   tag_id?: string | null;
+  auto_apply?: boolean;
+  reboot_mode?: 'never' | 'when_needed';
+  excluded_packages?: string | null;
+  require_backup_hours?: number | null;
+  host_ids?: string[];
 }
 
 export type UpgradeProfileUpdate = Partial<UpgradeProfileCreate>;
@@ -37,9 +52,10 @@ export type UpgradeProfileUpdate = Partial<UpgradeProfileCreate>;
 export interface TriggerResult {
   profile_id: string;
   name: string;
-  host_count: number;
-  enqueued_count: number;
-  host_ids: string[];
+  queued: number;
+  skipped: number;
+  nothing: number;
+  other_policy: number;
   next_run: string | null;
 }
 

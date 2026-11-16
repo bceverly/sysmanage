@@ -25,6 +25,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import DriftTimelineLink from '../Backups/DriftTimelineLink';
+import HostAutoUpdatesCard from '../AutoUpdates/HostAutoUpdatesCard';
+import { hasPermission, SecurityRoles } from '../../Services/permissions';
 import { InstallationHistoryItem } from './hostDetailTypes';
 import {
     formatDateTime,
@@ -47,9 +49,15 @@ const HostSoftwareChangesTab: React.FC<HostSoftwareChangesTabProps> = ({
 }) => {
     const { t } = useTranslation();
     const { hostId } = useParams<{ hostId: string }>();
+    // 26.1: changing a host's opt-out takes the role that applies updates.
+    const [canManage, setCanManage] = React.useState(false);
+    React.useEffect(() => {
+        void hasPermission(SecurityRoles.APPLY_SOFTWARE_UPDATE).then(setCanManage).catch(() => setCanManage(false));
+    }, []);
     return (
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
+                        {hostId && <HostAutoUpdatesCard hostId={hostId} canManage={canManage} />}
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>

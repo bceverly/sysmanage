@@ -130,6 +130,11 @@ def test_db():
         UserAccessGroup,
         UserMfaEnrollment,
     )
+    from tests.api._orm_mirror_c import (  # noqa: F401  pylint: disable=unused-import
+        AutoUpdateRun,
+        AutoUpdateSettings,
+        UpgradeProfileHost,
+    )
     from tests.api._orm_mirror_base import TestBase
 
     # Create all tables with test models

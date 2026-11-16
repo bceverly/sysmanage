@@ -320,8 +320,9 @@ class TestUpgradeProfileTrigger:
         assert r.status_code == 200, r.text
         body = r.json()
         assert body["profile_id"] == created["id"]
-        assert "host_count" in body
-        assert "host_ids" in body
+        # 26.1: what the run did, per host outcome.
+        for key in ("queued", "skipped", "nothing", "other_policy"):
+            assert key in body
         assert body["next_run"] is not None
 
         # Verify last_run was set.
@@ -353,8 +354,8 @@ class TestUpgradeProfileTick:
         )
         r = client.post("/api/v1/upgrade-profiles/tick", headers=auth_headers)
         assert r.status_code == 200
-        assert "fired_count" in r.json()
-        assert "fired" in r.json()
+        # 26.1: one pass of the automatic update driver.
+        assert {"queued", "timed_out", "held"} <= set(r.json())
 
 
 class TestUpgradeProfileDispatch:
@@ -365,10 +366,16 @@ class TestUpgradeProfileDispatch:
     """Phase 8.2 wire-up: trigger and tick must actually queue
     apply_updates command messages, not just update timestamps."""
 
-    def test_trigger_response_carries_enqueued_count(self, client, auth_headers):
+    def test_trigger_with_no_hosts_queues_nothing(self, client, auth_headers):
+        """A profile whose scope holds no hosts runs cleanly and says so.
+        (The real planner and queue are tested in
+        tests/services/test_auto_update_runner.py.)"""
         created = client.post(
             "/api/v1/upgrade-profiles",
-            json={"name": "real-fire"},
+            json={
+                "name": "real-fire",
+                "tag_id": "00000000-0000-0000-0000-0000000000aa",
+            },
             headers=auth_headers,
         ).json()
         r = client.post(
@@ -376,28 +383,4 @@ class TestUpgradeProfileDispatch:
             headers=auth_headers,
         )
         assert r.status_code == 200
-        body = r.json()
-        # enqueued_count must be present.  In the unit-test DB, no real
-        # hosts exist so it's 0 -- that's the expected value.  We're
-        # checking the FIELD, not the count.
-        assert "enqueued_count" in body
-        assert body["enqueued_count"] >= 0
-
-    def test_dispatch_helper_handles_zero_hosts(self, client, auth_headers):
-        """Empty target list must not raise -- common when a profile is
-        scoped to a tag with no current hosts."""
-        from backend.api.upgrade_profiles import _dispatch_profile_to_hosts
-
-        from types import SimpleNamespace
-
-        fake_profile = SimpleNamespace(
-            id="00000000-0000-0000-0000-000000000001",
-            name="empty",
-            staggered_window_min=0,
-            security_only=False,
-            package_managers=None,
-        )
-        # We pass a None DB -- the function returns early on empty list,
-        # so the DB is never touched.
-        result = _dispatch_profile_to_hosts(fake_profile, [], None)
-        assert result == 0
+        assert r.json()["queued"] == 0

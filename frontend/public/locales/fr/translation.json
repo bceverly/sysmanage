@@ -791,7 +791,8 @@
     "hardwareNeedsAttention": "Matériel nécessitant une attention",
     "backupsAttention": "Sauvegardes nécessitant une attention",
     "backupsEscrowStale": "Export de clés d'urgence obsolète",
-    "backupsServerUnprotected": "Ce serveur SysManage n'a aucune sauvegarde réussie"
+    "backupsServerUnprotected": "Ce serveur SysManage n'a aucune sauvegarde réussie",
+    "autoUpdateProblems": "Problèmes de mises à jour automatiques"
   },
   "dataGrid": {
     "columnVisibility": "Visibilité des colonnes",
@@ -3784,12 +3785,28 @@
     "title": "Profils de mise à jour",
     "trigger": "Déclencher maintenant",
     "triggerError": "Échec du déclenchement du profil",
-    "triggered": "Déclenché contre {{count}} hôte(s) -- {{enqueued}} envoyés",
     "updated": "Profil de mise à jour enregistré",
     "window": "Fenêtre échelonnée (minutes)",
     "windowHelp": "Répartir les envois d'agents sur ce nombre de minutes (0-720)",
     "windowRange": "La fenêtre échelonnée doit être comprise entre 0 et 720 minutes",
-    "addDialogTitle": "Ajouter un profil de mise à jour"
+    "addDialogTitle": "Ajouter un profil de mise à jour",
+    "autoApply": "Appliquer automatiquement selon cette planification",
+    "automatic": "Automatique",
+    "backupHelp": "Vide : ne pas vérifier les sauvegardes",
+    "backupHours": "Uniquement après une sauvegarde réussie datant de moins de (heures)",
+    "excluded": "Ne jamais appliquer ces paquets",
+    "excludedHelp": "Noms séparés par des virgules ; * correspond à n'importe quoi (linux-image-*, postgresql*)",
+    "held": "En attente",
+    "hold": "Mettre en attente cette politique",
+    "holdReason": "Pourquoi mettre \"{{name}}\" en attente ?",
+    "listedHosts": "{{count}} hôte(s) listé(s)",
+    "listedHostsHelp": "Les hôtes listés ont la priorité sur l'étiquette. Un hôte couvert par plusieurs politiques suit la plus spécifique.",
+    "listedHostsLabel": "Uniquement ces hôtes",
+    "ranNow": "Mise à jour de {{queued}}, {{skipped}} ignoré(s), rien à faire sur {{nothing}}",
+    "reboot": "Redémarrages",
+    "rebootNever": "Jamais (l'hôte affiche \"redémarrage requis\")",
+    "rebootWhenNeeded": "Redémarrer lorsque la mise à jour l'exige",
+    "release": "Lever la mise en attente"
   },
   "userDetail": {
     "active": "Actif",
@@ -6174,5 +6191,67 @@
       "view_report": "Voir le rapport",
       "view_user_security_roles": "Voir les rôles de sécurité de l'utilisateur"
     }
+  },
+  "autoUpdates": {
+    "acknowledge": "Confirmer",
+    "allHeld": "Toutes les politiques de mise à jour automatique sont en attente.",
+    "appliedOf": "{{applied}} sur {{total}} appliqués",
+    "details": "Détails",
+    "followsPolicy": "Suit \"{{name}}\" : {{rule}}.",
+    "heldBy": "En attente depuis {{when}} par {{who}} : {{reason}}",
+    "holdAll": "Mettre en attente toutes les politiques",
+    "holdReason": "Pourquoi mettre en attente toutes les mises à jour automatiques ?",
+    "hostTitle": "Mises à jour automatiques",
+    "noPolicy": "Aucune politique de mise à jour automatique ne couvre cet hôte.",
+    "noProblems": "Aucune exécution automatique ne nécessite d'attention.",
+    "optOut": "Ne jamais mettre à jour automatiquement",
+    "optOutReason": "Pourquoi cet hôte ne doit-il jamais être mis à jour automatiquement ?",
+    "optedOut": "Jamais mis à jour automatiquement : {{reason}}",
+    "pkg": {
+      "agent": "l'agent se met à jour via \"Mettre à jour l'agent\"",
+      "busy": "déjà en cours de mise à jour",
+      "excluded": "exclu par la politique",
+      "firmware": "le firmware uniquement si la politique mentionne fwupd",
+      "held": "bloqué sur l'hôte",
+      "manager": "le gestionnaire de paquets n'est pas inclus dans la politique",
+      "notSecurity": "ce n'est pas une mise à jour de sécurité",
+      "osUpgrade": "une mise à niveau du système d'exploitation n'est jamais automatique"
+    },
+    "policy": "Politique",
+    "reboot": {
+      "back": "Redémarré et de nouveau en ligne",
+      "notBack": "N'est pas revenu en ligne après son redémarrage",
+      "queued": "Redémarrage"
+    },
+    "result": "Résultat",
+    "rule": {
+      "moreConservative": "la plus conservatrice des politiques également spécifiques",
+      "moreSpecific": "la politique la plus spécifique qui couvre cet hôte",
+      "only": "la seule politique qui couvre cet hôte"
+    },
+    "saveError": "Impossible d'enregistrer le changement",
+    "skip": {
+      "failedRecently": "son exécution précédente a échoué ; il attend que quelqu'un la confirme ou que le délai de nouvelle tentative (en heures) soit écoulé",
+      "imageMode": "un hôte en mode image met à jour son image à la place",
+      "inactive": "l'hôte est inactif",
+      "needsRepair": "le gestionnaire de paquets nécessite une réparation",
+      "noBackup": "il n'a pas de sauvegarde récente et fiable",
+      "notApproved": "l'hôte n'est pas approuvé",
+      "optedOut": "l'hôte n'est jamais mis à jour automatiquement",
+      "pending": "son exécution précédente n'est pas terminée",
+      "agentCannotApply": "son agent ne peut pas appliquer de mises à jour ; mettez l'agent à jour"
+    },
+    "status": {
+      "failed": "Échoué",
+      "nothingToDo": "Rien à faire",
+      "partial": "Échec partiel",
+      "queued": "En cours",
+      "skipped": "Ignoré",
+      "succeeded": "Réussi",
+      "timedOut": "Aucun résultat"
+    },
+    "subtitle": "Les profils dont l'option \"Appliquer automatiquement\" est activée mettent à jour leurs hôtes selon leur planification.",
+    "title": "Mises à jour automatiques",
+    "when": "Quand"
   }
 }

@@ -791,7 +791,8 @@
     "hardwareNeedsAttention": "対応が必要なハードウェア",
     "backupsAttention": "対応が必要なバックアップ",
     "backupsEscrowStale": "緊急用の鍵のエクスポートが古くなっています",
-    "backupsServerUnprotected": "この SysManage サーバーには正常なバックアップがありません"
+    "backupsServerUnprotected": "この SysManage サーバーには正常なバックアップがありません",
+    "autoUpdateProblems": "自動更新の問題"
   },
   "dataGrid": {
     "columnVisibility": "列の表示",
@@ -3784,12 +3785,28 @@
     "title": "更新プロファイル",
     "trigger": "今すぐ実行",
     "triggerError": "プロファイルの実行に失敗しました",
-    "triggered": "{{count}} ホストに対して実行 -- {{enqueued}} 件送信",
     "updated": "更新プロファイルを保存しました",
     "window": "段階的ウィンドウ (分)",
     "windowHelp": "エージェント配信をこの分数にわたって分散 (0-720)",
     "windowRange": "段階的ウィンドウは 0 ～ 720 分の範囲である必要があります",
-    "addDialogTitle": "更新プロファイルを追加"
+    "addDialogTitle": "更新プロファイルを追加",
+    "autoApply": "このスケジュールで自動的に適用する",
+    "automatic": "自動",
+    "backupHelp": "空欄: バックアップを確認しない",
+    "backupHours": "直近 (時間) 以内に正常なバックアップがある場合のみ",
+    "excluded": "これらのパッケージは適用しない",
+    "excludedHelp": "カンマ区切りの名前； * は何でもマッチします (linux-image-*、postgresql*)",
+    "held": "一時停止中",
+    "hold": "このポリシーを一時停止",
+    "holdReason": "「{{name}}」を一時停止する理由は？",
+    "listedHosts": "指定ホスト {{count}} 台",
+    "listedHostsHelp": "リストで指定したホストはタグより優先されます。複数のポリシーの対象となるホストは、最も具体的なポリシーに従います。",
+    "listedHostsLabel": "これらのホストのみ",
+    "ranNow": "{{queued}} 台を更新中、{{skipped}} 台をスキップ、{{nothing}} 台は対応不要",
+    "reboot": "再起動",
+    "rebootNever": "しない (ホストに「再起動が必要」と表示されます)",
+    "rebootWhenNeeded": "更新で必要な場合に再起動",
+    "release": "一時停止を解除"
   },
   "userDetail": {
     "active": "アクティブ",
@@ -6174,5 +6191,67 @@
       "view_report": "レポートを表示する",
       "view_user_security_roles": "ユーザーのセキュリティロールを表示する"
     }
+  },
+  "autoUpdates": {
+    "acknowledge": "確認",
+    "allHeld": "すべての自動更新ポリシーが一時停止されています。",
+    "appliedOf": "{{total}} 件中 {{applied}} 件を適用済み",
+    "details": "詳細",
+    "followsPolicy": "\"{{name}}\"に従います: {{rule}}。",
+    "heldBy": "{{when}} から {{who}} により一時停止中: {{reason}}",
+    "holdAll": "すべてのポリシーを一時停止",
+    "holdReason": "すべての自動更新を一時停止する理由は？",
+    "hostTitle": "自動更新",
+    "noPolicy": "このホストには自動更新ポリシーが適用されていません。",
+    "noProblems": "対応が必要な自動実行はありません。",
+    "optOut": "自動更新しない",
+    "optOutReason": "このホストはなぜ自動的に更新されてはならないのか？",
+    "optedOut": "自動的に更新されません: {{reason}}",
+    "pkg": {
+      "agent": "エージェントは「エージェントを更新」で更新されます",
+      "busy": "すでに更新中です",
+      "excluded": "ポリシーによって除外されている",
+      "firmware": "ファームウェアはポリシーで fwupd が指定されている場合のみ",
+      "held": "ホスト上でホールドされている",
+      "manager": "パッケージマネージャーがポリシーに含まれていない",
+      "notSecurity": "セキュリティ更新ではありません",
+      "osUpgrade": "OS のアップグレードは自動では行われません"
+    },
+    "policy": "ポリシー",
+    "reboot": {
+      "back": "再起動して復旧しました",
+      "notBack": "再起動後に復帰しませんでした",
+      "queued": "再起動中"
+    },
+    "result": "結果",
+    "rule": {
+      "moreConservative": "同等に具体的なポリシーのうち、より保守的なもの",
+      "moreSpecific": "これをカバーする最も具体的なポリシー",
+      "only": "このホストをカバーする唯一のポリシー"
+    },
+    "saveError": "変更を保存できませんでした",
+    "skip": {
+      "failedRecently": "前回の実行が失敗しました。誰かが確認するか、再試行までの時間が経過するまで待機します",
+      "imageMode": "イメージモードのホストは代わりにイメージを更新します",
+      "inactive": "ホストが非アクティブです",
+      "needsRepair": "パッケージマネージャーの修復が必要です",
+      "noBackup": "最近の正常なバックアップがありません",
+      "notApproved": "ホストが承認されていません",
+      "optedOut": "ホストは決して自動的に更新されません",
+      "pending": "前の実行がまだ完了していない",
+      "agentCannotApply": "エージェントが更新を適用できません。エージェントを更新してください"
+    },
+    "status": {
+      "failed": "失敗",
+      "nothingToDo": "対応不要",
+      "partial": "部分的に失敗しました",
+      "queued": "実行中",
+      "skipped": "スキップ",
+      "succeeded": "成功",
+      "timedOut": "結果なし"
+    },
+    "subtitle": "「自動適用」が有効なプロファイルは、スケジュールに従ってホストを更新します。",
+    "title": "自動更新",
+    "when": "日時"
   }
 }

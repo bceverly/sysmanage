@@ -15,6 +15,7 @@ from .advisor import *
 from .advisory import *
 from .threat_model import *
 from .asset_discovery import *
+from .auto_updates import *
 from .malware import *
 from .airgap import *
 from .airgap_bundle import *

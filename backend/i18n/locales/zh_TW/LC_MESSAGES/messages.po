@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-13 05:45-0800\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-16 10:03-0800\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -54,18 +54,14 @@ msgid ""
 "This server requires a client certificate from this host, and none was "
 "presented. The agent requests one automatically; if this persists, check "
 "that the agent is up to date."
-msgstr ""
-"此伺服器要求此主機提供用戶端憑證，但未提供任何憑證。代理會自動申請憑證；如果"
-"此問題持續發生，請檢查代理是否為最新版本。"
+msgstr "此伺服器要求此主機提供用戶端憑證，但未提供任何憑證。代理會自動申請憑證；如果此問題持續發生，請檢查代理是否為最新版本。"
 
 #: backend/security/agent_mtls.py:201
 msgid ""
 "The client certificate this host presented is not valid for it (not issued "
 "by this server, issued to another host, or replaced or revoked). The "
 "connection was refused."
-msgstr ""
-"此主機提供的用戶端憑證對該主機無效（不是由此伺服器簽發、簽發給其他主機，或已"
-"被取代或撤銷）。連線已被拒絕。"
+msgstr "此主機提供的用戶端憑證對該主機無效（不是由此伺服器簽發、簽發給其他主機，或已被取代或撤銷）。連線已被拒絕。"
 
 #: backend/security/agent_mtls.py:206
 msgid ""
@@ -219,8 +215,9 @@ msgstr "取得 CA 憑證失敗：%s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:425
-#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:374
+#: backend/api/maintenance_windows.py:431 backend/api/firewall_roles.py:473
+#: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "主機ID格式無效"
@@ -241,7 +238,8 @@ msgstr "主機ID格式無效"
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:167
-#: backend/api/backups.py:170 backend/api/diagnostics.py:102
+#: backend/api/backups.py:170 backend/api/auto_updates.py:220
+#: backend/api/auto_updates.py:254 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -260,7 +258,7 @@ msgstr "主機尚未被批准"
 #: backend/api/security_roles.py:204 backend/api/auth_mfa.py:149
 #: backend/api/airgap_collection_schedule.py:143
 #: backend/api/graylog_integration.py:171 backend/api/broadcast.py:128
-#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:88
+#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:93
 #: backend/api/access_groups.py:140 backend/api/grafana_integration.py:313
 #: backend/api/opentelemetry/deployment.py:67
 #: backend/api/opentelemetry/deployment.py:220
@@ -269,9 +267,10 @@ msgstr "主機尚未被批准"
 #: backend/api/opentelemetry/grafana_connection.py:201
 #: backend/api/cve_refresh_settings.py:66 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
-#: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
-#: backend/api/child_host_utils.py:33 backend/api/child_host_utils.py:67
+#: backend/api/packages_operations.py:247
+#: backend/api/license_management.py:116 backend/api/secrets/permissions.py:39
+#: backend/api/error_constants.py:22 backend/api/child_host_utils.py:33
+#: backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "找不到用戶"
 
@@ -283,8 +282,7 @@ msgstr "只有管理員才能變更惡意軟體規則集"
 msgid ""
 "Malware rule sets are shared by every tenant; change them from the server "
 "scope, not from inside a tenant"
-msgstr ""
-"惡意軟體規則集由所有租戶共用；請在伺服器範圍內變更，而非在某個租戶內部變更"
+msgstr "惡意軟體規則集由所有租戶共用；請在伺服器範圍內變更，而非在某個租戶內部變更"
 
 #: backend/api/malware.py:150
 msgid "Invalid id"
@@ -422,8 +420,7 @@ msgstr "找不到主機 %s 進行主機名更新"
 msgid ""
 "Updated hostname for host %(host_id)s from %(old_hostname)s to "
 "%(new_hostname)s"
-msgstr ""
-"更新主機 %(host_id)s 的主機名稱，從 %(old_hostname)s 更改為 %(new_hostname)s"
+msgstr "更新主機 %(host_id)s 的主機名稱，從 %(old_hostname)s 更改為 %(new_hostname)s"
 
 #: backend/api/handlers/hostname_handler.py:83
 #, python-format
@@ -437,8 +434,8 @@ msgstr "處理程序狀態更新失敗：%s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:755 backend/api/update_handlers.py:39
-#: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
+#: backend/api/message_handlers.py:775 backend/api/update_handlers.py:40
+#: backend/api/update_handlers.py:48 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "主機未註冊"
 
@@ -505,27 +502,27 @@ msgstr "無法處理角色數據更新：%s"
 msgid "Child host management requires a Professional+ license."
 msgstr "子主機管理需要 Professional+ 許可證。"
 
-#: backend/api/handlers/os_hardware_handlers.py:132
+#: backend/api/handlers/os_hardware_handlers.py:133
 msgid "No host identification available"
 msgstr "沒有可用的主機識別信息"
 
-#: backend/api/handlers/os_hardware_handlers.py:344
+#: backend/api/handlers/os_hardware_handlers.py:345
 msgid "os_version_updated"
 msgstr "作業系統版本已更新"
 
-#: backend/api/handlers/os_hardware_handlers.py:350
+#: backend/api/handlers/os_hardware_handlers.py:351
 msgid "No OS information provided"
 msgstr "未提供操作系統信息"
 
-#: backend/api/handlers/os_hardware_handlers.py:360
+#: backend/api/handlers/os_hardware_handlers.py:361
 msgid "Failed to update OS version"
 msgstr "更新作業系統版本失敗"
 
-#: backend/api/handlers/os_hardware_handlers.py:568
+#: backend/api/handlers/os_hardware_handlers.py:569
 msgid "hardware_updated"
 msgstr "硬體已更新"
 
-#: backend/api/handlers/os_hardware_handlers.py:577
+#: backend/api/handlers/os_hardware_handlers.py:578
 msgid "Failed to update hardware information"
 msgstr "更新硬體資訊失敗"
 
@@ -537,53 +534,53 @@ msgstr "軟體清單已更新"
 msgid "Failed to update software inventory"
 msgstr "更新軟體清單失敗"
 
-#: backend/api/handlers/software_package_handlers.py:296
-#: backend/api/updates/report_routes.py:75
+#: backend/api/handlers/software_package_handlers.py:299
+#: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "儲存更新失敗：%s"
 
-#: backend/api/handlers/software_package_handlers.py:411
+#: backend/api/handlers/software_package_handlers.py:414
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "無法處理套件收集結果：%s"
 
-#: backend/api/handlers/software_package_handlers.py:505
+#: backend/api/handlers/software_package_handlers.py:508
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "無法處理第三方倉庫更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:588
+#: backend/api/handlers/software_package_handlers.py:591
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "無法處理防毒狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:719
+#: backend/api/handlers/software_package_handlers.py:722
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "無法處理商業防毒狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:821
+#: backend/api/handlers/software_package_handlers.py:824
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "無法處理防火牆狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:907
+#: backend/api/handlers/software_package_handlers.py:910
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "無法處理Graylog狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:939
+#: backend/api/handlers/software_package_handlers.py:942
 msgid "Missing request_id in installation_complete"
 msgstr "缺少request_id在安裝完成中"
 
-#: backend/api/handlers/software_package_handlers.py:956
+#: backend/api/handlers/software_package_handlers.py:959
 #: backend/api/agent.py:933 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "未找到安裝請求：%s"
 
-#: backend/api/handlers/software_package_handlers.py:997
+#: backend/api/handlers/software_package_handlers.py:1000
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -595,7 +592,7 @@ msgstr "報告模板未找到"
 
 #: backend/api/report_templates.py:196 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
-#: backend/api/upgrade_profiles.py:128
+#: backend/api/upgrade_profiles.py:145
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
@@ -691,8 +688,7 @@ msgid ""
 "last 24 hours; enforcing now would refuse them. Update their agents, or "
 "confirm to enforce anyway."
 msgstr ""
-"有 %d 台已核准的主機在過去 24 小時內未提供有效的用戶端憑證；現在強制要求憑證"
-"將會拒絕這些主機。請更新它們的代理，或確認仍要強制要求憑證。"
+"有 %d 台已核准的主機在過去 24 小時內未提供有效的用戶端憑證；現在強制要求憑證將會拒絕這些主機。請更新它們的代理，或確認仍要強制要求憑證。"
 
 #: backend/api/third_party_repos.py:223
 #, python-format
@@ -765,8 +761,8 @@ msgstr "無法將倉庫禁用命令加入佇列：%s"
 
 #: backend/api/reports/endpoints.py:73
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade "
-"to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
 msgstr "報告產生需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
 #: backend/api/reports/endpoints.py:154
@@ -834,16 +830,14 @@ msgstr "schedule_id 的 UUID 無效: %s"
 msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
-msgstr ""
-"氣隙採集排程需要包含氣隙採集器引擎的 SysManage Professional+ 授權。請升級以存"
-"取此功能。"
+msgstr "氣隙採集排程需要包含氣隙採集器引擎的 SysManage Professional+ 授權。請升級以存取此功能。"
 
 #: backend/api/airgap_collection_schedule.py:85
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "無效的 cron 運算式：需要 5 個欄位 (m h dom mon dow)"
 
 #: backend/api/airgap_collection_schedule.py:94
-#: backend/api/upgrade_profiles.py:148
+#: backend/api/upgrade_profiles.py:165
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "無效的 cron 運算式: %s"
@@ -879,16 +873,15 @@ msgid ""
 "will fire only on the current tick window until the Pro+ license includes "
 "automation_engine."
 msgstr ""
-"automation_engine 未載入；next_run 時間戳記未推進。在 Pro+ 授權包含 "
-"automation_engine 之前，排程僅在目前 tick 視窗中觸發。"
+"automation_engine 未載入；next_run 時間戳記未推進。在 Pro+ 授權包含 automation_engine "
+"之前，排程僅在目前 tick 視窗中觸發。"
 
 #: backend/api/host_registration.py:82
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
-msgstr ""
-"主機 '%(fqdn)s' 通過註冊密鑰 '%(key_name)s' 加入（自動批准=%(auto_approve)s）"
+msgstr "主機 '%(fqdn)s' 通過註冊密鑰 '%(key_name)s' 加入（自動批准=%(auto_approve)s）"
 
 #: backend/api/host_registration.py:134
 msgid "Invalid or expired registration key"
@@ -900,10 +893,9 @@ msgstr "無效或已過期的入站令牌"
 
 #: backend/api/host_registration.py:239
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token "
-"instead of registering server-scoped."
-msgstr ""
-"此主機已屬於一個租戶。請使用其入駐令牌重新註冊，而不是進行伺服器範圍的註冊。"
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr "此主機已屬於一個租戶。請使用其入駐令牌重新註冊，而不是進行伺服器範圍的註冊。"
 
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -1116,8 +1108,7 @@ msgstr "找不到子主機"
 msgid ""
 "Container lifecycle management requires a SysManage Professional+ license. "
 "Please upgrade to access this feature."
-msgstr ""
-"容器生命週期管理需要 SysManage Professional+ 授權。請升級以存取此功能。"
+msgstr "容器生命週期管理需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
 # Child host lifecycle control messages
 #: backend/api/child_host_control.py:305
@@ -1176,8 +1167,7 @@ msgstr "已派遣圖像捕獲"
 msgid ""
 "No collector signing key found. Set this server's role to 'Air-Gap "
 "Collector' to generate one."
-msgstr ""
-"找不到收集器簽名密鑰。將此服務器的角色設置為'Air-Gap Collector'以生成一個。"
+msgstr "找不到收集器簽名密鑰。將此服務器的角色設置為'Air-Gap Collector'以生成一個。"
 
 #: backend/api/airgap_keys.py:96 backend/api/federation_identity.py:169
 #, python-format
@@ -1437,8 +1427,7 @@ msgid ""
 "Broadcast '%(action)s' delivered to %(delivered)d host(s) "
 "(filter=%(filter)s, %(elapsed).0fms)"
 msgstr ""
-"廣播 '%(action)s' 已發送到 %(delivered)d 主機 (過濾器=%(filter)s, "
-"%(elapsed).0fms)"
+"廣播 '%(action)s' 已發送到 %(delivered)d 主機 (過濾器=%(filter)s, %(elapsed).0fms)"
 
 #: backend/api/package_handlers.py:72
 msgid "Missing batch_id"
@@ -1450,8 +1439,8 @@ msgid ""
 "Host %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) attempted "
 "to report packages for %(os_name)s %(os_version)s"
 msgstr ""
-"主機 %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) 將其報告的系"
-"統版本為 %(os_name)s %(os_version)s 的包嘗試報告"
+"主機 %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) 將其報告的系統版本為 "
+"%(os_name)s %(os_version)s 的包嘗試報告"
 
 #: backend/api/package_handlers.py:178
 #, python-format
@@ -1493,12 +1482,12 @@ msgstr "權限被拒絕：需要 DELETE_QUEUE_MESSAGE 角色"
 msgid "No message IDs provided"
 msgstr "未提供消息ID"
 
-#: backend/api/queue.py:186
+#: backend/api/queue.py:190
 msgid "Message not found or not expired"
 msgstr "消息未找到或已過期"
 
 # Tag management messages
-#: backend/api/queue.py:249
+#: backend/api/queue.py:253
 msgid "Failed to fetch message details"
 msgstr "無法取得消息詳細資料"
 
@@ -1574,175 +1563,174 @@ msgstr "找不到鏡像主機"
 msgid "Mirror deleted"
 msgstr "鏡像已刪除"
 
-#: backend/api/repository_mirroring.py:262
+#: backend/api/repository_mirroring.py:263
 #, python-format
 msgid "Unsupported package_manager: %s"
 msgstr "不支援的包管理器：%s"
 
-#: backend/api/repository_mirroring.py:275
+#: backend/api/repository_mirroring.py:276
 msgid "Mirror sync dispatched"
 msgstr "鏡像同步已發送"
 
-#: backend/api/repository_mirroring.py:389
+#: backend/api/repository_mirroring.py:390
 msgid "Mirror tick requires automation_engine for cron evaluation."
 msgstr "鏡像tick需要automation_engine進行cron評估。"
 
-#: backend/api/repository_mirroring.py:604
+#: backend/api/repository_mirroring.py:605
 #, python-format
 msgid ""
 "Mirror %s has not completed a successful sync yet -- wait for sync to "
 "succeed before assigning it as a default."
 msgstr "鏡像%s尚未完成成功的同步----等待同步成功後再設置為默認值。"
 
-#: backend/api/repository_mirroring.py:613
+#: backend/api/repository_mirroring.py:614
 #, python-format
 msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
 "%(platform)s default"
-msgstr ""
-"鏡像 %(mirror_name)s 是為 %(package_manager)s 準備的，不能分配給 "
-"%(platform)s 預設值"
+msgstr "鏡像 %(mirror_name)s 是為 %(package_manager)s 準備的，不能分配給 %(platform)s 預設值"
 
-#: backend/api/repository_mirroring.py:696
+#: backend/api/repository_mirroring.py:697
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "未知的 (平台, 版本, 操作系統類型) 元組"
 
-#: backend/api/airgap_collector_runs.py:65
+#: backend/api/airgap_collector_runs.py:70
 msgid "Air-gap collection run not found"
 msgstr "離線收集運行未找到"
 
-#: backend/api/airgap_collector_runs.py:66
+#: backend/api/airgap_collector_runs.py:71
 msgid "Air-gap media manifest not found"
 msgstr "離線媒體清單未找到"
 
-#: backend/api/airgap_collector_runs.py:67
+#: backend/api/airgap_collector_runs.py:72
 #, python-format
 msgid "Invalid UUID for run_id: %s"
 msgstr "run_id 的 UUID 非法: %s"
 
-#: backend/api/airgap_collector_runs.py:68
+#: backend/api/airgap_collector_runs.py:73
 #, python-format
 msgid "Invalid UUID for manifest_id: %s"
 msgstr "manifest_id 的 UUID 非法: %s"
 
-#: backend/api/airgap_collector_runs.py:77
+#: backend/api/airgap_collector_runs.py:82
 msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
-msgstr ""
-"隔離收集運行需要 SysManage Professional+ 許可證，該許可證包含隔離收集引擎。請"
-"升級以使用此功能。"
+msgstr "隔離收集運行需要 SysManage Professional+ 許可證，該許可證包含隔離收集引擎。請升級以使用此功能。"
 
-#: backend/api/airgap_collector_runs.py:218
+#: backend/api/airgap_collector_runs.py:227
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded -- the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be"
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
-msgstr ""
-"隔離收集運行需要載入 repository_mirroring_engine 模組----收集器從鏡像樹快照中"
-"讀取每個目標的捆綁包。"
+msgstr "隔離收集運行需要載入 repository_mirroring_engine 模組----收集器從鏡像樹快照中讀取每個目標的捆綁包。"
 
-#: backend/api/airgap_collector_runs.py:229
+#: backend/api/airgap_collector_runs.py:238
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
-msgstr ""
-"全局鏡像設定缺失或 mirror_root_path 尚未配置。請在創建集合運行之前配置鏡像設"
-"定。"
+msgstr "全局鏡像設定缺失或 mirror_root_path 尚未配置。請在創建集合運行之前配置鏡像設定。"
 
-#: backend/api/airgap_collector_runs.py:289
+#: backend/api/airgap_collector_runs.py:298
 #, python-format
 msgid ""
 "Mirror %r has no known_version_id set; Option-B collection runs need the "
 "mirror to be tied to a catalog version so distro / version can be derived.  "
 "Edit the mirror and pick a version from the dropdown."
 msgstr ""
-"鏡像%r沒有已知的known_version_id設置；選項B收集需要鏡像與目錄版本綁定，以便推"
-"斷分發/版本。請編輯鏡像並從下拉菜單中選擇一個版本。"
+"鏡像%r沒有已知的known_version_id設置；選項B收集需要鏡像與目錄版本綁定，以便推斷分發/版本。請編輯鏡像並從下拉菜單中選擇一個版本。"
 
-#: backend/api/airgap_collector_runs.py:318
+#: backend/api/airgap_collector_runs.py:327
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
 "version on the mirror."
 msgstr "鏡像%r引用的目錄版本已不存在。請重新選擇鏡像上的版本。"
 
-#: backend/api/airgap_collector_runs.py:402
-#: backend/api/airgap_collector_runs.py:481
+#: backend/api/airgap_collector_runs.py:414
+#: backend/api/airgap_collector_runs.py:493
 msgid "At least one target is required to create a collection run."
 msgstr "至少需要一個目標來建立集合運行。"
 
-#: backend/api/airgap_collector_runs.py:412
+#: backend/api/airgap_collector_runs.py:424
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "鏡像 ID 的 UUID 格式無效：%s"
 
-#: backend/api/airgap_collector_runs.py:422
+#: backend/api/airgap_collector_runs.py:434
 #, python-format
 msgid "Mirror %s not found"
 msgstr "找不到鏡像%s"
 
-#: backend/api/airgap_collector_runs.py:428
+#: backend/api/airgap_collector_runs.py:440
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
 msgstr "鏡像%r已被禁用；啟用並同步後才能在收集運行中使用它。"
 
-#: backend/api/airgap_collector_runs.py:439
+#: backend/api/airgap_collector_runs.py:451
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
 "dispatches to a single agent). Selected mirrors span %d hosts."
-msgstr ""
-"所有目標鏡像必須位於同一主機上（收集計劃分派給單一 Agent）。選擇的鏡像跨越 "
-"%d 個主機。"
+msgstr "所有目標鏡像必須位於同一主機上（收集計劃分派給單一 Agent）。選擇的鏡像跨越 %d 個主機。"
 
-#: backend/api/airgap_collector_runs.py:535
+#: backend/api/airgap_collector_runs.py:547
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
-msgstr ""
-"已為空氣隔離收集運行 '%(iso_label)s' 創建一次性快照，目標鏡像數量為 "
-"%(mirror_count)d；快照已發送。"
+msgstr "已為空氣隔離收集運行 '%(iso_label)s' 創建一次性快照，目標鏡像數量為 %(mirror_count)d；快照已發送。"
 
-#: backend/api/airgap_collector_runs.py:658
+#: backend/api/airgap_collector_runs.py:670
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
 "ISO_BUILT."
 msgstr "ISO 尚未準備好下載（狀態：%s）。請等待運行達到 ISO_BUILT 狀態。"
 
-#: backend/api/airgap_collector_runs.py:668
+#: backend/api/airgap_collector_runs.py:680
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
-"the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
+" the collection to rebuild."
 msgstr "ISO 檔案已不在磁碟上；暫存卷可能已被清潔。重新執行收集以重建。"
 
-#: backend/api/airgap_collector_runs.py:685
+#: backend/api/airgap_collector_runs.py:697
 msgid "ISO file not found."
 msgstr "找不到 ISO 檔案。"
 
-#: backend/api/airgap_collector_runs.py:705
+#: backend/api/airgap_collector_runs.py:717
 #, python-format
 msgid "Disc %(disc)d not found for this run.  Available discs: %(available)s"
 msgstr "找不到 Disc %(disc)d。可用磁盤：%(available)s"
 
-#: backend/api/airgap_collector_runs.py:790
+#: backend/api/airgap_collector_runs.py:802
 msgid "Invalid or expired download token."
 msgstr "無效或已過期的下載令牌。"
 
-#: backend/api/airgap_collector_runs.py:823
+#: backend/api/airgap_collector_runs.py:828
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr "此運行未在等待空白光碟（狀態：%s）。"
+
+#: backend/api/airgap_collector_runs.py:843
+#, python-format
+msgid ""
+"Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run"
+" '%(iso_label)s'"
+msgstr "已為離線集合運行 '%(iso_label)s' 的第 %(disc)d 張光碟（共 %(count)d 張）放入空白光碟"
+
+#: backend/api/airgap_collector_runs.py:885
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "已刪除離線集合運行 '%s'"
 
-#: backend/api/airgap_collector_runs.py:895
+#: backend/api/airgap_collector_runs.py:957
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "運行尚未完成（狀態：%s）"
 
-#: backend/api/airgap_collector_runs.py:901
+#: backend/api/airgap_collector_runs.py:963
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "ISO 檔案已不在磁碟上：%s"
@@ -1753,8 +1741,8 @@ msgstr "套件配置文件未找到"
 
 #: backend/api/package_compliance.py:73
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 msgstr "包符合性配置檔需要 SysManage Professional 許可證。請升級以使用此功能。"
 
 #: backend/api/package_compliance.py:200
@@ -1790,8 +1778,7 @@ msgstr ""
 msgid ""
 "Dispatched compliance check to agent '%(host_fqdn)s' for profile "
 "'%(profile_name)s'"
-msgstr ""
-"已將合規性檢查分派給代理 '%(host_fqdn)s'，配置文件為 '%(profile_name)s'"
+msgstr "已將合規性檢查分派給代理 '%(host_fqdn)s'，配置文件為 '%(profile_name)s'"
 
 #: backend/api/file_watches.py:63
 msgid "Invalid watch ID format"
@@ -1981,8 +1968,7 @@ msgstr "註冊金鑰已刪除"
 msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
-msgstr ""
-"外部身份提供者整合需要 SysManage Professional+ 許可證。請升級以使用此功能。"
+msgstr "外部身份提供者整合需要 SysManage Professional+ 許可證。請升級以使用此功能。"
 
 #: backend/api/external_idp.py:89
 msgid "IdP provider not found"
@@ -2036,10 +2022,9 @@ msgstr "OIDC客戶端密鑰無法解析。"
 
 #: backend/api/external_idp.py:577 backend/api/external_idp.py:796
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to "
-"provision your account first."
-msgstr ""
-"沒有與此身份提供者身份相關聯的SysManage帳戶。請先要求管理員為您建立帳戶。"
+"No sysmanage account is linked to this IdP identity. Ask an administrator to"
+" provision your account first."
+msgstr "沒有與此身份提供者身份相關聯的SysManage帳戶。請先要求管理員為您建立帳戶。"
 
 #: backend/api/external_idp.py:582 backend/api/external_idp.py:801
 msgid "Account is inactive."
@@ -2191,20 +2176,17 @@ msgstr "連接失敗 - Grafana 伺服器可能已關閉或不可達"
 msgid "Unexpected error checking Grafana health"
 msgstr "檢查 Grafana 健康狀態時發生意外錯誤"
 
-#: backend/api/proplus_routes_stubs.py:64
+#: backend/api/proplus_routes_stubs.py:69
 msgid ""
 "Encrypted backups require a SysManage Professional+ license with the backup "
 "engine. Please upgrade to access this feature."
-msgstr ""
-"加密備份需要含有備份引擎的 SysManage Professional+ 授權。請升級以使用此功能。"
+msgstr "加密備份需要含有備份引擎的 SysManage Professional+ 授權。請升級以使用此功能。"
 
-#: backend/api/proplus_routes_stubs.py:120
+#: backend/api/proplus_routes_stubs.py:121
 msgid ""
 "Host provisioning requires a SysManage Professional+ license with the "
 "provisioning engine. Please upgrade to access this feature."
-msgstr ""
-"主機配置需要 SysManage Professional+ 許可證，並包含配置引擎。請升級以使用此功"
-"能。"
+msgstr "主機配置需要 SysManage Professional+ 許可證，並包含配置引擎。請升級以使用此功能。"
 
 #: backend/api/opentelemetry/status.py:63
 #: backend/api/opentelemetry/deployment.py:97
@@ -2212,8 +2194,8 @@ msgstr ""
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
-#: backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97
+#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "找不到主機或主機未激活"
 
@@ -2250,8 +2232,8 @@ msgstr "Grafana URL 不可用"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
-"on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
+" on the server."
 msgstr "OpenTelemetry部署需要在伺服器上載入Pro+ observability_engine。"
 
 #: backend/api/opentelemetry/deployment.py:179
@@ -2265,8 +2247,8 @@ msgstr "部署 OpenTelemetry 時失敗：%s"
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
-"the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
+" the server."
 msgstr "移除 OpenTelemetry 需要伺服器上載入 Pro+ observability_engine"
 
 #: backend/api/opentelemetry/deployment.py:291
@@ -2361,8 +2343,7 @@ msgstr "將 OpenTelemetry 連接到 Grafana 時失敗：%s"
 msgid ""
 "OpenTelemetry Grafana disconnection requires the Pro+ observability_engine "
 "to be loaded on the server."
-msgstr ""
-"OpenTelemetry Grafana斷開連接需要在伺服器上載入Pro+ observability_engine。"
+msgstr "OpenTelemetry Grafana斷開連接需要在伺服器上載入Pro+ observability_engine。"
 
 #: backend/api/opentelemetry/grafana_connection.py:277
 msgid "OpenTelemetry Grafana disconnection queued successfully"
@@ -2375,11 +2356,9 @@ msgstr "將 OpenTelemetry 從 Grafana 斷開時失敗：%s"
 
 #: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
-"license. Please upgrade to access this feature."
-msgstr ""
-"內容生命周期管理需要SysManage Professional+（Enterprise）許可證。請升級以訪問"
-"此功能。"
+"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
+" license. Please upgrade to access this feature."
+msgstr "內容生命周期管理需要SysManage Professional+（Enterprise）許可證。請升級以訪問此功能。"
 
 #: backend/api/content_lifecycle.py:121
 msgid "Environment name is required"
@@ -2439,15 +2418,13 @@ msgstr "該 '%s' 過濾器需要諮詢引擎，但此引擎未載入"
 #, python-format
 msgid "The '%s' filter needs a non-empty 'packages' list"
 msgstr ""
-"\\u2018%s\\u2019 \\u63d0\\u5240 \\u9700\\u8981 \\u4e00\\u4e2a \\u975e\\u7a7a "
-"\\u2018packages\\u2019 \\u5217\\u8868"
+"\\u2018%s\\u2019 \\u63d0\\u5240 \\u9700\\u8981 \\u4e00\\u4e2a \\u975e\\u7a7a"
+" \\u2018packages\\u2019 \\u5217\\u8868"
 
 #: backend/api/content_lifecycle.py:391
 #, python-format
 msgid "The '%s' filter needs a 'date' (YYYY-MM-DD)"
-msgstr ""
-"\\u2018%s\\u2019 \\u63d0\\u5240 \\u9700\\u8981 \\u4e00\\u4e2a \\u65e5\\u671f "
-"(YYYY-MM-DD)"
+msgstr "\\u2018%s\\u2019 \\u63d0\\u5240 \\u9700\\u8981 \\u4e00\\u4e2a \\u65e5\\u671f (YYYY-MM-DD)"
 
 #: backend/api/content_lifecycle.py:453 backend/api/content_lifecycle.py:501
 msgid "A content view with that name already exists"
@@ -2600,7 +2577,8 @@ msgstr "防火牆重啟命令已成功發送"
 msgid "Firewall deploy command sent successfully"
 msgstr "防火牆部署命令已成功發送"
 
-#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273
+#: backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "需要指定作業系統名稱"
@@ -2623,8 +2601,7 @@ msgid ""
 "Invalid package manager '%(package_manager)s' for OS '%(os_name)s'. Valid "
 "options: %(valid_options)s"
 msgstr ""
-"對於系統 '%(os_name)s' 無效的包管理器 '%(package_manager)s'。有效選項："
-"%(valid_options)s"
+"對於系統 '%(os_name)s' 無效的包管理器 '%(package_manager)s'。有效選項：%(valid_options)s"
 
 #: backend/api/default_repositories.py:308
 msgid "Repository URL is required"
@@ -2720,7 +2697,8 @@ msgstr "憑證主機尚未註冊。請重新註冊。"
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Agent 認證失敗：無效的主機 ID"
 
-#: backend/api/message_handlers_core.py:98 backend/utils/host_validation.py:104
+#: backend/api/message_handlers_core.py:98
+#: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID 為 %s 的主機尚未註冊。請重新註冊。"
@@ -2733,9 +2711,7 @@ msgstr "已拒絕代理程式工作階段：它未證明自己是此主機"
 msgid ""
 "This agent did not prove it is this host. If the host was reinstalled, "
 "remove it from SysManage and approve its new registration."
-msgstr ""
-"此代理程式未證明自己是此主機。如果主機已重新安裝，請從 SysManage 中移除它，然"
-"後核准其新的註冊。"
+msgstr "此代理程式未證明自己是此主機。如果主機已重新安裝，請從 SysManage 中移除它，然後核准其新的註冊。"
 
 #: backend/api/message_handlers_core.py:194
 #, python-format
@@ -2754,7 +2730,7 @@ msgstr "主機自動批准通過子主機建立"
 msgid "Agent registered and connected successfully"
 msgstr "Agent 註冊並成功連接"
 
-#: backend/api/message_handlers_core.py:945
+#: backend/api/message_handlers_core.py:947
 msgid "Failed to process heartbeat"
 msgstr "無法處理心跳"
 
@@ -2774,7 +2750,8 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "目標 '%(t)s' 對 %(f)s 無效"
 
 #: backend/api/logging_settings.py:134
-msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgid ""
+"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 msgstr "遠端 syslog 轉發需要一個專業許可證（LOG_ROUTING）。"
 
 #: backend/api/logging_settings.py:141
@@ -3104,11 +3081,9 @@ msgstr "此主機的代理程式還不能安裝 restate；請先升級代理程�
 
 #: backend/api/backups_equip.py:68
 msgid ""
-"restate has no package the agent can install on this operating system; build "
-"and install it by hand (see restate's README)"
-msgstr ""
-"restate 沒有代理程式可在此作業系統上安裝的套件；請手動建置並安裝（請參閱 "
-"restate 的 README）"
+"restate has no package the agent can install on this operating system; build"
+" and install it by hand (see restate's README)"
+msgstr "restate 沒有代理程式可在此作業系統上安裝的套件；請手動建置並安裝（請參閱 restate 的 README）"
 
 #: backend/api/backups_equip.py:71
 msgid "Equipping this host is already in progress"
@@ -3194,11 +3169,9 @@ msgstr "最多指定 25 條頻寬規則"
 
 #: backend/api/backups_transport.py:123
 msgid ""
-"A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours "
-"and a rate (08-18 2MiB/s)"
-msgstr ""
-"頻寬規則是一個速率（512KiB/s、2MiB/s、1GiB/s 或 unlimited），或者時段加速率"
-"（08-18 2MiB/s）"
+"A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours"
+" and a rate (08-18 2MiB/s)"
+msgstr "頻寬規則是一個速率（512KiB/s、2MiB/s、1GiB/s 或 unlimited），或者時段加速率（08-18 2MiB/s）"
 
 #: backend/api/backups_transport.py:127
 msgid "A bandwidth rate must be at least 64KiB/s"
@@ -3274,28 +3247,28 @@ msgstr "無法傳送測試電子郵件。請檢查您的 SMTP 設定。"
 msgid "Error sending test email: {error}"
 msgstr "傳送測試電子郵件時發生錯誤：{error}"
 
-#: backend/api/airgap_bundles.py:132
+#: backend/api/airgap_bundles.py:140
 msgid "Bundle not found"
 msgstr "捆包未找到"
 
-#: backend/api/airgap_bundles.py:469
+#: backend/api/airgap_bundles.py:479
 msgid "product must be one of: "
 msgstr "產品必須是以下之一： "
 
-#: backend/api/airgap_bundles.py:483
+#: backend/api/airgap_bundles.py:493
 msgid "Insufficient host resources to build a bundle: "
 msgstr "主機資源不足，無法建立套件"
 
-#: backend/api/airgap_bundles.py:578
+#: backend/api/airgap_bundles.py:596
 #, python-format
 msgid "Bundle is not ready yet (status: %s)"
 msgstr "捆包尚未準備好（狀態：%s）"
 
-#: backend/api/airgap_bundles.py:582
+#: backend/api/airgap_bundles.py:600
 msgid "Bundle file is no longer on disk"
 msgstr "捆包檔案已不在磁碟上"
 
-#: backend/api/airgap_bundles.py:629
+#: backend/api/airgap_bundles.py:647
 msgid "Invalid or expired download token"
 msgstr "無效或已過期的下載令牌"
 
@@ -3307,16 +3280,13 @@ msgstr "此主機尚未獲得核准"
 msgid ""
 "This host already has a valid certificate; present it to renew, or wait "
 "until it is close to expiry"
-msgstr ""
-"此主機已有有效的憑證；請提供該憑證以進行續約，或等到憑證即將到期時再操作"
+msgstr "此主機已有有效的憑證；請提供該憑證以進行續約，或等到憑證即將到期時再操作"
 
 #: backend/api/agent_certificate.py:138
 msgid ""
 "This server could not read the TLS certificate it serves to agents. Set "
 "agent_tls_spki in Settings, or check that nginx answers on this host."
-msgstr ""
-"此伺服器無法讀取它提供給代理的 TLS 憑證。請在設定中設定 agent_tls_spki，或檢"
-"查 nginx 是否在此主機上回應。"
+msgstr "此伺服器無法讀取它提供給代理的 TLS 憑證。請在設定中設定 agent_tls_spki，或檢查 nginx 是否在此主機上回應。"
 
 # Tag management messages
 #: backend/api/tag.py:133
@@ -3384,9 +3354,7 @@ msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
 "instructions and will be unable to log in."
-msgstr ""
-"在 YAML 設定檔中啟用電子郵件並設定 SMTP 設定。如果沒有電子郵件整合，新使用者"
-"將無法收到密碼設定說明，也無法登入。"
+msgstr "在 YAML 設定檔中啟用電子郵件並設定 SMTP 設定。如果沒有電子郵件整合，新使用者將無法收到密碼設定說明，也無法登入。"
 
 #: backend/api/security.py:175
 msgid "Default admin credentials are configured in your YAML file"
@@ -3434,7 +3402,8 @@ msgid ""
 "{command}"
 msgstr "密碼鹽使用預設值，但 JWT 密鑰已變更。執行：{command}"
 
-#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76
+#: backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr "Ubuntu Pro 基於合同的密鑰必須以 'C' 開頭"
 
@@ -3530,25 +3499,26 @@ msgstr "計算套件數量時失敗：%s"
 msgid "Failed to search packages: %s"
 msgstr "無法搜尋套件：%s"
 
-#: backend/api/host.py:196
+#: backend/api/host.py:230
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "權限被拒絕：需要 DELETE_HOST 角色"
 
-#: backend/api/host.py:260
+#: backend/api/host.py:294
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "權限 denied: VIEW_HOST_DETAILS 角色所需"
 
-#: backend/api/host.py:688
+#: backend/api/host.py:683
 msgid "Host already exists"
 msgstr "主機已存在"
 
-#: backend/api/host.py:800
+#: backend/api/host.py:795
 msgid "Registration absorbed: host was recently deleted"
 msgstr "註冊被吸收：主機最近已被刪除"
 
-#: backend/api/host.py:880
+#: backend/api/host.py:875
 #, python-format
-msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid ""
+"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "主機 '%(fqdn)s' 通過入網令牌加入租戶 %(tenant_id)s"
 
 #: backend/api/agent_poll.py:120
@@ -3587,7 +3557,7 @@ msgstr "設定已推送到平台代理"
 msgid "Must specify target_hostname, target_platform, or push_to_all"
 msgstr "必須指定 target_hostname、target_platform 或 push_to_all"
 
-#: backend/api/config_management.py:276
+#: backend/api/config_management.py:280
 msgid "Configuration acknowledgment processed"
 msgstr "設定確認已處理"
 
@@ -3636,34 +3606,34 @@ msgstr "此工作已經完成"
 msgid "Cancelled by an operator"
 msgstr "由操作員取消"
 
-#: backend/api/message_handlers.py:608
+#: backend/api/message_handlers.py:628
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "無法處理診斷結果：%s"
 
-#: backend/api/message_handlers.py:642
+#: backend/api/message_handlers.py:662
 msgid "Missing message_id in command acknowledgment"
 msgstr "缺少消息ID在命令確認中"
 
-#: backend/api/message_handlers.py:709
+#: backend/api/message_handlers.py:729
 msgid "This session cannot acknowledge another host's message"
 msgstr "此工作階段無法確認其他主機的訊息"
 
-#: backend/api/message_handlers.py:779
+#: backend/api/message_handlers.py:799
 msgid "Missing installation_id in package installation status"
 msgstr "缺少安裝ID在包安裝狀態中"
 
-#: backend/api/message_handlers.py:799
+#: backend/api/message_handlers.py:819
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "未找到 ID 為 %s 的安裝日誌條目"
 
-#: backend/api/message_handlers.py:845
+#: backend/api/message_handlers.py:865
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "代理程式 {hostname} 上的包安裝 {status}"
 
-#: backend/api/message_handlers.py:874
+#: backend/api/message_handlers.py:894
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "更新套件安裝狀態失敗：%s"
@@ -3698,7 +3668,8 @@ msgstr "未指定要安裝的包"
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgid ""
+"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr "在主機 %(host_fqdn)s 上安裝了 %(package_count)d 個包"
 
 #: backend/api/packages_operations.py:199
@@ -3755,20 +3726,20 @@ msgstr "系統信息更新請求"
 msgid "Environment subscriptions are managed on the federation coordinator"
 msgstr "環境訂閱由聯邦協調器管理"
 
-#: backend/api/airgap_devices.py:79
+#: backend/api/airgap_devices.py:82
 #, python-format
 msgid "Device %s is not an available import drive"
 msgstr "裝置 %s 不是可用的匯入磁碟"
 
-#: backend/api/airgap_devices.py:103
+#: backend/api/airgap_devices.py:106
 msgid "no import device selected"
 msgstr "未選擇導入設備"
 
-#: backend/api/airgap_devices.py:123
+#: backend/api/airgap_devices.py:132
 msgid "No import device selected"
 msgstr "未選擇導入設備"
 
-#: backend/api/airgap_devices.py:128
+#: backend/api/airgap_devices.py:137
 #, python-format
 msgid "Import device not ready: %s"
 msgstr "導入裝置尚未準備好：%s"
@@ -3803,7 +3774,7 @@ msgstr "無法使用 API 金鑰認證管理 API 金鑰。"
 msgid "API key not found."
 msgstr "API 金鑰未找到。"
 
-#: backend/api/update_handlers.py:207
+#: backend/api/update_handlers.py:229
 msgid "Failed to process update results"
 msgstr "無法處理更新結果"
 
@@ -3837,8 +3808,8 @@ msgstr "由於登入嘗試失敗次數過多，帳戶已被鎖定"
 
 #: backend/api/auth.py:391
 msgid ""
-"Multi-factor authentication is required for this account. Please enroll from "
-"your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from"
+" your profile page before signing in."
 msgstr "多因素驗證對這個帳戶需要。請在您的設定檔頁面註冊，然後再登入。"
 
 #: backend/api/auth.py:480
@@ -3871,14 +3842,13 @@ msgstr "密碼已成功更改"
 
 #: backend/api/profile.py:237
 msgid ""
-"Profile images cannot be uploaded on this server: it runs Python 3.10, where "
-"the image library still has security issues that are fixed only for Python "
+"Profile images cannot be uploaded on this server: it runs Python 3.10, where"
+" the image library still has security issues that are fixed only for Python "
 "3.11 and later. Move the server to Python 3.11 or later (Ubuntu 24.04 or "
 "newer) to upload images."
 msgstr ""
 "無法在此伺服器上傳頭像：它執行 Python 3.10，其影像函式庫仍有僅在 Python 3.11 "
-"及更新版本中修正的安全問題。若要上傳圖片，請將伺服器遷移到 Python 3.11 或更新"
-"版本（Ubuntu 24.04 或更新）。"
+"及更新版本中修正的安全問題。若要上傳圖片，請將伺服器遷移到 Python 3.11 或更新版本（Ubuntu 24.04 或更新）。"
 
 #: backend/api/profile.py:247
 msgid "File size too large. Maximum allowed size is 5MB."
@@ -3913,7 +3883,8 @@ msgstr "此主機沒有可用的作業系統升級"
 
 #: backend/api/updates/os_upgrade_routes.py:352
 #, python-format
-msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgid ""
+"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr "在主機 %(fqdn)s 上啟動了 OS 升級，升級數量為 %(upgrade_count)d"
 
 #: backend/api/updates/os_upgrade_routes.py:383
@@ -3929,22 +3900,23 @@ msgstr "無法將作業系統升級命令加入佇列"
 msgid "Failed to get update summary: %s"
 msgstr "取得更新摘要失敗：%s"
 
-#: backend/api/updates/query_routes.py:199
+#: backend/api/updates/query_routes.py:203
 #, python-format
 msgid "Failed to get host updates: %s"
 msgstr "取得主機更新失敗：%s"
 
-#: backend/api/updates/query_routes.py:301
+#: backend/api/updates/query_routes.py:305
 #, python-format
 msgid "Failed to get updates: %s"
 msgstr "取得更新失敗：%s"
 
-#: backend/api/updates/query_routes.py:321
+#: backend/api/updates/query_routes.py:325
 #, python-format
 msgid "Failed to get update results: %s"
 msgstr "獲取更新結果時失敗：%s"
 
 #: backend/api/updates/execution_routes.py:65
+#: backend/api/upgrade_profiles.py:182
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "權限被拒絕：需要 APPLY_SOFTWARE_UPDATE 角色"
 
@@ -3977,7 +3949,7 @@ msgstr "傳送更新指令失敗：%s"
 msgid "Failed to execute updates: %s"
 msgstr "執行更新失敗：%s"
 
-#: backend/api/updates/execution_routes.py:307
+#: backend/api/updates/execution_routes.py:311
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "取得執行記錄失敗：%s"
@@ -3990,9 +3962,9 @@ msgstr "未知種類：%(kind)s (允許值：%(allowed)s)"
 #: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
-msgstr ""
-"發行動態密鑰 '%(name)s'（類型=%(kind)s，角色=%(role)s，有效期=%(ttl)ds）"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
+"ttl=%(ttl)ds)"
+msgstr "發行動態密鑰 '%(name)s'（類型=%(kind)s，角色=%(role)s，有效期=%(ttl)ds）"
 
 #: backend/api/dynamic_secrets.py:186
 #, python-format
@@ -4055,7 +4027,8 @@ msgstr "已請求VMM初始化"
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd daemon."
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
 msgstr "已請求VMM初始化。代理將啟用並啟動vmd守護程序。"
 
 #: backend/api/child_host_virtualization_enable.py:348
@@ -4087,8 +4060,8 @@ msgstr "bhyve 初始化請求"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the "
-"system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the"
+" system for bhyve virtual machines."
 msgstr "bhyve 初始化請求。代理將加載 vmm.ko 並為 bhyve 虛擬機配置系統。"
 
 #: backend/api/child_host_virtualization_enable.py:474
@@ -4103,9 +4076,7 @@ msgstr "bhyve 禁用請求"
 msgid ""
 "bhyve disable requested. The agent will unload vmm.ko and update the system "
 "configuration. This will fail if any VMs are running."
-msgstr ""
-"bhyve 禁用請求。代理將卸載 vmm.ko 並更新系統配置。如果任何 VM 正在運行，此操"
-"作將失敗。"
+msgstr "bhyve 禁用請求。代理將卸載 vmm.ko 並更新系統配置。如果任何 VM 正在運行，此操作將失敗。"
 
 #: backend/api/child_host_virtualization_enable.py:536
 msgid "Agent must be running with root privileges to enable KVM modules"
@@ -4117,8 +4088,8 @@ msgstr "請求啟用KVM模塊"
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via "
-"modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via"
+" modprobe."
 msgstr "請求啟用KVM模塊。代理將通過modprobe加載KVM內核模塊。"
 
 #: backend/api/child_host_virtualization_enable.py:600
@@ -4133,9 +4104,7 @@ msgstr "請求禁用KVM模塊"
 msgid ""
 "KVM modules disable requested. The agent will unload the KVM kernel modules "
 "via modprobe -r. This will fail if any VMs are running."
-msgstr ""
-"請求禁用KVM模塊。代理將通過modprobe -r卸載KVM內核模塊。如果任何虛擬機正在運"
-"行，此操作將失敗。"
+msgstr "請求禁用KVM模塊。代理將通過modprobe -r卸載KVM內核模塊。如果任何虛擬機正在運行，此操作將失敗。"
 
 # KVM Networking Configuration strings
 #: backend/api/child_host_virtualization_enable.py:697
@@ -4242,11 +4211,9 @@ msgstr "快照目錄"
 #: backend/api/backups.py:247
 #, python-format
 msgid ""
-"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no "
-"trailing '/')"
-msgstr ""
-"%s 必須是簡單的絕對路徑（僅限字母、數字、'_'、'.'、'-' 和 '/'；結尾不能有 "
-"'/'）"
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
+" trailing '/')"
+msgstr "%s 必須是簡單的絕對路徑（僅限字母、數字、'_'、'.'、'-' 和 '/'；結尾不能有 '/'）"
 
 #: backend/api/backups.py:255
 msgid "The snapshot directory must be outside the storage path"
@@ -4272,11 +4239,9 @@ msgstr "最多可以設定 50 個路徑規則"
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
-msgstr ""
-"每個路徑規則是一行，長度最多為 512 字元，且不能有開頭或結尾的空白字元或開頭"
-"的 #"
+msgstr "每個路徑規則是一行，長度最多為 512 字元，且不能有開頭或結尾的空白字元或開頭的 #"
 
-#: backend/api/backups.py:298 backend/api/backups_drift.py:97
+#: backend/api/backups.py:298 backend/api/backups_drift.py:103
 #: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "快照名稱無效"
@@ -4363,11 +4328,9 @@ msgid ""
 "This backup is encrypted to your break-glass escrow key, which SysManage "
 "never holds. Restore it by hand with restate and that key, as the server "
 "recovery runbook describes."
-msgstr ""
-"此備份使用您的緊急託管金鑰加密，SysManage 從不持有該金鑰。請依伺服器復原手冊"
-"所述，使用 restate 和該金鑰手動還原。"
+msgstr "此備份使用您的緊急託管金鑰加密，SysManage 從不持有該金鑰。請依伺服器復原手冊所述，使用 restate 和該金鑰手動還原。"
 
-#: backend/api/backups.py:876 backend/api/backups_drift.py:105
+#: backend/api/backups.py:876 backend/api/backups_drift.py:114
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "此主機的 restate 尚不支援此操作；請升級 restate"
@@ -4450,34 +4413,34 @@ msgstr "已請求作業系統版本更新"
 msgid "Updates check requested"
 msgstr "檢查更新請求"
 
-#: backend/api/secrets/crud.py:35 backend/api/error_constants.py:166
+#: backend/api/secrets/crud.py:36 backend/api/error_constants.py:166
 #: backend/services/vault_service.py:423
 msgid "Secret not found"
 msgstr "未找到密鑰"
 
-#: backend/api/secrets/crud.py:46
+#: backend/api/secrets/crud.py:47
 msgid ""
 "Secrets management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr "密鑰管理需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
-#: backend/api/secrets/crud.py:128
+#: backend/api/secrets/crud.py:129
 msgid "Failed to retrieve secret content from vault"
 msgstr "從保險庫檢索密鑰內容失敗"
 
-#: backend/api/secrets/crud.py:160
+#: backend/api/secrets/crud.py:161
 msgid "Failed to store secret in vault"
 msgstr "將密鑰存儲到保險庫失敗"
 
-#: backend/api/secrets/crud.py:223
+#: backend/api/secrets/crud.py:224
 msgid "Failed to update secret in vault"
 msgstr "更新保險庫中的密鑰失敗"
 
-#: backend/api/secrets/crud.py:266
+#: backend/api/secrets/crud.py:267
 msgid "Secret deleted successfully"
 msgstr "密鑰刪除成功"
 
-#: backend/api/secrets/crud.py:296
+#: backend/api/secrets/crud.py:297
 #, python-brace-format
 msgid "Deleted {count} secrets"
 msgstr "已刪除 {count} 個密鑰"
@@ -4509,9 +4472,7 @@ msgstr "通道 '{channel}' 無法鏡像。"
 msgid ""
 "Mirror URL must be an http/https/ftp/file URL with no spaces, quotes or "
 "shell metacharacters."
-msgstr ""
-"鏡像 URL 必須是不含空格、引號或 shell 特殊字符的 http/https/ftp/file 類型的 "
-"URL。"
+msgstr "鏡像 URL 必須是不含空格、引號或 shell 特殊字符的 http/https/ftp/file 類型的 URL。"
 
 #: backend/api/airgap_agent_mirrors.py:138
 #, python-brace-format
@@ -4526,7 +4487,8 @@ msgid ""
 msgstr "編排重新啟動需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
 #: backend/api/reboot_orchestration.py:135
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
 msgstr "未找到正在執行的子主機。請改用標準重新啟動端點。"
 
 #: backend/api/reboot_orchestration.py:204
@@ -4538,40 +4500,85 @@ msgstr "已啟動編排重新啟動，包含 %d 個正在執行的子主機"
 msgid "Reboot orchestration not found"
 msgstr "未找到重新啟動編排"
 
-#: backend/api/upgrade_profiles.py:58
+#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:185
 msgid "Upgrade profile not found"
 msgstr "升級配置文件未找到"
 
-#: backend/api/upgrade_profiles.py:74
+#: backend/api/upgrade_profiles.py:71
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
-"upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
 msgstr "排程升級設定檔需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
-#: backend/api/upgrade_profiles.py:196
+#: backend/api/upgrade_profiles.py:273
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "已建立升級設定檔「%s」"
 
-#: backend/api/upgrade_profiles.py:263
+#: backend/api/upgrade_profiles.py:342
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "已更新升級設定檔「%s」"
 
-#: backend/api/upgrade_profiles.py:295
+#: backend/api/upgrade_profiles.py:375
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "已刪除升級設定檔「%s」"
 
-#: backend/api/upgrade_profiles.py:300
+#: backend/api/upgrade_profiles.py:380
 msgid "Upgrade profile deleted"
 msgstr "升級設定檔已刪除"
 
-#: backend/api/upgrade_profiles.py:390
+#: backend/api/upgrade_profiles.py:416
 #, python-format
-msgid ""
-"Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
-msgstr "觸發升級配置文件 '%(profile_name)s' 對於 %(host_count)d 個主機"
+msgid "Ran upgrade profile '%s' now"
+msgstr "已立即執行更新設定檔 '%s'"
+
+#: backend/api/auto_updates.py:64
+msgid "A reason is required"
+msgstr "必須填寫原因"
+
+#: backend/api/auto_updates.py:133
+#, python-format
+msgid "Held every automatic update policy: %s"
+msgstr "已暫停所有自動更新原則：%s"
+
+#: backend/api/auto_updates.py:135
+msgid "Released the hold on every automatic update policy"
+msgstr "已解除所有自動更新原則的暫停"
+
+#: backend/api/auto_updates.py:162
+msgid "Changed the automatic update settings"
+msgstr "已變更自動更新設定"
+
+#: backend/api/auto_updates.py:195
+#, python-format
+msgid "Held automatic update policy '%(policy)s': %(reason)s"
+msgstr "已暫停自動更新原則 '%(policy)s'：%(reason)s"
+
+#: backend/api/auto_updates.py:198
+#, python-format
+msgid "Released the hold on automatic update policy '%s'"
+msgstr "已解除自動更新原則 '%s' 的暫停"
+
+#: backend/api/auto_updates.py:228
+#, python-format
+msgid "%(host)s will never be updated automatically: %(reason)s"
+msgstr "%(host)s 將永不自動更新：%(reason)s"
+
+#: backend/api/auto_updates.py:231
+#, python-format
+msgid "%s may be updated automatically again"
+msgstr "%s 可以再次自動更新"
+
+#: backend/api/auto_updates.py:328
+msgid "Run not found"
+msgstr "找不到執行"
+
+#: backend/api/auto_updates.py:336
+#, python-format
+msgid "Acknowledged the automatic update run on %s"
+msgstr "已確認 %s 上的自動更新執行"
 
 #: backend/api/agent.py:101
 msgid "Rate limit exceeded"
@@ -4783,7 +4790,8 @@ msgstr "已啟動對所有 %d 個主機的防病毒部署"
 #: backend/api/antivirus_status.py:346
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
+"hosts"
 msgstr "已為 %(success_count)d of %(total_count)d 主機部署防毒軟件"
 
 #: backend/api/antivirus_status.py:352
@@ -4815,15 +4823,15 @@ msgstr "子主機引擎無法處理此請求。"
 msgid "Permission denied: {} role required"
 msgstr "權限 denied: {} 角色所需"
 
-#: backend/api/backups_drift.py:57
+#: backend/api/backups_drift.py:63
 msgid "The drift timeline needs the Professional+ backup engine"
 msgstr "漂移時間軸需要 Professional+ 備份引擎"
 
-#: backend/api/backups_drift.py:77 backend/api/backups_browse.py:95
+#: backend/api/backups_drift.py:83 backend/api/backups_browse.py:95
 msgid "The path must be absolute"
 msgstr "路徑必須是絕對路徑"
 
-#: backend/api/backups_drift.py:109
+#: backend/api/backups_drift.py:118
 msgid "A comparison of snapshots is already running"
 msgstr "快照比較已在進行中"
 
@@ -4996,15 +5004,15 @@ msgstr "需要提供覆蓋理由。"
 msgid "Override duration must be positive."
 msgstr "覆蓋持續時間必須為正數。"
 
-#: backend/api/maintenance_windows.py:455
+#: backend/api/maintenance_windows.py:461
 msgid "Permission denied: Delete Queue Message role required"
 msgstr "權限遭拒：需要 Delete Queue Message 角色"
 
-#: backend/api/maintenance_windows.py:472
+#: backend/api/maintenance_windows.py:478
 msgid "Message not found"
 msgstr "找不到訊息"
 
-#: backend/api/maintenance_windows.py:480
+#: backend/api/maintenance_windows.py:486
 msgid "Only a command a maintenance window is holding can be canceled."
 msgstr "只能取消被維護時段暫緩的命令。"
 
@@ -5154,15 +5162,13 @@ msgstr "存儲庫鏡像需要SysManage Professional+許可證。請升級以訪�
 msgid ""
 "Snap store proxy requires a SysManage Professional+ license. Please upgrade "
 "to access this feature."
-msgstr ""
-"Snap 儲存庫代理需要 SysManage Professional+ 設定許可證。請升級以使用此功能。"
+msgstr "Snap 儲存庫代理需要 SysManage Professional+ 設定許可證。請升級以使用此功能。"
 
 #: backend/api/repository_mirroring_helpers.py:78
 msgid ""
 "Container image registry proxy requires a SysManage Professional+ license. "
 "Please upgrade to access this feature."
-msgstr ""
-"容器圖像存儲庫代理需要SysManage專業版或更高版本的許可證。請升級以訪問此功能。"
+msgstr "容器圖像存儲庫代理需要SysManage專業版或更高版本的許可證。請升級以訪問此功能。"
 
 #: backend/api/repository_mirroring_setup.py:197
 #: backend/api/repository_mirroring_setup.py:259
@@ -5337,7 +5343,8 @@ msgstr "權限被拒絕：需要 ADD_ENABLED_PACKAGE_MANAGER 角色"
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS "
+"'%(os_name)s'"
 msgstr "包管理器 '%(package_manager)s' 已經啟用於作業系統 '%(os_name)s'"
 
 #: backend/api/enabled_package_managers.py:382
@@ -5381,10 +5388,12 @@ msgid "Script content cannot be empty"
 msgstr "腳本內容不能為空"
 
 #: backend/api/scripts/models.py:122
+#: backend/api/scripts/routes_executions.py:97
 msgid "Either saved_script_id or script_content must be provided"
 msgstr "必須提供 saved_script_id 或 script_content 其一"
 
 #: backend/api/scripts/models.py:132
+#: backend/api/scripts/routes_executions.py:106
 msgid "shell_type is required for ad-hoc scripts"
 msgstr "ad-hoc 腳本需要 shell_type"
 
@@ -5394,66 +5403,66 @@ msgid ""
 "approval."
 msgstr "此主機的腳本需要經過批准；請從經過批准的已儲存腳本執行它。"
 
-#: backend/api/scripts/routes_executions.py:104
+#: backend/api/scripts/routes_executions.py:126
 msgid "Saved script not found"
 msgstr "儲存的腳本未找到"
 
-#: backend/api/scripts/routes_executions.py:109
+#: backend/api/scripts/routes_executions.py:131
 msgid "Script is not active"
 msgstr "腳本未啟用"
 
-#: backend/api/scripts/routes_executions.py:189
+#: backend/api/scripts/routes_executions.py:211
 #, python-brace-format
 msgid "Executed script '{script_name}' on host '{host_fqdn}'"
 msgstr "在主機 '{host_fqdn}' 上執行腳本 '{script_name}'"
 
-#: backend/api/scripts/routes_executions.py:211
+#: backend/api/scripts/routes_executions.py:233
 msgid "Failed to queue script execution: {}"
 msgstr "無法將腳本執行命令加入佇列：{}"
 
-#: backend/api/scripts/routes_executions.py:221
+#: backend/api/scripts/routes_executions.py:243
 msgid "Failed to queue script execution"
 msgstr "無法將腳本執行命令加入佇列"
 
-#: backend/api/scripts/routes_executions.py:234
+#: backend/api/scripts/routes_executions.py:256
 msgid "Script execution queued for delivery"
 msgstr "腳本執行已排隊等待交付"
 
-#: backend/api/scripts/routes_executions.py:242
+#: backend/api/scripts/routes_executions.py:264
 msgid "Failed to execute script"
 msgstr "執行腳本時失敗"
 
-#: backend/api/scripts/routes_executions.py:326
+#: backend/api/scripts/routes_executions.py:348
 msgid "Failed to fetch script executions"
 msgstr "無法取得多個腳本執行"
 
-#: backend/api/scripts/routes_executions.py:347
-#: backend/api/scripts/routes_executions.py:417
+#: backend/api/scripts/routes_executions.py:369
+#: backend/api/scripts/routes_executions.py:439
 msgid "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 msgstr "權限被拒絕：需要 DELETE_SCRIPT_EXECUTION 角色"
 
-#: backend/api/scripts/routes_executions.py:359
-#: backend/api/scripts/routes_executions.py:486
+#: backend/api/scripts/routes_executions.py:381
+#: backend/api/scripts/routes_executions.py:508
 msgid "Script execution not found"
 msgstr "找不到腳本執行"
 
-#: backend/api/scripts/routes_executions.py:387
+#: backend/api/scripts/routes_executions.py:409
 msgid "Script execution deleted successfully"
 msgstr "腳本執行已成功刪除"
 
-#: backend/api/scripts/routes_executions.py:396
+#: backend/api/scripts/routes_executions.py:418
 msgid "Failed to delete script execution"
 msgstr "無法刪除腳本執行"
 
-#: backend/api/scripts/routes_executions.py:457
+#: backend/api/scripts/routes_executions.py:479
 msgid "Script executions deleted successfully"
 msgstr "腳本執行已成功刪除"
 
-#: backend/api/scripts/routes_executions.py:464
+#: backend/api/scripts/routes_executions.py:486
 msgid "Failed to delete script executions"
 msgstr "無法刪除多個腳本執行"
 
-#: backend/api/scripts/routes_executions.py:521
+#: backend/api/scripts/routes_executions.py:543
 msgid "Failed to fetch script execution"
 msgstr "無法取得腳本執行"
 
@@ -5523,8 +5532,8 @@ msgid ""
 "there to 2.2.0.12 or later, then save the policy without years and set them "
 "once it has reported in"
 msgstr ""
-"儲存主機上的 restate 還無法保留年度快照：請將該主機上的 restate 更新至 "
-"2.2.0.12 或更新版本，然後先儲存不含年數的原則，待其回報後再設定年數"
+"儲存主機上的 restate 還無法保留年度快照：請將該主機上的 restate 更新至 2.2.0.12 "
+"或更新版本，然後先儲存不含年數的原則，待其回報後再設定年數"
 
 #: backend/api/machines.py:170
 #, python-format
@@ -5539,12 +5548,12 @@ msgstr "變更內容僅與目前的存放庫進行比較"
 msgid "A check of what changed is already running"
 msgstr "變更檢查已在執行"
 
-#: backend/websocket/message_router.py:280
+#: backend/websocket/message_router.py:287
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "隊列中未知的消息類型: %s"
 
-#: backend/websocket/message_router.py:285
+#: backend/websocket/message_router.py:292
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "路由消息類型 %(message_type)s 時發生錯誤：%(error)s"
@@ -5605,8 +5614,7 @@ msgstr "找不到消息 %(message_id)s 的主機 %(hostname)s，刪除"
 msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
 "%(message_id)s, deleting"
-msgstr ""
-"主機 %(hostname)s 未批准（狀態：%(status)s）的消息 %(message_id)s，正在刪除"
+msgstr "主機 %(hostname)s 未批准（狀態：%(status)s）的消息 %(message_id)s，正在刪除"
 
 #: backend/websocket/inbound_processor.py:158
 #, python-format
@@ -5622,17 +5630,14 @@ msgid ""
 "message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
-"主機 %(host_id)s 在此資料庫中未找到；延期 %(count)d 個佇列中的訊息（不會刪"
-"除）----可能是正在進行的入網程序或已刪除的主機"
+"主機 %(host_id)s 在此資料庫中未找到；延期 %(count)d 個佇列中的訊息（不會刪除）----可能是正在進行的入網程序或已刪除的主機"
 
 #: backend/websocket/inbound_processor.py:407
 #, python-format
 msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
 "deleting all its messages from queue"
-msgstr ""
-"主機 %(host_id)s (FQDN: %(fqdn)s) 已不再批准（狀態：%(status)s），刪除其所有"
-"消息"
+msgstr "主機 %(host_id)s (FQDN: %(fqdn)s) 已不再批准（狀態：%(status)s），刪除其所有消息"
 
 #: backend/websocket/inbound_processor.py:413
 #, python-format
@@ -5714,8 +5719,8 @@ msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
 "direction=%(direction)s, host_id=%(host_id)s"
 msgstr ""
-"入隊消息：id=%(message_id)s, 類型=%(message_type)s, 方向=%(direction)s, 主機"
-"ID=%(host_id)s"
+"入隊消息：id=%(message_id)s, 類型=%(message_type)s, 方向=%(direction)s, "
+"主機ID=%(host_id)s"
 
 # Message acknowledgment strings
 #: backend/websocket/queue_operations.py:517
@@ -5786,8 +5791,7 @@ msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
 "scheduled for retry in %(backoff)d seconds"
 msgstr ""
-"消息 %(message_id)s 失敗（嘗試次數 %(attempt)d/%(max_retries)d），安排在 "
-"%(backoff)d 秒後重試"
+"消息 %(message_id)s 失敗（嘗試次數 %(attempt)d/%(max_retries)d），安排在 %(backoff)d 秒後重試"
 
 #: backend/websocket/queue_operations.py:898
 #, python-format
@@ -5840,9 +5844,7 @@ msgstr "此主機"
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
 "capability set, so the command was not sent."
-msgstr ""
-"在{host}上的代理不支援'{command}'。由於它宣佈了簡化的功能集，因此未發送該命"
-"令。"
+msgstr "在{host}上的代理不支援'{command}'。由於它宣佈了簡化的功能集，因此未發送該命令。"
 
 #: backend/services/asset_discovery_review.py:125
 #, python-format
@@ -5895,16 +5897,15 @@ msgid ""
 "keeps its database running, leaves OpenBAO's unseal key out and encrypts to "
 "the escrow key"
 msgstr ""
-"此主機是 SysManage 伺服器。請使用「備份此 SysManage 伺服器」，它會保持資料庫"
-"執行、排除 OpenBAO 的解封金鑰，並使用託管金鑰加密"
+"此主機是 SysManage 伺服器。請使用「備份此 SysManage 伺服器」，它會保持資料庫執行、排除 OpenBAO "
+"的解封金鑰，並使用託管金鑰加密"
 
-#: backend/services/backup_server.py:172
+#: backend/services/backup_server.py:181
 msgid ""
 "Save a break-glass escrow key first: the SysManage server's own backup is "
 "encrypted to it, so restoring OpenBAO never needs a key kept inside OpenBAO"
 msgstr ""
-"請先儲存緊急託管金鑰：SysManage 伺服器自身的備份使用該金鑰加密，因此還原 "
-"OpenBAO 時絕不需要保存在 OpenBAO 中的金鑰"
+"請先儲存緊急託管金鑰：SysManage 伺服器自身的備份使用該金鑰加密，因此還原 OpenBAO 時絕不需要保存在 OpenBAO 中的金鑰"
 
 #: backend/services/cloud_backup_tick.py:327
 msgid "iCloud sign-in ends soon: sign in again"
@@ -5913,17 +5914,13 @@ msgstr "iCloud 登入即將到期：請重新登入"
 #: backend/services/cloud_backup_tick.py:329
 #, python-format
 msgid ""
-"The iCloud sign-in for %(account)s ends around %(date)s. After that, "
-"SysManage cannot download its photos until someone signs in again.\n"
+"The iCloud sign-in for %(account)s ends around %(date)s. After that, SysManage cannot download its photos until someone signs in again.\n"
 "\n"
-"Open Backups, then Cloud backup, and press Connect on this account. You will "
-"need the Apple ID's two-factor code."
+"Open Backups, then Cloud backup, and press Connect on this account. You will need the Apple ID's two-factor code."
 msgstr ""
-"%(account)s 的 iCloud 登入將在 %(date)s 左右到期。之後，在有人重新登入之前，"
-"SysManage 無法下載其照片。\n"
+"%(account)s 的 iCloud 登入將在 %(date)s 左右到期。之後，在有人重新登入之前，SysManage 無法下載其照片。\n"
 "\n"
-"請開啟「備份」，再開啟「雲端備份」，然後在此帳號上按「連線」。您需要 Apple "
-"ID 的雙重認證碼。"
+"請開啟「備份」，再開啟「雲端備份」，然後在此帳號上按「連線」。您需要 Apple ID 的雙重認證碼。"
 
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
@@ -5966,6 +5963,20 @@ msgid ""
 "Confirm that packages will be installed, and packages the snapshot did not "
 "have removed, to match the snapshot"
 msgstr "請確認將安裝套件，並移除快照中沒有的套件，以使主機與快照一致"
+
+#: backend/services/auto_update_runner.py:309
+#, python-format
+msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
+msgstr "原則 '%(policy)s' 已在 %(host)s 上排入自動更新"
+
+#: backend/services/auto_update_runner.py:387
+msgid "The host never reported the result"
+msgstr "主機從未回報結果"
+
+#: backend/services/auto_update_results.py:68
+#, python-format
+msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
+msgstr "原則 '%(policy)s' 之後自動重新啟動 %(host)s"
 
 #: backend/services/held_asset_tags.py:159
 #, python-format
@@ -6164,12 +6175,12 @@ msgstr "沒有選擇的主機有加密備份"
 #: backend/services/backup_reach.py:147
 #, python-format
 msgid ""
-"This host cannot reach the backup storage's restate-proxy (%(address)s, port "
-"%(port)s): %(error)s. Backups need a network path to it, and a certificate "
+"This host cannot reach the backup storage's restate-proxy (%(address)s, port"
+" %(port)s): %(error)s. Backups need a network path to it, and a certificate "
 "this host trusts."
 msgstr ""
-"此主機無法連線到備份儲存的 restate-proxy（%(address)s，連接埠 %(port)s）："
-"%(error)s。備份需要一條通往它的網路路徑，以及此主機信任的憑證。"
+"此主機無法連線到備份儲存的 restate-proxy（%(address)s，連接埠 "
+"%(port)s）：%(error)s。備份需要一條通往它的網路路徑，以及此主機信任的憑證。"
 
 #: backend/services/backup_reach.py:157
 #, python-format
@@ -6180,17 +6191,14 @@ msgid ""
 "behind its NAT."
 msgstr ""
 "此主機位於 NAT 之後：備份儲存（%(storage)s）將其視為 %(seen)s，而不是 "
-"%(address)s，因此拒絕掛載。請將主機接入儲存主機所在的網路（虛擬機器使用橋接網"
-"路），而不要放在其 NAT 之後。"
+"%(address)s，因此拒絕掛載。請將主機接入儲存主機所在的網路（虛擬機器使用橋接網路），而不要放在其 NAT 之後。"
 
 #: backend/services/backup_reach.py:167
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "
 "port %(port)s). Backups need a network path to it."
-msgstr ""
-"此主機無法連到備份儲存（%(storage)s、%(address)s、NFS 連接埠 %(port)s）。備份"
-"需要一條通往它的網路路徑。"
+msgstr "此主機無法連到備份儲存（%(storage)s、%(address)s、NFS 連接埠 %(port)s）。備份需要一條通往它的網路路徑。"
 
 #: backend/services/backup_escrow.py:283
 msgid "Backup keys rotated: make a new break-glass export"
@@ -6199,18 +6207,13 @@ msgstr "備份金鑰已輪替：請重新進行緊急金鑰匯出"
 #: backend/services/backup_escrow.py:285
 #, python-format
 msgid ""
-"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-"
-"glass export made before this rotation does not hold the new keys, and "
-"backups taken from now on need them.\n"
+"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-glass export made before this rotation does not hold the new keys, and backups taken from now on need them.\n"
 "\n"
-"Open Backups, then a host's Encryption panel, and use \"Break-glass key "
-"export\" to make a new export. Keep it offline, and destroy the old one."
+"Open Backups, then a host's Encryption panel, and use \"Break-glass key export\" to make a new export. Keep it offline, and destroy the old one."
 msgstr ""
-"SysManage 已依排程輪替了 %(count)d 個備份加密金鑰。在此次輪替之前進行的緊急金"
-"鑰匯出不包含新金鑰，而從現在起進行的備份需要這些金鑰。\n"
+"SysManage 已依排程輪替了 %(count)d 個備份加密金鑰。在此次輪替之前進行的緊急金鑰匯出不包含新金鑰，而從現在起進行的備份需要這些金鑰。\n"
 "\n"
-"請開啟「備份」，再開啟某台主機的「加密」面板，使用「緊急金鑰匯出」重新匯出。"
-"請離線保存，並銷毀舊的匯出。"
+"請開啟「備份」，再開啟某台主機的「加密」面板，使用「緊急金鑰匯出」重新匯出。請離線保存，並銷毀舊的匯出。"
 
 #: backend/services/config_mgmt_baseline.py:286
 #, python-format
@@ -6340,26 +6343,21 @@ msgstr "密鑰格式無效"
 msgid ""
 "This Professional+ engine is licensed but not loaded: the server started "
 "before the database was migrated. Restart the SysManage server to load it."
-msgstr ""
-"此 Professional+ 引擎已獲授權但尚未載入：伺服器在資料庫移轉之前就已啟動。請重"
-"新啟動 SysManage 伺服器以載入它。"
+msgstr "此 Professional+ 引擎已獲授權但尚未載入：伺服器在資料庫移轉之前就已啟動。請重新啟動 SysManage 伺服器以載入它。"
 
 #: backend/licensing/migration_compat.py:156
 msgid ""
 "This Professional+ engine is licensed but needs a newer SysManage server. "
 "Upgrade the SysManage server package, then restart it."
 msgstr ""
-"此 Professional+ 引擎已獲授權，但需要較新版本的 SysManage 伺服器。請升級 "
-"SysManage 伺服器套件，然後重新啟動伺服器。"
+"此 Professional+ 引擎已獲授權，但需要較新版本的 SysManage 伺服器。請升級 SysManage 伺服器套件，然後重新啟動伺服器。"
 
 #: backend/licensing/migration_compat.py:160
 msgid ""
 "This Professional+ engine is licensed but not loaded: the database is older "
 "than it needs. Run the database migrations, then restart the SysManage "
 "server."
-msgstr ""
-"此 Professional+ 引擎已獲授權但尚未載入：資料庫版本低於其需求。請執行資料庫移"
-"轉，然後重新啟動 SysManage 伺服器。"
+msgstr "此 Professional+ 引擎已獲授權但尚未載入：資料庫版本低於其需求。請執行資料庫移轉，然後重新啟動 SysManage 伺服器。"
 
 #: backend/vulnerability/cve_sources.py:23
 msgid "Primary CVE data source from NIST (includes Apple/macOS CVEs)"
@@ -6393,15 +6391,10 @@ msgstr "NetBSD pkgsrc 套件弱點（pkg_admin audit 讀取的資料）"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "依作業系統版本列出的 macOS 弱點（來自 NVD 的受影響版本資料）"
 
-#: backend/api/airgap_collector_runs.py
 #, python-format
-msgid "This run is not waiting for a blank disc (status: %s)."
-msgstr "此運行未在等待空白光碟（狀態：%s）。"
-
-#: backend/api/airgap_collector_runs.py
-#, python-format
-msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
-msgstr "已為離線集合運行 '%(iso_label)s' 的第 %(disc)d 張光碟（共 %(count)d 張）放入空白光碟"
+#~ msgid ""
+#~ "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
+#~ msgstr "觸發升級配置文件 '%(profile_name)s' 對於 %(host_count)d 個主機"
 
 #~ msgid ""
 #~ "Confirm that photos will be deleted from iCloud once they are downloaded"
@@ -6416,9 +6409,7 @@ msgstr "已為離線集合運行 '%(iso_label)s' 的第 %(disc)d 張光碟（共
 #~ msgid ""
 #~ "This snapshot is encrypted; restoring or browsing it needs a restate that "
 #~ "can take the key for one job, which is not released yet"
-#~ msgstr ""
-#~ "此快照已加密；若要還原或瀏覽，需要一個能為單一工作接收金鑰的 restate，但該"
-#~ "版本尚未發布"
+#~ msgstr "此快照已加密；若要還原或瀏覽，需要一個能為單一工作接收金鑰的 restate，但該版本尚未發布"
 
 #~ msgid "Days to keep seals"
 #~ msgstr "封存快照保留天數"
@@ -6429,8 +6420,7 @@ msgstr "已為離線集合運行 '%(iso_label)s' 的第 %(disc)d 張光碟（共
 #, python-format
 #~ msgid ""
 #~ "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
-#~ msgstr ""
-#~ "消息 %(message_id)s 狀態不是 SENT，跳過確認（當前狀態為：%(status)s）"
+#~ msgstr "消息 %(message_id)s 狀態不是 SENT，跳過確認（當前狀態為：%(status)s）"
 
 #, python-format
 #~ msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
@@ -6440,8 +6430,8 @@ msgstr "已為離線集合運行 '%(iso_label)s' 的第 %(disc)d 張光碟（共
 #~ msgstr "電子郵件服務已停用。請在設定檔中啟用。"
 
 #~ msgid ""
-#~ "Multi-factor authentication is required for this account. Please enrol "
-#~ "from your profile page before signing in."
+#~ "Multi-factor authentication is required for this account. Please enrol from "
+#~ "your profile page before signing in."
 #~ msgstr "需要多因素驗證才能登入此帳戶。請在設定檔頁面註冊後再登入。"
 
 #, python-format
@@ -6601,18 +6591,15 @@ msgstr "已為離線集合運行 '%(iso_label)s' 的第 %(disc)d 張光碟（共
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for "
-#~ "retry (NOT deleting) -- may be an in-flight enrollment or a deleted host"
-#~ msgstr ""
-#~ "主機 '%s' 在此資料庫中不存在；將延遲 %d 個佇列中的消息（不會刪除）----可能"
-#~ "是正在註冊或已刪除的主機"
+#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
+#~ msgstr "主機 '%s' 在此資料庫中不存在；將延遲 %d 個佇列中的消息（不會刪除）----可能是正在註冊或已刪除的主機"
 
 #, python-format
 #~ msgid ""
 #~ "Host %s (FQDN: %s) no longer approved (status: %s), deleting all its "
 #~ "messages from queue"
-#~ msgstr ""
-#~ "主機 %s (FQDN: %s) 已不再批准（狀態：%s），正在從佇列中刪除所有其消息"
+#~ msgstr "主機 %s (FQDN: %s) 已不再批准（狀態：%s），正在從佇列中刪除所有其消息"
 
 #, python-format
 #~ msgid "Deleted %d messages for unapproved host %s"
@@ -6837,8 +6824,8 @@ msgstr "已為離線集合運行 '%(iso_label)s' 的第 %(disc)d 張光碟（共
 #~ msgstr "確認作業系統升級"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system "
-#~ "reboot. Continue?"
+#~ "This action will upgrade the operating system and require a system reboot. "
+#~ "Continue?"
 #~ msgstr "此動作將升級作業系統並需要系統重新啟動。繼續？"
 
 #~ msgid "OS upgrades are always security updates"
@@ -6953,11 +6940,9 @@ msgstr "已為離線集合運行 '%(iso_label)s' 的第 %(disc)d 張光碟（共
 #~ msgstr "KVM/libvirt初始化成功"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please "
-#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
-#~ msgstr ""
-#~ "稽核日誌匯出需要 SysManage Professional+ 授權。請升級以存取 CSV、JSON、"
-#~ "CEF 和 LEEF 匯出格式。"
+#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
+#~ "to access CSV, JSON, CEF, and LEEF export formats."
+#~ msgstr "稽核日誌匯出需要 SysManage Professional+ 授權。請升級以存取 CSV、JSON、CEF 和 LEEF 匯出格式。"
 
 # Pro+ redirect messages
 #~ msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"

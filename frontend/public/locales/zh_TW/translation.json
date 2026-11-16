@@ -791,7 +791,8 @@
     "hardwareNeedsAttention": "需要注意的硬體",
     "backupsAttention": "需要注意的備份",
     "backupsEscrowStale": "緊急金鑰匯出已過時",
-    "backupsServerUnprotected": "此 SysManage 伺服器沒有成功的備份"
+    "backupsServerUnprotected": "此 SysManage 伺服器沒有成功的備份",
+    "autoUpdateProblems": "自動更新問題"
   },
   "dataGrid": {
     "columnVisibility": "欄位可見性",
@@ -3784,12 +3785,28 @@
     "title": "更新設定檔",
     "trigger": "立即觸發",
     "triggerError": "觸發設定檔失敗",
-    "triggered": "對 {{count}} 個主機觸發 -- 已派送 {{enqueued}} 個",
     "updated": "更新設定檔已儲存",
     "window": "分階段視窗 (分鐘)",
     "windowHelp": "將代理派送分散在這麼多分鐘內 (0-720)",
     "windowRange": "分階段視窗必須在 0 至 720 分鐘之間",
-    "addDialogTitle": "新增更新設定檔"
+    "addDialogTitle": "新增更新設定檔",
+    "autoApply": "依此排程自動套用",
+    "automatic": "自動",
+    "backupHelp": "空白：不檢查備份",
+    "backupHours": "僅在（小時）內有成功備份時",
+    "excluded": "永不套用這些套件",
+    "excludedHelp": "以逗號分隔的名稱； * 匹配任何內容（linux-image-*、postgresql*）",
+    "held": "暫停中",
+    "hold": "暫停此策略",
+    "holdReason": "為什麼要暫停 \"{{name}}\"？",
+    "listedHosts": "已列出 {{count}} 台主機",
+    "listedHostsHelp": "列出的主機優先於標籤。被多個策略涵蓋的主機會遵循最具體的策略。",
+    "listedHostsLabel": "只有這些主機",
+    "ranNow": "正在更新 {{queued}} 台，已跳過 {{skipped}} 台，{{nothing}} 台無需處理",
+    "reboot": "重新啟動",
+    "rebootNever": "永不（主機顯示「需要重新啟動」）",
+    "rebootWhenNeeded": "在更新需要時重新啟動",
+    "release": "解除暫停"
   },
   "userDetail": {
     "active": "活躍",
@@ -6174,5 +6191,67 @@
       "view_report": "檢視報告",
       "view_user_security_roles": "檢視使用者安全角色"
     }
+  },
+  "autoUpdates": {
+    "acknowledge": "確認",
+    "allHeld": "每項自動更新策略均已暫停。",
+    "appliedOf": "已套用 {{applied}} 個，共 {{total}} 個",
+    "details": "詳細資料",
+    "followsPolicy": "遵循 \"{{name}}\"：{{rule}}。",
+    "heldBy": "自 {{when}} 起由 {{who}} 暫停：{{reason}}",
+    "holdAll": "暫停所有策略",
+    "holdReason": "為什麼要暫停所有自動更新？",
+    "hostTitle": "自動更新",
+    "noPolicy": "沒有任何自動更新策略涵蓋此主機。",
+    "noProblems": "沒有需要注意的自動執行。",
+    "optOut": "永遠不自動更新",
+    "optOutReason": "為什麼這個主機永遠不能自動更新？",
+    "optedOut": "永不自動更新：{{reason}}",
+    "pkg": {
+      "agent": "代理程式透過「更新代理」進行更新",
+      "busy": "已在更新中",
+      "excluded": "被策略排除",
+      "firmware": "只有在策略指定 fwupd 時才更新韌體",
+      "held": "已在主機上鎖定版本",
+      "manager": "套件管理器未包含在策略中",
+      "notSecurity": "非安全更新",
+      "osUpgrade": "作業系統升級從不自動進行"
+    },
+    "policy": "策略",
+    "reboot": {
+      "back": "已重新啟動並恢復上線",
+      "notBack": "重新啟動後未恢復上線",
+      "queued": "正在重新啟動"
+    },
+    "result": "結果",
+    "rule": {
+      "moreConservative": "同等具體的策略中較保守的一個",
+      "moreSpecific": "涵蓋此主機的策略中最具體者",
+      "only": "唯一涵蓋此主機的策略"
+    },
+    "saveError": "無法儲存變更",
+    "skip": {
+      "failedRecently": "上次執行失敗；將等待有人確認或重試間隔時間過去",
+      "imageMode": "映像模式的主機改為更新其映像",
+      "inactive": "主機處於非使用中狀態",
+      "needsRepair": "套件管理器需要修復",
+      "noBackup": "最近沒有成功的備份",
+      "notApproved": "主機未獲核准",
+      "optedOut": "主機永遠不會自動更新",
+      "pending": "之前的執行尚未完成",
+      "agentCannotApply": "其代理程式無法套用更新；請更新代理程式"
+    },
+    "status": {
+      "failed": "失敗",
+      "nothingToDo": "無需處理",
+      "partial": "部分失敗",
+      "queued": "執行中",
+      "skipped": "已跳過",
+      "succeeded": "成功",
+      "timedOut": "沒有結果"
+    },
+    "subtitle": "啟用「自動套用」的設定檔會依排程更新其主機。",
+    "title": "自動更新",
+    "when": "時間"
   }
 }

@@ -38,7 +38,9 @@ import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
+  Pause as PauseIcon,
   PlayArrow as PlayArrowIcon,
+  PlayCircleOutline as ResumeIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
@@ -47,11 +49,28 @@ import {
   upgradeProfilesService,
 } from '../Services/upgradeProfiles';
 import { formatUTCTimestamp } from '../utils/dateUtils';
+import { autoUpdatesService } from '../Services/autoUpdates';
+import AutoUpdatesPanel from './AutoUpdates/AutoUpdatesPanel';
+import AutomaticFields from './AutoUpdates/AutomaticFields';
 
 interface TagOption {
   id: string;
   name: string;
 }
+
+interface HostOption {
+  id: string;
+  fqdn: string;
+}
+
+// 26.1: the automatic fields, blank for a new profile.
+const AUTO_DEFAULTS = {
+  auto_apply: false,
+  reboot_mode: 'never' as 'never' | 'when_needed',
+  excluded_packages: '',
+  require_backup_hours: '' as number | '',
+  host_ids: [] as string[],
+};
 
 const PACKAGE_MANAGER_OPTIONS = [
   'apt',
@@ -73,6 +92,7 @@ const UpgradeProfilesSettings: React.FC = () => {
 
   const [profiles, setProfiles] = useState<UpgradeProfile[]>([]);
   const [tags, setTags] = useState<TagOption[]>([]);
+  const [hosts, setHosts] = useState<HostOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,6 +111,7 @@ const UpgradeProfilesSettings: React.FC = () => {
     package_managers: [] as string[],
     staggered_window_min: 0,
     tag_id: '',
+    ...AUTO_DEFAULTS,
   });
 
   const showError = (msg: string) => {
@@ -108,12 +129,14 @@ const UpgradeProfilesSettings: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const [p, tagResp] = await Promise.all([
+      const [p, tagResp, hostResp] = await Promise.all([
         upgradeProfilesService.list(),
         axiosInstance.get('/api/v1/tags'),
+        axiosInstance.get('/api/v1/hosts').catch(() => ({ data: [] })),
       ]);
       setProfiles(p);
       setTags(tagResp.data || []);
+      setHosts(Array.isArray(hostResp.data) ? hostResp.data : []);
     } catch (e) {
       console.error(e);
       setError(t('upgradeProfiles.loadError', 'Failed to load update profiles'));
@@ -137,6 +160,7 @@ const UpgradeProfilesSettings: React.FC = () => {
       package_managers: [],
       staggered_window_min: 0,
       tag_id: '',
+      ...AUTO_DEFAULTS,
     });
     setDialogOpen(true);
   };
@@ -151,6 +175,11 @@ const UpgradeProfilesSettings: React.FC = () => {
       package_managers: p.package_managers ?? [],
       staggered_window_min: p.staggered_window_min,
       tag_id: p.tag_id ?? '',
+      auto_apply: Boolean(p.auto_apply),
+      reboot_mode: p.reboot_mode ?? 'never',
+      excluded_packages: p.excluded_packages ?? '',
+      require_backup_hours: p.require_backup_hours ?? '',
+      host_ids: p.host_ids ?? [],
     });
     setDialogOpen(true);
   };
@@ -177,6 +206,11 @@ const UpgradeProfilesSettings: React.FC = () => {
       package_managers: form.package_managers.length ? form.package_managers : null,
       staggered_window_min: form.staggered_window_min,
       tag_id: form.tag_id || null,
+      auto_apply: form.auto_apply,
+      reboot_mode: form.reboot_mode,
+      excluded_packages: form.excluded_packages.trim() || null,
+      require_backup_hours: form.require_backup_hours === '' ? (editing ? 0 : null) : form.require_backup_hours,
+      host_ids: form.host_ids,
     };
     try {
       if (editing) {
@@ -215,15 +249,33 @@ const UpgradeProfilesSettings: React.FC = () => {
     try {
       const r = await upgradeProfilesService.trigger(p.id);
       showSuccess(
-        t('upgradeProfiles.triggered', 'Triggered against {{count}} host(s) -- {{enqueued}} dispatched', {
-          count: r.host_count,
-          enqueued: r.enqueued_count,
+        t('upgradeProfiles.ranNow', 'Updating {{queued}}, skipped {{skipped}}, nothing to do on {{nothing}}', {
+          queued: r.queued,
+          skipped: r.skipped,
+          nothing: r.nothing,
         }),
       );
       await refresh();
     } catch (e: unknown) {
       const detail = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
       showError(detail || t('upgradeProfiles.triggerError', 'Failed to trigger profile'));
+    }
+  };
+
+  const handleHold = async (p: UpgradeProfile) => {
+    let reason: string | undefined;
+    if (!p.held) {
+      reason =
+        globalThis.prompt(t('upgradeProfiles.holdReason', 'Why hold "{{name}}"?', { name: p.name })) ??
+        undefined;
+      if (!reason?.trim()) return;
+    }
+    try {
+      await autoUpdatesService.holdProfile(p.id, !p.held, reason);
+      await refresh();
+    } catch (e: unknown) {
+      const detail = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      showError(detail || t('upgradeProfiles.saveError', 'Failed to save update profile'));
     }
   };
 
@@ -247,6 +299,21 @@ const UpgradeProfilesSettings: React.FC = () => {
         ) : (
           <Chip size="small" label={t('common.no', 'No')} />
         ),
+    },
+    {
+      field: 'auto_apply',
+      headerName: t('upgradeProfiles.automatic', 'Automatic'),
+      width: 120,
+      renderCell: (params: GridRenderCellParams<UpgradeProfile>) => {
+        if (!params.row.auto_apply) return <Chip size="small" label={t('common.no', 'No')} />;
+        return params.row.held ? (
+          <Tooltip title={params.row.hold_reason ?? ''}>
+            <Chip size="small" color="warning" label={t('upgradeProfiles.held', 'On hold')} />
+          </Tooltip>
+        ) : (
+          <Chip size="small" color="success" label={t('common.yes', 'Yes')} />
+        );
+      },
     },
     {
       field: 'cron',
@@ -273,8 +340,12 @@ const UpgradeProfilesSettings: React.FC = () => {
       field: 'tag_id',
       headerName: t('upgradeProfiles.tag', 'Tag'),
       width: 140,
-      valueGetter: (_v, row) =>
-        row.tag_id ? (tagNameById.get(row.tag_id) || row.tag_id) : t('upgradeProfiles.allHosts', 'All Hosts'),
+      valueGetter: (_v, row) => {
+        if (row.host_ids?.length) {
+          return t('upgradeProfiles.listedHosts', '{{count}} listed host(s)', { count: row.host_ids.length });
+        }
+        return row.tag_id ? (tagNameById.get(row.tag_id) || row.tag_id) : t('upgradeProfiles.allHosts', 'All Hosts');
+      },
     },
     {
       field: 'last_run',
@@ -300,9 +371,22 @@ const UpgradeProfilesSettings: React.FC = () => {
       field: 'actions',
       headerName: t('common.actions', 'Actions'),
       sortable: false,
-      width: 170,
+      width: 200,
       renderCell: (params: GridRenderCellParams<UpgradeProfile>) => (
         <Stack direction="row" spacing={0.5}>
+          {params.row.auto_apply && (
+            <Tooltip
+              title={
+                params.row.held
+                  ? t('upgradeProfiles.release', 'Release the hold')
+                  : t('upgradeProfiles.hold', 'Hold this policy')
+              }
+            >
+              <IconButton size="small" onClick={() => void handleHold(params.row)}>
+                {params.row.held ? <ResumeIcon fontSize="small" /> : <PauseIcon fontSize="small" />}
+              </IconButton>
+            </Tooltip>
+          )}
           <Tooltip title={t('upgradeProfiles.trigger', 'Trigger Now')}>
             <IconButton size="small" color="primary" onClick={() => handleTrigger(params.row)}>
               <PlayArrowIcon fontSize="small" />
@@ -354,6 +438,8 @@ const UpgradeProfilesSettings: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {error && <Alert severity="error">{error}</Alert>}
+
+      <AutoUpdatesPanel />
 
       <Card>
         <CardHeader
@@ -486,6 +572,7 @@ const UpgradeProfilesSettings: React.FC = () => {
                 ))}
               </Select>
             </FormControl>
+            <AutomaticFields form={form} setForm={setForm} hosts={hosts} />
           </Stack>
         </DialogContent>
         <DialogActions>

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-13 05:45-0800\n"
+"POT-Creation-Date: 2026-11-16 10:03-0800\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -223,8 +223,9 @@ msgstr "Failed to get CA certificate: %s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:425
-#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:374
+#: backend/api/maintenance_windows.py:431 backend/api/firewall_roles.py:473
+#: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "Invalid host ID format"
@@ -245,7 +246,8 @@ msgstr "Invalid host ID format"
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:167
-#: backend/api/backups.py:170 backend/api/diagnostics.py:102
+#: backend/api/backups.py:170 backend/api/auto_updates.py:220
+#: backend/api/auto_updates.py:254 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -264,7 +266,7 @@ msgstr "Host is not approved"
 #: backend/api/security_roles.py:204 backend/api/auth_mfa.py:149
 #: backend/api/airgap_collection_schedule.py:143
 #: backend/api/graylog_integration.py:171 backend/api/broadcast.py:128
-#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:88
+#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:93
 #: backend/api/access_groups.py:140 backend/api/grafana_integration.py:313
 #: backend/api/opentelemetry/deployment.py:67
 #: backend/api/opentelemetry/deployment.py:220
@@ -443,8 +445,8 @@ msgstr "Failed to process process status update: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:755 backend/api/update_handlers.py:39
-#: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
+#: backend/api/message_handlers.py:775 backend/api/update_handlers.py:40
+#: backend/api/update_handlers.py:48 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host not registered"
 
@@ -511,27 +513,27 @@ msgstr "Failed to process role data update: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "Child host management requires a Professional+ license."
 
-#: backend/api/handlers/os_hardware_handlers.py:132
+#: backend/api/handlers/os_hardware_handlers.py:133
 msgid "No host identification available"
 msgstr "No host identification available"
 
-#: backend/api/handlers/os_hardware_handlers.py:344
+#: backend/api/handlers/os_hardware_handlers.py:345
 msgid "os_version_updated"
 msgstr "os_version_updated"
 
-#: backend/api/handlers/os_hardware_handlers.py:350
+#: backend/api/handlers/os_hardware_handlers.py:351
 msgid "No OS information provided"
 msgstr "No OS information provided"
 
-#: backend/api/handlers/os_hardware_handlers.py:360
+#: backend/api/handlers/os_hardware_handlers.py:361
 msgid "Failed to update OS version"
 msgstr "Failed to update OS version"
 
-#: backend/api/handlers/os_hardware_handlers.py:568
+#: backend/api/handlers/os_hardware_handlers.py:569
 msgid "hardware_updated"
 msgstr "hardware_updated"
 
-#: backend/api/handlers/os_hardware_handlers.py:577
+#: backend/api/handlers/os_hardware_handlers.py:578
 msgid "Failed to update hardware information"
 msgstr "Failed to update hardware information"
 
@@ -543,53 +545,53 @@ msgstr "software_inventory_updated"
 msgid "Failed to update software inventory"
 msgstr "Failed to update software inventory"
 
-#: backend/api/handlers/software_package_handlers.py:296
-#: backend/api/updates/report_routes.py:75
+#: backend/api/handlers/software_package_handlers.py:299
+#: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Failed to store updates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:411
+#: backend/api/handlers/software_package_handlers.py:414
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "Failed to process package collection result: %s"
 
-#: backend/api/handlers/software_package_handlers.py:505
+#: backend/api/handlers/software_package_handlers.py:508
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "Failed to process third-party repository update: %s"
 
-#: backend/api/handlers/software_package_handlers.py:588
+#: backend/api/handlers/software_package_handlers.py:591
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "Failed to process antivirus status update: %s"
 
-#: backend/api/handlers/software_package_handlers.py:719
+#: backend/api/handlers/software_package_handlers.py:722
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "Failed to process commercial antivirus status update: %s"
 
-#: backend/api/handlers/software_package_handlers.py:821
+#: backend/api/handlers/software_package_handlers.py:824
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "Failed to process firewall status update: %s"
 
-#: backend/api/handlers/software_package_handlers.py:907
+#: backend/api/handlers/software_package_handlers.py:910
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Failed to process Graylog status update: %s"
 
-#: backend/api/handlers/software_package_handlers.py:939
+#: backend/api/handlers/software_package_handlers.py:942
 msgid "Missing request_id in installation_complete"
 msgstr "Missing request_id in installation_complete"
 
-#: backend/api/handlers/software_package_handlers.py:956
+#: backend/api/handlers/software_package_handlers.py:959
 #: backend/api/agent.py:933 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Installation request not found: %s"
 
-#: backend/api/handlers/software_package_handlers.py:997
+#: backend/api/handlers/software_package_handlers.py:1000
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -601,7 +603,7 @@ msgstr "Report template not found"
 
 #: backend/api/report_templates.py:196 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
-#: backend/api/upgrade_profiles.py:128
+#: backend/api/upgrade_profiles.py:145
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
@@ -855,7 +857,7 @@ msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 
 #: backend/api/airgap_collection_schedule.py:94
-#: backend/api/upgrade_profiles.py:148
+#: backend/api/upgrade_profiles.py:165
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "Invalid cron expression: %s"
@@ -1514,12 +1516,12 @@ msgstr "Permission denied: DELETE_QUEUE_MESSAGE role required"
 msgid "No message IDs provided"
 msgstr "No message IDs provided"
 
-#: backend/api/queue.py:186
+#: backend/api/queue.py:190
 msgid "Message not found or not expired"
 msgstr "Message not found or not expired"
 
 # Tag management messages
-#: backend/api/queue.py:249
+#: backend/api/queue.py:253
 msgid "Failed to fetch message details"
 msgstr "Failed to fetch message details"
 
@@ -1603,20 +1605,20 @@ msgstr "Mirror host not found"
 msgid "Mirror deleted"
 msgstr "Mirror deleted"
 
-#: backend/api/repository_mirroring.py:262
+#: backend/api/repository_mirroring.py:263
 #, python-format
 msgid "Unsupported package_manager: %s"
 msgstr "Unsupported package_manager: %s"
 
-#: backend/api/repository_mirroring.py:275
+#: backend/api/repository_mirroring.py:276
 msgid "Mirror sync dispatched"
 msgstr "Mirror sync dispatched"
 
-#: backend/api/repository_mirroring.py:389
+#: backend/api/repository_mirroring.py:390
 msgid "Mirror tick requires automation_engine for cron evaluation."
 msgstr "Mirror tick requires automation_engine for cron evaluation."
 
-#: backend/api/repository_mirroring.py:604
+#: backend/api/repository_mirroring.py:605
 #, python-format
 msgid ""
 "Mirror %s has not completed a successful sync yet -- wait for sync to "
@@ -1625,7 +1627,7 @@ msgstr ""
 "Mirror %s has not completed a successful sync yet -- wait for sync to "
 "succeed before assigning it as a default."
 
-#: backend/api/repository_mirroring.py:613
+#: backend/api/repository_mirroring.py:614
 #, python-format
 msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
@@ -1634,29 +1636,29 @@ msgstr ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
 "%(platform)s default"
 
-#: backend/api/repository_mirroring.py:696
+#: backend/api/repository_mirroring.py:697
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "Unknown (platform, version, os_family) tuple"
 
-#: backend/api/airgap_collector_runs.py:65
+#: backend/api/airgap_collector_runs.py:70
 msgid "Air-gap collection run not found"
 msgstr "Air-gap collection run not found"
 
-#: backend/api/airgap_collector_runs.py:66
+#: backend/api/airgap_collector_runs.py:71
 msgid "Air-gap media manifest not found"
 msgstr "Air-gap media manifest not found"
 
-#: backend/api/airgap_collector_runs.py:67
+#: backend/api/airgap_collector_runs.py:72
 #, python-format
 msgid "Invalid UUID for run_id: %s"
 msgstr "Invalid UUID for run_id: %s"
 
-#: backend/api/airgap_collector_runs.py:68
+#: backend/api/airgap_collector_runs.py:73
 #, python-format
 msgid "Invalid UUID for manifest_id: %s"
 msgstr "Invalid UUID for manifest_id: %s"
 
-#: backend/api/airgap_collector_runs.py:77
+#: backend/api/airgap_collector_runs.py:82
 msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
@@ -1664,7 +1666,7 @@ msgstr ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
 
-#: backend/api/airgap_collector_runs.py:218
+#: backend/api/airgap_collector_runs.py:227
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be "
 "loaded -- the collector reads each target's bundle from a snapshot of its "
@@ -1674,7 +1676,7 @@ msgstr ""
 "loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 
-#: backend/api/airgap_collector_runs.py:229
+#: backend/api/airgap_collector_runs.py:238
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
@@ -1682,7 +1684,7 @@ msgstr ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
 
-#: backend/api/airgap_collector_runs.py:289
+#: backend/api/airgap_collector_runs.py:298
 #, python-format
 msgid ""
 "Mirror %r has no known_version_id set; Option-B collection runs need the "
@@ -1693,7 +1695,7 @@ msgstr ""
 "mirror to be tied to a catalog version so distro / version can be derived.  "
 "Edit the mirror and pick a version from the dropdown."
 
-#: backend/api/airgap_collector_runs.py:318
+#: backend/api/airgap_collector_runs.py:327
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
@@ -1702,29 +1704,29 @@ msgstr ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
 "version on the mirror."
 
-#: backend/api/airgap_collector_runs.py:402
-#: backend/api/airgap_collector_runs.py:481
+#: backend/api/airgap_collector_runs.py:414
+#: backend/api/airgap_collector_runs.py:493
 msgid "At least one target is required to create a collection run."
 msgstr "At least one target is required to create a collection run."
 
-#: backend/api/airgap_collector_runs.py:412
+#: backend/api/airgap_collector_runs.py:424
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "Invalid UUID for mirror_id: %s"
 
-#: backend/api/airgap_collector_runs.py:422
+#: backend/api/airgap_collector_runs.py:434
 #, python-format
 msgid "Mirror %s not found"
 msgstr "Mirror %s not found"
 
-#: backend/api/airgap_collector_runs.py:428
+#: backend/api/airgap_collector_runs.py:440
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
 msgstr ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
 
-#: backend/api/airgap_collector_runs.py:439
+#: backend/api/airgap_collector_runs.py:451
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
@@ -1733,7 +1735,7 @@ msgstr ""
 "All target mirrors must live on the same host (the collection plan "
 "dispatches to a single agent). Selected mirrors span %d hosts."
 
-#: backend/api/airgap_collector_runs.py:535
+#: backend/api/airgap_collector_runs.py:547
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
@@ -1742,7 +1744,7 @@ msgstr ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
 
-#: backend/api/airgap_collector_runs.py:658
+#: backend/api/airgap_collector_runs.py:670
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
@@ -1751,7 +1753,7 @@ msgstr ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
 "ISO_BUILT."
 
-#: backend/api/airgap_collector_runs.py:668
+#: backend/api/airgap_collector_runs.py:680
 msgid ""
 "ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
 "the collection to rebuild."
@@ -1759,30 +1761,44 @@ msgstr ""
 "ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
 "the collection to rebuild."
 
-#: backend/api/airgap_collector_runs.py:685
+#: backend/api/airgap_collector_runs.py:697
 msgid "ISO file not found."
 msgstr "ISO file not found."
 
-#: backend/api/airgap_collector_runs.py:705
+#: backend/api/airgap_collector_runs.py:717
 #, python-format
 msgid "Disc %(disc)d not found for this run.  Available discs: %(available)s"
 msgstr "Disc %(disc)d not found for this run.  Available discs: %(available)s"
 
-#: backend/api/airgap_collector_runs.py:790
+#: backend/api/airgap_collector_runs.py:802
 msgid "Invalid or expired download token."
 msgstr "Invalid or expired download token."
 
-#: backend/api/airgap_collector_runs.py:823
+#: backend/api/airgap_collector_runs.py:828
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr "This run is not waiting for a blank disc (status: %s)."
+
+#: backend/api/airgap_collector_runs.py:843
+#, python-format
+msgid ""
+"Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run "
+"'%(iso_label)s'"
+msgstr ""
+"Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run "
+"'%(iso_label)s'"
+
+#: backend/api/airgap_collector_runs.py:885
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "Deleted air-gap collection run '%s'"
 
-#: backend/api/airgap_collector_runs.py:895
+#: backend/api/airgap_collector_runs.py:957
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "Run is not COMPLETE yet (status: %s)"
 
-#: backend/api/airgap_collector_runs.py:901
+#: backend/api/airgap_collector_runs.py:963
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "ISO file is no longer on disk: %s"
@@ -2237,7 +2253,7 @@ msgstr "Connection failed - Grafana server may be down or unreachable"
 msgid "Unexpected error checking Grafana health"
 msgstr "Unexpected error checking Grafana health"
 
-#: backend/api/proplus_routes_stubs.py:64
+#: backend/api/proplus_routes_stubs.py:69
 msgid ""
 "Encrypted backups require a SysManage Professional+ license with the backup "
 "engine. Please upgrade to access this feature."
@@ -2245,7 +2261,7 @@ msgstr ""
 "Encrypted backups require a SysManage Professional+ license with the backup "
 "engine. Please upgrade to access this feature."
 
-#: backend/api/proplus_routes_stubs.py:120
+#: backend/api/proplus_routes_stubs.py:121
 msgid ""
 "Host provisioning requires a SysManage Professional+ license with the "
 "provisioning engine. Please upgrade to access this feature."
@@ -2811,7 +2827,7 @@ msgstr "Host auto-approved via child host creation"
 msgid "Agent registered and connected successfully"
 msgstr "Agent registered and connected successfully"
 
-#: backend/api/message_handlers_core.py:945
+#: backend/api/message_handlers_core.py:947
 msgid "Failed to process heartbeat"
 msgstr "Failed to process heartbeat"
 
@@ -3344,28 +3360,28 @@ msgstr "Failed to send test email. Please check your SMTP configuration."
 msgid "Error sending test email: {error}"
 msgstr "Error sending test email: {error}"
 
-#: backend/api/airgap_bundles.py:132
+#: backend/api/airgap_bundles.py:140
 msgid "Bundle not found"
 msgstr "Bundle not found"
 
-#: backend/api/airgap_bundles.py:469
+#: backend/api/airgap_bundles.py:479
 msgid "product must be one of: "
 msgstr "product must be one of: "
 
-#: backend/api/airgap_bundles.py:483
+#: backend/api/airgap_bundles.py:493
 msgid "Insufficient host resources to build a bundle: "
 msgstr "Insufficient host resources to build a bundle: "
 
-#: backend/api/airgap_bundles.py:578
+#: backend/api/airgap_bundles.py:596
 #, python-format
 msgid "Bundle is not ready yet (status: %s)"
 msgstr "Bundle is not ready yet (status: %s)"
 
-#: backend/api/airgap_bundles.py:582
+#: backend/api/airgap_bundles.py:600
 msgid "Bundle file is no longer on disk"
 msgstr "Bundle file is no longer on disk"
 
-#: backend/api/airgap_bundles.py:629
+#: backend/api/airgap_bundles.py:647
 msgid "Invalid or expired download token"
 msgstr "Invalid or expired download token"
 
@@ -3608,23 +3624,23 @@ msgstr "Failed to count packages: %s"
 msgid "Failed to search packages: %s"
 msgstr "Failed to search packages: %s"
 
-#: backend/api/host.py:196
+#: backend/api/host.py:230
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Permission denied: DELETE_HOST role required"
 
-#: backend/api/host.py:260
+#: backend/api/host.py:294
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Permission denied: VIEW_HOST_DETAILS role required"
 
-#: backend/api/host.py:688
+#: backend/api/host.py:683
 msgid "Host already exists"
 msgstr "Host already exists"
 
-#: backend/api/host.py:800
+#: backend/api/host.py:795
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registration absorbed: host was recently deleted"
 
-#: backend/api/host.py:880
+#: backend/api/host.py:875
 #, python-format
 msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
@@ -3666,7 +3682,7 @@ msgstr "Configuration pushed to platform agents"
 msgid "Must specify target_hostname, target_platform, or push_to_all"
 msgstr "Must specify target_hostname, target_platform, or push_to_all"
 
-#: backend/api/config_management.py:276
+#: backend/api/config_management.py:280
 msgid "Configuration acknowledgment processed"
 msgstr "Configuration acknowledgment processed"
 
@@ -3715,34 +3731,34 @@ msgstr "This job has already finished"
 msgid "Cancelled by an operator"
 msgstr "Cancelled by an operator"
 
-#: backend/api/message_handlers.py:608
+#: backend/api/message_handlers.py:628
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "Failed to process diagnostic result: %s"
 
-#: backend/api/message_handlers.py:642
+#: backend/api/message_handlers.py:662
 msgid "Missing message_id in command acknowledgment"
 msgstr "Missing message_id in command acknowledgment"
 
-#: backend/api/message_handlers.py:709
+#: backend/api/message_handlers.py:729
 msgid "This session cannot acknowledge another host's message"
 msgstr "This session cannot acknowledge another host's message"
 
-#: backend/api/message_handlers.py:779
+#: backend/api/message_handlers.py:799
 msgid "Missing installation_id in package installation status"
 msgstr "Missing installation_id in package installation status"
 
-#: backend/api/message_handlers.py:799
+#: backend/api/message_handlers.py:819
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "Installation log entry not found for ID: %s"
 
-#: backend/api/message_handlers.py:845
+#: backend/api/message_handlers.py:865
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Package installation {status} on agent {hostname}"
 
-#: backend/api/message_handlers.py:874
+#: backend/api/message_handlers.py:894
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Failed to update package installation status: %s"
@@ -3836,20 +3852,20 @@ msgstr "System info update requested"
 msgid "Environment subscriptions are managed on the federation coordinator"
 msgstr "Environment subscriptions are managed on the federation coordinator"
 
-#: backend/api/airgap_devices.py:79
+#: backend/api/airgap_devices.py:82
 #, python-format
 msgid "Device %s is not an available import drive"
 msgstr "Device %s is not an available import drive"
 
-#: backend/api/airgap_devices.py:103
+#: backend/api/airgap_devices.py:106
 msgid "no import device selected"
 msgstr "no import device selected"
 
-#: backend/api/airgap_devices.py:123
+#: backend/api/airgap_devices.py:132
 msgid "No import device selected"
 msgstr "No import device selected"
 
-#: backend/api/airgap_devices.py:128
+#: backend/api/airgap_devices.py:137
 #, python-format
 msgid "Import device not ready: %s"
 msgstr "Import device not ready: %s"
@@ -3885,7 +3901,7 @@ msgstr "API keys cannot be managed with API-key authentication."
 msgid "API key not found."
 msgstr "API key not found."
 
-#: backend/api/update_handlers.py:207
+#: backend/api/update_handlers.py:229
 msgid "Failed to process update results"
 msgstr "Failed to process update results"
 
@@ -4017,22 +4033,23 @@ msgstr "Failed to queue OS upgrade command"
 msgid "Failed to get update summary: %s"
 msgstr "Failed to get update summary: %s"
 
-#: backend/api/updates/query_routes.py:199
+#: backend/api/updates/query_routes.py:203
 #, python-format
 msgid "Failed to get host updates: %s"
 msgstr "Failed to get host updates: %s"
 
-#: backend/api/updates/query_routes.py:301
+#: backend/api/updates/query_routes.py:305
 #, python-format
 msgid "Failed to get updates: %s"
 msgstr "Failed to get updates: %s"
 
-#: backend/api/updates/query_routes.py:321
+#: backend/api/updates/query_routes.py:325
 #, python-format
 msgid "Failed to get update results: %s"
 msgstr "Failed to get update results: %s"
 
 #: backend/api/updates/execution_routes.py:65
+#: backend/api/upgrade_profiles.py:182
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 
@@ -4067,7 +4084,7 @@ msgstr "Failed to send update command: %s"
 msgid "Failed to execute updates: %s"
 msgstr "Failed to execute updates: %s"
 
-#: backend/api/updates/execution_routes.py:307
+#: backend/api/updates/execution_routes.py:311
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "Failed to get execution log: %s"
@@ -4379,7 +4396,7 @@ msgstr ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 
-#: backend/api/backups.py:298 backend/api/backups_drift.py:97
+#: backend/api/backups.py:298 backend/api/backups_drift.py:103
 #: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "The snapshot name is not valid"
@@ -4471,7 +4488,7 @@ msgstr ""
 "never holds. Restore it by hand with restate and that key, as the server "
 "recovery runbook describes."
 
-#: backend/api/backups.py:876 backend/api/backups_drift.py:105
+#: backend/api/backups.py:876 backend/api/backups_drift.py:114
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "This host's restate cannot do this yet; upgrade restate"
@@ -4554,12 +4571,12 @@ msgstr "OS version update requested"
 msgid "Updates check requested"
 msgstr "Updates check requested"
 
-#: backend/api/secrets/crud.py:35 backend/api/error_constants.py:166
+#: backend/api/secrets/crud.py:36 backend/api/error_constants.py:166
 #: backend/services/vault_service.py:423
 msgid "Secret not found"
 msgstr "Secret not found"
 
-#: backend/api/secrets/crud.py:46
+#: backend/api/secrets/crud.py:47
 msgid ""
 "Secrets management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
@@ -4567,23 +4584,23 @@ msgstr ""
 "Secrets management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 
-#: backend/api/secrets/crud.py:128
+#: backend/api/secrets/crud.py:129
 msgid "Failed to retrieve secret content from vault"
 msgstr "Failed to retrieve secret content from vault"
 
-#: backend/api/secrets/crud.py:160
+#: backend/api/secrets/crud.py:161
 msgid "Failed to store secret in vault"
 msgstr "Failed to store secret in vault"
 
-#: backend/api/secrets/crud.py:223
+#: backend/api/secrets/crud.py:224
 msgid "Failed to update secret in vault"
 msgstr "Failed to update secret in vault"
 
-#: backend/api/secrets/crud.py:266
+#: backend/api/secrets/crud.py:267
 msgid "Secret deleted successfully"
 msgstr "Secret deleted successfully"
 
-#: backend/api/secrets/crud.py:296
+#: backend/api/secrets/crud.py:297
 #, python-brace-format
 msgid "Deleted {count} secrets"
 msgstr "Deleted {count} secrets"
@@ -4649,11 +4666,11 @@ msgstr "Orchestrated reboot initiated with %d running child host(s)"
 msgid "Reboot orchestration not found"
 msgstr "Reboot orchestration not found"
 
-#: backend/api/upgrade_profiles.py:58
+#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:185
 msgid "Upgrade profile not found"
 msgstr "Upgrade profile not found"
 
-#: backend/api/upgrade_profiles.py:74
+#: backend/api/upgrade_profiles.py:71
 msgid ""
 "Scheduled upgrade profiles require a SysManage Professional+ license. Please "
 "upgrade to access this feature."
@@ -4661,31 +4678,75 @@ msgstr ""
 "Scheduled upgrade profiles require a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 
-#: backend/api/upgrade_profiles.py:196
+#: backend/api/upgrade_profiles.py:273
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "Created upgrade profile '%s'"
 
-#: backend/api/upgrade_profiles.py:263
+#: backend/api/upgrade_profiles.py:342
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "Updated upgrade profile '%s'"
 
-#: backend/api/upgrade_profiles.py:295
+#: backend/api/upgrade_profiles.py:375
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "Deleted upgrade profile '%s'"
 
-#: backend/api/upgrade_profiles.py:300
+#: backend/api/upgrade_profiles.py:380
 msgid "Upgrade profile deleted"
 msgstr "Upgrade profile deleted"
 
-#: backend/api/upgrade_profiles.py:390
+#: backend/api/upgrade_profiles.py:416
 #, python-format
-msgid ""
-"Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
-msgstr ""
-"Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
+msgid "Ran upgrade profile '%s' now"
+msgstr "Ran upgrade profile '%s' now"
+
+#: backend/api/auto_updates.py:64
+msgid "A reason is required"
+msgstr "A reason is required"
+
+#: backend/api/auto_updates.py:133
+#, python-format
+msgid "Held every automatic update policy: %s"
+msgstr "Held every automatic update policy: %s"
+
+#: backend/api/auto_updates.py:135
+msgid "Released the hold on every automatic update policy"
+msgstr "Released the hold on every automatic update policy"
+
+#: backend/api/auto_updates.py:162
+msgid "Changed the automatic update settings"
+msgstr "Changed the automatic update settings"
+
+#: backend/api/auto_updates.py:195
+#, python-format
+msgid "Held automatic update policy '%(policy)s': %(reason)s"
+msgstr "Held automatic update policy '%(policy)s': %(reason)s"
+
+#: backend/api/auto_updates.py:198
+#, python-format
+msgid "Released the hold on automatic update policy '%s'"
+msgstr "Released the hold on automatic update policy '%s'"
+
+#: backend/api/auto_updates.py:228
+#, python-format
+msgid "%(host)s will never be updated automatically: %(reason)s"
+msgstr "%(host)s will never be updated automatically: %(reason)s"
+
+#: backend/api/auto_updates.py:231
+#, python-format
+msgid "%s may be updated automatically again"
+msgstr "%s may be updated automatically again"
+
+#: backend/api/auto_updates.py:328
+msgid "Run not found"
+msgstr "Run not found"
+
+#: backend/api/auto_updates.py:336
+#, python-format
+msgid "Acknowledged the automatic update run on %s"
+msgstr "Acknowledged the automatic update run on %s"
 
 #: backend/api/agent.py:101
 msgid "Rate limit exceeded"
@@ -4934,15 +4995,15 @@ msgstr "Child host engine could not dispatch this request."
 msgid "Permission denied: {} role required"
 msgstr "Permission denied: {} role required"
 
-#: backend/api/backups_drift.py:57
+#: backend/api/backups_drift.py:63
 msgid "The drift timeline needs the Professional+ backup engine"
 msgstr "The drift timeline needs the Professional+ backup engine"
 
-#: backend/api/backups_drift.py:77 backend/api/backups_browse.py:95
+#: backend/api/backups_drift.py:83 backend/api/backups_browse.py:95
 msgid "The path must be absolute"
 msgstr "The path must be absolute"
 
-#: backend/api/backups_drift.py:109
+#: backend/api/backups_drift.py:118
 msgid "A comparison of snapshots is already running"
 msgstr "A comparison of snapshots is already running"
 
@@ -5117,15 +5178,15 @@ msgstr "An override reason is required."
 msgid "Override duration must be positive."
 msgstr "Override duration must be positive."
 
-#: backend/api/maintenance_windows.py:455
+#: backend/api/maintenance_windows.py:461
 msgid "Permission denied: Delete Queue Message role required"
 msgstr "Permission denied: Delete Queue Message role required"
 
-#: backend/api/maintenance_windows.py:472
+#: backend/api/maintenance_windows.py:478
 msgid "Message not found"
 msgstr "Message not found"
 
-#: backend/api/maintenance_windows.py:480
+#: backend/api/maintenance_windows.py:486
 msgid "Only a command a maintenance window is holding can be canceled."
 msgstr "Only a command a maintenance window is holding can be canceled."
 
@@ -5513,10 +5574,12 @@ msgid "Script content cannot be empty"
 msgstr "Script content cannot be empty"
 
 #: backend/api/scripts/models.py:122
+#: backend/api/scripts/routes_executions.py:97
 msgid "Either saved_script_id or script_content must be provided"
 msgstr "Either saved_script_id or script_content must be provided"
 
 #: backend/api/scripts/models.py:132
+#: backend/api/scripts/routes_executions.py:106
 msgid "shell_type is required for ad-hoc scripts"
 msgstr "shell_type is required for ad-hoc scripts"
 
@@ -5528,67 +5591,67 @@ msgstr ""
 "This host requires approval for scripts; run it from a saved script with "
 "approval."
 
-#: backend/api/scripts/routes_executions.py:104
+#: backend/api/scripts/routes_executions.py:126
 msgid "Saved script not found"
 msgstr "Saved script not found"
 
-#: backend/api/scripts/routes_executions.py:109
+#: backend/api/scripts/routes_executions.py:131
 msgid "Script is not active"
 msgstr "Script is not active"
 
-#: backend/api/scripts/routes_executions.py:189
+#: backend/api/scripts/routes_executions.py:211
 #, python-brace-format
 msgid "Executed script '{script_name}' on host '{host_fqdn}'"
 msgstr "Executed script '{script_name}' on host '{host_fqdn}'"
 
-#: backend/api/scripts/routes_executions.py:211
+#: backend/api/scripts/routes_executions.py:233
 msgid "Failed to queue script execution: {}"
 msgstr "Failed to queue script execution: {}"
 
-#: backend/api/scripts/routes_executions.py:221
+#: backend/api/scripts/routes_executions.py:243
 msgid "Failed to queue script execution"
 msgstr "Failed to queue script execution"
 
-#: backend/api/scripts/routes_executions.py:234
+#: backend/api/scripts/routes_executions.py:256
 msgid "Script execution queued for delivery"
 msgstr "Script execution queued for delivery"
 
-#: backend/api/scripts/routes_executions.py:242
+#: backend/api/scripts/routes_executions.py:264
 msgid "Failed to execute script"
 msgstr "Failed to execute script"
 
 # Tag management messages
-#: backend/api/scripts/routes_executions.py:326
+#: backend/api/scripts/routes_executions.py:348
 msgid "Failed to fetch script executions"
 msgstr "Failed to fetch script executions"
 
-#: backend/api/scripts/routes_executions.py:347
-#: backend/api/scripts/routes_executions.py:417
+#: backend/api/scripts/routes_executions.py:369
+#: backend/api/scripts/routes_executions.py:439
 msgid "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 msgstr "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 
-#: backend/api/scripts/routes_executions.py:359
-#: backend/api/scripts/routes_executions.py:486
+#: backend/api/scripts/routes_executions.py:381
+#: backend/api/scripts/routes_executions.py:508
 msgid "Script execution not found"
 msgstr "Script execution not found"
 
-#: backend/api/scripts/routes_executions.py:387
+#: backend/api/scripts/routes_executions.py:409
 msgid "Script execution deleted successfully"
 msgstr "Script execution deleted successfully"
 
-#: backend/api/scripts/routes_executions.py:396
+#: backend/api/scripts/routes_executions.py:418
 msgid "Failed to delete script execution"
 msgstr "Failed to delete script execution"
 
-#: backend/api/scripts/routes_executions.py:457
+#: backend/api/scripts/routes_executions.py:479
 msgid "Script executions deleted successfully"
 msgstr "Script executions deleted successfully"
 
-#: backend/api/scripts/routes_executions.py:464
+#: backend/api/scripts/routes_executions.py:486
 msgid "Failed to delete script executions"
 msgstr "Failed to delete script executions"
 
-#: backend/api/scripts/routes_executions.py:521
+#: backend/api/scripts/routes_executions.py:543
 msgid "Failed to fetch script execution"
 msgstr "Failed to fetch script execution"
 
@@ -5675,12 +5738,12 @@ msgstr "What changed compares with the current repository only"
 msgid "A check of what changed is already running"
 msgstr "A check of what changed is already running"
 
-#: backend/websocket/message_router.py:280
+#: backend/websocket/message_router.py:287
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Unknown message type in queue: %s"
 
-#: backend/websocket/message_router.py:285
+#: backend/websocket/message_router.py:292
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Error routing message type %(message_type)s: %(error)s"
@@ -6046,7 +6109,7 @@ msgstr ""
 "keeps its database running, leaves OpenBAO's unseal key out and encrypts to "
 "the escrow key"
 
-#: backend/services/backup_server.py:172
+#: backend/services/backup_server.py:181
 msgid ""
 "Save a break-glass escrow key first: the SysManage server's own backup is "
 "encrypted to it, so restoring OpenBAO never needs a key kept inside OpenBAO"
@@ -6116,6 +6179,20 @@ msgid ""
 msgstr ""
 "Confirm that packages will be installed, and packages the snapshot did not "
 "have removed, to match the snapshot"
+
+#: backend/services/auto_update_runner.py:309
+#, python-format
+msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
+msgstr "Automatic update queued on %(host)s by policy '%(policy)s'"
+
+#: backend/services/auto_update_runner.py:387
+msgid "The host never reported the result"
+msgstr "The host never reported the result"
+
+#: backend/services/auto_update_results.py:68
+#, python-format
+msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
+msgstr "Automatic reboot of %(host)s after policy '%(policy)s'"
 
 #: backend/services/held_asset_tags.py:159
 #, python-format
@@ -6548,15 +6625,13 @@ msgstr "NetBSD pkgsrc package vulnerabilities (what pkg_admin audit reads)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
 
-#: backend/api/airgap_collector_runs.py
 #, python-format
-msgid "This run is not waiting for a blank disc (status: %s)."
-msgstr "This run is not waiting for a blank disc (status: %s)."
-
-#: backend/api/airgap_collector_runs.py
-#, python-format
-msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
-msgstr "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
+#~ msgid ""
+#~ "Triggered upgrade profile '%(profile_name)s' against %(host_count)d "
+#~ "host(s)"
+#~ msgstr ""
+#~ "Triggered upgrade profile '%(profile_name)s' against %(host_count)d "
+#~ "host(s)"
 
 #~ msgid ""
 #~ "Confirm that photos will be deleted from iCloud once they are downloaded"

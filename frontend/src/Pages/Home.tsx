@@ -15,6 +15,7 @@ import { AxiosResponse } from 'axios';
 import { doGetHostsSummary, HostsSummary } from '../Services/hosts'
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
 import { updatesService, UpdateStatsSummary } from '../Services/updates';
+import { autoUpdatesService } from '../Services/autoUpdates';
 import axiosInstance from '../Services/api';
 import { getFleetSummary, FleetSummary } from '../Services/timeSync';
 import { getHardwareSummary, HardwareSummary, needingAttention } from '../Services/hardwareHealth';
@@ -169,6 +170,9 @@ const Dashboard = () => {
     const [serverUnprotected, setServerUnprotected] = useState<boolean>(false);
     // iCloud Photos to local (24.12): counted with the backups, one note line.
     const [cloudSummary, setCloudSummary] = useState<CloudSummary | null>(null);
+    // 26.1 (Enterprise): automatic runs that failed, never reported, or whose
+    // reboot did not come back.  null = no engine: the card is not shown.
+    const [autoProblems, setAutoProblems] = useState<number | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [cardVisibility, setCardVisibility] = useState<Record<string, boolean>>({
@@ -280,6 +284,10 @@ const Dashboard = () => {
                 getBackupSummary(),
             ]);
             getCloudSummary().then(setCloudSummary).catch(() => setCloudSummary(null));
+            autoUpdatesService
+                .settings()
+                .then((s) => setAutoProblems((s.counts?.failed_recent ?? 0) + (s.counts?.reboot_not_back ?? 0)))
+                .catch(() => setAutoProblems(null));
 
             processHostsResponse(hostsResponse);
             processUpdatesResponse(updatesResponse);
@@ -373,6 +381,10 @@ const Dashboard = () => {
         void navigate('/updates?securityOnly=true');
     };
 
+    const handleAutoUpdatesClick = () => {
+        void navigate('/settings#update-profiles');
+    };
+
     const handleRebootClick = () => {
         // Navigate to hosts page to show hosts requiring reboot
         void navigate('/hosts');
@@ -464,6 +476,18 @@ const Dashboard = () => {
                             maxValue={hostsTotal || 1}
                             color={rebootColor}
                             onClick={handleRebootClick}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
+                {autoProblems !== null && (
+                    <Grid>
+                        <DashboardCard
+                            title={t('dashboard.autoUpdateProblems', 'Automatic update problems')}
+                            value={autoProblems}
+                            maxValue={Math.max(autoProblems, 1)}
+                            color={autoProblems > 0 ? COLOR_RED : COLOR_GREEN}
+                            onClick={handleAutoUpdatesClick}
                             loading={loading}
                         />
                     </Grid>

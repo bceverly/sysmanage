@@ -791,7 +791,8 @@
     "hardwareNeedsAttention": "조치가 필요한 하드웨어",
     "backupsAttention": "주의가 필요한 백업",
     "backupsEscrowStale": "비상용 키 내보내기가 오래됨",
-    "backupsServerUnprotected": "이 SysManage 서버에는 정상 백업이 없습니다"
+    "backupsServerUnprotected": "이 SysManage 서버에는 정상 백업이 없습니다",
+    "autoUpdateProblems": "자동 업데이트 문제"
   },
   "dataGrid": {
     "columnVisibility": "열 표시",
@@ -3784,12 +3785,28 @@
     "title": "업데이트 프로필",
     "trigger": "지금 실행",
     "triggerError": "프로필 실행에 실패했습니다",
-    "triggered": "{{count}}개 호스트에 실행됨 -- {{enqueued}}개 전송됨",
     "updated": "업데이트 프로필이 저장되었습니다",
     "window": "단계별 창 (분)",
     "windowHelp": "에이전트 전송을 이 분 수에 걸쳐 분산 (0-720)",
     "windowRange": "단계별 창은 0 ~ 720분 사이여야 합니다",
-    "addDialogTitle": "업데이트 프로필 추가"
+    "addDialogTitle": "업데이트 프로필 추가",
+    "autoApply": "이 일정에 따라 자동으로 적용",
+    "automatic": "자동",
+    "backupHelp": "비워 두면: 백업을 확인하지 않음",
+    "backupHours": "(시간) 이내에 정상 백업이 있는 경우에만",
+    "excluded": "이 패키지는 적용하지 않음",
+    "excludedHelp": "쉼표로 구분된 이름, *는 모든 문자열과 일치 (linux-image-*, postgresql*)",
+    "held": "일시 중지됨",
+    "hold": "이 정책 일시 중지",
+    "holdReason": "\"{{name}}\"을(를) 일시 중지하는 이유는 무엇입니까?",
+    "listedHosts": "지정된 호스트 {{count}}개",
+    "listedHostsHelp": "목록에 지정된 호스트가 태그보다 우선합니다. 여러 정책에 적용되는 호스트는 가장 구체적인 정책을 따릅니다.",
+    "listedHostsLabel": "이 호스트만",
+    "ranNow": "{{queued}}개 업데이트 중, {{skipped}}개 건너뜀, {{nothing}}개는 할 일 없음",
+    "reboot": "재부팅",
+    "rebootNever": "안 함 (호스트에 '재부팅 필요'가 표시됨)",
+    "rebootWhenNeeded": "업데이트에 필요할 때 재부팅",
+    "release": "일시 중지 해제"
   },
   "userDetail": {
     "active": "활성",
@@ -6174,5 +6191,67 @@
       "view_report": "보고서 보기",
       "view_user_security_roles": "사용자 보안 역할 보기"
     }
+  },
+  "autoUpdates": {
+    "acknowledge": "확인",
+    "allHeld": "모든 자동 업데이트 정책이 일시 중지되었습니다.",
+    "appliedOf": "{{total}}개 중 {{applied}}개 적용됨",
+    "details": "세부 정보",
+    "followsPolicy": "\"{{name}}\" 정책을 따름: {{rule}}.",
+    "heldBy": "{{when}}부터 {{who}}에 의해 일시 중지됨: {{reason}}",
+    "holdAll": "모든 정책 일시 중지",
+    "holdReason": "모든 자동 업데이트를 일시 중지하는 이유는 무엇입니까?",
+    "hostTitle": "자동 업데이트",
+    "noPolicy": "이 호스트에는 자동 업데이트 정책이 적용되지 않습니다.",
+    "noProblems": "주의가 필요한 자동 실행이 없습니다.",
+    "optOut": "자동 업데이트하지 않음",
+    "optOutReason": "이 호스트를 자동으로 업데이트하면 안 되는 이유는 무엇입니까?",
+    "optedOut": "자동 업데이트 안 함: {{reason}}",
+    "pkg": {
+      "agent": "에이전트는 '에이전트 업데이트'를 통해 업데이트됩니다",
+      "busy": "이미 업데이트 중입니다",
+      "excluded": "정책에 의해 제외되었습니다",
+      "firmware": "펌웨어는 정책에서 fwupd를 지정할 때만 업데이트됩니다",
+      "held": "호스트에서 보류(hold)됨",
+      "manager": "패키지 관리자가 정책에 포함되어 있지 않습니다",
+      "notSecurity": "보안 업데이트가 아닙니다",
+      "osUpgrade": "운영체제 업그레이드는 자동으로 수행되지 않습니다"
+    },
+    "policy": "정책",
+    "reboot": {
+      "back": "재부팅 후 다시 온라인 상태",
+      "notBack": "재부팅 후 다시 온라인 상태가 되지 않았습니다",
+      "queued": "재부팅 중"
+    },
+    "result": "결과",
+    "rule": {
+      "moreConservative": "동등하게 구체적인 정책 중 더 보수적인 정책",
+      "moreSpecific": "이 호스트에 적용되는 가장 구체적인 정책",
+      "only": "이 호스트에 적용되는 유일한 정책"
+    },
+    "saveError": "변경 사항을 저장할 수 없습니다",
+    "skip": {
+      "failedRecently": "이전 실행이 실패했습니다. 누군가 확인하거나 재시도 대기 시간이 지날 때까지 기다립니다",
+      "imageMode": "이미지 모드 호스트는 이미지를 대신 업데이트합니다",
+      "inactive": "호스트가 비활성입니다",
+      "needsRepair": "패키지 관리자를 복구해야 합니다",
+      "noBackup": "최근 정상 백업이 없습니다",
+      "notApproved": "호스트가 승인되지 않았습니다",
+      "optedOut": "이 호스트는 절대 자동으로 업데이트되지 않습니다",
+      "pending": "이전 실행이 아직 완료되지 않았습니다",
+      "agentCannotApply": "에이전트가 업데이트를 적용할 수 없습니다. 에이전트를 업데이트하세요"
+    },
+    "status": {
+      "failed": "실패",
+      "nothingToDo": "할 일 없음",
+      "partial": "일부 실패",
+      "queued": "실행 중",
+      "skipped": "건너뜀",
+      "succeeded": "성공",
+      "timedOut": "결과 없음"
+    },
+    "subtitle": "\"자동 적용\"이 켜진 프로필은 일정에 따라 해당 호스트를 업데이트합니다.",
+    "title": "자동 업데이트",
+    "when": "일시"
   }
 }

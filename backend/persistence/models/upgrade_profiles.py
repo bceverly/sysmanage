@@ -27,6 +27,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     Boolean,
+    false,
     Column,
     DateTime,
     ForeignKey,
@@ -76,6 +77,20 @@ class UpgradeProfile(Base):
     # Where to apply
     tag_id = Column(GUID(), ForeignKey("tags.id", ondelete="SET NULL"), nullable=True)
 
+    # Automatic application (26.1, Enterprise; q94autoupdate).  Off by
+    # default: before 26.1 nothing ran a profile on its schedule, so turning
+    # the driver on must not start patching profiles made for manual use.
+    auto_apply = Column(Boolean, nullable=False, default=False, server_default=false())
+    reboot_mode = Column(
+        String(16), nullable=False, default="never"
+    )  # never / when_needed
+    excluded_packages = Column(Text, nullable=True)  # glob patterns, comma/newline
+    require_backup_hours = Column(Integer, nullable=True)  # backups first
+    held = Column(Boolean, nullable=False, default=False, server_default=false())
+    hold_reason = Column(String(1000), nullable=True)
+    hold_by = Column(String(255), nullable=True)
+    hold_at = Column(DateTime, nullable=True)
+
     created_by = Column(GUID(), ForeignKey("user.id", ondelete="SET NULL"))
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
@@ -110,6 +125,14 @@ class UpgradeProfile(Base):
             ),
             "staggered_window_min": self.staggered_window_min,
             "tag_id": str(self.tag_id) if self.tag_id else None,
+            "auto_apply": bool(self.auto_apply),
+            "reboot_mode": self.reboot_mode or "never",
+            "excluded_packages": self.excluded_packages or "",
+            "require_backup_hours": self.require_backup_hours,
+            "held": bool(self.held),
+            "hold_reason": self.hold_reason,
+            "hold_by": self.hold_by,
+            "hold_at": self.hold_at.isoformat() if self.hold_at else None,
             "last_run": self.last_run.isoformat() if self.last_run else None,
             "last_status": self.last_status,
             "next_run": self.next_run.isoformat() if self.next_run else None,

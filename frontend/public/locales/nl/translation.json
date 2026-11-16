@@ -791,7 +791,8 @@
     "hardwareNeedsAttention": "Hardware die aandacht vereist",
     "backupsAttention": "Back-ups die aandacht nodig hebben",
     "backupsEscrowStale": "Noodexport van sleutels verouderd",
-    "backupsServerUnprotected": "Deze SysManage-server heeft geen geslaagde back-up"
+    "backupsServerUnprotected": "Deze SysManage-server heeft geen geslaagde back-up",
+    "autoUpdateProblems": "Problemen met automatische updates"
   },
   "dataGrid": {
     "columnVisibility": "Kolomzichtbaarheid",
@@ -3784,12 +3785,28 @@
     "title": "Updateprofielen",
     "trigger": "Nu activeren",
     "triggerError": "Profiel activeren mislukt",
-    "triggered": "Geactiveerd voor {{count}} host(s) -- {{enqueued}} verzonden",
     "updated": "Updateprofiel opgeslagen",
     "window": "Gespreid venster (minuten)",
     "windowHelp": "Agent-verzendingen over zoveel minuten verspreiden (0-720)",
     "windowRange": "Gespreid venster moet tussen 0 en 720 minuten liggen",
-    "addDialogTitle": "Updateprofiel toevoegen"
+    "addDialogTitle": "Updateprofiel toevoegen",
+    "autoApply": "Automatisch toepassen volgens deze planning",
+    "automatic": "Automatisch",
+    "backupHelp": "Leeg: controleer geen back-ups",
+    "backupHours": "Alleen na een goede back-up binnen (uren)",
+    "excluded": "Nooit deze pakketten toepassen",
+    "excludedHelp": "Door komma's gescheiden namen; * komt overeen met alles (linux-image-*, postgresql*)",
+    "held": "Opgeschort",
+    "hold": "Dit beleid opschorten",
+    "holdReason": "Waarom \"{{name}}\" opschorten?",
+    "listedHosts": "{{count}} vermelde host(s)",
+    "listedHostsHelp": "Vermelde hosts hebben voorrang op de tag. Een host die door meerdere beleidsregels wordt gedekt, volgt de meest specifieke.",
+    "listedHostsLabel": "Alleen deze hosts",
+    "ranNow": "{{queued}} worden bijgewerkt, {{skipped}} overgeslagen, niets te doen op {{nothing}}",
+    "reboot": "Herstarten",
+    "rebootNever": "Nooit (de host toont \"herstart vereist\")",
+    "rebootWhenNeeded": "Herstart wanneer de update het vereist",
+    "release": "Opschorting opheffen"
   },
   "userDetail": {
     "active": "Actief",
@@ -6174,5 +6191,67 @@
       "view_user_security_roles": "Beveiligingsrollen van gebruiker bekijken",
       "update_agent": "Agent bijwerken"
     }
+  },
+  "autoUpdates": {
+    "acknowledge": "Bevestigen",
+    "allHeld": "Elk beleid voor automatische updates is opgeschort.",
+    "appliedOf": "{{applied}} van {{total}} toegepast",
+    "details": "Details",
+    "followsPolicy": "Volgt \"{{name}}\": {{rule}}.",
+    "heldBy": "Opgeschort sinds {{when}} door {{who}}: {{reason}}",
+    "holdAll": "Alle beleidsregels opschorten",
+    "holdReason": "Waarom alle automatische updates opschorten?",
+    "hostTitle": "Automatische updates",
+    "noPolicy": "Geen beleid voor automatische updates dekt deze host.",
+    "noProblems": "Geen automatische run vereist aandacht.",
+    "optOut": "Nooit automatisch bijwerken",
+    "optOutReason": "Waarom mag deze host nooit automatisch worden bijgewerkt?",
+    "optedOut": "Nooit automatisch bijgewerkt: {{reason}}",
+    "pkg": {
+      "agent": "de agent wordt bijgewerkt via \"Agent bijwerken\"",
+      "busy": "wordt al bijgewerkt",
+      "excluded": "uitgesloten door het beleid",
+      "firmware": "firmware alleen wanneer het beleid fwupd noemt",
+      "held": "vastgezet op de host",
+      "manager": "pakketbeheerder niet opgenomen in het beleid",
+      "notSecurity": "geen beveiligingsupdate",
+      "osUpgrade": "een besturingssysteem-upgrade is nooit automatisch"
+    },
+    "policy": "Beleid",
+    "reboot": {
+      "back": "Herstart en weer online",
+      "notBack": "Niet teruggekomen na de herstart",
+      "queued": "Herstarten"
+    },
+    "result": "Resultaat",
+    "rule": {
+      "moreConservative": "het meest conservatieve van even specifieke beleidsregels",
+      "moreSpecific": "het meest specifieke beleid dat dit dekt",
+      "only": "het enige beleid dat deze host dekt"
+    },
+    "saveError": "Kon de wijziging niet opslaan",
+    "skip": {
+      "failedRecently": "de vorige uitvoering is mislukt; er wordt gewacht tot iemand deze bevestigt of de uren tot een nieuwe poging verstreken zijn",
+      "imageMode": "een host in image-modus werkt in plaats daarvan zijn image bij",
+      "inactive": "de host is inactief",
+      "needsRepair": "de pakketbeheerder moet worden gerepareerd",
+      "noBackup": "er is geen recente geslaagde back-up",
+      "notApproved": "de host is niet goedgekeurd",
+      "optedOut": "de host wordt nooit automatisch bijgewerkt",
+      "pending": "de vorige uitvoering is nog niet afgerond",
+      "agentCannotApply": "de agent kan geen updates toepassen; werk de agent bij"
+    },
+    "status": {
+      "failed": "Mislukt",
+      "nothingToDo": "Niets te doen",
+      "partial": "Gedeeltelijk mislukt",
+      "queued": "Bezig",
+      "skipped": "Overgeslagen",
+      "succeeded": "Geslaagd",
+      "timedOut": "Geen resultaat"
+    },
+    "subtitle": "Profielen met \"Automatisch toepassen\" ingeschakeld werken hun hosts volgens schema bij.",
+    "title": "Automatische updates",
+    "when": "Tijdstip"
   }
 }

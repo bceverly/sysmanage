@@ -146,6 +146,11 @@ class Host(TestBase):
     package_manager_checked_at = Column(DateTime, nullable=True)
     # Automatic Ubuntu Pro attach, handled once (q90proautoattach).
     ubuntu_pro_auto_attach_at = Column(DateTime, nullable=True)
+    auto_update_opt_out = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    auto_update_opt_out_reason = Column(String(1000), nullable=True)
+    boot_time = Column(DateTime, nullable=True)
 
     # Agent privilege status
     is_agent_privileged = Column(Boolean, nullable=True, default=False)
@@ -565,6 +570,7 @@ class PackageUpdate(TestBase):
     update_type = Column(String(20), nullable=False)  # security, bugfix, enhancement
     source = Column(String(255), nullable=True)
     requires_reboot = Column(Boolean, nullable=False, default=False)
+    held = Column(Boolean, nullable=False, default=False, server_default=false())
     update_size_bytes = Column(Integer, nullable=True)
     bundle_id = Column(String(255), nullable=True)
     repository = Column(String(255), nullable=True)

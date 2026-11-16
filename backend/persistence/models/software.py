@@ -19,6 +19,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    false,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import TypeDecorator
@@ -144,6 +145,9 @@ class PackageUpdate(Base):
     description = Column(Text, nullable=True)
     size_bytes = Column(BigInteger, nullable=True)
     requires_reboot = Column(Boolean, nullable=False, default=False)
+    # Held (pinned) by the administrator on the host: apt-mark hold, pkg lock
+    # (26.1).  Never applied automatically.
+    held = Column(Boolean, nullable=False, default=False, server_default=false())
     status = Column(
         String(20), nullable=False, default="available", index=True
     )  # available, updating, failed

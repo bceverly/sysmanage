@@ -791,7 +791,8 @@
     "hardwareNeedsAttention": "Hardware que requer atenção",
     "backupsAttention": "Backups que precisam de atenção",
     "backupsEscrowStale": "Exportação de chaves de emergência desatualizada",
-    "backupsServerUnprotected": "Este servidor SysManage não tem um backup bem-sucedido"
+    "backupsServerUnprotected": "Este servidor SysManage não tem um backup bem-sucedido",
+    "autoUpdateProblems": "Problemas de atualizações automáticas"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidade das colunas",
@@ -3784,12 +3785,28 @@
     "title": "Perfis de Atualização",
     "trigger": "Disparar Agora",
     "triggerError": "Falha ao disparar o perfil",
-    "triggered": "Disparado contra {{count}} host(s) -- {{enqueued}} enviados",
     "updated": "Perfil de atualização salvo",
     "window": "Janela Escalonada (minutos)",
     "windowHelp": "Distribuir os envios do agente nesses minutos (0-720)",
     "windowRange": "A janela escalonada deve estar entre 0 e 720 minutos",
-    "addDialogTitle": "Adicionar Perfil de Atualização"
+    "addDialogTitle": "Adicionar Perfil de Atualização",
+    "autoApply": "Aplicar automaticamente de acordo com este agendamento",
+    "automatic": "Automático",
+    "backupHelp": "Em branco: não verificar backups",
+    "backupHours": "Somente após um backup bem-sucedido nas últimas (horas)",
+    "excluded": "Nunca aplicar estes pacotes",
+    "excludedHelp": "Nomes separados por vírgula; * corresponde a qualquer coisa (linux-image-*, postgresql*)",
+    "held": "Suspensa",
+    "hold": "Suspender esta política",
+    "holdReason": "Por que suspender \"{{name}}\"?",
+    "listedHosts": "{{count}} host(s) listado(s)",
+    "listedHostsHelp": "Os hosts listados têm prioridade sobre a etiqueta. Um host coberto por várias políticas segue a mais específica.",
+    "listedHostsLabel": "Apenas estes hosts",
+    "ranNow": "Atualizando {{queued}}, {{skipped}} ignorado(s), nada a fazer em {{nothing}}",
+    "reboot": "Reinicializações",
+    "rebootNever": "Nunca (o host exibe \"reinicialização necessária\")",
+    "rebootWhenNeeded": "Reiniciar quando a atualização exigir",
+    "release": "Remover a suspensão"
   },
   "userDetail": {
     "active": "Ativo",
@@ -6174,5 +6191,67 @@
       "view_report": "Visualizar Relatório",
       "view_user_security_roles": "Visualizar Papéis de Segurança do Usuário"
     }
+  },
+  "autoUpdates": {
+    "acknowledge": "Confirmar",
+    "allHeld": "Todas as políticas de atualização automática estão suspensas.",
+    "appliedOf": "{{applied}} de {{total}} aplicados",
+    "details": "Detalhes",
+    "followsPolicy": "Segue \"{{name}}\": {{rule}}.",
+    "heldBy": "Suspensa desde {{when}} por {{who}}: {{reason}}",
+    "holdAll": "Suspender todas as políticas",
+    "holdReason": "Por que suspender todas as atualizações automáticas?",
+    "hostTitle": "Atualizações automáticas",
+    "noPolicy": "Não há política de atualização automática que cubra este host.",
+    "noProblems": "Nenhuma execução automática requer atenção.",
+    "optOut": "Nunca atualizar automaticamente",
+    "optOutReason": "Por que este host nunca deve ser atualizado automaticamente?",
+    "optedOut": "Nunca atualizado automaticamente: {{reason}}",
+    "pkg": {
+      "agent": "o agente é atualizado por \"Atualizar agente\"",
+      "busy": "já está sendo atualizado",
+      "excluded": "excluído pela política",
+      "firmware": "firmware somente quando a política cita fwupd",
+      "held": "retido no host",
+      "manager": "o gerenciador de pacotes não está na política",
+      "notSecurity": "não é uma atualização de segurança",
+      "osUpgrade": "uma atualização de sistema operacional nunca é automática"
+    },
+    "policy": "Política",
+    "reboot": {
+      "back": "Reiniciado e de volta online",
+      "notBack": "Não retornou após sua reinicialização",
+      "queued": "Reiniciando"
+    },
+    "result": "Resultado",
+    "rule": {
+      "moreConservative": "a política mais conservadora entre as políticas igualmente específicas",
+      "moreSpecific": "a política mais específica que o abrange",
+      "only": "a única política que cobre este host"
+    },
+    "saveError": "Não foi possível salvar a alteração",
+    "skip": {
+      "failedRecently": "sua execução anterior falhou; aguarda até que alguém a confirme ou até que passem as horas de nova tentativa",
+      "imageMode": "um host em modo de imagem atualiza sua imagem em vez disso",
+      "inactive": "o host está inativo",
+      "needsRepair": "o gerenciador de pacotes precisa ser consertado",
+      "noBackup": "ele não tem um bom backup recente",
+      "notApproved": "o host não está aprovado",
+      "optedOut": "o host nunca é atualizado automaticamente",
+      "pending": "sua execução anterior não foi concluída",
+      "agentCannotApply": "seu agente não consegue aplicar atualizações; atualize o agente"
+    },
+    "status": {
+      "failed": "Falhou",
+      "nothingToDo": "Nada a fazer",
+      "partial": "Falha parcial",
+      "queued": "Em execução",
+      "skipped": "Ignorado",
+      "succeeded": "Concluído",
+      "timedOut": "Nenhum resultado"
+    },
+    "subtitle": "Perfis com \"Aplicar automaticamente\" ativado atualizam seus hosts conforme o agendamento.",
+    "title": "Atualizações automáticas",
+    "when": "Quando"
   }
 }

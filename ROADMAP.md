@@ -14410,10 +14410,10 @@ server stays the control plane.
   is all SysManage's.
 - **Then, if the measurements say so, SysManage drops NFS (Bryan,
   2026-11-05).**  Phase 25 measures restate-proxy against NFS on real
-  targets (below); if the proxy holds up, Phase 26.8 removes the NFS
+  targets (below); if the proxy holds up, Phase 27.8 (was 26.8) removes the NFS
   transport from sysmanage and sysmanage-agent and every mention of NFS from
   sysmanage-docs, leaving restate-proxy as SysManage's one transport.  If it
-  does not, NFS stays and 26.8 is dropped with the reason recorded.
+  does not, NFS stays and 27.8 is dropped with the reason recorded.
 - **HTTPS only, and restores go through it too.**  Capture, browse, plan,
   compare and restore all work through the proxy.
 - **Written in C, sharing restate's library code.**  The proxy links the same
@@ -14573,7 +14573,7 @@ before Pro+ encryption.
       capture across the remote route (production's server), a restore
       while a prune waits, and a month of nightly runs on production with no
       failed night the proxy caused.  Recorded in this section with the
-      numbers, for the 26.8 decision -- FIRST NUMBERS 2026-11-10 (drill VMs on beast's br0, one small host, so not yet the comparison): through the proxy, a capture of 227.1 MiB new in 25 s (19.5 s CPU, 662 MiB peak on the host; 56.9 MB on the wire, encrypted and compressed) and an incremental of 45.4 MiB new in 11 s (9.4 s CPU); a one-file restore in 5.6 s. A capture that ran into a storage-side lock (a held `flock -x` on the repository's `lock`, as a prune takes) came back `423 busy`, exit 5, recorded `busy` with restate's message, and was due again 30 minutes later (`BUSY_RETRY`); run by hand once the lock went, it succeeded. Still to do: the same runs over NFS on the same pair, a large host, a whole-host restore, a fleet night, the remote route and a month on production -- SAME-PAIR NUMBERS 2026-11-14 (t14 over Wi-Fi to drill-storage, 4 vCPU / 8 GB on beast's br0; a throwaway 50,916-file 3.3 GiB data set of small files, text and large blobs; NFS 4.2 vs restate-proxy, caches dropped on both ends before each step, each step started only after 2 min under 20 ms to the storage host): incremental (343 MB new, 3.1 GB reused) NFS 20 min 24 s vs proxy 17 min 8 s, t14 CPU 20 s both, storage box CPU 23 s vs 21 s (nfsd 7.8 s; proxy 6.7 s); one-file restore 4.8 s vs 3.6 s; whole-tree restore (51,412 files, 3.5 GB, 0 failed) 9 min 33 s vs 8 min 52 s, t14 CPU 49 s vs 62 s (the proxy's TLS: system time 11 s vs 25 s), storage box CPU 15 s vs 10 s; proxy peak memory 8.4 MB throughout; t14 peak 56-99 MB either way. Full capture NOT a fair pair: NFS 61 min, proxy 2 h 5 min and, rerun, 1 h 32 min (3.5 GB after the incremental's changes), t14 CPU 171-173 s every time, 70 MB peak; the Wi-Fi went to 0.2-3 s round trips during the proxy runs (the gate checks only at the start). OFF THE WI-FI 2026-11-14 (drill-alpine, 2 vCPU / 2 GB, and drill-storage, 4 vCPU / 8 GB, both VMs on beast's br0, 0.3 ms apart; the same deterministic data set; caches dropped; NFS 4.2 vs restate-proxy 3.2.1.5): full capture (3.5 GB, all new) NFS 109 s vs proxy 120 s, client CPU 103 s vs 104 s (user + system), storage box CPU 37 s vs 33 s (nfsd 31 s; proxy 32 s); incremental (343 MB new) 12.9 s vs 16.3 s, client CPU 13 s both, storage 1.0 s vs 3.7 s; one-file restore 1.5 s vs 1.9 s; whole-tree restore (51,412 files, 3.5 GB, 0 failed) 31.5 s vs 39.7 s, client CPU 37 s vs 40 s, storage 4.0 s vs 4.9 s; proxy peak memory 8.4 MB throughout, client peak 56-94 MB either way. So the proxy costs 10-27% in wall time at LAN speed and the same CPU on both ends, and a capture is bound by the client's CPU (compression and hashing: 103 s of CPU in 109 s on 2 vCPUs), not by round trips -- the slow t14 numbers above were the Wi-Fi alone (correcting the round-trip guess first written here). Still to do: a large host, a fleet night, the remote route measured (it is proven working: production's three cloud hosts back up through it) and a month on production -- 2026-11-14 (Bryan): what is left -- a large host, a fleet night within the concurrency cap, the remote route timed, a restore while a prune waits, and a month of nightly runs on production -- MOVED to Phase 26.8, whose NFS decision it feeds; the numbers above stay here
+      numbers, for the 27.8 (was 26.8) decision -- FIRST NUMBERS 2026-11-10 (drill VMs on beast's br0, one small host, so not yet the comparison): through the proxy, a capture of 227.1 MiB new in 25 s (19.5 s CPU, 662 MiB peak on the host; 56.9 MB on the wire, encrypted and compressed) and an incremental of 45.4 MiB new in 11 s (9.4 s CPU); a one-file restore in 5.6 s. A capture that ran into a storage-side lock (a held `flock -x` on the repository's `lock`, as a prune takes) came back `423 busy`, exit 5, recorded `busy` with restate's message, and was due again 30 minutes later (`BUSY_RETRY`); run by hand once the lock went, it succeeded. Still to do: the same runs over NFS on the same pair, a large host, a whole-host restore, a fleet night, the remote route and a month on production -- SAME-PAIR NUMBERS 2026-11-14 (t14 over Wi-Fi to drill-storage, 4 vCPU / 8 GB on beast's br0; a throwaway 50,916-file 3.3 GiB data set of small files, text and large blobs; NFS 4.2 vs restate-proxy, caches dropped on both ends before each step, each step started only after 2 min under 20 ms to the storage host): incremental (343 MB new, 3.1 GB reused) NFS 20 min 24 s vs proxy 17 min 8 s, t14 CPU 20 s both, storage box CPU 23 s vs 21 s (nfsd 7.8 s; proxy 6.7 s); one-file restore 4.8 s vs 3.6 s; whole-tree restore (51,412 files, 3.5 GB, 0 failed) 9 min 33 s vs 8 min 52 s, t14 CPU 49 s vs 62 s (the proxy's TLS: system time 11 s vs 25 s), storage box CPU 15 s vs 10 s; proxy peak memory 8.4 MB throughout; t14 peak 56-99 MB either way. Full capture NOT a fair pair: NFS 61 min, proxy 2 h 5 min and, rerun, 1 h 32 min (3.5 GB after the incremental's changes), t14 CPU 171-173 s every time, 70 MB peak; the Wi-Fi went to 0.2-3 s round trips during the proxy runs (the gate checks only at the start). OFF THE WI-FI 2026-11-14 (drill-alpine, 2 vCPU / 2 GB, and drill-storage, 4 vCPU / 8 GB, both VMs on beast's br0, 0.3 ms apart; the same deterministic data set; caches dropped; NFS 4.2 vs restate-proxy 3.2.1.5): full capture (3.5 GB, all new) NFS 109 s vs proxy 120 s, client CPU 103 s vs 104 s (user + system), storage box CPU 37 s vs 33 s (nfsd 31 s; proxy 32 s); incremental (343 MB new) 12.9 s vs 16.3 s, client CPU 13 s both, storage 1.0 s vs 3.7 s; one-file restore 1.5 s vs 1.9 s; whole-tree restore (51,412 files, 3.5 GB, 0 failed) 31.5 s vs 39.7 s, client CPU 37 s vs 40 s, storage 4.0 s vs 4.9 s; proxy peak memory 8.4 MB throughout, client peak 56-94 MB either way. So the proxy costs 10-27% in wall time at LAN speed and the same CPU on both ends, and a capture is bound by the client's CPU (compression and hashing: 103 s of CPU in 109 s on 2 vCPUs), not by round trips -- the slow t14 numbers above were the Wi-Fi alone (correcting the round-trip guess first written here). Still to do: a large host, a fleet night, the remote route measured (it is proven working: production's three cloud hosts back up through it) and a month on production -- 2026-11-14 (Bryan): what is left -- a large host, a fleet night within the concurrency cap, the remote route timed, a restore while a prune waits, and a month of nightly runs on production -- MOVED to Phase 26.8 (now 27.8), whose NFS decision it feeds; the numbers above stay here
 - [x] **Remote route, documented:** for hosts outside the site, the firewall
       forwards the public name to the proxy as plain TCP (for pfSense, HAProxy
       in TCP mode routing by SNI), so TLS ends on the storage host and nothing
@@ -14659,7 +14659,7 @@ before Pro+ encryption.
 
 - [x] A LAN host and a remote host (production's SysManage server, through the site's firewall) each back up and restore through restate-proxy with no mount; from either, deleting, renaming or overwriting any pack or snapshot, or naming another host's repository, is refused, and a pack that does not match its `.sum` (or, unencrypted, whose `.idx` does not match its content) is rejected; a concurrent capture and storage-side prune still resolve to "busy, retry" -- 2026-11-12 production, the remote half: the SysManage server (a DigitalOcean droplet) and two other cloud servers backed up through restate-proxy via pfSense with no mount (first captures ok); the LAN hosts (beast, milsurpmonitor, nextcloud, ubiquiti, mail) are on the proxy from that night's schedule. PROVEN IN PRODUCTION 2026-11-14: restores through the proxy with no mount -- beast (LAN, 10 s) and license.sysmanage.org (a cloud host through pfSense, 18 s), `/etc/hostname` into staging from `https://backup.theeverlys.com:8443` each, 0 refused or failed (the droplet's own backup is encrypted to the break-glass escrow key and correctly refused through SysManage: it is restored by hand, as the runbook says); and from the droplet with its own token, 9/9 refusals: DELETE, MOVE and PUT on a pack 405, another host's repository 401 (opened or listed), no token 401, an upload in a look session 403, a commit of a different pack under an existing name 409 name-taken, a pack not matching its .sum 422 invalid (the append session ended 204, nothing kept); and a second append session while one held the lock 423 busy, then 201 once it ended
 - [x] A target still using NFS backs up and restores exactly as before, and a target switched from NFS to restate-proxy and back keeps its repositories and snapshots -- PROVEN: NFS to the proxy and back on the netbsd VM 2026-11-10 (25.5 Job files); proxy to NFS and back on freebsd 2026-11-13 (drill VMs, Pro+ tag GFS): prepare on NFS made its export, a capture over the NFS mount wrote into the repository the proxy had made (and left no NFS mount behind), the target back on the proxy with its pin and CA, and the next capture through the proxy went on in the same repository; yesterday's 20261112T215731Z survived both switches, and the only snapshots that went were the two the tag policy's retention removed after each capture (each matching its preview). NFS restores are what Phase 24 shipped and production ran until 2026-11-12
-- [x] **NFS or restate-proxy, decided on numbers:** the 25.5 measurements recorded (first full capture, incremental, file and whole-host restore, fleet night, remote route, a month of production nights), and Bryan's go / no-go for removing NFS from SysManage in 26.8 written here with the reason -- MOVED to Phase 26.8 with the remaining measurements (2026-11-14, Bryan)
+- [x] **NFS or restate-proxy, decided on numbers:** the 25.5 measurements recorded (first full capture, incremental, file and whole-host restore, fleet night, remote route, a month of production nights), and Bryan's go / no-go for removing NFS from SysManage in 27.8 (was 26.8) written here with the reason -- MOVED to Phase 26.8 with the remaining measurements (2026-11-14, Bryan), then to 27.8 (2026-11-16)
 - [x] A storage-side prune started during a restore through the proxy waits as busy and removes nothing the restore reads; a host whose `proxy.d` file the agent removed (left the target, or deleted) is refused on its next request; a token rotated by the agent (new hash added, then the old removed) keeps the host backing up with no failed night; a capture with `--sign-with` through the proxy restores as signed, and `restate sign` on a stored snapshot through the proxy is refused -- PROVEN 2026-11-13 on the drill VMs (restate and restate-proxy 3.2.1.5), except the token rotation: (1) a read session opened with drill-alpine's own token (as a restore holds one) and kept renewed; a capture beside it succeeded, and the prune after it came back `busy` (exit 5, "something is reading it while prune wants to") with both snapshots still there; the session ended, the next prune removed exactly the older one. (2) drill-alpine's policy deleted (tag removed first): the client list re-sent, the storage agent removed its `proxy.d` grant, and the same token that had opened a session a minute before got `401 unauthorized`. (3) Signing: Pro+ snapshot signing turned on for the target (`enable_signing`); freebsd's next capture through the proxy was signed on the storage host before protect (`sign ok`), and a restore through the proxy said "signed by SysManage backup signer (9ED0 D866 ...)" and put the file back; `restate sign` from freebsd on that snapshot through the proxy was refused ("sign changes a snapshot already there, which nothing through restate-proxy may"). SysManage never signs from the host (`capture --sign-with`), so that half is restate's own test. (4) TOKEN ROTATION IS NOT PROVEN, AND FOUND: the agent never rotates a token; it makes a new one only when its token file is missing, and starts using it at once, before the storage host's grant has its hash (freebsd, 2026-11-13: about 15 s, then one rewrite of the grant straight to the new hash; the old-and-new overlap never reached the storage host). A capture in that gap is refused 401. Afterwards the old token was refused and captures at 14:32 and 15:09 (the window) succeeded with the new one. Real rotation needs a pending token the host switches to only once the server reports its hash granted -- BUILT AND PROVEN 2026-11-13: a token older than 90 days gets a next one, kept in the agent's own state (0600) and reported only as its hash (`next`); the server grants it beside the current one (`proxy_token_sha256_next`, migration q87tokennext) and, once the storage host has acknowledged a configure whose grant holds it and both sides are current, re-sends the host's job files with `granted` (the hashes of the newest acknowledged storage grant; only while a rotation is under way, so an older agent never sees the key); only then does the host install it root's and report it as current, and the old hash retires as before. On freebsd (token backdated 91 days): v25 the host reported next 22ee62e9 and the storage host wrote the grant with both (16:25:26); v26 the host was told granted and switched; v29 the grant held only the new hash; the token in use was in the grant at every point, and the capture after it (20261113T163624Z) succeeded. Tests: agent `test_an_old_token_is_replaced_only_once_its_successor_is_granted` and two more; server `tests/test_backup_proxy_rotation.py` (3) and the migration test
 
 **The server backs itself up (25.9, Community / Pro+)**
@@ -14683,10 +14683,10 @@ before Pro+ encryption.
 
 ---
 
-## Phase 26: Automatic Update Application (Community / OSS; Pro+; Enterprise)
+## Phase 26: Automatic Update Application (Enterprise; Community fixes)
 
 **Target Release:** **v3.14.0.0**
-**Focus:** Updates that apply themselves, safely: a policy says which hosts take which updates, when, and whether they may reboot; Pro+ keeps that inside each host's maintenance windows and holds a patch for a set number of days (one count for regular patches, a shorter one for patches fixing a critical CVE); Enterprise rolls a change out one fleet at a time, stopping when a fleet comes back unhealthy, so the whole estate is never patched at once.
+**Focus:** Updates that apply themselves, safely (Enterprise: decided 2026-11-16, Bryan -- upgrade profiles have been gated by the Enterprise-tier `automation_engine` since Phase 10.6, and automatic application, windows and waiting periods stay there): a policy says which hosts take which updates, when, and whether they may reboot; it keeps that inside each host's maintenance windows and holds a patch for a set number of days (one count for regular patches, a shorter one for patches fixing a critical CVE); Enterprise rolls a change out one fleet at a time, stopping when a fleet comes back unhealthy, so the whole estate is never patched at once.
 
 **Why here (and why still v3.x):** added 2026-11-02 (Bryan), placed right after Phase 25 so every host it patches already has a tested Community / Pro+ backup to fall back on; the Enterprise / MULTITENANT_SAAS backup-at-scale work follows it as Phase 27 (moved there 2026-11-05), and the mobile work that takes the v4.0.0.0 major bump (now Phase 28) comes after that. It is a new capability on existing machinery, not a new device class, so it is a minor release.
 
@@ -14703,33 +14703,33 @@ before Pro+ encryption.
 #### Carried over from Phase 25 (2026-11-14, Bryan)
 - [ ] **The server's own backup, a week of nights:** production's server backs itself up nightly through the server preset (encrypted to the escrow key, PostgreSQL never stopped, OpenBAO's unseal key left out) for seven nights in a row with no failed night -- nights of 2026-11-12, 2026-11-13, 2026-11-14 and 2026-11-15 ok (capture, sign, protect, seal, prune, du); due about 2026-11-19. Each of those nights also queued a drift `diff` that failed, "the secret key for it is not in the key files": the diff reads both indexes, which are sealed to the escrow key SysManage never holds -- fixed 2026-11-16 (no diff is queued for an escrow-keyed repository, and a manual compare answers 409); it was never part of the backup itself. The backups this phase's automatic updates fall back on include the server's own
 
-#### 26.1 Automatic update policies (Community / OSS)
+#### 26.1 Automatic update policies (Enterprise; the Ubuntu Pro and package-manager items are Community)
 
-- [ ] **Automatic Ubuntu Pro attach (added 2026-11-13, Bryan; Community):** the Ubuntu Pro settings page stored "auto-attach" beside the master key, but nothing read it, so new Ubuntu hosts were never attached (found in production 2026-11-13: the switch on, a master key saved, no attach ever sent). BUILT 2026-11-13: each Ubuntu Pro report from an approved, active host that says it is not attached queues one `ubuntu_pro_attach` with the tenant's master key and organization, when auto-attach is on and a key is set (`backend/services/ubuntu_pro_auto_attach.py`, called from the Ubuntu Pro report handler). Each host is handled once, recorded in `host.ubuntu_pro_auto_attach_at` (migration q90proautoattach): a failed attach is never retried in a loop (a person repeats it from the host's Ubuntu Pro tab), and a host seen attached is marked too, so detaching it on purpose later is respected. Hosts that report before auto-attach is turned on, or before a key is saved, stay unmarked and are attached once it is. Tests: `tests/test_ubuntu_pro_auto_attach.py` (6). Still to prove: a new Ubuntu host in the lab, then production (milsurpmonitor is the one unattached host there)
-- [ ] **Package manager needs repair (added 2026-11-13, Bryan; Community, alert Pro+):** production, 2026-11-13: an update that stopped the agent mid-upgrade left dpkg interrupted on eight hosts, and every update sent to them afterwards failed ("dpkg was interrupted, you must manually run 'sudo dpkg --configure -a'") while the hosts looked healthy. BUILT 2026-11-13 (all three repos): each update scan reports whether the package manager can install anything (agent `collection/package_manager_health.py`: dpkg interrupted or `dpkg --audit` findings; `dnf check`; FreeBSD `pkg check -d`; read-only and unprivileged), kept on the host (migration q88pmrepair); the hosts grid flags it ("Package manager needs repair", the package manager's own words on hover); **Repair Package Manager** on the checked hosts (Apply Software Update role, audited) has the agent run the standard repair (`dpkg --configure -a`, then `apt-get install -f`; `pkg check -d -y` -- each granted exactly in sudoers) and check again; dnf's problems are reported, never repaired (which package to keep is a person's call); and the Pro+ alerting engine's stateful `package_manager_repair` condition alerts on any platform (warning where the button can fix it, critical where a person must; `repairable_only` to leave those out), re-notified daily. The root cause is fixed beside it: the agent's systemd unit is `KillMode=process`, so stopping the agent no longer kills the package manager it started. Tests: agent `tests/test_package_manager_health.py` (8), `tests/test_agent_unit_kill_mode.py`; server `tests/test_package_manager_repair.py` (8); frontend `packageManagerRepair.test.tsx`; engine `test_alerting_package_manager.py` (4). Strings in 14 locales, verified. Still to prove: on a real interrupted dpkg in the lab, then production
+- [x] **Automatic Ubuntu Pro attach (added 2026-11-13, Bryan; Community):** the Ubuntu Pro settings page stored "auto-attach" beside the master key, but nothing read it, so new Ubuntu hosts were never attached (found in production 2026-11-13: the switch on, a master key saved, no attach ever sent). BUILT 2026-11-13: each Ubuntu Pro report from an approved, active host that says it is not attached queues one `ubuntu_pro_attach` with the tenant's master key and organization, when auto-attach is on and a key is set (`backend/services/ubuntu_pro_auto_attach.py`, called from the Ubuntu Pro report handler). Each host is handled once, recorded in `host.ubuntu_pro_auto_attach_at` (migration q90proautoattach): a failed attach is never retried in a loop (a person repeats it from the host's Ubuntu Pro tab), and a host seen attached is marked too, so detaching it on purpose later is respected. Hosts that report before auto-attach is turned on, or before a key is saved, stay unmarked and are attached once it is. Tests: `tests/test_ubuntu_pro_auto_attach.py` (6). Still to prove: a new Ubuntu host in the lab, then production (milsurpmonitor is the one unattached host there) -- PROVEN IN PRODUCTION 2026-11-14: milsurpmonitor's Ubuntu Pro report at 04:03:45 UTC queued one `ubuntu_pro_attach` ("Ubuntu Pro auto-attach queued"), the agent acknowledged it and answered success at 04:03:51, the host has reported attached since, and every host carries its `ubuntu_pro_auto_attach_at` mark (2026-11-14 04:03 to 04:07); the lab run was not needed once the real unattached host went through it
+- [x] **Package manager needs repair (added 2026-11-13, Bryan; Community, alert Pro+):** production, 2026-11-13: an update that stopped the agent mid-upgrade left dpkg interrupted on eight hosts, and every update sent to them afterwards failed ("dpkg was interrupted, you must manually run 'sudo dpkg --configure -a'") while the hosts looked healthy. BUILT 2026-11-13 (all three repos): each update scan reports whether the package manager can install anything (agent `collection/package_manager_health.py`: dpkg interrupted or `dpkg --audit` findings; `dnf check`; FreeBSD `pkg check -d`; read-only and unprivileged), kept on the host (migration q88pmrepair); the hosts grid flags it ("Package manager needs repair", the package manager's own words on hover); **Repair Package Manager** on the checked hosts (Apply Software Update role, audited) has the agent run the standard repair (`dpkg --configure -a`, then `apt-get install -f`; `pkg check -d -y` -- each granted exactly in sudoers) and check again; dnf's problems are reported, never repaired (which package to keep is a person's call); and the Pro+ alerting engine's stateful `package_manager_repair` condition alerts on any platform (warning where the button can fix it, critical where a person must; `repairable_only` to leave those out), re-notified daily. The root cause is fixed beside it: the agent's systemd unit is `KillMode=process`, so stopping the agent no longer kills the package manager it started. Tests: agent `tests/test_package_manager_health.py` (8), `tests/test_agent_unit_kill_mode.py`; server `tests/test_package_manager_repair.py` (8); frontend `packageManagerRepair.test.tsx`; engine `test_alerting_package_manager.py` (4). Strings in 14 locales, verified. Still to prove: on a real interrupted dpkg in the lab, then production -- PROVEN IN THE LAB 2026-11-16 (autoupd-lab, Ubuntu 26.04, against the dev server): a package left unpacked but not configured (`dpkg --unpack hello`) was reported on the next scan ("Packages not fully installed: hello", repairable), Repair Package Manager queued the repair, dpkg configured it and the flag cleared on the following scan. Found doing it: dpkg 1.22 refuses `dpkg --audit` without root ("unable to check lock file"), so the unprivileged agent never saw a half-installed package -- it now reads `/var/lib/dpkg/status` when `--audit` is refused (agent `package_manager_health._dpkg_unfinished`). The interrupted-dpkg case (production's, `/var/lib/dpkg/updates` not empty) needs no privilege and is covered by the agent's tests; production showed no host needing repair on 2026-11-16, so there was nothing there to prove it on
 - [x] **Select every update on every page (added 2026-11-13, Bryan):** with a whole page of the Updates list ticked and more matching than one page shows, "Select all N updates" selects every update the filters match, and Execute applies them all host by host; found on the way: Execute sent only the page on screen, so rows ticked on earlier pages were silently dropped -- now every selected row is applied (frontend `Updates.interactions.test.tsx`, 4 new)
-- [ ] **The policy:** an upgrade profile gains "apply automatically": on / off, scope (all hosts, a tag, or listed hosts), what to apply (everything, security only, or a package-manager allowlist -- the existing profile fields), a schedule (the profile's cron), and reboot handling (below). A host covered by several policies resolves to one, with the rule shown on the host
-- [ ] **A server-side driver:** a leader-elected tick runs due policies (replacing "an external scheduler calls `tick`"), queues `apply_updates` per host through the normal outbound queue with the profile's stagger, and records a run per host; idempotent across restarts and workers, and never queues a second run for a host whose last one is still pending
-- [ ] **What a run applies:** the host's currently pending updates that match the policy at the moment the run is queued (from `package_update`), named explicitly in the command, so a run never applies something nobody could see beforehand; a run with nothing to apply is recorded as "nothing to do", not as a success or a failure
-- [ ] **Reboots:** never automatic unless the policy says so. Options: never (the host shows "reboot required" as today), reboot when the run needs it (`reboot_required`), or reboot only inside a maintenance window (Pro+, 26.2); a reboot is a separate, audited command, and a host whose reboot does not come back within a set time is flagged
-- [ ] **Safety:** a per-host opt-out ("never apply automatically" on the host, beating every policy); a hold (pause one policy, or every policy, at once, with a reason, audited); pinned / held packages respected (apt-mark hold, dnf versionlock, pkg lock, zypper locks -- what the host already reports, never overridden); excluded packages per policy (kernels and databases are the usual ones); a host with a failed previous run is not retried until someone looks, or until a set number of hours has passed
-- [ ] **Results and reporting:** per run and per host: packages applied, failed, skipped, whether a reboot was needed or done, and the agent's output tail on failure; the host's update history shows automatic runs alongside manual ones; failures count on the dashboard
-- [ ] **Audit:** every policy change, hold, opt-out, run and automatic reboot audited, with the policy and the packages named
-- [ ] **Backups first (link to Phase 24):** optionally, "apply only after a good backup in the last N hours" -- a host whose backup is overdue or failed is skipped and says why
+- [ ] **The policy:** an upgrade profile gains "apply automatically": on / off, scope (all hosts, a tag, or listed hosts), what to apply (everything, security only, or a package-manager allowlist -- the existing profile fields), a schedule (the profile's cron), and reboot handling (below). A host covered by several policies resolves to one, with the rule shown on the host: the most specific scope wins (listed hosts, then a tag, then all hosts), and a tie goes to the more conservative policy (security only over everything, no reboot over reboot) (Bryan, 2026-11-16). Found 2026-11-16: a profile's dispatch never worked -- it sent `apply_updates` with no package names, which the agent refuses ("No packages specified"); the run below names them -- BUILT 2026-11-16 (all three repos; lab proof below still to do): `upgrade_profiles` gains `auto_apply` (off: before 26.1 nothing ran a profile, so turning the driver on must not start patching profiles made for manual use), `reboot_mode`, `excluded_packages`, `require_backup_hours` and the hold; `upgrade_profile_host` lists hosts by name (tenant migration q94autoupdate); `automation_engine.resolve_policy` picks the policy, and the host's Software Changes tab says which one and why. Every automatic setting takes the Apply Software Update role
+- [ ] **A server-side driver:** a leader-elected tick runs due policies (replacing "an external scheduler calls `tick`"), queues `apply_updates` per host through the normal outbound queue with the profile's stagger, and records a run per host; idempotent across restarts and workers, and never queues a second run for a host whose last one is still pending -- BUILT 2026-11-16 (all three repos; lab proof below still to do): `backend/services/auto_update_runner.py`, a leader-elected `singleton_task` started with `automation_engine`, every minute in every tenant database; one `auto_update_run` per host per firing; a host whose last run is still queued is skipped (`previous_run_pending`); a run never reported in 12 hours is `timed_out` and its packages failed. `POST /upgrade-profiles/tick` now runs one pass, and Trigger Now goes through the same planner
+- [ ] **What a run applies:** the host's currently pending updates that match the policy at the moment the run is queued (from `package_update`), named explicitly in the command, so a run never applies something nobody could see beforehand; a run with nothing to apply is recorded as "nothing to do", not as a success or a failure -- BUILT 2026-11-16 (all three repos; lab proof below still to do): `automation_engine.plan_host_run`: the host's pending updates at queue time, each named in `apply_updates`, released on the profile's stagger (`scheduled_at`); never an OS release upgrade, the agent itself ("Update Agent" is its path), firmware unless the policy names fwupd, a held package, or one already updating; "nothing to do" is its own outcome
+- [ ] **Reboots:** never automatic unless the policy says so. Options: never (the host shows "reboot required" as today), reboot when the run needs it (`reboot_required`), or reboot only inside a maintenance window (26.2); a reboot is a separate, audited command, and a host whose reboot does not come back within a set time is flagged -- BUILT 2026-11-16 (all three repos; lab proof below still to do): `never` (default) or `when_needed`: one audited `reboot_system` when the results or the host's own reboot-required report (up to 30 minutes later) say so; the heartbeat now carries the boot time (agent `_boot_time`, `host.boot_time`), so "came back" means booted after the request, and a host that does not within the timeout (30 minutes, settable) is `not_back` on its run, in the panel and on the dashboard card. "Only inside a maintenance window" is 26.2. Found on the way: every update result that needed a reboot was rolled back whole (`Unconsumed column names: requires_reboot`, production, nextcloud, 2026-11-02) -- fixed
+- [ ] **Safety:** a per-host opt-out ("never apply automatically" on the host, beating every policy); a hold (pause one policy, or every policy, at once, with a reason, audited); pinned / held packages respected (apt-mark hold, dnf versionlock, pkg lock, zypper locks -- what the host already reports, never overridden); excluded packages per policy (kernels and databases are the usual ones); a host with a failed previous run is not retried until someone looks, or until a set number of hours has passed -- BUILT 2026-11-16 (all three repos; lab proof below still to do): per-host opt-out with a reason; hold one policy or all of them, with a reason, audited; holds marked by the agent's scan (apt `apt-mark showhold`, FreeBSD `pkg lock -l`; dnf's versionlock never lists a locked version, zypper locks still to do) and never applied -- `apt-get -y` refused a whole run beside one held package; excluded packages as globs; a failed, partial or unreported run blocks the host until someone acknowledges it or the retry hours (24, settable) pass; a host whose package manager needs repair is skipped
+- [ ] **Results and reporting:** per run and per host: packages applied, failed, skipped, whether a reboot was needed or done, and the agent's output tail on failure; the host's update history shows automatic runs alongside manual ones; failures count on the dashboard -- BUILT 2026-11-16 (all three repos; lab proof below still to do): applied, failed (with the agent's own error), skipped with the reason per package, reboot; on the host's Software Changes tab beside the manual history; the Update Profiles settings panel lists the runs that need someone; the home dashboard counts them (Enterprise)
+- [ ] **Audit:** every policy change, hold, opt-out, run and automatic reboot audited, with the policy and the packages named -- BUILT 2026-11-16 (all three repos; lab proof below still to do): policy create/change (with every changed field), holds, opt-outs, settings, each queued run (with its packages and what it left out), each automatic reboot, each acknowledgement
+- [ ] **Backups first (link to Phase 24):** optionally, "apply only after a good backup in the last N hours" -- a host whose backup is overdue or failed is skipped and says why -- BUILT 2026-11-16 (all three repos; lab proof below still to do): `require_backup_hours`: a host without a good capture (`ok` or `incomplete`) that recent is skipped, `no_recent_backup`
 
-#### 26.2 Inside maintenance windows (Pro+ -- a professional feature)
+#### 26.2 Inside maintenance windows (Enterprise)
 
-- [ ] **Window-aligned application:** for a host with maintenance windows, automatic runs start only when a window opens and only if the run is expected to finish inside it; the 14.2 dispatch gate still holds anything that misses, so a run is never dropped and never runs outside the window. A host with no window behaves exactly as Community (26.1). Bryan: Pro+ gets this as a professional feature, even though the windows themselves are OSS
+- [ ] **Window-aligned application:** for a host with maintenance windows, automatic runs start only when a window opens and only if the run is expected to finish inside it; the 14.2 dispatch gate still holds anything that misses, so a run is never dropped and never runs outside the window. A host with no window behaves exactly as 26.1. The windows themselves stay OSS (Bryan, 2026-11-02; Enterprise, not Professional, since 2026-11-16 with the rest of automatic updates)
 - [ ] **Blackouts win:** a blackout period never sees an automatic run or reboot, even with a run already queued; the emergency override (14.2) does not apply to automatic runs -- only a person can override for a person's change
 - [ ] **Reboot inside the window:** with "reboot only inside a maintenance window", a run that needs a reboot reboots before the window closes, or leaves the host "reboot required" for the next window and says so
 - [ ] **402-clean:** without the license, window alignment is off and policies behave as 26.1; the UI says why the option is unavailable
 
-#### 26.3 Waiting periods: regular patches vs critical CVEs (Pro+ and Enterprise)
+#### 26.3 Waiting periods: regular patches vs critical CVEs (Enterprise)
 
-- [ ] **Two day counts per policy:** wait N days before applying a regular patch, and M days before applying a patch that fixes a critical CVE (Bryan: separate numbers; the critical one is usually much shorter, often 0); counted from when the update was first seen for that host (`package_update.discovered_at`), or from the vendor's release date where the advisory gives one -- whichever is earlier, so a host that came online late does not wait twice
+- [ ] **Two day counts per policy:** wait N days before applying a regular patch, and M days before applying a patch that fixes a critical CVE (Bryan: separate numbers; the critical one is usually much shorter, often 0); counted from when the update was first seen for that host (`package_update.discovered_at`), or from the vendor's release date where the advisory gives one -- whichever is earlier, so a host that came online late does not wait twice -- NOTE 2026-11-16: `package_update.discovered_at` is reset on every scan today (the ingest deletes and re-adds every row), so "first seen" must be kept across scans before this can count from it
 - [ ] **What "critical CVE" means:** the update fixes at least one CVE that the vulnerability engine rates CRITICAL for that host (`HostVulnerabilityFinding`), or that the vendor advisory (`advisory_engine`) marks critical; the policy names the source it trusts, and the threshold (critical only, or high and critical) is a setting; without the Pro+ engines' data the critical count never applies and everything waits the regular count (and the UI says so)
 - [ ] **Shown, not guessed:** each pending update on a host shows when it becomes eligible and why ("critical CVE-2026-1234: eligible now"; "regular: eligible on Nov 9"); a run applies only eligible updates and leaves the rest pending
-- [ ] **402-clean:** without Pro+ / Enterprise, waiting periods are hidden and Community applies on schedule (26.1)
+- [ ] **402-clean:** without Enterprise, waiting periods are hidden and nothing applies automatically; with Enterprise but without the vulnerability or advisory engine's data, everything waits the regular count and the UI says so
 
 #### 26.4 Fleet-by-fleet rollout (Enterprise)
 
@@ -14740,56 +14740,25 @@ before Pro+ encryption.
 - [ ] **With 26.2 and 26.3:** each fleet's hosts still apply only inside their own windows and only eligible updates, so "the fleet is done" means every host that could apply did, and the rest say why not
 - [ ] **402-clean:** without Enterprise, the rollout option is hidden and a policy applies per host as 26.1 / 26.2
 
-#### 26.5 Alerts, reports and dashboard (Pro+ / Enterprise; Community counts)
+#### 26.5 Alerts, reports and dashboard (Enterprise)
 
 - [ ] **Alerts** through the alerting engine: an automatic run failed, a host did not come back after an automatic reboot, a rollout halted at a fleet's health gate, a critical-CVE patch still unapplied past its waiting period, a policy on hold longer than N days
 - [ ] **Report** (reporting engine): per policy and fleet over a period -- runs, hosts patched, failures, reboots, median time from a critical CVE's patch appearing to its being applied
-- [ ] **Dashboard card** (card contract: Phase 38.1): automatic-update failures, hosts waiting on a reboot, rollouts in progress or halted; Community gets the counts
+- [ ] **Dashboard card** (card contract: Phase 38.1): automatic-update failures, hosts waiting on a reboot, rollouts in progress or halted
 
 #### 26.6 Docs, screenshots, i18n
 
-- [ ] sysmanage-docs: automatic updates (Community), maintenance-window alignment and waiting periods (Pro+), fleet-by-fleet rollout (Enterprise); how "critical CVE" is decided; safety (opt-out, holds, pinned packages, reboots); every screenshot reproducible with `make screenshots`
+- [ ] sysmanage-docs (Enterprise): automatic updates, maintenance-window alignment, waiting periods and fleet-by-fleet rollout; how "critical CVE" is decided; safety (opt-out, holds, pinned packages, reboots); every screenshot reproducible with `make screenshots` -- 2026-11-16: automatic updates (26.1) written -- new `docs/professional-plus/automatic-updates.html`, its module card, the corrected Upgrade Profiles entry in the settings guide (it described blackout windows and fleet groups profiles never had), and the new-device alert on the Network Discovery and Alerting pages (26.9); 50 keys in 13 locales, machine-translated then hand-reviewed (650 values; the service rendered "held package" as "installed package" in several), every docs gate green. Still to do here: their screenshots through `make screenshots`, and 26.2-26.4 when built
 - [ ] Every new string in 14 locales, hand-checked (the verifier passes wrong translations of short UI strings)
 
 #### 26.7 Editions
 
-- [ ] **Community / OSS:** automatic update policies, the server-side driver, reboot handling, safety controls, results and audit (26.1)
-- [ ] **Pro+ (Professional):** maintenance-window-aligned application and reboots (26.2); waiting periods for regular and critical-CVE patches (26.3); alerts and the report (26.5)
-- [ ] **Enterprise:** everything in Pro+, plus fleet-by-fleet rollout with health gates and canaries (26.4)
-- [ ] Every tier gate in **both** repos, and every licensed feature 402-clean when unlicensed, with Community still able to apply updates automatically
+- [ ] **Community / OSS:** automatic Ubuntu Pro attach and package-manager repair (26.1); nothing applies automatically
+- [ ] **Professional:** the package-manager repair alert (26.1); nothing applies automatically
+- [ ] **Enterprise:** automatic update policies, the server-side driver, reboot handling, safety controls, results and audit (26.1); maintenance-window-aligned application and reboots (26.2); waiting periods for regular and critical-CVE patches (26.3); fleet-by-fleet rollout with health gates and canaries (26.4); alerts and the report (26.5); the new-device alert (26.9)
+- [ ] Every tier gate in **both** repos, and every licensed feature 402-clean when unlicensed, with Community still able to apply updates by hand
 
-#### 26.8 Retire SysManage's NFS backup transport (Community / OSS) (added 2026-11-05, Bryan; only on a "go" from Phase 25)
-
-**Only if** Phase 25's measurements of restate-proxy against NFS (25.5) came
-out well and Bryan's go is recorded in Phase 25's exit criteria; on a no-go
-this sub-phase is dropped with the reason.  restate is untouched: it keeps
-working over NFS for anyone who mounts a repository by hand.
-
-- [ ] **The measurements this decision needs (moved from Phase 25, 2026-11-14, Bryan):** NFS against restate-proxy on the same storage host -- a large host (nextcloud-sized), a night of the whole fleet within the target's concurrency cap, a capture across the remote route (production's server) timed, a restore while a prune waits, and a month of nightly runs on production with no failed night the proxy caused. Already measured in Phase 25 (25.5): the same-pair LAN numbers (the proxy 10-27% slower in wall time, the same CPU on both ends, 8.4 MB of memory) and the Wi-Fi run that showed the link, not the transport, dominates
-- [ ] **NFS or restate-proxy, decided on numbers (moved from Phase 25's exit criteria):** the measurements above recorded with Phase 25's, and Bryan's go / no-go for removing NFS written here with the reason; nothing below starts without a go
-- [ ] **Every target on restate-proxy first:** production and the lab
-      switched and proven for a full retention cycle before any code goes;
-      the server refuses to remove NFS support while any target still uses
-      it, and says which
-- [ ] **sysmanage:** the target's NFS / restate-proxy setting removed (the
-      proxy is the only transport); per-host export generation, the port
-      2049 reach check, the export and NFS-server parts of the storage audit,
-      and the NFS jobs removed; a migration drops the NFS-only columns
-      (expand-contract: unread for a release first); the audit messages and
-      their strings in 14 locales removed
-- [ ] **sysmanage-agent:** NFS mounting, the export handling on storage hosts,
-      the NFS sudoers rules and the per-OS NFS client code removed; Equip no
-      longer installs NFS packages; an old job file naming a mount is refused
-      with a plain reason
-- [ ] **sysmanage-docs:** every mention of NFS removed or rewritten for the
-      proxy (Fleet Backups, Backup storage, the storage-host setup, the
-      recovery runbooks, the supported-platforms notes), screenshots retaken
-      through `make screenshots`, and the changed strings in 14 locales
-- [ ] **Release notes:** say that NFS was removed, why (the Phase 25
-      numbers), and what an installation still on NFS must do before
-      upgrading
-
-#### 26.9 Dependency upkeep (Community / OSS) (added 2026-11-09, Bryan)
+#### 26.8 Dependency upkeep (Community / OSS) (added 2026-11-09, Bryan)
 
 - [ ] **Playwright 1.65.0, for the Brotli decoder out-of-bounds write
       (code scanning #2177, Semgrep `ssc-9c34c675-756b-44e8-9512-28718930fef2`,
@@ -14810,36 +14779,137 @@ working over NFS for anyone who mounts a repository by hand.
       a full `make screenshots` pass.  If the next scan still flags 1.65.0,
       dismiss #2177 in GitHub as "used in tests" with that reason.  Done when
       #2177 is closed (fixed or dismissed with the reason) and both runs pass
+      2026-11-16: both lockfiles on 1.65.1 (accepted narrowly in `.semgrep-accepted.json`); `make test-e2e` 158/158 on it, after fixing what it found -- every page load on a licensed server whose federation role is "none" got a 503 from the federation stubs ("module not currently available"); they answer 409 with the role needed now (`feature_gate.role_mismatch_error`).  Left: #2177 closed in GitHub, and a full `make screenshots` pass on 1.65.1
+
+#### 26.9 Alert on a new device on the network (Enterprise) (added 2026-11-16, Bryan)
+
+Bryan: an administrator gets an email when a new address shows up in the
+network scan, filtered by what kind of device it is (computer, IoT, ...).
+Every piece exists already: 21.6 network discovery (`discovered_asset` with
+`first_seen_at`, the engine's `device_type` guess, correlation against the
+managed fleet, exclusions), the Pro+ alerting engine's conditions and its
+notification channels (email, webhook, Slack, Teams).  This is a new
+condition plus its settings, not a new subsystem.  Enterprise, because the
+discovery engine it reads is Enterprise.
+
+- [ ] **The condition:** a new alerting-engine condition, `new_network_device`,
+      that fires once per device the first time discovery sees it -- unmanaged
+      (not a host, child host, hypervisor port or VIP) and not excluded.  It
+      is never re-notified: a device is new once
+      BUILT 2026-11-16 (lab proof below still to do): `alerting_engine/alerting_new_device.pxi`, judged once per
+      rule per pass (`RULE_LEVEL_CONDITIONS`, a new branch in
+      `evaluate_all_rules`), each device recorded in `new_device_alert_mark`
+      (tenant migration q93newdevicealert: alerted / baseline / filtered),
+      the alert raised on the agent that first saw the device; found on the
+      way: alert emails put the message, title and host name into the HTML
+      unescaped -- now escaped for every alert (a device name from mDNS or
+      DHCP is the network's choice).  Tests: sysmanage
+      `tests/services/test_new_device_alert.py` (10, real engine + database),
+      engine `test_alerting_new_device.py` (6), plugin
+      `NewDeviceTypePicker.test.tsx` (3) and `AlertRulesPage.test.tsx`;
+      frontend `AssetDiscovery.test.tsx` (`?search=`).  Strings: 6 engine
+      strings and 2 plugin strings by hand in 13 locales; the type labels
+      reuse the discovery page's
+- [ ] **New device, not new lease:** identity is the device (its MAC, the
+      21.6 rule), so a known device renumbered by DHCP does not alert; an
+      option on the rule, off by default, also alerts when a known device
+      appears on an address it has never used.  A device seen only by IP
+      (no MAC; the labeled `ip:` fallback) is new per address, and the email
+      says so
+- [ ] **Filter by type:** the rule picks the device types it alerts on, from
+      the engine's own list -- computer, phone or tablet, printer, media, IoT,
+      network equipment, virtual machine, unknown (virtual addresses are left
+      out: they are VIPs, not devices) -- and optionally the networks
+      (segments) it covers.  "Unknown" is on by default: a device nothing can
+      identify is the one an administrator most wants to hear about
+- [ ] **Wait for the type before deciding:** the type often arrives after the
+      first sighting (mDNS evidence took 20 to 70 seconds in the 21.6 spike),
+      so a new device is judged after a settle time (default 5 minutes) with
+      the best classification by then, rather than alerting or filtering on
+      "unknown" too early
+- [ ] **No flood on day one:** when discovery or the rule is first turned on,
+      the devices already present are the baseline and are not "new"; a burst
+      (many new devices in one pass, for example a new segment's agent coming
+      online) goes out as one email listing them, not one email each
+- [ ] **Randomized MACs:** phones and tablets rotate their MAC (19% of the
+      devices on Bryan's LAN in the 21.6 spike); a locally administered MAC is
+      labeled in the email ("address may change"), and the rule has an option
+      to leave such devices out
+- [ ] **The email:** the address(es), MAC and vendor, the guessed type with its
+      confidence and reasons, any names, which agent saw it on which network,
+      first seen, and a link to the device on the Network Discovery page,
+      where it can be excluded ("this is a printer, fine")
+- [ ] **402-clean:** without Enterprise (or with discovery off), the
+      condition is not offered, and the alert rules page says why
+- [ ] **Docs and i18n:** the Network Discovery and Alerts docs pages, a
+      `make screenshots` capture of the rule, every string in 14 locales
+
+#### 26.10 Better device types: phones, tablets, cameras (Enterprise) (added 2026-11-16, Bryan)
+
+Bryan: printers, phones and cameras each their own category, from passive
+evidence rather than nmap (nmap's OS detection is a raw-packet scan that trips
+IDS, needs root or Npcap, is NPSL-licensed -- an OEM license for a commercial
+product -- and is weakest on exactly the phones and tablets this is about).
+Printers are already their own type (`printer`); phones share
+`phone_or_tablet` with tablets, and there is no camera type.  The types feed
+the Network Discovery page and the 26.9 alert's filter.
+
+- [ ] **New types:** `phone`, `tablet` and `camera` in the engine's
+      `DEVICE_TYPES` (`asset_discovery_engine/classify.pxi`); `phone_or_tablet`
+      stays as the fallback when nothing tells a phone from a tablet, so a
+      guess is never dressed up as more than it is
+- [ ] **mDNS device-info model:** the `model=` value Apple devices announce
+      (`iPhone15,2`, `iPad13,1`, `MacBookAir10,1`) decides phone, tablet or
+      computer outright (high confidence); Android and others where they
+      announce one
+- [ ] **DHCP fingerprinting:** the agents already hear DHCP on the segment
+      (21.6 device-hostnames work): the option 55 parameter request list and
+      option 60 vendor class (`android-dhcp-14`, `MSFT 5.0`, ...) matched
+      against a shipped fingerprint table (air-gap clean, like the OUI table),
+      for phone vs computer vs IoT
+- [ ] **Cameras:** RTSP / ONVIF evidence -- an mDNS or SSDP announcement of
+      `_rtsp._tcp` or an ONVIF device type, a camera vendor's OUI (Axis,
+      Hikvision, Dahua, Reolink, Amcrest, ...); with Phase 37's port probe,
+      554 open adds weight (the probe stays there)
+- [ ] **Host names as weak evidence:** "iPhone", "Galaxy-S24", "iPad",
+      "Galaxy-Tab", "Pixel" in a DHCP or mDNS name -- low confidence on its own
+- [ ] **Everywhere the types show:** the Network Discovery page's labels and
+      filter, the 26.9 alert's type chips (a rule listing `phone_or_tablet`
+      also matches `phone` and `tablet`, so existing rules keep working), the
+      posture punch-list counts; strings in 14 locales
+- [ ] **Proof:** on Bryan's LAN, a phone, a tablet and a camera each shown as
+      such, with the evidence that decided it
 
 ### Licensing summary
 
-- **Community / OSS:** automatic update application by policy -- scope, what to apply, a schedule, reboot handling, per-host opt-out, holds, pinned packages, results and audit.
-- **Pro+:** automatic runs and reboots aligned to each host's maintenance windows (Community behavior without windows); separate waiting periods for regular patches and for patches fixing a critical CVE; alerts and reports.
-- **Enterprise:** fleet-by-fleet rollout, one fleet at a time, with canaries, soak times and health gates between fleets.
+- **Community / OSS:** automatic Ubuntu Pro attach; package-manager health and repair. Updates are applied by hand.
+- **Professional:** the package-manager repair alert.
+- **Enterprise:** automatic update application by policy -- scope, what to apply, a schedule, reboot handling, per-host opt-out, holds, pinned packages, results and audit; automatic runs and reboots aligned to each host's maintenance windows (on schedule without windows); separate waiting periods for regular patches and for patches fixing a critical CVE; alerts and reports; fleet-by-fleet rollout, one fleet at a time, with canaries, soak times and health gates between fleets; an emailed alert when a new device appears on the network, filtered by device type (26.9); phones, tablets and cameras as their own device types (26.10).
 
 ### Exit Criteria
 
-**Community / OSS**
+**Enterprise -- automatic updates (26.1)**
 
-- [ ] A policy applies security updates to a lab host on schedule with no one clicking anything; the host's history shows the run, the packages and the result; a pinned package is left alone; an opted-out host is skipped and says why
-- [ ] Reboots: "never" leaves the host "reboot required"; "when needed" reboots it and it comes back; a host that does not come back is flagged
-- [ ] A hold stops every automatic run at once and is audited; two server workers never apply one policy twice
+- [x] A policy applies security updates to a lab host on schedule with no one clicking anything; the host's history shows the run, the packages and the result; a pinned package is left alone; an opted-out host is skipped and says why -- PROVEN 2026-11-16 (autoupd-lab, a fresh Ubuntu 26.04 VM on beast, against the dev server, lab tenant): the server's own tick at 19:49:34 queued one run naming 55 security updates (non-security ones left out, `not_security`); the agent applied 55 of 55; `distro-info-data`, held with `apt-mark hold`, was reported held, left out (`held`) and not upgraded; opted out, the host's next due run was recorded `skipped`, `opted_out`; the run, its packages and its result are on the host's Software Changes tab
+- [x] Reboots: "never" leaves the host "reboot required"; "when needed" reboots it and it comes back; a host that does not come back is flagged -- PROVEN 2026-11-16 (same lab): "when needed" rebooted the host onto the new kernel (7.0.0-38 to -43) and the run says back (boot time 19:53:13, after the request); "never" applied 8 updates with no reboot and the host shows reboot required; a reboot cancelled on the host (`shutdown -c`) was flagged `not_back` five minutes later (lab timeout 5) with a warning in the log. Found and fixed doing it: timezone-aware PostgreSQL timestamps stopped every tick in the tenant; the agent's post-reboot "not required" was dropped as unchanged (now forced after applying updates); a policy switched from never to when needed rebooted the host for a run made under never, and a host could get two automatic reboots at once (runs now record `not_wanted`, only a host's latest run may reboot it late, and never while another reboot is pending)
+- [ ] A hold stops every automatic run at once and is audited; two server workers never apply one policy twice -- 2026-11-16: the hold PROVEN in the lab (a due policy did not fire while every policy was held; on release it fired at once and was recorded `nothing_to_do`); two workers NOT proven here -- the driver starts through `singleton_task` (the Phase 22.2 leader lock), and the dev server runs one worker; needs a run with `SYSMANAGE_UVICORN_WORKERS=2`
+- [ ] Unlicensed: no policy applies anything, the routes answer 402, and updates still apply by hand
 
-**Pro+**
+**Enterprise -- windows and waiting periods**
 
-- [ ] A host with a maintenance window gets its automatic run only inside the window, and a blackout holds it; a host with no window is patched on the Community schedule
+- [ ] A host with a maintenance window gets its automatic run only inside the window, and a blackout holds it; a host with no window is patched on the policy's schedule
 - [ ] Waiting periods: with regular = 7 days and critical = 0, a critical-CVE fix applies on the next run while a regular update waits, and each shows when it becomes eligible
-- [ ] Unlicensed: window alignment and waiting periods are off and the policy behaves as Community
+- [ ] Professional: no automatic update option anywhere; the routes answer 402
 
-**Enterprise**
+**Enterprise -- fleet rollout**
 
 - [ ] A rollout across three lab fleets patches one fleet at a time; a fleet with a forced failure stops the rollout at its health gate with an alert, and the next fleet does not start until someone resumes it
 
-**NFS retired (26.8, only on a "go" from Phase 25)**
+**New device alert (26.9)**
 
-- [ ] No target uses NFS; sysmanage, sysmanage-agent and sysmanage-docs carry no NFS transport code or NFS instructions (a search of all three for NFS finds only the release note); production and the lab back up and restore through restate-proxy alone
+- [ ] In the lab, a device new to the network (never seen before) brings one email within the settle time naming its type; a rule set to "IoT only" stays quiet for a new computer; a known device renumbered by DHCP sends nothing; turning the rule on in production sends no backlog of the devices already there -- 2026-11-16 LAB PART PROVEN (dev server, lab tenant, observer autoupd-lab, Gmail channel): a brand-new VM booted on beast's bridge (52:54:00:b2:24:11, first seen 20:52:04) brought one alert and one email at 20:54:26 (settle 2 minutes), naming its address, MAC, type virtual_machine (high), network, announced name and "address may change"; a second new VM alerted on the default rule and was recorded `filtered` by an "IoT only" rule, whose own first pass made every device already present its baseline. Not yet proven: a DHCP renumber of a known device in the lab (covered by `tests/services/test_new_device_alert.py`), and no backlog when the rule is turned on in production (needs the release deployed)
 
-**Dependency upkeep (26.9)**
+**Dependency upkeep (26.8)**
 
 - [ ] Playwright on 1.65.0 or later in `frontend/` and the FreeBSD port's copy, the e2e tests and `make screenshots` passing on it, and code scanning #2177 closed
 
@@ -15058,9 +15128,40 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
 - [ ] **MULTITENANT_SAAS:** per-tenant storage, keys, quotas and usage metering (27.4)
 - [ ] Every tier gate in **both** repos, and every Enterprise / MULTITENANT_SAAS feature 402-clean when unlicensed, with Community and Pro+ backups unaffected
 
+#### 27.8 Retire SysManage's NFS backup transport (Community / OSS) (added 2026-11-05, Bryan; only on a "go" from Phase 25; moved from 26.8 on 2026-11-16, Bryan: Phase 26 will not take the month of production nights the decision needs)
+
+**Only if** Phase 25's measurements of restate-proxy against NFS (25.5) came
+out well and Bryan's go is recorded in Phase 25's exit criteria; on a no-go
+this sub-phase is dropped with the reason.  restate is untouched: it keeps
+working over NFS for anyone who mounts a repository by hand.
+
+- [ ] **The measurements this decision needs (moved from Phase 25, 2026-11-14, Bryan):** NFS against restate-proxy on the same storage host -- a large host (nextcloud-sized), a night of the whole fleet within the target's concurrency cap, a capture across the remote route (production's server) timed, a restore while a prune waits, and a month of nightly runs on production with no failed night the proxy caused. Already measured in Phase 25 (25.5): the same-pair LAN numbers (the proxy 10-27% slower in wall time, the same CPU on both ends, 8.4 MB of memory) and the Wi-Fi run that showed the link, not the transport, dominates
+- [ ] **NFS or restate-proxy, decided on numbers (moved from Phase 25's exit criteria):** the measurements above recorded with Phase 25's, and Bryan's go / no-go for removing NFS written here with the reason; nothing below starts without a go
+- [ ] **Every target on restate-proxy first:** production and the lab
+      switched and proven for a full retention cycle before any code goes;
+      the server refuses to remove NFS support while any target still uses
+      it, and says which
+- [ ] **sysmanage:** the target's NFS / restate-proxy setting removed (the
+      proxy is the only transport); per-host export generation, the port
+      2049 reach check, the export and NFS-server parts of the storage audit,
+      and the NFS jobs removed; a migration drops the NFS-only columns
+      (expand-contract: unread for a release first); the audit messages and
+      their strings in 14 locales removed
+- [ ] **sysmanage-agent:** NFS mounting, the export handling on storage hosts,
+      the NFS sudoers rules and the per-OS NFS client code removed; Equip no
+      longer installs NFS packages; an old job file naming a mount is refused
+      with a plain reason
+- [ ] **sysmanage-docs:** every mention of NFS removed or rewritten for the
+      proxy (Fleet Backups, Backup storage, the storage-host setup, the
+      recovery runbooks, the supported-platforms notes), screenshots retaken
+      through `make screenshots`, and the changed strings in 14 locales
+- [ ] **Release notes:** say that NFS was removed, why (the Phase 25
+      numbers), and what an installation still on NFS must do before
+      upgrading
+
 ### Licensing summary
 
-- **Community / OSS:** the rest of iCloud -- Drive, Contacts, Calendars and Notes -- beside 24.12's Photos (27.5).
+- **Community / OSS:** the rest of iCloud -- Drive, Contacts, Calendars and Notes -- beside 24.12's Photos (27.5); on a go from the measurements, restate-proxy as the only backup transport, NFS removed (27.8).
 - **Enterprise:** multi-site and recovery at scale -- many targets, per-site targets through federation, off-site replication, immutable copies, air-gap media, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes approval, legal hold and automated restore drills.
 - **MULTITENANT_SAAS:** per-tenant storage namespaces and keys, operator storage pools, quotas and usage metering, bring-your-own storage, and tenant lifecycle handling for backup data.
 
@@ -15083,6 +15184,10 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
 - [ ] **Tenant isolation proven:** two tenants on one pool -- no cross-tenant listing, reading, mounting or deduplication, and neither tenant's keys open the other's repositories
 - [ ] **Quota enforcement proven:** a tenant over quota has new captures blocked with an alert, cannot prune below its plan's minimum retention, and recovers when space is freed
 - [ ] Bring-your-own storage works with the operator holding no credentials; tenant removal runs its retention / export step before storage is destroyed
+
+**NFS retired (27.8, only on a "go" from Phase 25)**
+
+- [ ] No target uses NFS; sysmanage, sysmanage-agent and sysmanage-docs carry no NFS transport code or NFS instructions (a search of all three for NFS finds only the release note); production and the lab back up and restore through restate-proxy alone
 
 **Every phase**
 
@@ -17452,8 +17557,8 @@ from the home screen and found only by an operator asking why.
 | 23 | v3.11.0.0 | Hardware, Time & Asset Visibility | Drive health (SMART, NVMe), degraded arrays and ZFS pools, temperatures and hardware errors from every OS, with real-time email alerts; every host's clock drift measured, NTP managed fleet-wide, out-of-bounds hosts resynchronized and alerted on; asset tags bound to the physical machine (shared by every OS on it), a naming-scheme builder, search, reports and CSV import |
 | 24 | v3.12.0.0 | Fleet Backup & Recovery with restate | Scheduled, deduplicated per-host backups to a NAS target with restate (per-host repositories over NFSv4, append-only), quiesce hooks, a Backups page, file restore (Community); policies, encryption with OpenBAO-held keys and rotation, break-glass export, GFS retention, alerts, verification, drift timeline and package restore (Pro+) |
 | 25 | v3.13.0.0 | Fleet Backup Completion | restate-proxy (backups over HTTPS, NFS measured against it), a backup runner without systemd, the SysManage server backing itself up, agent-server mutual TLS and server pinning (Community / Pro+) |
-| 26 | v3.14.0.0 | Automatic Update Application | Policies that apply updates on a schedule with reboot handling, opt-outs, holds and pinned packages (Community); runs aligned to maintenance windows and separate waiting periods for regular and critical-CVE patches (Pro+); fleet-by-fleet rollout with health gates (Enterprise) |
-| 27 | v3.15.0.0 | Fleet Backup at Scale | Per-site storage through federation, restore readiness, bare-metal rebuild and clones, fleet restore jobs, four-eyes approval, legal hold, restore drills, off-site / immutable / air-gap / Glacier copies (Enterprise); backup multi-tenancy (MULTITENANT_SAAS) |
+| 26 | v3.14.0.0 | Automatic Update Application | Policies that apply updates on a schedule with reboot handling, opt-outs, holds and pinned packages, runs aligned to maintenance windows, separate waiting periods for regular and critical-CVE patches, fleet-by-fleet rollout with health gates, and an emailed alert for a new device on the network (Enterprise) |
+| 27 | v3.15.0.0 | Fleet Backup at Scale | Per-site storage through federation, restore readiness, bare-metal rebuild and clones, fleet restore jobs, four-eyes approval, legal hold, restore drills, off-site / immutable / air-gap / Glacier copies (Enterprise); backup multi-tenancy (MULTITENANT_SAAS); NFS retired for restate-proxy on a go (Community) |
 | 28 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible**; plus a getting-started wizard and Setup health page for new installs (OSS) |
 | 29 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
 | 30 | **v5.0.0.0** | Market-Parity GA | **MAJOR -- market parity reached.** All gap features hardened; v5.0 GA |

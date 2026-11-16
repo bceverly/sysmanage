@@ -34,15 +34,12 @@ from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.persistence.partitions import get_tenant_db, iter_host_databases
-from backend.services import upgrade_scheduler
+from backend.persistence.partitions import get_tenant_db
+from backend.security.roles import SecurityRoles
+from backend.services import auto_update_runner
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
-from backend.websocket.messages import create_command_message
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
 
 logger = logging.getLogger(__name__)
-queue_ops = QueueOperations()
 
 
 # Phase 13.2.1: prefix moved to registration (_include_versioned) so this router
@@ -87,6 +84,12 @@ class UpgradeProfileCreateRequest(BaseModel):
     package_managers: Optional[List[str]] = None
     staggered_window_min: int = Field(default=0, ge=0, le=720)  # 0..12h
     tag_id: Optional[str] = None
+    # 26.1 automatic application (Enterprise)
+    auto_apply: bool = False
+    reboot_mode: str = Field(default="never", pattern="^(never|when_needed)$")
+    excluded_packages: Optional[str] = Field(default=None, max_length=4000)
+    require_backup_hours: Optional[int] = Field(default=None, ge=1, le=720)
+    host_ids: Optional[List[str]] = None
 
 
 class UpgradeProfileUpdateRequest(BaseModel):
@@ -98,6 +101,11 @@ class UpgradeProfileUpdateRequest(BaseModel):
     package_managers: Optional[List[str]] = None
     staggered_window_min: Optional[int] = Field(None, ge=0, le=720)
     tag_id: Optional[str] = None
+    auto_apply: Optional[bool] = None
+    reboot_mode: Optional[str] = Field(None, pattern="^(never|when_needed)$")
+    excluded_packages: Optional[str] = Field(None, max_length=4000)
+    require_backup_hours: Optional[int] = Field(None, ge=0, le=720)  # 0 = off
+    host_ids: Optional[List[str]] = None
 
 
 class UpgradeProfileResponse(BaseModel):
@@ -115,6 +123,15 @@ class UpgradeProfileResponse(BaseModel):
     next_run: Optional[str] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
+    auto_apply: bool = False
+    reboot_mode: str = "never"
+    excluded_packages: str = ""
+    require_backup_hours: Optional[int] = None
+    held: bool = False
+    hold_reason: Optional[str] = None
+    hold_by: Optional[str] = None
+    hold_at: Optional[str] = None
+    host_ids: List[str] = []
 
 
 def _parse_uuid_or_400(value: Optional[str], field: str) -> Optional[uuid.UUID]:
@@ -149,11 +166,63 @@ def _validate_and_compute_next_run(cron: str) -> datetime:
         ) from exc
 
 
+def _response(profile, db: Session) -> UpgradeProfileResponse:
+    hosts = auto_update_runner.profile_host_ids(db, [profile.id])
+    return UpgradeProfileResponse(
+        **profile.to_dict(), host_ids=hosts.get(str(profile.id), [])
+    )
+
+
+def _require_apply_role(user) -> None:
+    """Automatic application changes hosts unattended: the same role as
+    applying an update by hand (26.1)."""
+    if not user.has_role(SecurityRoles.APPLY_SOFTWARE_UPDATE):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: APPLY_SOFTWARE_UPDATE role required"),
+        )
+
+
+def _audit_details(request) -> dict:
+    """What changed, for the audit log: every field the request set."""
+    return {k: v for k, v in request.model_dump().items() if v is not None}
+
+
+def _apply_automatic_fields(db: Session, profile, request, user) -> None:
+    touches = any(
+        getattr(request, f) is not None
+        for f in ("auto_apply", "reboot_mode", "excluded_packages",
+                  "require_backup_hours", "host_ids")  # fmt: skip
+    )
+    if touches and (request.auto_apply or profile.auto_apply):
+        _require_apply_role(user)
+    if request.auto_apply is not None:
+        profile.auto_apply = request.auto_apply
+    if request.reboot_mode is not None:
+        profile.reboot_mode = request.reboot_mode
+    if request.excluded_packages is not None:
+        profile.excluded_packages = request.excluded_packages or None
+    if request.require_backup_hours is not None:
+        profile.require_backup_hours = request.require_backup_hours or None
+    _set_hosts(db, profile, request.host_ids)
+
+
+def _set_hosts(db: Session, profile, host_ids: Optional[List[str]]) -> None:
+    if host_ids is None:
+        return
+    wanted = {_parse_uuid_or_400(h, "host_ids") for h in host_ids}
+    db.query(models.UpgradeProfileHost).filter(
+        models.UpgradeProfileHost.profile_id == profile.id
+    ).delete()
+    for host_id in sorted(wanted, key=str):
+        db.add(models.UpgradeProfileHost(profile_id=profile.id, host_id=host_id))
+
+
 @router.get("", response_model=List[UpgradeProfileResponse])
 async def list_profiles(db: Session = Depends(get_tenant_db)):
     _check_automation_module()
     rows = db.query(models.UpgradeProfile).order_by(models.UpgradeProfile.name).all()
-    return [UpgradeProfileResponse(**r.to_dict()) for r in rows]
+    return [_response(r, db) for r in rows]
 
 
 @router.post("", response_model=UpgradeProfileResponse)
@@ -166,6 +235,8 @@ async def create_profile(
     # require_authenticated_user (user data is server-global); the profile data
     # and its audit trail route to the tenant engine via ``db``.
     _check_automation_module()
+    if request.auto_apply:
+        _require_apply_role(current_user)
     tag_uuid = _parse_uuid_or_400(request.tag_id, "tag_id")
 
     next_run = _validate_and_compute_next_run(request.cron)
@@ -183,8 +254,14 @@ async def create_profile(
         tag_id=tag_uuid,
         next_run=next_run,
         created_by=current_user.id,
+        auto_apply=request.auto_apply,
+        reboot_mode=request.reboot_mode,
+        excluded_packages=request.excluded_packages or None,
+        require_backup_hours=request.require_backup_hours,
     )
     db.add(profile)
+    db.flush()
+    _set_hosts(db, profile, request.host_ids)
     db.commit()
     db.refresh(profile)
     AuditService.log(
@@ -197,8 +274,9 @@ async def create_profile(
         user_id=current_user.id,
         username=current_user.userid,
         result=Result.SUCCESS,
+        details=_audit_details(request),
     )
-    return UpgradeProfileResponse(**profile.to_dict())
+    return _response(profile, db)
 
 
 @router.get("/{profile_id}", response_model=UpgradeProfileResponse)
@@ -210,7 +288,7 @@ async def get_profile(profile_id: str, db: Session = Depends(get_tenant_db)):
     )
     if not profile:
         raise HTTPException(status_code=404, detail=_(_ERR_UPGRADE_PROFILE_NOT_FOUND))
-    return UpgradeProfileResponse(**profile.to_dict())
+    return _response(profile, db)
 
 
 @router.put("/{profile_id}", response_model=UpgradeProfileResponse)
@@ -251,6 +329,7 @@ async def update_profile(
         profile.tag_id = (
             _parse_uuid_or_400(request.tag_id, "tag_id") if request.tag_id else None
         )
+    _apply_automatic_fields(db, profile, request, current_user)
 
     db.commit()
     db.refresh(profile)
@@ -264,8 +343,9 @@ async def update_profile(
         user_id=current_user.id,
         username=current_user.userid,
         result=Result.SUCCESS,
+        details=_audit_details(request),
     )
-    return UpgradeProfileResponse(**profile.to_dict())
+    return _response(profile, db)
 
 
 @router.delete("/{profile_id}")
@@ -300,72 +380,18 @@ async def delete_profile(
     return {"message": _("Upgrade profile deleted"), "id": str(pid)}
 
 
-def _dispatch_profile_to_hosts(profile, target_host_ids, db: Session) -> int:
-    """Enqueue an ``apply_updates`` command for each target host.
-
-    Phase 10.6: the per-host message-building (staggered window math,
-    flag forwarding, command shape) lives in
-    ``automation_engine.build_upgrade_profile_dispatch``.  This OSS
-    helper is just a thin enqueue loop -- caller is already
-    license-gated by ``_check_automation_module`` so the engine is
-    guaranteed to be loaded.
-
-    Returns the count of messages queued.  Failures on individual hosts
-    are tolerated -- log + continue, so one offline host can't block
-    the rest of the fleet's update.
-    """
-    if not target_host_ids:
-        return 0
-
-    engine = _check_automation_module()
-    profile_dict = {
-        "id": profile.id,
-        "name": profile.name,
-        "security_only": profile.security_only,
-        "package_managers": profile.package_managers,
-        "staggered_window_min": profile.staggered_window_min,
-    }
-    dispatches = engine.build_upgrade_profile_dispatch(
-        profile_dict, list(target_host_ids)
-    )
-
-    enqueued = 0
-    for entry in dispatches:
-        try:
-            command_message = create_command_message(
-                entry["command_type"], entry["parameters"]
-            )
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=entry["host_id"],
-                db=db,
-            )
-            enqueued += 1
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            logger.warning(
-                "Failed to enqueue apply_updates for host %s (profile %s): %s",
-                entry["host_id"],
-                profile.id,
-                exc,
-            )
-    return enqueued
-
-
 @router.post("/{profile_id}/trigger")
 async def trigger_profile(
     profile_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
 ):
-    """Fire a profile NOW.  Resolves the target host set, enqueues an
-    ``apply_updates`` command for each (with the profile's flags +
-    staggered-window delay), updates last_run / next_run, and returns
-    the count of hosts actually dispatched to."""
-    # Identity resolved on the MAIN engine; profile + audit data routes to the
-    # tenant engine via ``db``.
-    _check_automation_module()
+    """Run a profile NOW on every host it covers (26.1: through the same
+    planner as the schedule -- the host's eligible pending updates, named in
+    the command, staggered).  Before 26.1 this queued ``apply_updates`` with
+    no package names, which every agent refuses."""
+    engine = _check_automation_module()
+    _require_apply_role(current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
         db.query(models.UpgradeProfile).filter(models.UpgradeProfile.id == pid).first()
@@ -373,11 +399,12 @@ async def trigger_profile(
     if not profile:
         raise HTTPException(status_code=404, detail=_(_ERR_UPGRADE_PROFILE_NOT_FOUND))
 
-    target_ids = upgrade_scheduler.selectors_for_profile(profile, db)
-    enqueued = _dispatch_profile_to_hosts(profile, target_ids, db)
-    profile.last_run = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = auto_update_runner.now_naive()
+    summary = auto_update_runner.fire_profile(
+        db, engine, profile, now, triggered_by=current_user.userid
+    )
+    profile.last_run = now
     profile.last_status = "SUCCESS"
-    profile.next_run = _validate_and_compute_next_run(profile.cron)
     db.commit()
 
     AuditService.log(
@@ -386,103 +413,23 @@ async def trigger_profile(
         entity_type=EntityType.SETTING,
         entity_id=str(profile.id),
         entity_name=profile.name,
-        description=_(
-            "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
-        )
-        % {"profile_name": profile.name, "host_count": len(target_ids)},
+        description=_("Ran upgrade profile '%s' now") % profile.name,
         user_id=current_user.id,
         username=current_user.userid,
         result=Result.SUCCESS,
-        details={
-            "host_ids": [str(h) for h in target_ids],
-            "security_only": profile.security_only,
-            "staggered_window_min": profile.staggered_window_min,
-        },
+        details=summary,
     )
     return {
         "profile_id": str(profile.id),
         "name": profile.name,
-        "host_count": len(target_ids),
-        "enqueued_count": enqueued,
-        "host_ids": [str(h) for h in target_ids],
+        **summary,
         "next_run": profile.next_run.isoformat() if profile.next_run else None,
     }
 
 
-def _tick_profiles_one_db(session, now):
-    """Run the upgrade-profile tick against a SINGLE host database.
-
-    Returns the list of fired profiles for this database.  Selecting due
-    profiles, resolving each profile's target hosts, and enqueuing the
-    ``apply_updates`` commands all run on ``session`` -- so a tenant's profiles,
-    its hosts, and its outbound queue stay together in that tenant's DB.
-    Commits ``session`` on the way out.
-    """
-    due = (
-        session.query(models.UpgradeProfile)
-        .filter(
-            models.UpgradeProfile.enabled.is_(True),
-            models.UpgradeProfile.next_run.isnot(None),
-            models.UpgradeProfile.next_run <= now,
-        )
-        .all()
-    )
-    fired = []
-    for profile in due:
-        try:
-            target_ids = upgrade_scheduler.selectors_for_profile(profile, session)
-            enqueued = _dispatch_profile_to_hosts(profile, target_ids, session)
-            profile.last_run = now
-            profile.last_status = "SUCCESS"
-            # Phase 10.6: cron re-compute goes through automation_engine
-            # (matches ``trigger_profile`` and the docstring above; the OSS
-            # ``upgrade_scheduler`` parser is preserved as a tested utility
-            # but is not on the runtime path once the engine is loaded).
-            profile.next_run = _validate_and_compute_next_run(profile.cron)
-            fired.append(
-                {
-                    "profile_id": str(profile.id),
-                    "name": profile.name,
-                    "host_count": len(target_ids),
-                    "enqueued_count": enqueued,
-                }
-            )
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            logger.exception("tick: failed firing profile %s: %s", profile.id, exc)
-            profile.last_run = now
-            profile.last_status = "FAILURE"
-    session.commit()
-    return fired
-
-
 @router.post("/tick")
 async def tick():
-    """Driver hook for an external scheduler.  Selects every enabled
-    profile where ``next_run <= now``, fires it (updates last_run /
-    next_run / status), and returns the list of fired profiles.
-
-    Phase 10.6: gated on the ``automation_engine`` Pro+ module -- the
-    cron-recompute and per-host dispatch live there now.
-
-    Phase 13.1: no logged-in user / active-tenant context here (an external
-    scheduler drives this), so -- like the heartbeat sweep -- it fans out across
-    EVERY host database via ``iter_host_databases()`` (bootstrap + each
-    provisioned tenant DB).  A tenant's profiles and hosts live in its tenant
-    database, so the bootstrap pass alone would never see them.  One bad tenant
-    DB is logged and skipped without stalling the rest of the sweep.
-
-    Idempotent within a single tick -- running the same tick twice in
-    quick succession will fire a profile only once because the FIRST
-    invocation pushes ``next_run`` forward."""
+    """One pass of the automatic update driver, now (26.1: the server runs it
+    every minute on its own; this endpoint is for tests and operators)."""
     _check_automation_module()
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
-    fired = []
-    for label, _tenant, session in iter_host_databases():
-        try:
-            fired.extend(_tick_profiles_one_db(session, now))
-        except Exception:  # pylint: disable=broad-exception-caught
-            session.rollback()
-            logger.exception("tick: failed for database %s", label)
-        finally:
-            session.close()
-    return {"fired_count": len(fired), "fired": fired}
+    return auto_update_runner.run_one_tick()

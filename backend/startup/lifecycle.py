@@ -379,6 +379,17 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                                 "Failed to start automation schedule dispatcher: %s",
                                 auto_e,
                             )
+                    # 26.1: automatic update policies run on the same engine.
+                    try:
+                        from backend.services.auto_update_runner import (
+                            auto_update_tick_service,
+                        )
+
+                        _track_background_task(
+                            singleton_task(auto_update_tick_service())
+                        )
+                    except Exception as au_e:  # pylint: disable=broad-except
+                        logger.warning("Failed to start automatic updates: %s", au_e)
 
                 # Start fleet_engine schedule dispatcher (Phase 5)
                 fleet_engine = module_loader.get_module("fleet_engine")

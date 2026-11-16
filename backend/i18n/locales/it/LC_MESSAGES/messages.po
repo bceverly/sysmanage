@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-13 05:45-0800\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-16 10:03-0800\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -223,8 +223,9 @@ msgstr "Fallimento nell'ottenere il certificato CA: %s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:425
-#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:374
+#: backend/api/maintenance_windows.py:431 backend/api/firewall_roles.py:473
+#: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "Formato di ID host non valido"
@@ -245,7 +246,8 @@ msgstr "Formato di ID host non valido"
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:167
-#: backend/api/backups.py:170 backend/api/diagnostics.py:102
+#: backend/api/backups.py:170 backend/api/auto_updates.py:220
+#: backend/api/auto_updates.py:254 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -264,7 +266,7 @@ msgstr "Il sistema host non è approvato"
 #: backend/api/security_roles.py:204 backend/api/auth_mfa.py:149
 #: backend/api/airgap_collection_schedule.py:143
 #: backend/api/graylog_integration.py:171 backend/api/broadcast.py:128
-#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:88
+#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:93
 #: backend/api/access_groups.py:140 backend/api/grafana_integration.py:313
 #: backend/api/opentelemetry/deployment.py:67
 #: backend/api/opentelemetry/deployment.py:220
@@ -273,9 +275,10 @@ msgstr "Il sistema host non è approvato"
 #: backend/api/opentelemetry/grafana_connection.py:201
 #: backend/api/cve_refresh_settings.py:66 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
-#: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
-#: backend/api/child_host_utils.py:33 backend/api/child_host_utils.py:67
+#: backend/api/packages_operations.py:247
+#: backend/api/license_management.py:116 backend/api/secrets/permissions.py:39
+#: backend/api/error_constants.py:22 backend/api/child_host_utils.py:33
+#: backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "Utente non trovato"
 
@@ -405,7 +408,8 @@ msgstr "Il ruolo con ID %s non esiste"
 
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
-msgstr "Messaggio di modifica del nome host ricevuto senza ID del sistema host"
+msgstr ""
+"Messaggio di modifica del nome host ricevuto senza ID del sistema host"
 
 #: backend/api/handlers/hostname_handler.py:48
 #, python-format
@@ -446,8 +450,8 @@ msgstr ""
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:755 backend/api/update_handlers.py:39
-#: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
+#: backend/api/message_handlers.py:775 backend/api/update_handlers.py:40
+#: backend/api/update_handlers.py:48 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host non registrato"
 
@@ -515,27 +519,27 @@ msgstr "Impossibile elaborare l'aggiornamento dei dati del ruolo: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "La gestione dei host figli richiede una licenza Professional+"
 
-#: backend/api/handlers/os_hardware_handlers.py:132
+#: backend/api/handlers/os_hardware_handlers.py:133
 msgid "No host identification available"
 msgstr "Identificazione host non disponibile"
 
-#: backend/api/handlers/os_hardware_handlers.py:344
+#: backend/api/handlers/os_hardware_handlers.py:345
 msgid "os_version_updated"
 msgstr "Versione OS aggiornata"
 
-#: backend/api/handlers/os_hardware_handlers.py:350
+#: backend/api/handlers/os_hardware_handlers.py:351
 msgid "No OS information provided"
 msgstr "Non sono state fornite informazioni sul sistema operativo"
 
-#: backend/api/handlers/os_hardware_handlers.py:360
+#: backend/api/handlers/os_hardware_handlers.py:361
 msgid "Failed to update OS version"
 msgstr "Impossibile aggiornare la versione del sistema operativo"
 
-#: backend/api/handlers/os_hardware_handlers.py:568
+#: backend/api/handlers/os_hardware_handlers.py:569
 msgid "hardware_updated"
 msgstr "Hardware aggiornato"
 
-#: backend/api/handlers/os_hardware_handlers.py:577
+#: backend/api/handlers/os_hardware_handlers.py:578
 msgid "Failed to update hardware information"
 msgstr "Impossibile aggiornare le informazioni sullo hardware"
 
@@ -547,54 +551,55 @@ msgstr "Inventario software aggiornato"
 msgid "Failed to update software inventory"
 msgstr "Impossibile aggiornare l'inventario software"
 
-#: backend/api/handlers/software_package_handlers.py:296
-#: backend/api/updates/report_routes.py:75
+#: backend/api/handlers/software_package_handlers.py:299
+#: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Fallimento nel salvare gli aggiornamenti: %s"
 
-#: backend/api/handlers/software_package_handlers.py:411
+#: backend/api/handlers/software_package_handlers.py:414
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "Impossibile elaborare il risultato della raccolta dei pacchetti: %s"
 
-#: backend/api/handlers/software_package_handlers.py:505
+#: backend/api/handlers/software_package_handlers.py:508
 #, python-format
 msgid "Failed to process third-party repository update: %s"
-msgstr "Impossibile elaborare l'aggiornamento dell'archivio di terze parti: %s"
+msgstr ""
+"Impossibile elaborare l'aggiornamento dell'archivio di terze parti: %s"
 
-#: backend/api/handlers/software_package_handlers.py:588
+#: backend/api/handlers/software_package_handlers.py:591
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "Impossibile elaborare l'aggiornamento di stato antivirus: %s"
 
-#: backend/api/handlers/software_package_handlers.py:719
+#: backend/api/handlers/software_package_handlers.py:722
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr ""
 "Impossibile elaborare l'aggiornamento di stato antivirus commerciale: %s"
 
-#: backend/api/handlers/software_package_handlers.py:821
+#: backend/api/handlers/software_package_handlers.py:824
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "Impossibile elaborare l'aggiornamento di stato firewall: %s"
 
-#: backend/api/handlers/software_package_handlers.py:907
+#: backend/api/handlers/software_package_handlers.py:910
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Impossibile elaborare l'aggiornamento di stato Graylog: %s"
 
-#: backend/api/handlers/software_package_handlers.py:939
+#: backend/api/handlers/software_package_handlers.py:942
 msgid "Missing request_id in installation_complete"
 msgstr "Manca request_id in installation_complete"
 
-#: backend/api/handlers/software_package_handlers.py:956
+#: backend/api/handlers/software_package_handlers.py:959
 #: backend/api/agent.py:933 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Richiesta di installazione non trovata: %s"
 
-#: backend/api/handlers/software_package_handlers.py:997
+#: backend/api/handlers/software_package_handlers.py:1000
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -606,7 +611,7 @@ msgstr "Modello di report non trovato"
 
 #: backend/api/report_templates.py:196 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
-#: backend/api/upgrade_profiles.py:128
+#: backend/api/upgrade_profiles.py:145
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
@@ -787,8 +792,8 @@ msgstr ""
 
 #: backend/api/reports/endpoints.py:73
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade "
-"to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
 msgstr ""
 "La generazione di report richiede una licenza SysManage Professional+. "
 "Effettuare l'upgrade per accedere a questa funzionalità."
@@ -869,7 +874,7 @@ msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "Espressione cron non valida: previsti 5 campi (m h dom mon dow)"
 
 #: backend/api/airgap_collection_schedule.py:94
-#: backend/api/upgrade_profiles.py:148
+#: backend/api/upgrade_profiles.py:165
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "Espressione cron non valida: %s"
@@ -928,8 +933,8 @@ msgstr "Token di iscrizione non valido o scaduto"
 
 #: backend/api/host_registration.py:239
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token "
-"instead of registering server-scoped."
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
 msgstr ""
 "Questa istanza appartiene già a un tenant. Ri-registrare con il token di "
 "iscrizione invece di registrare al livello del server."
@@ -970,7 +975,8 @@ msgstr "L'URL Graylog non è configurato"
 #: backend/api/graylog_integration.py:541
 msgid "Connection timeout - Graylog server may be unreachable"
 msgstr ""
-"Timeout della connessione - Il server Graylog potrebbe essere irraggiungibile"
+"Timeout della connessione - Il server Graylog potrebbe essere "
+"irraggiungibile"
 
 #: backend/api/graylog_integration.py:550
 msgid "Connection failed - Graylog server may be down or unreachable"
@@ -1118,7 +1124,8 @@ msgstr "Impossibile aggiornare le preferenze della colonna: %s"
 
 #: backend/api/user_preferences.py:252
 msgid "Column preferences reset to defaults"
-msgstr "Le preferenze delle colonne sono state resettate ai valori predefiniti"
+msgstr ""
+"Le preferenze delle colonne sono state resettate ai valori predefiniti"
 
 #: backend/api/user_preferences.py:254
 msgid "No preferences found to delete"
@@ -1232,8 +1239,8 @@ msgid ""
 "This is the last active administrator. Make another user an administrator "
 "first."
 msgstr ""
-"Questo è l'ultimo amministratore attivo. Rendi prima amministratore un altro "
-"utente."
+"Questo è l'ultimo amministratore attivo. Rendi prima amministratore un altro"
+" utente."
 
 #: backend/api/user.py:129
 msgid "Permission denied: DELETE_USER role required"
@@ -1350,7 +1357,8 @@ msgstr "Invito revocato"
 #: backend/api/invitations.py:265
 msgid "Failed to send invitation email. Please check email configuration."
 msgstr ""
-"Invio dell'e-mail di invito non riuscito. Controlla la configurazione e-mail."
+"Invio dell'e-mail di invito non riuscito. Controlla la configurazione "
+"e-mail."
 
 #: backend/api/invitations.py:269
 #, python-brace-format
@@ -1536,12 +1544,12 @@ msgstr "Accesso negato: richiesta del ruolo DELETE_QUEUE_MESSAGE"
 msgid "No message IDs provided"
 msgstr "Non sono stati forniti ID messaggio"
 
-#: backend/api/queue.py:186
+#: backend/api/queue.py:190
 msgid "Message not found or not expired"
 msgstr "Messaggio non trovato o scaduto"
 
 # Tag management messages
-#: backend/api/queue.py:249
+#: backend/api/queue.py:253
 msgid "Failed to fetch message details"
 msgstr "Impossibile ottenere i dettagli del messaggio"
 
@@ -1633,21 +1641,21 @@ msgstr "Host dello specchio non trovato"
 msgid "Mirror deleted"
 msgstr "Specchio eliminato"
 
-#: backend/api/repository_mirroring.py:262
+#: backend/api/repository_mirroring.py:263
 #, python-format
 msgid "Unsupported package_manager: %s"
 msgstr "Gestore dei pacchetti non supportato: %s"
 
-#: backend/api/repository_mirroring.py:275
+#: backend/api/repository_mirroring.py:276
 msgid "Mirror sync dispatched"
 msgstr "Sincronizzazione dello specchio inviata"
 
-#: backend/api/repository_mirroring.py:389
+#: backend/api/repository_mirroring.py:390
 msgid "Mirror tick requires automation_engine for cron evaluation."
 msgstr ""
 "Il tick dello specchio richiede automation_engine per l'evaluazione cron."
 
-#: backend/api/repository_mirroring.py:604
+#: backend/api/repository_mirroring.py:605
 #, python-format
 msgid ""
 "Mirror %s has not completed a successful sync yet -- wait for sync to "
@@ -1656,7 +1664,7 @@ msgstr ""
 "Lo specchio %s non ha completato ancora una sincronizzazione corretta -- "
 "attendi che la sincronizzazione riesca prima di assegnarlo come predefinito."
 
-#: backend/api/repository_mirroring.py:613
+#: backend/api/repository_mirroring.py:614
 #, python-format
 msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
@@ -1665,48 +1673,48 @@ msgstr ""
 "Il mirror %(mirror_name)s è per %(package_manager)s, non può essere "
 "assegnato a un default di %(platform)s"
 
-#: backend/api/repository_mirroring.py:696
+#: backend/api/repository_mirroring.py:697
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "Tuple di piattaforma, versione e os_family sconosciuta"
 
-#: backend/api/airgap_collector_runs.py:65
+#: backend/api/airgap_collector_runs.py:70
 msgid "Air-gap collection run not found"
 msgstr "Esecuzione della raccolta in modalità air-gap non trovata"
 
-#: backend/api/airgap_collector_runs.py:66
+#: backend/api/airgap_collector_runs.py:71
 msgid "Air-gap media manifest not found"
 msgstr "Manifesto dell'interfaccia di backup in modalità air-gap non trovato"
 
-#: backend/api/airgap_collector_runs.py:67
+#: backend/api/airgap_collector_runs.py:72
 #, python-format
 msgid "Invalid UUID for run_id: %s"
 msgstr "UUID non valido per run_id: %s"
 
-#: backend/api/airgap_collector_runs.py:68
+#: backend/api/airgap_collector_runs.py:73
 #, python-format
 msgid "Invalid UUID for manifest_id: %s"
 msgstr "UUID non valido per manifest_id: %s"
 
-#: backend/api/airgap_collector_runs.py:77
+#: backend/api/airgap_collector_runs.py:82
 msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
 msgstr ""
-"Le raccolte di air-gap richiedono una licenza SysManage Professional+ con il "
-"motore del collector air-gap. Si prega di aggiornare per accedere a questa "
+"Le raccolte di air-gap richiedono una licenza SysManage Professional+ con il"
+" motore del collector air-gap. Si prega di aggiornare per accedere a questa "
 "funzionalità."
 
-#: backend/api/airgap_collector_runs.py:218
+#: backend/api/airgap_collector_runs.py:227
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded -- the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be"
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Le raccolte di air-gap richiedono che il modulo repository_mirroring_engine "
 "sia caricato -- il collector legge ogni pacchetto obiettivo dalla snapshot "
 "dell'albero mirror."
 
-#: backend/api/airgap_collector_runs.py:229
+#: backend/api/airgap_collector_runs.py:238
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
@@ -1715,7 +1723,7 @@ msgstr ""
 "configurato. Configura le impostazioni dello specchio prima di creare una "
 "sessione di raccolta."
 
-#: backend/api/airgap_collector_runs.py:289
+#: backend/api/airgap_collector_runs.py:298
 #, python-format
 msgid ""
 "Mirror %r has no known_version_id set; Option-B collection runs need the "
@@ -1723,11 +1731,11 @@ msgid ""
 "Edit the mirror and pick a version from the dropdown."
 msgstr ""
 "Lo specchio %r non ha un known_version_id impostato; le esecuzioni di "
-"raccolta Opzione-B necessitano che lo specchio sia legato a una versione del "
-"catalogo in modo da poter derivare distribuzione / versione. Modifica lo "
+"raccolta Opzione-B necessitano che lo specchio sia legato a una versione del"
+" catalogo in modo da poter derivare distribuzione / versione. Modifica lo "
 "specchio e seleziona una versione dalla lista a discesa."
 
-#: backend/api/airgap_collector_runs.py:318
+#: backend/api/airgap_collector_runs.py:327
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
@@ -1736,23 +1744,23 @@ msgstr ""
 "Lo specchio %r fa riferimento a una versione del catalogo che non esiste "
 "più. Seleziona nuovamente una versione nello specchio."
 
-#: backend/api/airgap_collector_runs.py:402
-#: backend/api/airgap_collector_runs.py:481
+#: backend/api/airgap_collector_runs.py:414
+#: backend/api/airgap_collector_runs.py:493
 msgid "At least one target is required to create a collection run."
 msgstr ""
 "Almeno un destinatario è richiesto per creare una sessione di raccolta."
 
-#: backend/api/airgap_collector_runs.py:412
+#: backend/api/airgap_collector_runs.py:424
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "UUID non valido per mirror_id: %s"
 
-#: backend/api/airgap_collector_runs.py:422
+#: backend/api/airgap_collector_runs.py:434
 #, python-format
 msgid "Mirror %s not found"
 msgstr "Lo specchio %s non trovato"
 
-#: backend/api/airgap_collector_runs.py:428
+#: backend/api/airgap_collector_runs.py:440
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
@@ -1760,7 +1768,7 @@ msgstr ""
 "Lo specchio %r è disabilitato; abilitalo e sincronizzalo prima di "
 "utilizzarlo in un'operazione di raccolta."
 
-#: backend/api/airgap_collector_runs.py:439
+#: backend/api/airgap_collector_runs.py:451
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
@@ -1769,7 +1777,7 @@ msgstr ""
 "Tutti i mirror degli obiettivi devono vivere sullo stesso host (il piano di "
 "raccolta invia a un singolo agente). I mirror selezionati coprono %d host."
 
-#: backend/api/airgap_collector_runs.py:535
+#: backend/api/airgap_collector_runs.py:547
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
@@ -1778,7 +1786,7 @@ msgstr ""
 "Creata una raccolta unica air-gap di rilevamento '%(iso_label)s' con "
 "%(mirror_count)d target mirror; snapshot inviati."
 
-#: backend/api/airgap_collector_runs.py:658
+#: backend/api/airgap_collector_runs.py:670
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
@@ -1787,40 +1795,54 @@ msgstr ""
 "Il file ISO non è ancora pronto per il download (stato: %s). Attendere fino "
 "a quando l'esecuzione raggiunge ISO_BUILT."
 
-#: backend/api/airgap_collector_runs.py:668
+#: backend/api/airgap_collector_runs.py:680
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
-"the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
+" the collection to rebuild."
 msgstr ""
 "Il file ISO non è più presente sul disco; il volume di staging potrebbe "
 "essere stato pulito. Eseguire nuovamente la raccolta per ricostruirlo."
 
-#: backend/api/airgap_collector_runs.py:685
+#: backend/api/airgap_collector_runs.py:697
 msgid "ISO file not found."
 msgstr "File ISO non trovato."
 
-#: backend/api/airgap_collector_runs.py:705
+#: backend/api/airgap_collector_runs.py:717
 #, python-format
 msgid "Disc %(disc)d not found for this run.  Available discs: %(available)s"
 msgstr ""
-"Disco (disc) %(disc)d non trovato per questa esecuzione. Dischi disponibili: "
-"%(available)s"
+"Disco (disc) %(disc)d non trovato per questa esecuzione. Dischi disponibili:"
+" %(available)s"
 
-#: backend/api/airgap_collector_runs.py:790
+#: backend/api/airgap_collector_runs.py:802
 msgid "Invalid or expired download token."
 msgstr "Token di download non valido o scaduto."
 
-#: backend/api/airgap_collector_runs.py:823
+#: backend/api/airgap_collector_runs.py:828
+#, python-format
+msgid "This run is not waiting for a blank disc (status: %s)."
+msgstr "Questa esecuzione non è in attesa di un disco vuoto (stato: %s)."
+
+#: backend/api/airgap_collector_runs.py:843
+#, python-format
+msgid ""
+"Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run"
+" '%(iso_label)s'"
+msgstr ""
+"Caricato un disco vuoto per il disco %(disc)d di %(count)d della sessione di"
+" raccolta air-gap '%(iso_label)s'"
+
+#: backend/api/airgap_collector_runs.py:885
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "Eliminata la sessione di raccolta air-gap '%s'"
 
-#: backend/api/airgap_collector_runs.py:895
+#: backend/api/airgap_collector_runs.py:957
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "L'esecuzione non è ANCORA completa (stato: %s)"
 
-#: backend/api/airgap_collector_runs.py:901
+#: backend/api/airgap_collector_runs.py:963
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "Il file ISO non è più presente sul disco: %s"
@@ -1831,8 +1853,8 @@ msgstr "Profilo di pacchetto non trovato"
 
 #: backend/api/package_compliance.py:73
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 msgstr ""
 "I profili di conformità dei pacchetti richiedono una licenza SysManage "
 "Professional. Aggiorna per accedere a questa funzionalità."
@@ -2119,8 +2141,8 @@ msgstr "Impossibile risolvere il segreto del client OIDC."
 
 #: backend/api/external_idp.py:577 backend/api/external_idp.py:796
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to "
-"provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to"
+" provision your account first."
 msgstr ""
 "Nessun account SysManage è collegato a questa identità IdP. Chiedi "
 "all'amministratore di configurare il tuo account prima."
@@ -2284,7 +2306,7 @@ msgstr ""
 msgid "Unexpected error checking Grafana health"
 msgstr "Errore imprevisto durante il controllo della salute di Grafana"
 
-#: backend/api/proplus_routes_stubs.py:64
+#: backend/api/proplus_routes_stubs.py:69
 msgid ""
 "Encrypted backups require a SysManage Professional+ license with the backup "
 "engine. Please upgrade to access this feature."
@@ -2292,7 +2314,7 @@ msgstr ""
 "I backup cifrati richiedono una licenza SysManage Professional+ con il "
 "motore di backup. Esegui l'upgrade per accedere a questa funzione."
 
-#: backend/api/proplus_routes_stubs.py:120
+#: backend/api/proplus_routes_stubs.py:121
 msgid ""
 "Host provisioning requires a SysManage Professional+ license with the "
 "provisioning engine. Please upgrade to access this feature."
@@ -2307,8 +2329,8 @@ msgstr ""
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
-#: backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97
+#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "Sistema host non trovato o non attivo"
 
@@ -2345,8 +2367,8 @@ msgstr "URL Grafana non disponibile"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
-"on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
+" on the server."
 msgstr ""
 "La distribuzione OpenTelemetry richiede che l'engine observability_engine "
 "Pro+ sia caricato sul server."
@@ -2362,8 +2384,8 @@ msgstr "Impossibile distribuire OpenTelemetry: %s"
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
-"the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
+" the server."
 msgstr ""
 "La rimozione di OpenTelemetry richiede che l'engine observability_engine "
 "Pro+ sia caricato sul server."
@@ -2479,8 +2501,8 @@ msgstr "Impossibile disconnettere OpenTelemetry da Grafana: %s"
 
 #: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
-"license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
+" license. Please upgrade to access this feature."
 msgstr ""
 "La gestione del ciclo di vita dei contenuti richiede una licenza SysManage "
 "Professional+ (Enterprise). Per accedere a questa funzionalità, effettua "
@@ -2529,7 +2551,8 @@ msgstr "Vista di contenuto non trovata"
 #: backend/api/content_lifecycle.py:320
 msgid "Each content-view member needs a mirror or component CV"
 msgstr ""
-"Ogni membro della vista di contenuto deve avere un mirror o una componente CV"
+"Ogni membro della vista di contenuto deve avere un mirror o una componente "
+"CV"
 
 #: backend/api/content_lifecycle.py:365
 #, python-format
@@ -2708,7 +2731,8 @@ msgstr "Comando di riavvio del firewall inviato con successo"
 msgid "Firewall deploy command sent successfully"
 msgstr "Comando di distribuzione firewall inviato con successo"
 
-#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273
+#: backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "È richiesto un nome di sistema operativo"
@@ -2831,7 +2855,8 @@ msgstr "Il sistema host con token non è iscritto. Si prega di riiscrivere."
 msgid "Agent authentication failed: invalid host ID"
 msgstr "L'autenticazione dell'agente ha fallito: ID host non valido"
 
-#: backend/api/message_handlers_core.py:98 backend/utils/host_validation.py:104
+#: backend/api/message_handlers_core.py:98
+#: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "Il sistema host con ID %s non è iscritto. Si prega di riiscrivere."
@@ -2861,14 +2886,14 @@ msgstr "Iscrizione del sistema host in sospeso per approvazione"
 #: backend/api/message_handlers_core.py:452
 msgid "Host auto-approved via child host creation"
 msgstr ""
-"Il sistema host è stato approvato automaticamente tramite la creazione di un "
-"sistema figlio"
+"Il sistema host è stato approvato automaticamente tramite la creazione di un"
+" sistema figlio"
 
 #: backend/api/message_handlers_core.py:576
 msgid "Agent registered and connected successfully"
 msgstr "Agente registrato e connesso correttamente"
 
-#: backend/api/message_handlers_core.py:945
+#: backend/api/message_handlers_core.py:947
 msgid "Failed to process heartbeat"
 msgstr "Impossibile elaborare il battito cardiaco"
 
@@ -2888,7 +2913,8 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "La destinazione '%(t)s' non è valida per %(f)s"
 
 #: backend/api/logging_settings.py:134
-msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgid ""
+"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 msgstr ""
 "Il forwarding syslog remoto richiede una licenza Professional (LOG_ROUTING)."
 
@@ -2960,8 +2986,8 @@ msgid ""
 "Child host creation requested. This may take several minutes. The host will "
 "be automatically approved when it connects."
 msgstr ""
-"Creazione del host figlio richiesta. Il host verrà automaticamente approvato "
-"al momento della connessione."
+"Creazione del host figlio richiesta. Il host verrà automaticamente approvato"
+" al momento della connessione."
 
 #: backend/api/child_host_virtualization.py:660
 msgid "Child host creation requested. This may take several minutes."
@@ -3160,7 +3186,8 @@ msgstr "Questo host segue già il suo criterio per tag"
 #: backend/api/backups_tag_policies.py:280
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr ""
-"Nessun criterio per tag si applica a questo host; non c'è nulla a cui passare"
+"Nessun criterio per tag si applica a questo host; non c'è nulla a cui "
+"passare"
 
 #: backend/api/image_mode_actions.py:75
 msgid ""
@@ -3244,8 +3271,8 @@ msgstr ""
 
 #: backend/api/backups_equip.py:68
 msgid ""
-"restate has no package the agent can install on this operating system; build "
-"and install it by hand (see restate's README)"
+"restate has no package the agent can install on this operating system; build"
+" and install it by hand (see restate's README)"
 msgstr ""
 "restate non ha un pacchetto che l'agente possa installare su questo sistema "
 "operativo; compilalo e installalo a mano (vedi il README di restate)"
@@ -3270,7 +3297,8 @@ msgstr "Il nome del sistema operativo deve essere lungo 100 caratteri o meno"
 
 #: backend/api/antivirus_defaults.py:81
 msgid "Antivirus package name must be 255 characters or less"
-msgstr "Il nome del pacchetto antivirus deve essere lungo 255 caratteri o meno"
+msgstr ""
+"Il nome del pacchetto antivirus deve essere lungo 255 caratteri o meno"
 
 #: backend/api/antivirus_defaults.py:106
 #, python-format
@@ -3336,8 +3364,8 @@ msgstr "Indicate al massimo 25 regole di larghezza di banda"
 
 #: backend/api/backups_transport.py:123
 msgid ""
-"A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours "
-"and a rate (08-18 2MiB/s)"
+"A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours"
+" and a rate (08-18 2MiB/s)"
 msgstr ""
 "Una regola di larghezza di banda è una velocità (512KiB/s, 2MiB/s, 1GiB/s o "
 "unlimited), oppure delle ore e una velocità (08-18 2MiB/s)"
@@ -3404,7 +3432,8 @@ msgstr "Impossibile ottenere la configurazione email"
 #: backend/api/email.py:102
 msgid "Email service is disabled. Enable it in Settings > Configuration."
 msgstr ""
-"Il servizio email è disabilitato. Abilitalo in Impostazioni > Configurazione."
+"Il servizio email è disabilitato. Abilitalo in Impostazioni > "
+"Configurazione."
 
 #: backend/api/email.py:112
 #, python-brace-format
@@ -3421,28 +3450,28 @@ msgstr ""
 msgid "Error sending test email: {error}"
 msgstr "Errore nell'invio dell'email di test: {error}"
 
-#: backend/api/airgap_bundles.py:132
+#: backend/api/airgap_bundles.py:140
 msgid "Bundle not found"
 msgstr "Pacchetto non trovato"
 
-#: backend/api/airgap_bundles.py:469
+#: backend/api/airgap_bundles.py:479
 msgid "product must be one of: "
 msgstr "il prodotto deve essere uno dei seguenti:"
 
-#: backend/api/airgap_bundles.py:483
+#: backend/api/airgap_bundles.py:493
 msgid "Insufficient host resources to build a bundle: "
 msgstr "Risorse host insufficienti per creare un bundle:"
 
-#: backend/api/airgap_bundles.py:578
+#: backend/api/airgap_bundles.py:596
 #, python-format
 msgid "Bundle is not ready yet (status: %s)"
 msgstr "Il pacchetto non è ancora pronto (stato: %s)"
 
-#: backend/api/airgap_bundles.py:582
+#: backend/api/airgap_bundles.py:600
 msgid "Bundle file is no longer on disk"
 msgstr "Il file del pacchetto non è più presente sul disco"
 
-#: backend/api/airgap_bundles.py:629
+#: backend/api/airgap_bundles.py:647
 msgid "Invalid or expired download token"
 msgstr "Token di download non valido o scaduto"
 
@@ -3455,8 +3484,8 @@ msgid ""
 "This host already has a valid certificate; present it to renew, or wait "
 "until it is close to expiry"
 msgstr ""
-"Questo host ha già un certificato valido; presentarlo per rinnovarlo, oppure "
-"attendere che sia prossimo alla scadenza"
+"Questo host ha già un certificato valido; presentarlo per rinnovarlo, oppure"
+" attendere che sia prossimo alla scadenza"
 
 #: backend/api/agent_certificate.py:138
 msgid ""
@@ -3535,8 +3564,8 @@ msgid ""
 "Without email integration, new users cannot receive password setup "
 "instructions and will be unable to log in."
 msgstr ""
-"Abilita le email nel file di configurazione YAML e configura le impostazioni "
-"SMTP. Senza integrazione email, i nuovi utenti non possono ricevere le "
+"Abilita le email nel file di configurazione YAML e configura le impostazioni"
+" SMTP. Senza integrazione email, i nuovi utenti non possono ricevere le "
 "istruzioni per l'impostazione della password e non potranno accedere."
 
 #: backend/api/security.py:175
@@ -3592,10 +3621,12 @@ msgstr ""
 "Il salt della password utilizza il valore predefinito ma il segreto JWT è "
 "stato modificato. Esegui: {command}"
 
-#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76
+#: backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr ""
-"Per le chiavi basate su contratto, la chiave Ubuntu Pro deve iniziare con 'C'"
+"Per le chiavi basate su contratto, la chiave Ubuntu Pro deve iniziare con "
+"'C'"
 
 #: backend/api/ubuntu_pro_settings.py:80
 msgid "Ubuntu Pro key appears to be too short"
@@ -3693,27 +3724,29 @@ msgstr "Impossibile conteggiare i pacchetti: %s"
 msgid "Failed to search packages: %s"
 msgstr "Impossibile cercare i pacchetti: %s"
 
-#: backend/api/host.py:196
+#: backend/api/host.py:230
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Accesso negato: richiesta del ruolo DELETE_HOST"
 
-#: backend/api/host.py:260
+#: backend/api/host.py:294
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Permesso negato: richiesta del ruolo VIEW_HOST_DETAILS"
 
-#: backend/api/host.py:688
+#: backend/api/host.py:683
 msgid "Host already exists"
 msgstr "L'host esiste già"
 
-#: backend/api/host.py:800
+#: backend/api/host.py:795
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registrazione assorbita: l'host è stato recentemente eliminato"
 
-#: backend/api/host.py:880
+#: backend/api/host.py:875
 #, python-format
-msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid ""
+"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
-"Host '%(fqdn)s' iscritto nel tenant %(tenant_id)s tramite token di iscrizione"
+"Host '%(fqdn)s' iscritto nel tenant %(tenant_id)s tramite token di "
+"iscrizione"
 
 #: backend/api/agent_poll.py:120
 msgid "Missing agent connection token"
@@ -3751,7 +3784,7 @@ msgstr "Configurazione inviata agli agent di piattaforma"
 msgid "Must specify target_hostname, target_platform, or push_to_all"
 msgstr "Deve specificare target_hostname, target_platform, o push_to_all"
 
-#: backend/api/config_management.py:276
+#: backend/api/config_management.py:280
 msgid "Configuration acknowledgment processed"
 msgstr "Conferma configurazione elaborata"
 
@@ -3800,34 +3833,34 @@ msgstr "Questo lavoro si è già concluso"
 msgid "Cancelled by an operator"
 msgstr "Annullato da un operatore"
 
-#: backend/api/message_handlers.py:608
+#: backend/api/message_handlers.py:628
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "Impossibile elaborare il risultato diagnostico: %s"
 
-#: backend/api/message_handlers.py:642
+#: backend/api/message_handlers.py:662
 msgid "Missing message_id in command acknowledgment"
 msgstr "Mancante message_id nell'accettazione del comando"
 
-#: backend/api/message_handlers.py:709
+#: backend/api/message_handlers.py:729
 msgid "This session cannot acknowledge another host's message"
 msgstr "Questa sessione non può confermare il messaggio di un altro host"
 
-#: backend/api/message_handlers.py:779
+#: backend/api/message_handlers.py:799
 msgid "Missing installation_id in package installation status"
 msgstr "Mancante installation_id nello stato di installazione del pacchetto"
 
-#: backend/api/message_handlers.py:799
+#: backend/api/message_handlers.py:819
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "Voce non trovata nel registro delle installazioni per ID: %s"
 
-#: backend/api/message_handlers.py:845
+#: backend/api/message_handlers.py:865
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Installazione del pacchetto {status} sull'agente {hostname}"
 
-#: backend/api/message_handlers.py:874
+#: backend/api/message_handlers.py:894
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Impossibile aggiornare lo stato dell'installazione dei pacchetti: %s"
@@ -3864,7 +3897,8 @@ msgstr "Non sono stati specificati pacchetti da installare"
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgid ""
+"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr ""
 "Installazione in coda di %(package_count)d pacchetti sull'host %(host_fqdn)s"
 
@@ -3877,8 +3911,8 @@ msgstr "In coda %d pacchetti per l'installazione con successo"
 #, python-format
 msgid "Failed to queue package installation: %s"
 msgstr ""
-"Impossibile inserire la richiesta di installazione del pacchetto nella coda: "
-"%s"
+"Impossibile inserire la richiesta di installazione del pacchetto nella coda:"
+" %s"
 
 #: backend/api/packages_operations.py:255
 msgid "Permission denied: REMOVE_PACKAGE role required"
@@ -3929,20 +3963,20 @@ msgstr ""
 "Le sottoscrizioni dell'ambiente sono gestite dal coordinatore della "
 "federazione"
 
-#: backend/api/airgap_devices.py:79
+#: backend/api/airgap_devices.py:82
 #, python-format
 msgid "Device %s is not an available import drive"
 msgstr "Il dispositivo '%s' non è disponibile come unità di importazione"
 
-#: backend/api/airgap_devices.py:103
+#: backend/api/airgap_devices.py:106
 msgid "no import device selected"
 msgstr "nessun dispositivo di importazione selezionato"
 
-#: backend/api/airgap_devices.py:123
+#: backend/api/airgap_devices.py:132
 msgid "No import device selected"
 msgstr "Dispositivo di import non selezionato"
 
-#: backend/api/airgap_devices.py:128
+#: backend/api/airgap_devices.py:137
 #, python-format
 msgid "Import device not ready: %s"
 msgstr "Dispositivo di importazione non pronto: %s"
@@ -3981,7 +4015,7 @@ msgstr ""
 msgid "API key not found."
 msgstr "Chiave API non trovata."
 
-#: backend/api/update_handlers.py:207
+#: backend/api/update_handlers.py:229
 msgid "Failed to process update results"
 msgstr "Impossibile elaborare i risultati di aggiornamento"
 
@@ -4016,8 +4050,8 @@ msgstr "L'account è bloccato a causa di troppi tentativi di accesso falliti"
 
 #: backend/api/auth.py:391
 msgid ""
-"Multi-factor authentication is required for this account. Please enroll from "
-"your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from"
+" your profile page before signing in."
 msgstr ""
 "L'autenticazione a più fattori è richiesta per questo account. Per favore, "
 "registrati dalla tua pagina profilo prima di accedere."
@@ -4052,8 +4086,8 @@ msgstr "Password modificata con successo"
 
 #: backend/api/profile.py:237
 msgid ""
-"Profile images cannot be uploaded on this server: it runs Python 3.10, where "
-"the image library still has security issues that are fixed only for Python "
+"Profile images cannot be uploaded on this server: it runs Python 3.10, where"
+" the image library still has security issues that are fixed only for Python "
 "3.11 and later. Move the server to Python 3.11 or later (Ubuntu 24.04 or "
 "newer) to upload images."
 msgstr ""
@@ -4100,7 +4134,8 @@ msgstr "Nessun aggiornamento OS disponibile per questo host"
 
 #: backend/api/updates/os_upgrade_routes.py:352
 #, python-format
-msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgid ""
+"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr ""
 "Iniziato aggiornamento OS sull'host %(fqdn)s con %(upgrade_count)d "
 "aggiornamenti"
@@ -4118,22 +4153,23 @@ msgstr "Impossibile inserire il comando di aggiornamento OS nella coda"
 msgid "Failed to get update summary: %s"
 msgstr "Fallimento nell'ottenere il riassunto aggiornamento: %s"
 
-#: backend/api/updates/query_routes.py:199
+#: backend/api/updates/query_routes.py:203
 #, python-format
 msgid "Failed to get host updates: %s"
 msgstr "Fallimento nell'ottenere gli aggiornamenti host: %s"
 
-#: backend/api/updates/query_routes.py:301
+#: backend/api/updates/query_routes.py:305
 #, python-format
 msgid "Failed to get updates: %s"
 msgstr "Fallimento nell'ottenere gli aggiornamenti: %s"
 
-#: backend/api/updates/query_routes.py:321
+#: backend/api/updates/query_routes.py:325
 #, python-format
 msgid "Failed to get update results: %s"
 msgstr "Impossibile ottenere i risultati dell'aggiornamento: %s"
 
 #: backend/api/updates/execution_routes.py:65
+#: backend/api/upgrade_profiles.py:182
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "Accesso negato: richiesta del ruolo APPLY_SOFTWARE_UPDATE"
 
@@ -4169,7 +4205,7 @@ msgstr "Fallimento nell'invio comando di aggiornamento: %s"
 msgid "Failed to execute updates: %s"
 msgstr "Fallimento nell'esecuzione degli aggiornamenti: %s"
 
-#: backend/api/updates/execution_routes.py:307
+#: backend/api/updates/execution_routes.py:311
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "Fallimento nell'ottenere il log di esecuzione: %s"
@@ -4182,7 +4218,8 @@ msgstr "Tipo sconosciuto: %(kind)s (consentiti: %(allowed)s)"
 #: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
+"ttl=%(ttl)ds)"
 msgstr ""
 "Emissione segreto dinamico '%(name)s' (kind=%(kind)s, role=%(role)s, "
 "ttl=%(ttl)ds)"
@@ -4258,7 +4295,8 @@ msgstr "Inizializzazione VMM richiesta"
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd daemon."
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
 msgstr ""
 "Inizializzazione VMM richiesta. L'agente abiliterà e avvierà il daemon vmd."
 
@@ -4287,7 +4325,8 @@ msgstr "bhyve è supportato solo su sistemi FreeBSD"
 #: backend/api/child_host_virtualization_enable.py:411
 msgid "Agent must be running with root privileges to initialize bhyve"
 msgstr ""
-"L'agente deve essere in esecuzione con privilegi root per inizializzare bhyve"
+"L'agente deve essere in esecuzione con privilegi root per inizializzare "
+"bhyve"
 
 #: backend/api/child_host_virtualization_enable.py:425
 msgid "bhyve initialization requested"
@@ -4295,11 +4334,11 @@ msgstr "Inizializzazione bhyve richiesta"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the "
-"system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the"
+" system for bhyve virtual machines."
 msgstr ""
-"Inizializzazione bhyve richiesta. L'agente caricherà vmm.ko e configurerà il "
-"sistema per le macchine virtuali bhyve."
+"Inizializzazione bhyve richiesta. L'agente caricherà vmm.ko e configurerà il"
+" sistema per le macchine virtuali bhyve."
 
 #: backend/api/child_host_virtualization_enable.py:474
 msgid "Agent must be running with root privileges to disable bhyve"
@@ -4316,14 +4355,14 @@ msgid ""
 "configuration. This will fail if any VMs are running."
 msgstr ""
 "Disabilitazione bhyve richiesta. L'agente discaricherà vmm.ko e aggiusterà "
-"la configurazione del sistema. Questa operazione fallirà se ci sono macchine "
-"virtuali in esecuzione."
+"la configurazione del sistema. Questa operazione fallirà se ci sono macchine"
+" virtuali in esecuzione."
 
 #: backend/api/child_host_virtualization_enable.py:536
 msgid "Agent must be running with root privileges to enable KVM modules"
 msgstr ""
-"L'agente deve essere in esecuzione con privilegi root per abilitare i moduli "
-"KVM"
+"L'agente deve essere in esecuzione con privilegi root per abilitare i moduli"
+" KVM"
 
 #: backend/api/child_host_virtualization_enable.py:550
 msgid "KVM modules enable requested"
@@ -4331,8 +4370,8 @@ msgstr "Moduli KVM abilitano richiesti"
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via "
-"modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via"
+" modprobe."
 msgstr ""
 "I moduli KVM sono abilitati. L'agente caricherà i moduli del nucleo KVM "
 "tramite modprobe."
@@ -4352,8 +4391,8 @@ msgid ""
 "KVM modules disable requested. The agent will unload the KVM kernel modules "
 "via modprobe -r. This will fail if any VMs are running."
 msgstr ""
-"Disabilitazione dei moduli KVM richiesta. L'agente discaricherà i moduli del "
-"kernel KVM tramite modprobe -r. Questo fallirá se sono in esecuzione "
+"Disabilitazione dei moduli KVM richiesta. L'agente discaricherà i moduli del"
+" kernel KVM tramite modprobe -r. Questo fallirá se sono in esecuzione "
 "qualsiasi VM."
 
 # KVM Networking Configuration strings
@@ -4382,7 +4421,8 @@ msgstr "Configurazione di rete KVM richiesta: modalità %s"
 msgid ""
 "KVM networking configuration requested. The agent will configure the %s "
 "network."
-msgstr "Configurazione di rete KVM richiesta. L'agente configurerà la rete %s."
+msgstr ""
+"Configurazione di rete KVM richiesta. L'agente configurerà la rete %s."
 
 #: backend/api/child_host_virtualization_enable.py:778
 msgid "KVM networks are only available on Linux hosts"
@@ -4468,8 +4508,8 @@ msgstr "Directory degli snapshot"
 #: backend/api/backups.py:247
 #, python-format
 msgid ""
-"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no "
-"trailing '/')"
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
+" trailing '/')"
 msgstr ""
 "%s deve essere un percorso assoluto semplice (lettere, cifre, '_', '.', '-' "
 "e '/'; senza '/' finale)"
@@ -4477,7 +4517,8 @@ msgstr ""
 #: backend/api/backups.py:255
 msgid "The snapshot directory must be outside the storage path"
 msgstr ""
-"La directory degli snapshot deve trovarsi fuori dal percorso di archiviazione"
+"La directory degli snapshot deve trovarsi fuori dal percorso di "
+"archiviazione"
 
 #: backend/api/backups.py:261
 msgid "Snapshots to keep"
@@ -4504,7 +4545,7 @@ msgstr ""
 "Ogni regola di percorso è una riga di al massimo 512 caratteri, senza spazi "
 "iniziali o finali e senza # iniziale"
 
-#: backend/api/backups.py:298 backend/api/backups_drift.py:97
+#: backend/api/backups.py:298 backend/api/backups_drift.py:103
 #: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "Il nome dello snapshot non è valido"
@@ -4600,10 +4641,10 @@ msgid ""
 "recovery runbook describes."
 msgstr ""
 "Questo backup è cifrato con la tua chiave di deposito di emergenza, che "
-"SysManage non possiede mai. Ripristinalo a mano con restate e quella chiave, "
-"come descrive la procedura di ripristino del server."
+"SysManage non possiede mai. Ripristinalo a mano con restate e quella chiave,"
+" come descrive la procedura di ripristino del server."
 
-#: backend/api/backups.py:876 backend/api/backups_drift.py:105
+#: backend/api/backups.py:876 backend/api/backups_drift.py:114
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "Il restate di questo host non può ancora farlo; aggiorna restate"
@@ -4619,8 +4660,8 @@ msgstr "Attività di backup non trovata"
 #: backend/api/firewall_roles_helpers.py:137
 msgid "Port number must be between 0 and 65535 (0 means any port)"
 msgstr ""
-"Il numero di porta deve essere compreso tra 0 e 65535 (0 significa qualsiasi "
-"porta)"
+"Il numero di porta deve essere compreso tra 0 e 65535 (0 significa qualsiasi"
+" porta)"
 
 #: backend/api/firewall_roles_helpers.py:148
 msgid "At least one protocol (TCP or UDP) must be selected"
@@ -4688,12 +4729,12 @@ msgstr "Aggiornamento versione OS richiesto"
 msgid "Updates check requested"
 msgstr "Controllo delle aggiornamenti richiesto"
 
-#: backend/api/secrets/crud.py:35 backend/api/error_constants.py:166
+#: backend/api/secrets/crud.py:36 backend/api/error_constants.py:166
 #: backend/services/vault_service.py:423
 msgid "Secret not found"
 msgstr "Segreto non trovato"
 
-#: backend/api/secrets/crud.py:46
+#: backend/api/secrets/crud.py:47
 msgid ""
 "Secrets management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
@@ -4701,23 +4742,23 @@ msgstr ""
 "La gestione dei segreti richiede una licenza SysManage Professional+. "
 "Effettuare l'upgrade per accedere a questa funzionalità."
 
-#: backend/api/secrets/crud.py:128
+#: backend/api/secrets/crud.py:129
 msgid "Failed to retrieve secret content from vault"
 msgstr "Impossibile recuperare il contenuto del segreto dal vault"
 
-#: backend/api/secrets/crud.py:160
+#: backend/api/secrets/crud.py:161
 msgid "Failed to store secret in vault"
 msgstr "Impossibile memorizzare il segreto nel vault"
 
-#: backend/api/secrets/crud.py:223
+#: backend/api/secrets/crud.py:224
 msgid "Failed to update secret in vault"
 msgstr "Impossibile aggiornare il segreto nel vault"
 
-#: backend/api/secrets/crud.py:266
+#: backend/api/secrets/crud.py:267
 msgid "Secret deleted successfully"
 msgstr "Segreto eliminato con successo"
 
-#: backend/api/secrets/crud.py:296
+#: backend/api/secrets/crud.py:297
 #, python-brace-format
 msgid "Deleted {count} secrets"
 msgstr "{count} segreti eliminati"
@@ -4770,7 +4811,8 @@ msgstr ""
 "Aggiorna per accedere a questa funzionalità."
 
 #: backend/api/reboot_orchestration.py:135
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
 msgstr ""
 "Nessun host figlio in esecuzione trovato. Utilizzare l'endpoint di riavvio "
 "standard."
@@ -4784,44 +4826,87 @@ msgstr "Riavvio orchestrato avviato con %d host figlio/i in esecuzione"
 msgid "Reboot orchestration not found"
 msgstr "Orchestrazione di riavvio non trovata"
 
-#: backend/api/upgrade_profiles.py:58
+#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:185
 msgid "Upgrade profile not found"
 msgstr "Profilo di aggiornamento non trovato"
 
-#: backend/api/upgrade_profiles.py:74
+#: backend/api/upgrade_profiles.py:71
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
-"upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
 msgstr ""
 "I profili di aggiornamento pianificati richiedono una licenza SysManage "
 "Professional+. Esegui l'upgrade per accedere a questa funzionalità."
 
-#: backend/api/upgrade_profiles.py:196
+#: backend/api/upgrade_profiles.py:273
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "Profilo di aggiornamento '%s' creato"
 
-#: backend/api/upgrade_profiles.py:263
+#: backend/api/upgrade_profiles.py:342
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "Profilo di aggiornamento '%s' aggiornato"
 
-#: backend/api/upgrade_profiles.py:295
+#: backend/api/upgrade_profiles.py:375
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "Profilo di aggiornamento '%s' eliminato"
 
-#: backend/api/upgrade_profiles.py:300
+#: backend/api/upgrade_profiles.py:380
 msgid "Upgrade profile deleted"
 msgstr "Profilo di aggiornamento eliminato"
 
-#: backend/api/upgrade_profiles.py:390
+#: backend/api/upgrade_profiles.py:416
 #, python-format
-msgid ""
-"Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
-msgstr ""
-"Profilo di aggiornamento '%(profile_name)s' attivato contro %(host_count)d "
-"host(s)"
+msgid "Ran upgrade profile '%s' now"
+msgstr "Profilo di aggiornamento '%s' eseguito ora"
+
+#: backend/api/auto_updates.py:64
+msgid "A reason is required"
+msgstr "È richiesto un motivo"
+
+#: backend/api/auto_updates.py:133
+#, python-format
+msgid "Held every automatic update policy: %s"
+msgstr "Tutti i criteri di aggiornamento automatico sospesi: %s"
+
+#: backend/api/auto_updates.py:135
+msgid "Released the hold on every automatic update policy"
+msgstr "Sospensione di tutti i criteri di aggiornamento automatico revocata"
+
+#: backend/api/auto_updates.py:162
+msgid "Changed the automatic update settings"
+msgstr "Impostazioni degli aggiornamenti automatici modificate"
+
+#: backend/api/auto_updates.py:195
+#, python-format
+msgid "Held automatic update policy '%(policy)s': %(reason)s"
+msgstr "Criterio di aggiornamento automatico '%(policy)s' sospeso: %(reason)s"
+
+#: backend/api/auto_updates.py:198
+#, python-format
+msgid "Released the hold on automatic update policy '%s'"
+msgstr "Sospensione del criterio di aggiornamento automatico '%s' revocata"
+
+#: backend/api/auto_updates.py:228
+#, python-format
+msgid "%(host)s will never be updated automatically: %(reason)s"
+msgstr "%(host)s non verrà mai aggiornato automaticamente: %(reason)s"
+
+#: backend/api/auto_updates.py:231
+#, python-format
+msgid "%s may be updated automatically again"
+msgstr "%s può di nuovo essere aggiornato automaticamente"
+
+#: backend/api/auto_updates.py:328
+msgid "Run not found"
+msgstr "Esecuzione non trovata"
+
+#: backend/api/auto_updates.py:336
+#, python-format
+msgid "Acknowledged the automatic update run on %s"
+msgstr "Esecuzione dell'aggiornamento automatico su %s confermata"
 
 #: backend/api/agent.py:101
 msgid "Rate limit exceeded"
@@ -5042,7 +5127,8 @@ msgstr "Iniziativa dell'installazione antivirus per tutti i %d host"
 #: backend/api/antivirus_status.py:346
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
+"hosts"
 msgstr ""
 "Iniziativa della distribuzione antivirus per %(success_count)d di "
 "%(total_count)d host"
@@ -5076,15 +5162,15 @@ msgstr "Il motore del host figlio non può elaborare questa richiesta."
 msgid "Permission denied: {} role required"
 msgstr "Autorizzazione negata: ruolo {} richiesto"
 
-#: backend/api/backups_drift.py:57
+#: backend/api/backups_drift.py:63
 msgid "The drift timeline needs the Professional+ backup engine"
 msgstr "La cronologia del drift richiede il motore di backup di Professional+"
 
-#: backend/api/backups_drift.py:77 backend/api/backups_browse.py:95
+#: backend/api/backups_drift.py:83 backend/api/backups_browse.py:95
 msgid "The path must be absolute"
 msgstr "Il percorso deve essere assoluto"
 
-#: backend/api/backups_drift.py:109
+#: backend/api/backups_drift.py:118
 msgid "A comparison of snapshots is already running"
 msgstr "È già in corso un confronto di snapshot"
 
@@ -5165,7 +5251,8 @@ msgstr "Impossibile recuperare le versioni del sistema operativo: %s"
 #, python-format
 msgid "Failed to retrieve packages for manager %(manager_name)s: %(error)s"
 msgstr ""
-"Impossibile recuperare i pacchetti per il manager %(manager_name)s: %(error)s"
+"Impossibile recuperare i pacchetti per il manager %(manager_name)s: "
+"%(error)s"
 
 #: backend/api/packages.py:310
 #, python-format
@@ -5262,15 +5349,15 @@ msgstr "È necessario specificare un motivo di override."
 msgid "Override duration must be positive."
 msgstr "La durata dell'override deve essere positiva."
 
-#: backend/api/maintenance_windows.py:455
+#: backend/api/maintenance_windows.py:461
 msgid "Permission denied: Delete Queue Message role required"
 msgstr "Permesso negato: è richiesto il ruolo Delete Queue Message"
 
-#: backend/api/maintenance_windows.py:472
+#: backend/api/maintenance_windows.py:478
 msgid "Message not found"
 msgstr "Messaggio non trovato"
 
-#: backend/api/maintenance_windows.py:480
+#: backend/api/maintenance_windows.py:486
 msgid "Only a command a maintenance window is holding can be canceled."
 msgstr ""
 "Si può annullare solo un comando trattenuto da una finestra di manutenzione."
@@ -5453,8 +5540,8 @@ msgstr "Una configurazione di piattaforma per %s su questo host esiste già"
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr ""
-"La configurazione della piattaforma possiede ancora %d specchio/i; eliminare "
-"quelli prima"
+"La configurazione della piattaforma possiede ancora %d specchio/i; eliminare"
+" quelli prima"
 
 #: backend/api/first_admin.py:89
 msgid ""
@@ -5596,7 +5683,8 @@ msgstr "Il server host di servizio non ha indirizzi risolvibili"
 #: backend/api/content_lifecycle_promotion.py:543
 msgid "Repository mirroring is required to repoint a host"
 msgstr ""
-"È richiesta la sincronizzazione del repository per riorientare il server host"
+"È richiesta la sincronizzazione del repository per riorientare il server "
+"host"
 
 #: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
@@ -5629,7 +5717,8 @@ msgstr "Accesso negato: richiesta del ruolo ADD_ENABLED_PACKAGE_MANAGER"
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS "
+"'%(os_name)s'"
 msgstr ""
 "Il gestore dei pacchetti '%(package_manager)s' è già abilitato per OS "
 "'%(os_name)s'"
@@ -5675,10 +5764,12 @@ msgid "Script content cannot be empty"
 msgstr "Il contenuto dello script non può essere vuoto"
 
 #: backend/api/scripts/models.py:122
+#: backend/api/scripts/routes_executions.py:97
 msgid "Either saved_script_id or script_content must be provided"
 msgstr "Ottieni o specifica saved_script_id o script_content"
 
 #: backend/api/scripts/models.py:132
+#: backend/api/scripts/routes_executions.py:106
 msgid "shell_type is required for ad-hoc scripts"
 msgstr "shell_type è richiesto per gli script ad hoc"
 
@@ -5690,66 +5781,66 @@ msgstr ""
 "Questo host richiede l'approvazione per gli script; lo esegua da uno script "
 "salvato con approvazione."
 
-#: backend/api/scripts/routes_executions.py:104
+#: backend/api/scripts/routes_executions.py:126
 msgid "Saved script not found"
 msgstr "Script salvato non trovato"
 
-#: backend/api/scripts/routes_executions.py:109
+#: backend/api/scripts/routes_executions.py:131
 msgid "Script is not active"
 msgstr "Lo script non è attivo"
 
-#: backend/api/scripts/routes_executions.py:189
+#: backend/api/scripts/routes_executions.py:211
 #, python-brace-format
 msgid "Executed script '{script_name}' on host '{host_fqdn}'"
 msgstr "Script '{script_name}' eseguito sull'host '{host_fqdn}'"
 
-#: backend/api/scripts/routes_executions.py:211
+#: backend/api/scripts/routes_executions.py:233
 msgid "Failed to queue script execution: {}"
 msgstr "Impossibile inserire l'esecuzione dello script nella coda: {}"
 
-#: backend/api/scripts/routes_executions.py:221
+#: backend/api/scripts/routes_executions.py:243
 msgid "Failed to queue script execution"
 msgstr "Impossibile inserire l'esecuzione dello script nella coda"
 
-#: backend/api/scripts/routes_executions.py:234
+#: backend/api/scripts/routes_executions.py:256
 msgid "Script execution queued for delivery"
 msgstr "L'esecuzione dello script in coda per la consegna"
 
-#: backend/api/scripts/routes_executions.py:242
+#: backend/api/scripts/routes_executions.py:264
 msgid "Failed to execute script"
 msgstr "Impossibile eseguire lo script"
 
-#: backend/api/scripts/routes_executions.py:326
+#: backend/api/scripts/routes_executions.py:348
 msgid "Failed to fetch script executions"
 msgstr "Impossibile ottenere le esecuzioni dello script"
 
-#: backend/api/scripts/routes_executions.py:347
-#: backend/api/scripts/routes_executions.py:417
+#: backend/api/scripts/routes_executions.py:369
+#: backend/api/scripts/routes_executions.py:439
 msgid "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 msgstr "Accesso negato: richiesta del ruolo DELETE_SCRIPT_EXECUTION"
 
-#: backend/api/scripts/routes_executions.py:359
-#: backend/api/scripts/routes_executions.py:486
+#: backend/api/scripts/routes_executions.py:381
+#: backend/api/scripts/routes_executions.py:508
 msgid "Script execution not found"
 msgstr "L'esecuzione dello script non trovata"
 
-#: backend/api/scripts/routes_executions.py:387
+#: backend/api/scripts/routes_executions.py:409
 msgid "Script execution deleted successfully"
 msgstr "L'esecuzione dello script è stata eliminata con successo"
 
-#: backend/api/scripts/routes_executions.py:396
+#: backend/api/scripts/routes_executions.py:418
 msgid "Failed to delete script execution"
 msgstr "Impossibile cancellare l'esecuzione dello script"
 
-#: backend/api/scripts/routes_executions.py:457
+#: backend/api/scripts/routes_executions.py:479
 msgid "Script executions deleted successfully"
 msgstr "Le esecuzioni dello script sono state eliminate con successo"
 
-#: backend/api/scripts/routes_executions.py:464
+#: backend/api/scripts/routes_executions.py:486
 msgid "Failed to delete script executions"
 msgstr "Impossibile cancellare le esecuzioni dello script"
 
-#: backend/api/scripts/routes_executions.py:521
+#: backend/api/scripts/routes_executions.py:543
 msgid "Failed to fetch script execution"
 msgstr "Impossibile ottenere l'esecuzione dello script"
 
@@ -5838,15 +5929,16 @@ msgstr "Cosa è cambiato confronta solo con il repository attuale"
 msgid "A check of what changed is already running"
 msgstr "È già in corso una verifica delle modifiche"
 
-#: backend/websocket/message_router.py:280
+#: backend/websocket/message_router.py:287
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Tipo di messaggio sconosciuto nella coda: %s"
 
-#: backend/websocket/message_router.py:285
+#: backend/websocket/message_router.py:292
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
-msgstr "Errore nella routing del tipo di messaggio %(message_type)s: %(error)s"
+msgstr ""
+"Errore nella routing del tipo di messaggio %(message_type)s: %(error)s"
 
 #: backend/websocket/queue_maintenance.py:70
 #, python-format
@@ -5937,8 +6029,8 @@ msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
 "deleting all its messages from queue"
 msgstr ""
-"L'host %(host_id)s (FQDN: %(fqdn)s) non è più approvato (stato: %(status)s), "
-"eliminando tutti i suoi messaggi dalla coda"
+"L'host %(host_id)s (FQDN: %(fqdn)s) non è più approvato (stato: %(status)s),"
+" eliminando tutti i suoi messaggi dalla coda"
 
 #: backend/websocket/inbound_processor.py:413
 #, python-format
@@ -5964,7 +6056,8 @@ msgstr "Messaggio %s manca di hostname e host_id, eliminando"
 #, python-format
 msgid "Error processing NULL host_id message %(message_id)s: %(error)s"
 msgstr ""
-"Errore nel processamento del messaggio NULL host_id %(message_id)s: %(error)s"
+"Errore nel processamento del messaggio NULL host_id %(message_id)s: "
+"%(error)s"
 
 #: backend/websocket/inbound_processor.py:668
 #, python-format
@@ -6005,7 +6098,8 @@ msgstr ""
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr ""
-"Impossibile contrassegnare il messaggio SYSTEM_INFO '%s' come in elaborazione"
+"Impossibile contrassegnare il messaggio SYSTEM_INFO '%s' come in "
+"elaborazione"
 
 #: backend/websocket/inbound_processor.py:811
 #, python-format
@@ -6042,8 +6136,8 @@ msgstr "Marcato messaggio come in elaborazione: %s"
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr ""
-"Impossibile contrassegnare il messaggio %(message_id)s come in elaborazione: "
-"%(error)s"
+"Impossibile contrassegnare il messaggio %(message_id)s come in elaborazione:"
+" %(error)s"
 
 # Message acknowledgment strings
 #: backend/websocket/queue_operations.py:567
@@ -6108,8 +6202,9 @@ msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
 "scheduled for retry in %(backoff)d seconds"
 msgstr ""
-"Il messaggio %(message_id)s ha fallito (tentativo %(attempt)d/"
-"%(max_retries)d), pianificato per ripetizione in %(backoff)d secondi"
+"Il messaggio %(message_id)s ha fallito (tentativo "
+"%(attempt)d/%(max_retries)d), pianificato per ripetizione in %(backoff)d "
+"secondi"
 
 #: backend/websocket/queue_operations.py:898
 #, python-format
@@ -6222,10 +6317,10 @@ msgid ""
 "the escrow key"
 msgstr ""
 "Questo host è il server SysManage. Usa «Esegui il backup di questo server "
-"SysManage», che mantiene in esecuzione il suo database, esclude la chiave di "
-"unseal di OpenBAO e cifra con la chiave di deposito"
+"SysManage», che mantiene in esecuzione il suo database, esclude la chiave di"
+" unseal di OpenBAO e cifra con la chiave di deposito"
 
-#: backend/services/backup_server.py:172
+#: backend/services/backup_server.py:181
 msgid ""
 "Save a break-glass escrow key first: the SysManage server's own backup is "
 "encrypted to it, so restoring OpenBAO never needs a key kept inside OpenBAO"
@@ -6241,18 +6336,13 @@ msgstr "L'accesso a iCloud scade presto: accedi di nuovo"
 #: backend/services/cloud_backup_tick.py:329
 #, python-format
 msgid ""
-"The iCloud sign-in for %(account)s ends around %(date)s. After that, "
-"SysManage cannot download its photos until someone signs in again.\n"
+"The iCloud sign-in for %(account)s ends around %(date)s. After that, SysManage cannot download its photos until someone signs in again.\n"
 "\n"
-"Open Backups, then Cloud backup, and press Connect on this account. You will "
-"need the Apple ID's two-factor code."
+"Open Backups, then Cloud backup, and press Connect on this account. You will need the Apple ID's two-factor code."
 msgstr ""
-"L'accesso a iCloud per %(account)s scade intorno al %(date)s. Dopo quella "
-"data SysManage non potrà scaricare le sue foto finché qualcuno non accederà "
-"di nuovo.\n"
+"L'accesso a iCloud per %(account)s scade intorno al %(date)s. Dopo quella data SysManage non potrà scaricare le sue foto finché qualcuno non accederà di nuovo.\n"
 "\n"
-"Apri Backup, poi Backup cloud, e premi Connetti su questo account. Servirà "
-"il codice a due fattori dell'ID Apple."
+"Apri Backup, poi Backup cloud, e premi Connetti su questo account. Servirà il codice a due fattori dell'ID Apple."
 
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
@@ -6302,6 +6392,21 @@ msgid ""
 msgstr ""
 "Confermi che verranno installati pacchetti e rimossi quelli che lo snapshot "
 "non aveva, perché corrisponda allo snapshot"
+
+#: backend/services/auto_update_runner.py:309
+#, python-format
+msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
+msgstr ""
+"Aggiornamento automatico accodato su %(host)s dal criterio '%(policy)s'"
+
+#: backend/services/auto_update_runner.py:387
+msgid "The host never reported the result"
+msgstr "L'host non ha mai segnalato il risultato"
+
+#: backend/services/auto_update_results.py:68
+#, python-format
+msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
+msgstr "Riavvio automatico di %(host)s dopo il criterio '%(policy)s'"
 
 #: backend/services/held_asset_tags.py:159
 #, python-format
@@ -6471,8 +6576,8 @@ msgstr "Incolli una chiave pubblica OpenPGP in formato ASCII armor"
 #: backend/services/backup_escrow.py:214
 msgid "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
 msgstr ""
-"Questa è una chiave SEGRETA; incolla la chiave PUBBLICA (gpg --armor --"
-"export)"
+"Questa è una chiave SEGRETA; incolla la chiave PUBBLICA (gpg --armor "
+"--export)"
 
 #: backend/services/backup_breakglass.py:238
 msgid "Paste exactly one public key, not several"
@@ -6491,7 +6596,8 @@ msgstr ""
 #: backend/services/backup_breakglass.py:261
 #, python-format
 msgid "Say why the keys are exported, in %(min)d to %(max)d characters"
-msgstr "Spiega perché le chiavi sono esportate, da %(min)d a %(max)d caratteri"
+msgstr ""
+"Spiega perché le chiavi sono esportate, da %(min)d a %(max)d caratteri"
 
 #: backend/services/backup_breakglass.py:323
 #, python-format
@@ -6510,8 +6616,8 @@ msgstr "Nessuno degli host selezionati dispone di backup crittografati"
 #: backend/services/backup_reach.py:147
 #, python-format
 msgid ""
-"This host cannot reach the backup storage's restate-proxy (%(address)s, port "
-"%(port)s): %(error)s. Backups need a network path to it, and a certificate "
+"This host cannot reach the backup storage's restate-proxy (%(address)s, port"
+" %(port)s): %(error)s. Backups need a network path to it, and a certificate "
 "this host trusts."
 msgstr ""
 "Questo host non riesce a raggiungere il restate-proxy dell'archivio dei "
@@ -6550,21 +6656,13 @@ msgstr ""
 #: backend/services/backup_escrow.py:285
 #, python-format
 msgid ""
-"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-"
-"glass export made before this rotation does not hold the new keys, and "
-"backups taken from now on need them.\n"
+"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-glass export made before this rotation does not hold the new keys, and backups taken from now on need them.\n"
 "\n"
-"Open Backups, then a host's Encryption panel, and use \"Break-glass key "
-"export\" to make a new export. Keep it offline, and destroy the old one."
+"Open Backups, then a host's Encryption panel, and use \"Break-glass key export\" to make a new export. Keep it offline, and destroy the old one."
 msgstr ""
-"SysManage ha ruotato %(count)d chiave/i di cifratura dei backup come "
-"pianificato. Un'esportazione delle chiavi di emergenza fatta prima di questa "
-"rotazione non contiene le nuove chiavi, e i backup eseguiti da ora in poi ne "
-"hanno bisogno.\n"
+"SysManage ha ruotato %(count)d chiave/i di cifratura dei backup come pianificato. Un'esportazione delle chiavi di emergenza fatta prima di questa rotazione non contiene le nuove chiavi, e i backup eseguiti da ora in poi ne hanno bisogno.\n"
 "\n"
-"Apri Backup, poi il pannello \"Cifratura\" di un host, e usa \"Esportazione "
-"delle chiavi di emergenza\" per crearne una nuova. Conservala offline e "
-"distruggi quella vecchia."
+"Apri Backup, poi il pannello \"Cifratura\" di un host, e usa \"Esportazione delle chiavi di emergenza\" per crearne una nuova. Conservala offline e distruggi quella vecchia."
 
 #: backend/services/config_mgmt_baseline.py:286
 #, python-format
@@ -6591,7 +6689,8 @@ msgstr ""
 
 #: backend/services/network_sweep.py:70
 msgid "That network is too large to sweep (at most 4096 addresses)"
-msgstr "Questa rete è troppo grande da scansionare (al massimo 4096 indirizzi)"
+msgstr ""
+"Questa rete è troppo grande da scansionare (al massimo 4096 indirizzi)"
 
 #: backend/services/network_sweep.py:73
 msgid "No agent is on that network, so it cannot be swept from here"
@@ -6732,7 +6831,8 @@ msgstr "Fonte principale di dati CVE del NIST (include le CVE di Apple/macOS)"
 #: backend/vulnerability/cve_sources.py:30
 msgid "Ubuntu-specific vulnerability data with package fixes"
 msgstr ""
-"Dati sulle vulnerabilità specifici di Ubuntu, con le correzioni dei pacchetti"
+"Dati sulle vulnerabilità specifici di Ubuntu, con le correzioni dei "
+"pacchetti"
 
 #: backend/vulnerability/cve_sources.py:36
 msgid "Debian package vulnerability data"
@@ -6763,20 +6863,16 @@ msgstr ""
 "Vulnerabilità di macOS per versione del sistema operativo, dai dati del NVD "
 "sulle versioni interessate"
 
-#: backend/api/airgap_collector_runs.py
 #, python-format
-msgid "This run is not waiting for a blank disc (status: %s)."
-msgstr "Questa esecuzione non è in attesa di un disco vuoto (stato: %s)."
-
-#: backend/api/airgap_collector_runs.py
-#, python-format
-msgid "Loaded a blank disc for disc %(disc)d of %(count)d of air-gap collection run '%(iso_label)s'"
-msgstr "Caricato un disco vuoto per il disco %(disc)d di %(count)d della sessione di raccolta air-gap '%(iso_label)s'"
+#~ msgid ""
+#~ "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
+#~ msgstr ""
+#~ "Profilo di aggiornamento '%(profile_name)s' attivato contro %(host_count)d "
+#~ "host(s)"
 
 #~ msgid ""
 #~ "Confirm that photos will be deleted from iCloud once they are downloaded"
-#~ msgstr ""
-#~ "Conferma che le foto verranno eliminate da iCloud una volta scaricate"
+#~ msgstr "Conferma che le foto verranno eliminate da iCloud una volta scaricate"
 
 #~ msgid "The backup engine is not available"
 #~ msgstr "Il motore di backup non è disponibile"
@@ -6788,9 +6884,9 @@ msgstr "Caricato un disco vuoto per il disco %(disc)d di %(count)d della session
 #~ "This snapshot is encrypted; restoring or browsing it needs a restate that "
 #~ "can take the key for one job, which is not released yet"
 #~ msgstr ""
-#~ "Questo snapshot è cifrato; per ripristinarlo o sfogliarlo serve un "
-#~ "restate in grado di ricevere la chiave per un singolo processo, che non è "
-#~ "ancora disponibile"
+#~ "Questo snapshot è cifrato; per ripristinarlo o sfogliarlo serve un restate "
+#~ "in grado di ricevere la chiave per un singolo processo, che non è ancora "
+#~ "disponibile"
 
 #~ msgid "Days to keep seals"
 #~ msgstr "Giorni di conservazione degli snapshot sigillati"
@@ -6807,19 +6903,18 @@ msgstr "Caricato un disco vuoto per il disco %(disc)d di %(count)d della session
 
 #, python-format
 #~ msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
-#~ msgstr ""
-#~ "Elaborazione messaggi per host approvato %(host_id)s (FQDN: %(fqdn)s)"
+#~ msgstr "Elaborazione messaggi per host approvato %(host_id)s (FQDN: %(fqdn)s)"
 
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr ""
 #~ "Il servizio email è disabilitato. Abilitalo nel file di configurazione."
 
 #~ msgid ""
-#~ "Multi-factor authentication is required for this account. Please enrol "
-#~ "from your profile page before signing in."
+#~ "Multi-factor authentication is required for this account. Please enrol from "
+#~ "your profile page before signing in."
 #~ msgstr ""
-#~ "Per questo account è richiesta l'autenticazione a più fattori. Per "
-#~ "favore, iscriviti dalla tua pagina del profilo prima di accedere."
+#~ "Per questo account è richiesta l'autenticazione a più fattori. Per favore, "
+#~ "iscriviti dalla tua pagina del profilo prima di accedere."
 
 #, python-format
 #~ msgid "Package collection requested from host %s"
@@ -6856,8 +6951,7 @@ msgstr "Caricato un disco vuoto per il disco %(disc)d di %(count)d della session
 
 #, python-format
 #~ msgid "Mirror %s is for %s, can't assign to a %s default"
-#~ msgstr ""
-#~ "Lo specchio %s è per %s, non può essere assegnato a un predefinito %s"
+#~ msgstr "Lo specchio %s è per %s, non può essere assegnato a un predefinito %s"
 
 #, python-format
 #~ msgid ""
@@ -6898,8 +6992,7 @@ msgstr "Caricato un disco vuoto per il disco %(disc)d di %(count)d della session
 
 #, python-format
 #~ msgid "Host '%s' enrolled into tenant %s via enrollment token"
-#~ msgstr ""
-#~ "Sistema host '%s' iscritto nel tenant %s tramite token di iscrizione"
+#~ msgstr "Sistema host '%s' iscritto nel tenant %s tramite token di iscrizione"
 
 #, python-format
 #~ msgid "Host '%s' enrolled via registration key '%s' (auto_approve=%s)"
@@ -6956,8 +7049,7 @@ msgstr "Caricato un disco vuoto per il disco %(disc)d di %(count)d della session
 #, python-format
 #~ msgid "Package manager '%s' is already enabled for OS '%s'"
 #~ msgstr ""
-#~ "Il gestore di pacchetti '%s' è giaè abilitato per il sistema operativo "
-#~ "'%s'"
+#~ "Il gestore di pacchetti '%s' è giaè abilitato per il sistema operativo '%s'"
 
 #, python-format
 #~ msgid "Error routing message type %s: %s"
@@ -6988,13 +7080,12 @@ msgstr "Caricato un disco vuoto per il disco %(disc)d di %(count)d della session
 
 #, python-format
 #~ msgid "Processing NULL host_id message for approved host %s (ID: %s)"
-#~ msgstr ""
-#~ "Elaborando il messaggio NULL host_id per l'host approvato %s (ID: %s)"
+#~ msgstr "Elaborando il messaggio NULL host_id per l'host approvato %s (ID: %s)"
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for "
-#~ "retry (NOT deleting) -- may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "Il sistema host '%s' non è presente in questo database; differendo %d "
 #~ "messaggio(i) in coda (NON eliminando) - potrebbe essere un'iscrizione in "
@@ -7063,8 +7154,8 @@ msgstr "Caricato un disco vuoto per il disco %(disc)d di %(count)d della session
 #, python-format
 #~ msgid "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
 #~ msgstr ""
-#~ "Messaggio %s fallito (tentativo %d/%d), pianificato per un ripetizione "
-#~ "tra %d secondi"
+#~ "Messaggio %s fallito (tentativo %d/%d), pianificato per un ripetizione tra "
+#~ "%d secondi"
 
 #, python-format
 #~ msgid "Message %s permanently failed after %d attempts: %s"
@@ -7233,8 +7324,8 @@ msgstr "Caricato un disco vuoto per il disco %(disc)d di %(count)d della session
 #~ msgstr "Conferma Aggiornamento OS"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system "
-#~ "reboot. Continue?"
+#~ "This action will upgrade the operating system and require a system reboot. "
+#~ "Continue?"
 #~ msgstr ""
 #~ "Questa azione aggiornerà il sistema operativo e richiederà un riavvio "
 #~ "sistema. Continuare?"
@@ -7351,12 +7442,12 @@ msgstr "Caricato un disco vuoto per il disco %(disc)d di %(count)d della session
 #~ msgstr "KVM/libvirt inizializzato con successo"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please "
-#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
+#~ "to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
 #~ "L'esportazione del registro di audit richiede una licenza SysManage "
-#~ "Professional+. Effettuare l'upgrade per accedere ai formati di "
-#~ "esportazione CSV, JSON, CEF e LEEF."
+#~ "Professional+. Effettuare l'upgrade per accedere ai formati di esportazione "
+#~ "CSV, JSON, CEF e LEEF."
 
 # Pro+ redirect messages
 #~ msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"

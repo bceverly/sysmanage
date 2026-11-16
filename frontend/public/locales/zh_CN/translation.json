@@ -791,7 +791,8 @@
     "hardwareNeedsAttention": "需要关注的硬件",
     "backupsAttention": "需要关注的备份",
     "backupsEscrowStale": "应急密钥导出已过时",
-    "backupsServerUnprotected": "此 SysManage 服务器没有成功的备份"
+    "backupsServerUnprotected": "此 SysManage 服务器没有成功的备份",
+    "autoUpdateProblems": "自动更新问题"
   },
   "dataGrid": {
     "columnVisibility": "列可见性",
@@ -3784,12 +3785,28 @@
     "title": "更新配置文件",
     "trigger": "立即触发",
     "triggerError": "触发配置文件失败",
-    "triggered": "对 {{count}} 个主机触发 -- 已派发 {{enqueued}} 个",
     "updated": "更新配置文件已保存",
     "window": "分阶段窗口 (分钟)",
     "windowHelp": "将代理调度分散在这么多分钟内 (0-720)",
     "windowRange": "分阶段窗口必须在 0 至 720 分钟之间",
-    "addDialogTitle": "添加更新配置文件"
+    "addDialogTitle": "添加更新配置文件",
+    "autoApply": "按此计划自动应用",
+    "automatic": "自动",
+    "backupHelp": "空白：不检查备份",
+    "backupHours": "仅在（小时）内有成功备份时",
+    "excluded": "永不应用这些软件包",
+    "excludedHelp": "用逗号分隔的名称； * 匹配任何内容（linux-image-*、postgresql*）",
+    "held": "已暂停",
+    "hold": "暂停此策略",
+    "holdReason": "为何暂停 \"{{name}}\"？",
+    "listedHosts": "已列出 {{count}} 台主机",
+    "listedHostsHelp": "列出的主机优先于标签。一个同时被多个策略覆盖的主机遵循最具体的策略。",
+    "listedHostsLabel": "仅这些主机",
+    "ranNow": "正在更新 {{queued}} 台，已跳过 {{skipped}} 台，{{nothing}} 台无需处理",
+    "reboot": "重启",
+    "rebootNever": "从不（主机显示“需要重启”）",
+    "rebootWhenNeeded": "在更新需要时重启",
+    "release": "解除暂停"
   },
   "userDetail": {
     "active": "活跃",
@@ -6174,5 +6191,67 @@
       "view_report": "查看报告",
       "view_user_security_roles": "查看用户安全角色"
     }
+  },
+  "autoUpdates": {
+    "acknowledge": "确认",
+    "allHeld": "每条自动更新策略都已暂停。",
+    "appliedOf": "已应用 {{applied}} 个，共 {{total}} 个",
+    "details": "详情",
+    "followsPolicy": "遵循 \"{{name}}\"：{{rule}}。",
+    "heldBy": "自 {{when}} 起由 {{who}} 暂停：{{reason}}",
+    "holdAll": "暂停所有策略",
+    "holdReason": "为何暂停所有自动更新？",
+    "hostTitle": "自动更新",
+    "noPolicy": "没有任何自动更新策略覆盖此主机。",
+    "noProblems": "没有需要关注的自动运行。",
+    "optOut": "永远不自动更新",
+    "optOutReason": "为何这个主机永远不能自动更新？",
+    "optedOut": "永不自动更新：{{reason}}",
+    "pkg": {
+      "agent": "代理通过“更新代理”进行更新",
+      "busy": "已在更新中",
+      "excluded": "由策略排除",
+      "firmware": "仅当策略指定fwupd时才更新固件",
+      "held": "已在主机上锁定版本",
+      "manager": "包管理器未包含在策略中",
+      "notSecurity": "不是安全更新",
+      "osUpgrade": "操作系统升级从不自动"
+    },
+    "policy": "策略",
+    "reboot": {
+      "back": "已重启并恢复在线",
+      "notBack": "重启后未恢复在线",
+      "queued": "正在重启"
+    },
+    "result": "结果",
+    "rule": {
+      "moreConservative": "同等具体的策略中较保守的一个",
+      "moreSpecific": "覆盖它的最具体策略",
+      "only": "唯一覆盖该主机的策略"
+    },
+    "saveError": "无法保存更改",
+    "skip": {
+      "failedRecently": "上一次运行失败；将等待有人确认或重试间隔时间过去",
+      "imageMode": "镜像模式的主机改为更新其镜像",
+      "inactive": "主机处于非活动状态",
+      "needsRepair": "包管理器需要修复",
+      "noBackup": "最近没有成功的备份",
+      "notApproved": "主机未被批准",
+      "optedOut": "主机永远不会自动更新",
+      "pending": "上一次运行尚未完成",
+      "agentCannotApply": "其代理无法应用更新；请更新代理"
+    },
+    "status": {
+      "failed": "失败",
+      "nothingToDo": "无需操作",
+      "partial": "部分失败",
+      "queued": "运行中",
+      "skipped": "已跳过",
+      "succeeded": "成功",
+      "timedOut": "没有结果"
+    },
+    "subtitle": "启用了“自动应用”的配置文件会按计划更新其主机。",
+    "title": "自动更新",
+    "when": "时间"
   }
 }

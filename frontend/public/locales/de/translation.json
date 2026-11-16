@@ -791,7 +791,8 @@
     "hardwareNeedsAttention": "Hardware mit Handlungsbedarf",
     "backupsAttention": "Sicherungen, die Aufmerksamkeit erfordern",
     "backupsEscrowStale": "Notfall-Schlüsselexport veraltet",
-    "backupsServerUnprotected": "Dieser SysManage-Server hat keine erfolgreiche Sicherung"
+    "backupsServerUnprotected": "Dieser SysManage-Server hat keine erfolgreiche Sicherung",
+    "autoUpdateProblems": "Probleme bei automatischen Updates"
   },
   "dataGrid": {
     "columnVisibility": "Spaltensichtbarkeit",
@@ -3784,12 +3785,28 @@
     "title": "Aktualisierungsprofile",
     "trigger": "Jetzt auslösen",
     "triggerError": "Profil konnte nicht ausgelöst werden",
-    "triggered": "Ausgelöst für {{count}} Host(s) -- {{enqueued}} verteilt",
     "updated": "Aktualisierungsprofil gespeichert",
     "window": "Gestaffeltes Fenster (Minuten)",
     "windowHelp": "Agent-Versand über diese Anzahl Minuten verteilen (0-720)",
     "windowRange": "Gestaffeltes Fenster muss zwischen 0 und 720 Minuten liegen",
-    "addDialogTitle": "Aktualisierungsprofil hinzufügen"
+    "addDialogTitle": "Aktualisierungsprofil hinzufügen",
+    "autoApply": "Automatisch zu diesem Zeitplan anwenden",
+    "automatic": "Automatisch",
+    "backupHelp": "Leer: Backups nicht überprüfen",
+    "backupHours": "Nur nach einem guten Backup innerhalb von (Stunden)",
+    "excluded": "Diese Pakete nie anwenden",
+    "excludedHelp": "Komma-getrennte Namen; * passt zu allem (linux-image-*, postgresql*)",
+    "held": "Angehalten",
+    "hold": "Diese Richtlinie anhalten",
+    "holdReason": "Warum wird \"{{name}}\" gehalten?",
+    "listedHosts": "{{count}} listet Host(s) auf",
+    "listedHostsHelp": "Gelistete Hosts haben Vorrang vor Tags. Ein Host, der von mehreren Richtlinien abgedeckt ist, folgt der spezifischsten.",
+    "listedHostsLabel": "Nur diese Hosts",
+    "ranNow": "{{queued}} werden aktualisiert, {{skipped}} übersprungen, bei {{nothing}} nichts zu tun",
+    "reboot": "Neustarts",
+    "rebootNever": "Nie (der Host zeigt \"Neustart erforderlich\")",
+    "rebootWhenNeeded": "Neustart durchführen, wenn die Aktualisierung es erfordert",
+    "release": "Anhalten aufheben"
   },
   "userDetail": {
     "active": "Aktiv",
@@ -6174,5 +6191,67 @@
       "view_report": "Bericht anzeigen",
       "view_user_security_roles": "Benutzer-Sicherheitsrollen anzeigen"
     }
+  },
+  "autoUpdates": {
+    "acknowledge": "Bestätigen",
+    "allHeld": "Alle Richtlinien für automatische Updates sind angehalten.",
+    "appliedOf": "{{applied}} von {{total}} angewendet",
+    "details": "Details",
+    "followsPolicy": "Folgt \"{{name}}\": {{rule}}.",
+    "heldBy": "Angehalten seit {{when}} durch {{who}}: {{reason}}",
+    "holdAll": "Alle Richtlinien anhalten",
+    "holdReason": "Warum sollen alle automatischen Updates angehalten werden?",
+    "hostTitle": "Automatische Updates",
+    "noPolicy": "Es gibt keine automatische Update-Richtlinie für diesen Host.",
+    "noProblems": "Kein automatischer Lauf erfordert Aufmerksamkeit.",
+    "optOut": "Nie automatisch aktualisieren",
+    "optOutReason": "Warum darf dieser Host niemals automatisch aktualisiert werden?",
+    "optedOut": "Wird nie automatisch aktualisiert: {{reason}}",
+    "pkg": {
+      "agent": "der Agent wird über Agent aktualisieren aktualisiert",
+      "busy": "Wird bereits aktualisiert",
+      "excluded": "Von der Richtlinie ausgeschlossen",
+      "firmware": "Firmware nur, wenn die Richtlinie fwupd nennt",
+      "held": "Auf dem Host gehalten",
+      "manager": "Paketmanager ist in der Richtlinie nicht enthalten",
+      "notSecurity": "Kein Sicherheitsupdate",
+      "osUpgrade": "Ein Betriebssystem-Update ist nie automatisch"
+    },
+    "policy": "Richtlinie",
+    "reboot": {
+      "back": "Neu gestartet und wieder erreichbar",
+      "notBack": "Ist nach seinem Neustart nicht zurückgekehrt",
+      "queued": "Neustart"
+    },
+    "result": "Ergebnis",
+    "rule": {
+      "moreConservative": "Die konservativere von gleich spezifischen Richtlinien",
+      "moreSpecific": "Die spezifischste Richtlinie, die diesen Host abdeckt",
+      "only": "Die einzige Richtlinie, die diesen Host abdeckt"
+    },
+    "saveError": "Die Änderung konnte nicht gespeichert werden",
+    "skip": {
+      "failedRecently": "Sein vorheriger Lauf ist fehlgeschlagen; er wartet, bis jemand ihn bestätigt oder die Wiederholungsstunden abgelaufen sind",
+      "imageMode": "Ein Host im Image-Modus aktualisiert sein Image stattdessen",
+      "inactive": "Der Host ist inaktiv",
+      "needsRepair": "Der Paketmanager muss repariert werden",
+      "noBackup": "Es gibt keine aktuelle gute Sicherung",
+      "notApproved": "Der Host ist nicht genehmigt",
+      "optedOut": "Der Host aktualisiert niemals automatisch",
+      "pending": "Sein vorheriger Lauf ist noch nicht abgeschlossen",
+      "agentCannotApply": "sein Agent kann keine Updates anwenden; aktualisieren Sie den Agenten"
+    },
+    "status": {
+      "failed": "Fehlgeschlagen",
+      "nothingToDo": "Nichts zu tun",
+      "partial": "Teilweise fehlgeschlagen",
+      "queued": "Läuft",
+      "skipped": "Übersprungen",
+      "succeeded": "Erfolgreich abgeschlossen",
+      "timedOut": "Kein Ergebnis"
+    },
+    "subtitle": "Profile mit der Option 'Automatisch anwenden' aktualisieren ihre Hosts nach Plan.",
+    "title": "Automatische Updates",
+    "when": "Zeitpunkt"
   }
 }

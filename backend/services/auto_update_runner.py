@@ -1,0 +1,503 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
+"""The automatic update driver (ROADMAP 26.1, Enterprise).
+
+Before 26.1 nothing ran an upgrade profile on its schedule (the ``tick``
+endpoint waited for "an external scheduler" that never existed), and a
+profile's dispatch never worked: it sent ``apply_updates`` with no package
+names, which every agent refuses ("No packages specified").
+
+Now one leader-elected tick a minute, in every tenant database:
+
+  1. closes runs that never reported (``RUN_TIMEOUT_HOURS``) and follows the
+     reboots it asked for (``auto_update_results``);
+  2. unless every policy is on hold, fires each due policy (``auto_apply``
+     on, not held, ``next_run`` passed): every host it covers that follows
+     it (``resolve_policy``) gets a run -- skipped with a reason, "nothing to
+     do", or the exact pending updates the engine chose, named in an
+     ``apply_updates`` command released on the profile's stagger.
+
+Every decision is the Enterprise ``automation_engine``'s; this module only
+reads and writes the database and the queue.  Without the engine nothing is
+applied automatically (and the routes answer 402).
+"""
+
+import logging
+import uuid
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+
+from backend.i18n import _
+from backend.persistence import models
+from backend.persistence.partitions import iter_host_databases
+from backend.services.agent_capability_service import host_supports
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.websocket.messages import create_command_message
+from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
+from backend.startup.tick_runner import run_periodic
+
+logger = logging.getLogger(__name__)
+queue_ops = QueueOperations()
+
+TICK_INTERVAL_SECONDS = 60
+ERROR_BACKOFF_SECONDS = 30
+RUN_TIMEOUT_HOURS = 12
+ACTOR = "automatic updates"
+AGENT_CANNOT_APPLY = "agent_cannot_apply"
+
+
+def now_naive() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def engine():
+    """The Enterprise automation engine, or None."""
+    from backend.licensing.module_loader import (  # pylint: disable=import-outside-toplevel
+        module_loader,
+    )
+
+    return module_loader.get_module("automation_engine")
+
+
+def settings_row(db) -> models.AutoUpdateSettings:
+    """The tenant's one settings row, made on first use."""
+    row = db.query(models.AutoUpdateSettings).first()
+    if row is None:
+        row = models.AutoUpdateSettings(
+            id=uuid.uuid4(),
+            hold_all=False,
+            retry_after_hours=24,
+            reboot_timeout_minutes=30,
+        )
+        db.add(row)
+        db.flush()
+    return row
+
+
+def settings_dict(row: models.AutoUpdateSettings) -> Dict[str, Any]:
+    return {
+        "retry_after_hours": row.retry_after_hours,
+        "reboot_timeout_minutes": row.reboot_timeout_minutes,
+    }
+
+
+# ---------------------------------------------------------------------------
+# reading: profiles, hosts, updates as the engine's dicts
+# ---------------------------------------------------------------------------
+
+
+def profile_host_ids(db, profile_ids) -> Dict[str, List[str]]:
+    rows = (
+        db.query(
+            models.UpgradeProfileHost.profile_id, models.UpgradeProfileHost.host_id
+        )
+        .filter(models.UpgradeProfileHost.profile_id.in_(list(profile_ids)))
+        .all()
+    )
+    out: Dict[str, List[str]] = {}
+    for profile_id, host_id in rows:
+        out.setdefault(str(profile_id), []).append(str(host_id))
+    return out
+
+
+def profile_dict(profile, host_ids=None) -> Dict[str, Any]:
+    return {
+        "id": str(profile.id),
+        "name": profile.name,
+        "auto_apply": bool(profile.auto_apply),
+        "tag_id": str(profile.tag_id) if profile.tag_id else None,
+        "host_ids": list(host_ids or []),
+        "security_only": bool(profile.security_only),
+        "package_managers": (
+            profile.package_managers.split(",") if profile.package_managers else []
+        ),
+        "excluded_packages": profile.excluded_packages or "",
+        "reboot_mode": profile.reboot_mode or "never",
+        "require_backup_hours": profile.require_backup_hours,
+        "staggered_window_min": profile.staggered_window_min or 0,
+    }
+
+
+def auto_profiles(db) -> List[Dict[str, Any]]:
+    """Every policy that applies automatically, as dicts (for resolution)."""
+    rows = (
+        db.query(models.UpgradeProfile)
+        .filter(models.UpgradeProfile.auto_apply.is_(True))
+        .all()
+    )
+    hosts = profile_host_ids(db, [r.id for r in rows])
+    return [profile_dict(r, hosts.get(str(r.id))) for r in rows]
+
+
+def _tag_ids(db, host_ids) -> Dict[str, List[str]]:
+    out: Dict[str, List[str]] = {}
+    if not host_ids:
+        return out
+    for host_id, tag_id in (
+        db.query(models.HostTag.host_id, models.HostTag.tag_id)
+        .filter(models.HostTag.host_id.in_(list(host_ids)))
+        .all()
+    ):
+        out.setdefault(str(host_id), []).append(str(tag_id))
+    return out
+
+
+def last_run(db, host_id) -> Optional[models.AutoUpdateRun]:
+    return (
+        db.query(models.AutoUpdateRun)
+        .filter(
+            models.AutoUpdateRun.host_id == host_id,
+            models.AutoUpdateRun.status != "skipped",
+        )
+        .order_by(models.AutoUpdateRun.queued_at.desc())
+        .first()
+    )
+
+
+def _last_good_backup(db, host_id):
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        backup_jobs as jobs,
+    )
+
+    row = (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.host_id == host_id,
+            models.BackupRun.action == "capture",
+            models.BackupRun.status.in_(jobs.GOOD_CAPTURE),
+        )
+        .order_by(models.BackupRun.queued_at.desc())
+        .first()
+    )
+    if row is None:
+        return None
+    from backend.services.auto_update_results import (  # pylint: disable=import-outside-toplevel
+        naive_utc,
+    )
+
+    return naive_utc(row.finished_at or row.queued_at)
+
+
+def host_dict(db, host, tag_ids, profile) -> Dict[str, Any]:
+    previous = last_run(db, host.id)
+    ctx = {
+        "id": str(host.id),
+        "tag_ids": tag_ids,
+        "active": bool(host.active),
+        "approval_status": host.approval_status,
+        "opted_out": bool(host.auto_update_opt_out),
+        "image_mode": bool(getattr(host, "is_image_mode", False)),
+        "needs_repair": bool(host.package_manager_needs_repair),
+        "last_run": None,
+        "last_good_backup_at": None,
+    }
+    if previous is not None:
+        ctx["last_run"] = {
+            "status": previous.status,
+            "queued_at": previous.queued_at,
+            "completed_at": previous.completed_at,
+            "acknowledged": previous.acknowledged_at is not None,
+        }
+    if profile.get("require_backup_hours"):
+        ctx["last_good_backup_at"] = _last_good_backup(db, host.id)
+    return ctx
+
+
+def update_dicts(db, host_id) -> List[Dict[str, Any]]:
+    rows = (
+        db.query(models.PackageUpdate)
+        .filter(models.PackageUpdate.host_id == host_id)
+        .order_by(models.PackageUpdate.package_name)
+        .all()
+    )
+    return [
+        {
+            "id": str(r.id),
+            "package_name": r.package_name,
+            "package_manager": r.package_manager,
+            "bundle_id": r.bundle_id,
+            "update_type": r.update_type,
+            "status": r.status,
+            "held": bool(r.held),
+            "requires_reboot": bool(r.requires_reboot),
+            "current_version": r.current_version,
+            "available_version": r.available_version,
+        }
+        for r in rows
+    ]
+
+
+def covered_hosts(db, profile: Dict[str, Any]) -> List[models.Host]:
+    query = db.query(models.Host)
+    if profile["host_ids"]:
+        query = query.filter(
+            models.Host.id.in_([uuid.UUID(h) for h in profile["host_ids"]])
+        )
+    elif profile["tag_id"]:
+        query = query.join(
+            models.HostTag, models.HostTag.host_id == models.Host.id
+        ).filter(models.HostTag.tag_id == uuid.UUID(profile["tag_id"]))
+    return query.order_by(models.Host.fqdn).all()
+
+
+# ---------------------------------------------------------------------------
+# writing: a run, its execution logs, its command
+# ---------------------------------------------------------------------------
+
+
+def _record(db, profile, host, plan, status, triggered_by, now, release_at=None):
+    run = models.AutoUpdateRun(
+        id=uuid.uuid4(),
+        profile_id=uuid.UUID(profile["id"]),
+        profile_name=profile["name"],
+        host_id=host.id,
+        status=status,
+        reason=plan.get("reason"),
+        triggered_by=triggered_by,
+        packages=[
+            {k: p.get(k) for k in ("package_name", "package_manager", "current_version",
+                                   "available_version", "update_type")}  # fmt: skip
+            for p in plan.get("packages", [])
+        ],
+        skipped=plan.get("skipped") or [],
+        queued_at=now,
+        release_at=release_at,
+        completed_at=None if status == "queued" else now,
+    )
+    db.add(run)
+    return run
+
+
+def _command_package(update: Dict[str, Any]) -> Dict[str, Any]:
+    package = {
+        "package_name": update["package_name"],
+        "bundle_id": update.get("bundle_id"),
+        "package_manager": update["package_manager"],
+    }
+    if update["package_manager"] == "fwupd":
+        package["device_id"] = update.get("bundle_id")
+    return package
+
+
+def _queue_apply(db, host, run, packages, release_at, now):
+    for update in packages:
+        row = db.get(models.PackageUpdate, uuid.UUID(update["id"]))
+        if row is not None:
+            row.status = "updating"
+            row.updated_at = now
+        db.add(
+            models.UpdateExecutionLog(
+                host_id=host.id,
+                package_name=update["package_name"],
+                package_manager=update["package_manager"],
+                from_version=update.get("current_version") or "unknown",
+                to_version=update.get("available_version") or "unknown",
+                execution_status="pending",
+                executed_by=run.triggered_by or ACTOR,
+                execution_method="automatic",
+                run_id=run.id,
+                created_at=now,
+                updated_at=now,
+            )
+        )
+    message = create_command_message(
+        "apply_updates", {"packages": [_command_package(p) for p in packages]}
+    )
+    run.command_id = message.get("message_id")
+    queue_ops.enqueue_message(
+        message_type="command",
+        message_data=message,
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host.id),
+        db=db,
+        scheduled_at=release_at if release_at and release_at > now else None,
+    )
+    AuditService.log(
+        db=db,
+        action_type=ActionType.EXECUTE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=host.fqdn,
+        description=_("Automatic update queued on %(host)s by policy '%(policy)s'")
+        % {"host": host.fqdn, "policy": run.profile_name},
+        result=Result.SUCCESS,
+        username=run.triggered_by or ACTOR,
+        details={
+            "run_id": str(run.id),
+            "packages": [p["package_name"] for p in packages],
+            "skipped": run.skipped,
+        },
+        commit=False,
+    )
+
+
+def fire_profile(db, eng, profile_row, now, triggered_by=None) -> Dict[str, int]:
+    """Run one policy now.  On the schedule (``triggered_by`` None) a host
+    another policy wins for is left to that policy; a person's "run now"
+    applies the profile they chose to every host it covers."""
+    settings = settings_dict(settings_row(db))
+    policies = auto_profiles(db)
+    host_ids = profile_host_ids(db, [profile_row.id]).get(str(profile_row.id))
+    profile = profile_dict(profile_row, host_ids)
+    hosts = covered_hosts(db, profile)
+    tags = _tag_ids(db, [h.id for h in hosts])
+    summary = {"queued": 0, "skipped": 0, "nothing": 0, "other_policy": 0}
+    applying = []
+    for host in hosts:
+        tag_ids = tags.get(str(host.id), [])
+        if triggered_by is None:
+            winner = eng.resolve_policy(
+                {"id": str(host.id), "tag_ids": tag_ids}, policies
+            )
+            if not winner or winner["profile_id"] != profile["id"]:
+                summary["other_policy"] += 1
+                continue
+        ctx = host_dict(db, host, tag_ids, profile)
+        plan = eng.plan_host_run(ctx, profile, update_dicts(db, host.id), settings, now)
+        if plan["action"] == "apply" and host_supports(host, "apply_updates") is False:
+            # An agent that does not advertise apply_updates refuses it at
+            # queue time; raised here it aborted the whole policy and every
+            # other host's run with it (screenshot VM, 2026-11-16).
+            plan = {**plan, "action": "skip", "reason": AGENT_CANNOT_APPLY,
+                    "packages": []}  # fmt: skip
+        if plan["action"] == "skip":
+            _record(db, profile, host, plan, "skipped", triggered_by, now)
+            summary["skipped"] += 1
+        elif plan["action"] == "nothing":
+            _record(db, profile, host, plan, "nothing_to_do", triggered_by, now)
+            summary["nothing"] += 1
+        else:
+            applying.append((host, plan))
+    offsets = eng.stagger_offsets(len(applying), profile["staggered_window_min"])
+    for (host, plan), offset in zip(applying, offsets):
+        release_at = now + timedelta(seconds=offset)
+        run = _record(db, profile, host, plan, "queued", triggered_by, now, release_at)
+        db.flush()
+        _queue_apply(db, host, run, plan["packages"], release_at, now)
+        summary["queued"] += 1
+    return summary
+
+
+# ---------------------------------------------------------------------------
+# the tick
+# ---------------------------------------------------------------------------
+
+
+def expire_stale_runs(db, now) -> int:
+    """Runs that never reported back within ``RUN_TIMEOUT_HOURS`` of their
+    release are timed out, and their pending packages failed: an agent that
+    restarted mid-update never answers, and a run left "queued" would block
+    the host's every later run."""
+    cutoff = now - timedelta(hours=RUN_TIMEOUT_HOURS)
+    stale = (
+        db.query(models.AutoUpdateRun)
+        .filter(models.AutoUpdateRun.status == "queued")
+        .all()
+    )
+    expired = 0
+    for run in stale:
+        if (run.release_at or run.queued_at) > cutoff:
+            continue
+        run.status, run.completed_at = "timed_out", now
+        for log in db.query(models.UpdateExecutionLog).filter(
+            models.UpdateExecutionLog.run_id == run.id,
+            models.UpdateExecutionLog.execution_status == "pending",
+        ):
+            log.execution_status = "failed"
+            log.error_log = _("The host never reported the result")
+            log.completed_at = log.updated_at = now
+        expired += 1
+    return expired
+
+
+def _due(db, now):
+    return (
+        db.query(models.UpgradeProfile)
+        .filter(
+            models.UpgradeProfile.enabled.is_(True),
+            models.UpgradeProfile.auto_apply.is_(True),
+            models.UpgradeProfile.held.is_(False),
+            models.UpgradeProfile.next_run.isnot(None),
+            models.UpgradeProfile.next_run <= now,
+        )
+        .all()
+    )
+
+
+def tick_database(db, eng, now, summary) -> None:
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        auto_update_results,
+    )
+
+    summary["timed_out"] += expire_stale_runs(db, now)
+    db.commit()
+    try:
+        auto_update_results.follow_reboots(db, eng, now)
+        db.commit()
+    except Exception:  # pylint: disable=broad-exception-caught
+        # Following reboots must never stop policies from firing.
+        db.rollback()
+        logger.exception("Automatic updates: following reboots failed")
+    if settings_row(db).hold_all:
+        summary["held"] = True
+        db.commit()
+        return
+    for profile in _due(db, now):
+        try:
+            fired = fire_profile(db, eng, profile, now)
+            profile.last_run, profile.last_status = now, "SUCCESS"
+            summary["queued"] += fired["queued"]
+        except Exception:  # pylint: disable=broad-exception-caught
+            db.rollback()
+            logger.exception("Automatic updates: policy %s failed to fire", profile.id)
+            profile.last_run, profile.last_status = now, "FAILURE"
+        profile.next_run = eng.next_run_from_cron(
+            profile.cron, datetime.now(timezone.utc)
+        )
+        if profile.next_run is not None and profile.next_run.tzinfo is not None:
+            profile.next_run = profile.next_run.astimezone(timezone.utc).replace(
+                tzinfo=None
+            )
+        db.commit()
+
+
+def run_one_tick() -> Dict[str, Any]:
+    """One pass over every tenant database.  Never raises."""
+    summary: Dict[str, Any] = {"queued": 0, "timed_out": 0, "held": False}
+    eng = engine()
+    if eng is None or not hasattr(eng, "plan_host_run"):
+        return summary
+    now = now_naive()
+    for label, _tenant, db in iter_host_databases():
+        try:
+            tick_database(db, eng, now, summary)
+        except Exception:  # pylint: disable=broad-exception-caught
+            db.rollback()
+            logger.exception("Automatic updates tick failed for database %s", label)
+        finally:
+            db.close()
+    return summary
+
+
+async def auto_update_tick_service() -> None:
+    """Background service: one tick every ``TICK_INTERVAL_SECONDS``."""
+
+    def _report(summary):
+        if summary["queued"] or summary["timed_out"]:
+            logger.info(
+                "Automatic updates: queued=%d timed_out=%d",
+                summary["queued"],
+                summary["timed_out"],
+            )
+
+    await run_periodic(
+        "Automatic updates tick",
+        run_one_tick,
+        TICK_INTERVAL_SECONDS,
+        ERROR_BACKOFF_SECONDS,
+        on_result=_report,
+        logger=logger,
+    )

@@ -40,6 +40,15 @@ const mockProfile: UpgradeProfile = {
     next_run: null,
     created_at: null,
     updated_at: null,
+    auto_apply: false,
+    reboot_mode: 'never',
+    excluded_packages: '',
+    require_backup_hours: null,
+    held: false,
+    hold_reason: null,
+    hold_by: null,
+    hold_at: null,
+    host_ids: [],
 };
 
 describe('upgradeProfilesService', () => {
@@ -118,9 +127,10 @@ describe('upgradeProfilesService', () => {
             const mockTrigger: TriggerResult = {
                 profile_id: 'p-1',
                 name: 'Nightly',
-                host_count: 2,
-                enqueued_count: 2,
-                host_ids: ['h1', 'h2'],
+                queued: 2,
+                skipped: 1,
+                nothing: 0,
+                other_policy: 0,
                 next_run: null,
             };
             vi.mocked(axiosInstance.post).mockResolvedValueOnce({ data: mockTrigger });

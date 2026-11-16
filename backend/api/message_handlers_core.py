@@ -18,7 +18,7 @@ from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
 from backend.persistence.models import Host, HostChild
 from backend.security import agent_identity, agent_mtls
-from backend.services import agent_version_change, clock_tracking
+from backend.services import agent_version_change, clock_tracking, host_boot
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket import delivery_confirmation, heartbeat_batch, report_window
@@ -697,6 +697,8 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                 ):
                     # Store as naive UTC datetime (timezone stripped but value is UTC)
                     host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
+
+                host_boot.note_boot_time(host, message_data.get("boot_time"))
 
                 # Update privileged status if provided in heartbeat
                 is_privileged = message_data.get("is_privileged")

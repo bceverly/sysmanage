@@ -224,6 +224,15 @@ class Host(Base):
     package_manager_checked_at = Column(DateTime, nullable=True)
     # Automatic Ubuntu Pro attach, handled once (q90proautoattach).
     ubuntu_pro_auto_attach_at = Column(DateTime, nullable=True)
+    # Automatic updates (26.1, q94autoupdate): a host that must never be
+    # patched unattended, whatever policy covers it; and when it last booted
+    # (from the heartbeat), which tells a reboot that came back from an agent
+    # that never stopped.
+    auto_update_opt_out = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    auto_update_opt_out_reason = Column(String(1000), nullable=True)
+    boot_time = Column(DateTime, nullable=True)
 
     # Agent privilege status
     is_agent_privileged = Column(Boolean, nullable=True, default=False)

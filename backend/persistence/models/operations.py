@@ -125,6 +125,8 @@ class UpdateExecutionLog(Base):
     execution_method = Column(String(50), nullable=True)  # manual, automatic, scheduled
     requires_reboot = Column(Boolean, nullable=False, default=False)
     reboot_requested = Column(Boolean, nullable=False, default=False)
+    # The automatic run that queued it (26.1); None for a person's update.
+    run_id = Column(GUID(), nullable=True, index=True)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)
 
