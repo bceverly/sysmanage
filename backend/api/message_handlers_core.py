@@ -18,7 +18,7 @@ from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
 from backend.persistence.models import Host, HostChild
 from backend.security import agent_identity, agent_mtls
-from backend.services import clock_tracking
+from backend.services import agent_version_change, clock_tracking
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket import delivery_confirmation, heartbeat_batch, report_window
@@ -723,10 +723,10 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                         json.dumps(enabled_shells) if enabled_shells else None
                     )
 
-                # Update agent version if provided in heartbeat
-                agent_version = message_data.get("agent_version")
-                if agent_version:
-                    host.agent_version = agent_version
+                # A new agent version also refreshes the host's updates.
+                agent_version_change.note_agent_version(
+                    db, host, message_data.get("agent_version")
+                )
 
                 # Phase 12.7: resolve public-IP -> geo when the agent reports it.
                 # The agent fetches its public IP at startup + on the

@@ -115,8 +115,15 @@ def after_capture(
     db: Session, policy: models.BackupPolicy, run: models.BackupRun
 ) -> None:
     """A good capture: compare it with the snapshot before it, when the
-    engine is licensed and the host's restate can (``diff`` ability)."""
+    engine is licensed and the host's restate can (``diff`` ability).
+
+    Never for a repository encrypted to the operator's escrow key (the
+    server's own backup, 25.9): a diff reads both indexes, and only the
+    operator holds that key, so it could only fail -- it did, every night
+    on production from 2026-11-12."""
     if not run.snapshot or engine() is None or "diff" not in jobs.abilities(policy):
+        return
+    if jobs.escrow_keyed(policy):
         return
     before = previous_snapshot(db, policy, run.snapshot)
     if before is None or _known(db, policy, before, run.snapshot):

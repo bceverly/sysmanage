@@ -20,7 +20,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from backend.api.backups import _audit, _host_or_404, _ready_policy, _require
+from backend.api.backups import (
+    ESCROW_ONLY,
+    _audit,
+    _host_or_404,
+    _ready_policy,
+    _require,
+)
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.licensing.migration_compat import missing_engine_detail
@@ -99,6 +105,9 @@ async def drift_compute(
     host = _host_or_404(db, host_id)
     policy = _ready_policy(db, host)
     reach.refuse_if_blocked(db, host)  # the host reads its repository
+    if jobs.escrow_keyed(policy):
+        # Both indexes are sealed to a key only the operator holds (25.9).
+        raise HTTPException(status_code=409, detail=ESCROW_ONLY)
     if "diff" not in jobs.abilities(policy):
         raise HTTPException(
             status_code=409,

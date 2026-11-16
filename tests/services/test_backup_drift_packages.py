@@ -154,6 +154,43 @@ def test_an_encrypted_repository_releases_its_keys_for_the_diff(session, sent):
     assert jobs.DIFF in backup_key_release.KEYED_ACTIONS
 
 
+def _escrow_keyed(session, s):
+    """The server's own backup (25.9): sealed to the operator's escrow key,
+    with no secret key in OpenBAO."""
+    s.policy.encrypt_public_key = (
+        "-----BEGIN PGP PUBLIC KEY BLOCK-----\nk\n-----END PGP PUBLIC KEY BLOCK-----\n"
+    )
+    s.policy.encrypt_key_ref = None
+    s.policy.server_preset = True
+    session.commit()
+    assert jobs.escrow_keyed(s.policy)
+
+
+def test_the_servers_own_backup_is_never_compared(session, sent, fake_engine):
+    """Production, 2026-11-12 to 11-15: every night's diff of the server's
+    backup failed -- its indexes are sealed to the escrow key."""
+    s = _setup(session)
+    _able(session, s, "diff")
+    _escrow_keyed(session, s)
+    _snapshot(session, s, "20261114T213433Z")
+    _snapshot(session, s, "20261115T222527Z")
+    run = SimpleNamespace(snapshot="20261115T222527Z", host_id=s.host.id)
+    drift.after_capture(session, s.policy, run)
+    assert not _diffs_sent(sent)
+
+
+@pytest.mark.asyncio
+async def test_comparing_the_servers_own_backup_is_refused(session, sent, fake_engine):
+    s = _setup(session)
+    _able(session, s, "diff")
+    _escrow_keyed(session, s)
+    with pytest.raises(HTTPException) as refused:
+        await drift_api.drift_compute(str(s.host.id), None, session, MANAGER)
+    assert refused.value.status_code == 409
+    assert refused.value.detail == api.ESCROW_ONLY
+    assert not _diffs_sent(sent)
+
+
 def test_a_finished_diff_is_kept_for_its_pair(session, sent, fake_engine):
     s = _setup(session)
     run = drift.queue_diff(session, s.policy, s.host.id, None, None)
@@ -200,7 +237,7 @@ async def test_the_timeline_goes_through_the_engine(session, sent, fake_engine):
     view = await drift_api.drift_timeline(
         str(s.host.id), True, "/etc", 30, session, RESTORER
     )
-    rows, ignore, hide, path = FakeEngine.seen
+    rows, ignore, hide, path = FakeEngine.seen  # pylint: disable=unpacking-non-sequence
     assert rows[0]["to"] == "20261102T181741Z" and ignore == ["/home/*/dev"]
     assert hide is True and path == "/etc"
     assert view["missing"] == [{"from": "20261102T181741Z", "to": "20261102T190000Z"}]

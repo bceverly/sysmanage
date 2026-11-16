@@ -14701,7 +14701,7 @@ before Pro+ encryption.
 
 
 #### Carried over from Phase 25 (2026-11-14, Bryan)
-- [ ] **The server's own backup, a week of nights:** production's server backs itself up nightly through the server preset (encrypted to the escrow key, PostgreSQL never stopped, OpenBAO's unseal key left out) for seven nights in a row with no failed night -- nights of 2026-11-12 and 2026-11-13 ok; due about 2026-11-19. The backups this phase's automatic updates fall back on include the server's own
+- [ ] **The server's own backup, a week of nights:** production's server backs itself up nightly through the server preset (encrypted to the escrow key, PostgreSQL never stopped, OpenBAO's unseal key left out) for seven nights in a row with no failed night -- nights of 2026-11-12, 2026-11-13, 2026-11-14 and 2026-11-15 ok (capture, sign, protect, seal, prune, du); due about 2026-11-19. Each of those nights also queued a drift `diff` that failed, "the secret key for it is not in the key files": the diff reads both indexes, which are sealed to the escrow key SysManage never holds -- fixed 2026-11-16 (no diff is queued for an escrow-keyed repository, and a manual compare answers 409); it was never part of the backup itself. The backups this phase's automatic updates fall back on include the server's own
 
 #### 26.1 Automatic update policies (Community / OSS)
 
@@ -16032,12 +16032,16 @@ Phases 0-24 again had no unticked boxes, so, like the Phase 21-24 audits, this o
       a capture, a prune past the old snapshots, the retirement, and a
       restore from the newest. With yearly rotation the cap is 16 years away;
       on-demand rotations reach it sooner. Could equally sit in Phase 27
-- [ ] **Turn snapshot signing on in production** (moved from 24.6 Snapshot
+- [x] **Turn snapshot signing on in production** (moved from 24.6 Snapshot
       signing by the 2026-11-14 audit; Bryan). Signing was proven end to end
       on the lab 2026-11-03; the same entry asked for it to be turned on in
       production, and nothing records that it was. An operator setting on
       the production target, not engineering; tick when production's
-      snapshots read signed
+      snapshots read signed -- DONE (checked 2026-11-16):
+      production's NAS target has had signing on since 2026-11-03
+      (`signing_enabled_at` 12:41 UTC), and every snapshot taken since
+      2026-11-06 reads signed (91 of 118 in all; the unsigned 27 predate it
+      or were mid-switch on 11-03 and 11-05)
 
 ### Multi-boot machines that keep one hostname (from the 23.2 T480 proof, 2026-10-15)
 
