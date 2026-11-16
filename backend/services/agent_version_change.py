@@ -15,6 +15,7 @@ the same command as "Check for updates" on the host.
 
 import logging
 
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -46,7 +47,7 @@ def note_agent_version(db, host, reported) -> bool:
     logger.info(
         "Host %s: agent %s -> %s; update check queued",
         host.id,
-        previous,
-        reported,
+        sanitize_log(previous),
+        sanitize_log(reported),
     )
     return True
