@@ -608,7 +608,7 @@ msgstr "報告模板未找到"
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
-msgstr "對於字段 '%(field)s' 的無效 UUID：%(value)s"
+msgstr "欄位 %(field)s 的 UUID 無效：%(value)s"
 
 #: backend/api/report_templates.py:221 backend/api/report_templates.py:289
 #, python-format
@@ -4518,7 +4518,7 @@ msgstr "未找到重新啟動編排"
 
 #: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:203
 msgid "Upgrade profile not found"
-msgstr "升級配置文件未找到"
+msgstr "找不到升級設定檔"
 
 #: backend/api/upgrade_profiles.py:71
 msgid ""
@@ -4569,11 +4569,11 @@ msgstr "必須填寫原因"
 #: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
-msgstr "已暫停所有自動更新原則：%s"
+msgstr "已暫停所有自動更新策略：%s"
 
 #: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
-msgstr "已解除所有自動更新原則的暫停"
+msgstr "已解除所有自動更新策略的暫停"
 
 #: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
@@ -4582,12 +4582,12 @@ msgstr "已變更自動更新設定"
 #: backend/api/auto_updates.py:213
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
-msgstr "已暫停自動更新原則 '%(policy)s'：%(reason)s"
+msgstr "已暫停自動更新策略 '%(policy)s'：%(reason)s"
 
 #: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
-msgstr "已解除自動更新原則 '%s' 的暫停"
+msgstr "已解除自動更新策略 '%s' 的暫停"
 
 #: backend/api/auto_updates.py:246
 #, python-format
@@ -5995,7 +5995,7 @@ msgstr "請確認將安裝套件，並移除快照中沒有的套件，以使主
 #: backend/services/auto_update_runner.py:354
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
-msgstr "原則 '%(policy)s' 已在 %(host)s 上排入自動更新"
+msgstr "策略 '%(policy)s' 已在 %(host)s 上排入自動更新"
 
 #: backend/services/auto_update_runner.py:539
 msgid "The host never reported the result"
@@ -6004,7 +6004,7 @@ msgstr "主機從未回報結果"
 #: backend/services/auto_update_results.py:102
 #, python-format
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
-msgstr "原則 '%(policy)s' 之後自動重新啟動 %(host)s"
+msgstr "策略 '%(policy)s' 之後自動重新啟動 %(host)s"
 
 #: backend/services/held_asset_tags.py:159
 #, python-format

@@ -4922,11 +4922,11 @@ msgstr "Ein Grund ist erforderlich"
 #: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
-msgstr "Alle Richtlinien für automatische Updates angehalten: %s"
+msgstr "Alle Richtlinien für automatische Updates pausiert: %s"
 
 #: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
-msgstr "Anhalten aller Richtlinien für automatische Updates aufgehoben"
+msgstr "Pause aller Richtlinien für automatische Updates aufgehoben"
 
 #: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
@@ -4935,13 +4935,12 @@ msgstr "Einstellungen für automatische Updates geändert"
 #: backend/api/auto_updates.py:213
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
-msgstr ""
-"Richtlinie für automatische Updates '%(policy)s' angehalten: %(reason)s"
+msgstr "Richtlinie für automatische Updates '%(policy)s' pausiert: %(reason)s"
 
 #: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
-msgstr "Anhalten der Richtlinie für automatische Updates '%s' aufgehoben"
+msgstr "Pause der Richtlinie für automatische Updates '%s' aufgehoben"
 
 #: backend/api/auto_updates.py:246
 #, python-format

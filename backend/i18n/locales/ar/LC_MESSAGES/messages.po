@@ -4060,7 +4060,7 @@ msgstr "فشل في الحصول على نتائج التحديث: %s"
 #: backend/api/updates/execution_routes.py:65
 #: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
-msgstr " رفض الوصول: يتطلب دور APPLY_SOFTWARE_UPDATE"
+msgstr "رفض الوصول: يتطلب دور APPLY_SOFTWARE_UPDATE"
 
 #: backend/api/updates/execution_routes.py:126
 msgid ""
@@ -4675,7 +4675,7 @@ msgstr "لم يتم العثور على تنسيق إعادة التشغيل"
 
 #: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:203
 msgid "Upgrade profile not found"
-msgstr "لم يتم العثور على ملف التعديل"
+msgstr "لم يتم العثور على ملف الترقية"
 
 #: backend/api/upgrade_profiles.py:71
 msgid ""

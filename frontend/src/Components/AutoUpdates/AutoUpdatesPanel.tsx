@@ -139,7 +139,7 @@ const AutoUpdatesPanel: React.FC = () => {
             labelId="auto-updates-threshold-label"
             label={t('autoUpdates.threshold', 'A patch is critical when it fixes a CVE rated')}
             value={settings.critical_threshold ?? 'critical'}
-            onChange={(e) => void setThreshold(e.target.value as 'critical' | 'high')}
+            onChange={(e) => void setThreshold(e.target.value)}
           >
             <MenuItem value="critical">{t('autoUpdates.thresholdCritical', 'Critical')}</MenuItem>
             <MenuItem value="high">{t('autoUpdates.thresholdHigh', 'High or critical')}</MenuItem>

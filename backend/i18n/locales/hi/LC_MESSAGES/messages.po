@@ -4763,7 +4763,7 @@ msgstr "रीबूट ऑर्केस्ट्रेशन नहीं म
 
 #: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:203
 msgid "Upgrade profile not found"
-msgstr "अपग्रेड profile नहीं मिला"
+msgstr "अपग्रेड प्रोफ़ाइल नहीं मिली"
 
 #: backend/api/upgrade_profiles.py:71
 msgid ""

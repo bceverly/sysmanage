@@ -3788,7 +3788,7 @@
     "saveError": "Falha ao salvar o perfil de atualização",
     "securityOnly": "Apenas Atualizações de Segurança",
     "subtitle": "Agende atualizações recorrentes de frota com cron, apenas segurança e implantação escalonada",
-    "tabLabel": "Atualizar Perfis",
+    "tabLabel": "Perfis de Atualização",
     "tag": "Etiqueta",
     "title": "Perfis de Atualização",
     "trigger": "Disparar Agora",
@@ -6248,7 +6248,7 @@
       "held": "retido no host",
       "manager": "o gerenciador de pacotes não está na política",
       "notSecurity": "não é uma atualização de segurança",
-      "osUpgrade": "uma atualização de sistema operacional nunca é automática",
+      "osUpgrade": "uma atualização de versão do sistema operacional nunca é automática",
       "waiting": "em período de espera"
     },
     "policy": "Política",
@@ -6285,7 +6285,7 @@
       "partial": "Falha parcial",
       "queued": "Em execução",
       "skipped": "Ignorado",
-      "succeeded": "Concluído",
+      "succeeded": "Bem-sucedido",
       "timedOut": "Nenhum resultado",
       "waiting": "Aguardando a janela de manutenção"
     },

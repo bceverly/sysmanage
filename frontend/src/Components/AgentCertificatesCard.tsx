@@ -93,7 +93,7 @@ const AgentCertificatesCard: React.FC = () => {
                     <FormControl size="small" fullWidth>
                         <InputLabel id="agent-cert-mode">{t('agentCertificates.mode', 'Mode')}</InputLabel>
                         <Select labelId="agent-cert-mode" label={t('agentCertificates.mode', 'Mode')} value={mode}
-                            onChange={e => { setMode(e.target.value as AgentCertificateMode); setConfirm(null); }}>
+                            onChange={e => { setMode(e.target.value); setConfirm(null); }}>
                             <MenuItem value="off">{t('agentCertificates.modeOff', 'Off')}</MenuItem>
                             <MenuItem value="optional">{t('agentCertificates.modeOptional', 'Optional')}</MenuItem>
                             <MenuItem value="enforced">{t('agentCertificates.modeEnforced', 'Enforced')}</MenuItem>

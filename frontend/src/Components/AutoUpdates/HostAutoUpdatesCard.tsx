@@ -39,7 +39,7 @@ import {
 } from './autoUpdateLabels';
 import PendingEligibility, { eligibilityLabel } from './PendingEligibility';
 
-const REBOOT_CHIPS = ['queued', 'back', 'not_back', 'next_window'];
+const REBOOT_CHIPS = new Set(['queued', 'back', 'not_back', 'next_window']);
 
 interface Props {
   hostId: string;
@@ -174,7 +174,7 @@ const HostAutoUpdatesCard: React.FC<Props> = ({ hostId, canManage }) => {
                         color={runStatusColor(run.status)}
                         label={runStatusLabel(t, run.status)}
                       />
-                      {REBOOT_CHIPS.includes(run.reboot_status) && (
+                      {REBOOT_CHIPS.has(run.reboot_status) && (
                         <Chip
                           size="small"
                           color={run.reboot_status === 'not_back' ? 'error' : 'default'}

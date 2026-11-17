@@ -48,7 +48,7 @@ interface Props<F extends AutomaticForm> {
   tags?: { id: string; name: string }[];
 }
 
-function AutomaticFields<F extends AutomaticForm>({ form, setForm, hosts, tags = [] }: Props<F>) {
+function AutomaticFields<F extends AutomaticForm>({ form, setForm, hosts, tags = [] }: Readonly<Props<F>>) {
   const { t } = useTranslation();
   const selected = hosts.filter((h) => form.host_ids.includes(h.id));
   return (
@@ -71,7 +71,7 @@ function AutomaticFields<F extends AutomaticForm>({ form, setForm, hosts, tags =
               label={t('upgradeProfiles.reboot', 'Reboots')}
               value={form.reboot_mode}
               onChange={(e) =>
-                setForm({ ...form, reboot_mode: e.target.value as AutomaticForm['reboot_mode'] })
+                setForm({ ...form, reboot_mode: e.target.value })
               }
             >
               <MenuItem value="never">
@@ -120,7 +120,7 @@ function AutomaticFields<F extends AutomaticForm>({ form, setForm, hosts, tags =
               label={t('upgradeProfiles.criticalSource', 'Critical means rated critical by')}
               value={form.critical_source}
               onChange={(e) =>
-                setForm({ ...form, critical_source: e.target.value as CriticalSource })
+                setForm({ ...form, critical_source: e.target.value })
               }
             >
               <MenuItem value="either">

@@ -124,7 +124,7 @@ class UpgradeProfileUpdateRequest(BaseModel):
     auto_apply: Optional[bool] = None
     reboot_mode: Optional[str] = Field(None, pattern="^(never|when_needed|in_window)$")
     excluded_packages: Optional[str] = Field(None, max_length=4000)
-    require_backup_hours: Optional[int] = Field(None, ge=0, le=720)  # 0 = off
+    require_backup_hours: Optional[int] = Field(None, ge=0, le=720)  # zero turns it off
     host_ids: Optional[List[str]] = None
     wait_days_regular: Optional[int] = Field(None, ge=0, le=365)
     wait_days_critical: Optional[int] = Field(None, ge=0, le=365)

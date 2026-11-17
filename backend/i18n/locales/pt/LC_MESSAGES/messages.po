@@ -4153,7 +4153,7 @@ msgstr "Falha ao obter resultados de atualização: %s"
 #: backend/api/updates/execution_routes.py:65
 #: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
-msgstr "Permissão negada: role APPLY_SOFTWARE_UPDATE requerida"
+msgstr "Permissão negada: função APPLY_SOFTWARE_UPDATE necessária"
 
 #: backend/api/updates/execution_routes.py:126
 msgid ""
@@ -4841,7 +4841,8 @@ msgstr "Perfil de atualização excluído"
 
 #: backend/api/upgrade_profiles.py:483
 msgid "A rollout of this policy is still running or halted"
-msgstr "Uma implantação desta política ainda está em andamento ou interrompida"
+msgstr ""
+"Uma implantação desta política ainda está em andamento ou interrompida"
 
 #: backend/api/upgrade_profiles.py:499
 #, python-format
@@ -4855,11 +4856,11 @@ msgstr "É necessário um motivo"
 #: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
-msgstr "Todas as políticas de atualização automática em espera: %s"
+msgstr "Todas as políticas de atualização automática suspensas: %s"
 
 #: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
-msgstr "Liberada a espera de todas as políticas de atualização automática"
+msgstr "Removida a suspensão de todas as políticas de atualização automática"
 
 #: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
@@ -4868,12 +4869,12 @@ msgstr "Configurações de atualizações automáticas alteradas"
 #: backend/api/auto_updates.py:213
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
-msgstr "Política de atualização automática '%(policy)s' em espera: %(reason)s"
+msgstr "Política de atualização automática '%(policy)s' suspensa: %(reason)s"
 
 #: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
-msgstr "Liberada a espera da política de atualização automática '%s'"
+msgstr "Removida a suspensão da política de atualização automática '%s'"
 
 #: backend/api/auto_updates.py:246
 #, python-format
@@ -6758,7 +6759,9 @@ msgstr "Implantação da política '%(policy)s' iniciada: %(count)d frota(s)"
 #: backend/services/auto_update_rollout.py:275
 #, python-format
 msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
-msgstr "Implantação da política '%(policy)s' interrompida na frota '%(fleet)s': %(reason)s"
+msgstr ""
+"Implantação da política '%(policy)s' interrompida na frota '%(fleet)s': "
+"%(reason)s"
 
 #: backend/services/auto_update_rollout.py:321
 #, python-format
@@ -6768,7 +6771,8 @@ msgstr "Implantação da política '%(policy)s' concluída"
 #: backend/services/auto_update_rollout.py:376
 #, python-format
 msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
-msgstr "Implantação da política '%(policy)s' retomada após a frota '%(fleet)s'"
+msgstr ""
+"Implantação da política '%(policy)s' retomada após a frota '%(fleet)s'"
 
 #: backend/services/auto_update_rollout.py:393
 #, python-format

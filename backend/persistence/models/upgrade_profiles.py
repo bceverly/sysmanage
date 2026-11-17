@@ -47,6 +47,7 @@ from backend.persistence.models.core import GUID
 # scheduler engine.  See ``next_run_from_cron`` in
 # backend/services/upgrade_scheduler.py.
 DEFAULT_CRON = "0 3 * * *"  # daily at 03:00
+SET_NULL = "SET NULL"
 
 
 class UpgradeProfile(Base):
@@ -75,7 +76,7 @@ class UpgradeProfile(Base):
     )  # 0 = launch all hosts simultaneously
 
     # Where to apply
-    tag_id = Column(GUID(), ForeignKey("tags.id", ondelete="SET NULL"), nullable=True)
+    tag_id = Column(GUID(), ForeignKey("tags.id", ondelete=SET_NULL), nullable=True)
 
     # Automatic application (26.1, Enterprise; q94autoupdate).  Off by
     # default: before 26.1 nothing ran a profile on its schedule, so turning
@@ -111,7 +112,7 @@ class UpgradeProfile(Base):
         Integer, nullable=False, default=0, server_default="0"
     )
 
-    created_by = Column(GUID(), ForeignKey("user.id", ondelete="SET NULL"))
+    created_by = Column(GUID(), ForeignKey("user.id", ondelete=SET_NULL))
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
@@ -182,7 +183,7 @@ class UpgradeProfileRolloutStage(Base):
     )
     position = Column(Integer, nullable=False)
     name = Column(String(120), nullable=False)
-    tag_id = Column(GUID(), ForeignKey("tags.id", ondelete="SET NULL"), nullable=True)
+    tag_id = Column(GUID(), ForeignKey("tags.id", ondelete=SET_NULL), nullable=True)
     soak_minutes = Column(Integer, nullable=False, default=0, server_default="0")
 
     def to_dict(self) -> dict:

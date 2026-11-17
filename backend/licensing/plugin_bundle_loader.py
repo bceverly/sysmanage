@@ -261,29 +261,33 @@ class PluginBundleLoader:
 
         return actual_hash
 
+    def _download_target(self, module_code: str, version_str: str):
+        """``(url, license key)`` to fetch the bundle from, or None when it
+        should not be asked for at all."""
+        download_url = self._get_plugin_download_url()
+        if not download_url:
+            logger.warning("No plugin download URL configured")
+            return None
+        license_key = get_config().get("license", {}).get("key")
+        if not license_key:
+            logger.warning("No license key configured - cannot download plugins")
+            return None
+        if _no_bundle_recently(module_code):
+            return None  # the server said it has none, not long ago (22.4)
+        if not self.publishes_plugin(module_code):
+            logger.debug("No UI plugin bundle published for %s", module_code)
+            return None  # not in the license server's list: do not ask
+        return f"{download_url}/{module_code}/{version_str}", license_key
+
     async def _download_plugin_bundle(
         self, module_code: str, version: Optional[str] = None
     ) -> bool:
         """Download a plugin JS bundle from the license server."""
-        download_url = self._get_plugin_download_url()
-        if not download_url:
-            logger.warning("No plugin download URL configured")
-            return False
-
-        config = get_config()
-        license_config = config.get("license", {})
-        license_key = license_config.get("key")
-        if not license_key:
-            logger.warning("No license key configured - cannot download plugins")
-            return False
-
         version_str = version or "latest"
-        url = f"{download_url}/{module_code}/{version_str}"
-        if _no_bundle_recently(module_code):
-            return False  # the server said it has none, not long ago (22.4)
-        if not self.publishes_plugin(module_code):
-            logger.debug("No UI plugin bundle published for %s", module_code)
-            return False  # not in the license server's list: do not ask
+        target = self._download_target(module_code, version_str)
+        if target is None:
+            return False
+        url, license_key = target
 
         modules_path = self._get_modules_path()
         Path(modules_path).mkdir(parents=True, exist_ok=True)

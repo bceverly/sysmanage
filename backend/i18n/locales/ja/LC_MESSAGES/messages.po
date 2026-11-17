@@ -4630,11 +4630,11 @@ msgstr "理由の入力が必要です"
 #: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
-msgstr "すべての自動更新ポリシーを保留しました: %s"
+msgstr "すべての自動更新ポリシーを一時停止しました: %s"
 
 #: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
-msgstr "すべての自動更新ポリシーの保留を解除しました"
+msgstr "すべての自動更新ポリシーの一時停止を解除しました"
 
 #: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
@@ -4643,12 +4643,12 @@ msgstr "自動更新の設定を変更しました"
 #: backend/api/auto_updates.py:213
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
-msgstr "自動更新ポリシー '%(policy)s' を保留しました: %(reason)s"
+msgstr "自動更新ポリシー '%(policy)s' を一時停止しました: %(reason)s"
 
 #: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
-msgstr "自動更新ポリシー '%s' の保留を解除しました"
+msgstr "自動更新ポリシー '%s' の一時停止を解除しました"
 
 #: backend/api/auto_updates.py:246
 #, python-format

@@ -56,6 +56,7 @@ import { autoUpdatesService } from '../Services/autoUpdates';
 import AutoUpdatesPanel from './AutoUpdates/AutoUpdatesPanel';
 import AutomaticFields from './AutoUpdates/AutomaticFields';
 import RolloutsCard from './AutoUpdates/RolloutsCard';
+import { newStageUid } from './AutoUpdates/RolloutFields';
 
 interface TagOption {
   id: string;
@@ -199,6 +200,7 @@ const UpgradeProfilesSettings: React.FC = () => {
         name: s.name,
         tag_id: s.tag_id ?? '',
         soak_hours: (s.soak_minutes ?? 0) / 60,
+        uid: newStageUid(),
       })),
     });
     setDialogOpen(true);
@@ -228,6 +230,14 @@ const UpgradeProfilesSettings: React.FC = () => {
       );
       return;
     }
+    // Left empty: no backup requirement -- on an edit that has to be said as 0
+    // (the server's "turn it off"); a new policy simply sends none.
+    let backupHours: number | null = null;
+    if (form.require_backup_hours !== '') {
+      backupHours = form.require_backup_hours;
+    } else if (editing) {
+      backupHours = 0;
+    }
     const payload = {
       name: form.name.trim(),
       description: form.description.trim() || null,
@@ -240,14 +250,14 @@ const UpgradeProfilesSettings: React.FC = () => {
       auto_apply: form.auto_apply,
       reboot_mode: form.reboot_mode,
       excluded_packages: form.excluded_packages.trim() || null,
-      require_backup_hours: form.require_backup_hours === '' ? (editing ? 0 : null) : form.require_backup_hours,
+      require_backup_hours: backupHours,
       host_ids: form.host_ids,
       wait_days_regular: form.wait_days_regular,
       wait_days_critical: form.wait_days_critical,
       critical_source: form.critical_source,
       rollout_enabled: form.rollout_enabled,
       rollout_max_failure_pct: form.rollout_max_failure_pct,
-      rollout_stages: form.rollout_stages.map((s) => ({ ...s, name: s.name.trim() })),
+      rollout_stages: form.rollout_stages.map(({ uid: _uid, ...s }) => ({ ...s, name: s.name.trim() })),
     };
     try {
       if (editing) {

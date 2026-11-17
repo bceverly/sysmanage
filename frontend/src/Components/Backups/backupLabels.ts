@@ -206,7 +206,10 @@ export const pausedServicesOf = (run: BackupRun): PausedService[] => {
     const entries = (run.result as { quiesce?: Array<Record<string, string | boolean>> } | null)?.quiesce;
     if (!Array.isArray(entries)) return [];
     return entries.map(entry => {
-        const text = (key: string): string => (typeof entry[key] === 'string' ? entry[key] as string : '');
+        const text = (key: string): string => {
+            const value = entry[key];
+            return typeof value === 'string' ? value : '';
+        };
         const paused = Date.parse(text('paused_at'));
         const resumed = Date.parse(text('resumed_at'));
         return {

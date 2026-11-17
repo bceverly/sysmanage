@@ -181,14 +181,23 @@ const Reports: React.FC = () => {
   // surface a feature they aren't licensed for. Gate on that engine being
   // licensed; default hidden until the license cache resolves.
   const [federationLicensed, setFederationLicensed] = useState(false);
+  // The Automatic Updates report is the Enterprise automation_engine's (26.7):
+  // reporting is Professional, so a Professional user must not be offered it.
+  const [automationLicensed, setAutomationLicensed] = useState(false);
   useEffect(() => {
     let cancelled = false;
     refreshLicenseCache()
       .then(() => {
-        if (!cancelled) setFederationLicensed(isModuleLicensed('federation_controller_engine'));
+        if (!cancelled) {
+          setFederationLicensed(isModuleLicensed('federation_controller_engine'));
+          setAutomationLicensed(isModuleLicensed('automation_engine'));
+        }
       })
       .catch(() => {
-        if (!cancelled) setFederationLicensed(false);
+        if (!cancelled) {
+          setFederationLicensed(false);
+          setAutomationLicensed(false);
+        }
       });
     return () => { cancelled = true; };
   }, []);
@@ -377,6 +386,9 @@ const Reports: React.FC = () => {
         if (report.id === 'audit-log' && !canViewAuditLog) {
           return false;
         }
+        if (report.id === 'automatic-updates' && !automationLicensed) {
+          return false;
+        }
         return true;
       })
       .filter(report => {
@@ -384,7 +396,7 @@ const Reports: React.FC = () => {
         const searchValue = searchField === 'name' ? report.name : report.description;
         return searchValue.toLowerCase().includes(searchTerm.toLowerCase());
       });
-  }, [tabValue, searchTerm, searchField, canViewAuditLog, t]);
+  }, [tabValue, searchTerm, searchField, canViewAuditLog, automationLicensed, t]);
 
   const handleViewReport = (reportId: string) => {
     // Audit log has its own dedicated viewer component

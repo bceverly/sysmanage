@@ -451,6 +451,16 @@ def _adopt_waiting(db, profile, host, triggered_by, now, rollout) -> None:
     _record(db, profile, host, skipped, "skipped", triggered_by, now, None, rollout)
 
 
+def _record_unapplied(db, profile, host, result, context, summary) -> None:
+    """A host skipped, or with nothing to apply: its run says so.
+    ``context`` is ``(triggered_by, now, rollout)``."""
+    triggered_by, now, rollout = context
+    skipped = result["action"] == "skip"
+    _record(db, profile, host, result, "skipped" if skipped else "nothing_to_do",
+            triggered_by, now, None, rollout)  # fmt: skip
+    summary["skipped" if skipped else "nothing"] += 1
+
+
 def fire_hosts(db, eng, profile, hosts, tags, settings, now, triggered_by, summary,
                rollout=None):  # fmt: skip
     """Plan every host in ``hosts`` under ``profile`` and record (and, when
@@ -472,9 +482,8 @@ def fire_hosts(db, eng, profile, hosts, tags, settings, now, triggered_by, summa
             continue
         result = plan(db, eng, host, profile, settings, now, tags.get(str(host.id), []))
         if result["action"] in ("skip", "nothing"):
-            status = "skipped" if result["action"] == "skip" else "nothing_to_do"
-            _record(db, profile, host, result, status, triggered_by, now, None, rollout)
-            summary["skipped" if result["action"] == "skip" else "nothing"] += 1
+            _record_unapplied(db, profile, host, result, (triggered_by, now, rollout),
+                              summary)  # fmt: skip
         else:
             applying.append((host, result))
     offsets = eng.stagger_offsets(len(applying), profile["staggered_window_min"])
@@ -512,7 +521,7 @@ def fire_profile(db, eng, profile_row, now, triggered_by=None) -> Dict[str, int]
                 continue
         chosen.append(host)
     if rollouts.enabled(eng, profile_row):
-        rollouts.start(db, eng, profile_row, profile, chosen, tags, now,
+        rollouts.start(db, eng, profile_row, chosen, tags, now,
                        triggered_by, summary)  # fmt: skip
         return summary
     fire_hosts(db, eng, profile, chosen, tags, settings, now, triggered_by, summary)

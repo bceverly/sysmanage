@@ -3767,7 +3767,7 @@
     "add": "Agregar Perfil",
     "allHosts": "Todos los hosts",
     "confirmDelete": "¿Desea eliminar el perfil de actualización \"{{name}}\"?",
-    "confirmTrigger": "¿Activar el disparador \"{{name}}\" ahora? Las actualizaciones se enviarán a los hosts que coincidan.",
+    "confirmTrigger": "¿Ejecutar \"{{name}}\" ahora? Las actualizaciones se enviarán a los hosts que coincidan.",
     "created": "Perfil de actualización creado",
     "cron": "Programación Cron",
     "cronHelp": "Cron POSIX -- minuto hora día-del-mes mes día-de-la-semana",
@@ -3788,7 +3788,7 @@
     "saveError": "Error al guardar el perfil de actualización",
     "securityOnly": "Solo Actualizaciones de Seguridad",
     "subtitle": "Programe actualizaciones recurrentes de la flota con cron, solo seguridad y despliegue escalonado",
-    "tabLabel": "Actualizar Perfiles",
+    "tabLabel": "Perfiles de actualización",
     "tag": "Etiqueta",
     "title": "Perfiles de Actualización",
     "trigger": "Disparar Ahora",
@@ -6226,7 +6226,7 @@
     }
   },
   "autoUpdates": {
-    "acknowledge": "Aceptar",
+    "acknowledge": "Confirmar",
     "allHeld": "Todas las políticas de actualización automática están en espera.",
     "appliedOf": "{{applied}} de {{total}} aplicados",
     "details": "Detalles",
@@ -6248,7 +6248,7 @@
       "held": "retenido en el host",
       "manager": "el administrador de paquetes no está en la política",
       "notSecurity": "no es una actualización de seguridad",
-      "osUpgrade": "una actualización de SO nunca es automática",
+      "osUpgrade": "una actualización de versión del SO nunca es automática",
       "waiting": "en período de espera"
     },
     "policy": "Política",
@@ -6285,7 +6285,7 @@
       "partial": "Falló parcialmente",
       "queued": "En ejecución",
       "skipped": "Omitido",
-      "succeeded": "Completado",
+      "succeeded": "Correcto",
       "timedOut": "Sin resultado",
       "waiting": "Esperando su ventana de mantenimiento"
     },

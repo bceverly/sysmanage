@@ -59,3 +59,34 @@ class TestReportsProplusGate:
         self._assert_402(
             client.get("/api/v1/reporting/view/audit-log", headers=auth_headers)
         )
+
+
+@pytest.fixture
+def _professional():
+    """Reporting loaded (Professional), automation not (Enterprise)."""
+    reporting = object()
+
+    def get_module(code):
+        return reporting if code == "reporting_engine" else None
+
+    with patch(
+        "backend.api.reports.endpoints.module_loader.get_module",
+        side_effect=get_module,
+    ), patch(
+        "backend.api.upgrade_profiles.module_loader.get_module",
+        side_effect=get_module,
+    ):
+        yield
+
+
+class TestAutomaticUpdatesReportIsEnterprise:
+    """26.7: reporting is Professional, but the Automatic Updates report is the
+    Enterprise automation_engine's -- a Professional server gets the same 402
+    as every automatic-update route, before any report work starts."""
+
+    @pytest.mark.parametrize("action", ["view", "generate"])
+    def test_professional_gets_402(self, client, auth_headers, _professional, action):
+        resp = client.get(
+            f"/api/v1/reporting/{action}/automatic-updates", headers=auth_headers
+        )
+        assert resp.status_code == 402, resp.text

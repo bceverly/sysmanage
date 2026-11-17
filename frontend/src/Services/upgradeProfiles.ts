@@ -53,6 +53,9 @@ export interface RolloutStageInput {
   name: string;
   tag_id: string;
   soak_hours: number;
+  /** Client-only identity for React keys (fleets can be reordered); stripped
+   *  before saving. */
+  uid?: string;
 }
 
 // 26.2: in_window reboots only inside a maintenance window.

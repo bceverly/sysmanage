@@ -6338,7 +6338,7 @@
       "completed": "已完成",
       "halted": "已停止",
       "haltedBecause": "停在 {{fleet}}：{{reason}}（{{hosts}}）。在有人继续或取消部署之前，不会再打任何补丁。",
-      "resume": "恢复",
+      "resume": "继续",
       "resumeReason": "为什么越过此主机群继续？",
       "running": "进行中",
       "started": "开始于 {{when}}",

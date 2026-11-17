@@ -113,6 +113,39 @@ def _profile(db, run) -> Optional[models.UpgradeProfile]:
     return db.get(models.UpgradeProfile, run.profile_id) if run.profile_id else None
 
 
+def _start_one(db, eng, run, settings, now) -> bool:
+    """Plan one waiting run again now and send it if its window allows;
+    closes or re-times it otherwise.  True when it was sent."""
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        auto_update_runner as runner,
+    )
+
+    row = _profile(db, run)
+    host = db.get(models.Host, run.host_id)
+    if row is None or host is None or not (row.enabled and row.auto_apply):
+        _close(run, "skipped", POLICY_CHANGED, now)
+        return False
+    if row.held:
+        return False
+    hosts = runner.profile_host_ids(db, [row.id]).get(str(row.id))
+    profile = runner.profile_dict(row, hosts)
+    plan = runner.plan(db, eng, host, profile, settings, now)
+    if plan["action"] in ("skip", "nothing"):
+        skipped = plan["action"] == "skip"
+        _close(run, "skipped" if skipped else "nothing_to_do",
+               plan["reason"] if skipped else None, now, plan.get("skipped") or [])  # fmt: skip
+        return False
+    answer = slot(db, eng, host, profile, len(plan["packages"]), now)
+    if answer is not None and answer["start"] is None:
+        _close(run, "skipped", NO_WINDOW, now, plan.get("skipped") or [])
+        return False
+    if answer is not None and answer["start"] > now + START_TOLERANCE:
+        run.release_at = answer["start"]  # the window closed meanwhile
+        return False
+    runner.send(db, host, run, plan, now, now)
+    return True
+
+
 def start_waiting_runs(db, eng, now) -> int:
     """Send each run whose window has opened, planned again now.  A held
     policy's run keeps waiting; one whose policy was turned off or deleted
@@ -121,7 +154,6 @@ def start_waiting_runs(db, eng, now) -> int:
         auto_update_runner as runner,
     )
 
-    started = 0
     due = (
         db.query(models.AutoUpdateRun)
         .filter(
@@ -131,30 +163,4 @@ def start_waiting_runs(db, eng, now) -> int:
         .all()
     )
     settings = runner.settings_dict(runner.settings_row(db))
-    for run in due:
-        row = _profile(db, run)
-        host = db.get(models.Host, run.host_id)
-        if row is None or host is None or not (row.enabled and row.auto_apply):
-            _close(run, "skipped", POLICY_CHANGED, now)
-            continue
-        if row.held:
-            continue
-        hosts = runner.profile_host_ids(db, [row.id]).get(str(row.id))
-        profile = runner.profile_dict(row, hosts)
-        plan = runner.plan(db, eng, host, profile, settings, now)
-        if plan["action"] == "skip":
-            _close(run, "skipped", plan["reason"], now, plan.get("skipped") or [])
-            continue
-        if plan["action"] == "nothing":
-            _close(run, "nothing_to_do", None, now, plan.get("skipped") or [])
-            continue
-        answer = slot(db, eng, host, profile, len(plan["packages"]), now)
-        if answer is not None and answer["start"] is None:
-            _close(run, "skipped", NO_WINDOW, now, plan.get("skipped") or [])
-            continue
-        if answer is not None and answer["start"] > now + START_TOLERANCE:
-            run.release_at = answer["start"]  # the window closed meanwhile
-            continue
-        runner.send(db, host, run, plan, now, now)
-        started += 1
-    return started
+    return sum(1 for run in due if _start_one(db, eng, run, settings, now))

@@ -38,6 +38,7 @@ from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
 HOST_ID = "host.id"
+UPGRADE_PROFILE_ID = "upgrade_profiles.id"
 
 
 def _utcnow():
@@ -56,7 +57,7 @@ class UpgradeProfileHost(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     profile_id = Column(
         GUID(),
-        ForeignKey("upgrade_profiles.id", ondelete="CASCADE"),
+        ForeignKey(UPGRADE_PROFILE_ID, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -107,7 +108,7 @@ class AutoUpdateRun(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     profile_id = Column(
         GUID(),
-        ForeignKey("upgrade_profiles.id", ondelete="SET NULL"),
+        ForeignKey(UPGRADE_PROFILE_ID, ondelete="SET NULL"),
         nullable=True,
         index=True,
     )
@@ -185,7 +186,7 @@ class AutoUpdateRollout(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     profile_id = Column(
         GUID(),
-        ForeignKey("upgrade_profiles.id", ondelete="SET NULL"),
+        ForeignKey(UPGRADE_PROFILE_ID, ondelete="SET NULL"),
         nullable=True,
         index=True,
     )

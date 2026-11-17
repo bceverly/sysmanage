@@ -114,7 +114,7 @@ def _audit(db, rollout, description, username=None, details=None) -> None:
 # ---------------------------------------------------------------------------
 
 
-def start(db, eng, profile_row, profile, hosts, tags, now, triggered_by, summary):
+def start(db, eng, profile_row, hosts, tags, now, triggered_by, summary):
     """The policy fired: start its rollout with the first fleet -- or, when
     one is still running or halted, start nothing."""
     if open_rollout(db, profile_row.id) is not None:
@@ -287,6 +287,26 @@ def _finish_stage(rollout, index, gate, now) -> None:
     _save(rollout, stages, now)
 
 
+def _keep_waiting(rollout, index, gate, now) -> None:
+    """The fleet is still running, or soaking: record where it stands."""
+    stages = copy.deepcopy(rollout.stages)
+    stages[index]["counts"] = gate["counts"]
+    if gate["action"] == "soak" and not stages[index].get("finished_at"):
+        stages[index]["finished_at"] = _iso(now)
+    stages[index]["soak_until"] = _iso(gate.get("until"))
+    _save(rollout, stages, now)
+
+
+def _complete(db, rollout, now) -> None:
+    rollout.status, rollout.completed_at = COMPLETED, now
+    _audit(
+        db,
+        rollout,
+        _("Rollout of policy '%(policy)s' completed")
+        % {"policy": rollout.profile_name},
+    )
+
+
 def advance(db, eng, rollout, profile_row, now, summary=None) -> None:
     """Move ``rollout`` on as far as its fleets' health allows right now."""
     summary = summary if summary is not None else {}
@@ -305,22 +325,11 @@ def advance(db, eng, rollout, profile_row, now, summary=None) -> None:
             summary["halted"] = summary.get("halted", 0) + 1
             return
         if gate["action"] in ("wait", "soak"):
-            stages = copy.deepcopy(rollout.stages)
-            stages[index]["counts"] = gate["counts"]
-            if gate["action"] == "soak" and not stages[index].get("finished_at"):
-                stages[index]["finished_at"] = _iso(now)
-            stages[index]["soak_until"] = _iso(gate.get("until"))
-            _save(rollout, stages, now)
+            _keep_waiting(rollout, index, gate, now)
             return
         _finish_stage(rollout, index, gate, now)
         if index + 1 >= len(rollout.stages):
-            rollout.status, rollout.completed_at = COMPLETED, now
-            _audit(
-                db,
-                rollout,
-                _("Rollout of policy '%(policy)s' completed")
-                % {"policy": rollout.profile_name},
-            )
+            _complete(db, rollout, now)
             return
         rollout.stage_index = index + 1
 

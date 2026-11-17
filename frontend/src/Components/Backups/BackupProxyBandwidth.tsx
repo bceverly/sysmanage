@@ -82,6 +82,8 @@ export const BandwidthDialog: React.FC<{
             setError(null);
         }
     }, [open, target]);
+    const removeRow = (index: number) =>
+        setRows(current => current.filter((_r, i) => i !== index));
     const change = (index: number, patch: Partial<Row>) =>
         setRows(current => current.map((row, i) => (i === index ? { ...row, ...patch } : row)));
     const save = async (rules: string[]) => {
@@ -118,7 +120,7 @@ export const BandwidthDialog: React.FC<{
                                 placeholder="2MiB/s" onChange={e => change(index, { rate: e.target.value })}
                                 sx={{ flex: 1 }} />
                             <IconButton aria-label={t('backups.bandwidth.removeRule', 'Remove this rule')}
-                                onClick={() => setRows(current => current.filter((_r, i) => i !== index))}>
+                                onClick={() => removeRow(index)}>
                                 <DeleteIcon />
                             </IconButton>
                         </Box>

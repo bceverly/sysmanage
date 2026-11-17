@@ -4897,11 +4897,12 @@ msgstr "È richiesto un motivo"
 #: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
-msgstr "Tutti i criteri di aggiornamento automatico sospesi: %s"
+msgstr "Tutte le politiche di aggiornamento automatico sospese: %s"
 
 #: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
-msgstr "Sospensione di tutti i criteri di aggiornamento automatico revocata"
+msgstr ""
+"Sospensione di tutte le politiche di aggiornamento automatico revocata"
 
 #: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
@@ -4910,12 +4911,12 @@ msgstr "Impostazioni degli aggiornamenti automatici modificate"
 #: backend/api/auto_updates.py:213
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
-msgstr "Criterio di aggiornamento automatico '%(policy)s' sospeso: %(reason)s"
+msgstr "Politica di aggiornamento automatico '%(policy)s' sospesa: %(reason)s"
 
 #: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
-msgstr "Sospensione del criterio di aggiornamento automatico '%s' revocata"
+msgstr "Sospensione della politica di aggiornamento automatico '%s' revocata"
 
 #: backend/api/auto_updates.py:246
 #, python-format
@@ -6425,7 +6426,7 @@ msgstr ""
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
 msgstr ""
-"Aggiornamento automatico accodato su %(host)s dal criterio '%(policy)s'"
+"Aggiornamento automatico accodato su %(host)s dalla politica '%(policy)s'"
 
 #: backend/services/auto_update_runner.py:539
 msgid "The host never reported the result"
@@ -6434,7 +6435,7 @@ msgstr "L'host non ha mai segnalato il risultato"
 #: backend/services/auto_update_results.py:102
 #, python-format
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
-msgstr "Riavvio automatico di %(host)s dopo il criterio '%(policy)s'"
+msgstr "Riavvio automatico di %(host)s dopo la politica '%(policy)s'"
 
 #: backend/services/held_asset_tags.py:159
 #, python-format
@@ -6832,7 +6833,9 @@ msgstr "Il rollout della politica '%(policy)s' è iniziato: %(count)d flotta/e"
 #: backend/services/auto_update_rollout.py:275
 #, python-format
 msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
-msgstr "Il rollout della politica '%(policy)s' è stato interrotto alla flotta '%(fleet)s': %(reason)s"
+msgstr ""
+"Il rollout della politica '%(policy)s' è stato interrotto alla flotta "
+"'%(fleet)s': %(reason)s"
 
 #: backend/services/auto_update_rollout.py:321
 #, python-format

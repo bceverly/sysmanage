@@ -175,6 +175,30 @@ class WebSocketSecurityManager:
             )
             return False, None, _("Malformed token")
 
+    @staticmethod
+    def _timestamp_error(message: Dict[str, Any], message_type: str) -> str:
+        """Why a message's timestamp is refused, or "" when it is fine.
+
+        Every message but a script result carries a timestamp that must parse;
+        results of work the server sent skip only the age limit (see
+        LATE_RESULT_TYPES).  The limit is 30 minutes (increased tolerance for
+        inventory messages after host approval)."""
+        try:
+            msg_timestamp = datetime.fromisoformat(
+                message["timestamp"].replace("Z", "+00:00")
+            )
+            time_diff = abs(
+                (datetime.now(timezone.utc) - msg_timestamp).total_seconds()
+            )
+        except (ValueError, AttributeError, TypeError):
+            return f"Invalid timestamp format in {message_type} message"
+        if time_diff > 1800 and message_type not in LATE_RESULT_TYPES:
+            return (
+                f"Message timestamp too old ({int(time_diff)}s) in "
+                f"{message_type} message"
+            )
+        return ""
+
     def validate_message_integrity(
         self, message: Dict[str, Any], connection_id: str
     ) -> Tuple[bool, str]:
@@ -210,31 +234,9 @@ class WebSocketSecurityManager:
                 return False, error_msg
 
         # Validate timestamp (should be within last 30 minutes to handle post-approval scenarios)
-        # Every message but a script result carries a timestamp that must
-        # parse; results of work the server sent skip only the age limit
-        # (see LATE_RESULT_TYPES).
         if message_type != "script_execution_result":
-            try:
-                msg_timestamp = datetime.fromisoformat(
-                    message["timestamp"].replace("Z", "+00:00")
-                )
-                current_time = datetime.now(timezone.utc)
-                time_diff = abs((current_time - msg_timestamp).total_seconds())
-            except (ValueError, AttributeError, TypeError):
-                error_msg = f"Invalid timestamp format in {message_type} message"
-                logger.warning(
-                    LOG_MSG_FROM_CONNECTION,
-                    sanitize_log(error_msg),
-                    sanitize_log(connection_id),
-                )
-                return False, error_msg
-            # 30 minutes (increased tolerance for inventory messages after
-            # host approval)
-            if time_diff > 1800 and message_type not in LATE_RESULT_TYPES:
-                error_msg = (
-                    f"Message timestamp too old ({int(time_diff)}s) in "
-                    f"{message_type} message"
-                )
+            error_msg = self._timestamp_error(message, message_type)
+            if error_msg:
                 logger.warning(
                     LOG_MSG_FROM_CONNECTION,
                     sanitize_log(error_msg),

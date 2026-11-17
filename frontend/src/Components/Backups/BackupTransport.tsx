@@ -85,7 +85,7 @@ export const TransportDialog: React.FC<{
                         <InputLabel id="backup-transport">{t('backups.transport.label', 'Reach the storage through')}</InputLabel>
                         <Select labelId="backup-transport" label={t('backups.transport.label', 'Reach the storage through')}
                             value={form.transport}
-                            onChange={e => set({ transport: e.target.value as TransportInput['transport'] })}>
+                            onChange={e => set({ transport: e.target.value })}>
                             <MenuItem value="nfs">{t('backups.transport.nfs', 'NFS (each host mounts its own export)')}</MenuItem>
                             <MenuItem value="proxy">{t('backups.transport.proxy', 'restate-proxy (HTTPS to the storage host)')}</MenuItem>
                         </Select>

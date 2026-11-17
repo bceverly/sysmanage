@@ -70,7 +70,9 @@ describe('RolloutFields', () => {
     render(<RolloutFields form={FORM} setForm={setForm} tags={TAGS} />);
     fireEvent.click(screen.getByLabelText('Roll out fleet by fleet'));
     const last = setForm.mock.calls.at(-1)?.[0];
-    expect(last.rollout_stages).toEqual([{ name: 'Canary fleet', tag_id: '', soak_hours: 24 }]);
+    expect(last.rollout_stages).toMatchObject([{ name: 'Canary fleet', tag_id: '', soak_hours: 24 }]);
+    // A stable client-side key, since fleets can be reordered (stripped on save).
+    expect(last.rollout_stages[0].uid).toMatch(/^fleet-/);
   });
 
   test('fleets can be reordered and removed', () => {

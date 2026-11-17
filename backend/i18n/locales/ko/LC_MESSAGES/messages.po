@@ -3977,7 +3977,7 @@ msgstr "업데이트 결과 가져오기 실패: %s"
 #: backend/api/updates/execution_routes.py:65
 #: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
-msgstr "퍼미션 denied: APPLY_SOFTWARE_UPDATE 역할 필요"
+msgstr "권한 거부됨: APPLY_SOFTWARE_UPDATE 역할이 필요합니다"
 
 #: backend/api/updates/execution_routes.py:126
 msgid ""
@@ -4621,11 +4621,11 @@ msgstr "사유를 입력해야 합니다"
 #: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
-msgstr "모든 자동 업데이트 정책을 보류했습니다: %s"
+msgstr "모든 자동 업데이트 정책을 일시 중지했습니다: %s"
 
 #: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
-msgstr "모든 자동 업데이트 정책의 보류를 해제했습니다"
+msgstr "모든 자동 업데이트 정책의 일시 중지를 해제했습니다"
 
 #: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
@@ -4634,12 +4634,12 @@ msgstr "자동 업데이트 설정을 변경했습니다"
 #: backend/api/auto_updates.py:213
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
-msgstr "자동 업데이트 정책 '%(policy)s'을(를) 보류했습니다: %(reason)s"
+msgstr "자동 업데이트 정책 '%(policy)s'을(를) 일시 중지했습니다: %(reason)s"
 
 #: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
-msgstr "자동 업데이트 정책 '%s'의 보류를 해제했습니다"
+msgstr "자동 업데이트 정책 '%s'의 일시 중지를 해제했습니다"
 
 #: backend/api/auto_updates.py:246
 #, python-format

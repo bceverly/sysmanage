@@ -39,6 +39,21 @@ class RolloutActionRequest(BaseModel):
     reason: str = Field(..., min_length=1, max_length=1000)
 
 
+def _host_row(host_id, hostname, run) -> dict:
+    """One host of a fleet, with its latest run in the rollout (or none yet)."""
+    row = {"host_id": host_id, "hostname": hostname, "run_id": None, "status": None,
+           "reason": None, "reboot_status": None, "release_at": None}  # fmt: skip
+    if run is not None:
+        row.update(
+            run_id=str(run.id),
+            status=run.status,
+            reason=run.reason,
+            reboot_status=run.reboot_status,
+            release_at=run.release_at.isoformat() if run.release_at else None,
+        )
+    return row
+
+
 def _view(db, rollout) -> dict:
     """The rollout with each started fleet's hosts and their latest runs."""
     out = rollout.to_dict()
@@ -49,30 +64,17 @@ def _view(db, rollout) -> dict:
             models.Host.id.in_([uuid.UUID(h) for h in ids] or [uuid.uuid4()])
         )
     }
-    runs = {}
-    for run in (
-        db.query(models.AutoUpdateRun)
+    runs = {
+        (str(run.host_id), run.rollout_stage): run
+        for run in db.query(models.AutoUpdateRun)
         .filter(models.AutoUpdateRun.rollout_id == rollout.id)
         .order_by(models.AutoUpdateRun.queued_at)
-    ):
-        runs[(str(run.host_id), run.rollout_stage)] = run
+    }
     for index, stage in enumerate(out["stages"]):
-        stage["hosts"] = []
-        for host_id in stage.get("host_ids", []):
-            run = runs.get((host_id, index))
-            stage["hosts"].append(
-                {
-                    "host_id": host_id,
-                    "hostname": names.get(host_id),
-                    "run_id": str(run.id) if run else None,
-                    "status": run.status if run else None,
-                    "reason": run.reason if run else None,
-                    "reboot_status": run.reboot_status if run else None,
-                    "release_at": (
-                        run.release_at.isoformat() if run and run.release_at else None
-                    ),
-                }
-            )
+        stage["hosts"] = [
+            _host_row(host_id, names.get(host_id), runs.get((host_id, index)))
+            for host_id in stage.get("host_ids", [])
+        ]
     return out
 
 

@@ -4903,12 +4903,11 @@ msgstr "Se requiere un motivo"
 #: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
-msgstr "Todas las políticas de actualización automática en pausa: %s"
+msgstr "Todas las políticas de actualización automática en espera: %s"
 
 #: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
-msgstr ""
-"Se levantó la pausa de todas las políticas de actualización automática"
+msgstr "Se quitó la espera de todas las políticas de actualización automática"
 
 #: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
@@ -4918,12 +4917,12 @@ msgstr "Se cambió la configuración de actualizaciones automáticas"
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
 msgstr ""
-"Política de actualización automática '%(policy)s' en pausa: %(reason)s"
+"Política de actualización automática '%(policy)s' en espera: %(reason)s"
 
 #: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
-msgstr "Se levantó la pausa de la política de actualización automática '%s'"
+msgstr "Se quitó la espera de la política de actualización automática '%s'"
 
 #: backend/api/auto_updates.py:246
 #, python-format
@@ -6831,7 +6830,9 @@ msgstr "Despliegue de la política '%(policy)s' iniciado: %(count)d flota(s)"
 #: backend/services/auto_update_rollout.py:275
 #, python-format
 msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
-msgstr "Despliegue de la política '%(policy)s' detenido en la flota '%(fleet)s': %(reason)s"
+msgstr ""
+"Despliegue de la política '%(policy)s' detenido en la flota '%(fleet)s': "
+"%(reason)s"
 
 #: backend/services/auto_update_rollout.py:321
 #, python-format
@@ -6841,7 +6842,9 @@ msgstr "Despliegue de la política '%(policy)s' completado"
 #: backend/services/auto_update_rollout.py:376
 #, python-format
 msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
-msgstr "Despliegue de la política '%(policy)s' reanudado más allá de la flota '%(fleet)s'"
+msgstr ""
+"Despliegue de la política '%(policy)s' reanudado más allá de la flota "
+"'%(fleet)s'"
 
 #: backend/services/auto_update_rollout.py:393
 #, python-format

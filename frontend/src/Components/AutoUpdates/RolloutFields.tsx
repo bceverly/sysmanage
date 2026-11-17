@@ -45,7 +45,15 @@ function clamp(value: string, max: number, decimals = false): number {
   return Number.isNaN(n) ? 0 : Math.max(0, Math.min(max, n));
 }
 
-function RolloutFields<F extends RolloutForm>({ form, setForm, tags }: Props<F>) {
+let nextUid = 0;
+/** A client-only identity for a fleet row: fleets move up and down, so the
+ *  array index is not a stable React key. */
+export const newStageUid = (): string => {
+  nextUid += 1;
+  return `fleet-${nextUid}`;
+};
+
+function RolloutFields<F extends RolloutForm>({ form, setForm, tags }: Readonly<Props<F>>) {
   const { t } = useTranslation();
   const stages = form.rollout_stages;
   const setStages = (next: RolloutStageInput[]) => setForm({ ...form, rollout_stages: next });
@@ -63,6 +71,7 @@ function RolloutFields<F extends RolloutForm>({ form, setForm, tags }: Props<F>)
         name: stages.length === 0 ? t('upgradeProfiles.rolloutCanary', 'Canary fleet') : '',
         tag_id: '',
         soak_hours: stages.length === 0 ? 24 : 0,
+        uid: newStageUid(),
       },
     ]);
 
@@ -91,7 +100,7 @@ function RolloutFields<F extends RolloutForm>({ form, setForm, tags }: Props<F>)
           </Typography>
           {stages.map((stage, index) => (
             <Stack
-              key={index}
+              key={stage.uid ?? `${stage.name}|${stage.tag_id}`}
               direction={{ xs: 'column', sm: 'row' }}
               spacing={1}
               sx={{ alignItems: { sm: 'center' } }}
@@ -128,7 +137,9 @@ function RolloutFields<F extends RolloutForm>({ form, setForm, tags }: Props<F>)
                 value={stage.soak_hours}
                 onChange={(e) => change(index, { soak_hours: clamp(e.target.value, 720, true) })}
                 slotProps={{ htmlInput: { min: 0, max: 720, step: 0.5 } }}
-                sx={{ flex: 1, minWidth: 100 }}
+                // As wide as the name and tag: at flex 1 its label ("Soak time (hours)",
+                // longer in most languages) was cut to "Soak time (...".
+                sx={{ flex: 2, minWidth: 170 }}
               />
               <Stack direction="row">
                 <Tooltip title={t('upgradeProfiles.rolloutUp', 'Move earlier')}>
