@@ -36,6 +36,16 @@ vi.mock("../../Services/upgradeProfiles", () => ({
   },
 }));
 
+// The automatic-updates panel and the rollouts card (26.1/26.4) have their
+// own tests; here they render nothing (no Enterprise engine).
+vi.mock("../../Services/autoUpdates", () => ({
+  autoUpdatesService: {
+    settings: vi.fn(() => Promise.reject(new Error("402"))),
+    runs: vi.fn(() => Promise.reject(new Error("402"))),
+    rollouts: vi.fn(() => Promise.reject(new Error("402"))),
+  },
+}));
+
 vi.mock("@mui/x-data-grid", () => ({
   DataGrid: ({
     rows,

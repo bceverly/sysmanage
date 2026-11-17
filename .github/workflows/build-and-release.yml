@@ -3693,7 +3693,7 @@ jobs:
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/')
     env:
-      # snapcore/action-build@v1 and action-publish@v1 are pinned on
+      # snapcore/action-publish@v1 is pinned on
       # Node.js 20, which GitHub removes from runners on 2026-09-16.
       # This flag tells the runner to force-run JS actions on Node.js 24
       # until snapcore ships a Node 24-native release.  Drop this env
@@ -3731,10 +3731,45 @@ jobs:
           mkdir -p snap/gui
           cp installer/snap/gui/icon.svg snap/gui/icon.svg
 
-      - name: Build and publish snap
-        uses: snapcore/action-build@3bdaa03e1ba6bf59a65f84a751d943d549a54e79 # v1
-        with:
-          snapcraft-channel: latest/edge
+      - name: Install LXD and Snapcraft
+        run: |
+          # Replaces snapcore/action-build (2026-11-17): it installs LXD and
+          # Snapcraft with no retry, so one Snap Store timeout failed the
+          # release.  Same setup as the action, but each Snap Store call is
+          # retried with exponential back off: 15s, 30s, 60s, 120s, 240s
+          # between six tries (about 8 min).
+          retry() {
+            delay=15
+            for attempt in 1 2 3 4 5 6; do
+              if "$@"; then
+                return 0
+              fi
+              if [ "$attempt" -eq 6 ]; then
+                echo "::error::'$*' failed 6 times; the Snap Store is unreachable"
+                return 1
+              fi
+              echo "::warning::'$*' failed (try $attempt of 6); retrying in ${delay}s"
+              sleep "$delay"
+              delay=$((delay * 2))
+            done
+          }
+          [ "$(stat -c %u:%g /)" = 0:0 ] || sudo chown root:root /
+          sudo groupadd --force --system lxd
+          sudo usermod --append --groups lxd "$(id -un)"
+          retry sudo snap install lxd
+          sudo lxd init --auto
+          sudo iptables -P FORWARD ACCEPT
+          retry sudo snap install --channel latest/edge --classic snapcraft
+
+      - name: Build snap
+        env:
+          SNAPCRAFT_BUILD_ENVIRONMENT: lxd
+          SNAPCRAFT_BUILD_INFO: '1'
+          SNAPCRAFT_IMAGE_INFO: '{"build_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
+        run: |
+          # As the action ran it: sudo -u starts a fresh login for this user,
+          # so the lxd group added above applies.
+          sudo -u "$(id -un)" -E snapcraft
 
       - name: Get snap filename
         id: snap_file

@@ -138,6 +138,9 @@ class AutoUpdateRun(Base):
     completed_at = Column(DateTime, nullable=True)
     acknowledged_by = Column(String(255), nullable=True)
     acknowledged_at = Column(DateTime, nullable=True)
+    # The rollout and fleet this run belongs to (26.4); NULL outside one.
+    rollout_id = Column(GUID(), nullable=True, index=True)
+    rollout_stage = Column(Integer, nullable=True)
 
     def to_dict(self):
         return {
@@ -145,6 +148,8 @@ class AutoUpdateRun(Base):
             "profile_id": str(self.profile_id) if self.profile_id else None,
             "profile_name": self.profile_name,
             "host_id": str(self.host_id),
+            "rollout_id": str(self.rollout_id) if self.rollout_id else None,
+            "rollout_stage": self.rollout_stage,
             "status": self.status,
             "reason": self.reason,
             "triggered_by": self.triggered_by,
@@ -165,9 +170,63 @@ class AutoUpdateRun(Base):
         }
 
 
+class AutoUpdateRollout(Base):
+    """One fleet-by-fleet rollout of a policy (26.4).
+
+    ``stages`` is the plan as it started: ``[{"name", "tag_id",
+    "soak_minutes", "host_ids", "remaining", "started_at", "finished_at",
+    "status", "forced"}]`` -- each host in the first fleet that contains it,
+    once.  ``stage_index`` is the fleet in progress; only one runs at a time.
+    running / halted (``halt_reason``, ``halt_detail``: the hosts that
+    caused it) / completed / canceled."""
+
+    __tablename__ = "auto_update_rollout"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    profile_id = Column(
+        GUID(),
+        ForeignKey("upgrade_profiles.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    profile_name = Column(String(120), nullable=False)
+    status = Column(String(16), nullable=False, index=True)
+    stage_index = Column(Integer, nullable=False, default=0, server_default="0")
+    stages = Column(JSON, nullable=True)
+    triggered_by = Column(String(255), nullable=True)  # None = the schedule
+    started_at = Column(DateTime, nullable=False, default=_utcnow)
+    updated_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    halt_reason = Column(String(40), nullable=True)
+    halt_detail = Column(JSON, nullable=True)
+    halted_at = Column(DateTime, nullable=True)
+    ended_by = Column(String(255), nullable=True)  # who resumed or canceled
+    end_reason = Column(String(1000), nullable=True)
+
+    def to_dict(self):
+        return {
+            "id": str(self.id),
+            "profile_id": str(self.profile_id) if self.profile_id else None,
+            "profile_name": self.profile_name,
+            "status": self.status,
+            "stage_index": self.stage_index,
+            "stages": self.stages or [],
+            "triggered_by": self.triggered_by,
+            "started_at": _iso(self.started_at),
+            "updated_at": _iso(self.updated_at),
+            "completed_at": _iso(self.completed_at),
+            "halt_reason": self.halt_reason,
+            "halt_detail": self.halt_detail or {},
+            "halted_at": _iso(self.halted_at),
+            "ended_by": self.ended_by,
+            "end_reason": self.end_reason,
+        }
+
+
 # Imported here so the model module stays the one place that names them.
 __all__ = [
     "UpgradeProfileHost",
     "AutoUpdateSettings",
     "AutoUpdateRun",
+    "AutoUpdateRollout",
 ]

@@ -792,7 +792,10 @@
     "backupsAttention": "주의가 필요한 백업",
     "backupsEscrowStale": "비상용 키 내보내기가 오래됨",
     "backupsServerUnprotected": "이 SysManage 서버에는 정상 백업이 없습니다",
-    "autoUpdateProblems": "자동 업데이트 문제"
+    "autoUpdateProblems": "자동 업데이트 문제",
+    "autoRebootsWaiting": "유지보수 윈도우를 기다리는 자동 재부팅",
+    "rolloutsHalted": "중지된 롤아웃: {{count}}",
+    "rolloutsRunning": "진행 중인 롤아웃"
   },
   "dataGrid": {
     "columnVisibility": "열 표시",
@@ -2992,7 +2995,8 @@
       "users": "사용자들",
       "assetTags": "자산 태그",
       "hardware": "하드웨어",
-      "backups": "백업"
+      "backups": "백업",
+      "updates": "업데이트"
     },
     "title": "보고서",
     "unknownError": "알 수 없는 오류",
@@ -3012,6 +3016,10 @@
     "backupSla": {
       "name": "백업 SLA",
       "description": "백업되는 각 호스트에 대해 복구 시점 목표(백업 간격의 두 배)를 현재와 최근 30일의 각 날짜에 충족했는지, 실패한 백업, 마지막 전체 읽기 검증, 저장소 크기를 보여 줍니다."
+    },
+    "automaticUpdates": {
+      "description": "지난 30일 동안 자동 업데이트 정책과 플릿별: 실행 횟수, 패치된 호스트 수, 실패한 실행 횟수, 재부팅 횟수, 그리고 심각한 CVE에 대한 패치가 호스트에 나타난 시점부터 적용되기까지 걸린 시간의 중앙값.",
+      "name": "자동 업데이트"
     }
   },
   "resetPassword": {
@@ -3815,7 +3823,20 @@
     "criticalEither": "취약점 스캔 또는 공급업체 보안 권고",
     "criticalVulnerability": "호스트의 취약점 스캔",
     "criticalAdvisory": "공급업체 보안 권고",
-    "criticalHelp": "호스트에 취약점 스캔이나 공급업체 보안 권고가 없으면 해당 호스트의 모든 패치는 일반 대기 기간을 따릅니다."
+    "criticalHelp": "호스트에 취약점 스캔이나 공급업체 보안 권고가 없으면 해당 호스트의 모든 패치는 일반 대기 기간을 따릅니다.",
+    "rolloutAdd": "플릿 추가",
+    "rolloutCanary": "카나리 플릿",
+    "rolloutDown": "뒤 순서로 이동",
+    "rolloutEnabled": "플릿별로 롤아웃",
+    "rolloutFleetName": "플릿 {{n}}",
+    "rolloutFleetTag": "태그가 지정된 호스트",
+    "rolloutHelp": "이 순서대로 한 번에 한 플릿씩 진행하며, 첫 번째 플릿이 카나리입니다. 다음 플릿은 현재 플릿이 완료되고 정상 상태이며 관찰 기간이 지난 후에만 시작됩니다. 호스트는 자신이 가진 태그와 일치하는 첫 번째 플릿에서 패치되며, 어느 플릿에도 속하지 않는 호스트는 마지막에 패치됩니다.",
+    "rolloutIncomplete": "롤아웃의 모든 플릿에는 이름과 태그가 필요합니다",
+    "rolloutMaxFailures": "플릿에서 실패한 비율이 이 값을 초과하면 중지 (%)",
+    "rolloutMaxFailuresHelp": "0: 실행이 하나라도 실패하면 롤아웃이 중지됩니다. 재부팅 후 다시 온라인 상태가 되지 않은 호스트, 보고를 중단한 호스트 또는 플릿에서 새로 발생한 심각한 경고가 있으면 항상 중지됩니다.",
+    "rolloutRemove": "이 플릿 제거",
+    "rolloutSoak": "관찰 기간 (시간)",
+    "rolloutUp": "앞 순서로 이동"
   },
   "userDetail": {
     "active": "활성",
@@ -6285,6 +6306,41 @@
     "startsAt": "윈도우가 열리면 시작: {{when}}",
     "threshold": "다음 등급의 CVE를 수정하는 패치를 심각으로 간주",
     "thresholdCritical": "심각",
-    "thresholdHigh": "높음 또는 심각"
+    "thresholdHigh": "높음 또는 심각",
+    "fleet": {
+      "counts": "적용 {{applied}}, 실패 {{failed}}, 진행 중 {{inFlight}}, 미적용 {{other}}",
+      "done": "완료",
+      "halted": "여기서 중지됨",
+      "hide": "호스트 숨기기",
+      "hosts": "호스트 {{count}}대",
+      "noRun": "아직 계획되지 않음",
+      "pending": "시작되지 않음",
+      "remaining": "남은 호스트",
+      "resumedBy": "{{who}}님이 재개함",
+      "running": "진행 중",
+      "show": "호스트 표시",
+      "soakUntil": "관찰 기간 종료: {{when}}"
+    },
+    "halt": {
+      "criticalAlerts": "이 플릿의 호스트에서 심각한 경고가 발생했습니다",
+      "notBack": "호스트가 재부팅 후 다시 온라인 상태가 되지 않았습니다",
+      "notReporting": "패치 후 호스트가 보고를 중단했습니다",
+      "runFailures": "이 플릿에서 실패한 실행이 너무 많습니다"
+    },
+    "rollout": {
+      "cancel": "취소",
+      "cancelReason": "이 롤아웃을 취소하는 이유는 무엇입니까?",
+      "canceled": "취소됨",
+      "canceledBy": "{{who}}님이 취소함: {{reason}}",
+      "completed": "완료",
+      "halted": "중지됨",
+      "haltedBecause": "{{fleet}}에서 중지됨: {{reason}} ({{hosts}}). 누군가 재개하거나 취소할 때까지 더 이상 패치되지 않습니다.",
+      "resume": "재개",
+      "resumeReason": "이 플릿 이후로 계속 진행하는 이유는 무엇입니까?",
+      "running": "진행 중",
+      "started": "{{when}}에 시작됨",
+      "subtitle": "플릿별로 롤아웃하는 정책: 한 번에 한 플릿씩, 각 플릿이 정상인지 확인한 후 다음 플릿으로 진행합니다.",
+      "title": "플릿별 단계적 롤아웃"
+    }
   }
 }

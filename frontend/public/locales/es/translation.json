@@ -792,7 +792,10 @@
     "backupsAttention": "Copias de seguridad que requieren atención",
     "backupsEscrowStale": "Exportación de claves de emergencia desactualizada",
     "backupsServerUnprotected": "Este servidor SysManage no tiene una copia de seguridad correcta",
-    "autoUpdateProblems": "Problemas de actualizaciones automáticas"
+    "autoUpdateProblems": "Problemas de actualizaciones automáticas",
+    "autoRebootsWaiting": "Reinicios automáticos en espera de una ventana de mantenimiento",
+    "rolloutsHalted": "Despliegues detenidos: {{count}}",
+    "rolloutsRunning": "Despliegues en curso"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidad de columnas",
@@ -2992,7 +2995,8 @@
       "users": "usuarios",
       "assetTags": "etiquetas de activos",
       "hardware": "hardware",
-      "backups": "respaldos"
+      "backups": "respaldos",
+      "updates": "actualizaciones"
     },
     "title": "Informes",
     "unknownError": "Error desconocido",
@@ -3012,6 +3016,10 @@
     "backupSla": {
       "name": "SLA de copias de seguridad",
       "description": "Para cada host con copia de seguridad: si su objetivo de punto de recuperación (el doble de su intervalo de copia) se cumple ahora y en cada uno de los últimos 30 días, sus copias fallidas, su última verificación con lectura completa y el tamaño de su repositorio."
+    },
+    "automaticUpdates": {
+      "description": "Para cada política de actualización automática y cada flota en los últimos 30 días: ejecuciones, hosts parcheados, ejecuciones fallidas, reinicios y la mediana del tiempo desde que aparece en un host un parche para un CVE crítico hasta que se aplica allí.",
+      "name": "Actualizaciones automáticas"
     }
   },
   "resetPassword": {
@@ -3815,7 +3823,20 @@
     "criticalEither": "El análisis de vulnerabilidades o el aviso de seguridad del proveedor",
     "criticalVulnerability": "El análisis de vulnerabilidades del host",
     "criticalAdvisory": "El aviso de seguridad del proveedor",
-    "criticalHelp": "Sin análisis de vulnerabilidades ni avisos de seguridad del proveedor para un host, cada parche en él espera el plazo normal."
+    "criticalHelp": "Sin análisis de vulnerabilidades ni avisos de seguridad del proveedor para un host, cada parche en él espera el plazo normal.",
+    "rolloutAdd": "Agregar una flota",
+    "rolloutCanary": "Flota canario",
+    "rolloutDown": "Retrasar en el orden",
+    "rolloutEnabled": "Desplegar flota por flota",
+    "rolloutFleetName": "Flota {{n}}",
+    "rolloutFleetTag": "Hosts con la etiqueta",
+    "rolloutHelp": "Una flota a la vez, en este orden; la primera es el canario. La siguiente flota solo comienza cuando esta ha terminado, está en buen estado y ha cumplido su periodo de observación. Un host se parchea con la primera flota cuya etiqueta lleva; los hosts que no están en ninguna flota van al final.",
+    "rolloutIncomplete": "Cada flota del despliegue necesita un nombre y una etiqueta",
+    "rolloutMaxFailures": "Detener cuando falle más de este porcentaje de una flota (%)",
+    "rolloutMaxFailuresHelp": "0: cualquier ejecución fallida detiene el despliegue. Un host que no regresa de su reinicio, un host que dejó de reportar o una nueva alerta crítica en la flota siempre lo detiene.",
+    "rolloutRemove": "Eliminar esta flota",
+    "rolloutSoak": "Tiempo de observación (horas)",
+    "rolloutUp": "Adelantar en el orden"
   },
   "userDetail": {
     "active": "Activo",
@@ -6285,6 +6306,41 @@
     "startsAt": "Comienza cuando se abre su ventana de mantenimiento: {{when}}",
     "threshold": "Un parche es crítico cuando corrige una CVE calificada como",
     "thresholdCritical": "Crítica",
-    "thresholdHigh": "Alta o crítica"
+    "thresholdHigh": "Alta o crítica",
+    "fleet": {
+      "counts": "{{applied}} aplicados, {{failed}} fallidos, {{inFlight}} en curso, {{other}} no aplicados",
+      "done": "Terminado",
+      "halted": "Detenido aquí",
+      "hide": "Ocultar hosts",
+      "hosts": "{{count}} host(s)",
+      "noRun": "Aún no planificado",
+      "pending": "No iniciado",
+      "remaining": "Los hosts restantes",
+      "resumedBy": "reanudado por {{who}}",
+      "running": "En curso",
+      "show": "Mostrar hosts",
+      "soakUntil": "el tiempo de observación termina {{when}}"
+    },
+    "halt": {
+      "criticalAlerts": "se generó una alerta crítica en un host dentro de esta flota",
+      "notBack": "un host no regresó de su reinicio",
+      "notReporting": "un host dejó de reportar después de ser parcheado",
+      "runFailures": "demasiadas ejecuciones en esta flota fallaron"
+    },
+    "rollout": {
+      "cancel": "Cancelar",
+      "cancelReason": "¿Por qué cancelar este despliegue?",
+      "canceled": "Cancelado",
+      "canceledBy": "Cancelado por {{who}}: {{reason}}",
+      "completed": "Completado",
+      "halted": "Detenido",
+      "haltedBecause": "Detenido en la flota {{fleet}}: {{reason}} ({{hosts}}). No se aplicarán más parches hasta que alguien lo reanude o cancele.",
+      "resume": "Reanudar",
+      "resumeReason": "¿Por qué seguir más allá de esta flota?",
+      "running": "En curso",
+      "started": "iniciado {{when}}",
+      "subtitle": "Políticas que se despliegan flota por flota: una flota a la vez, cada una en buen estado antes de la siguiente.",
+      "title": "Despliegues flota por flota"
+    }
   }
 }

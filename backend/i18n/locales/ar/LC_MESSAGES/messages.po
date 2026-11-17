@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 10:03-0800\n"
+"POT-Creation-Date: 2026-11-16 21:22-0800\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -244,8 +244,8 @@ msgstr "تنسيق ID المضيف غير صحيح"
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:167
-#: backend/api/backups.py:170 backend/api/auto_updates.py:220
-#: backend/api/auto_updates.py:254 backend/api/diagnostics.py:102
+#: backend/api/backups.py:170 backend/api/auto_updates.py:238
+#: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -279,6 +279,18 @@ msgstr "المضيف غير معتمد"
 #: backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "لم يتم العثور على المستخدم"
+
+#: backend/api/auto_update_rollouts.py:104
+msgid "Rollout not found"
+msgstr "لم يتم العثور على النشر"
+
+#: backend/api/auto_update_rollouts.py:122
+msgid "Only a halted rollout can resume"
+msgstr "لا يمكن استئناف إلا النشر الموقوف"
+
+#: backend/api/auto_update_rollouts.py:143
+msgid "This rollout has already ended"
+msgstr "انتهى هذا النشر بالفعل"
 
 #: backend/api/malware.py:134
 msgid "Only an administrator can change the malware rule sets"
@@ -536,61 +548,61 @@ msgstr "تم تحديث الأجهزة"
 msgid "Failed to update hardware information"
 msgstr "فشل في تحديث معلومات الأجهزة"
 
-#: backend/api/handlers/software_package_handlers.py:112
+#: backend/api/handlers/software_package_handlers.py:113
 msgid "software_inventory_updated"
 msgstr "تم تحديث مخزون البرمجيات"
 
-#: backend/api/handlers/software_package_handlers.py:121
+#: backend/api/handlers/software_package_handlers.py:122
 msgid "Failed to update software inventory"
 msgstr "فشل في تحديث سجل البرمجيات"
 
-#: backend/api/handlers/software_package_handlers.py:299
+#: backend/api/handlers/software_package_handlers.py:293
 #: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "فشل في حفظ التحديثات: %s"
 
-#: backend/api/handlers/software_package_handlers.py:414
+#: backend/api/handlers/software_package_handlers.py:408
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "فشل في معالجة نتائج جمع الحزم: %s"
 
-#: backend/api/handlers/software_package_handlers.py:508
+#: backend/api/handlers/software_package_handlers.py:502
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "فشل في معالجة تحديث مستودع المستخدم الخارجي: %s"
 
-#: backend/api/handlers/software_package_handlers.py:591
+#: backend/api/handlers/software_package_handlers.py:585
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "فشل في معالجة تحديث حالة مضاد الفيروسات: %s"
 
-#: backend/api/handlers/software_package_handlers.py:722
+#: backend/api/handlers/software_package_handlers.py:716
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "فشل في معالجة تحديث حالة مضاد الفيروسات التجاري: %s"
 
-#: backend/api/handlers/software_package_handlers.py:824
+#: backend/api/handlers/software_package_handlers.py:818
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "فشل في معالجة تحديث حالة جدار الحماية: %s"
 
-#: backend/api/handlers/software_package_handlers.py:910
+#: backend/api/handlers/software_package_handlers.py:904
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "فشل في معالجة تحديث حالة Graylog: %s"
 
-#: backend/api/handlers/software_package_handlers.py:942
+#: backend/api/handlers/software_package_handlers.py:936
 msgid "Missing request_id in installation_complete"
 msgstr "لا يوجد معرف الطلب في استجابة الإكمال"
 
-#: backend/api/handlers/software_package_handlers.py:959
+#: backend/api/handlers/software_package_handlers.py:953
 #: backend/api/agent.py:933 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "لم يتم العثور على طلب التثبيت: %s"
 
-#: backend/api/handlers/software_package_handlers.py:1000
+#: backend/api/handlers/software_package_handlers.py:994
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -600,40 +612,40 @@ msgstr "فشل في تسجيل انتهاء التثبيت: %s"
 msgid "Report template not found"
 msgstr "لم يتم العثور على قالب التقرير"
 
-#: backend/api/report_templates.py:196 backend/api/package_compliance.py:138
+#: backend/api/report_templates.py:206 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
-#: backend/api/upgrade_profiles.py:145
+#: backend/api/upgrade_profiles.py:179
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "UUID غير صالحة لـ %(field)s: %(value)s"
 
-#: backend/api/report_templates.py:211 backend/api/report_templates.py:279
+#: backend/api/report_templates.py:221 backend/api/report_templates.py:289
 #, python-format
 msgid "Unknown base_report_type: %s"
 msgstr "base_report_type غير معروف: %s"
 
-#: backend/api/report_templates.py:220
+#: backend/api/report_templates.py:230
 #, python-format
 msgid "Unknown field code(s) for %(base_report_type)s: %(codes)s"
 msgstr "رمز حقل غير معروف لـ %(base_report_type)s: %(codes)s"
 
-#: backend/api/report_templates.py:263
+#: backend/api/report_templates.py:273
 #, python-format
 msgid "Created report template '%s'"
 msgstr "تم إنشاء قالب التقرير '%s'"
 
-#: backend/api/report_templates.py:353
+#: backend/api/report_templates.py:363
 #, python-format
 msgid "Updated report template '%s'"
 msgstr "تم تحديث قالب التقرير '%s'"
 
-#: backend/api/report_templates.py:386
+#: backend/api/report_templates.py:396
 #, python-format
 msgid "Deleted report template '%s'"
 msgstr "تم حذف قالب التقرير '%s'"
 
-#: backend/api/report_templates.py:391
+#: backend/api/report_templates.py:401
 msgid "Report template deleted"
 msgstr "تم حذف قالب التقرير"
 
@@ -775,7 +787,7 @@ msgstr "تمت إضافة طلب تعطيل المخزن الناجح في ال�
 msgid "Failed to queue repository disable: %s"
 msgstr "فشل في ترتيب تعطيل المستودع في قائمة الانتظار: %s"
 
-#: backend/api/reports/endpoints.py:73
+#: backend/api/reports/endpoints.py:75
 msgid ""
 "Report generation requires a SysManage Professional+ license. Please upgrade"
 " to access this feature."
@@ -783,55 +795,59 @@ msgstr ""
 "يتطلب إنشاء التقارير ترخيص SysManage Professional+. يرجى الترقية للوصول إلى "
 "هذه الميزة."
 
-#: backend/api/reports/endpoints.py:154
+#: backend/api/reports/endpoints.py:156
 msgid "Registered Hosts"
 msgstr "المضيفات المسجلة"
 
-#: backend/api/reports/endpoints.py:156
+#: backend/api/reports/endpoints.py:158
 msgid "Hosts with Tags"
 msgstr "المضيفات مع العلامات"
 
-#: backend/api/reports/endpoints.py:164
+#: backend/api/reports/endpoints.py:166
 msgid "SysManage Users"
 msgstr "مستخدمو SysManage"
 
-#: backend/api/reports/endpoints.py:169
+#: backend/api/reports/endpoints.py:171
 msgid "Host Firewall Status"
 msgstr "حالة جدار الحماية للمضيف"
 
-#: backend/api/reports/endpoints.py:175
+#: backend/api/reports/endpoints.py:177
 msgid "Open-Source Antivirus Status"
 msgstr "حالة مكافحة الفيروسات مفتوحة المصدر"
 
-#: backend/api/reports/endpoints.py:182
+#: backend/api/reports/endpoints.py:184
 msgid "Commercial Antivirus Status"
 msgstr "حالة مكافحة الفيروسات التجارية"
 
-#: backend/api/reports/endpoints.py:195
+#: backend/api/reports/endpoints.py:197
 msgid "User Security Roles (RBAC)"
 msgstr "أدوار أمان المستخدم (RBAC)"
 
-#: backend/api/reports/endpoints.py:205 backend/api/audit_log.py:477
+#: backend/api/reports/endpoints.py:207 backend/api/audit_log.py:477
 msgid "Audit Log"
 msgstr "سجل التدقيق"
 
-#: backend/api/reports/endpoints.py:211
+#: backend/api/reports/endpoints.py:213
 msgid "Untagged Machines"
 msgstr "الأجهزة غير الموسومة"
 
-#: backend/api/reports/endpoints.py:217
+#: backend/api/reports/endpoints.py:219
 msgid "Backup SLA"
 msgstr "اتفاقية مستوى خدمة النسخ الاحتياطي"
 
-#: backend/api/reports/endpoints.py:220 backend/api/reports/endpoints.py:372
+#: backend/api/reports/endpoints.py:225
+msgid "Automatic Updates"
+msgstr "التحديثات التلقائية"
+
+#: backend/api/reports/endpoints.py:228 backend/api/reports/endpoints.py:387
 msgid "Unknown report type"
 msgstr "نوع التقرير غير المعروف"
 
-#: backend/api/reports/endpoints.py:311
+#: backend/api/reports/endpoints.py:319
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "إنشاء PDF غير متوفر. يرجى تثبيت حزمة reportlab."
 
-#: backend/api/reports/endpoints.py:397
+#: backend/api/reports/endpoints.py:412
 msgid "Report"
 msgstr "تقرير"
 
@@ -857,7 +873,7 @@ msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "تعبير cron غير صالح: متوقع 5 حقول (m h dom mon dow)"
 
 #: backend/api/airgap_collection_schedule.py:94
-#: backend/api/upgrade_profiles.py:165
+#: backend/api/upgrade_profiles.py:199
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "تعبير cron غير صالح: %s"
@@ -4042,7 +4058,7 @@ msgid "Failed to get update results: %s"
 msgstr "فشل في الحصول على نتائج التحديث: %s"
 
 #: backend/api/updates/execution_routes.py:65
-#: backend/api/upgrade_profiles.py:182
+#: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr " رفض الوصول: يتطلب دور APPLY_SOFTWARE_UPDATE"
 
@@ -4657,7 +4673,7 @@ msgstr "تم بدء إعادة التشغيل المنسقة مع %d مضيف(م
 msgid "Reboot orchestration not found"
 msgstr "لم يتم العثور على تنسيق إعادة التشغيل"
 
-#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:185
+#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:203
 msgid "Upgrade profile not found"
 msgstr "لم يتم العثور على ملف التعديل"
 
@@ -4669,72 +4685,84 @@ msgstr ""
 "تتطلب ملفات تعريف الترقية المجدولة ترخيص SysManage Professional+. يرجى "
 "الترقية للوصول إلى هذه الميزة."
 
-#: backend/api/upgrade_profiles.py:273
+#: backend/api/upgrade_profiles.py:258
+msgid "Each fleet of a rollout needs its own tag"
+msgstr "يحتاج كل أسطول في النشر إلى علامة خاصة به"
+
+#: backend/api/upgrade_profiles.py:276
+msgid "A rollout needs at least one fleet"
+msgstr "يحتاج النشر إلى أسطول واحد على الأقل"
+
+#: backend/api/upgrade_profiles.py:349
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "تم إنشاء ملف الترقية '%s'"
 
-#: backend/api/upgrade_profiles.py:342
+#: backend/api/upgrade_profiles.py:418
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "تم تحديث ملف الترقية '%s'"
 
-#: backend/api/upgrade_profiles.py:375
+#: backend/api/upgrade_profiles.py:451
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "تم حذف ملف الترقية '%s'"
 
-#: backend/api/upgrade_profiles.py:380
+#: backend/api/upgrade_profiles.py:456
 msgid "Upgrade profile deleted"
 msgstr "تم حذف ملف الترقية"
 
-#: backend/api/upgrade_profiles.py:416
+#: backend/api/upgrade_profiles.py:483
+msgid "A rollout of this policy is still running or halted"
+msgstr "لا يزال نشر لهذه السياسة قيد التنفيذ أو موقوفًا"
+
+#: backend/api/upgrade_profiles.py:499
 #, python-format
 msgid "Ran upgrade profile '%s' now"
 msgstr "تم تشغيل ملف تعريف التحديث '%s' الآن"
 
-#: backend/api/auto_updates.py:64
+#: backend/api/auto_updates.py:68
 msgid "A reason is required"
 msgstr "يلزم ذكر سبب"
 
-#: backend/api/auto_updates.py:133
+#: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
 msgstr "تم إيقاف جميع سياسات التحديث التلقائي مؤقتًا: %s"
 
-#: backend/api/auto_updates.py:135
+#: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
 msgstr "تم رفع الإيقاف المؤقت عن جميع سياسات التحديث التلقائي"
 
-#: backend/api/auto_updates.py:162
+#: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
 msgstr "تم تغيير إعدادات التحديثات التلقائية"
 
-#: backend/api/auto_updates.py:195
+#: backend/api/auto_updates.py:213
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
 msgstr "تم إيقاف سياسة التحديث التلقائي '%(policy)s' مؤقتًا: %(reason)s"
 
-#: backend/api/auto_updates.py:198
+#: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
 msgstr "تم رفع الإيقاف المؤقت عن سياسة التحديث التلقائي '%s'"
 
-#: backend/api/auto_updates.py:228
+#: backend/api/auto_updates.py:246
 #, python-format
 msgid "%(host)s will never be updated automatically: %(reason)s"
 msgstr "لن يتم تحديث %(host)s تلقائيًا أبدًا: %(reason)s"
 
-#: backend/api/auto_updates.py:231
+#: backend/api/auto_updates.py:249
 #, python-format
 msgid "%s may be updated automatically again"
 msgstr "يمكن تحديث %s تلقائيًا مرة أخرى"
 
-#: backend/api/auto_updates.py:328
+#: backend/api/auto_updates.py:398
 msgid "Run not found"
 msgstr "لم يتم العثور على التشغيل"
 
-#: backend/api/auto_updates.py:336
+#: backend/api/auto_updates.py:406
 #, python-format
 msgid "Acknowledged the automatic update run on %s"
 msgstr "تم الإقرار بتشغيل التحديث التلقائي على %s"
@@ -6162,16 +6190,16 @@ msgstr ""
 "أكّد أنه ستُثبّت حزم وتُزال الحزم التي لم تكن في اللقطة، ليطابق المضيف "
 "اللقطة"
 
-#: backend/services/auto_update_runner.py:309
+#: backend/services/auto_update_runner.py:354
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
 msgstr "تمت جدولة تحديث تلقائي على %(host)s بواسطة السياسة '%(policy)s'"
 
-#: backend/services/auto_update_runner.py:387
+#: backend/services/auto_update_runner.py:539
 msgid "The host never reported the result"
 msgstr "لم يُبلغ المضيف عن النتيجة أبدًا"
 
-#: backend/services/auto_update_results.py:68
+#: backend/services/auto_update_results.py:102
 #, python-format
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "إعادة تشغيل تلقائية لـ %(host)s بعد السياسة '%(policy)s'"
@@ -6541,6 +6569,31 @@ msgstr "استجابة vault غير صالحة"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr " định dạng bí mật không hợp lệ"
+
+#: backend/services/auto_update_rollout.py:149
+#, python-format
+msgid "Rollout of policy '%(policy)s' started: %(count)d fleet(s)"
+msgstr "بدأ نشر السياسة '%(policy)s': عدد الأساطيل %(count)d"
+
+#: backend/services/auto_update_rollout.py:275
+#, python-format
+msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
+msgstr "أُوقف نشر السياسة '%(policy)s' عند الأسطول '%(fleet)s': %(reason)s"
+
+#: backend/services/auto_update_rollout.py:321
+#, python-format
+msgid "Rollout of policy '%(policy)s' completed"
+msgstr "اكتمل نشر السياسة '%(policy)s'"
+
+#: backend/services/auto_update_rollout.py:376
+#, python-format
+msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
+msgstr "استؤنف نشر السياسة '%(policy)s' بعد الأسطول '%(fleet)s'"
+
+#: backend/services/auto_update_rollout.py:393
+#, python-format
+msgid "Rollout of policy '%(policy)s' canceled"
+msgstr "تم إلغاء نشر السياسة '%(policy)s'"
 
 #: backend/licensing/migration_compat.py:150
 msgid ""

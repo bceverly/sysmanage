@@ -100,6 +100,17 @@ class UpgradeProfile(Base):
         String(16), nullable=False, default="either", server_default="either"
     )
 
+    # Fleet-by-fleet rollout (26.4, q96autoupdaterollout): off, every host
+    # as 26.1-26.3; on, the fleets in ``UpgradeProfileRolloutStage`` one at a
+    # time.  ``rollout_max_failure_pct``: the share of a fleet's runs that may
+    # fail before the rollout halts (0: any failure halts it).
+    rollout_enabled = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    rollout_max_failure_pct = Column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+
     created_by = Column(GUID(), ForeignKey("user.id", ondelete="SET NULL"))
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
@@ -145,9 +156,40 @@ class UpgradeProfile(Base):
             "wait_days_regular": self.wait_days_regular or 0,
             "wait_days_critical": self.wait_days_critical or 0,
             "critical_source": self.critical_source or "either",
+            "rollout_enabled": bool(self.rollout_enabled),
+            "rollout_max_failure_pct": self.rollout_max_failure_pct or 0,
             "last_run": self.last_run.isoformat() if self.last_run else None,
             "last_status": self.last_status,
             "next_run": self.next_run.isoformat() if self.next_run else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class UpgradeProfileRolloutStage(Base):
+    """One fleet of a policy's rollout (26.4): the hosts carrying ``tag_id``,
+    patched after the fleets before it and soaked ``soak_minutes`` before the
+    next one starts.  The first is the canary by convention."""
+
+    __tablename__ = "upgrade_profile_rollout_stage"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    profile_id = Column(
+        GUID(),
+        ForeignKey("upgrade_profiles.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    position = Column(Integer, nullable=False)
+    name = Column(String(120), nullable=False)
+    tag_id = Column(GUID(), ForeignKey("tags.id", ondelete="SET NULL"), nullable=True)
+    soak_minutes = Column(Integer, nullable=False, default=0, server_default="0")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.id),
+            "position": self.position,
+            "name": self.name,
+            "tag_id": str(self.tag_id) if self.tag_id else None,
+            "soak_minutes": self.soak_minutes or 0,
         }

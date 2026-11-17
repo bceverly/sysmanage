@@ -292,3 +292,7 @@ backups.useTag.change
 
 # How hosts reach the storage (25.5): "NFS" is a protocol name in every locale.
 backups.transport.viaNfs
+
+# --- 26.4: "host" is the product's own word in es/nl/pt, so "{{count}} host(s)"
+# reads the same as the English there --------------------------------------
+autoUpdates.fleet.hosts

@@ -146,4 +146,26 @@ describe('Home Page', () => {
     });
     expect(await screen.findByText('Break-glass key export out of date')).toBeInTheDocument();
   });
+
+  test('automatic updates: problems, reboots waiting for a window, halted rollouts (26.5)', async () => {
+    server.use(
+      http.get('/api/v1/auto-updates/settings', () =>
+        HttpResponse.json({
+          hold_all: false, counts: {
+            failed_recent: 2, queued: 0, reboot_not_back: 1, opted_out_hosts: 0,
+            reboot_waiting: 4, rollouts_running: 1, rollouts_halted: 1,
+          },
+        }),
+      ),
+    );
+    await act(async () => {
+      render(<HomeWithRouter />);
+    });
+    expect(await screen.findByText('Rollouts halted: 1')).toBeInTheDocument();
+    expect(screen.getByText('Automatic reboots waiting for a window')).toBeInTheDocument();
+    const values = vi.mocked(Gauge).mock.calls.map(([props]) => (props as { value?: number }).value);
+    expect(values).toContain(3); // failed runs + host not back
+    expect(values).toContain(4); // reboots waiting
+    expect(values).toContain(2); // rollouts running + halted
+  });
 });

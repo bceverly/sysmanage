@@ -125,6 +125,7 @@ const FORM = {
   auto_apply: false, reboot_mode: 'never' as const, excluded_packages: '',
   require_backup_hours: '' as const, host_ids: [], wait_days_regular: 0,
   wait_days_critical: 0, critical_source: 'either' as const,
+  rollout_enabled: false, rollout_max_failure_pct: 0, rollout_stages: [],
 };
 
 describe('26.2 and 26.3 on the host card', () => {

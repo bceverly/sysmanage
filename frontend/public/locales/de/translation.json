@@ -792,7 +792,10 @@
     "backupsAttention": "Sicherungen, die Aufmerksamkeit erfordern",
     "backupsEscrowStale": "Notfall-Schlüsselexport veraltet",
     "backupsServerUnprotected": "Dieser SysManage-Server hat keine erfolgreiche Sicherung",
-    "autoUpdateProblems": "Probleme bei automatischen Updates"
+    "autoUpdateProblems": "Probleme bei automatischen Updates",
+    "autoRebootsWaiting": "Automatische Neustarts warten auf ein Wartungsfenster",
+    "rolloutsHalted": "Angehaltene Rollouts: {{count}}",
+    "rolloutsRunning": "Laufende Rollouts"
   },
   "dataGrid": {
     "columnVisibility": "Spaltensichtbarkeit",
@@ -2992,7 +2995,8 @@
       "users": "Benutzer",
       "assetTags": "Asset-Tags",
       "hardware": "Hardware",
-      "backups": "Sicherungen"
+      "backups": "Sicherungen",
+      "updates": "Updates"
     },
     "title": "Berichte",
     "unknownError": "Unbekannter Fehler",
@@ -3012,6 +3016,10 @@
     "backupSla": {
       "name": "Backup-SLA",
       "description": "Für jeden gesicherten Host: ob sein Recovery Point Objective (das Doppelte seines Sicherungsintervalls) jetzt und an jedem der letzten 30 Tage eingehalten wird, seine fehlgeschlagenen Sicherungen, seine letzte Verifizierung mit vollständigem Lesen und die Größe seines Repositorys."
+    },
+    "automaticUpdates": {
+      "description": "Für jede Richtlinie für automatische Updates und jede Flotte der letzten 30 Tage: Läufe, gepatchte Hosts, fehlgeschlagene Läufe, Neustarts und die mittlere Zeit (Median) vom Erscheinen eines Patches für eine kritische CVE auf einem Host bis zu seiner Anwendung dort.",
+      "name": "Automatische Updates"
     }
   },
   "resetPassword": {
@@ -3815,7 +3823,20 @@
     "criticalEither": "Schwachstellenscan oder Sicherheitshinweis des Herstellers",
     "criticalVulnerability": "Schwachstellenscan des Hosts",
     "criticalAdvisory": "Sicherheitshinweis des Herstellers",
-    "criticalHelp": "Ohne Schwachstellenscans oder Sicherheitshinweise des Herstellers für einen Host wartet jeder Patch auf diesem Host die reguläre Anzahl an Tagen."
+    "criticalHelp": "Ohne Schwachstellenscans oder Sicherheitshinweise des Herstellers für einen Host wartet jeder Patch auf diesem Host die reguläre Anzahl an Tagen.",
+    "rolloutAdd": "Eine Flotte hinzufügen",
+    "rolloutCanary": "Canary-Flotte",
+    "rolloutDown": "Nach hinten verschieben",
+    "rolloutEnabled": "Flotte für Flotte ausrollen",
+    "rolloutFleetName": "Flotte {{n}}",
+    "rolloutFleetTag": "Hosts mit Tag",
+    "rolloutHelp": "Eine Flotte nach der anderen, in dieser Reihenfolge; die erste ist der Canary. Die nächste Flotte startet erst, wenn diese abgeschlossen ist, gesund ist und ihre Beobachtungszeit abgelaufen ist. Ein Host wird mit der ersten Flotte gepatcht, deren Tag er trägt; Hosts ohne Flotte kommen zuletzt.",
+    "rolloutIncomplete": "Jede Flotte des Rollouts benötigt einen Namen und ein Tag",
+    "rolloutMaxFailures": "Anhalten, wenn mehr als dieser Anteil einer Flotte fehlschlägt (%)",
+    "rolloutMaxFailuresHelp": "0: Jeder fehlgeschlagene Lauf hält den Rollout an. Ein Host, der nach seinem Neustart nicht zurückkommt, ein Host, der keine Meldungen mehr sendet, oder ein neuer kritischer Alarm in der Flotte halten ihn immer an.",
+    "rolloutRemove": "Diese Flotte entfernen",
+    "rolloutSoak": "Beobachtungszeit (Stunden)",
+    "rolloutUp": "Nach vorne verschieben"
   },
   "userDetail": {
     "active": "Aktiv",
@@ -6285,6 +6306,41 @@
     "startsAt": "Startet, wenn sich sein Wartungsfenster öffnet: {{when}}",
     "threshold": "Ein Patch gilt als kritisch, wenn die behobene CVE eingestuft ist als",
     "thresholdCritical": "Kritisch",
-    "thresholdHigh": "Hoch oder kritisch"
+    "thresholdHigh": "Hoch oder kritisch",
+    "fleet": {
+      "counts": "{{applied}} angewendet, {{failed}} fehlgeschlagen, {{inFlight}} laufend, {{other}} nicht angewendet",
+      "done": "Erledigt",
+      "halted": "Hier angehalten",
+      "hide": "Hosts ausblenden",
+      "hosts": "{{count}} Host(s)",
+      "noRun": "Noch nicht geplant",
+      "pending": "Nicht begonnen",
+      "remaining": "Die verbleibenden Hosts",
+      "resumedBy": "von {{who}} wieder aufgenommen",
+      "running": "Läuft",
+      "show": "Hosts anzeigen",
+      "soakUntil": "Beobachtungszeit endet {{when}}"
+    },
+    "halt": {
+      "criticalAlerts": "auf einem Host dieser Flotte wurde ein kritischer Alarm ausgelöst",
+      "notBack": "ein Host kam nach seinem Neustart nicht zurück",
+      "notReporting": "ein Host meldete sich nach dem Patchen nicht mehr",
+      "runFailures": "zu viele Läufe in dieser Flotte sind fehlgeschlagen"
+    },
+    "rollout": {
+      "cancel": "Abbrechen",
+      "cancelReason": "Warum diesen Rollout abbrechen?",
+      "canceled": "Abgebrochen",
+      "canceledBy": "Abgebrochen von {{who}}: {{reason}}",
+      "completed": "Abgeschlossen",
+      "halted": "Angehalten",
+      "haltedBecause": "Angehalten bei {{fleet}}: {{reason}} ({{hosts}}). Es wird nichts weiter gepatcht, bis jemand den Rollout fortsetzt oder abbricht.",
+      "resume": "Fortsetzen",
+      "resumeReason": "Warum über diese Flotte hinaus fortfahren?",
+      "running": "Läuft",
+      "started": "gestartet {{when}}",
+      "subtitle": "Richtlinien, die Flotte für Flotte ausrollen: eine Flotte nach der anderen, jede gesund, bevor die nächste beginnt.",
+      "title": "Rollouts Flotte für Flotte"
+    }
   }
 }

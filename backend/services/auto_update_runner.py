@@ -266,12 +266,18 @@ def covered_hosts(db, profile: Dict[str, Any]) -> List[models.Host]:
 
 
 def _package_record(update: Dict[str, Any]) -> Dict[str, Any]:
-    return {k: update.get(k) for k in ("package_name", "package_manager", "current_version",
-                                       "available_version", "update_type", "kind",
-                                       "fix_id")}  # fmt: skip
+    record = {k: update.get(k) for k in ("package_name", "package_manager",
+                                         "current_version", "available_version",
+                                         "update_type", "kind", "fix_id")}  # fmt: skip
+    # When the update first appeared: the report's "time from a critical
+    # patch appearing to its being applied" (26.5) counts from it.
+    seen = update.get("discovered_at")
+    record["first_seen"] = seen.isoformat() if hasattr(seen, "isoformat") else seen
+    return record
 
 
-def _record(db, profile, host, plan, status, triggered_by, now, release_at=None):
+def _record(db, profile, host, plan, status, triggered_by, now, release_at=None,
+            rollout=None):  # fmt: skip
     run = models.AutoUpdateRun(
         id=uuid.uuid4(),
         profile_id=uuid.UUID(profile["id"]),
@@ -285,6 +291,8 @@ def _record(db, profile, host, plan, status, triggered_by, now, release_at=None)
         queued_at=now,
         release_at=release_at,
         completed_at=None if status in ("queued", "waiting") else now,
+        rollout_id=rollout[0] if rollout else None,
+        rollout_stage=rollout[1] if rollout else None,
     )
     db.add(run)
     return run
@@ -358,13 +366,15 @@ def _queue_apply(db, host, run, packages, release_at, now):
 
 def plan(db, eng, host, profile, settings, now, tag_ids=None) -> Dict[str, Any]:
     """The engine's plan for one host under ``profile`` now -- with what its
-    pending updates fix when the policy waits (26.3), and a skip when the
-    agent cannot apply updates at all."""
+    pending updates fix (26.3: the waiting periods; 26.5: every applied
+    critical-CVE patch is recorded as such, waiting or not, for the report's
+    "critical patch to applied"), and a skip when the agent cannot apply
+    updates at all."""
     if tag_ids is None:
         tag_ids = _tag_ids(db, [host.id]).get(str(host.id), [])
     ctx = host_dict(db, host, tag_ids, profile)
     updates = update_dicts(db, host.id)
-    if hasattr(eng, "update_eligibility") and eng.waits(profile):
+    if hasattr(eng, "update_eligibility"):
         from backend.services import (  # pylint: disable=import-outside-toplevel
             auto_update_evidence,
         )
@@ -389,7 +399,8 @@ def send(db, host, run, result, release_at, now) -> None:
     _queue_apply(db, host, run, result["packages"], release_at, now)
 
 
-def _place(db, eng, profile, host, result, triggered_by, now, offset, summary):
+def _place(db, eng, profile, host, result, triggered_by, now, offset, summary,
+           rollout=None):  # fmt: skip
     """Record and (when its window allows) send one host's run (26.2)."""
     from backend.services import (  # pylint: disable=import-outside-toplevel
         auto_update_timing as timing,
@@ -399,30 +410,80 @@ def _place(db, eng, profile, host, result, triggered_by, now, offset, summary):
     answer = timing.slot(db, eng, host, profile, len(result["packages"]), now, offset)
     if answer is not None and answer["start"] is None:
         skipped = {**result, "reason": timing.NO_WINDOW, "packages": []}
-        _record(db, profile, host, skipped, "skipped", triggered_by, now)
+        _record(db, profile, host, skipped, "skipped", triggered_by, now, None, rollout)
         summary["skipped"] += 1
         return
     if answer is not None:
         release_at = answer["start"]
     if answer is not None and answer["waits"]:
-        _record(
-            db, profile, host, result, timing.WAITING, triggered_by, now, release_at
-        )
+        _record(db, profile, host, result, timing.WAITING, triggered_by, now,
+                release_at, rollout)  # fmt: skip
         summary["waiting"] += 1
         return
-    run = _record(db, profile, host, result, "queued", triggered_by, now, release_at)
+    run = _record(db, profile, host, result, "queued", triggered_by, now, release_at,
+                  rollout)  # fmt: skip
     db.flush()
     _queue_apply(db, host, run, result["packages"], release_at, now)
     summary["queued"] += 1
+
+
+def _adopt_waiting(db, profile, host, triggered_by, now, rollout) -> None:
+    """A rollout's host whose run already waits for its window (26.2): the
+    run joins the rollout -- or, when another policy's run is the one
+    waiting, this policy's run says so."""
+    run = (
+        db.query(models.AutoUpdateRun)
+        .filter(models.AutoUpdateRun.host_id == host.id,
+                models.AutoUpdateRun.status == "waiting")  # fmt: skip
+        .first()
+    )
+    if run is not None and str(run.profile_id) == profile["id"]:
+        run.rollout_id, run.rollout_stage = rollout
+        return
+    skipped = {"reason": "previous_run_pending", "packages": []}
+    _record(db, profile, host, skipped, "skipped", triggered_by, now, None, rollout)
+
+
+def fire_hosts(db, eng, profile, hosts, tags, settings, now, triggered_by, summary,
+               rollout=None):  # fmt: skip
+    """Plan every host in ``hosts`` under ``profile`` and record (and, when
+    its window allows, send) each one's run.  ``rollout`` is ``(rollout id,
+    fleet index)`` when the hosts are a rollout's fleet (26.4)."""
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        auto_update_timing as timing,
+    )
+
+    for key in ("queued", "skipped", "nothing", "waiting"):
+        summary.setdefault(key, 0)
+    waiting = timing.waiting_host_ids(db)
+    applying = []
+    for host in hosts:
+        if str(host.id) in waiting:
+            summary["waiting"] += 1  # its run already waits for its window
+            if rollout is not None:
+                _adopt_waiting(db, profile, host, triggered_by, now, rollout)
+            continue
+        result = plan(db, eng, host, profile, settings, now, tags.get(str(host.id), []))
+        if result["action"] in ("skip", "nothing"):
+            status = "skipped" if result["action"] == "skip" else "nothing_to_do"
+            _record(db, profile, host, result, status, triggered_by, now, None, rollout)
+            summary["skipped" if result["action"] == "skip" else "nothing"] += 1
+        else:
+            applying.append((host, result))
+    offsets = eng.stagger_offsets(len(applying), profile["staggered_window_min"])
+    for (host, result), offset in zip(applying, offsets):
+        _place(db, eng, profile, host, result, triggered_by, now, offset, summary,
+               rollout)  # fmt: skip
 
 
 def fire_profile(db, eng, profile_row, now, triggered_by=None) -> Dict[str, int]:
     """Run one policy now.  On the schedule (``triggered_by`` None) a host
     another policy wins for is left to that policy; a person's "run now"
     applies the profile they chose to every host it covers.  Either way a
-    host with maintenance windows starts only inside one (26.2)."""
+    host with maintenance windows starts only inside one (26.2), and a
+    policy that rolls out fleet by fleet starts a rollout (26.4)."""
     from backend.services import (  # pylint: disable=import-outside-toplevel
-        auto_update_timing as timing,
+        auto_update_rollout as rollouts,
     )
 
     settings = settings_dict(settings_row(db))
@@ -431,34 +492,23 @@ def fire_profile(db, eng, profile_row, now, triggered_by=None) -> Dict[str, int]
     profile = profile_dict(profile_row, host_ids)
     hosts = covered_hosts(db, profile)
     tags = _tag_ids(db, [h.id for h in hosts])
-    waiting = timing.waiting_host_ids(db)
     summary = {"queued": 0, "skipped": 0, "nothing": 0, "other_policy": 0,
                "waiting": 0}  # fmt: skip
-    applying = []
+    chosen = []
     for host in hosts:
-        tag_ids = tags.get(str(host.id), [])
         if triggered_by is None:
             winner = eng.resolve_policy(
-                {"id": str(host.id), "tag_ids": tag_ids}, policies
+                {"id": str(host.id), "tag_ids": tags.get(str(host.id), [])}, policies
             )
             if not winner or winner["profile_id"] != profile["id"]:
                 summary["other_policy"] += 1
                 continue
-        if str(host.id) in waiting:
-            summary["waiting"] += 1  # its run already waits for its window
-            continue
-        result = plan(db, eng, host, profile, settings, now, tag_ids)
-        if result["action"] == "skip":
-            _record(db, profile, host, result, "skipped", triggered_by, now)
-            summary["skipped"] += 1
-        elif result["action"] == "nothing":
-            _record(db, profile, host, result, "nothing_to_do", triggered_by, now)
-            summary["nothing"] += 1
-        else:
-            applying.append((host, result))
-    offsets = eng.stagger_offsets(len(applying), profile["staggered_window_min"])
-    for (host, result), offset in zip(applying, offsets):
-        _place(db, eng, profile, host, result, triggered_by, now, offset, summary)
+        chosen.append(host)
+    if rollouts.enabled(eng, profile_row):
+        rollouts.start(db, eng, profile_row, profile, chosen, tags, now,
+                       triggered_by, summary)  # fmt: skip
+        return summary
+    fire_hosts(db, eng, profile, chosen, tags, settings, now, triggered_by, summary)
     return summary
 
 
@@ -536,6 +586,11 @@ def tick_database(db, eng, now, summary) -> None:
     except Exception:  # pylint: disable=broad-exception-caught
         db.rollback()
         logger.exception("Automatic updates: starting waiting runs failed")
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        auto_update_rollout,
+    )
+
+    auto_update_rollout.advance_rollouts(db, eng, now)
     for profile in _due(db, now):
         try:
             fired = fire_profile(db, eng, profile, now)

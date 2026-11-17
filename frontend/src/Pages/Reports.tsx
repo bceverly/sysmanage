@@ -306,6 +306,14 @@ const Reports: React.FC = () => {
         tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.backups', 'backups'), t('reports.tag.compliance', 'compliance')]
       },
       {
+        id: 'automatic-updates',
+        name: t('reports.automaticUpdates.name', 'Automatic Updates'),
+        description: t('reports.automaticUpdates.description', 'For each automatic update policy and fleet over the last 30 days: runs, hosts patched, failed runs, reboots, and the median time from a patch for a critical CVE appearing on a host to its being applied there.'),
+        category: 'hosts',
+        screenshot: `${baseURL}/api/v1/reporting/screenshots/automatic-updates.png`,
+        tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.updates', 'updates'), t('reports.tag.compliance', 'compliance')]
+      },
+      {
         id: 'users-list',
         name: t('reports.usersList.name', 'SysManage Users'),
         description: t('reports.usersList.description', 'Comprehensive list of all SysManage users showing their profiles, roles, permissions, and account status. Includes user creation dates and last login times.'),

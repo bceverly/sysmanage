@@ -792,7 +792,10 @@
     "backupsAttention": "Backups needing attention",
     "backupsEscrowStale": "Break-glass key export out of date",
     "backupsServerUnprotected": "This SysManage server has no good backup",
-    "autoUpdateProblems": "Automatic update problems"
+    "autoUpdateProblems": "Automatic update problems",
+    "autoRebootsWaiting": "Automatic reboots waiting for a window",
+    "rolloutsHalted": "Rollouts halted: {{count}}",
+    "rolloutsRunning": "Rollouts in progress"
   },
   "dataGrid": {
     "columnVisibility": "Column Visibility",
@@ -3011,7 +3014,8 @@
       "users": "users",
       "assetTags": "asset tags",
       "hardware": "hardware",
-      "backups": "backups"
+      "backups": "backups",
+      "updates": "updates"
     },
     "title": "Reports",
     "unknownError": "Unknown error",
@@ -3031,6 +3035,10 @@
     "backupSla": {
       "name": "Backup SLA",
       "description": "For every backed-up host: whether its recovery point objective (twice its backup interval) is met now and on each of the last 30 days, its failed backups, its last full-read verification, and its repository size."
+    },
+    "automaticUpdates": {
+      "description": "For each automatic update policy and fleet over the last 30 days: runs, hosts patched, failed runs, reboots, and the median time from a patch for a critical CVE appearing on a host to its being applied there.",
+      "name": "Automatic Updates"
     }
   },
   "resetPassword": {
@@ -3834,7 +3842,20 @@
     "criticalEither": "The vulnerability scan or the vendor advisory",
     "criticalVulnerability": "The vulnerability scan of the host",
     "criticalAdvisory": "The vendor advisory",
-    "criticalHelp": "Without vulnerability scans or vendor advisories for a host, every patch on it waits the regular count."
+    "criticalHelp": "Without vulnerability scans or vendor advisories for a host, every patch on it waits the regular count.",
+    "rolloutAdd": "Add a fleet",
+    "rolloutCanary": "Canary fleet",
+    "rolloutDown": "Move later",
+    "rolloutEnabled": "Roll out fleet by fleet",
+    "rolloutFleetName": "Fleet {{n}}",
+    "rolloutFleetTag": "Hosts tagged",
+    "rolloutHelp": "One fleet at a time, in this order; the first is the canary. The next fleet starts only when this one has finished, is healthy and has soaked. A host is patched with the first fleet whose tag it carries; hosts in no fleet go last.",
+    "rolloutIncomplete": "Every fleet of the rollout needs a name and a tag",
+    "rolloutMaxFailures": "Halt when more than this share of a fleet fails (%)",
+    "rolloutMaxFailuresHelp": "0: any failed run halts the rollout. A host not back from its reboot, a host that stopped reporting, or a new critical alert on the fleet always halts it.",
+    "rolloutRemove": "Remove this fleet",
+    "rolloutSoak": "Soak time (hours)",
+    "rolloutUp": "Move earlier"
   },
   "userDetail": {
     "active": "Active",
@@ -6285,6 +6306,41 @@
     "startsAt": "Starts when its window opens: {{when}}",
     "threshold": "A patch is critical when it fixes a CVE rated",
     "thresholdCritical": "Critical",
-    "thresholdHigh": "High or critical"
+    "thresholdHigh": "High or critical",
+    "fleet": {
+      "counts": "{{applied}} applied, {{failed}} failed, {{inFlight}} in progress, {{other}} not applied",
+      "done": "Done",
+      "halted": "Halted here",
+      "hide": "Hide hosts",
+      "hosts": "{{count}} host(s)",
+      "noRun": "Not planned yet",
+      "pending": "Not started",
+      "remaining": "The remaining hosts",
+      "resumedBy": "resumed by {{who}}",
+      "running": "In progress",
+      "show": "Show hosts",
+      "soakUntil": "soak time ends {{when}}"
+    },
+    "halt": {
+      "criticalAlerts": "a critical alert was raised on a host in this fleet",
+      "notBack": "a host did not come back from its reboot",
+      "notReporting": "a host stopped reporting after it was patched",
+      "runFailures": "too many runs in this fleet failed"
+    },
+    "rollout": {
+      "cancel": "Cancel",
+      "cancelReason": "Why cancel this rollout?",
+      "canceled": "Canceled",
+      "canceledBy": "Canceled by {{who}}: {{reason}}",
+      "completed": "Completed",
+      "halted": "Halted",
+      "haltedBecause": "Halted at {{fleet}}: {{reason}} ({{hosts}}). Nothing more is patched until someone resumes or cancels it.",
+      "resume": "Resume",
+      "resumeReason": "Why continue past this fleet?",
+      "running": "In progress",
+      "started": "started {{when}}",
+      "subtitle": "Policies that roll out fleet by fleet: one fleet at a time, each healthy before the next.",
+      "title": "Fleet-by-fleet rollouts"
+    }
   }
 }

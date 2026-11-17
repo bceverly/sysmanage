@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 10:03-0800\n"
+"POT-Creation-Date: 2026-11-16 21:22-0800\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -242,8 +242,8 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:167
-#: backend/api/backups.py:170 backend/api/auto_updates.py:220
-#: backend/api/auto_updates.py:254 backend/api/diagnostics.py:102
+#: backend/api/backups.py:170 backend/api/auto_updates.py:238
+#: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -277,6 +277,18 @@ msgstr "호스트가 승인이 되지 않았습니다."
 #: backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "사용자를 찾을 수 없습니다"
+
+#: backend/api/auto_update_rollouts.py:104
+msgid "Rollout not found"
+msgstr "롤아웃을 찾을 수 없습니다"
+
+#: backend/api/auto_update_rollouts.py:122
+msgid "Only a halted rollout can resume"
+msgstr "중지된 롤아웃만 재개할 수 있습니다"
+
+#: backend/api/auto_update_rollouts.py:143
+msgid "This rollout has already ended"
+msgstr "이 롤아웃은 이미 종료되었습니다"
 
 #: backend/api/malware.py:134
 msgid "Only an administrator can change the malware rule sets"
@@ -531,61 +543,61 @@ msgstr "하드웨어가 업데이트되었습니다"
 msgid "Failed to update hardware information"
 msgstr "하드웨어 정보를 업데이트하는 데 실패했습니다"
 
-#: backend/api/handlers/software_package_handlers.py:112
+#: backend/api/handlers/software_package_handlers.py:113
 msgid "software_inventory_updated"
 msgstr "소프트웨어 인벤토리가 업데이트되었습니다"
 
-#: backend/api/handlers/software_package_handlers.py:121
+#: backend/api/handlers/software_package_handlers.py:122
 msgid "Failed to update software inventory"
 msgstr "소프트웨어 인벤토리를 업데이트하는 데 실패했습니다"
 
-#: backend/api/handlers/software_package_handlers.py:299
+#: backend/api/handlers/software_package_handlers.py:293
 #: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "업데이트 저장 실패: %s"
 
-#: backend/api/handlers/software_package_handlers.py:414
+#: backend/api/handlers/software_package_handlers.py:408
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "_PACKAGE_COLLECTION_ 결과 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:508
+#: backend/api/handlers/software_package_handlers.py:502
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "제3자 저장소 업데이트 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:591
+#: backend/api/handlers/software_package_handlers.py:585
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "_ANTIVIRUS_ 상태 업데이트 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:722
+#: backend/api/handlers/software_package_handlers.py:716
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "_COMMERCIAL_ANTIVIRUS_ 상태 업데이트 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:824
+#: backend/api/handlers/software_package_handlers.py:818
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "방화벽 상태 업데이트 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:910
+#: backend/api/handlers/software_package_handlers.py:904
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Graylog 상태 업데이트 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:942
+#: backend/api/handlers/software_package_handlers.py:936
 msgid "Missing request_id in installation_complete"
 msgstr "installation_complete에서 request_id가 누락됨"
 
-#: backend/api/handlers/software_package_handlers.py:959
+#: backend/api/handlers/software_package_handlers.py:953
 #: backend/api/agent.py:933 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "설정 요청을 찾을 수 없습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:1000
+#: backend/api/handlers/software_package_handlers.py:994
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -595,40 +607,40 @@ msgstr "_INSTALLATION_COMPLETION_ 기록에 실패했습니다: %s"
 msgid "Report template not found"
 msgstr "보고서 템플릿을 찾을 수 없습니다."
 
-#: backend/api/report_templates.py:196 backend/api/package_compliance.py:138
+#: backend/api/report_templates.py:206 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
-#: backend/api/upgrade_profiles.py:145
+#: backend/api/upgrade_profiles.py:179
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "'%(field)s' 필드에 유효하지 않은 UUID: '%(value)s'"
 
-#: backend/api/report_templates.py:211 backend/api/report_templates.py:279
+#: backend/api/report_templates.py:221 backend/api/report_templates.py:289
 #, python-format
 msgid "Unknown base_report_type: %s"
 msgstr "알 수 없는 base_report_type: %s"
 
-#: backend/api/report_templates.py:220
+#: backend/api/report_templates.py:230
 #, python-format
 msgid "Unknown field code(s) for %(base_report_type)s: %(codes)s"
 msgstr "%(base_report_type)s에 대한 알려지지 않은 필드 코드: %(codes)s"
 
-#: backend/api/report_templates.py:263
+#: backend/api/report_templates.py:273
 #, python-format
 msgid "Created report template '%s'"
 msgstr "보고서 템플릿 '%s' 가 생성되었습니다"
 
-#: backend/api/report_templates.py:353
+#: backend/api/report_templates.py:363
 #, python-format
 msgid "Updated report template '%s'"
 msgstr "보고서 템플릿 '%s' 가 업데이트되었습니다"
 
-#: backend/api/report_templates.py:386
+#: backend/api/report_templates.py:396
 #, python-format
 msgid "Deleted report template '%s'"
 msgstr "보고서 템플릿 '%s' 가 삭제되었습니다"
 
-#: backend/api/report_templates.py:391
+#: backend/api/report_templates.py:401
 msgid "Report template deleted"
 msgstr "보고서 템플릿이 삭제되었습니다"
 
@@ -765,61 +777,65 @@ msgstr "저장소 비활성화 요청을 대기열에 성공적으로 추가했�
 msgid "Failed to queue repository disable: %s"
 msgstr "저장소 비활성화를 대기열에 추가하는 데 실패했습니다: %s"
 
-#: backend/api/reports/endpoints.py:73
+#: backend/api/reports/endpoints.py:75
 msgid ""
 "Report generation requires a SysManage Professional+ license. Please upgrade"
 " to access this feature."
 msgstr "보고서 생성에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
-#: backend/api/reports/endpoints.py:154
+#: backend/api/reports/endpoints.py:156
 msgid "Registered Hosts"
 msgstr "등록된 호스트"
 
-#: backend/api/reports/endpoints.py:156
+#: backend/api/reports/endpoints.py:158
 msgid "Hosts with Tags"
 msgstr "태그가 있는 호스트"
 
-#: backend/api/reports/endpoints.py:164
+#: backend/api/reports/endpoints.py:166
 msgid "SysManage Users"
 msgstr "SysManage 사용자"
 
-#: backend/api/reports/endpoints.py:169
+#: backend/api/reports/endpoints.py:171
 msgid "Host Firewall Status"
 msgstr "호스트 방화벽 상태"
 
-#: backend/api/reports/endpoints.py:175
+#: backend/api/reports/endpoints.py:177
 msgid "Open-Source Antivirus Status"
 msgstr "오픈 소스 백신 상태"
 
-#: backend/api/reports/endpoints.py:182
+#: backend/api/reports/endpoints.py:184
 msgid "Commercial Antivirus Status"
 msgstr "상용 백신 상태"
 
-#: backend/api/reports/endpoints.py:195
+#: backend/api/reports/endpoints.py:197
 msgid "User Security Roles (RBAC)"
 msgstr "사용자 보안 역할 (RBAC)"
 
-#: backend/api/reports/endpoints.py:205 backend/api/audit_log.py:477
+#: backend/api/reports/endpoints.py:207 backend/api/audit_log.py:477
 msgid "Audit Log"
 msgstr "감사 로그"
 
-#: backend/api/reports/endpoints.py:211
+#: backend/api/reports/endpoints.py:213
 msgid "Untagged Machines"
 msgstr "태그가 없는 머신"
 
-#: backend/api/reports/endpoints.py:217
+#: backend/api/reports/endpoints.py:219
 msgid "Backup SLA"
 msgstr "백업 SLA"
 
-#: backend/api/reports/endpoints.py:220 backend/api/reports/endpoints.py:372
+#: backend/api/reports/endpoints.py:225
+msgid "Automatic Updates"
+msgstr "자동 업데이트"
+
+#: backend/api/reports/endpoints.py:228 backend/api/reports/endpoints.py:387
 msgid "Unknown report type"
 msgstr "알 수 없는 보고서 유형"
 
-#: backend/api/reports/endpoints.py:311
+#: backend/api/reports/endpoints.py:319
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF 생성을 사용할 수 없습니다. reportlab 패키지를 설치하세요."
 
-#: backend/api/reports/endpoints.py:397
+#: backend/api/reports/endpoints.py:412
 msgid "Report"
 msgstr "보고서"
 
@@ -844,7 +860,7 @@ msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "잘못된 cron 표현식: 5개 필드 필요 (m h dom mon dow)"
 
 #: backend/api/airgap_collection_schedule.py:94
-#: backend/api/upgrade_profiles.py:165
+#: backend/api/upgrade_profiles.py:199
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "잘못된 cron 표현식: %s"
@@ -3959,7 +3975,7 @@ msgid "Failed to get update results: %s"
 msgstr "업데이트 결과 가져오기 실패: %s"
 
 #: backend/api/updates/execution_routes.py:65
-#: backend/api/upgrade_profiles.py:182
+#: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "퍼미션 denied: APPLY_SOFTWARE_UPDATE 역할 필요"
 
@@ -4551,7 +4567,7 @@ msgstr "실행 중인 자식 호스트 %d개로 오케스트레이션 재부팅�
 msgid "Reboot orchestration not found"
 msgstr "재부팅 오케스트레이션을 찾을 수 없습니다"
 
-#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:185
+#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:203
 msgid "Upgrade profile not found"
 msgstr "업그레이드 프로필을 찾을 수 없습니다."
 
@@ -4562,72 +4578,84 @@ msgid ""
 msgstr ""
 "예약된 업그레이드 프로필에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
-#: backend/api/upgrade_profiles.py:273
+#: backend/api/upgrade_profiles.py:258
+msgid "Each fleet of a rollout needs its own tag"
+msgstr "롤아웃의 각 플릿에는 고유한 태그가 필요합니다"
+
+#: backend/api/upgrade_profiles.py:276
+msgid "A rollout needs at least one fleet"
+msgstr "롤아웃에는 최소한 하나의 플릿이 필요합니다"
+
+#: backend/api/upgrade_profiles.py:349
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "업그레이드 프로필 '%s' 가 생성되었습니다"
 
-#: backend/api/upgrade_profiles.py:342
+#: backend/api/upgrade_profiles.py:418
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "업그레이드 프로필 '%s' 가 업데이트되었습니다"
 
-#: backend/api/upgrade_profiles.py:375
+#: backend/api/upgrade_profiles.py:451
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "업그레이드 프로필 '%s' 가 삭제되었습니다"
 
-#: backend/api/upgrade_profiles.py:380
+#: backend/api/upgrade_profiles.py:456
 msgid "Upgrade profile deleted"
 msgstr "업그레이드 프로필이 삭제되었습니다"
 
-#: backend/api/upgrade_profiles.py:416
+#: backend/api/upgrade_profiles.py:483
+msgid "A rollout of this policy is still running or halted"
+msgstr "이 정책의 롤아웃이 아직 실행 중이거나 중지된 상태입니다"
+
+#: backend/api/upgrade_profiles.py:499
 #, python-format
 msgid "Ran upgrade profile '%s' now"
 msgstr "업데이트 프로필 '%s'을(를) 지금 실행했습니다"
 
-#: backend/api/auto_updates.py:64
+#: backend/api/auto_updates.py:68
 msgid "A reason is required"
 msgstr "사유를 입력해야 합니다"
 
-#: backend/api/auto_updates.py:133
+#: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
 msgstr "모든 자동 업데이트 정책을 보류했습니다: %s"
 
-#: backend/api/auto_updates.py:135
+#: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
 msgstr "모든 자동 업데이트 정책의 보류를 해제했습니다"
 
-#: backend/api/auto_updates.py:162
+#: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
 msgstr "자동 업데이트 설정을 변경했습니다"
 
-#: backend/api/auto_updates.py:195
+#: backend/api/auto_updates.py:213
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
 msgstr "자동 업데이트 정책 '%(policy)s'을(를) 보류했습니다: %(reason)s"
 
-#: backend/api/auto_updates.py:198
+#: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
 msgstr "자동 업데이트 정책 '%s'의 보류를 해제했습니다"
 
-#: backend/api/auto_updates.py:228
+#: backend/api/auto_updates.py:246
 #, python-format
 msgid "%(host)s will never be updated automatically: %(reason)s"
 msgstr "%(host)s은(는) 자동으로 업데이트되지 않습니다: %(reason)s"
 
-#: backend/api/auto_updates.py:231
+#: backend/api/auto_updates.py:249
 #, python-format
 msgid "%s may be updated automatically again"
 msgstr "%s은(는) 다시 자동으로 업데이트될 수 있습니다"
 
-#: backend/api/auto_updates.py:328
+#: backend/api/auto_updates.py:398
 msgid "Run not found"
 msgstr "실행을 찾을 수 없습니다"
 
-#: backend/api/auto_updates.py:336
+#: backend/api/auto_updates.py:406
 #, python-format
 msgid "Acknowledged the automatic update run on %s"
 msgstr "%s의 자동 업데이트 실행을 확인했습니다"
@@ -6025,16 +6053,16 @@ msgid ""
 "have removed, to match the snapshot"
 msgstr "스냅샷과 일치하도록 패키지가 설치되고 스냅샷에 없던 패키지가 제거됨을 확인하세요"
 
-#: backend/services/auto_update_runner.py:309
+#: backend/services/auto_update_runner.py:354
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
 msgstr "정책 '%(policy)s'에 따라 %(host)s에 자동 업데이트를 대기열에 넣었습니다"
 
-#: backend/services/auto_update_runner.py:387
+#: backend/services/auto_update_runner.py:539
 msgid "The host never reported the result"
 msgstr "호스트가 결과를 보고하지 않았습니다"
 
-#: backend/services/auto_update_results.py:68
+#: backend/services/auto_update_results.py:102
 #, python-format
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "정책 '%(policy)s'에 따른 %(host)s 자동 재부팅"
@@ -6402,6 +6430,31 @@ msgstr "vault에서 잘못된 응답"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "비밀 형식이 잘못되었습니다"
+
+#: backend/services/auto_update_rollout.py:149
+#, python-format
+msgid "Rollout of policy '%(policy)s' started: %(count)d fleet(s)"
+msgstr "'%(policy)s' 정책의 롤아웃이 시작되었습니다: 플릿 %(count)d개"
+
+#: backend/services/auto_update_rollout.py:275
+#, python-format
+msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
+msgstr "'%(policy)s' 정책의 롤아웃이 플릿 '%(fleet)s'에서 중지되었습니다: %(reason)s"
+
+#: backend/services/auto_update_rollout.py:321
+#, python-format
+msgid "Rollout of policy '%(policy)s' completed"
+msgstr "'%(policy)s' 정책의 롤아웃이 완료되었습니다"
+
+#: backend/services/auto_update_rollout.py:376
+#, python-format
+msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
+msgstr "'%(policy)s' 정책의 롤아웃이 플릿 '%(fleet)s' 이후로 재개되었습니다"
+
+#: backend/services/auto_update_rollout.py:393
+#, python-format
+msgid "Rollout of policy '%(policy)s' canceled"
+msgstr "'%(policy)s' 정책의 롤아웃이 취소되었습니다"
 
 #: backend/licensing/migration_compat.py:150
 msgid ""

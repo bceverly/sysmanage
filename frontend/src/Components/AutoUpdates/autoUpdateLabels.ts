@@ -102,3 +102,42 @@ export function policyRuleLabel(t: TFunction, rule: string): string {
   };
   return labels[rule] ?? rule;
 }
+
+// 26.4: a rollout's state, and why it halted at a fleet.
+export function rolloutStatusLabel(t: TFunction, status: string): string {
+  const labels: Record<string, string> = {
+    running: t('autoUpdates.rollout.running', 'In progress'),
+    halted: t('autoUpdates.rollout.halted', 'Halted'),
+    completed: t('autoUpdates.rollout.completed', 'Completed'),
+    canceled: t('autoUpdates.rollout.canceled', 'Canceled'),
+  };
+  return labels[status] ?? status;
+}
+
+export function rolloutStatusColor(status: string): 'success' | 'error' | 'info' | 'default' {
+  if (status === 'completed') return 'success';
+  if (status === 'halted') return 'error';
+  if (status === 'running') return 'info';
+  return 'default';
+}
+
+export function fleetStatusLabel(t: TFunction, status: string): string {
+  const labels: Record<string, string> = {
+    pending: t('autoUpdates.fleet.pending', 'Not started'),
+    running: t('autoUpdates.fleet.running', 'In progress'),
+    done: t('autoUpdates.fleet.done', 'Done'),
+    halted: t('autoUpdates.fleet.halted', 'Halted here'),
+  };
+  return labels[status] ?? status;
+}
+
+export function haltReasonLabel(t: TFunction, reason: string | null): string {
+  if (!reason) return '';
+  const labels: Record<string, string> = {
+    run_failures: t('autoUpdates.halt.runFailures', 'too many runs in this fleet failed'),
+    reboot_not_back: t('autoUpdates.halt.notBack', 'a host did not come back from its reboot'),
+    not_reporting: t('autoUpdates.halt.notReporting', 'a host stopped reporting after it was patched'),
+    critical_alerts: t('autoUpdates.halt.criticalAlerts', 'a critical alert was raised on a host in this fleet'),
+  };
+  return labels[reason] ?? reason;
+}

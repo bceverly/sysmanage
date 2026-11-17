@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-API-test ORM schema mirror, part C: automatic updates (ROADMAP 26.1).
+API-test ORM schema mirror, part C: automatic updates (ROADMAP 26.1-26.4).
 
 SQLite-compatible, hand-written mirrors of the production models.  See
 ``tests/api/conftest.py`` for the full rationale and the maintenance warning.
@@ -63,3 +63,34 @@ class AutoUpdateRun(TestBase):
     completed_at = Column(DateTime, nullable=True)
     acknowledged_by = Column(String(255), nullable=True)
     acknowledged_at = Column(DateTime, nullable=True)
+    rollout_id = Column(GUID(), nullable=True)
+    rollout_stage = Column(Integer, nullable=True)
+
+
+class UpgradeProfileRolloutStage(TestBase):
+    __tablename__ = "upgrade_profile_rollout_stage"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    profile_id = Column(GUID(), nullable=False)
+    position = Column(Integer, nullable=False)
+    name = Column(String(120), nullable=False)
+    tag_id = Column(GUID(), nullable=True)
+    soak_minutes = Column(Integer, nullable=False, default=0, server_default="0")
+
+
+class AutoUpdateRollout(TestBase):
+    __tablename__ = "auto_update_rollout"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    profile_id = Column(GUID(), nullable=True)
+    profile_name = Column(String(120), nullable=False)
+    status = Column(String(16), nullable=False)
+    stage_index = Column(Integer, nullable=False, default=0, server_default="0")
+    stages = Column(JSON, nullable=True)
+    triggered_by = Column(String(255), nullable=True)
+    started_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    halt_reason = Column(String(40), nullable=True)
+    halt_detail = Column(JSON, nullable=True)
+    halted_at = Column(DateTime, nullable=True)
+    ended_by = Column(String(255), nullable=True)
+    end_reason = Column(String(1000), nullable=True)

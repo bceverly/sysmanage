@@ -792,7 +792,10 @@
     "backupsAttention": "Backups que precisam de atenção",
     "backupsEscrowStale": "Exportação de chaves de emergência desatualizada",
     "backupsServerUnprotected": "Este servidor SysManage não tem um backup bem-sucedido",
-    "autoUpdateProblems": "Problemas de atualizações automáticas"
+    "autoUpdateProblems": "Problemas de atualizações automáticas",
+    "autoRebootsWaiting": "Reinicializações automáticas aguardando uma janela de manutenção",
+    "rolloutsHalted": "Implantações interrompidas: {{count}}",
+    "rolloutsRunning": "Implantações em andamento"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidade das colunas",
@@ -2992,7 +2995,8 @@
       "users": "usuários",
       "assetTags": "tags de ativos",
       "hardware": "hardware",
-      "backups": "backup"
+      "backups": "backup",
+      "updates": "atualizações"
     },
     "title": "Relatórios",
     "unknownError": "Erro desconhecido",
@@ -3012,6 +3016,10 @@
     "backupSla": {
       "name": "SLA de backup",
       "description": "Para cada host com backup: se o objetivo de ponto de recuperação (o dobro do intervalo de backup) é cumprido agora e em cada um dos últimos 30 dias, os backups com falha, a última verificação com leitura completa e o tamanho do repositório."
+    },
+    "automaticUpdates": {
+      "description": "Para cada política de atualização automática e cada frota nos últimos 30 dias: execuções, hosts atualizados, execuções com falha, reinicializações e o tempo mediano entre o surgimento, em um host, de um patch para uma CVE crítica e sua aplicação nesse host.",
+      "name": "Atualizações Automáticas"
     }
   },
   "resetPassword": {
@@ -3815,7 +3823,20 @@
     "criticalEither": "A verificação de vulnerabilidades ou o aviso de segurança do fornecedor",
     "criticalVulnerability": "A verificação de vulnerabilidades do host",
     "criticalAdvisory": "O aviso de segurança do fornecedor",
-    "criticalHelp": "Sem verificações de vulnerabilidades ou avisos de segurança do fornecedor para um host, todo patch nele aguarda o prazo comum."
+    "criticalHelp": "Sem verificações de vulnerabilidades ou avisos de segurança do fornecedor para um host, todo patch nele aguarda o prazo comum.",
+    "rolloutAdd": "Adicionar uma frota",
+    "rolloutCanary": "Frota canário",
+    "rolloutDown": "Mover para depois",
+    "rolloutEnabled": "Implantar frota por frota",
+    "rolloutFleetName": "Frota {{n}}",
+    "rolloutFleetTag": "Hosts com a etiqueta",
+    "rolloutHelp": "Uma frota de cada vez, nesta ordem; a primeira é a canário. A próxima frota só começa quando esta tiver terminado, estiver saudável e tiver cumprido o período de observação. Um host é atualizado com a primeira frota cuja etiqueta ele possui; hosts que não estão em nenhuma frota ficam por último.",
+    "rolloutIncomplete": "Cada frota da implantação precisa de um nome e de uma etiqueta",
+    "rolloutMaxFailures": "Interromper quando falhar mais do que esta parcela de uma frota (%)",
+    "rolloutMaxFailuresHelp": "0: qualquer execução com falha interrompe a implantação. Um host que não volta da reinicialização, um host que parou de se reportar ou um novo alerta crítico na frota sempre a interrompe.",
+    "rolloutRemove": "Remover esta frota",
+    "rolloutSoak": "Tempo de observação (horas)",
+    "rolloutUp": "Mover para antes"
   },
   "userDetail": {
     "active": "Ativo",
@@ -6285,6 +6306,41 @@
     "startsAt": "Começa quando sua janela de manutenção abrir: {{when}}",
     "threshold": "Um patch é crítico quando corrige uma CVE classificada como",
     "thresholdCritical": "Crítica",
-    "thresholdHigh": "Alta ou crítica"
+    "thresholdHigh": "Alta ou crítica",
+    "fleet": {
+      "counts": "{{applied}} aplicados, {{failed}} com falha, {{inFlight}} em andamento, {{other}} não aplicados",
+      "done": "Concluída",
+      "halted": "Interrompida aqui",
+      "hide": "Ocultar hosts",
+      "hosts": "{{count}} host(s)",
+      "noRun": "Ainda não planejada",
+      "pending": "Não iniciada",
+      "remaining": "Os hosts restantes",
+      "resumedBy": "retomada por {{who}}",
+      "running": "Em andamento",
+      "show": "Mostrar hosts",
+      "soakUntil": "o tempo de observação termina {{when}}"
+    },
+    "halt": {
+      "criticalAlerts": "um alerta crítico foi gerado em um host desta frota",
+      "notBack": "um host não voltou da reinicialização",
+      "notReporting": "um host parou de se reportar depois de ser atualizado",
+      "runFailures": "falharam execuções demais nesta frota"
+    },
+    "rollout": {
+      "cancel": "Cancelar",
+      "cancelReason": "Por que cancelar esta implantação?",
+      "canceled": "Cancelada",
+      "canceledBy": "Cancelada por {{who}}: {{reason}}",
+      "completed": "Concluída",
+      "halted": "Interrompida",
+      "haltedBecause": "Interrompida em {{fleet}}: {{reason}} ({{hosts}}). Nada mais é atualizado até que alguém a retome ou a cancele.",
+      "resume": "Retomar",
+      "resumeReason": "Por que continuar além desta frota?",
+      "running": "Em andamento",
+      "started": "iniciada em {{when}}",
+      "subtitle": "Políticas implantadas frota por frota: uma frota de cada vez, cada uma saudável antes da próxima.",
+      "title": "Implantações por frota de hosts"
+    }
   }
 }

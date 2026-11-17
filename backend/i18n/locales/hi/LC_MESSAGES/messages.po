@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 10:03-0800\n"
+"POT-Creation-Date: 2026-11-16 21:22-0800\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -247,8 +247,8 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:167
-#: backend/api/backups.py:170 backend/api/auto_updates.py:220
-#: backend/api/auto_updates.py:254 backend/api/diagnostics.py:102
+#: backend/api/backups.py:170 backend/api/auto_updates.py:238
+#: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -282,6 +282,18 @@ msgstr "होस्ट की पार्सनल है"
 #: backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "उपयोगकर्ता पाया नहीं जा सकता"
+
+#: backend/api/auto_update_rollouts.py:104
+msgid "Rollout not found"
+msgstr "रोलआउट नहीं मिला"
+
+#: backend/api/auto_update_rollouts.py:122
+msgid "Only a halted rollout can resume"
+msgstr "केवल रुका हुआ रोलआउट फिर से शुरू किया जा सकता है"
+
+#: backend/api/auto_update_rollouts.py:143
+msgid "This rollout has already ended"
+msgstr "यह रोलआउट पहले से ही समाप्त हो चुका है"
 
 #: backend/api/malware.py:134
 msgid "Only an administrator can change the malware rule sets"
@@ -544,61 +556,61 @@ msgstr "हार्डवेयर अपडेट किया गया"
 msgid "Failed to update hardware information"
 msgstr "हार्डवेयर सूचना का अपडेट वापरे में विफल"
 
-#: backend/api/handlers/software_package_handlers.py:112
+#: backend/api/handlers/software_package_handlers.py:113
 msgid "software_inventory_updated"
 msgstr "सॉफ़्टवेयर इन्वेंटरी अपडेट किया गया"
 
-#: backend/api/handlers/software_package_handlers.py:121
+#: backend/api/handlers/software_package_handlers.py:122
 msgid "Failed to update software inventory"
 msgstr "सॉफ्टवेयर संग्रहण का अपडेट वापरे में विफल"
 
-#: backend/api/handlers/software_package_handlers.py:299
+#: backend/api/handlers/software_package_handlers.py:293
 #: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "अपडेट संग्रहीत करने में असफल: %s"
 
-#: backend/api/handlers/software_package_handlers.py:414
+#: backend/api/handlers/software_package_handlers.py:408
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "पैकेज कलेक्शन रिझल्ट प्रोसेस करने में विफल हुए: %s"
 
-#: backend/api/handlers/software_package_handlers.py:508
+#: backend/api/handlers/software_package_handlers.py:502
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "तीसरी पक्ष के अनुभाग संशोधन प्रोसेसिंग में विफल हो गया: %s"
 
-#: backend/api/handlers/software_package_handlers.py:591
+#: backend/api/handlers/software_package_handlers.py:585
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "अंटीवायरस स्थिति अपडेट प्रोसेस करने में विफल: %s"
 
-#: backend/api/handlers/software_package_handlers.py:722
+#: backend/api/handlers/software_package_handlers.py:716
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "कॉमर्शियल एंटीवायरस स्थिति अपडेट प्रोसेस करने में विफल हुए: %s"
 
-#: backend/api/handlers/software_package_handlers.py:824
+#: backend/api/handlers/software_package_handlers.py:818
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "फायरवॉल स्टेटस अपडेट प्रोसेस करने में विफल हुए: %s"
 
-#: backend/api/handlers/software_package_handlers.py:910
+#: backend/api/handlers/software_package_handlers.py:904
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Graylog की स्थिति अपडेट प्रोसेस करने में विफल हुए: %s"
 
-#: backend/api/handlers/software_package_handlers.py:942
+#: backend/api/handlers/software_package_handlers.py:936
 msgid "Missing request_id in installation_complete"
 msgstr "installation_complete में request_id नहीं पाया गया"
 
-#: backend/api/handlers/software_package_handlers.py:959
+#: backend/api/handlers/software_package_handlers.py:953
 #: backend/api/agent.py:933 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "इनस्टॉलेशन अनुरोध %s के लिए मिल नहीं पाया"
 
-#: backend/api/handlers/software_package_handlers.py:1000
+#: backend/api/handlers/software_package_handlers.py:994
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -608,40 +620,40 @@ msgstr "इंस्टॉलेशन पूर्णता रिकॉर्�
 msgid "Report template not found"
 msgstr "रिपोर्ट प्रतिक्रिया नहीं मिली"
 
-#: backend/api/report_templates.py:196 backend/api/package_compliance.py:138
+#: backend/api/report_templates.py:206 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
-#: backend/api/upgrade_profiles.py:145
+#: backend/api/upgrade_profiles.py:179
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "%(field)s के लिए गलत UUID: %(value)s"
 
-#: backend/api/report_templates.py:211 backend/api/report_templates.py:279
+#: backend/api/report_templates.py:221 backend/api/report_templates.py:289
 #, python-format
 msgid "Unknown base_report_type: %s"
 msgstr "अज्ञात base_report_type: %s"
 
-#: backend/api/report_templates.py:220
+#: backend/api/report_templates.py:230
 #, python-format
 msgid "Unknown field code(s) for %(base_report_type)s: %(codes)s"
 msgstr "%(base_report_type)s के लिए अज्ञात कॉड़(s): %(codes)s"
 
-#: backend/api/report_templates.py:263
+#: backend/api/report_templates.py:273
 #, python-format
 msgid "Created report template '%s'"
 msgstr "रिपोर्ट टेम्पलेट '%s' बनाया गया"
 
-#: backend/api/report_templates.py:353
+#: backend/api/report_templates.py:363
 #, python-format
 msgid "Updated report template '%s'"
 msgstr "रिपोर्ट टेम्पलेट '%s' अपडेट"
 
-#: backend/api/report_templates.py:386
+#: backend/api/report_templates.py:396
 #, python-format
 msgid "Deleted report template '%s'"
 msgstr "रिपोर्ट टेम्पलेट '%s' हटाया गया"
 
-#: backend/api/report_templates.py:391
+#: backend/api/report_templates.py:401
 msgid "Report template deleted"
 msgstr "रिपोर्ट टेम्पलेट हटाया गया"
 
@@ -781,7 +793,7 @@ msgstr "रिपॉजिटरी अक्षम करने का अन�
 msgid "Failed to queue repository disable: %s"
 msgstr "प्रतिष्ठान दisable करने में विफल रहा: %s"
 
-#: backend/api/reports/endpoints.py:73
+#: backend/api/reports/endpoints.py:75
 msgid ""
 "Report generation requires a SysManage Professional+ license. Please upgrade"
 " to access this feature."
@@ -789,55 +801,59 @@ msgstr ""
 "रिपोर्ट जनरेशन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा "
 "तक पहुँचने के लिए कृपया अपग्रेड करें।"
 
-#: backend/api/reports/endpoints.py:154
+#: backend/api/reports/endpoints.py:156
 msgid "Registered Hosts"
 msgstr "पंजीकृत होस्ट"
 
-#: backend/api/reports/endpoints.py:156
+#: backend/api/reports/endpoints.py:158
 msgid "Hosts with Tags"
 msgstr "टैग के साथ होस्ट"
 
-#: backend/api/reports/endpoints.py:164
+#: backend/api/reports/endpoints.py:166
 msgid "SysManage Users"
 msgstr "SysManage उपयोगकर्ता"
 
-#: backend/api/reports/endpoints.py:169
+#: backend/api/reports/endpoints.py:171
 msgid "Host Firewall Status"
 msgstr "होस्ट फ़ायरवॉल स्थिति"
 
-#: backend/api/reports/endpoints.py:175
+#: backend/api/reports/endpoints.py:177
 msgid "Open-Source Antivirus Status"
 msgstr "ओपन-सोर्स एंटीवायरस स्थिति"
 
-#: backend/api/reports/endpoints.py:182
+#: backend/api/reports/endpoints.py:184
 msgid "Commercial Antivirus Status"
 msgstr "वाणिज्यिक एंटीवायरस स्थिति"
 
-#: backend/api/reports/endpoints.py:195
+#: backend/api/reports/endpoints.py:197
 msgid "User Security Roles (RBAC)"
 msgstr "उपयोगकर्ता सुरक्षा भूमिकाएँ (RBAC)"
 
-#: backend/api/reports/endpoints.py:205 backend/api/audit_log.py:477
+#: backend/api/reports/endpoints.py:207 backend/api/audit_log.py:477
 msgid "Audit Log"
 msgstr "ऑडिट लॉग"
 
-#: backend/api/reports/endpoints.py:211
+#: backend/api/reports/endpoints.py:213
 msgid "Untagged Machines"
 msgstr "बिना टैग वाली मशीनें"
 
-#: backend/api/reports/endpoints.py:217
+#: backend/api/reports/endpoints.py:219
 msgid "Backup SLA"
 msgstr "बैकअप SLA"
 
-#: backend/api/reports/endpoints.py:220 backend/api/reports/endpoints.py:372
+#: backend/api/reports/endpoints.py:225
+msgid "Automatic Updates"
+msgstr "स्वचालित अपडेट"
+
+#: backend/api/reports/endpoints.py:228 backend/api/reports/endpoints.py:387
 msgid "Unknown report type"
 msgstr "अज्ञात रिपोर्ट प्रकार"
 
-#: backend/api/reports/endpoints.py:311
+#: backend/api/reports/endpoints.py:319
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF उत्पादन उपलब्ध नहीं है। कृपया reportlab पैकेज इंस्टॉल करें।"
 
-#: backend/api/reports/endpoints.py:397
+#: backend/api/reports/endpoints.py:412
 msgid "Report"
 msgstr "रिपोर्ट"
 
@@ -863,7 +879,7 @@ msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "अमान्य cron अभिव्यक्ति: 5 फ़ील्ड अपेक्षित (m h dom mon dow)"
 
 #: backend/api/airgap_collection_schedule.py:94
-#: backend/api/upgrade_profiles.py:165
+#: backend/api/upgrade_profiles.py:199
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "अमान्य क्रॉन एक्सप्रेशन: %s"
@@ -4105,7 +4121,7 @@ msgid "Failed to get update results: %s"
 msgstr "अपडेट परिणाम प्राप्त करने में विफल: %s"
 
 #: backend/api/updates/execution_routes.py:65
-#: backend/api/upgrade_profiles.py:182
+#: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "प्रवेश नहीं: APPLY_SOFTWARE_UPDATE भूमिका की आवश्यकता है"
 
@@ -4745,7 +4761,7 @@ msgstr "%d चल रहे चाइल्ड होस्ट(ओं) के �
 msgid "Reboot orchestration not found"
 msgstr "रीबूट ऑर्केस्ट्रेशन नहीं मिला"
 
-#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:185
+#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:203
 msgid "Upgrade profile not found"
 msgstr "अपग्रेड profile नहीं मिला"
 
@@ -4757,72 +4773,84 @@ msgstr ""
 "अनुसूचित अपग्रेड प्रोफ़ाइलों के लिए SysManage Professional+ लाइसेंस आवश्यक "
 "है। इस सुविधा तक पहुंचने के लिए कृपया अपग्रेड करें।"
 
-#: backend/api/upgrade_profiles.py:273
+#: backend/api/upgrade_profiles.py:258
+msgid "Each fleet of a rollout needs its own tag"
+msgstr "रोलआउट के हर फ्लीट का अपना टैग होना चाहिए"
+
+#: backend/api/upgrade_profiles.py:276
+msgid "A rollout needs at least one fleet"
+msgstr "एक रोलआउट के लिए कम से कम एक फ्लीट की आवश्यकता होती है"
+
+#: backend/api/upgrade_profiles.py:349
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "अपग्रेड प्रोफ़ाइल '%s' बनाई गई"
 
-#: backend/api/upgrade_profiles.py:342
+#: backend/api/upgrade_profiles.py:418
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "अपग्रेड प्रोफ़ाइल '%s' अपडेट"
 
-#: backend/api/upgrade_profiles.py:375
+#: backend/api/upgrade_profiles.py:451
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "अपग्रेड प्रोफ़ाइल '%s' हटाई गई"
 
-#: backend/api/upgrade_profiles.py:380
+#: backend/api/upgrade_profiles.py:456
 msgid "Upgrade profile deleted"
 msgstr "अपग्रेड प्रोफ़ाइल हटाई गई"
 
-#: backend/api/upgrade_profiles.py:416
+#: backend/api/upgrade_profiles.py:483
+msgid "A rollout of this policy is still running or halted"
+msgstr "इस नीति का एक रोलआउट अभी भी चल रहा है या रुका हुआ है"
+
+#: backend/api/upgrade_profiles.py:499
 #, python-format
 msgid "Ran upgrade profile '%s' now"
 msgstr "अपडेट प्रोफ़ाइल '%s' अभी चलाई गई"
 
-#: backend/api/auto_updates.py:64
+#: backend/api/auto_updates.py:68
 msgid "A reason is required"
 msgstr "कारण बताना आवश्यक है"
 
-#: backend/api/auto_updates.py:133
+#: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
 msgstr "सभी स्वचालित अपडेट नीतियाँ रोकी गईं: %s"
 
-#: backend/api/auto_updates.py:135
+#: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
 msgstr "सभी स्वचालित अपडेट नीतियों पर लगी रोक हटाई गई"
 
-#: backend/api/auto_updates.py:162
+#: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
 msgstr "स्वचालित अपडेट की सेटिंग्स बदली गईं"
 
-#: backend/api/auto_updates.py:195
+#: backend/api/auto_updates.py:213
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
 msgstr "स्वचालित अपडेट नीति '%(policy)s' रोकी गई: %(reason)s"
 
-#: backend/api/auto_updates.py:198
+#: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
 msgstr "स्वचालित अपडेट नीति '%s' पर लगी रोक हटाई गई"
 
-#: backend/api/auto_updates.py:228
+#: backend/api/auto_updates.py:246
 #, python-format
 msgid "%(host)s will never be updated automatically: %(reason)s"
 msgstr "%(host)s को कभी भी स्वचालित रूप से अपडेट नहीं किया जाएगा: %(reason)s"
 
-#: backend/api/auto_updates.py:231
+#: backend/api/auto_updates.py:249
 #, python-format
 msgid "%s may be updated automatically again"
 msgstr "%s को फिर से स्वचालित रूप से अपडेट किया जा सकता है"
 
-#: backend/api/auto_updates.py:328
+#: backend/api/auto_updates.py:398
 msgid "Run not found"
 msgstr "रन नहीं मिला"
 
-#: backend/api/auto_updates.py:336
+#: backend/api/auto_updates.py:406
 #, python-format
 msgid "Acknowledged the automatic update run on %s"
 msgstr "%s पर स्वचालित अपडेट रन की पुष्टि की गई"
@@ -6280,16 +6308,16 @@ msgstr ""
 "पुष्टि करें कि पैकेज इंस्टॉल होंगे, और स्नैपशॉट में न रहे पैकेज हटाए जाएँगे,"
 " ताकि होस्ट स्नैपशॉट से मेल खाए"
 
-#: backend/services/auto_update_runner.py:309
+#: backend/services/auto_update_runner.py:354
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
 msgstr "नीति '%(policy)s' द्वारा %(host)s पर स्वचालित अपडेट कतार में डाला गया"
 
-#: backend/services/auto_update_runner.py:387
+#: backend/services/auto_update_runner.py:539
 msgid "The host never reported the result"
 msgstr "होस्ट ने कभी परिणाम की सूचना नहीं दी"
 
-#: backend/services/auto_update_results.py:68
+#: backend/services/auto_update_results.py:102
 #, python-format
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "नीति '%(policy)s' के बाद %(host)s का स्वचालित रीबूट"
@@ -6669,6 +6697,31 @@ msgstr "वॉल्ट से अवैध प्रतिक्रिया"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "गुप्त प्रारूप गलत है"
+
+#: backend/services/auto_update_rollout.py:149
+#, python-format
+msgid "Rollout of policy '%(policy)s' started: %(count)d fleet(s)"
+msgstr "नीति '%(policy)s' का रोलआउट शुरू हुआ: %(count)d फ्लीट"
+
+#: backend/services/auto_update_rollout.py:275
+#, python-format
+msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
+msgstr "नीति '%(policy)s' का रोलआउट फ्लीट '%(fleet)s' पर रुका: %(reason)s"
+
+#: backend/services/auto_update_rollout.py:321
+#, python-format
+msgid "Rollout of policy '%(policy)s' completed"
+msgstr "नीति '%(policy)s' का रोलआउट पूरा हुआ"
+
+#: backend/services/auto_update_rollout.py:376
+#, python-format
+msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
+msgstr "नीति '%(policy)s' का रोलआउट फ्लीट '%(fleet)s' से आगे फिर से शुरू हुआ"
+
+#: backend/services/auto_update_rollout.py:393
+#, python-format
+msgid "Rollout of policy '%(policy)s' canceled"
+msgstr "नीति '%(policy)s' का रोलआउट रद्द किया गया"
 
 #: backend/licensing/migration_compat.py:150
 msgid ""

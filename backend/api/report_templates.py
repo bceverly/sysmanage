@@ -155,6 +155,16 @@ _BASE_REPORTS: Dict[str, List[Dict[str, str]]] = {
         {"code": "verified", "label": "Last Full-Read Verification"},
         {"code": "size", "label": "Repository Size"},
     ],
+    # Pro+ reporting_engine AUTO_UPDATE_CODES (generators_auto_updates.pxi).
+    "automatic-updates": [
+        {"code": "policy", "label": "Policy"},
+        {"code": "fleet", "label": "Fleet"},
+        {"code": "runs", "label": "Runs"},
+        {"code": "hosts_patched", "label": "Hosts Patched"},
+        {"code": "failures", "label": "Failed Runs"},
+        {"code": "reboots", "label": "Reboots"},
+        {"code": "critical_median", "label": "Critical Patch to Applied (Median)"},
+    ],
 }
 
 _VALID_BASE_TYPES = tuple(_BASE_REPORTS.keys())

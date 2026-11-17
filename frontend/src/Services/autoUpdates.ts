@@ -65,7 +65,56 @@ export interface AutoUpdateSettings {
     waiting?: number;
     reboot_not_back: number;
     opted_out_hosts: number;
+    // 26.5: reboots waiting for a window; 26.4 rollouts.
+    reboot_waiting?: number;
+    rollouts_running?: number;
+    rollouts_halted?: number;
   };
+}
+
+// 26.4: one host of a rollout's fleet and its latest run there.
+export interface RolloutHost {
+  host_id: string;
+  hostname: string | null;
+  run_id: string | null;
+  status: string | null;
+  reason: string | null;
+  reboot_status: string | null;
+  release_at: string | null;
+}
+
+export interface RolloutStage {
+  name: string;
+  tag_id: string | null;
+  soak_minutes: number;
+  host_ids: string[];
+  remaining?: boolean;
+  status: 'pending' | 'running' | 'done' | 'halted';
+  started_at: string | null;
+  finished_at: string | null;
+  soak_until?: string | null;
+  forced?: boolean;
+  resumed_by?: string;
+  counts?: { hosts: number; in_flight?: number; applied?: number; failed?: number; other?: number };
+  hosts: RolloutHost[];
+}
+
+export interface Rollout {
+  id: string;
+  profile_id: string | null;
+  profile_name: string;
+  status: 'running' | 'halted' | 'completed' | 'canceled';
+  stage_index: number;
+  stages: RolloutStage[];
+  triggered_by: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  halt_reason: string | null;
+  halt_detail: { stage?: number; culprits?: string[]; failure_pct?: number;
+    max_failure_pct?: number; alerts?: string[] };
+  halted_at: string | null;
+  ended_by: string | null;
+  end_reason: string | null;
 }
 
 export interface HostAutoUpdates {
@@ -128,5 +177,14 @@ export const autoUpdatesService = {
   },
   async acknowledge(runId: string): Promise<AutoUpdateRun> {
     return (await axiosInstance.post(`${BASE}/runs/${runId}/acknowledge`)).data;
+  },
+  async rollouts(params: { status?: string; limit?: number } = {}): Promise<Rollout[]> {
+    return (await axiosInstance.get(`${BASE}/rollouts`, { params })).data;
+  },
+  async resumeRollout(id: string, reason: string): Promise<Rollout> {
+    return (await axiosInstance.post(`${BASE}/rollouts/${id}/resume`, { reason })).data;
+  },
+  async cancelRollout(id: string, reason: string): Promise<Rollout> {
+    return (await axiosInstance.post(`${BASE}/rollouts/${id}/cancel`, { reason })).data;
   },
 };

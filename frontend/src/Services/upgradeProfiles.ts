@@ -33,6 +33,26 @@ export interface UpgradeProfile {
   wait_days_regular: number;
   wait_days_critical: number;
   critical_source: CriticalSource;
+  // 26.4 fleet-by-fleet rollout (Enterprise)
+  rollout_enabled: boolean;
+  rollout_max_failure_pct: number;
+  rollout_stages: RolloutStageConfig[];
+}
+
+// 26.4: one fleet of a policy's rollout, as stored.
+export interface RolloutStageConfig {
+  id?: string;
+  position?: number;
+  name: string;
+  tag_id: string | null;
+  soak_minutes: number;
+}
+
+// 26.4: one fleet as the form sends it.
+export interface RolloutStageInput {
+  name: string;
+  tag_id: string;
+  soak_hours: number;
 }
 
 // 26.2: in_window reboots only inside a maintenance window.
@@ -56,6 +76,9 @@ export interface UpgradeProfileCreate {
   wait_days_regular?: number;
   wait_days_critical?: number;
   critical_source?: CriticalSource;
+  rollout_enabled?: boolean;
+  rollout_max_failure_pct?: number;
+  rollout_stages?: RolloutStageInput[];
 }
 
 export type UpgradeProfileUpdate = Partial<UpgradeProfileCreate>;

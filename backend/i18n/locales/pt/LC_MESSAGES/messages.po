@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 10:03-0800\n"
+"POT-Creation-Date: 2026-11-16 21:22-0800\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -246,8 +246,8 @@ msgstr "Formato de ID de host inválido"
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:167
-#: backend/api/backups.py:170 backend/api/auto_updates.py:220
-#: backend/api/auto_updates.py:254 backend/api/diagnostics.py:102
+#: backend/api/backups.py:170 backend/api/auto_updates.py:238
+#: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -281,6 +281,18 @@ msgstr "O host não está aprovado"
 #: backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "Usuário não encontrado"
+
+#: backend/api/auto_update_rollouts.py:104
+msgid "Rollout not found"
+msgstr "Implantação não encontrada"
+
+#: backend/api/auto_update_rollouts.py:122
+msgid "Only a halted rollout can resume"
+msgstr "Somente uma implantação interrompida pode ser retomada"
+
+#: backend/api/auto_update_rollouts.py:143
+msgid "This rollout has already ended"
+msgstr "Esta implantação já terminou"
 
 #: backend/api/malware.py:134
 msgid "Only an administrator can change the malware rule sets"
@@ -541,61 +553,61 @@ msgstr "Hardware atualizado"
 msgid "Failed to update hardware information"
 msgstr "Falha ao atualizar informações de hardware"
 
-#: backend/api/handlers/software_package_handlers.py:112
+#: backend/api/handlers/software_package_handlers.py:113
 msgid "software_inventory_updated"
 msgstr "Inventário de software atualizado"
 
-#: backend/api/handlers/software_package_handlers.py:121
+#: backend/api/handlers/software_package_handlers.py:122
 msgid "Failed to update software inventory"
 msgstr "Falha ao atualizar inventário de software"
 
-#: backend/api/handlers/software_package_handlers.py:299
+#: backend/api/handlers/software_package_handlers.py:293
 #: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Falha ao armazenar atualizações: %s"
 
-#: backend/api/handlers/software_package_handlers.py:414
+#: backend/api/handlers/software_package_handlers.py:408
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "Falha ao processar o resultado da coleção de pacotes: %s"
 
-#: backend/api/handlers/software_package_handlers.py:508
+#: backend/api/handlers/software_package_handlers.py:502
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "Falha ao processar atualização do repositório de terceiros: %s"
 
-#: backend/api/handlers/software_package_handlers.py:591
+#: backend/api/handlers/software_package_handlers.py:585
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "Falha ao processar atualização de status do antivírus: %s"
 
-#: backend/api/handlers/software_package_handlers.py:722
+#: backend/api/handlers/software_package_handlers.py:716
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "Falha ao processar atualização de status do antivórus comercial: %s"
 
-#: backend/api/handlers/software_package_handlers.py:824
+#: backend/api/handlers/software_package_handlers.py:818
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "Falha ao processar atualização de status do firewall: %s"
 
-#: backend/api/handlers/software_package_handlers.py:910
+#: backend/api/handlers/software_package_handlers.py:904
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Falha ao processar atualização de status do Graylog: %s"
 
-#: backend/api/handlers/software_package_handlers.py:942
+#: backend/api/handlers/software_package_handlers.py:936
 msgid "Missing request_id in installation_complete"
 msgstr "Falta request_id em installation_complete"
 
-#: backend/api/handlers/software_package_handlers.py:959
+#: backend/api/handlers/software_package_handlers.py:953
 #: backend/api/agent.py:933 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Solicitação de instalação não encontrada: %s"
 
-#: backend/api/handlers/software_package_handlers.py:1000
+#: backend/api/handlers/software_package_handlers.py:994
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -605,41 +617,41 @@ msgstr "Falha ao registrar a conclusão da instalação: %s"
 msgid "Report template not found"
 msgstr "Modelo de relatório não encontrado"
 
-#: backend/api/report_templates.py:196 backend/api/package_compliance.py:138
+#: backend/api/report_templates.py:206 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
-#: backend/api/upgrade_profiles.py:145
+#: backend/api/upgrade_profiles.py:179
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "UUID inválido para %(field)s: %(value)s"
 
-#: backend/api/report_templates.py:211 backend/api/report_templates.py:279
+#: backend/api/report_templates.py:221 backend/api/report_templates.py:289
 #, python-format
 msgid "Unknown base_report_type: %s"
 msgstr "base_report_type desconhecido: %s"
 
-#: backend/api/report_templates.py:220
+#: backend/api/report_templates.py:230
 #, python-format
 msgid "Unknown field code(s) for %(base_report_type)s: %(codes)s"
 msgstr ""
 "Código(s) de campo desconhecido(s) para %(base_report_type)s: %(codes)s"
 
-#: backend/api/report_templates.py:263
+#: backend/api/report_templates.py:273
 #, python-format
 msgid "Created report template '%s'"
 msgstr "Modelo de relatório '%s' criado"
 
-#: backend/api/report_templates.py:353
+#: backend/api/report_templates.py:363
 #, python-format
 msgid "Updated report template '%s'"
 msgstr "Modelo de relatório '%s' atualizado"
 
-#: backend/api/report_templates.py:386
+#: backend/api/report_templates.py:396
 #, python-format
 msgid "Deleted report template '%s'"
 msgstr "Modelo de relatório '%s' excluído"
 
-#: backend/api/report_templates.py:391
+#: backend/api/report_templates.py:401
 msgid "Report template deleted"
 msgstr "Modelo de relatório excluído"
 
@@ -779,7 +791,7 @@ msgstr "Solicitação de desativação de repositório enfileirada com sucesso"
 msgid "Failed to queue repository disable: %s"
 msgstr "Falha ao filas desativar repositório: %s"
 
-#: backend/api/reports/endpoints.py:73
+#: backend/api/reports/endpoints.py:75
 msgid ""
 "Report generation requires a SysManage Professional+ license. Please upgrade"
 " to access this feature."
@@ -787,56 +799,60 @@ msgstr ""
 "A geração de relatórios requer uma licença SysManage Professional+. Atualize"
 " para acessar este recurso."
 
-#: backend/api/reports/endpoints.py:154
+#: backend/api/reports/endpoints.py:156
 msgid "Registered Hosts"
 msgstr "Hosts registrados"
 
-#: backend/api/reports/endpoints.py:156
+#: backend/api/reports/endpoints.py:158
 msgid "Hosts with Tags"
 msgstr "Hosts com tags"
 
-#: backend/api/reports/endpoints.py:164
+#: backend/api/reports/endpoints.py:166
 msgid "SysManage Users"
 msgstr "Usuários SysManage"
 
-#: backend/api/reports/endpoints.py:169
+#: backend/api/reports/endpoints.py:171
 msgid "Host Firewall Status"
 msgstr "Status do Firewall do Host"
 
-#: backend/api/reports/endpoints.py:175
+#: backend/api/reports/endpoints.py:177
 msgid "Open-Source Antivirus Status"
 msgstr "Status do Antivírus de Código Aberto"
 
-#: backend/api/reports/endpoints.py:182
+#: backend/api/reports/endpoints.py:184
 msgid "Commercial Antivirus Status"
 msgstr "Status do Antivírus Comercial"
 
-#: backend/api/reports/endpoints.py:195
+#: backend/api/reports/endpoints.py:197
 msgid "User Security Roles (RBAC)"
 msgstr "Funções de Segurança do Usuário (RBAC)"
 
-#: backend/api/reports/endpoints.py:205 backend/api/audit_log.py:477
+#: backend/api/reports/endpoints.py:207 backend/api/audit_log.py:477
 msgid "Audit Log"
 msgstr "Registro de auditoria"
 
-#: backend/api/reports/endpoints.py:211
+#: backend/api/reports/endpoints.py:213
 msgid "Untagged Machines"
 msgstr "Máquinas sem etiqueta"
 
-#: backend/api/reports/endpoints.py:217
+#: backend/api/reports/endpoints.py:219
 msgid "Backup SLA"
 msgstr "SLA de backup"
 
-#: backend/api/reports/endpoints.py:220 backend/api/reports/endpoints.py:372
+#: backend/api/reports/endpoints.py:225
+msgid "Automatic Updates"
+msgstr "Atualizações automáticas"
+
+#: backend/api/reports/endpoints.py:228 backend/api/reports/endpoints.py:387
 msgid "Unknown report type"
 msgstr "Tipo de relatório desconhecido"
 
-#: backend/api/reports/endpoints.py:311
+#: backend/api/reports/endpoints.py:319
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr ""
 "A geração de PDF não está disponível. Por favor instale o pacote reportlab."
 
-#: backend/api/reports/endpoints.py:397
+#: backend/api/reports/endpoints.py:412
 msgid "Report"
 msgstr "Relatório"
 
@@ -863,7 +879,7 @@ msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "Expressão cron inválida: esperados 5 campos (m h dom mon dow)"
 
 #: backend/api/airgap_collection_schedule.py:94
-#: backend/api/upgrade_profiles.py:165
+#: backend/api/upgrade_profiles.py:199
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "Expressão cron inválida: %s"
@@ -4135,7 +4151,7 @@ msgid "Failed to get update results: %s"
 msgstr "Falha ao obter resultados de atualização: %s"
 
 #: backend/api/updates/execution_routes.py:65
-#: backend/api/upgrade_profiles.py:182
+#: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "Permissão negada: role APPLY_SOFTWARE_UPDATE requerida"
 
@@ -4784,7 +4800,7 @@ msgstr ""
 msgid "Reboot orchestration not found"
 msgstr "Orquestração de reinicialização não encontrada"
 
-#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:185
+#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:203
 msgid "Upgrade profile not found"
 msgstr "Perfil de atualização não encontrado"
 
@@ -4796,72 +4812,84 @@ msgstr ""
 "Os perfis de atualização agendados exigem uma licença SysManage "
 "Professional+. Faça upgrade para acessar este recurso."
 
-#: backend/api/upgrade_profiles.py:273
+#: backend/api/upgrade_profiles.py:258
+msgid "Each fleet of a rollout needs its own tag"
+msgstr "Cada frota de uma implantação precisa de sua própria etiqueta"
+
+#: backend/api/upgrade_profiles.py:276
+msgid "A rollout needs at least one fleet"
+msgstr "Uma implantação precisa de pelo menos uma frota"
+
+#: backend/api/upgrade_profiles.py:349
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "Perfil de atualização '%s' criado"
 
-#: backend/api/upgrade_profiles.py:342
+#: backend/api/upgrade_profiles.py:418
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "Perfil de atualização '%s' atualizado"
 
-#: backend/api/upgrade_profiles.py:375
+#: backend/api/upgrade_profiles.py:451
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "Perfil de atualização '%s' excluído"
 
-#: backend/api/upgrade_profiles.py:380
+#: backend/api/upgrade_profiles.py:456
 msgid "Upgrade profile deleted"
 msgstr "Perfil de atualização excluído"
 
-#: backend/api/upgrade_profiles.py:416
+#: backend/api/upgrade_profiles.py:483
+msgid "A rollout of this policy is still running or halted"
+msgstr "Uma implantação desta política ainda está em andamento ou interrompida"
+
+#: backend/api/upgrade_profiles.py:499
 #, python-format
 msgid "Ran upgrade profile '%s' now"
 msgstr "Perfil de atualização '%s' executado agora"
 
-#: backend/api/auto_updates.py:64
+#: backend/api/auto_updates.py:68
 msgid "A reason is required"
 msgstr "É necessário um motivo"
 
-#: backend/api/auto_updates.py:133
+#: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
 msgstr "Todas as políticas de atualização automática em espera: %s"
 
-#: backend/api/auto_updates.py:135
+#: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
 msgstr "Liberada a espera de todas as políticas de atualização automática"
 
-#: backend/api/auto_updates.py:162
+#: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
 msgstr "Configurações de atualizações automáticas alteradas"
 
-#: backend/api/auto_updates.py:195
+#: backend/api/auto_updates.py:213
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
 msgstr "Política de atualização automática '%(policy)s' em espera: %(reason)s"
 
-#: backend/api/auto_updates.py:198
+#: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
 msgstr "Liberada a espera da política de atualização automática '%s'"
 
-#: backend/api/auto_updates.py:228
+#: backend/api/auto_updates.py:246
 #, python-format
 msgid "%(host)s will never be updated automatically: %(reason)s"
 msgstr "%(host)s nunca será atualizado automaticamente: %(reason)s"
 
-#: backend/api/auto_updates.py:231
+#: backend/api/auto_updates.py:249
 #, python-format
 msgid "%s may be updated automatically again"
 msgstr "%s pode voltar a ser atualizado automaticamente"
 
-#: backend/api/auto_updates.py:328
+#: backend/api/auto_updates.py:398
 msgid "Run not found"
 msgstr "Execução não encontrada"
 
-#: backend/api/auto_updates.py:336
+#: backend/api/auto_updates.py:406
 #, python-format
 msgid "Acknowledged the automatic update run on %s"
 msgstr "Execução de atualização automática em %s confirmada"
@@ -6325,17 +6353,17 @@ msgstr ""
 "Confirme que pacotes serão instalados e os que o snapshot não tinha serão "
 "removidos, para que o host corresponda ao snapshot"
 
-#: backend/services/auto_update_runner.py:309
+#: backend/services/auto_update_runner.py:354
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
 msgstr ""
 "Atualização automática enfileirada em %(host)s pela política '%(policy)s'"
 
-#: backend/services/auto_update_runner.py:387
+#: backend/services/auto_update_runner.py:539
 msgid "The host never reported the result"
 msgstr "O host nunca informou o resultado"
 
-#: backend/services/auto_update_results.py:68
+#: backend/services/auto_update_results.py:102
 #, python-format
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "Reinicialização automática de %(host)s após a política '%(policy)s'"
@@ -6721,6 +6749,31 @@ msgstr "Resposta do vault inválida"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "Formato de segredo inválido"
+
+#: backend/services/auto_update_rollout.py:149
+#, python-format
+msgid "Rollout of policy '%(policy)s' started: %(count)d fleet(s)"
+msgstr "Implantação da política '%(policy)s' iniciada: %(count)d frota(s)"
+
+#: backend/services/auto_update_rollout.py:275
+#, python-format
+msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
+msgstr "Implantação da política '%(policy)s' interrompida na frota '%(fleet)s': %(reason)s"
+
+#: backend/services/auto_update_rollout.py:321
+#, python-format
+msgid "Rollout of policy '%(policy)s' completed"
+msgstr "Implantação da política '%(policy)s' concluída"
+
+#: backend/services/auto_update_rollout.py:376
+#, python-format
+msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
+msgstr "Implantação da política '%(policy)s' retomada após a frota '%(fleet)s'"
+
+#: backend/services/auto_update_rollout.py:393
+#, python-format
+msgid "Rollout of policy '%(policy)s' canceled"
+msgstr "Implantação da política '%(policy)s' cancelada"
 
 #: backend/licensing/migration_compat.py:150
 msgid ""

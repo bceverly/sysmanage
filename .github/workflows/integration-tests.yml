@@ -111,9 +111,24 @@ jobs:
 
       - name: Install LXD (for container_engine integration tests)
         run: |
-          sudo snap install lxd
+          # The Snap Store sometimes times out from the runners ("unable to
+          # contact snap store", 2026-11-17).  Retry with exponential back
+          # off: 15s, 30s, 60s, 120s, 240s between six tries (about 8 min).
+          delay=15
+          for attempt in 1 2 3 4 5 6; do
+            if sudo snap install lxd; then
+              break
+            fi
+            if [ "$attempt" -eq 6 ]; then
+              echo "::error::snap install lxd failed 6 times; the Snap Store is unreachable"
+              exit 1
+            fi
+            echo "::warning::snap install lxd failed (try $attempt of 6); retrying in ${delay}s"
+            sleep "$delay"
+            delay=$((delay * 2))
+          done
           sudo lxd init --auto
-          sudo usermod -aG lxd $USER
+          sudo usermod -aG lxd "$USER"
           # Run lxc as root via sudo in tests; group change won't take effect here.
 
       - uses: ./.github/actions/harden-apt

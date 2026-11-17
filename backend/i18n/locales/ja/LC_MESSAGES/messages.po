@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 10:03-0800\n"
+"POT-Creation-Date: 2026-11-16 21:22-0800\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -241,8 +241,8 @@ msgstr "ホストIDの形式が無効です"
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:167
-#: backend/api/backups.py:170 backend/api/auto_updates.py:220
-#: backend/api/auto_updates.py:254 backend/api/diagnostics.py:102
+#: backend/api/backups.py:170 backend/api/auto_updates.py:238
+#: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -276,6 +276,18 @@ msgstr "ホストは承認されていません"
 #: backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "ユーザーが見つかりません"
+
+#: backend/api/auto_update_rollouts.py:104
+msgid "Rollout not found"
+msgstr "ロールアウトが見つかりません"
+
+#: backend/api/auto_update_rollouts.py:122
+msgid "Only a halted rollout can resume"
+msgstr "停止したロールアウトのみ再開できます"
+
+#: backend/api/auto_update_rollouts.py:143
+msgid "This rollout has already ended"
+msgstr "このロールアウトはすでに終了しています"
 
 #: backend/api/malware.py:134
 msgid "Only an administrator can change the malware rule sets"
@@ -529,61 +541,61 @@ msgstr "ハードウェアが更新されました"
 msgid "Failed to update hardware information"
 msgstr "ハードウェア情報の更新に失敗しました"
 
-#: backend/api/handlers/software_package_handlers.py:112
+#: backend/api/handlers/software_package_handlers.py:113
 msgid "software_inventory_updated"
 msgstr "ソフトウェアインベントリが更新されました"
 
-#: backend/api/handlers/software_package_handlers.py:121
+#: backend/api/handlers/software_package_handlers.py:122
 msgid "Failed to update software inventory"
 msgstr "ソフトウェアインベントリの更新に失敗しました"
 
-#: backend/api/handlers/software_package_handlers.py:299
+#: backend/api/handlers/software_package_handlers.py:293
 #: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "更新の保存に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:414
+#: backend/api/handlers/software_package_handlers.py:408
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "パッケージ収集結果の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:508
+#: backend/api/handlers/software_package_handlers.py:502
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "サードパーティーリポジトリ更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:591
+#: backend/api/handlers/software_package_handlers.py:585
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "アンチウイルスステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:722
+#: backend/api/handlers/software_package_handlers.py:716
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "商用アンチウイルスステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:824
+#: backend/api/handlers/software_package_handlers.py:818
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "ファイアウォールステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:910
+#: backend/api/handlers/software_package_handlers.py:904
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Graylog ステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:942
+#: backend/api/handlers/software_package_handlers.py:936
 msgid "Missing request_id in installation_complete"
 msgstr "インストール完了リクエストに request_id が含まれていません"
 
-#: backend/api/handlers/software_package_handlers.py:959
+#: backend/api/handlers/software_package_handlers.py:953
 #: backend/api/agent.py:933 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "インストール要求が見つかりません: %s"
 
-#: backend/api/handlers/software_package_handlers.py:1000
+#: backend/api/handlers/software_package_handlers.py:994
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -593,40 +605,40 @@ msgstr "インストール完了の記録に失敗しました: %s"
 msgid "Report template not found"
 msgstr "レポートテンプレートが見つかりません"
 
-#: backend/api/report_templates.py:196 backend/api/package_compliance.py:138
+#: backend/api/report_templates.py:206 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
-#: backend/api/upgrade_profiles.py:145
+#: backend/api/upgrade_profiles.py:179
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "'%(field)s' の無効な UUID: '%(value)s'"
 
-#: backend/api/report_templates.py:211 backend/api/report_templates.py:279
+#: backend/api/report_templates.py:221 backend/api/report_templates.py:289
 #, python-format
 msgid "Unknown base_report_type: %s"
 msgstr "不明な base_report_type: %s"
 
-#: backend/api/report_templates.py:220
+#: backend/api/report_templates.py:230
 #, python-format
 msgid "Unknown field code(s) for %(base_report_type)s: %(codes)s"
 msgstr "%(base_report_type)s に対する未知のフィールドコード: %(codes)s"
 
-#: backend/api/report_templates.py:263
+#: backend/api/report_templates.py:273
 #, python-format
 msgid "Created report template '%s'"
 msgstr "レポートテンプレート '%s' を作成しました"
 
-#: backend/api/report_templates.py:353
+#: backend/api/report_templates.py:363
 #, python-format
 msgid "Updated report template '%s'"
 msgstr "レポートテンプレート '%s' を更新"
 
-#: backend/api/report_templates.py:386
+#: backend/api/report_templates.py:396
 #, python-format
 msgid "Deleted report template '%s'"
 msgstr "レポートテンプレート '%s' を削除しました"
 
-#: backend/api/report_templates.py:391
+#: backend/api/report_templates.py:401
 msgid "Report template deleted"
 msgstr "レポートテンプレートを削除しました"
 
@@ -763,61 +775,65 @@ msgstr "リポジトリ無効化要求をキューに入れました"
 msgid "Failed to queue repository disable: %s"
 msgstr "リポジトリ無効化をキューに追加できませんでした: %s"
 
-#: backend/api/reports/endpoints.py:73
+#: backend/api/reports/endpoints.py:75
 msgid ""
 "Report generation requires a SysManage Professional+ license. Please upgrade"
 " to access this feature."
 msgstr "レポート生成にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
-#: backend/api/reports/endpoints.py:154
+#: backend/api/reports/endpoints.py:156
 msgid "Registered Hosts"
 msgstr "登録済みホスト"
 
-#: backend/api/reports/endpoints.py:156
+#: backend/api/reports/endpoints.py:158
 msgid "Hosts with Tags"
 msgstr "タグ付きホスト"
 
-#: backend/api/reports/endpoints.py:164
+#: backend/api/reports/endpoints.py:166
 msgid "SysManage Users"
 msgstr "SysManageユーザー"
 
-#: backend/api/reports/endpoints.py:169
+#: backend/api/reports/endpoints.py:171
 msgid "Host Firewall Status"
 msgstr "ホストファイアウォールステータス"
 
-#: backend/api/reports/endpoints.py:175
+#: backend/api/reports/endpoints.py:177
 msgid "Open-Source Antivirus Status"
 msgstr "オープンソースアンチウイルスステータス"
 
-#: backend/api/reports/endpoints.py:182
+#: backend/api/reports/endpoints.py:184
 msgid "Commercial Antivirus Status"
 msgstr "商用アンチウイルスステータス"
 
-#: backend/api/reports/endpoints.py:195
+#: backend/api/reports/endpoints.py:197
 msgid "User Security Roles (RBAC)"
 msgstr "ユーザーセキュリティロール (RBAC)"
 
-#: backend/api/reports/endpoints.py:205 backend/api/audit_log.py:477
+#: backend/api/reports/endpoints.py:207 backend/api/audit_log.py:477
 msgid "Audit Log"
 msgstr "監査ログ"
 
-#: backend/api/reports/endpoints.py:211
+#: backend/api/reports/endpoints.py:213
 msgid "Untagged Machines"
 msgstr "タグなしのマシン"
 
-#: backend/api/reports/endpoints.py:217
+#: backend/api/reports/endpoints.py:219
 msgid "Backup SLA"
 msgstr "バックアップ SLA"
 
-#: backend/api/reports/endpoints.py:220 backend/api/reports/endpoints.py:372
+#: backend/api/reports/endpoints.py:225
+msgid "Automatic Updates"
+msgstr "自動更新"
+
+#: backend/api/reports/endpoints.py:228 backend/api/reports/endpoints.py:387
 msgid "Unknown report type"
 msgstr "未知のレポートタイプ"
 
-#: backend/api/reports/endpoints.py:311
+#: backend/api/reports/endpoints.py:319
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF生成は利用できません。reportlabパッケージをインストールしてください。"
 
-#: backend/api/reports/endpoints.py:397
+#: backend/api/reports/endpoints.py:412
 msgid "Report"
 msgstr "レポート"
 
@@ -843,7 +859,7 @@ msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "無効な cron 式: 5 つのフィールド (m h dom mon dow) が必要です"
 
 #: backend/api/airgap_collection_schedule.py:94
-#: backend/api/upgrade_profiles.py:165
+#: backend/api/upgrade_profiles.py:199
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "無効な cron 式: %s"
@@ -3966,7 +3982,7 @@ msgid "Failed to get update results: %s"
 msgstr "更新結果の取得に失敗しました: %s"
 
 #: backend/api/updates/execution_routes.py:65
-#: backend/api/upgrade_profiles.py:182
+#: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "アクセス権限がありません: APPLY_SOFTWARE_UPDATE ロールが必要です"
 
@@ -4559,7 +4575,7 @@ msgstr "実行中の子ホスト%d台でオーケストレーション再起動�
 msgid "Reboot orchestration not found"
 msgstr "再起動オーケストレーションが見つかりません"
 
-#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:185
+#: backend/api/upgrade_profiles.py:55 backend/api/auto_updates.py:203
 msgid "Upgrade profile not found"
 msgstr "アップグレードプロファイルが見つかりません"
 
@@ -4571,72 +4587,84 @@ msgstr ""
 "スケジュールされたアップグレードプロファイルにはSysManage "
 "Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
-#: backend/api/upgrade_profiles.py:273
+#: backend/api/upgrade_profiles.py:258
+msgid "Each fleet of a rollout needs its own tag"
+msgstr "ロールアウトの各フリートには独自のタグが必要です"
+
+#: backend/api/upgrade_profiles.py:276
+msgid "A rollout needs at least one fleet"
+msgstr "ロールアウトには少なくとも1つのフリートが必要です"
+
+#: backend/api/upgrade_profiles.py:349
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "アップグレードプロファイル '%s' を作成しました"
 
-#: backend/api/upgrade_profiles.py:342
+#: backend/api/upgrade_profiles.py:418
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "アップグレードプロファイル '%s' を更新"
 
-#: backend/api/upgrade_profiles.py:375
+#: backend/api/upgrade_profiles.py:451
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "アップグレードプロファイル '%s' を削除しました"
 
-#: backend/api/upgrade_profiles.py:380
+#: backend/api/upgrade_profiles.py:456
 msgid "Upgrade profile deleted"
 msgstr "アップグレードプロファイルを削除しました"
 
-#: backend/api/upgrade_profiles.py:416
+#: backend/api/upgrade_profiles.py:483
+msgid "A rollout of this policy is still running or halted"
+msgstr "このポリシーのロールアウトがまだ実行中または停止中です"
+
+#: backend/api/upgrade_profiles.py:499
 #, python-format
 msgid "Ran upgrade profile '%s' now"
 msgstr "更新プロファイル '%s' を今すぐ実行しました"
 
-#: backend/api/auto_updates.py:64
+#: backend/api/auto_updates.py:68
 msgid "A reason is required"
 msgstr "理由の入力が必要です"
 
-#: backend/api/auto_updates.py:133
+#: backend/api/auto_updates.py:149
 #, python-format
 msgid "Held every automatic update policy: %s"
 msgstr "すべての自動更新ポリシーを保留しました: %s"
 
-#: backend/api/auto_updates.py:135
+#: backend/api/auto_updates.py:151
 msgid "Released the hold on every automatic update policy"
 msgstr "すべての自動更新ポリシーの保留を解除しました"
 
-#: backend/api/auto_updates.py:162
+#: backend/api/auto_updates.py:180
 msgid "Changed the automatic update settings"
 msgstr "自動更新の設定を変更しました"
 
-#: backend/api/auto_updates.py:195
+#: backend/api/auto_updates.py:213
 #, python-format
 msgid "Held automatic update policy '%(policy)s': %(reason)s"
 msgstr "自動更新ポリシー '%(policy)s' を保留しました: %(reason)s"
 
-#: backend/api/auto_updates.py:198
+#: backend/api/auto_updates.py:216
 #, python-format
 msgid "Released the hold on automatic update policy '%s'"
 msgstr "自動更新ポリシー '%s' の保留を解除しました"
 
-#: backend/api/auto_updates.py:228
+#: backend/api/auto_updates.py:246
 #, python-format
 msgid "%(host)s will never be updated automatically: %(reason)s"
 msgstr "%(host)s は自動更新されません: %(reason)s"
 
-#: backend/api/auto_updates.py:231
+#: backend/api/auto_updates.py:249
 #, python-format
 msgid "%s may be updated automatically again"
 msgstr "%s は再び自動更新できます"
 
-#: backend/api/auto_updates.py:328
+#: backend/api/auto_updates.py:398
 msgid "Run not found"
 msgstr "実行が見つかりません"
 
-#: backend/api/auto_updates.py:336
+#: backend/api/auto_updates.py:406
 #, python-format
 msgid "Acknowledged the automatic update run on %s"
 msgstr "%s での自動更新の実行を確認済みにしました"
@@ -6044,16 +6072,16 @@ msgid ""
 "have removed, to match the snapshot"
 msgstr "スナップショットに合わせるため、パッケージがインストールされ、スナップショットになかったパッケージが削除されることを確認してください"
 
-#: backend/services/auto_update_runner.py:309
+#: backend/services/auto_update_runner.py:354
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
 msgstr "ポリシー '%(policy)s' により %(host)s で自動更新をキューに入れました"
 
-#: backend/services/auto_update_runner.py:387
+#: backend/services/auto_update_runner.py:539
 msgid "The host never reported the result"
 msgstr "ホストが結果を報告しませんでした"
 
-#: backend/services/auto_update_results.py:68
+#: backend/services/auto_update_results.py:102
 #, python-format
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "ポリシー '%(policy)s' の後の %(host)s の自動再起動"
@@ -6421,6 +6449,31 @@ msgstr "vaultからの応答が無効です"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "シークレットフォーマットが無効です"
+
+#: backend/services/auto_update_rollout.py:149
+#, python-format
+msgid "Rollout of policy '%(policy)s' started: %(count)d fleet(s)"
+msgstr "ポリシー '%(policy)s' のロールアウトを開始しました: %(count)d 個のフリート"
+
+#: backend/services/auto_update_rollout.py:275
+#, python-format
+msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
+msgstr "ポリシー '%(policy)s' のロールアウトがフリート '%(fleet)s' で停止しました: %(reason)s"
+
+#: backend/services/auto_update_rollout.py:321
+#, python-format
+msgid "Rollout of policy '%(policy)s' completed"
+msgstr "ポリシー '%(policy)s' のロールアウトが完了しました"
+
+#: backend/services/auto_update_rollout.py:376
+#, python-format
+msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
+msgstr "ポリシー '%(policy)s' のロールアウトがフリート '%(fleet)s' を越えて再開されました"
+
+#: backend/services/auto_update_rollout.py:393
+#, python-format
+msgid "Rollout of policy '%(policy)s' canceled"
+msgstr "ポリシー '%(policy)s' のロールアウトがキャンセルされました"
 
 #: backend/licensing/migration_compat.py:150
 msgid ""

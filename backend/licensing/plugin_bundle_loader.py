@@ -15,7 +15,7 @@ import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
 import aiofiles
 import aiohttp
@@ -53,6 +53,31 @@ class PluginBundleLoader:
         self.last_fetch_status: Optional[int] = (
             None  # the last refused fetch's HTTP status
         )
+        # The plugin bundles the license server publishes, from its version
+        # list; None until a version check has answered.  See
+        # note_published_plugins.
+        self._published: Optional[Set[str]] = None
+
+    def note_published_plugins(self, server_versions: Optional[Dict]) -> None:
+        """Remember which engines have a UI plugin bundle on the license server.
+
+        Most engines ship no UI plugin.  Every worker used to ask the license
+        server for each of their bundles at startup -- six workers times the
+        UI-less engines at once -- and the server answered the later ones
+        with 429 Too Many Requests, about fifty false ERRORs per start
+        (2026-11-17).  The version check already lists every published
+        bundle, so an engine missing from that list is not asked for at all.
+
+        Only a version check that answered counts: an empty or failed one
+        (``{}``, no "plugins" key) leaves the list unknown, and every engine
+        is asked for as before.
+        """
+        if server_versions and "plugins" in server_versions:
+            self._published = set(server_versions["plugins"])
+
+    def publishes_plugin(self, module_code: str) -> bool:
+        """False only when the license server's list is known and lacks it."""
+        return self._published is None or module_code in self._published
 
     def _get_modules_path(self) -> str:
         """Get the path for storing downloaded modules."""
@@ -153,6 +178,15 @@ class PluginBundleLoader:
             detail = str((body or {}).get("detail") or "")
         except Exception:  # pylint: disable=broad-except
             pass  # a body that is not JSON: fall through to ERROR
+        if response.status == 429:
+            # The license server is throttling this server; nothing is wrong
+            # with the bundle, and the next update check fetches it.
+            logger.warning(
+                "The license server is rate-limiting plugin downloads (429); "
+                "%s will be fetched at the next update check",
+                url.rstrip("/").rsplit("/", 2)[-2],
+            )
+            return
         if response.status == 404 and detail.startswith("Plugin bundle not found"):
             logger.info(
                 "No UI plugin bundle published for %s (engines without a "
@@ -247,6 +281,9 @@ class PluginBundleLoader:
         url = f"{download_url}/{module_code}/{version_str}"
         if _no_bundle_recently(module_code):
             return False  # the server said it has none, not long ago (22.4)
+        if not self.publishes_plugin(module_code):
+            logger.debug("No UI plugin bundle published for %s", module_code)
+            return False  # not in the license server's list: do not ask
 
         modules_path = self._get_modules_path()
         Path(modules_path).mkdir(parents=True, exist_ok=True)
@@ -428,6 +465,7 @@ class PluginBundleLoader:
         if not server_versions:
             return []
 
+        self.note_published_plugins(server_versions)
         plugin_versions = server_versions.get("plugins", {})
         updates_available = []
 

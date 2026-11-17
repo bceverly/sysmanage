@@ -333,6 +333,25 @@ def test_a_patch_fixing_a_critical_cve_waits_the_critical_count(
     assert [s["package_name"] for s in run.skipped] == ["vim"]
 
 
+def test_without_waiting_periods_a_critical_patch_is_still_recorded_as_one(
+    session, automation, cve_data
+):
+    # 26.5's report measures "critical patch to applied" for every policy,
+    # not only those that wait (lab, 2026-11-17: always N/A without waits).
+    host = _host(session)
+    _update(session, host, "openssl", age_days=2)
+    _critical_finding(session, host, "openssl")
+    _policy(session)
+    session.commit()
+
+    _tick(session, automation)
+    package = session.query(models.AutoUpdateRun).one().packages[0]
+    assert (package["kind"], package["fix_id"]) == ("critical", "CVE-2026-1234")
+    assert package["first_seen"].startswith(
+        (_now() - timedelta(days=2)).date().isoformat()
+    )
+
+
 def test_the_host_view_shows_when_each_update_becomes_eligible(
     session, automation, cve_data
 ):

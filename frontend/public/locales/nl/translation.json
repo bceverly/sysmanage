@@ -792,7 +792,10 @@
     "backupsAttention": "Back-ups die aandacht nodig hebben",
     "backupsEscrowStale": "Noodexport van sleutels verouderd",
     "backupsServerUnprotected": "Deze SysManage-server heeft geen geslaagde back-up",
-    "autoUpdateProblems": "Problemen met automatische updates"
+    "autoUpdateProblems": "Problemen met automatische updates",
+    "autoRebootsWaiting": "Automatische herstarts die wachten op een onderhoudsvenster",
+    "rolloutsHalted": "Gestopte uitrollen: {{count}}",
+    "rolloutsRunning": "Lopende uitrollen"
   },
   "dataGrid": {
     "columnVisibility": "Kolomzichtbaarheid",
@@ -2992,7 +2995,8 @@
       "users": "gebruikers",
       "assetTags": "assettags",
       "hardware": "Hardware",
-      "backups": "backuppen"
+      "backups": "backuppen",
+      "updates": "updates"
     },
     "title": "Rapporten",
     "unknownError": "Onbekende fout",
@@ -3012,6 +3016,10 @@
     "backupSla": {
       "name": "Back-up-SLA",
       "description": "Voor elke host waarvan een back-up wordt gemaakt: of zijn recovery point objective (tweemaal zijn back-upinterval) nu en op elk van de laatste 30 dagen wordt gehaald, zijn mislukte back-ups, zijn laatste verificatie met volledig lezen en de grootte van zijn repository."
+    },
+    "automaticUpdates": {
+      "description": "Per beleid voor automatische updates en per machinegroep over de afgelopen 30 dagen: uitvoeringen, gepatchte hosts, mislukte uitvoeringen, herstarts en de mediane tijd tussen het verschijnen van een patch voor een kritieke CVE op een host en het toepassen ervan daar.",
+      "name": "Automatische updates"
     }
   },
   "resetPassword": {
@@ -3815,7 +3823,20 @@
     "criticalEither": "De kwetsbaarheidsscan of het beveiligingsadvies van de leverancier",
     "criticalVulnerability": "De kwetsbaarheidsscan van de host",
     "criticalAdvisory": "Het beveiligingsadvies van de leverancier",
-    "criticalHelp": "Zonder kwetsbaarheidsscans of beveiligingsadviezen van de leverancier voor een host wacht elke patch op die host het gewone aantal dagen."
+    "criticalHelp": "Zonder kwetsbaarheidsscans of beveiligingsadviezen van de leverancier voor een host wacht elke patch op die host het gewone aantal dagen.",
+    "rolloutAdd": "Machinegroep toevoegen",
+    "rolloutCanary": "Canary-machinegroep",
+    "rolloutDown": "Later plaatsen",
+    "rolloutEnabled": "Machinegroep na machinegroep uitrollen",
+    "rolloutFleetName": "Machinegroep {{n}}",
+    "rolloutFleetTag": "Hosts met label",
+    "rolloutHelp": "Eén machinegroep tegelijk, in deze volgorde; de eerste is de canary. De volgende machinegroep start pas als deze klaar is, gezond is en de observatietijd voorbij is. Een host wordt gepatcht met de eerste machinegroep waarvan hij het label heeft; hosts die in geen enkele machinegroep zitten, komen als laatste.",
+    "rolloutIncomplete": "Elke machinegroep van de uitrol heeft een naam en een label nodig",
+    "rolloutMaxFailures": "Stoppen wanneer meer dan dit aandeel van een machinegroep mislukt (%)",
+    "rolloutMaxFailuresHelp": "0: elke mislukte uitvoering stopt de uitrol. Een host die niet terugkomt na zijn herstart, een host die niet meer rapporteert of een nieuwe kritieke waarschuwing in de machinegroep stopt de uitrol altijd.",
+    "rolloutRemove": "Deze machinegroep verwijderen",
+    "rolloutSoak": "Observatietijd (uren)",
+    "rolloutUp": "Eerder plaatsen"
   },
   "userDetail": {
     "active": "Actief",
@@ -6285,6 +6306,41 @@
     "startsAt": "Start wanneer het onderhoudsvenster opent: {{when}}",
     "threshold": "Een patch is kritiek wanneer deze een CVE verhelpt met beoordeling",
     "thresholdCritical": "Kritiek",
-    "thresholdHigh": "Hoog of kritiek"
+    "thresholdHigh": "Hoog of kritiek",
+    "fleet": {
+      "counts": "{{applied}} toegepast, {{failed}} mislukt, {{inFlight}} bezig, {{other}} niet toegepast",
+      "done": "Klaar",
+      "halted": "Hier gestopt",
+      "hide": "Hosts verbergen",
+      "hosts": "{{count}} host(s)",
+      "noRun": "Nog niet gepland",
+      "pending": "Niet gestart",
+      "remaining": "De resterende hosts",
+      "resumedBy": "hervat door {{who}}",
+      "running": "Bezig",
+      "show": "Hosts tonen",
+      "soakUntil": "observatietijd eindigt {{when}}"
+    },
+    "halt": {
+      "criticalAlerts": "er is een kritieke waarschuwing gegeven op een host in deze machinegroep",
+      "notBack": "een host kwam niet terug na zijn herstart",
+      "notReporting": "een host stopte met rapporteren nadat hij gepatcht was",
+      "runFailures": "te veel uitvoeringen in deze machinegroep zijn mislukt"
+    },
+    "rollout": {
+      "cancel": "Annuleren",
+      "cancelReason": "Waarom deze uitrol annuleren?",
+      "canceled": "Geannuleerd",
+      "canceledBy": "Geannuleerd door {{who}}: {{reason}}",
+      "completed": "Voltooid",
+      "halted": "Gestopt",
+      "haltedBecause": "Gestopt bij {{fleet}}: {{reason}} ({{hosts}}). Er wordt niets meer gepatcht totdat iemand de uitrol hervat of annuleert.",
+      "resume": "Hervatten",
+      "resumeReason": "Waarom doorgaan voorbij deze machinegroep?",
+      "running": "Bezig",
+      "started": "gestart op {{when}}",
+      "subtitle": "Beleid dat machinegroep na machinegroep uitrolt: één machinegroep tegelijk, elke groep gezond voordat de volgende start.",
+      "title": "Uitrollen per machinegroep"
+    }
   }
 }

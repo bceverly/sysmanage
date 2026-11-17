@@ -43,6 +43,7 @@ class ReportType(str, Enum):
     AUDIT_LOG = "audit-log"
     UNTAGGED_MACHINES = "untagged-machines"
     BACKUP_SLA = "backup-sla"
+    AUTO_UPDATES = "automatic-updates"
 
 
 # Report types whose data is HOST-SCOPED (tenant database) vs server-global.
@@ -59,6 +60,7 @@ _HOST_SCOPED_REPORTS = frozenset(
         ReportType.ANTIVIRUS_COMMERCIAL,
         ReportType.UNTAGGED_MACHINES,
         ReportType.BACKUP_SLA,
+        ReportType.AUTO_UPDATES,
     }
 )
 
@@ -216,6 +218,12 @@ def _build_report_html(reporting_engine, report_type, template_id, tenant_id):
             html_content = html_gen.generate_backup_sla_html(
                 _("Backup SLA"), selected_fields=selected_fields
             )
+        elif report_type == ReportType.AUTO_UPDATES and hasattr(
+            html_gen, "generate_auto_updates_html"
+        ):
+            html_content = html_gen.generate_auto_updates_html(
+                _("Automatic Updates"), selected_fields=selected_fields
+            )
         else:
             raise HTTPException(status_code=400, detail=_("Unknown report type"))
 
@@ -368,6 +376,13 @@ def _build_report_pdf(reporting_engine, report_type, template_id, tenant_id):
                 models, selected_fields=selected_fields
             )
             filename = f"backup_sla_{ts}.pdf"
+        elif report_type == ReportType.AUTO_UPDATES and hasattr(
+            hosts_gen, "generate_auto_updates_report"
+        ):
+            pdf_buffer = hosts_gen.generate_auto_updates_report(
+                models, selected_fields=selected_fields
+            )
+            filename = f"automatic_updates_{ts}.pdf"
         else:
             raise HTTPException(status_code=400, detail=_("Unknown report type"))
 

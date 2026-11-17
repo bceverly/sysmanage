@@ -120,10 +120,10 @@ class ModuleLoaderUpdatesMixin:
                         "file_hash": plugin["file_hash"],
                     }
 
-                return {
-                    "modules": modules_result,
-                    "plugins": plugins_result,
-                }
+                result: Dict[str, Any] = {"modules": modules_result}
+                if "plugins" in data:  # absent: which plugins exist is unknown
+                    result["plugins"] = plugins_result
+                return result
 
         except aiohttp.ClientError as e:
             logger.warning("Version check network error: %s", e)
@@ -293,6 +293,16 @@ class ModuleLoaderUpdatesMixin:
         Returns:
             True if plugin is available, False otherwise
         """
+        if not getattr(self, "_plugin_list_checked", False):
+            # Once per process, before the first engine's bundle is asked
+            # for: which bundles the license server publishes, so the
+            # UI-less engines are not asked for at all (2026-11-17).  A
+            # check that fails leaves the list unknown -- every engine is
+            # then asked for, as before -- and is not repeated per engine.
+            self._plugin_list_checked = True
+            self._plugin_loader.note_published_plugins(
+                await self.query_server_versions()
+            )
         return await self._plugin_loader.ensure_plugin_available(module_code)
 
     async def check_for_plugin_updates(self) -> List[str]:

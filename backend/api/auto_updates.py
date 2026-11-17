@@ -13,6 +13,8 @@
   GET  /auto-updates/runs                     runs, newest first (filters)
   POST /auto-updates/runs/{id}/acknowledge    "someone looked": retry now
 
+Rollouts (26.4) are in ``auto_update_rollouts``.
+
 Every change is audited.  Gated like upgrade profiles on the Enterprise
 ``automation_engine`` (402 without it).
 """
@@ -100,6 +102,17 @@ def _counts(db) -> dict:
         .count(),
         "opted_out_hosts": db.query(models.Host)
         .filter(models.Host.auto_update_opt_out.is_(True))
+        .count(),
+        # 26.5: hosts whose automatic reboot waits for its window, and
+        # rollouts in progress or halted at a fleet's health gate (26.4).
+        "reboot_waiting": db.query(runs)
+        .filter(runs.reboot_status == "next_window")
+        .count(),
+        "rollouts_running": db.query(models.AutoUpdateRollout)
+        .filter(models.AutoUpdateRollout.status == "running")
+        .count(),
+        "rollouts_halted": db.query(models.AutoUpdateRollout)
+        .filter(models.AutoUpdateRollout.status == "halted")
         .count(),
     }
 

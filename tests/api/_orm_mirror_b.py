@@ -178,6 +178,11 @@ class UpgradeProfile(TestBase):
     critical_source = Column(
         String(16), nullable=False, default="either", server_default="either"
     )
+    # 26.4 fleet-by-fleet rollout (q96autoupdaterollout)
+    rollout_enabled = Column(Boolean, nullable=False, default=False, server_default="0")
+    rollout_max_failure_pct = Column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
 
 
 # Phase 11 -- air-gap tables (test-side mirrors).  These mirror the

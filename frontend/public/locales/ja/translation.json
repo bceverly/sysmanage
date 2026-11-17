@@ -792,7 +792,10 @@
     "backupsAttention": "対応が必要なバックアップ",
     "backupsEscrowStale": "緊急用の鍵のエクスポートが古くなっています",
     "backupsServerUnprotected": "この SysManage サーバーには正常なバックアップがありません",
-    "autoUpdateProblems": "自動更新の問題"
+    "autoUpdateProblems": "自動更新の問題",
+    "autoRebootsWaiting": "メンテナンスウィンドウを待機中の自動再起動",
+    "rolloutsHalted": "停止中のロールアウト: {{count}}",
+    "rolloutsRunning": "進行中のロールアウト"
   },
   "dataGrid": {
     "columnVisibility": "列の表示",
@@ -2992,7 +2995,8 @@
       "users": "ユーザー",
       "assetTags": "アセットタグ",
       "hardware": "ハードウェア",
-      "backups": "バックアップ"
+      "backups": "バックアップ",
+      "updates": "更新"
     },
     "title": "レポート",
     "unknownError": "未知のエラー",
@@ -3012,6 +3016,10 @@
     "backupSla": {
       "name": "バックアップ SLA",
       "description": "バックアップ対象の各ホストについて、目標復旧時点（バックアップ間隔の 2 倍）を現在および直近 30 日の各日に満たしているか、失敗したバックアップ、最後の全読み取り検証、リポジトリのサイズを示します。"
+    },
+    "automaticUpdates": {
+      "description": "過去30日間の自動更新ポリシーとフリートごとの、実行数、パッチを適用したホスト数、失敗した実行数、再起動数、および重大な CVE のパッチがホストに現れてから適用されるまでの時間の中央値。",
+      "name": "自動更新"
     }
   },
   "resetPassword": {
@@ -3815,7 +3823,20 @@
     "criticalEither": "脆弱性スキャンまたはベンダーのセキュリティ勧告",
     "criticalVulnerability": "ホストの脆弱性スキャン",
     "criticalAdvisory": "ベンダーのセキュリティ勧告",
-    "criticalHelp": "ホストに脆弱性スキャンもベンダーのセキュリティ勧告もない場合、そのホストのすべてのパッチは通常の日数だけ待機します。"
+    "criticalHelp": "ホストに脆弱性スキャンもベンダーのセキュリティ勧告もない場合、そのホストのすべてのパッチは通常の日数だけ待機します。",
+    "rolloutAdd": "フリートを追加",
+    "rolloutCanary": "カナリアフリート",
+    "rolloutDown": "順番を遅らせる",
+    "rolloutEnabled": "フリートごとに順次ロールアウト",
+    "rolloutFleetName": "フリート {{n}}",
+    "rolloutFleetTag": "このタグが付いたホスト",
+    "rolloutHelp": "この順序で一度に1つのフリートずつ適用し、最初のフリートがカナリアになります。次のフリートは、現在のフリートが完了し、正常であり、観察期間が経過した後にのみ開始されます。ホストは、そのホストが持つタグに一致する最初のフリートでパッチが適用されます。どのフリートにも属さないホストは最後になります。",
+    "rolloutIncomplete": "ロールアウトの各フリートには名前とタグが必要です",
+    "rolloutMaxFailures": "フリート内で失敗した割合がこの値を超えたら停止 (%)",
+    "rolloutMaxFailuresHelp": "0: 実行が1つでも失敗するとロールアウトを停止します。再起動から復帰しないホスト、報告を停止したホスト、またはフリートで新たに発生した重大なアラートがあると、常に停止します。",
+    "rolloutRemove": "このフリートを削除",
+    "rolloutSoak": "観察期間 (時間)",
+    "rolloutUp": "順番を早める"
   },
   "userDetail": {
     "active": "アクティブ",
@@ -6285,6 +6306,41 @@
     "startsAt": "ウィンドウが開いた時点で開始: {{when}}",
     "threshold": "次の評価の CVE を修正するパッチを重大とみなす",
     "thresholdCritical": "重大",
-    "thresholdHigh": "高または重大"
+    "thresholdHigh": "高または重大",
+    "fleet": {
+      "counts": "適用済み {{applied}}、失敗 {{failed}}、進行中 {{inFlight}}、未適用 {{other}}",
+      "done": "完了",
+      "halted": "ここで停止",
+      "hide": "ホストを非表示",
+      "hosts": "{{count}} 台のホスト",
+      "noRun": "まだ計画されていません",
+      "pending": "未開始",
+      "remaining": "残りのホスト",
+      "resumedBy": "{{who}} が再開",
+      "running": "進行中",
+      "show": "ホストを表示",
+      "soakUntil": "観察期間の終了: {{when}}"
+    },
+    "halt": {
+      "criticalAlerts": "このフリートのホストで重大なアラートが発生しました",
+      "notBack": "ホストが再起動後に復帰しませんでした",
+      "notReporting": "パッチ適用後、ホストは報告を停止しました",
+      "runFailures": "このフリートで失敗した実行が多すぎます"
+    },
+    "rollout": {
+      "cancel": "キャンセル",
+      "cancelReason": "このロールアウトをキャンセルする理由は？",
+      "canceled": "キャンセル済み",
+      "canceledBy": "{{who}} がキャンセル: {{reason}}",
+      "completed": "完了",
+      "halted": "停止中",
+      "haltedBecause": "{{fleet}} で停止: {{reason}} ({{hosts}})。誰かが再開またはキャンセルするまで、これ以上パッチは適用されません。",
+      "resume": "再開",
+      "resumeReason": "このフリートを越えて続行する理由は？",
+      "running": "進行中",
+      "started": "{{when}} に開始",
+      "subtitle": "フリートごとにロールアウトするポリシー: 一度に1つのフリートずつ、それぞれが正常であることを確認してから次へ進みます。",
+      "title": "フリートごとの段階的ロールアウト"
+    }
   }
 }

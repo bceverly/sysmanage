@@ -6,7 +6,8 @@
 // Enterprise): on/off, reboots, excluded packages, backups first, and the
 // hosts the policy lists by name (which take precedence over its tag);
 // reboots only inside a maintenance window (26.2) and the waiting periods
-// for regular and critical-CVE patches (26.3).
+// for regular and critical-CVE patches (26.3); fleet-by-fleet rollout
+// (26.4).
 
 import React from 'react';
 import {
@@ -22,8 +23,9 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { CriticalSource, RebootMode } from '../../Services/upgradeProfiles';
+import RolloutFields, { type RolloutForm } from './RolloutFields';
 
-export interface AutomaticForm {
+export interface AutomaticForm extends RolloutForm {
   auto_apply: boolean;
   reboot_mode: RebootMode;
   excluded_packages: string;
@@ -43,9 +45,10 @@ interface Props<F extends AutomaticForm> {
   form: F;
   setForm: (form: F) => void;
   hosts: { id: string; fqdn: string }[];
+  tags?: { id: string; name: string }[];
 }
 
-function AutomaticFields<F extends AutomaticForm>({ form, setForm, hosts }: Props<F>) {
+function AutomaticFields<F extends AutomaticForm>({ form, setForm, hosts, tags = [] }: Props<F>) {
   const { t } = useTranslation();
   const selected = hosts.filter((h) => form.host_ids.includes(h.id));
   return (
@@ -177,6 +180,7 @@ function AutomaticFields<F extends AutomaticForm>({ form, setForm, hosts }: Prop
               />
             )}
           />
+          <RolloutFields form={form} setForm={setForm} tags={tags} />
         </>
       )}
     </>

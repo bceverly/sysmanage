@@ -16,6 +16,9 @@ import { doGetHostsSummary, HostsSummary } from '../Services/hosts'
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
 import { updatesService, UpdateStatsSummary } from '../Services/updates';
 import { autoUpdatesService } from '../Services/autoUpdates';
+import type { AutoUpdateSettings } from '../Services/autoUpdates';
+
+type AutoUpdateCounts = NonNullable<AutoUpdateSettings['counts']>;
 import axiosInstance from '../Services/api';
 import { getFleetSummary, FleetSummary } from '../Services/timeSync';
 import { getHardwareSummary, HardwareSummary, needingAttention } from '../Services/hardwareHealth';
@@ -81,6 +84,12 @@ const getHardwareColor = (summary: HardwareSummary): string => {
 };
 
 // Phase 24: the level comes from backupSummaryLevel (backupLabels.ts).
+// 26.5: a halted rollout needs someone; one in progress is worth a look.
+function rolloutColor(r: { running: number; halted: number }): string {
+    if (r.halted > 0) return COLOR_RED;
+    return r.running > 0 ? COLOR_YELLOW : COLOR_GREEN;
+}
+
 const BACKUP_COLORS = { error: COLOR_RED, warning: COLOR_YELLOW, ok: COLOR_GREEN } as const;
 const getBackupColor = (summary: BackupSummary): string => BACKUP_COLORS[backupSummaryLevel(summary)];
 
@@ -172,7 +181,7 @@ const Dashboard = () => {
     const [cloudSummary, setCloudSummary] = useState<CloudSummary | null>(null);
     // 26.1 (Enterprise): automatic runs that failed, never reported, or whose
     // reboot did not come back.  null = no engine: the card is not shown.
-    const [autoProblems, setAutoProblems] = useState<number | null>(null);
+    const [autoCounts, setAutoCounts] = useState<AutoUpdateCounts | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [cardVisibility, setCardVisibility] = useState<Record<string, boolean>>({
@@ -286,8 +295,8 @@ const Dashboard = () => {
             getCloudSummary().then(setCloudSummary).catch(() => setCloudSummary(null));
             autoUpdatesService
                 .settings()
-                .then((s) => setAutoProblems((s.counts?.failed_recent ?? 0) + (s.counts?.reboot_not_back ?? 0)))
-                .catch(() => setAutoProblems(null));
+                .then((s) => setAutoCounts(s.counts ?? null))
+                .catch(() => setAutoCounts(null));
 
             processHostsResponse(hostsResponse);
             processUpdatesResponse(updatesResponse);
@@ -380,6 +389,14 @@ const Dashboard = () => {
         // Navigate to updates page with security filter pre-selected
         void navigate('/updates?securityOnly=true');
     };
+
+    // 26.1 failures and hosts not back; 26.5 reboots waiting and rollouts.
+    const autoProblems =
+        autoCounts === null ? null : (autoCounts.failed_recent ?? 0) + (autoCounts.reboot_not_back ?? 0);
+    const rollouts =
+        autoCounts?.rollouts_running === undefined
+            ? null
+            : { running: autoCounts.rollouts_running, halted: autoCounts.rollouts_halted ?? 0 };
 
     const handleAutoUpdatesClick = () => {
         void navigate('/settings#update-profiles');
@@ -487,6 +504,34 @@ const Dashboard = () => {
                             value={autoProblems}
                             maxValue={Math.max(autoProblems, 1)}
                             color={autoProblems > 0 ? COLOR_RED : COLOR_GREEN}
+                            onClick={handleAutoUpdatesClick}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
+                {autoCounts?.reboot_waiting !== undefined && (
+                    <Grid>
+                        <DashboardCard
+                            title={t('dashboard.autoRebootsWaiting', 'Automatic reboots waiting for a window')}
+                            value={autoCounts.reboot_waiting}
+                            maxValue={Math.max(autoCounts.reboot_waiting, 1)}
+                            color={autoCounts.reboot_waiting > 0 ? COLOR_YELLOW : COLOR_GREEN}
+                            onClick={handleAutoUpdatesClick}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
+                {rollouts !== null && (
+                    <Grid>
+                        <DashboardCard
+                            title={
+                                rollouts.halted > 0
+                                    ? t('dashboard.rolloutsHalted', 'Rollouts halted: {{count}}', { count: rollouts.halted })
+                                    : t('dashboard.rolloutsRunning', 'Rollouts in progress')
+                            }
+                            value={rollouts.running + rollouts.halted}
+                            maxValue={Math.max(rollouts.running + rollouts.halted, 1)}
+                            color={rolloutColor(rollouts)}
                             onClick={handleAutoUpdatesClick}
                             loading={loading}
                         />

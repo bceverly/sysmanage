@@ -36,7 +36,7 @@ from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
-from backend.services import auto_update_runner
+from backend.services import auto_update_rollout, auto_update_runner
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
@@ -75,6 +75,14 @@ def _check_automation_module():
     return engine
 
 
+class RolloutStageRequest(BaseModel):
+    """One fleet of a rollout (26.4): the hosts carrying ``tag_id``."""
+
+    name: str = Field(..., min_length=1, max_length=120)
+    tag_id: str
+    soak_hours: float = Field(default=0, ge=0, le=720)
+
+
 class UpgradeProfileCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
     description: Optional[str] = None
@@ -95,6 +103,12 @@ class UpgradeProfileCreateRequest(BaseModel):
     wait_days_critical: int = Field(default=0, ge=0, le=365)
     critical_source: str = Field(
         default="either", pattern="^(vulnerability|advisory|either)$"
+    )
+    # 26.4 fleet-by-fleet rollout (Enterprise)
+    rollout_enabled: bool = False
+    rollout_max_failure_pct: int = Field(default=0, ge=0, le=100)
+    rollout_stages: Optional[List[RolloutStageRequest]] = Field(
+        default=None, max_length=20
     )
 
 
@@ -117,6 +131,9 @@ class UpgradeProfileUpdateRequest(BaseModel):
     critical_source: Optional[str] = Field(
         None, pattern="^(vulnerability|advisory|either)$"
     )
+    rollout_enabled: Optional[bool] = None
+    rollout_max_failure_pct: Optional[int] = Field(None, ge=0, le=100)
+    rollout_stages: Optional[List[RolloutStageRequest]] = Field(None, max_length=20)
 
 
 class UpgradeProfileResponse(BaseModel):
@@ -146,6 +163,9 @@ class UpgradeProfileResponse(BaseModel):
     wait_days_regular: int = 0
     wait_days_critical: int = 0
     critical_source: str = "either"
+    rollout_enabled: bool = False
+    rollout_max_failure_pct: int = 0
+    rollout_stages: List[dict] = []
 
 
 def _parse_uuid_or_400(value: Optional[str], field: str) -> Optional[uuid.UUID]:
@@ -182,9 +202,11 @@ def _validate_and_compute_next_run(cron: str) -> datetime:
 
 def _response(profile, db: Session) -> UpgradeProfileResponse:
     hosts = auto_update_runner.profile_host_ids(db, [profile.id])
+    stages = [s.to_dict() for s in auto_update_rollout.stage_rows(db, profile.id)]
     return UpgradeProfileResponse(
-        **profile.to_dict(), host_ids=hosts.get(str(profile.id), [])
-    )
+        **profile.to_dict(), host_ids=hosts.get(str(profile.id), []),
+        rollout_stages=stages,
+    )  # fmt: skip
 
 
 def _require_apply_role(user) -> None:
@@ -204,9 +226,11 @@ def _audit_details(request) -> dict:
 
 _AUTOMATIC_FIELDS = ("auto_apply", "reboot_mode", "excluded_packages",
                      "require_backup_hours", "host_ids", "wait_days_regular",
-                     "wait_days_critical", "critical_source")  # fmt: skip
+                     "wait_days_critical", "critical_source", "rollout_enabled",
+                     "rollout_max_failure_pct", "rollout_stages")  # fmt: skip
 _SIMPLE_AUTOMATIC = ("auto_apply", "reboot_mode", "wait_days_regular",
-                     "wait_days_critical", "critical_source")  # fmt: skip
+                     "wait_days_critical", "critical_source", "rollout_enabled",
+                     "rollout_max_failure_pct")  # fmt: skip
 
 
 def _apply_automatic_fields(db: Session, profile, request, user) -> None:
@@ -221,6 +245,36 @@ def _apply_automatic_fields(db: Session, profile, request, user) -> None:
     if request.require_backup_hours is not None:
         profile.require_backup_hours = request.require_backup_hours or None
     _set_hosts(db, profile, request.host_ids)
+    _set_stages(db, profile, request.rollout_stages)
+
+
+def _set_stages(db: Session, profile, stages) -> None:
+    """Replace the policy's fleets (26.4).  Each needs its own tag; a rollout
+    needs at least one fleet."""
+    if stages is not None:
+        tags = [_parse_uuid_or_400(s.tag_id, "rollout_stages.tag_id") for s in stages]
+        if len(set(tags)) != len(tags):
+            raise HTTPException(
+                status_code=400, detail=_("Each fleet of a rollout needs its own tag")
+            )
+        db.query(models.UpgradeProfileRolloutStage).filter(
+            models.UpgradeProfileRolloutStage.profile_id == profile.id
+        ).delete()
+        for position, (stage, tag) in enumerate(zip(stages, tags)):
+            db.add(
+                models.UpgradeProfileRolloutStage(
+                    profile_id=profile.id,
+                    position=position,
+                    name=stage.name.strip(),
+                    tag_id=tag,
+                    soak_minutes=int(round(stage.soak_hours * 60)),
+                )
+            )
+        db.flush()
+    if profile.rollout_enabled and not auto_update_rollout.stage_rows(db, profile.id):
+        raise HTTPException(
+            status_code=400, detail=_("A rollout needs at least one fleet")
+        )
 
 
 def _set_hosts(db: Session, profile, host_ids: Optional[List[str]]) -> None:
@@ -277,10 +331,13 @@ async def create_profile(
         wait_days_regular=request.wait_days_regular,
         wait_days_critical=request.wait_days_critical,
         critical_source=request.critical_source,
+        rollout_enabled=request.rollout_enabled,
+        rollout_max_failure_pct=request.rollout_max_failure_pct,
     )
     db.add(profile)
     db.flush()
     _set_hosts(db, profile, request.host_ids)
+    _set_stages(db, profile, request.rollout_stages)
     db.commit()
     db.refresh(profile)
     AuditService.log(
@@ -418,6 +475,13 @@ async def trigger_profile(
     if not profile:
         raise HTTPException(status_code=404, detail=_(_ERR_UPGRADE_PROFILE_NOT_FOUND))
 
+    if auto_update_rollout.enabled(engine, profile) and (
+        auto_update_rollout.open_rollout(db, profile.id) is not None
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail=_("A rollout of this policy is still running or halted"),
+        )
     now = auto_update_runner.now_naive()
     summary = auto_update_runner.fire_profile(
         db, engine, profile, now, triggered_by=current_user.userid

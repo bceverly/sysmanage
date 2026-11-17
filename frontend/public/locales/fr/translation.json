@@ -792,7 +792,10 @@
     "backupsAttention": "Sauvegardes nécessitant une attention",
     "backupsEscrowStale": "Export de clés d'urgence obsolète",
     "backupsServerUnprotected": "Ce serveur SysManage n'a aucune sauvegarde réussie",
-    "autoUpdateProblems": "Problèmes de mises à jour automatiques"
+    "autoUpdateProblems": "Problèmes de mises à jour automatiques",
+    "autoRebootsWaiting": "Redémarrages automatiques en attente d'une fenêtre de maintenance",
+    "rolloutsHalted": "Déploiements arrêtés : {{count}}",
+    "rolloutsRunning": "Déploiements en cours"
   },
   "dataGrid": {
     "columnVisibility": "Visibilité des colonnes",
@@ -2992,7 +2995,8 @@
       "users": "utilisateurs",
       "assetTags": "tags d'actifs",
       "hardware": "matériel",
-      "backups": "sauvegardes"
+      "backups": "sauvegardes",
+      "updates": "mises à jour"
     },
     "title": "Rapports",
     "unknownError": "Erreur inconnue",
@@ -3012,6 +3016,10 @@
     "backupSla": {
       "name": "SLA des sauvegardes",
       "description": "Pour chaque hôte sauvegardé : si son objectif de point de reprise (le double de son intervalle de sauvegarde) est respecté maintenant et chacun des 30 derniers jours, ses sauvegardes en échec, sa dernière vérification par lecture complète et la taille de son dépôt."
+    },
+    "automaticUpdates": {
+      "description": "Pour chaque politique de mise à jour automatique et chaque flotte, sur les 30 derniers jours : exécutions, hôtes mis à jour, exécutions en échec, redémarrages, et le délai médian entre l'apparition sur un hôte d'un correctif pour une CVE critique et son application sur cet hôte.",
+      "name": "Mises à jour automatiques"
     }
   },
   "resetPassword": {
@@ -3815,7 +3823,20 @@
     "criticalEither": "L'analyse des vulnérabilités ou l'avis de sécurité du fournisseur",
     "criticalVulnerability": "L'analyse des vulnérabilités de l'hôte",
     "criticalAdvisory": "L'avis de sécurité du fournisseur",
-    "criticalHelp": "Sans analyse des vulnérabilités ni avis de sécurité du fournisseur pour un hôte, chaque correctif sur cet hôte attend le délai standard."
+    "criticalHelp": "Sans analyse des vulnérabilités ni avis de sécurité du fournisseur pour un hôte, chaque correctif sur cet hôte attend le délai standard.",
+    "rolloutAdd": "Ajouter une flotte",
+    "rolloutCanary": "Flotte canari",
+    "rolloutDown": "Déplacer plus tard",
+    "rolloutEnabled": "Déployer flotte par flotte",
+    "rolloutFleetName": "Flotte {{n}}",
+    "rolloutFleetTag": "Hôtes portant l'étiquette",
+    "rolloutHelp": "Une flotte à la fois, dans cet ordre ; la première est la flotte canari. La flotte suivante ne démarre que lorsque celle-ci est terminée, saine et a passé sa période d'observation. Un hôte est mis à jour avec la première flotte dont il porte l'étiquette ; les hôtes qui ne sont dans aucune flotte passent en dernier.",
+    "rolloutIncomplete": "Chaque flotte du déploiement nécessite un nom et une étiquette",
+    "rolloutMaxFailures": "Arrêter lorsque la part d'échecs dans une flotte dépasse ce seuil (%)",
+    "rolloutMaxFailuresHelp": "0 : toute exécution en échec arrête le déploiement. Un hôte qui ne revient pas de son redémarrage, un hôte qui a cessé de faire des rapports ou une nouvelle alerte critique sur la flotte l'arrête toujours.",
+    "rolloutRemove": "Retirer cette flotte",
+    "rolloutSoak": "Durée d'observation (heures)",
+    "rolloutUp": "Déplacer plus tôt"
   },
   "userDetail": {
     "active": "Actif",
@@ -6285,6 +6306,41 @@
     "startsAt": "Commence à l'ouverture de sa fenêtre de maintenance : {{when}}",
     "threshold": "Un correctif est critique lorsqu'il corrige une CVE notée",
     "thresholdCritical": "Critique",
-    "thresholdHigh": "Élevée ou critique"
+    "thresholdHigh": "Élevée ou critique",
+    "fleet": {
+      "counts": "{{applied}} appliqué(s), {{failed}} en échec, {{inFlight}} en cours, {{other}} non appliqué(s)",
+      "done": "Terminé",
+      "halted": "Arrêté ici",
+      "hide": "Masquer les hôtes",
+      "hosts": "{{count}} hôte(s)",
+      "noRun": "Pas encore planifié",
+      "pending": "Non démarré",
+      "remaining": "Les hôtes restants",
+      "resumedBy": "repris par {{who}}",
+      "running": "En cours",
+      "show": "Afficher les hôtes",
+      "soakUntil": "la durée d'observation se termine {{when}}"
+    },
+    "halt": {
+      "criticalAlerts": "une alerte critique a été déclenchée sur un hôte de cette flotte",
+      "notBack": "un hôte n'est pas revenu de son redémarrage",
+      "notReporting": "un hôte a cessé de faire des rapports après sa mise à jour",
+      "runFailures": "trop d'exécutions dans cette flotte ont échoué"
+    },
+    "rollout": {
+      "cancel": "Annuler",
+      "cancelReason": "Pourquoi annuler ce déploiement ?",
+      "canceled": "Annulé",
+      "canceledBy": "Annulé par {{who}} : {{reason}}",
+      "completed": "Terminé",
+      "halted": "Arrêté",
+      "haltedBecause": "Arrêté à {{fleet}} : {{reason}} ({{hosts}}). Plus rien n'est mis à jour tant que quelqu'un ne l'a pas repris ou annulé.",
+      "resume": "Reprendre",
+      "resumeReason": "Pourquoi continuer au-delà de cette flotte ?",
+      "running": "En cours",
+      "started": "démarré le {{when}}",
+      "subtitle": "Politiques déployées flotte par flotte : une flotte à la fois, chacune saine avant la suivante.",
+      "title": "Déploiements flotte par flotte"
+    }
   }
 }

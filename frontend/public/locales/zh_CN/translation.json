@@ -792,7 +792,10 @@
     "backupsAttention": "需要关注的备份",
     "backupsEscrowStale": "应急密钥导出已过时",
     "backupsServerUnprotected": "此 SysManage 服务器没有成功的备份",
-    "autoUpdateProblems": "自动更新问题"
+    "autoUpdateProblems": "自动更新问题",
+    "autoRebootsWaiting": "等待维护窗口的自动重启",
+    "rolloutsHalted": "已停止的部署：{{count}}",
+    "rolloutsRunning": "进行中的部署"
   },
   "dataGrid": {
     "columnVisibility": "列可见性",
@@ -2992,7 +2995,8 @@
       "users": "用户",
       "assetTags": "资产标签",
       "hardware": "硬件",
-      "backups": "备份"
+      "backups": "备份",
+      "updates": "更新"
     },
     "title": "报告",
     "unknownError": "未知错误",
@@ -3012,6 +3016,10 @@
     "backupSla": {
       "name": "备份 SLA",
       "description": "针对每台已备份的主机：其恢复点目标（备份间隔的两倍）当前以及最近 30 天中每一天是否满足、失败的备份、最近一次完整读取验证以及存储库大小。"
+    },
+    "automaticUpdates": {
+      "description": "过去 30 天内每条自动更新策略和每个主机群的情况：运行次数、已打补丁的主机、失败的运行、重启次数，以及从主机上出现修复严重 CVE 的补丁到该补丁在该主机上应用的中位时间。",
+      "name": "自动更新"
     }
   },
   "resetPassword": {
@@ -3815,7 +3823,20 @@
     "criticalEither": "漏洞扫描或供应商安全公告",
     "criticalVulnerability": "主机的漏洞扫描",
     "criticalAdvisory": "供应商安全公告",
-    "criticalHelp": "如果主机没有漏洞扫描或供应商安全公告，其上的所有补丁都按常规天数等待。"
+    "criticalHelp": "如果主机没有漏洞扫描或供应商安全公告，其上的所有补丁都按常规天数等待。",
+    "rolloutAdd": "添加一个主机群",
+    "rolloutCanary": "金丝雀主机群",
+    "rolloutDown": "移到后面",
+    "rolloutEnabled": "按主机群逐一部署",
+    "rolloutFleetName": "主机群 {{n}}",
+    "rolloutFleetTag": "带有此标签的主机",
+    "rolloutHelp": "按此顺序一次一个主机群；第一个是金丝雀。只有当前主机群已完成、状态健康且观察期已过，下一个主机群才会开始。主机随第一个带有其标签的主机群一起打补丁；不属于任何主机群的主机最后进行。",
+    "rolloutIncomplete": "部署中的每个主机群都需要名称和标签",
+    "rolloutMaxFailures": "主机群中失败比例超过此值时停止（%）",
+    "rolloutMaxFailuresHelp": "0：任何一次运行失败都会停止部署。主机重启后未恢复在线、主机停止报告，或主机群中出现新的严重警报，都总是会停止部署。",
+    "rolloutRemove": "移除此主机群",
+    "rolloutSoak": "观察时长（小时）",
+    "rolloutUp": "移到前面"
   },
   "userDetail": {
     "active": "活跃",
@@ -6285,6 +6306,41 @@
     "startsAt": "在维护窗口开启时开始：{{when}}",
     "threshold": "将补丁视为严重的 CVE 评级",
     "thresholdCritical": "严重",
-    "thresholdHigh": "高或严重"
+    "thresholdHigh": "高或严重",
+    "fleet": {
+      "counts": "{{applied}} 已应用，{{failed}} 失败，{{inFlight}} 进行中，{{other}} 未应用",
+      "done": "已完成",
+      "halted": "停在此处",
+      "hide": "隐藏主机",
+      "hosts": "{{count}} 台主机",
+      "noRun": "尚未计划",
+      "pending": "未开始",
+      "remaining": "其余主机",
+      "resumedBy": "由 {{who}} 继续",
+      "running": "进行中",
+      "show": "显示主机",
+      "soakUntil": "观察期于 {{when}} 结束"
+    },
+    "halt": {
+      "criticalAlerts": "此主机群中的一台主机出现了严重警报",
+      "notBack": "一台主机重启后未恢复在线",
+      "notReporting": "一台主机打补丁后停止报告",
+      "runFailures": "此主机群中失败的运行过多"
+    },
+    "rollout": {
+      "cancel": "取消",
+      "cancelReason": "为什么取消此部署？",
+      "canceled": "已取消",
+      "canceledBy": "已被 {{who}} 取消：{{reason}}",
+      "completed": "已完成",
+      "halted": "已停止",
+      "haltedBecause": "停在 {{fleet}}：{{reason}}（{{hosts}}）。在有人继续或取消部署之前，不会再打任何补丁。",
+      "resume": "恢复",
+      "resumeReason": "为什么越过此主机群继续？",
+      "running": "进行中",
+      "started": "开始于 {{when}}",
+      "subtitle": "按主机群逐一部署的策略：一次一个主机群，每个主机群健康后才进行下一个。",
+      "title": "按主机群分批部署"
+    }
   }
 }

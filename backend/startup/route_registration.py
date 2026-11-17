@@ -38,6 +38,7 @@ from backend.api import (
     audit_log,
     auth,
     auth_mfa,
+    auto_update_rollouts,
     auto_updates,
     broadcast,
     certificates,
@@ -587,6 +588,8 @@ def register_routes(app: FastAPI):
     _include_versioned(app, upgrade_profiles.router, suffix="/upgrade-profiles")
     # 26.1: automatic updates -- holds, opt-outs, runs.
     _include_versioned(app, auto_updates.router, suffix="/auto-updates")
+    # 26.4: fleet-by-fleet rollouts.
+    _include_versioned(app, auto_update_rollouts.router, suffix="/auto-updates")
 
     logger.debug("Adding package-compliance router (native /api/v1 + deprecated alias)")
     _include_versioned(app, package_compliance.router, suffix="/package-profiles")

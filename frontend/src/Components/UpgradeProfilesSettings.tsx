@@ -47,6 +47,7 @@ import axiosInstance from '../Services/api';
 import {
   type CriticalSource,
   type RebootMode,
+  type RolloutStageInput,
   UpgradeProfile,
   upgradeProfilesService,
 } from '../Services/upgradeProfiles';
@@ -54,6 +55,7 @@ import { formatUTCTimestamp } from '../utils/dateUtils';
 import { autoUpdatesService } from '../Services/autoUpdates';
 import AutoUpdatesPanel from './AutoUpdates/AutoUpdatesPanel';
 import AutomaticFields from './AutoUpdates/AutomaticFields';
+import RolloutsCard from './AutoUpdates/RolloutsCard';
 
 interface TagOption {
   id: string;
@@ -75,6 +77,9 @@ const AUTO_DEFAULTS = {
   wait_days_regular: 0,
   wait_days_critical: 0,
   critical_source: 'either' as CriticalSource,
+  rollout_enabled: false,
+  rollout_max_failure_pct: 0,
+  rollout_stages: [] as RolloutStageInput[],
 };
 
 const PACKAGE_MANAGER_OPTIONS = [
@@ -188,6 +193,13 @@ const UpgradeProfilesSettings: React.FC = () => {
       wait_days_regular: p.wait_days_regular ?? 0,
       wait_days_critical: p.wait_days_critical ?? 0,
       critical_source: p.critical_source ?? 'either',
+      rollout_enabled: Boolean(p.rollout_enabled),
+      rollout_max_failure_pct: p.rollout_max_failure_pct ?? 0,
+      rollout_stages: (p.rollout_stages ?? []).map((s) => ({
+        name: s.name,
+        tag_id: s.tag_id ?? '',
+        soak_hours: (s.soak_minutes ?? 0) / 60,
+      })),
     });
     setDialogOpen(true);
   };
@@ -203,6 +215,17 @@ const UpgradeProfilesSettings: React.FC = () => {
     }
     if (form.staggered_window_min < 0 || form.staggered_window_min > 720) {
       showError(t('upgradeProfiles.windowRange', 'Staggered window must be between 0 and 720 minutes'));
+      return;
+    }
+    if (
+      form.auto_apply &&
+      form.rollout_enabled &&
+      (form.rollout_stages.length === 0 ||
+        form.rollout_stages.some((s) => !s.name.trim() || !s.tag_id))
+    ) {
+      showError(
+        t('upgradeProfiles.rolloutIncomplete', 'Every fleet of the rollout needs a name and a tag'),
+      );
       return;
     }
     const payload = {
@@ -222,6 +245,9 @@ const UpgradeProfilesSettings: React.FC = () => {
       wait_days_regular: form.wait_days_regular,
       wait_days_critical: form.wait_days_critical,
       critical_source: form.critical_source,
+      rollout_enabled: form.rollout_enabled,
+      rollout_max_failure_pct: form.rollout_max_failure_pct,
+      rollout_stages: form.rollout_stages.map((s) => ({ ...s, name: s.name.trim() })),
     };
     try {
       if (editing) {
@@ -451,6 +477,7 @@ const UpgradeProfilesSettings: React.FC = () => {
       {error && <Alert severity="error">{error}</Alert>}
 
       <AutoUpdatesPanel />
+      <RolloutsCard />
 
       <Card>
         <CardHeader
@@ -583,7 +610,7 @@ const UpgradeProfilesSettings: React.FC = () => {
                 ))}
               </Select>
             </FormControl>
-            <AutomaticFields form={form} setForm={setForm} hosts={hosts} />
+            <AutomaticFields form={form} setForm={setForm} hosts={hosts} tags={tags} />
           </Stack>
         </DialogContent>
         <DialogActions>

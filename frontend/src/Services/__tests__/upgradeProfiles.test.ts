@@ -52,6 +52,9 @@ const mockProfile: UpgradeProfile = {
     wait_days_regular: 0,
     wait_days_critical: 0,
     critical_source: 'either',
+    rollout_enabled: false,
+    rollout_max_failure_pct: 0,
+    rollout_stages: [],
 };
 
 describe('upgradeProfilesService', () => {

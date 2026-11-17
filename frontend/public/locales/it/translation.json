@@ -792,7 +792,10 @@
     "backupsAttention": "Backup che richiedono attenzione",
     "backupsEscrowStale": "Esportazione delle chiavi di emergenza non aggiornata",
     "backupsServerUnprotected": "Questo server SysManage non ha un backup riuscito",
-    "autoUpdateProblems": "Problemi degli aggiornamenti automatici"
+    "autoUpdateProblems": "Problemi degli aggiornamenti automatici",
+    "autoRebootsWaiting": "Riavvi automatici in attesa di una finestra di manutenzione",
+    "rolloutsHalted": "Rollout interrotti: {{count}}",
+    "rolloutsRunning": "Rollout in corso"
   },
   "dataGrid": {
     "columnVisibility": "Visibilità colonne",
@@ -2992,7 +2995,8 @@
       "users": "utenti",
       "assetTags": "tag di asset",
       "hardware": "hardware",
-      "backups": "backup"
+      "backups": "backup",
+      "updates": "aggiornamenti"
     },
     "title": "Report",
     "unknownError": "Errore sconosciuto",
@@ -3012,6 +3016,10 @@
     "backupSla": {
       "name": "SLA dei backup",
       "description": "Per ogni host sottoposto a backup: se il suo obiettivo del punto di ripristino (il doppio del suo intervallo di backup) è rispettato ora e in ciascuno degli ultimi 30 giorni, i backup non riusciti, l'ultima verifica con lettura completa e la dimensione del repository."
+    },
+    "automaticUpdates": {
+      "description": "Per ogni politica di aggiornamento automatico e ogni flotta, negli ultimi 30 giorni: esecuzioni, host aggiornati, esecuzioni non riuscite, riavvi e il tempo mediano tra la comparsa su un host di una patch per una CVE critica e la sua applicazione su quell'host.",
+      "name": "Aggiornamenti automatici"
     }
   },
   "resetPassword": {
@@ -3815,7 +3823,20 @@
     "criticalEither": "La scansione delle vulnerabilità o l'avviso di sicurezza del fornitore",
     "criticalVulnerability": "La scansione delle vulnerabilità dell'host",
     "criticalAdvisory": "L'avviso di sicurezza del fornitore",
-    "criticalHelp": "Senza scansioni delle vulnerabilità o avvisi di sicurezza del fornitore per un host, ogni patch su di esso attende il periodo regolare."
+    "criticalHelp": "Senza scansioni delle vulnerabilità o avvisi di sicurezza del fornitore per un host, ogni patch su di esso attende il periodo regolare.",
+    "rolloutAdd": "Aggiungi una flotta",
+    "rolloutCanary": "Flotta canary",
+    "rolloutDown": "Sposta dopo",
+    "rolloutEnabled": "Rollout flotta per flotta",
+    "rolloutFleetName": "Flotta {{n}}",
+    "rolloutFleetTag": "Host con etichetta",
+    "rolloutHelp": "Una flotta alla volta, in questo ordine; la prima è la flotta canary. La flotta successiva parte solo quando questa è terminata, è integra e ha superato il periodo di osservazione. Un host viene aggiornato con la prima flotta di cui porta l'etichetta; gli host che non appartengono a nessuna flotta vanno per ultimi.",
+    "rolloutIncomplete": "Ogni flotta del rollout richiede un nome e un'etichetta",
+    "rolloutMaxFailures": "Interrompi quando fallisce più di questa quota di una flotta (%)",
+    "rolloutMaxFailuresHelp": "0: qualsiasi esecuzione non riuscita interrompe il rollout. Un host non tornato dal riavvio, un host che ha smesso di inviare report o un nuovo avviso critico sulla flotta lo interrompono sempre.",
+    "rolloutRemove": "Rimuovi questa flotta",
+    "rolloutSoak": "Tempo di osservazione (ore)",
+    "rolloutUp": "Sposta prima"
   },
   "userDetail": {
     "active": "Attivo",
@@ -6285,6 +6306,41 @@
     "startsAt": "Inizia all'apertura della finestra: {{when}}",
     "threshold": "Una patch è critica quando corregge una CVE classificata come",
     "thresholdCritical": "Critica",
-    "thresholdHigh": "Alta o critica"
+    "thresholdHigh": "Alta o critica",
+    "fleet": {
+      "counts": "{{applied}} applicati, {{failed}} non riusciti, {{inFlight}} in corso, {{other}} non applicati",
+      "done": "Completato",
+      "halted": "Interrotto qui",
+      "hide": "Nascondi host",
+      "hosts": "{{count}} host",
+      "noRun": "Non ancora pianificato",
+      "pending": "Non iniziato",
+      "remaining": "Gli host rimanenti",
+      "resumedBy": "ripreso da {{who}}",
+      "running": "In corso",
+      "show": "Mostra host",
+      "soakUntil": "il tempo di osservazione termina {{when}}"
+    },
+    "halt": {
+      "criticalAlerts": "è stato generato un avviso critico su un host di questa flotta",
+      "notBack": "un host non è tornato dal riavvio",
+      "notReporting": "un host ha smesso di inviare report dopo essere stato aggiornato",
+      "runFailures": "troppe esecuzioni in questa flotta sono fallite"
+    },
+    "rollout": {
+      "cancel": "Annulla",
+      "cancelReason": "Perché annullare questo rollout?",
+      "canceled": "Annullato",
+      "canceledBy": "Annullato da {{who}}: {{reason}}",
+      "completed": "Completato",
+      "halted": "Interrotto",
+      "haltedBecause": "Interrotto a {{fleet}}: {{reason}} ({{hosts}}). Nulla viene più aggiornato finché qualcuno non lo riprende o lo annulla.",
+      "resume": "Riprendi",
+      "resumeReason": "Perché continuare oltre questa flotta?",
+      "running": "In corso",
+      "started": "avviato il {{when}}",
+      "subtitle": "Politiche distribuite flotta per flotta: una flotta alla volta, ciascuna integra prima della successiva.",
+      "title": "Rollout flotta per flotta"
+    }
   }
 }

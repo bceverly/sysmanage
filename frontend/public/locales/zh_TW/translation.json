@@ -792,7 +792,10 @@
     "backupsAttention": "需要注意的備份",
     "backupsEscrowStale": "緊急金鑰匯出已過時",
     "backupsServerUnprotected": "此 SysManage 伺服器沒有成功的備份",
-    "autoUpdateProblems": "自動更新問題"
+    "autoUpdateProblems": "自動更新問題",
+    "autoRebootsWaiting": "等待維護窗口的自動重新啟動",
+    "rolloutsHalted": "已停止的部署：{{count}}",
+    "rolloutsRunning": "進行中的部署"
   },
   "dataGrid": {
     "columnVisibility": "欄位可見性",
@@ -2992,7 +2995,8 @@
       "users": "用戶",
       "assetTags": "資產標籤",
       "hardware": "硬體",
-      "backups": "備份"
+      "backups": "備份",
+      "updates": "更新"
     },
     "title": "報告",
     "unknownError": "未知錯誤",
@@ -3012,6 +3016,10 @@
     "backupSla": {
       "name": "備份 SLA",
       "description": "針對每台已備份的主機：其復原點目標（備份間隔的兩倍）目前以及最近 30 天中每一天是否達成、失敗的備份、最近一次完整讀取驗證，以及存放庫大小。"
+    },
+    "automaticUpdates": {
+      "description": "過去 30 天內每項自動更新策略和每個主機群的情況：執行次數、已修補的主機、失敗的執行、重新啟動次數，以及從主機上出現修復嚴重 CVE 的修補程式到該修補程式在該主機上套用的中位數時間。",
+      "name": "自動更新"
     }
   },
   "resetPassword": {
@@ -3815,7 +3823,20 @@
     "criticalEither": "漏洞掃描或供應商安全公告",
     "criticalVulnerability": "主機的漏洞掃描",
     "criticalAdvisory": "供應商安全公告",
-    "criticalHelp": "如果主機沒有漏洞掃描或供應商安全公告，其上的所有修補程式都按一般天數等待。"
+    "criticalHelp": "如果主機沒有漏洞掃描或供應商安全公告，其上的所有修補程式都按一般天數等待。",
+    "rolloutAdd": "新增一個主機群",
+    "rolloutCanary": "金絲雀主機群",
+    "rolloutDown": "移到後面",
+    "rolloutEnabled": "按主機群逐一部署",
+    "rolloutFleetName": "主機群 {{n}}",
+    "rolloutFleetTag": "帶有此標籤的主機",
+    "rolloutHelp": "依此順序一次一個主機群；第一個是金絲雀。只有目前的主機群已完成、狀態健康且觀察期已過，下一個主機群才會開始。主機會隨第一個帶有其標籤的主機群一起修補；不屬於任何主機群的主機最後進行。",
+    "rolloutIncomplete": "部署中的每個主機群都需要名稱和標籤",
+    "rolloutMaxFailures": "主機群中失敗比例超過此值時停止（%）",
+    "rolloutMaxFailuresHelp": "0：任何一次執行失敗都會停止部署。主機重新啟動後未恢復上線、主機停止回報，或主機群中出現新的嚴重警示，都一定會停止部署。",
+    "rolloutRemove": "移除此主機群",
+    "rolloutSoak": "觀察時長（小時）",
+    "rolloutUp": "移到前面"
   },
   "userDetail": {
     "active": "活躍",
@@ -6285,6 +6306,41 @@
     "startsAt": "在維護窗口開啟時開始：{{when}}",
     "threshold": "將修補程式視為嚴重的 CVE 評級",
     "thresholdCritical": "嚴重",
-    "thresholdHigh": "高或嚴重"
+    "thresholdHigh": "高或嚴重",
+    "fleet": {
+      "counts": "{{applied}} 已套用，{{failed}} 失敗，{{inFlight}} 進行中，{{other}} 未套用",
+      "done": "已完成",
+      "halted": "停在此處",
+      "hide": "隱藏主機",
+      "hosts": "{{count}} 台主機",
+      "noRun": "尚未排定",
+      "pending": "未開始",
+      "remaining": "其餘主機",
+      "resumedBy": "由 {{who}} 繼續",
+      "running": "進行中",
+      "show": "顯示主機",
+      "soakUntil": "觀察期於 {{when}} 結束"
+    },
+    "halt": {
+      "criticalAlerts": "此主機群中的一台主機出現了嚴重警示",
+      "notBack": "一台主機重新啟動後未恢復上線",
+      "notReporting": "一台主機修補後停止回報",
+      "runFailures": "此主機群中失敗的執行過多"
+    },
+    "rollout": {
+      "cancel": "取消",
+      "cancelReason": "為什麼要取消此部署？",
+      "canceled": "已取消",
+      "canceledBy": "已由 {{who}} 取消：{{reason}}",
+      "completed": "已完成",
+      "halted": "已停止",
+      "haltedBecause": "停在 {{fleet}}：{{reason}}（{{hosts}}）。在有人繼續或取消部署之前，不會再修補任何主機。",
+      "resume": "繼續",
+      "resumeReason": "為什麼要越過此主機群繼續？",
+      "running": "進行中",
+      "started": "開始於 {{when}}",
+      "subtitle": "按主機群逐一部署的策略：一次一個主機群，每個主機群健康後才進行下一個。",
+      "title": "依主機群分批部署"
+    }
   }
 }
