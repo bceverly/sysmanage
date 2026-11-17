@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from backend.api.error_constants import error_host_not_registered
 from backend.api.handlers.inventory_diff import replace_host_rows
 from backend.i18n import _
+from backend.services import package_update_first_seen as first_seen
 from backend.services.syspatch_classification import classify_syspatch_updates
 from backend.persistence.models import (
     AntivirusStatus,
@@ -148,7 +149,7 @@ async def handle_package_updates_update(  # NOSONAR
         }
 
     try:
-        # Clear existing updates for this host first
+        seen = first_seen.first_seen(db, connection.host_id)  # 26.3, before the delete
         db.execute(
             delete(PackageUpdate).where(PackageUpdate.host_id == connection.host_id)
         )
@@ -191,12 +192,7 @@ async def handle_package_updates_update(  # NOSONAR
         classify_syspatch_updates(db, connection.host_id, available_updates)
         for package_update in available_updates:
             now = datetime.now(timezone.utc).replace(tzinfo=None)
-            # Debug: log all keys in this package update
-            debug_logger.info(
-                "Package update keys for %s: %s",
-                package_update.get("package_name", "unknown"),
-                list(package_update.keys()),
-            )
+            debug_logger.info("Package update keys: %s", list(package_update.keys()))
 
             # Handle case where new_version is None - skip if no version available
             new_version = package_update.get("new_version") or package_update.get(
@@ -246,7 +242,7 @@ async def handle_package_updates_update(  # NOSONAR
                 requires_reboot=False,  # Default, could be enhanced later
                 held=bool(package_update.get("held")),  # pinned (26.1)
                 # Required timestamp fields
-                discovered_at=now,
+                discovered_at=first_seen.keep(seen, package_update, new_version, now),
                 created_at=now,
                 updated_at=now,
             )
