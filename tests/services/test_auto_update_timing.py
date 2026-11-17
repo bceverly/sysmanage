@@ -39,8 +39,23 @@ def _automation(monkeypatch):
     return eng
 
 
+_FROZEN = {}
+
+
+@pytest.fixture(autouse=True)
+def _one_clock():
+    """One ``now`` per test.  The helpers stamp rows with ``_now()`` too, and
+    when the second rolled over between the test's ``now`` and a helper's
+    stamp, the package was "discovered" a second after the tick's ``now`` --
+    not yet pending -- and the run said ``nothing_to_do``: a flaky failure
+    under load (2026-11-17)."""
+    _FROZEN["now"] = datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0)
+    yield
+    _FROZEN.clear()
+
+
 def _now():
-    return datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0)
+    return _FROZEN["now"]
 
 
 def _host(session, fqdn="web1", **kw):
