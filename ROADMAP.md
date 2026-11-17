@@ -14926,7 +14926,7 @@ the Network Discovery page and the 26.9 alert's filter.
 
 - [x] Every tier 402-clean when unlicensed, in both repos -- 2026-11-17 (26.7): Community proven on an unlicensed server, Professional from both repos' tier lists plus the report gap found and fixed
 - [x] Docs + 14-language i18n complete (26.6) -- DONE 2026-11-17, see 26.6
-- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped.
+- [x] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. -- DONE 2026-11-17: Phases 0-25 have no unticked boxes; every ticked item whose note still carried a hedge was read and, where the hedge was not settled in the note itself, checked against the code. Five Phase 25 leftovers were already done and are closed with their evidence; three are open and moved to Phase 30, "Carried forward by the Phase 26 audit": the air-gap toolchain on every server package, a least-privilege OpenBAO token by default, and Bryan's decision on 402 for stub reads
 - [ ] **Pro+ engines built for every OS + architecture and verified in R2**
       (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase))
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
@@ -16156,6 +16156,42 @@ Phases 0-24 again had no unticked boxes, so, like the Phase 21-24 audits, this o
       (`signing_enabled_at` 12:41 UTC), and every snapshot taken since
       2026-11-06 reads signed (91 of 118 in all; the unsigned 27 predate it
       or were mid-switch on 11-03 and 11-05)
+
+### Carried forward by the Phase 26 audit (2026-11-17)
+
+Phases 0-25 had no unticked boxes, so, like the Phase 21-25 audits, this one read every ticked item whose note still carried a hedge ("still to do", "still open", "not yet", "waits on", "OPEN", "Left", "to be checked"). Almost all were settled further along the same note or by an earlier audit. Checked against the code and closed: Phase 25's "security role names render English" (every role name now goes through `securityRoles.role.<slug>`, and all 107 names in `backend/security/roles.py` have a key in all 14 locales); its six docs label mismatches (Import from Media, Import ISO, Rescan, Copy Public Key, Import Key, Equip for backup now read the same in the docs and the UI); "reissue licenses (health_history)" (the dev license carries it); the air-gap `/airgap-tools/` nginx location (in every platform's config; the nginx drift check passes); the drill server's missing mTLS snippet (a disposable lab box; production's nginx has it, 25.10). Still open, below:
+
+- [ ] **The air-gap toolchain on every server package** (from 25.x Air-gapped
+      installs, which said "Not yet: the RPM spec and the other installers'
+      dependencies"). Only the Debian package recommends what building and
+      ingesting air-gap media needs -- `xorriso`, `createrepo-c`,
+      `apt-utils`, `gnupg`, `zstd` (`installer/ubuntu/debian/control`). The
+      EL and openSUSE RPM specs, Alpine's APKBUILD, the FreeBSD / OpenBSD /
+      NetBSD packages and the snap declare none of it, so an air-gap
+      collector or repository on those has to be told to install them by
+      hand. Real work: each platform's package names as weak dependencies
+      (Recommends / optional), checked by building each package, plus the
+      message the air-gap pages show when a tool is missing
+- [ ] **The server's OpenBAO token: least privilege by default** (from
+      25.x Recovery runbook, "the server's OpenBAO app token carries the
+      `root` policy (separate hardening item)", never tracked).
+      `scripts/_sysmanage_secure_installation.py` writes OpenBAO's ROOT
+      token into `sysmanage.yaml` (`vault.token`); a least-privilege,
+      periodic token already exists (`scripts/provision_bootstrap.py`
+      `_issue_server_token`: `sysmanage-server` + `sysmanage-provisioner`
+      only) but is printed for the operator to adopt, not installed. Real
+      work: the installer issues and installs the least-privilege token and
+      keeps the root token out of the server's config; then production
+      adopts one (an operator step -- not checked on production by this
+      audit)
+- [ ] **Do stub READS answer 402 too? -- Bryan to decide** (from 25.x
+      "Every tier gate in both repos", whose note says "OPEN: Bryan to
+      decide"). Unlicensed, every Pro+ write and feature route answers 402,
+      but the stub reads still answer 200 `{licensed: false}`, which the
+      Federation and Secrets pages read to show their upsell. Either keep
+      that (and record the decision here), or make them 402 and change
+      those pages to read 402 as unlicensed, as the plugin cards do
+
 
 ### Multi-boot machines that keep one hostname (from the 23.2 T480 proof, 2026-10-15)
 
