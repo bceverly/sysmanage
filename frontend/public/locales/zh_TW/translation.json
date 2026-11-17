@@ -3806,7 +3806,16 @@
     "reboot": "重新啟動",
     "rebootNever": "永不（主機顯示「需要重新啟動」）",
     "rebootWhenNeeded": "在更新需要時重新啟動",
-    "release": "解除暫停"
+    "release": "解除暫停",
+    "rebootInWindow": "必要時重新啟動，僅在維護窗口內進行",
+    "waitRegular": "套用一般修補程式前的等待時間（天）",
+    "waitHelp": "從主機首次發現該更新時開始計算；如果供應商發布的時間更早，則從發布時間開始計算。0：立即套用。",
+    "waitCritical": "套用修復嚴重 CVE 的修補程式前的等待時間（天）",
+    "criticalSource": "嚴重等級的評定來源",
+    "criticalEither": "漏洞掃描或供應商安全公告",
+    "criticalVulnerability": "主機的漏洞掃描",
+    "criticalAdvisory": "供應商安全公告",
+    "criticalHelp": "如果主機沒有漏洞掃描或供應商安全公告，其上的所有修補程式都按一般天數等待。"
   },
   "userDetail": {
     "active": "活躍",
@@ -6215,13 +6224,16 @@
       "held": "已在主機上鎖定版本",
       "manager": "套件管理器未包含在策略中",
       "notSecurity": "非安全更新",
-      "osUpgrade": "作業系統升級從不自動進行"
+      "osUpgrade": "作業系統升級從不自動進行",
+      "waiting": "處於等待期"
     },
     "policy": "策略",
     "reboot": {
       "back": "已重新啟動並恢復上線",
       "notBack": "重新啟動後未恢復上線",
-      "queued": "正在重新啟動"
+      "queued": "正在重新啟動",
+      "nextWindow": "需要重新啟動：將在下一個維護窗口進行",
+      "notNeeded": "不再需要重新啟動"
     },
     "result": "結果",
     "rule": {
@@ -6239,7 +6251,9 @@
       "notApproved": "主機未獲核准",
       "optedOut": "主機永遠不會自動更新",
       "pending": "之前的執行尚未完成",
-      "agentCannotApply": "其代理程式無法套用更新；請更新代理程式"
+      "agentCannotApply": "其代理程式無法套用更新；請更新代理程式",
+      "noWindow": "未來一週內沒有足夠長的維護窗口來完成本次執行",
+      "policyChanged": "在執行等待期間，其策略已被關閉或刪除"
     },
     "status": {
       "failed": "失敗",
@@ -6248,10 +6262,29 @@
       "queued": "執行中",
       "skipped": "已跳過",
       "succeeded": "成功",
-      "timedOut": "沒有結果"
+      "timedOut": "沒有結果",
+      "waiting": "等待維護窗口"
     },
     "subtitle": "啟用「自動套用」的設定檔會依排程更新其主機。",
     "title": "自動更新",
-    "when": "時間"
+    "when": "時間",
+    "eligible": {
+      "now": "現可自動套用",
+      "criticalOn": "嚴重 {{fix}}：{{when}} 起可自動套用",
+      "regularOn": "一般：{{when}} 起可自動套用",
+      "criticalNow": "嚴重 {{fix}}：現可自動套用"
+    },
+    "pendingTitle": "此策略下的待處理更新",
+    "noCveData": "此主機沒有漏洞掃描或供應商安全公告，因此其上的所有修補程式都按一般天數等待。",
+    "noPending": "沒有待處理的更新。",
+    "package": "套件",
+    "eligibility": "自動套用時間",
+    "inBlackout": "處於「{{name}}」禁止時段：不會自動套用任何更新。",
+    "windowNext": "適用維護窗口：自動執行只會在維護窗口內開始，且僅在時間足夠時開始。下一個：「{{name}}」，{{when}}。",
+    "windowNone": "適用維護窗口，但未來一週內沒有窗口開啟：不會自動套用任何更新。",
+    "startsAt": "在維護窗口開啟時開始：{{when}}",
+    "threshold": "將修補程式視為嚴重的 CVE 評級",
+    "thresholdCritical": "嚴重",
+    "thresholdHigh": "高或嚴重"
   }
 }

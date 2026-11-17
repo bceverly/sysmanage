@@ -3806,7 +3806,16 @@
     "reboot": "Redémarrages",
     "rebootNever": "Jamais (l'hôte affiche \"redémarrage requis\")",
     "rebootWhenNeeded": "Redémarrer lorsque la mise à jour l'exige",
-    "release": "Lever la mise en attente"
+    "release": "Lever la mise en attente",
+    "rebootInWindow": "Redémarrer si nécessaire, uniquement pendant une fenêtre de maintenance",
+    "waitRegular": "Délai avant l'application d'un correctif standard (jours)",
+    "waitHelp": "Compté à partir du moment où l'hôte a détecté la mise à jour pour la première fois, ou de sa publication par le fournisseur si elle est antérieure. 0 : appliquer immédiatement.",
+    "waitCritical": "Délai avant l'application d'un correctif résolvant une CVE critique (jours)",
+    "criticalSource": "Critique signifie classé critique par",
+    "criticalEither": "L'analyse des vulnérabilités ou l'avis de sécurité du fournisseur",
+    "criticalVulnerability": "L'analyse des vulnérabilités de l'hôte",
+    "criticalAdvisory": "L'avis de sécurité du fournisseur",
+    "criticalHelp": "Sans analyse des vulnérabilités ni avis de sécurité du fournisseur pour un hôte, chaque correctif sur cet hôte attend le délai standard."
   },
   "userDetail": {
     "active": "Actif",
@@ -6215,13 +6224,16 @@
       "held": "bloqué sur l'hôte",
       "manager": "le gestionnaire de paquets n'est pas inclus dans la politique",
       "notSecurity": "ce n'est pas une mise à jour de sécurité",
-      "osUpgrade": "une mise à niveau du système d'exploitation n'est jamais automatique"
+      "osUpgrade": "une mise à niveau du système d'exploitation n'est jamais automatique",
+      "waiting": "en période d'attente"
     },
     "policy": "Politique",
     "reboot": {
       "back": "Redémarré et de nouveau en ligne",
       "notBack": "N'est pas revenu en ligne après son redémarrage",
-      "queued": "Redémarrage"
+      "queued": "Redémarrage",
+      "nextWindow": "Redémarrage requis : attend sa prochaine fenêtre de maintenance",
+      "notNeeded": "Le redémarrage n'est plus nécessaire"
     },
     "result": "Résultat",
     "rule": {
@@ -6239,7 +6251,9 @@
       "notApproved": "l'hôte n'est pas approuvé",
       "optedOut": "l'hôte n'est jamais mis à jour automatiquement",
       "pending": "son exécution précédente n'est pas terminée",
-      "agentCannotApply": "son agent ne peut pas appliquer de mises à jour ; mettez l'agent à jour"
+      "agentCannotApply": "son agent ne peut pas appliquer de mises à jour ; mettez l'agent à jour",
+      "noWindow": "aucune de ses fenêtres de maintenance de la semaine prochaine n'est assez longue pour l'exécution",
+      "policyChanged": "sa politique a été désactivée ou supprimée pendant que l'exécution attendait"
     },
     "status": {
       "failed": "Échoué",
@@ -6248,10 +6262,29 @@
       "queued": "En cours",
       "skipped": "Ignoré",
       "succeeded": "Réussi",
-      "timedOut": "Aucun résultat"
+      "timedOut": "Aucun résultat",
+      "waiting": "En attente de sa fenêtre de maintenance"
     },
     "subtitle": "Les profils dont l'option \"Appliquer automatiquement\" est activée mettent à jour leurs hôtes selon leur planification.",
     "title": "Mises à jour automatiques",
-    "when": "Quand"
+    "when": "Quand",
+    "eligible": {
+      "criticalNow": "critique {{fix}} : applicable maintenant",
+      "now": "applicable maintenant",
+      "criticalOn": "critique {{fix}} : applicable à partir du {{when}}",
+      "regularOn": "standard : applicable à partir du {{when}}"
+    },
+    "pendingTitle": "Mises à jour en attente selon cette politique",
+    "noCveData": "Cet hôte n'a ni analyse des vulnérabilités ni avis de sécurité du fournisseur, donc chaque correctif sur cet hôte attend le délai standard.",
+    "noPending": "Aucune mise à jour en attente.",
+    "package": "Paquet",
+    "eligibility": "Application automatique",
+    "inBlackout": "Pendant la période de blocage « {{name}} » : rien n'est appliqué automatiquement.",
+    "windowNext": "Des fenêtres de maintenance s'appliquent : les exécutions automatiques ne démarrent qu'à l'intérieur de l'une d'elles, et seulement si elles y tiennent. Prochaine : « {{name}} » le {{when}}.",
+    "windowNone": "Des fenêtres de maintenance s'appliquent et aucune ne s'ouvre dans la semaine à venir : rien n'est appliqué automatiquement.",
+    "startsAt": "Commence à l'ouverture de sa fenêtre de maintenance : {{when}}",
+    "threshold": "Un correctif est critique lorsqu'il corrige une CVE notée",
+    "thresholdCritical": "Critique",
+    "thresholdHigh": "Élevée ou critique"
   }
 }

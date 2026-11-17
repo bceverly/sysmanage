@@ -8,6 +8,7 @@ Handles processing and sending of messages from server to agents.
 """
 
 import time
+import uuid
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import and_, func, or_
@@ -93,6 +94,36 @@ def _defer(messages, now, reason) -> None:
     )
 
 
+def automatic_held(db, host_id, now, gated) -> list:
+    """The automatic-update messages among ``gated`` that only an emergency
+    override would let through: those carry their run's id as correlation
+    id (``auto_update_runner``)."""
+    from backend.persistence.models import AutoUpdateRun  # noqa: PLC0415
+    from backend.services.maintenance_window_service import (  # noqa: PLC0415
+        active_override,
+        is_dispatch_allowed,
+    )
+
+    ids = {}
+    for message in gated:
+        try:
+            ids[message.correlation_id] = uuid.UUID(str(message.correlation_id))
+        except (TypeError, ValueError):
+            continue
+    if not ids or active_override(db, host_id, now) is None:
+        return []
+    runs = {
+        str(run_id)
+        for (run_id,) in db.query(AutoUpdateRun.id).filter(
+            AutoUpdateRun.id.in_(list(ids.values()))
+        )
+    }
+    automatic = [m for m in gated if str(ids.get(m.correlation_id)) in runs]
+    if automatic and not is_dispatch_allowed(db, host_id, now, honor_override=False):
+        return automatic
+    return []
+
+
 async def _send_to_host(db, host_id, now, deadline, seen) -> int:
     """Deliver this host's due messages; returns how many were handled."""
     from backend.persistence.models import Host  # noqa: PLC0415
@@ -138,8 +169,14 @@ async def _send_to_host(db, host_id, now, deadline, seen) -> int:
     gated = [m for m in messages if is_window_gated(m.message_type, m.message_data)]
     if gated and not is_dispatch_allowed(db, host_id, now):
         _defer(gated, now, f"Maintenance window closed for host {host.fqdn}")
-        held = {id(m) for m in gated}
-        messages = [m for m in messages if id(m) not in held]
+    else:
+        # An emergency override never lets an automatic run or reboot
+        # through (26.2): only a person can override for a person's change.
+        gated = automatic_held(db, host_id, now, gated)
+        if gated:
+            _defer(gated, now, f"Automatic update held by the window for {host.fqdn}")
+    held = {id(m) for m in gated}
+    messages = [m for m in messages if id(m) not in held]
 
     sent = 0
     for message in messages:

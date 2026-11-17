@@ -4,7 +4,8 @@
 
 // Automatic updates at a glance (ROADMAP 26.1, Enterprise): the hold on
 // every policy, and the runs that need someone to look -- failed, partly
-// failed, never reported, or a reboot that did not come back.
+// failed, never reported, or a reboot that did not come back; and what
+// makes a patch critical for the waiting periods (26.3).
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -14,7 +15,11 @@ import {
   CardContent,
   CardHeader,
   Chip,
+  FormControl,
   FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   Switch,
   Typography,
@@ -76,6 +81,16 @@ const AutoUpdatesPanel: React.FC = () => {
     }
   };
 
+  const setThreshold = async (value: 'critical' | 'high') => {
+    try {
+      await autoUpdatesService.updateSettings({ critical_threshold: value });
+      setError(null);
+      await load();
+    } catch {
+      setError(t('autoUpdates.saveError', 'Could not save the change'));
+    }
+  };
+
   const acknowledge = async (run: AutoUpdateRun) => {
     try {
       await autoUpdatesService.acknowledge(run.id);
@@ -116,6 +131,20 @@ const AutoUpdatesPanel: React.FC = () => {
             })}
           </Alert>
         )}
+        <FormControl size="small" sx={{ mb: 2, minWidth: 320 }}>
+          <InputLabel id="auto-updates-threshold-label">
+            {t('autoUpdates.threshold', 'A patch is critical when it fixes a CVE rated')}
+          </InputLabel>
+          <Select
+            labelId="auto-updates-threshold-label"
+            label={t('autoUpdates.threshold', 'A patch is critical when it fixes a CVE rated')}
+            value={settings.critical_threshold ?? 'critical'}
+            onChange={(e) => void setThreshold(e.target.value as 'critical' | 'high')}
+          >
+            <MenuItem value="critical">{t('autoUpdates.thresholdCritical', 'Critical')}</MenuItem>
+            <MenuItem value="high">{t('autoUpdates.thresholdHigh', 'High or critical')}</MenuItem>
+          </Select>
+        </FormControl>
         {problems.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
             {t('autoUpdates.noProblems', 'No automatic run needs attention.')}

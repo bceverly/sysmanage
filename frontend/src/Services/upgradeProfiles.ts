@@ -21,7 +21,7 @@ export interface UpgradeProfile {
   updated_at: string | null;
   // 26.1 automatic application (Enterprise)
   auto_apply: boolean;
-  reboot_mode: 'never' | 'when_needed';
+  reboot_mode: RebootMode;
   excluded_packages: string;
   require_backup_hours: number | null;
   held: boolean;
@@ -29,7 +29,15 @@ export interface UpgradeProfile {
   hold_by: string | null;
   hold_at: string | null;
   host_ids: string[];
+  // 26.3 waiting periods (Enterprise)
+  wait_days_regular: number;
+  wait_days_critical: number;
+  critical_source: CriticalSource;
 }
+
+// 26.2: in_window reboots only inside a maintenance window.
+export type RebootMode = 'never' | 'when_needed' | 'in_window';
+export type CriticalSource = 'vulnerability' | 'advisory' | 'either';
 
 export interface UpgradeProfileCreate {
   name: string;
@@ -41,10 +49,13 @@ export interface UpgradeProfileCreate {
   staggered_window_min?: number;
   tag_id?: string | null;
   auto_apply?: boolean;
-  reboot_mode?: 'never' | 'when_needed';
+  reboot_mode?: RebootMode;
   excluded_packages?: string | null;
   require_backup_hours?: number | null;
   host_ids?: string[];
+  wait_days_regular?: number;
+  wait_days_critical?: number;
+  critical_source?: CriticalSource;
 }
 
 export type UpgradeProfileUpdate = Partial<UpgradeProfileCreate>;
@@ -56,6 +67,7 @@ export interface TriggerResult {
   skipped: number;
   nothing: number;
   other_policy: number;
+  waiting?: number;
   next_run: string | null;
 }
 

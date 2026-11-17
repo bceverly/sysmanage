@@ -172,6 +172,12 @@ class UpgradeProfile(TestBase):
     hold_reason = Column(String(1000), nullable=True)
     hold_by = Column(String(255), nullable=True)
     hold_at = Column(DateTime, nullable=True)
+    # 26.3 waiting periods (q95autoupdatetiming)
+    wait_days_regular = Column(Integer, nullable=False, default=0, server_default="0")
+    wait_days_critical = Column(Integer, nullable=False, default=0, server_default="0")
+    critical_source = Column(
+        String(16), nullable=False, default="either", server_default="either"
+    )
 
 
 # Phase 11 -- air-gap tables (test-side mirrors).  These mirror the

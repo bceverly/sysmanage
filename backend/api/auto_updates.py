@@ -36,6 +36,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.services import auto_update_runner as runner
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.maintenance_window_service import next_window_for_host
 
 router = APIRouter(tags=["auto-updates"], dependencies=[Depends(JWTBearer())])
 
@@ -55,6 +56,7 @@ class OptOutRequest(BaseModel):
 class SettingsRequest(BaseModel):
     retry_after_hours: Optional[int] = Field(default=None, ge=1, le=720)
     reboot_timeout_minutes: Optional[int] = Field(default=None, ge=5, le=1440)
+    critical_threshold: Optional[str] = Field(default=None, pattern="^(critical|high)$")
 
 
 def _reason_or_400(request) -> Optional[str]:
@@ -92,6 +94,7 @@ def _counts(db) -> dict:
         )
         .count(),
         "queued": db.query(runs).filter(runs.status == "queued").count(),
+        "waiting": db.query(runs).filter(runs.status == "waiting").count(),
         "reboot_not_back": db.query(runs)
         .filter(runs.reboot_status == "not_back", runs.acknowledged_at.is_(None))
         .count(),
@@ -154,6 +157,8 @@ async def put_settings(
         row.retry_after_hours = request.retry_after_hours
     if request.reboot_timeout_minutes is not None:
         row.reboot_timeout_minutes = request.reboot_timeout_minutes
+    if request.critical_threshold is not None:
+        row.critical_threshold = request.critical_threshold
     row.updated_at = runner.now_naive()
     db.commit()
     _audit(
@@ -241,6 +246,51 @@ async def opt_out(
     }
 
 
+def _pending(db, engine, host, profile) -> Optional[dict]:
+    """Each pending update under the host's policy: applied on the next
+    run, left out and why, or waiting until when (26.3: shown, not
+    guessed).  None with an engine older than 26.3."""
+    if not hasattr(engine, "classify_updates"):
+        return None
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        auto_update_evidence,
+    )
+
+    settings = runner.settings_dict(runner.settings_row(db))
+    updates = runner.update_dicts(db, host.id)
+    sources = auto_update_evidence.attach(db, host.id, updates)
+    now = runner.now_naive()
+    packages, skipped = engine.classify_updates(updates, profile, settings, now)
+    rows = [
+        {
+            "package_name": p["package_name"],
+            "package_manager": p["package_manager"],
+            "available_version": p.get("available_version"),
+            "reason": None,
+            "kind": p.get("kind"),
+            "fix_id": p.get("fix_id"),
+            "eligible_at": None,
+        }
+        for p in packages
+    ]
+    rows += [
+        {
+            "package_name": s["package_name"],
+            "package_manager": s["package_manager"],
+            "reason": s["reason"],
+            "kind": s.get("kind"),
+            "fix_id": s.get("fix_id"),
+            "eligible_at": s.get("eligible_at"),
+        }
+        for s in skipped
+    ]
+    return {
+        "updates": sorted(rows, key=lambda r: (r["package_name"] or "")),
+        "sources": sources,
+        "critical_threshold": settings["critical_threshold"],
+    }
+
+
 @router.get("/hosts/{host_id}")
 async def host_view(
     host_id: str,
@@ -260,11 +310,16 @@ async def host_view(
     ]
     policies = runner.auto_profiles(db)
     resolved = engine.resolve_policy({"id": str(host.id), "tag_ids": tags}, policies)
-    policy = None
+    policy, pending = None, None
     if resolved:
         chosen = next(p for p in policies if p["id"] == resolved["profile_id"])
         policy = {"id": chosen["id"], "name": chosen["name"], "rule": resolved["rule"],
-                  "candidates": resolved["candidates"]}  # fmt: skip
+                  "candidates": resolved["candidates"],
+                  "wait_days_regular": chosen["wait_days_regular"],
+                  "wait_days_critical": chosen["wait_days_critical"],
+                  "critical_source": chosen["critical_source"],
+                  "reboot_mode": chosen["reboot_mode"]}  # fmt: skip
+        pending = _pending(db, engine, host, chosen)
     runs = (
         db.query(models.AutoUpdateRun)
         .filter(models.AutoUpdateRun.host_id == host.id)
@@ -279,6 +334,8 @@ async def host_view(
         "policy": policy,
         "hold_all": bool(runner.settings_row(db).hold_all),
         "runs": [r.to_dict() for r in runs],
+        "pending": pending,
+        "window": next_window_for_host(db, host.id, runner.now_naive()),
     }
 
 

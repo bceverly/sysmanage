@@ -90,6 +90,7 @@ def queue_reboot(db, run, host, now) -> None:
         direction=QueueDirection.OUTBOUND,
         host_id=str(host.id),
         db=db,
+        correlation_id=str(run.id),  # automatic: no override lets it through
     )
     run.reboot_status, run.reboot_queued_at = "queued", now
     AuditService.log(
@@ -105,6 +106,24 @@ def queue_reboot(db, run, host, now) -> None:
         details={"run_id": str(run.id)},
         commit=False,
     )
+
+
+def reboot(db, eng, run, host, profile, now) -> None:
+    """Reboot now -- or, with "reboot only inside a maintenance window",
+    only when the host is inside one with time for it; otherwise the host
+    stays "reboot required" and the run says it waits for the next window
+    (26.2; ``follow_reboots`` sends it then)."""
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        auto_update_timing,
+    )
+
+    mode = profile.reboot_mode if profile is not None else "never"
+    if mode == "in_window" and not auto_update_timing.reboot_fits_now(
+        db, eng, host, now
+    ):
+        run.reboot_status = "next_window"
+        return
+    queue_reboot(db, run, host, now)
 
 
 def _close(db, eng, run, host, requires_reboot: bool, now) -> None:
@@ -136,7 +155,7 @@ def _close(db, eng, run, host, requires_reboot: bool, now) -> None:
         # must not reboot a host for an old run (lab, 2026-11-16).
         run.reboot_status = "not_wanted"
     elif run.applied_count and run.reboot_needed:
-        queue_reboot(db, run, host, now)
+        reboot(db, eng, run, host, profile, now)
 
 
 def note_results(db, host_id, run_ids: Iterable, requires_reboot: bool, now) -> None:
@@ -187,12 +206,31 @@ def _late_reboots(db, eng, now) -> None:
             continue
         if eng.reboot_wanted(profile.reboot_mode, True):
             run.reboot_needed = True
-            queue_reboot(db, run, host, now)
+            reboot(db, eng, run, host, profile, now)
+
+
+def _window_reboots(db, eng, now) -> None:
+    """Reboots waiting for a window (26.2): sent once the host is inside one
+    with time for it; dropped when the host no longer needs one."""
+    for run in db.query(models.AutoUpdateRun).filter(
+        models.AutoUpdateRun.reboot_status == "next_window"
+    ):
+        host = db.get(models.Host, run.host_id)
+        if host is None or not host.reboot_required:
+            run.reboot_status = "not_needed"
+            continue
+        profile = _profile(db, run)
+        if profile is None or not eng.reboot_wanted(profile.reboot_mode, True):
+            run.reboot_status = "not_wanted"  # the policy no longer reboots
+            continue
+        reboot(db, eng, run, host, profile, now)
 
 
 def follow_reboots(db, eng, now) -> None:
-    """Late reboots, then whether each queued reboot came back."""
+    """Late reboots and reboots waiting for a window, then whether each
+    queued reboot came back."""
     _late_reboots(db, eng, now)
+    _window_reboots(db, eng, now)
     settings = db.query(models.AutoUpdateSettings).first()
     timeout = settings.reboot_timeout_minutes if settings else None
     for run in db.query(models.AutoUpdateRun).filter(

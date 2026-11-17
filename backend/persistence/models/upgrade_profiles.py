@@ -83,13 +83,22 @@ class UpgradeProfile(Base):
     auto_apply = Column(Boolean, nullable=False, default=False, server_default=false())
     reboot_mode = Column(
         String(16), nullable=False, default="never"
-    )  # never / when_needed
+    )  # never / when_needed / in_window (26.2: only inside a maintenance window)
     excluded_packages = Column(Text, nullable=True)  # glob patterns, comma/newline
     require_backup_hours = Column(Integer, nullable=True)  # backups first
     held = Column(Boolean, nullable=False, default=False, server_default=false())
     hold_reason = Column(String(1000), nullable=True)
     hold_by = Column(String(255), nullable=True)
     hold_at = Column(DateTime, nullable=True)
+    # Waiting periods (26.3, q95autoupdatetiming): days a regular patch, and
+    # a patch fixing a critical CVE, waits before it is applied.  0 and 0:
+    # no waiting, as 26.1.  ``critical_source``: vulnerability / advisory /
+    # either -- whose rating makes a patch critical.
+    wait_days_regular = Column(Integer, nullable=False, default=0, server_default="0")
+    wait_days_critical = Column(Integer, nullable=False, default=0, server_default="0")
+    critical_source = Column(
+        String(16), nullable=False, default="either", server_default="either"
+    )
 
     created_by = Column(GUID(), ForeignKey("user.id", ondelete="SET NULL"))
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -133,6 +142,9 @@ class UpgradeProfile(Base):
             "hold_reason": self.hold_reason,
             "hold_by": self.hold_by,
             "hold_at": self.hold_at.isoformat() if self.hold_at else None,
+            "wait_days_regular": self.wait_days_regular or 0,
+            "wait_days_critical": self.wait_days_critical or 0,
+            "critical_source": self.critical_source or "either",
             "last_run": self.last_run.isoformat() if self.last_run else None,
             "last_status": self.last_status,
             "next_run": self.next_run.isoformat() if self.next_run else None,

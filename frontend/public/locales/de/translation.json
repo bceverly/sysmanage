@@ -3806,7 +3806,16 @@
     "reboot": "Neustarts",
     "rebootNever": "Nie (der Host zeigt \"Neustart erforderlich\")",
     "rebootWhenNeeded": "Neustart durchführen, wenn die Aktualisierung es erfordert",
-    "release": "Anhalten aufheben"
+    "release": "Anhalten aufheben",
+    "rebootInWindow": "Bei Bedarf neu starten, ausschließlich während eines Wartungsfensters",
+    "waitRegular": "Wartezeit vor dem Anwenden eines regulären Patches (Tage)",
+    "waitHelp": "Gezählt ab dem Zeitpunkt, zu dem der Host das Update zuerst gesehen hat, oder ab der Veröffentlichung durch den Hersteller, falls diese früher war. 0: sofort anwenden.",
+    "waitCritical": "Wartezeit vor dem Anwenden eines Patches, der eine kritische CVE behebt (Tage)",
+    "criticalSource": "Kritisch bedeutet als kritisch eingestuft durch",
+    "criticalEither": "Schwachstellenscan oder Sicherheitshinweis des Herstellers",
+    "criticalVulnerability": "Schwachstellenscan des Hosts",
+    "criticalAdvisory": "Sicherheitshinweis des Herstellers",
+    "criticalHelp": "Ohne Schwachstellenscans oder Sicherheitshinweise des Herstellers für einen Host wartet jeder Patch auf diesem Host die reguläre Anzahl an Tagen."
   },
   "userDetail": {
     "active": "Aktiv",
@@ -6215,13 +6224,16 @@
       "held": "Auf dem Host gehalten",
       "manager": "Paketmanager ist in der Richtlinie nicht enthalten",
       "notSecurity": "Kein Sicherheitsupdate",
-      "osUpgrade": "Ein Betriebssystem-Update ist nie automatisch"
+      "osUpgrade": "Ein Betriebssystem-Update ist nie automatisch",
+      "waiting": "Wartezeit läuft"
     },
     "policy": "Richtlinie",
     "reboot": {
       "back": "Neu gestartet und wieder erreichbar",
       "notBack": "Ist nach seinem Neustart nicht zurückgekehrt",
-      "queued": "Neustart"
+      "queued": "Neustart",
+      "nextWindow": "Neustart erforderlich: wartet auf das nächste Wartungsfenster",
+      "notNeeded": "Neustart nicht mehr erforderlich"
     },
     "result": "Ergebnis",
     "rule": {
@@ -6239,7 +6251,9 @@
       "notApproved": "Der Host ist nicht genehmigt",
       "optedOut": "Der Host aktualisiert niemals automatisch",
       "pending": "Sein vorheriger Lauf ist noch nicht abgeschlossen",
-      "agentCannotApply": "sein Agent kann keine Updates anwenden; aktualisieren Sie den Agenten"
+      "agentCannotApply": "sein Agent kann keine Updates anwenden; aktualisieren Sie den Agenten",
+      "noWindow": "keines seiner Wartungsfenster in der nächsten Woche ist lang genug für den Lauf",
+      "policyChanged": "seine Richtlinie wurde deaktiviert oder gelöscht, während der Lauf wartete"
     },
     "status": {
       "failed": "Fehlgeschlagen",
@@ -6248,10 +6262,29 @@
       "queued": "Läuft",
       "skipped": "Übersprungen",
       "succeeded": "Erfolgreich abgeschlossen",
-      "timedOut": "Kein Ergebnis"
+      "timedOut": "Kein Ergebnis",
+      "waiting": "Wartet auf sein Wartungsfenster"
     },
     "subtitle": "Profile mit der Option 'Automatisch anwenden' aktualisieren ihre Hosts nach Plan.",
     "title": "Automatische Updates",
-    "when": "Zeitpunkt"
+    "when": "Zeitpunkt",
+    "eligible": {
+      "now": "jetzt anwendbar",
+      "criticalOn": "kritisch {{fix}}: anwendbar ab {{when}}",
+      "regularOn": "regulär: anwendbar ab {{when}}",
+      "criticalNow": "kritisch {{fix}}: jetzt anwendbar"
+    },
+    "pendingTitle": "Ausstehende Updates gemäß dieser Richtlinie",
+    "noCveData": "Für diesen Host gibt es weder einen Schwachstellenscan noch Sicherheitshinweise des Herstellers, daher wartet jeder Patch auf diesem Host die reguläre Anzahl an Tagen.",
+    "noPending": "Keine ausstehenden Updates.",
+    "package": "Paket",
+    "eligibility": "Automatische Anwendung",
+    "inBlackout": "In der Sperrzeit „{{name}}“: Es wird nichts automatisch angewendet.",
+    "windowNext": "Wartungsfenster gelten: Automatische Läufe starten nur innerhalb eines Fensters und nur, wenn sie hineinpassen. Nächstes: „{{name}}“ am {{when}}.",
+    "windowNone": "Wartungsfenster gelten, und in der nächsten Woche öffnet sich keines: Es wird nichts automatisch angewendet.",
+    "startsAt": "Startet, wenn sich sein Wartungsfenster öffnet: {{when}}",
+    "threshold": "Ein Patch gilt als kritisch, wenn die behobene CVE eingestuft ist als",
+    "thresholdCritical": "Kritisch",
+    "thresholdHigh": "Hoch oder kritisch"
   }
 }

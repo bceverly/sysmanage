@@ -49,6 +49,9 @@ const mockProfile: UpgradeProfile = {
     hold_by: null,
     hold_at: null,
     host_ids: [],
+    wait_days_regular: 0,
+    wait_days_critical: 0,
+    critical_source: 'either',
 };
 
 describe('upgradeProfilesService', () => {

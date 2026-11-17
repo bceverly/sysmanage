@@ -81,6 +81,10 @@ class AutoUpdateSettings(Base):
     hold_at = Column(DateTime, nullable=True)
     retry_after_hours = Column(Integer, nullable=False, default=24)
     reboot_timeout_minutes = Column(Integer, nullable=False, default=30)
+    # 26.3: "critical" only, or "high" and critical (q95autoupdatetiming)
+    critical_threshold = Column(
+        String(8), nullable=False, default="critical", server_default="critical"
+    )
     updated_at = Column(DateTime, nullable=True)
 
     def to_dict(self):
@@ -91,6 +95,7 @@ class AutoUpdateSettings(Base):
             "hold_at": _iso(self.hold_at),
             "retry_after_hours": self.retry_after_hours,
             "reboot_timeout_minutes": self.reboot_timeout_minutes,
+            "critical_threshold": self.critical_threshold or "critical",
         }
 
 
@@ -110,7 +115,8 @@ class AutoUpdateRun(Base):
     host_id = Column(
         GUID(), ForeignKey(HOST_ID, ondelete="CASCADE"), nullable=False, index=True
     )
-    # queued / succeeded / partial / failed / nothing_to_do / skipped / timed_out
+    # waiting (26.2: for its maintenance window) / queued / succeeded /
+    # partial / failed / nothing_to_do / skipped / timed_out
     status = Column(String(16), nullable=False, index=True)
     reason = Column(String(40), nullable=True)  # why skipped
     triggered_by = Column(String(255), nullable=True)  # None = the schedule
@@ -120,7 +126,9 @@ class AutoUpdateRun(Base):
     failed_count = Column(Integer, nullable=False, default=0)
     failures = Column(JSON, nullable=True)  # [{package_name, package_manager, error}]
     reboot_needed = Column(Boolean, nullable=False, default=False)
-    # none / not_wanted (the policy did not allow one) / queued / back / not_back
+    # none / not_wanted (the policy did not allow one) / next_window (26.2:
+    # waiting for a window it fits in) / not_needed (rebooted meanwhile) /
+    # queued / back / not_back
     reboot_status = Column(String(12), nullable=False, default="none")
     reboot_queued_at = Column(DateTime, nullable=True)
     reboot_back_at = Column(DateTime, nullable=True)

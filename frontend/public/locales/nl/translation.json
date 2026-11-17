@@ -3806,7 +3806,16 @@
     "reboot": "Herstarten",
     "rebootNever": "Nooit (de host toont \"herstart vereist\")",
     "rebootWhenNeeded": "Herstart wanneer de update het vereist",
-    "release": "Opschorting opheffen"
+    "release": "Opschorting opheffen",
+    "rebootInWindow": "Herstarten wanneer nodig, alleen binnen een onderhoudsvenster",
+    "waitRegular": "Wachttijd vóór het toepassen van een gewone patch (dagen)",
+    "waitHelp": "Gerekend vanaf het moment dat de host de update voor het eerst zag, of vanaf de release door de leverancier als die eerder was. 0: direct toepassen.",
+    "waitCritical": "Wachttijd vóór het toepassen van een patch die een kritieke CVE verhelpt (dagen)",
+    "criticalSource": "Kritiek betekent als kritiek beoordeeld door",
+    "criticalEither": "De kwetsbaarheidsscan of het beveiligingsadvies van de leverancier",
+    "criticalVulnerability": "De kwetsbaarheidsscan van de host",
+    "criticalAdvisory": "Het beveiligingsadvies van de leverancier",
+    "criticalHelp": "Zonder kwetsbaarheidsscans of beveiligingsadviezen van de leverancier voor een host wacht elke patch op die host het gewone aantal dagen."
   },
   "userDetail": {
     "active": "Actief",
@@ -6215,13 +6224,16 @@
       "held": "vastgezet op de host",
       "manager": "pakketbeheerder niet opgenomen in het beleid",
       "notSecurity": "geen beveiligingsupdate",
-      "osUpgrade": "een besturingssysteem-upgrade is nooit automatisch"
+      "osUpgrade": "een besturingssysteem-upgrade is nooit automatisch",
+      "waiting": "in de wachtperiode"
     },
     "policy": "Beleid",
     "reboot": {
       "back": "Herstart en weer online",
       "notBack": "Niet teruggekomen na de herstart",
-      "queued": "Herstarten"
+      "queued": "Herstarten",
+      "nextWindow": "Herstart vereist: wacht op het volgende onderhoudsvenster",
+      "notNeeded": "Herstart niet langer nodig"
     },
     "result": "Resultaat",
     "rule": {
@@ -6239,7 +6251,9 @@
       "notApproved": "de host is niet goedgekeurd",
       "optedOut": "de host wordt nooit automatisch bijgewerkt",
       "pending": "de vorige uitvoering is nog niet afgerond",
-      "agentCannotApply": "de agent kan geen updates toepassen; werk de agent bij"
+      "agentCannotApply": "de agent kan geen updates toepassen; werk de agent bij",
+      "noWindow": "geen van de onderhoudsvensters in de komende week is lang genoeg voor de uitvoering",
+      "policyChanged": "het beleid is uitgeschakeld of verwijderd terwijl de uitvoering wachtte"
     },
     "status": {
       "failed": "Mislukt",
@@ -6248,10 +6262,29 @@
       "queued": "Bezig",
       "skipped": "Overgeslagen",
       "succeeded": "Geslaagd",
-      "timedOut": "Geen resultaat"
+      "timedOut": "Geen resultaat",
+      "waiting": "Wacht op onderhoudsvenster"
     },
     "subtitle": "Profielen met \"Automatisch toepassen\" ingeschakeld werken hun hosts volgens schema bij.",
     "title": "Automatische updates",
-    "when": "Tijdstip"
+    "when": "Tijdstip",
+    "eligible": {
+      "criticalNow": "kritiek {{fix}}: nu automatisch toepasbaar",
+      "now": "nu automatisch toepasbaar",
+      "criticalOn": "kritiek {{fix}}: automatisch toepasbaar vanaf {{when}}",
+      "regularOn": "gewoon: automatisch toepasbaar vanaf {{when}}"
+    },
+    "pendingTitle": "Openstaande updates onder dit beleid",
+    "noCveData": "Deze host heeft geen kwetsbaarheidsscan of beveiligingsadviezen van de leverancier, dus elke patch op deze host wacht het gewone aantal dagen.",
+    "noPending": "Geen openstaande updates.",
+    "package": "Pakket",
+    "eligibility": "Automatisch toegepast",
+    "inBlackout": "In de blokkade \"{{name}}\": er wordt niets automatisch toegepast.",
+    "windowNext": "Er gelden onderhoudsvensters: automatische uitvoeringen starten alleen binnen een venster, en alleen als ze erin passen. Volgende: \"{{name}}\" op {{when}}.",
+    "windowNone": "Er gelden onderhoudsvensters, en in de komende week opent er geen: er wordt niets automatisch toegepast.",
+    "startsAt": "Start wanneer het onderhoudsvenster opent: {{when}}",
+    "threshold": "Een patch is kritiek wanneer deze een CVE verhelpt met beoordeling",
+    "thresholdCritical": "Kritiek",
+    "thresholdHigh": "Hoog of kritiek"
   }
 }

@@ -10,6 +10,16 @@ export interface SkippedPackage {
   package_name: string;
   package_manager: string;
   reason: string;
+  kind?: 'critical' | 'regular';
+  fix_id?: string | null;
+  eligible_at?: string | null;
+}
+
+// 26.3: one pending update under the host's policy -- applied on the next
+// run (reason null), left out and why, or waiting until eligible_at.
+export interface PendingUpdate extends SkippedPackage {
+  reason: string;
+  available_version?: string | null;
 }
 
 export interface AutoUpdateRun {
@@ -21,7 +31,13 @@ export interface AutoUpdateRun {
   status: string;
   reason: string | null;
   triggered_by: string | null;
-  packages: { package_name: string; package_manager: string; available_version?: string }[];
+  packages: {
+    package_name: string;
+    package_manager: string;
+    available_version?: string;
+    kind?: 'critical' | 'regular' | null;
+    fix_id?: string | null;
+  }[];
   skipped: SkippedPackage[];
   applied_count: number;
   failed_count: number;
@@ -42,9 +58,11 @@ export interface AutoUpdateSettings {
   hold_at: string | null;
   retry_after_hours: number;
   reboot_timeout_minutes: number;
+  critical_threshold: 'critical' | 'high';
   counts?: {
     failed_recent: number;
     queued: number;
+    waiting?: number;
     reboot_not_back: number;
     opted_out_hosts: number;
   };
@@ -55,8 +73,29 @@ export interface HostAutoUpdates {
   opt_out: boolean;
   opt_out_reason: string | null;
   hold_all: boolean;
-  policy: { id: string; name: string; rule: string; candidates: string[] } | null;
+  policy: {
+    id: string;
+    name: string;
+    rule: string;
+    candidates: string[];
+    wait_days_regular?: number;
+    wait_days_critical?: number;
+    critical_source?: string;
+    reboot_mode?: string;
+  } | null;
   runs: AutoUpdateRun[];
+  // 26.3: null with an engine older than 26.3, or no policy.
+  pending?: {
+    updates: PendingUpdate[];
+    sources: { vulnerability: boolean; advisory: boolean };
+    critical_threshold: string;
+  } | null;
+  // 26.2: the host's maintenance-window state.
+  window?: {
+    state: 'unrestricted' | 'in_window' | 'blocked' | 'override';
+    active_blackout: string | null;
+    next_window: { id: string; name: string; starts_at: string | null } | null;
+  } | null;
 }
 
 const BASE = '/api/v1/auto-updates';
@@ -79,6 +118,13 @@ export const autoUpdatesService = {
   },
   async runs(params: { status?: string; limit?: number } = {}): Promise<AutoUpdateRun[]> {
     return (await axiosInstance.get(`${BASE}/runs`, { params })).data;
+  },
+  async updateSettings(changes: {
+    retry_after_hours?: number;
+    reboot_timeout_minutes?: number;
+    critical_threshold?: 'critical' | 'high';
+  }): Promise<AutoUpdateSettings> {
+    return (await axiosInstance.put(`${BASE}/settings`, changes)).data;
   },
   async acknowledge(runId: string): Promise<AutoUpdateRun> {
     return (await axiosInstance.post(`${BASE}/runs/${runId}/acknowledge`)).data;

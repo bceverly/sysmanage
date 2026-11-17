@@ -4,7 +4,9 @@
 
 // The "apply automatically" half of an upgrade profile (ROADMAP 26.1,
 // Enterprise): on/off, reboots, excluded packages, backups first, and the
-// hosts the policy lists by name (which take precedence over its tag).
+// hosts the policy lists by name (which take precedence over its tag);
+// reboots only inside a maintenance window (26.2) and the waiting periods
+// for regular and critical-CVE patches (26.3).
 
 import React from 'react';
 import {
@@ -12,19 +14,29 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   InputLabel,
   MenuItem,
   Select,
   TextField,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import type { CriticalSource, RebootMode } from '../../Services/upgradeProfiles';
 
 export interface AutomaticForm {
   auto_apply: boolean;
-  reboot_mode: 'never' | 'when_needed';
+  reboot_mode: RebootMode;
   excluded_packages: string;
   require_backup_hours: number | '';
   host_ids: string[];
+  wait_days_regular: number;
+  wait_days_critical: number;
+  critical_source: CriticalSource;
+}
+
+function days(value: string): number {
+  const n = Number.parseInt(value, 10);
+  return Number.isNaN(n) ? 0 : Math.max(0, Math.min(365, n));
 }
 
 interface Props<F extends AutomaticForm> {
@@ -50,8 +62,9 @@ function AutomaticFields<F extends AutomaticForm>({ form, setForm, hosts }: Prop
       {form.auto_apply && (
         <>
           <FormControl fullWidth>
-            <InputLabel>{t('upgradeProfiles.reboot', 'Reboots')}</InputLabel>
+            <InputLabel id="automatic-fields-reboot-label">{t('upgradeProfiles.reboot', 'Reboots')}</InputLabel>
             <Select
+              labelId="automatic-fields-reboot-label"
               label={t('upgradeProfiles.reboot', 'Reboots')}
               value={form.reboot_mode}
               onChange={(e) =>
@@ -64,7 +77,65 @@ function AutomaticFields<F extends AutomaticForm>({ form, setForm, hosts }: Prop
               <MenuItem value="when_needed">
                 {t('upgradeProfiles.rebootWhenNeeded', 'Reboot when the update needs it')}
               </MenuItem>
+              <MenuItem value="in_window">
+                {t(
+                  'upgradeProfiles.rebootInWindow',
+                  'Reboot when needed, only inside a maintenance window',
+                )}
+              </MenuItem>
             </Select>
+          </FormControl>
+          <TextField
+            label={t('upgradeProfiles.waitRegular', 'Wait before applying a regular patch (days)')}
+            type="number"
+            value={form.wait_days_regular}
+            onChange={(e) => setForm({ ...form, wait_days_regular: days(e.target.value) })}
+            helperText={t(
+              'upgradeProfiles.waitHelp',
+              'Counted from when the host first saw the update, or the vendor released it if that was earlier. 0: apply at once.',
+            )}
+            slotProps={{ htmlInput: { min: 0, max: 365 } }}
+            fullWidth
+          />
+          <TextField
+            label={t(
+              'upgradeProfiles.waitCritical',
+              'Wait before applying a patch that fixes a critical CVE (days)',
+            )}
+            type="number"
+            value={form.wait_days_critical}
+            onChange={(e) => setForm({ ...form, wait_days_critical: days(e.target.value) })}
+            slotProps={{ htmlInput: { min: 0, max: 365 } }}
+            fullWidth
+          />
+          <FormControl fullWidth>
+            <InputLabel id="automatic-fields-critical-source-label">
+              {t('upgradeProfiles.criticalSource', 'Critical means rated critical by')}
+            </InputLabel>
+            <Select
+              labelId="automatic-fields-critical-source-label"
+              label={t('upgradeProfiles.criticalSource', 'Critical means rated critical by')}
+              value={form.critical_source}
+              onChange={(e) =>
+                setForm({ ...form, critical_source: e.target.value as CriticalSource })
+              }
+            >
+              <MenuItem value="either">
+                {t('upgradeProfiles.criticalEither', 'The vulnerability scan or the vendor advisory')}
+              </MenuItem>
+              <MenuItem value="vulnerability">
+                {t('upgradeProfiles.criticalVulnerability', 'The vulnerability scan of the host')}
+              </MenuItem>
+              <MenuItem value="advisory">
+                {t('upgradeProfiles.criticalAdvisory', 'The vendor advisory')}
+              </MenuItem>
+            </Select>
+            <FormHelperText>
+              {t(
+                'upgradeProfiles.criticalHelp',
+                'Without vulnerability scans or vendor advisories for a host, every patch on it waits the regular count.',
+              )}
+            </FormHelperText>
           </FormControl>
           <TextField
             label={t('upgradeProfiles.excluded', 'Never apply these packages')}

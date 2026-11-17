@@ -3806,7 +3806,16 @@
     "reboot": "Reinicializações",
     "rebootNever": "Nunca (o host exibe \"reinicialização necessária\")",
     "rebootWhenNeeded": "Reiniciar quando a atualização exigir",
-    "release": "Remover a suspensão"
+    "release": "Remover a suspensão",
+    "rebootInWindow": "Reiniciar quando necessário, somente dentro de uma janela de manutenção",
+    "waitRegular": "Espera antes de aplicar um patch comum (dias)",
+    "waitHelp": "Contada a partir de quando o host viu a atualização pela primeira vez, ou de quando o fornecedor a lançou, se isso ocorreu antes. 0: aplicar imediatamente.",
+    "waitCritical": "Espera antes de aplicar um patch que corrige uma CVE crítica (dias)",
+    "criticalSource": "Crítico significa classificado como crítico por",
+    "criticalEither": "A verificação de vulnerabilidades ou o aviso de segurança do fornecedor",
+    "criticalVulnerability": "A verificação de vulnerabilidades do host",
+    "criticalAdvisory": "O aviso de segurança do fornecedor",
+    "criticalHelp": "Sem verificações de vulnerabilidades ou avisos de segurança do fornecedor para um host, todo patch nele aguarda o prazo comum."
   },
   "userDetail": {
     "active": "Ativo",
@@ -6215,13 +6224,16 @@
       "held": "retido no host",
       "manager": "o gerenciador de pacotes não está na política",
       "notSecurity": "não é uma atualização de segurança",
-      "osUpgrade": "uma atualização de sistema operacional nunca é automática"
+      "osUpgrade": "uma atualização de sistema operacional nunca é automática",
+      "waiting": "em período de espera"
     },
     "policy": "Política",
     "reboot": {
       "back": "Reiniciado e de volta online",
       "notBack": "Não retornou após sua reinicialização",
-      "queued": "Reiniciando"
+      "queued": "Reiniciando",
+      "nextWindow": "Reinicialização necessária: aguarda a próxima janela de manutenção",
+      "notNeeded": "Reinicialização não é mais necessária"
     },
     "result": "Resultado",
     "rule": {
@@ -6239,7 +6251,9 @@
       "notApproved": "o host não está aprovado",
       "optedOut": "o host nunca é atualizado automaticamente",
       "pending": "sua execução anterior não foi concluída",
-      "agentCannotApply": "seu agente não consegue aplicar atualizações; atualize o agente"
+      "agentCannotApply": "seu agente não consegue aplicar atualizações; atualize o agente",
+      "noWindow": "nenhuma de suas janelas de manutenção na próxima semana é longa o suficiente para a execução",
+      "policyChanged": "sua política foi desativada ou excluída enquanto a execução aguardava"
     },
     "status": {
       "failed": "Falhou",
@@ -6248,10 +6262,29 @@
       "queued": "Em execução",
       "skipped": "Ignorado",
       "succeeded": "Concluído",
-      "timedOut": "Nenhum resultado"
+      "timedOut": "Nenhum resultado",
+      "waiting": "Aguardando a janela de manutenção"
     },
     "subtitle": "Perfis com \"Aplicar automaticamente\" ativado atualizam seus hosts conforme o agendamento.",
     "title": "Atualizações automáticas",
-    "when": "Quando"
+    "when": "Quando",
+    "eligible": {
+      "criticalNow": "crítico {{fix}}: liberado agora",
+      "now": "liberado agora",
+      "criticalOn": "crítico {{fix}}: liberado em {{when}}",
+      "regularOn": "comum: liberado em {{when}}"
+    },
+    "pendingTitle": "Atualizações pendentes sob esta política",
+    "noCveData": "Este host não tem verificação de vulnerabilidades nem avisos de segurança do fornecedor, portanto todo patch nele aguarda o prazo comum.",
+    "noPending": "Nenhuma atualização pendente.",
+    "package": "Pacote",
+    "eligibility": "Aplicado automaticamente",
+    "inBlackout": "No bloqueio \"{{name}}\": nada é aplicado automaticamente.",
+    "windowNext": "Janelas de manutenção se aplicam: execuções automáticas só começam dentro de uma janela, e somente se couberem nela. Próxima: \"{{name}}\" em {{when}}.",
+    "windowNone": "Janelas de manutenção se aplicam, e nenhuma abre na próxima semana: nada é aplicado automaticamente.",
+    "startsAt": "Começa quando sua janela de manutenção abrir: {{when}}",
+    "threshold": "Um patch é crítico quando corrige uma CVE classificada como",
+    "thresholdCritical": "Crítica",
+    "thresholdHigh": "Alta ou crítica"
   }
 }

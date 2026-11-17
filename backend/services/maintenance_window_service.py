@@ -236,12 +236,18 @@ def in_maintenance(db: Session, host_id, now_utc: datetime) -> bool:
         return False
 
 
-def is_dispatch_allowed(db: Session, host_id, now_utc: datetime) -> bool:
+def is_dispatch_allowed(
+    db: Session, host_id, now_utc: datetime, honor_override: bool = True
+) -> bool:
     """May a gated change reach ``host_id`` right now?  See module docstring for
     the policy.  Fails **open** (returns True) on any internal error -- a broken
-    evaluator must never freeze fleet management -- and logs loudly."""
+    evaluator must never freeze fleet management -- and logs loudly.
+
+    ``honor_override=False`` is for automatic updates (26.2): an emergency
+    override is a person's decision for a person's change, never a way for
+    an unattended run or reboot past a closed window or a blackout."""
     try:
-        if active_override(db, host_id, now_utc) is not None:
+        if honor_override and active_override(db, host_id, now_utc) is not None:
             return True
 
         host_tag_ids = _host_tag_ids(db, host_id)
@@ -272,6 +278,45 @@ def is_dispatch_allowed(db: Session, host_id, now_utc: datetime) -> bool:
             host_id,
         )
         return True
+
+
+def _occurrences(window: MaintenanceWindow, now_utc: datetime, days: int) -> list:
+    """Every ``(start, end)`` (naive UTC) of ``window`` that has not ended,
+    up to ``days`` ahead."""
+    if window.recurrence == RECURRENCE_ONCE:
+        if window.starts_at and window.ends_at and window.ends_at > now_utc:
+            return [(window.starts_at, window.ends_at)]
+        return []
+    tzinfo = _tzinfo(window.timezone)
+    now_local = now_utc.replace(tzinfo=timezone.utc).astimezone(tzinfo)
+    out = []
+    for day_offset in range(-1, days + 1):
+        occ = _recurring_occurrence(
+            window, (now_local + timedelta(days=day_offset)).date(), tzinfo
+        )
+        if occ and occ[1] > now_utc:
+            out.append(occ)
+    return out
+
+
+def host_timing(db: Session, host_id, now_utc: datetime, days: int = 8) -> dict:
+    """A host's maintenance windows as plain intervals for the automatic
+    update planner (26.2): ``{"restricted", "allow", "blackout", "horizon"}``.
+
+    ``restricted`` is False for a host no window applies to: it behaves as
+    before.  Emergency overrides are left out on purpose -- they never apply
+    to automatic runs."""
+    matching = _windows_for_host(db, host_id, _host_tag_ids(db, host_id))
+    allow, blackout = [], []
+    for m in matching:
+        target = blackout if m["window"].kind == WINDOW_KIND_BLACKOUT else allow
+        target.extend(_occurrences(m["window"], now_utc, days))
+    return {
+        "restricted": bool(matching),
+        "allow": sorted(allow),
+        "blackout": sorted(blackout),
+        "horizon": now_utc + timedelta(days=days),
+    }
 
 
 def _soonest_allow(

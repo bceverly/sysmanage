@@ -33,6 +33,9 @@ class AutoUpdateSettings(TestBase):
     hold_at = Column(DateTime, nullable=True)
     retry_after_hours = Column(Integer, nullable=False, default=24)
     reboot_timeout_minutes = Column(Integer, nullable=False, default=30)
+    critical_threshold = Column(
+        String(8), nullable=False, default="critical", server_default="critical"
+    )
     updated_at = Column(DateTime, nullable=True)
 
 

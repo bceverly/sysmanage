@@ -45,6 +45,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 import {
+  type CriticalSource,
+  type RebootMode,
   UpgradeProfile,
   upgradeProfilesService,
 } from '../Services/upgradeProfiles';
@@ -66,10 +68,13 @@ interface HostOption {
 // 26.1: the automatic fields, blank for a new profile.
 const AUTO_DEFAULTS = {
   auto_apply: false,
-  reboot_mode: 'never' as 'never' | 'when_needed',
+  reboot_mode: 'never' as RebootMode,
   excluded_packages: '',
   require_backup_hours: '' as number | '',
   host_ids: [] as string[],
+  wait_days_regular: 0,
+  wait_days_critical: 0,
+  critical_source: 'either' as CriticalSource,
 };
 
 const PACKAGE_MANAGER_OPTIONS = [
@@ -180,6 +185,9 @@ const UpgradeProfilesSettings: React.FC = () => {
       excluded_packages: p.excluded_packages ?? '',
       require_backup_hours: p.require_backup_hours ?? '',
       host_ids: p.host_ids ?? [],
+      wait_days_regular: p.wait_days_regular ?? 0,
+      wait_days_critical: p.wait_days_critical ?? 0,
+      critical_source: p.critical_source ?? 'either',
     });
     setDialogOpen(true);
   };
@@ -211,6 +219,9 @@ const UpgradeProfilesSettings: React.FC = () => {
       excluded_packages: form.excluded_packages.trim() || null,
       require_backup_hours: form.require_backup_hours === '' ? (editing ? 0 : null) : form.require_backup_hours,
       host_ids: form.host_ids,
+      wait_days_regular: form.wait_days_regular,
+      wait_days_critical: form.wait_days_critical,
+      critical_source: form.critical_source,
     };
     try {
       if (editing) {

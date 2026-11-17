@@ -3825,7 +3825,16 @@
     "reboot": "Reboots",
     "rebootNever": "Never (the host shows \"reboot required\")",
     "rebootWhenNeeded": "Reboot when the update needs it",
-    "release": "Release the hold"
+    "release": "Release the hold",
+    "rebootInWindow": "Reboot when needed, only inside a maintenance window",
+    "waitRegular": "Wait before applying a regular patch (days)",
+    "waitHelp": "Counted from when the host first saw the update, or the vendor released it if that was earlier. 0: apply at once.",
+    "waitCritical": "Wait before applying a patch that fixes a critical CVE (days)",
+    "criticalSource": "Critical means rated critical by",
+    "criticalEither": "The vulnerability scan or the vendor advisory",
+    "criticalVulnerability": "The vulnerability scan of the host",
+    "criticalAdvisory": "The vendor advisory",
+    "criticalHelp": "Without vulnerability scans or vendor advisories for a host, every patch on it waits the regular count."
   },
   "userDetail": {
     "active": "Active",
@@ -6215,13 +6224,16 @@
       "held": "held on the host",
       "manager": "package manager not in the policy",
       "notSecurity": "not a security update",
-      "osUpgrade": "an OS upgrade is never automatic"
+      "osUpgrade": "an OS upgrade is never automatic",
+      "waiting": "waiting its days"
     },
     "policy": "Policy",
     "reboot": {
       "back": "Rebooted and back",
       "notBack": "Did not come back from its reboot",
-      "queued": "Rebooting"
+      "queued": "Rebooting",
+      "nextWindow": "Reboot required: waits for its next window",
+      "notNeeded": "Reboot no longer needed"
     },
     "result": "Result",
     "rule": {
@@ -6239,7 +6251,9 @@
       "notApproved": "the host is not approved",
       "optedOut": "the host never updates automatically",
       "pending": "its previous run has not finished",
-      "agentCannotApply": "its agent cannot apply updates; update the agent"
+      "agentCannotApply": "its agent cannot apply updates; update the agent",
+      "noWindow": "none of its maintenance windows in the next week is long enough for the run",
+      "policyChanged": "its policy was turned off or deleted while the run waited"
     },
     "status": {
       "failed": "Failed",
@@ -6248,10 +6262,29 @@
       "queued": "Running",
       "skipped": "Skipped",
       "succeeded": "Succeeded",
-      "timedOut": "No result"
+      "timedOut": "No result",
+      "waiting": "Waiting for its window"
     },
     "subtitle": "Profiles with \"Apply automatically\" on update their hosts on schedule.",
     "title": "Automatic updates",
-    "when": "When"
+    "when": "When",
+    "eligible": {
+      "criticalNow": "critical {{fix}}: eligible now",
+      "now": "eligible now",
+      "criticalOn": "critical {{fix}}: eligible on {{when}}",
+      "regularOn": "regular: eligible on {{when}}"
+    },
+    "pendingTitle": "Pending updates under this policy",
+    "noCveData": "This host has no vulnerability scan or vendor advisories, so every patch on it waits the regular count.",
+    "noPending": "No pending updates.",
+    "package": "Package",
+    "eligibility": "Applied automatically",
+    "inBlackout": "In the blackout \"{{name}}\": nothing is applied automatically.",
+    "windowNext": "Maintenance windows apply: automatic runs start only inside one, and only if they fit. Next: \"{{name}}\" at {{when}}.",
+    "windowNone": "Maintenance windows apply, and none opens in the next week: nothing is applied automatically.",
+    "startsAt": "Starts when its window opens: {{when}}",
+    "threshold": "A patch is critical when it fixes a CVE rated",
+    "thresholdCritical": "Critical",
+    "thresholdHigh": "High or critical"
   }
 }

@@ -81,6 +81,7 @@ def settings_dict(row: models.AutoUpdateSettings) -> Dict[str, Any]:
     return {
         "retry_after_hours": row.retry_after_hours,
         "reboot_timeout_minutes": row.reboot_timeout_minutes,
+        "critical_threshold": row.critical_threshold or "critical",
     }
 
 
@@ -118,6 +119,9 @@ def profile_dict(profile, host_ids=None) -> Dict[str, Any]:
         "reboot_mode": profile.reboot_mode or "never",
         "require_backup_hours": profile.require_backup_hours,
         "staggered_window_min": profile.staggered_window_min or 0,
+        "wait_days_regular": profile.wait_days_regular or 0,
+        "wait_days_critical": profile.wait_days_critical or 0,
+        "critical_source": profile.critical_source or "either",
     }
 
 
@@ -150,7 +154,7 @@ def last_run(db, host_id) -> Optional[models.AutoUpdateRun]:
         db.query(models.AutoUpdateRun)
         .filter(
             models.AutoUpdateRun.host_id == host_id,
-            models.AutoUpdateRun.status != "skipped",
+            models.AutoUpdateRun.status.notin_(("skipped", "waiting")),
         )
         .order_by(models.AutoUpdateRun.queued_at.desc())
         .first()
@@ -206,6 +210,18 @@ def host_dict(db, host, tag_ids, profile) -> Dict[str, Any]:
     return ctx
 
 
+def as_written(value):
+    """``PackageUpdate.discovered_at`` as it was written (naive UTC).  On
+    PostgreSQL the column is ``timestamptz``: the naive UTC the handlers
+    write is read back labeled with the session's time zone, and comparing
+    that with the engine's naive ``now`` raised and stopped every policy
+    from firing (lab, 2026-11-17).  Dropping the label recovers the value
+    that was written."""
+    if value is not None and getattr(value, "tzinfo", None) is not None:
+        return value.replace(tzinfo=None)
+    return value
+
+
 def update_dicts(db, host_id) -> List[Dict[str, Any]]:
     rows = (
         db.query(models.PackageUpdate)
@@ -225,6 +241,7 @@ def update_dicts(db, host_id) -> List[Dict[str, Any]]:
             "requires_reboot": bool(r.requires_reboot),
             "current_version": r.current_version,
             "available_version": r.available_version,
+            "discovered_at": as_written(r.discovered_at),
         }
         for r in rows
     ]
@@ -248,6 +265,12 @@ def covered_hosts(db, profile: Dict[str, Any]) -> List[models.Host]:
 # ---------------------------------------------------------------------------
 
 
+def _package_record(update: Dict[str, Any]) -> Dict[str, Any]:
+    return {k: update.get(k) for k in ("package_name", "package_manager", "current_version",
+                                       "available_version", "update_type", "kind",
+                                       "fix_id")}  # fmt: skip
+
+
 def _record(db, profile, host, plan, status, triggered_by, now, release_at=None):
     run = models.AutoUpdateRun(
         id=uuid.uuid4(),
@@ -257,15 +280,11 @@ def _record(db, profile, host, plan, status, triggered_by, now, release_at=None)
         status=status,
         reason=plan.get("reason"),
         triggered_by=triggered_by,
-        packages=[
-            {k: p.get(k) for k in ("package_name", "package_manager", "current_version",
-                                   "available_version", "update_type")}  # fmt: skip
-            for p in plan.get("packages", [])
-        ],
+        packages=[_package_record(p) for p in plan.get("packages", [])],
         skipped=plan.get("skipped") or [],
         queued_at=now,
         release_at=release_at,
-        completed_at=None if status == "queued" else now,
+        completed_at=None if status in ("queued", "waiting") else now,
     )
     db.add(run)
     return run
@@ -314,6 +333,9 @@ def _queue_apply(db, host, run, packages, release_at, now):
         host_id=str(host.id),
         db=db,
         scheduled_at=release_at if release_at and release_at > now else None,
+        # Marks the message automatic: no emergency override lets it past a
+        # closed window (26.2, outbound_processor.automatic_held).
+        correlation_id=str(run.id),
     )
     AuditService.log(
         db=db,
@@ -334,17 +356,84 @@ def _queue_apply(db, host, run, packages, release_at, now):
     )
 
 
+def plan(db, eng, host, profile, settings, now, tag_ids=None) -> Dict[str, Any]:
+    """The engine's plan for one host under ``profile`` now -- with what its
+    pending updates fix when the policy waits (26.3), and a skip when the
+    agent cannot apply updates at all."""
+    if tag_ids is None:
+        tag_ids = _tag_ids(db, [host.id]).get(str(host.id), [])
+    ctx = host_dict(db, host, tag_ids, profile)
+    updates = update_dicts(db, host.id)
+    if hasattr(eng, "update_eligibility") and eng.waits(profile):
+        from backend.services import (  # pylint: disable=import-outside-toplevel
+            auto_update_evidence,
+        )
+
+        auto_update_evidence.attach(db, host.id, updates)
+    result = eng.plan_host_run(ctx, profile, updates, settings, now)
+    if result["action"] == "apply" and host_supports(host, "apply_updates") is False:
+        # An agent that does not advertise apply_updates refuses it at
+        # queue time; raised here it aborted the whole policy and every
+        # other host's run with it (screenshot VM, 2026-11-16).
+        result = {**result, "action": "skip", "reason": AGENT_CANNOT_APPLY,
+                  "packages": []}  # fmt: skip
+    return result
+
+
+def send(db, host, run, result, release_at, now) -> None:
+    """Queue ``run``'s ``apply_updates`` with the packages ``result`` chose."""
+    run.packages = [_package_record(p) for p in result["packages"]]
+    run.skipped = result.get("skipped") or []
+    run.status, run.release_at = "queued", release_at
+    db.flush()
+    _queue_apply(db, host, run, result["packages"], release_at, now)
+
+
+def _place(db, eng, profile, host, result, triggered_by, now, offset, summary):
+    """Record and (when its window allows) send one host's run (26.2)."""
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        auto_update_timing as timing,
+    )
+
+    release_at = now + timedelta(seconds=offset)
+    answer = timing.slot(db, eng, host, profile, len(result["packages"]), now, offset)
+    if answer is not None and answer["start"] is None:
+        skipped = {**result, "reason": timing.NO_WINDOW, "packages": []}
+        _record(db, profile, host, skipped, "skipped", triggered_by, now)
+        summary["skipped"] += 1
+        return
+    if answer is not None:
+        release_at = answer["start"]
+    if answer is not None and answer["waits"]:
+        _record(
+            db, profile, host, result, timing.WAITING, triggered_by, now, release_at
+        )
+        summary["waiting"] += 1
+        return
+    run = _record(db, profile, host, result, "queued", triggered_by, now, release_at)
+    db.flush()
+    _queue_apply(db, host, run, result["packages"], release_at, now)
+    summary["queued"] += 1
+
+
 def fire_profile(db, eng, profile_row, now, triggered_by=None) -> Dict[str, int]:
     """Run one policy now.  On the schedule (``triggered_by`` None) a host
     another policy wins for is left to that policy; a person's "run now"
-    applies the profile they chose to every host it covers."""
+    applies the profile they chose to every host it covers.  Either way a
+    host with maintenance windows starts only inside one (26.2)."""
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        auto_update_timing as timing,
+    )
+
     settings = settings_dict(settings_row(db))
     policies = auto_profiles(db)
     host_ids = profile_host_ids(db, [profile_row.id]).get(str(profile_row.id))
     profile = profile_dict(profile_row, host_ids)
     hosts = covered_hosts(db, profile)
     tags = _tag_ids(db, [h.id for h in hosts])
-    summary = {"queued": 0, "skipped": 0, "nothing": 0, "other_policy": 0}
+    waiting = timing.waiting_host_ids(db)
+    summary = {"queued": 0, "skipped": 0, "nothing": 0, "other_policy": 0,
+               "waiting": 0}  # fmt: skip
     applying = []
     for host in hosts:
         tag_ids = tags.get(str(host.id), [])
@@ -355,29 +444,21 @@ def fire_profile(db, eng, profile_row, now, triggered_by=None) -> Dict[str, int]
             if not winner or winner["profile_id"] != profile["id"]:
                 summary["other_policy"] += 1
                 continue
-        ctx = host_dict(db, host, tag_ids, profile)
-        plan = eng.plan_host_run(ctx, profile, update_dicts(db, host.id), settings, now)
-        if plan["action"] == "apply" and host_supports(host, "apply_updates") is False:
-            # An agent that does not advertise apply_updates refuses it at
-            # queue time; raised here it aborted the whole policy and every
-            # other host's run with it (screenshot VM, 2026-11-16).
-            plan = {**plan, "action": "skip", "reason": AGENT_CANNOT_APPLY,
-                    "packages": []}  # fmt: skip
-        if plan["action"] == "skip":
-            _record(db, profile, host, plan, "skipped", triggered_by, now)
+        if str(host.id) in waiting:
+            summary["waiting"] += 1  # its run already waits for its window
+            continue
+        result = plan(db, eng, host, profile, settings, now, tag_ids)
+        if result["action"] == "skip":
+            _record(db, profile, host, result, "skipped", triggered_by, now)
             summary["skipped"] += 1
-        elif plan["action"] == "nothing":
-            _record(db, profile, host, plan, "nothing_to_do", triggered_by, now)
+        elif result["action"] == "nothing":
+            _record(db, profile, host, result, "nothing_to_do", triggered_by, now)
             summary["nothing"] += 1
         else:
-            applying.append((host, plan))
+            applying.append((host, result))
     offsets = eng.stagger_offsets(len(applying), profile["staggered_window_min"])
-    for (host, plan), offset in zip(applying, offsets):
-        release_at = now + timedelta(seconds=offset)
-        run = _record(db, profile, host, plan, "queued", triggered_by, now, release_at)
-        db.flush()
-        _queue_apply(db, host, run, plan["packages"], release_at, now)
-        summary["queued"] += 1
+    for (host, result), offset in zip(applying, offsets):
+        _place(db, eng, profile, host, result, triggered_by, now, offset, summary)
     return summary
 
 
@@ -445,6 +526,16 @@ def tick_database(db, eng, now, summary) -> None:
         summary["held"] = True
         db.commit()
         return
+    try:
+        from backend.services import (  # pylint: disable=import-outside-toplevel
+            auto_update_timing,
+        )
+
+        summary["queued"] += auto_update_timing.start_waiting_runs(db, eng, now)
+        db.commit()
+    except Exception:  # pylint: disable=broad-exception-caught
+        db.rollback()
+        logger.exception("Automatic updates: starting waiting runs failed")
     for profile in _due(db, now):
         try:
             fired = fire_profile(db, eng, profile, now)

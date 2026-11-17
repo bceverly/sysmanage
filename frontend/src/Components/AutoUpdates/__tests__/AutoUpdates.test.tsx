@@ -4,7 +4,9 @@
 
 // Automatic updates UI (ROADMAP 26.1): the host card says which policy a
 // host follows and why, an opt-out needs a reason, a hold needs a reason,
-// and without the Enterprise engine nothing is shown.
+// and without the Enterprise engine nothing is shown.  26.2/26.3: a run
+// waiting for its window says when it starts, and each pending update says
+// when it becomes eligible and why.
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -29,6 +31,7 @@ vi.mock('../../../Services/autoUpdates', () => ({
     runs: vi.fn(),
     holdAll: vi.fn(),
     acknowledge: vi.fn(),
+    updateSettings: vi.fn(),
   },
 }));
 
@@ -118,9 +121,105 @@ describe('AutoUpdatesPanel', () => {
   });
 });
 
+const FORM = {
+  auto_apply: false, reboot_mode: 'never' as const, excluded_packages: '',
+  require_backup_hours: '' as const, host_ids: [], wait_days_regular: 0,
+  wait_days_critical: 0, critical_source: 'either' as const,
+};
+
+describe('26.2 and 26.3 on the host card', () => {
+  const view = (over = {}) => ({
+    host_id: 'h1', opt_out: false, opt_out_reason: null, hold_all: false,
+    policy: { id: 'p1', name: 'Nightly', rule: 'only', candidates: ['p1'],
+              wait_days_regular: 7, wait_days_critical: 0 },
+    runs: [], ...over,
+  });
+
+  test('a run waiting for its window says when it starts', async () => {
+    svc.host.mockResolvedValue(view({
+      runs: [run({ status: 'waiting', reboot_status: 'none', release_at: '2026-11-22T02:00:00',
+                   skipped: [], failures: [], applied_count: 0, failed_count: 0 })],
+      window: { state: 'blocked', active_blackout: null,
+                next_window: { id: 'w1', name: 'Sunday 2am', starts_at: '2026-11-22T02:00:00' } },
+    }));
+    render(<HostAutoUpdatesCard hostId="h1" canManage />);
+    expect(await screen.findByText('Waiting for its window')).toBeTruthy();
+    expect(screen.getByText(/Starts when its window opens/)).toBeTruthy();
+    expect(screen.getByText(/Next: "Sunday 2am"/)).toBeTruthy();
+  });
+
+  test('a blackout says nothing is applied', async () => {
+    svc.host.mockResolvedValue(view({
+      window: { state: 'blocked', active_blackout: 'Quarter end', next_window: null },
+    }));
+    render(<HostAutoUpdatesCard hostId="h1" canManage />);
+    expect(await screen.findByText(/In the blackout "Quarter end"/)).toBeTruthy();
+  });
+
+  test('each pending update says when it becomes eligible and why', async () => {
+    svc.host.mockResolvedValue(view({
+      pending: {
+        sources: { vulnerability: true, advisory: false }, critical_threshold: 'critical',
+        updates: [
+          { package_name: 'openssl', package_manager: 'apt', reason: null, kind: 'critical',
+            fix_id: 'CVE-2026-1234', eligible_at: null },
+          { package_name: 'vim', package_manager: 'apt', reason: 'waiting_period', kind: 'regular',
+            fix_id: null, eligible_at: '2026-11-23T03:00:00' },
+          { package_name: 'postgresql-16', package_manager: 'apt', reason: 'held' },
+        ],
+      },
+    }));
+    render(<HostAutoUpdatesCard hostId="h1" canManage />);
+    expect(await screen.findByText('critical CVE-2026-1234: eligible now')).toBeTruthy();
+    expect(screen.getByText(/^regular: eligible on /)).toBeTruthy();
+    expect(screen.getByText('held on the host')).toBeTruthy();
+    expect(screen.queryByText(/no vulnerability scan or vendor advisories/)).toBeNull();
+  });
+
+  test('without CVE data the host says every patch waits the regular count', async () => {
+    svc.host.mockResolvedValue(view({
+      pending: { sources: { vulnerability: false, advisory: false }, critical_threshold: 'critical',
+                 updates: [] },
+    }));
+    render(<HostAutoUpdatesCard hostId="h1" canManage />);
+    expect(await screen.findByText(/every patch on it waits the regular count/)).toBeTruthy();
+  });
+});
+
+describe('the critical threshold', () => {
+  test('is a tenant setting on the panel', async () => {
+    svc.settings.mockResolvedValue({ hold_all: false, hold_reason: null, hold_by: null, hold_at: null,
+                                     retry_after_hours: 24, reboot_timeout_minutes: 30,
+                                     critical_threshold: 'critical' });
+    svc.runs.mockResolvedValue([]);
+    svc.updateSettings.mockResolvedValue({});
+    render(<AutoUpdatesPanel />);
+    fireEvent.mouseDown(await screen.findByLabelText('A patch is critical when it fixes a CVE rated'));
+    fireEvent.click(await screen.findByText('High or critical'));
+    await waitFor(() => expect(svc.updateSettings).toHaveBeenCalledWith({ critical_threshold: 'high' }));
+  });
+});
+
 describe('AutomaticFields', () => {
+  test('the waiting periods and the in-window reboot are part of the policy', () => {
+    const setForm = vi.fn();
+    render(<AutomaticFields form={{ ...FORM, auto_apply: true }} setForm={setForm} hosts={[]} />);
+    fireEvent.change(screen.getByLabelText('Wait before applying a regular patch (days)'), {
+      target: { value: '7' },
+    });
+    expect(setForm).toHaveBeenCalledWith(expect.objectContaining({ wait_days_regular: 7 }));
+    fireEvent.change(
+      screen.getByLabelText('Wait before applying a patch that fixes a critical CVE (days)'),
+      { target: { value: '-3' } },
+    );
+    expect(setForm).toHaveBeenCalledWith(expect.objectContaining({ wait_days_critical: 0 }));
+    fireEvent.mouseDown(screen.getByLabelText('Reboots'));
+    fireEvent.click(screen.getByText('Reboot when needed, only inside a maintenance window'));
+    expect(setForm).toHaveBeenCalledWith(expect.objectContaining({ reboot_mode: 'in_window' }));
+  });
+
   test('the automatic settings appear only with "apply automatically" on', () => {
-    const form = { auto_apply: false, reboot_mode: 'never' as const, excluded_packages: '', require_backup_hours: '' as const, host_ids: [] };
+    const form = { ...FORM };
     const setForm = vi.fn();
     const { rerender } = render(<AutomaticFields form={form} setForm={setForm} hosts={[]} />);
     expect(screen.queryByLabelText('Never apply these packages')).toBeNull();

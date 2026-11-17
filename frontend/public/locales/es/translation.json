@@ -3806,7 +3806,16 @@
     "reboot": "Reinicios",
     "rebootNever": "Nunca (el host muestra \"reinicio requerido\")",
     "rebootWhenNeeded": "Reiniciar cuando la actualización lo necesite",
-    "release": "Quitar la espera"
+    "release": "Quitar la espera",
+    "rebootInWindow": "Reiniciar cuando sea necesario, solo dentro de una ventana de mantenimiento",
+    "waitRegular": "Espera antes de aplicar un parche normal (días)",
+    "waitHelp": "Se cuenta desde que el host vio la actualización por primera vez, o desde que el proveedor la publicó si fue antes. 0: aplicar de inmediato.",
+    "waitCritical": "Espera antes de aplicar un parche que corrige una CVE crítica (días)",
+    "criticalSource": "Crítico significa calificado como crítico por",
+    "criticalEither": "El análisis de vulnerabilidades o el aviso de seguridad del proveedor",
+    "criticalVulnerability": "El análisis de vulnerabilidades del host",
+    "criticalAdvisory": "El aviso de seguridad del proveedor",
+    "criticalHelp": "Sin análisis de vulnerabilidades ni avisos de seguridad del proveedor para un host, cada parche en él espera el plazo normal."
   },
   "userDetail": {
     "active": "Activo",
@@ -6215,13 +6224,16 @@
       "held": "retenido en el host",
       "manager": "el administrador de paquetes no está en la política",
       "notSecurity": "no es una actualización de seguridad",
-      "osUpgrade": "una actualización de SO nunca es automática"
+      "osUpgrade": "una actualización de SO nunca es automática",
+      "waiting": "en período de espera"
     },
     "policy": "Política",
     "reboot": {
       "back": "Reiniciado y de nuevo en línea",
       "notBack": "No volvió en línea tras su reinicio",
-      "queued": "Reiniciando"
+      "queued": "Reiniciando",
+      "nextWindow": "Reinicio requerido: espera a su próxima ventana de mantenimiento",
+      "notNeeded": "El reinicio ya no es necesario"
     },
     "result": "Resultado",
     "rule": {
@@ -6239,7 +6251,9 @@
       "notApproved": "el host no está aprobado",
       "optedOut": "el host nunca se actualiza automáticamente",
       "pending": "su ejecución anterior no ha terminado",
-      "agentCannotApply": "su agente no puede aplicar actualizaciones; actualice el agente"
+      "agentCannotApply": "su agente no puede aplicar actualizaciones; actualice el agente",
+      "noWindow": "ninguna de sus ventanas de mantenimiento en la próxima semana es lo suficientemente larga para la ejecución",
+      "policyChanged": "su política se desactivó o se eliminó mientras la ejecución esperaba"
     },
     "status": {
       "failed": "Fallido",
@@ -6248,10 +6262,29 @@
       "queued": "En ejecución",
       "skipped": "Omitido",
       "succeeded": "Completado",
-      "timedOut": "Sin resultado"
+      "timedOut": "Sin resultado",
+      "waiting": "Esperando su ventana de mantenimiento"
     },
     "subtitle": "Los perfiles con \"Aplicar automáticamente\" activado actualizan sus hosts según su programación.",
     "title": "Actualizaciones automáticas",
-    "when": "Cuándo"
+    "when": "Cuándo",
+    "eligible": {
+      "criticalNow": "crítico {{fix}}: aplicable ahora",
+      "now": "aplicable ahora",
+      "criticalOn": "crítico {{fix}}: aplicable a partir del {{when}}",
+      "regularOn": "normal: aplicable a partir del {{when}}"
+    },
+    "pendingTitle": "Actualizaciones pendientes según esta política",
+    "noCveData": "Este host no tiene análisis de vulnerabilidades ni avisos de seguridad del proveedor, por lo que cada parche en él espera el plazo normal.",
+    "noPending": "No hay actualizaciones pendientes.",
+    "package": "Paquete",
+    "eligibility": "Aplicación automática",
+    "inBlackout": "En el período de bloqueo «{{name}}»: no se aplica nada automáticamente.",
+    "windowNext": "Se aplican ventanas de mantenimiento: las ejecuciones automáticas solo comienzan dentro de una, y solo si caben. Siguiente: «{{name}}» el {{when}}.",
+    "windowNone": "Se aplican ventanas de mantenimiento y ninguna se abre en la próxima semana: no se aplica nada automáticamente.",
+    "startsAt": "Comienza cuando se abre su ventana de mantenimiento: {{when}}",
+    "threshold": "Un parche es crítico cuando corrige una CVE calificada como",
+    "thresholdCritical": "Crítica",
+    "thresholdHigh": "Alta o crítica"
   }
 }

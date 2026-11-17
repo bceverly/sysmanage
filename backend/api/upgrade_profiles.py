@@ -86,10 +86,16 @@ class UpgradeProfileCreateRequest(BaseModel):
     tag_id: Optional[str] = None
     # 26.1 automatic application (Enterprise)
     auto_apply: bool = False
-    reboot_mode: str = Field(default="never", pattern="^(never|when_needed)$")
+    reboot_mode: str = Field(default="never", pattern="^(never|when_needed|in_window)$")
     excluded_packages: Optional[str] = Field(default=None, max_length=4000)
     require_backup_hours: Optional[int] = Field(default=None, ge=1, le=720)
     host_ids: Optional[List[str]] = None
+    # 26.3 waiting periods (Enterprise)
+    wait_days_regular: int = Field(default=0, ge=0, le=365)
+    wait_days_critical: int = Field(default=0, ge=0, le=365)
+    critical_source: str = Field(
+        default="either", pattern="^(vulnerability|advisory|either)$"
+    )
 
 
 class UpgradeProfileUpdateRequest(BaseModel):
@@ -102,10 +108,15 @@ class UpgradeProfileUpdateRequest(BaseModel):
     staggered_window_min: Optional[int] = Field(None, ge=0, le=720)
     tag_id: Optional[str] = None
     auto_apply: Optional[bool] = None
-    reboot_mode: Optional[str] = Field(None, pattern="^(never|when_needed)$")
+    reboot_mode: Optional[str] = Field(None, pattern="^(never|when_needed|in_window)$")
     excluded_packages: Optional[str] = Field(None, max_length=4000)
     require_backup_hours: Optional[int] = Field(None, ge=0, le=720)  # 0 = off
     host_ids: Optional[List[str]] = None
+    wait_days_regular: Optional[int] = Field(None, ge=0, le=365)
+    wait_days_critical: Optional[int] = Field(None, ge=0, le=365)
+    critical_source: Optional[str] = Field(
+        None, pattern="^(vulnerability|advisory|either)$"
+    )
 
 
 class UpgradeProfileResponse(BaseModel):
@@ -132,6 +143,9 @@ class UpgradeProfileResponse(BaseModel):
     hold_by: Optional[str] = None
     hold_at: Optional[str] = None
     host_ids: List[str] = []
+    wait_days_regular: int = 0
+    wait_days_critical: int = 0
+    critical_source: str = "either"
 
 
 def _parse_uuid_or_400(value: Optional[str], field: str) -> Optional[uuid.UUID]:
@@ -188,18 +202,20 @@ def _audit_details(request) -> dict:
     return {k: v for k, v in request.model_dump().items() if v is not None}
 
 
+_AUTOMATIC_FIELDS = ("auto_apply", "reboot_mode", "excluded_packages",
+                     "require_backup_hours", "host_ids", "wait_days_regular",
+                     "wait_days_critical", "critical_source")  # fmt: skip
+_SIMPLE_AUTOMATIC = ("auto_apply", "reboot_mode", "wait_days_regular",
+                     "wait_days_critical", "critical_source")  # fmt: skip
+
+
 def _apply_automatic_fields(db: Session, profile, request, user) -> None:
-    touches = any(
-        getattr(request, f) is not None
-        for f in ("auto_apply", "reboot_mode", "excluded_packages",
-                  "require_backup_hours", "host_ids")  # fmt: skip
-    )
+    touches = any(getattr(request, f) is not None for f in _AUTOMATIC_FIELDS)
     if touches and (request.auto_apply or profile.auto_apply):
         _require_apply_role(user)
-    if request.auto_apply is not None:
-        profile.auto_apply = request.auto_apply
-    if request.reboot_mode is not None:
-        profile.reboot_mode = request.reboot_mode
+    for field in _SIMPLE_AUTOMATIC:
+        if getattr(request, field) is not None:
+            setattr(profile, field, getattr(request, field))
     if request.excluded_packages is not None:
         profile.excluded_packages = request.excluded_packages or None
     if request.require_backup_hours is not None:
@@ -258,6 +274,9 @@ async def create_profile(
         reboot_mode=request.reboot_mode,
         excluded_packages=request.excluded_packages or None,
         require_backup_hours=request.require_backup_hours,
+        wait_days_regular=request.wait_days_regular,
+        wait_days_critical=request.wait_days_critical,
+        critical_source=request.critical_source,
     )
     db.add(profile)
     db.flush()

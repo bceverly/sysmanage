@@ -4,7 +4,9 @@
 
 // A host's automatic updates (ROADMAP 26.1, Enterprise): the policy it
 // follows and why, its opt-out, and its automatic runs beside the manual
-// history.  Renders nothing without the Enterprise engine (402).
+// history; its maintenance windows (26.2) and when each pending update
+// becomes eligible (26.3).  Renders nothing without the Enterprise engine
+// (402).
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -35,6 +37,9 @@ import {
   runStatusLabel,
   skipReasonLabel,
 } from './autoUpdateLabels';
+import PendingEligibility, { eligibilityLabel } from './PendingEligibility';
+
+const REBOOT_CHIPS = ['queued', 'back', 'not_back', 'next_window'];
 
 interface Props {
   hostId: string;
@@ -93,6 +98,29 @@ const HostAutoUpdatesCard: React.FC<Props> = ({ hostId, canManage }) => {
     });
   };
 
+  const describeWindow = () => {
+    const w = data.window;
+    if (!w || w.state === 'unrestricted') return null;
+    if (w.active_blackout) {
+      return t('autoUpdates.inBlackout', 'In the blackout "{{name}}": nothing is applied automatically.', {
+        name: w.active_blackout,
+      });
+    }
+    if (w.next_window?.starts_at) {
+      return t(
+        'autoUpdates.windowNext',
+        'Maintenance windows apply: automatic runs start only inside one, and only if they fit. Next: "{{name}}" at {{when}}.',
+        { name: w.next_window.name, when: formatUTCTimestamp(w.next_window.starts_at, '--') },
+      );
+    }
+    return t(
+      'autoUpdates.windowNone',
+      'Maintenance windows apply, and none opens in the next week: nothing is applied automatically.',
+    );
+  };
+  const windowText = describeWindow();
+  const waits = Boolean(data.policy?.wait_days_regular || data.policy?.wait_days_critical);
+
   return (
     <Card sx={{ mb: 2 }}>
       <CardHeader
@@ -118,6 +146,12 @@ const HostAutoUpdatesCard: React.FC<Props> = ({ hostId, canManage }) => {
           </Alert>
         )}
         <Typography variant="body2" sx={{ mb: 2 }}>{describePolicy()}</Typography>
+        {windowText && (
+          <Typography variant="body2" sx={{ mb: 2 }}>{windowText}</Typography>
+        )}
+        {!data.opt_out && data.pending && (
+          <PendingEligibility pending={data.pending} waits={waits} />
+        )}
         {data.runs.length > 0 && (
           <Table size="small">
             <TableHead>
@@ -140,7 +174,7 @@ const HostAutoUpdatesCard: React.FC<Props> = ({ hostId, canManage }) => {
                         color={runStatusColor(run.status)}
                         label={runStatusLabel(t, run.status)}
                       />
-                      {['queued', 'back', 'not_back'].includes(run.reboot_status) && (
+                      {REBOOT_CHIPS.includes(run.reboot_status) && (
                         <Chip
                           size="small"
                           color={run.reboot_status === 'not_back' ? 'error' : 'default'}
@@ -152,6 +186,13 @@ const HostAutoUpdatesCard: React.FC<Props> = ({ hostId, canManage }) => {
                   <TableCell>
                     <Box sx={{ fontSize: '0.85em' }}>
                       {run.reason && <div>{skipReasonLabel(t, run.reason)}</div>}
+                      {run.status === 'waiting' && (
+                        <div>
+                          {t('autoUpdates.startsAt', 'Starts when its window opens: {{when}}', {
+                            when: formatUTCTimestamp(run.release_at ?? '', '--'),
+                          })}
+                        </div>
+                      )}
                       {run.packages.length > 0 && (
                         <div>
                           {t('autoUpdates.appliedOf', '{{applied}} of {{total}} applied', {
@@ -169,7 +210,10 @@ const HostAutoUpdatesCard: React.FC<Props> = ({ hostId, canManage }) => {
                       ))}
                       {run.skipped.map((s) => (
                         <div key={`s-${s.package_name}-${s.package_manager}`}>
-                          {s.package_name}: {packageReasonLabel(t, s.reason)}
+                          {s.package_name}:{' '}
+                          {s.reason === 'waiting_period'
+                            ? eligibilityLabel(t, { ...s, reason: s.reason })
+                            : packageReasonLabel(t, s.reason)}
                         </div>
                       ))}
                     </Box>

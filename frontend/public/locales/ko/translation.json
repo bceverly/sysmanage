@@ -3806,7 +3806,16 @@
     "reboot": "재부팅",
     "rebootNever": "안 함 (호스트에 '재부팅 필요'가 표시됨)",
     "rebootWhenNeeded": "업데이트에 필요할 때 재부팅",
-    "release": "일시 중지 해제"
+    "release": "일시 중지 해제",
+    "rebootInWindow": "필요할 때 재부팅 (유지보수 윈도우 내에서만)",
+    "waitRegular": "일반 패치 적용 전 대기 기간 (일)",
+    "waitHelp": "호스트가 업데이트를 처음 확인한 시점부터 계산하며, 공급업체 출시일이 더 이르면 그 시점부터 계산합니다. 0: 즉시 적용합니다.",
+    "waitCritical": "심각한 CVE를 수정하는 패치 적용 전 대기 기간 (일)",
+    "criticalSource": "'심각'으로 평가하는 출처",
+    "criticalEither": "취약점 스캔 또는 공급업체 보안 권고",
+    "criticalVulnerability": "호스트의 취약점 스캔",
+    "criticalAdvisory": "공급업체 보안 권고",
+    "criticalHelp": "호스트에 취약점 스캔이나 공급업체 보안 권고가 없으면 해당 호스트의 모든 패치는 일반 대기 기간을 따릅니다."
   },
   "userDetail": {
     "active": "활성",
@@ -6215,13 +6224,16 @@
       "held": "호스트에서 보류(hold)됨",
       "manager": "패키지 관리자가 정책에 포함되어 있지 않습니다",
       "notSecurity": "보안 업데이트가 아닙니다",
-      "osUpgrade": "운영체제 업그레이드는 자동으로 수행되지 않습니다"
+      "osUpgrade": "운영체제 업그레이드는 자동으로 수행되지 않습니다",
+      "waiting": "대기 기간 중"
     },
     "policy": "정책",
     "reboot": {
       "back": "재부팅 후 다시 온라인 상태",
       "notBack": "재부팅 후 다시 온라인 상태가 되지 않았습니다",
-      "queued": "재부팅 중"
+      "queued": "재부팅 중",
+      "nextWindow": "재부팅 필요: 다음 유지보수 윈도우에서 진행",
+      "notNeeded": "더 이상 재부팅이 필요하지 않음"
     },
     "result": "결과",
     "rule": {
@@ -6239,7 +6251,9 @@
       "notApproved": "호스트가 승인되지 않았습니다",
       "optedOut": "이 호스트는 절대 자동으로 업데이트되지 않습니다",
       "pending": "이전 실행이 아직 완료되지 않았습니다",
-      "agentCannotApply": "에이전트가 업데이트를 적용할 수 없습니다. 에이전트를 업데이트하세요"
+      "agentCannotApply": "에이전트가 업데이트를 적용할 수 없습니다. 에이전트를 업데이트하세요",
+      "noWindow": "다음 주의 유지보수 윈도우 중 실행에 충분히 긴 것이 없습니다",
+      "policyChanged": "실행 대기 중에 정책이 비활성화되거나 삭제되었습니다"
     },
     "status": {
       "failed": "실패",
@@ -6248,10 +6262,29 @@
       "queued": "실행 중",
       "skipped": "건너뜀",
       "succeeded": "성공",
-      "timedOut": "결과 없음"
+      "timedOut": "결과 없음",
+      "waiting": "유지보수 윈도우 대기 중"
     },
     "subtitle": "\"자동 적용\"이 켜진 프로필은 일정에 따라 해당 호스트를 업데이트합니다.",
     "title": "자동 업데이트",
-    "when": "일시"
+    "when": "일시",
+    "eligible": {
+      "criticalNow": "심각 {{fix}}: 지금 적용 가능",
+      "now": "지금 적용 가능",
+      "criticalOn": "심각 {{fix}}: {{when}}부터 적용 가능",
+      "regularOn": "일반: {{when}}부터 적용 가능"
+    },
+    "pendingTitle": "이 정책에 따라 대기 중인 업데이트",
+    "noCveData": "이 호스트에는 취약점 스캔이나 공급업체 보안 권고가 없으므로 모든 패치가 일반 대기 기간을 따릅니다.",
+    "noPending": "대기 중인 업데이트가 없습니다.",
+    "package": "패키지",
+    "eligibility": "자동 적용 시점",
+    "inBlackout": "블랙아웃 \"{{name}}\" 중: 자동으로 적용되는 항목이 없습니다.",
+    "windowNext": "유지보수 윈도우가 적용됩니다: 자동 실행은 윈도우 안에서, 시간 내에 끝날 수 있을 때만 시작됩니다. 다음: \"{{name}}\", {{when}}",
+    "windowNone": "유지보수 윈도우가 적용되며 다음 주에 열리는 윈도우가 없습니다: 자동으로 적용되는 항목이 없습니다.",
+    "startsAt": "윈도우가 열리면 시작: {{when}}",
+    "threshold": "다음 등급의 CVE를 수정하는 패치를 심각으로 간주",
+    "thresholdCritical": "심각",
+    "thresholdHigh": "높음 또는 심각"
   }
 }
