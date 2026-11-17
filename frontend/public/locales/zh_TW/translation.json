@@ -4649,12 +4649,15 @@
       "warning": "僅適用於永不變更的位址，例如虛擬 IP 或負載平衡器。註冊適用於持有此位址的任何裝置，因此透過 DHCP 取得位址的一般裝置會在下次租約後再次出現。"
     },
     "type": {
+      "camera": "攝影機",
       "computer": "電腦",
       "iot": "IoT 裝置",
       "media": "電視、喇叭或媒體播放器",
       "networkEquipment": "網路設備",
+      "phone": "手機",
       "phoneOrTablet": "手機或平板",
       "printer": "印表機",
+      "tablet": "平板",
       "unknown": "未知",
       "virtualAddress": "虛擬路由器位址",
       "virtualMachine": "虛擬機器"

@@ -4649,12 +4649,15 @@
       "warning": "가상 IP나 로드 밸런서처럼 절대 바뀌지 않는 주소에만 사용하세요. 이 주소를 가진 모든 장치에 적용되므로, DHCP로 주소를 받는 일반 장치는 다음 임대 후에 다시 나타납니다."
     },
     "type": {
+      "camera": "카메라",
       "computer": "컴퓨터",
       "iot": "IoT 장치",
       "media": "TV, 스피커 또는 미디어 플레이어",
       "networkEquipment": "네트워크 장비",
+      "phone": "휴대폰",
       "phoneOrTablet": "휴대폰 또는 태블릿",
       "printer": "프린터",
+      "tablet": "태블릿",
       "unknown": "알 수 없음",
       "virtualAddress": "가상 라우터 주소",
       "virtualMachine": "가상 머신"

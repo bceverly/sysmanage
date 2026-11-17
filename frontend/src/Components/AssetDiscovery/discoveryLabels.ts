@@ -73,7 +73,10 @@ export const deviceTypeLabel = (t: TFunction, kind: string | null | undefined): 
     const labels: Record<DeviceType, string> = {
         printer: t('assetDiscovery.type.printer', 'Printer'),
         media: t('assetDiscovery.type.media', 'TV, speaker or media player'),
+        phone: t('assetDiscovery.type.phone', 'Phone'),
+        tablet: t('assetDiscovery.type.tablet', 'Tablet'),
         phone_or_tablet: t('assetDiscovery.type.phoneOrTablet', 'Phone or tablet'),
+        camera: t('assetDiscovery.type.camera', 'Camera'),
         computer: t('assetDiscovery.type.computer', 'Computer'),
         network_equipment: t('assetDiscovery.type.networkEquipment', 'Network equipment'),
         iot: t('assetDiscovery.type.iot', 'IoT device'),
@@ -89,7 +92,10 @@ export const categoryForType = (kind: string | null | undefined): ExclusionCateg
     const map: Partial<Record<DeviceType, ExclusionCategory>> = {
         printer: 'printer',
         media: 'appliance',
+        phone: 'personal_device',
+        tablet: 'personal_device',
         phone_or_tablet: 'personal_device',
+        camera: 'iot',
         network_equipment: 'network_equipment',
         iot: 'iot',
         virtual_machine: 'virtual_machine',

@@ -4649,12 +4649,15 @@
       "warning": "Alleen voor adressen die nooit veranderen, zoals een virtueel IP-adres of een load balancer. Het geldt voor elk apparaat dat dit adres heeft, dus een gewoon apparaat dat zijn adressen via DHCP krijgt, verschijnt na zijn volgende lease opnieuw."
     },
     "type": {
+      "camera": "Camera",
       "computer": "Computer",
       "iot": "IoT-apparaat",
       "media": "Tv, speaker of mediaspeler",
       "networkEquipment": "Netwerkapparatuur",
+      "phone": "Telefoon",
       "phoneOrTablet": "Telefoon of tablet",
       "printer": "Afdrukapparaat",
+      "tablet": "Tablet",
       "unknown": "Onbekend",
       "virtualAddress": "Virtueel routeradres",
       "virtualMachine": "Virtuele machine"

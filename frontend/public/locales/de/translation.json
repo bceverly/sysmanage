@@ -4649,12 +4649,15 @@
       "warning": "Nur für Adressen, die sich nie ändern, etwa eine virtuelle IP oder ein Load Balancer. Die Registrierung gilt für jedes Gerät, das diese Adresse gerade hat; ein gewöhnliches Gerät, das seine Adressen per DHCP erhält, erscheint daher nach seiner nächsten Lease wieder."
     },
     "type": {
+      "camera": "Kamera",
       "computer": "Rechner",
       "iot": "IoT-Gerät",
       "media": "Fernseher, Lautsprecher oder Mediaplayer",
       "networkEquipment": "Netzwerkausrüstung",
+      "phone": "Telefon",
       "phoneOrTablet": "Telefon oder Tablet",
       "printer": "Drucker",
+      "tablet": "Tablet",
       "unknown": "Unbekannt",
       "virtualAddress": "Virtuelle Router-Adresse",
       "virtualMachine": "Virtuelle Maschine"

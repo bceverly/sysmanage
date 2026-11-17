@@ -201,6 +201,7 @@ ar	09982351d2b61af3	model
 ar	099c6d5db48b6eb5	model
 ar	09a2f99e5dcfcf68	model
 ar	09a3e35dfe7894c3	model
+ar	09a5ae5933711606	model
 ar	09b00683f07e7995	model
 ar	09b8cefd8b9d967b	model
 ar	09b96cd2c3d294ee	model
@@ -731,6 +732,7 @@ ar	1f800ebd12db1989	model
 ar	1f86182fcc4e273f	model
 ar	1f8b523668a7d475	model
 ar	1f99acfabe9a9e6d	model
+ar	1fb5eca5e8c75e3b	model
 ar	1fc9f082d9a5adf8	model
 ar	1fcd0e6e0d9ef1c6	model
 ar	1fd54691e4d897e4	model
@@ -3354,6 +3356,7 @@ ar	901bba4e4d5d57fd	model
 ar	9027f978374bfd57	model
 ar	9030286f1ebd15ad	model
 ar	90417d4bb8f0cfb2	model
+ar	9041daa564f80cc4	model
 ar	9042ab513a918bac	model
 ar	905e61096b00d139	model
 ar	9073658f871aa9c6	model
@@ -6225,6 +6228,7 @@ de	0ad3be722bd12345	model
 de	0ae6f686bea699f7	model
 de	0aea8dec68951ba5	model
 de	0aebc2e46784df41	model
+de	0b1d45ded8e81a7e	model (verified in sysmanage-professional-plus)
 de	0b2504e3b5291aeb	model
 de	0b2e22a96a752a97	model
 de	0b35d2835d1dc0ce	model
@@ -6314,6 +6318,7 @@ de	0f0d5a4b6ac6e282	model
 de	0f130e102246b397	human hand-translated by Claude, reviewed against the English and the locale's Configure label (2026-11-13)
 de	0f20449cc09d28e2	model
 de	0f2834dcddd5b00f	model
+de	0f4f7c34dfc33d0d	model
 de	0f59f1190a1f37ba	model
 de	0f61d3db34ba379a	model
 de	0f7d3196046f35d5	model
@@ -6897,6 +6902,7 @@ de	2917d476ca026b26	model
 de	291d2638fb90dcda	model
 de	29414b1c5ea2f516	model
 de	29421d3b1b18f7c8	model
+de	296c7c0a2f63dd85	human Hand-reviewed 2026-11-17: the loanword is the standard term in this language, as in its existing phoneOrTablet label
 de	2970428f465851ed	model
 de	297218b4b7456bc0	model
 de	2981d022a6fe2327	model
@@ -12374,6 +12380,7 @@ es	1a0147d42029118e	model
 es	1a017ceb67447d06	model
 es	1a07ab7eed630104	model
 es	1a07e14fa0b9caf5	model
+es	1a1ea9c6374e326a	model
 es	1a2233b6ed245504	model
 es	1a3faa2254cfe304	model
 es	1a4f32657916ff7c	model
@@ -12541,6 +12548,7 @@ es	2145ddc2dbf53344	model
 es	217a6b756f825584	model
 es	2189e8fe598d2a48	model
 es	218b7cac01ad9191	model
+es	21972a34aebe473e	model (verified in sysmanage-professional-plus)
 es	21a4467222be293c	model
 es	21aa717ec72cf22a	model
 es	21c8574fbf162a5b	model
@@ -13715,6 +13723,7 @@ es	55c023bbe2143c63	model
 es	55c06ff5b2319fff	model
 es	55c3026544e39410	model
 es	55c4fedaf464b481	model
+es	55c6793ef93cd475	model
 es	55cb97e2eaff0d48	model
 es	55f3e4459760c44e	model
 es	55fa081b928d2678	model
@@ -18465,6 +18474,7 @@ fr	2368387cb4351f31	model
 fr	237c54eae4a2b8b5	model
 fr	238662a4c03df21c	model
 fr	239a595eee2a2aa3	model
+fr	23a01d4899375844	model
 fr	23a861db177f5a4e	model
 fr	23b1bbca5e5a6799	model
 fr	23b2b5e17cdcb133	model
@@ -20530,6 +20540,7 @@ fr	7ca9d48946251d55	model
 fr	7caff1067255fa1b	model
 fr	7cb14d439b8843d2	model
 fr	7cb3f30500078a3d	model
+fr	7cb56c94a3cea65c	model (verified in sysmanage-professional-plus)
 fr	7cc1c402d79d532f	model
 fr	7ce2b032da3e860b	model
 fr	7ce2f7aa3c3ea241	model
@@ -23096,6 +23107,7 @@ fr	eeb658371b73d0ae	model
 fr	eebb2a4d23fc74c7	model
 fr	eebcf156d7e6bde2	model
 fr	eed1445167a0ae88	model
+fr	eed4e6bd646d8a11	model
 fr	eede84d137f37fb9	model
 fr	eef76a057f1011c6	model
 fr	eefd4f43d6679d03	model
@@ -26839,6 +26851,7 @@ hi	910b142ef32472dc	model
 hi	9118443055757693	model
 hi	911cf7387e6c441e	model
 hi	9129f56a8ec3d4bb	model
+hi	912a9f78213bdcd9	model
 hi	912c7101c20f1044	model
 hi	912dd041486dbfee	model
 hi	912f5f53b0809776	model
@@ -28722,6 +28735,7 @@ hi	e28a557d536e62e4	model
 hi	e28d7c00fe308edb	model
 hi	e2a02c436bd24a9f	model
 hi	e2b210375335a14b	model
+hi	e2b230da176e16cb	model (verified in sysmanage-professional-plus)
 hi	e2bb7f813cf8030e	model
 hi	e2bd5c2a70872610	model
 hi	e2d0349ef6f04325	model
@@ -28730,6 +28744,7 @@ hi	e2fe9a27c1b091d0	model
 hi	e30d9c8f64c48b2c	model (verified in sysmanage-professional-plus)
 hi	e3221a983bde909b	model
 hi	e323cea96f0f3f5f	model
+hi	e33544d4f623df9f	model
 hi	e33da9464710e2f8	model
 hi	e343688fd6c8cb3e	model
 hi	e3502ceea7b73cf0	model
@@ -29909,6 +29924,7 @@ it	1610c9e69770b3de	model
 it	1625cefc54326184	model
 it	1632d53d27e6c779	model
 it	1634a800e81144f9	model
+it	16360bee801589b1	model (verified in sysmanage-professional-plus)
 it	163aee35c1391ea5	model
 it	163eae57161a915a	model
 it	164f4358c2428ccd	model
@@ -32357,6 +32373,7 @@ it	80ee8d8d8bbf63cb	model
 it	80f038247af33f58	model
 it	8107fa54da8e11ea	model
 it	8110edb365f9a027	model
+it	811b6ed5a7906385	human Hand-reviewed 2026-11-17: the loanword is the standard term in this language, as in its existing phoneOrTablet label
 it	812435744b5740ce	model
 it	8135fc8f1a57a822	model
 it	81390dac3a04b350	model
@@ -33742,6 +33759,7 @@ it	bc470527a8d84546	model
 it	bc471177811a4aa2	model
 it	bc496e218d3ebe0a	model
 it	bc49724e3f930698	model
+it	bc4d03f549dd3995	model
 it	bc63d55200a6bcc2	model
 it	bc6bed1466c8ee22	model
 it	bc80b00048453e24	model
@@ -37050,6 +37068,7 @@ ja	4ffb8e224a6fa151	model
 ja	5009303631b5b677	model
 ja	501c755181331f11	model
 ja	501da061a1ba996a	model
+ja	504808053da6f035	model
 ja	504a20fd882f84ae	model
 ja	504bafa6b8d7baab	model
 ja	50690cd5a6137c8d	model
@@ -37212,6 +37231,7 @@ ja	574f26c6c4fc4ae4	model
 ja	5758389b740e6675	model
 ja	575a4caa709c1b77	model
 ja	5787b2125076547d	model
+ja	578fdd42fb764e44	model
 ja	5790cb99aac178bb	model
 ja	5792b005ae6c7409	model
 ja	57e30ea636588762	model
@@ -39906,6 +39926,7 @@ ja	caf2ee20df25c5d6	model
 ja	caf8d3ec27d32a06	model
 ja	cb057e832ebc9006	model
 ja	cb065f02a7748c32	model
+ja	cb0db55bf96312cd	model
 ja	cb112cba19061250	model
 ja	cb2a149421f37bc7	model
 ja	cb4ec72a9b257e62	model
@@ -42787,6 +42808,7 @@ ko	47f62cd617aafc01	model
 ko	4809cab71e6d7ccf	model
 ko	480a32b7051fcdfa	model
 ko	480c50ee0b7b0d8e	model
+ko	48174234a87a357b	model
 ko	481791c749a840ca	model
 ko	4817d2f3d6c2602f	model
 ko	4818e36b8467d9c5	model
@@ -43747,6 +43769,7 @@ ko	7199ac7b29ac9a72	model
 ko	71a1801e32f9736b	model
 ko	71bbfe176275f509	model
 ko	71ddb0005f07b7fe	model
+ko	71e21a162ce225bf	model
 ko	71e76d6d0fbe5040	model
 ko	720a6f2bc95097e5	model
 ko	720ba319a73aa0fb	model
@@ -43805,6 +43828,7 @@ ko	745bf1273f9d3ae2	model
 ko	745e38cebf20b46f	model
 ko	746b77f8466d03a5	model
 ko	746e8413321f4eac	model
+ko	748047666ad9c67d	model
 ko	749df507fa9d6aa2	model
 ko	74a02b60cb71c51c	model
 ko	74a625479432a411	model
@@ -47379,6 +47403,7 @@ nl	120d50576e89cb60	model
 nl	12138d2201cef9e1	model
 nl	12195aed3e4d8e8e	model
 nl	121c5be6962707e4	model
+nl	124bd986f58ef435	model (verified in sysmanage-professional-plus)
 nl	1269c2c962f96161	model
 nl	12755dc1e42b8bce	model
 nl	129e91a89768999e	model
@@ -48893,6 +48918,7 @@ nl	55e6c8daa16bbb92	model
 nl	55e7263a85474b8b	model
 nl	55e797de60dba0b1	model
 nl	55eebc298f4911da	model
+nl	56161939bc1ae4cb	human Hand-reviewed 2026-11-17: the loanword is the standard term in this language, as in its existing phoneOrTablet label
 nl	561c8d0d9940fc61	model
 nl	565caf2b9e136867	model
 nl	56623f4d094c158b	model
@@ -51474,6 +51500,7 @@ nl	c60850483b339dfd	model
 nl	c61bd644f93e91be	model
 nl	c6267d2f4c8f10af	model
 nl	c64369713cc11b0d	model
+nl	c6475dfa333c6717	human Hand-reviewed 2026-11-17: the loanword is the standard term in this language, as in its existing phoneOrTablet label
 nl	c663c75aa46ba876	model
 nl	c66c9a36ec64c9a7	model
 nl	c67744e3d1dcda99	model
@@ -56618,6 +56645,7 @@ pt	a81e2d9b9e4e253b	model
 pt	a82143c9a2a01468	model
 pt	a83ba58503750d28	model
 pt	a83eb70bc3a8b9ed	model
+pt	a841e920a9609f53	model
 pt	a84b4798759b0eec	model
 pt	a85f83938bf01e07	model
 pt	a860ee707ca8f1d9	model
@@ -57655,6 +57683,7 @@ pt	d6651392e6812a8f	model
 pt	d66b3737b08d2e64	model
 pt	d66bf3fd167a8cb9	model
 pt	d67a7fa85bcb284b	model
+pt	d68823a8c15e9bb5	human Hand-reviewed 2026-11-17: the loanword is the standard term in this language, as in its existing phoneOrTablet label
 pt	d6b0e6b868aee08f	human hand-translated by Claude, reviewed against the English (2026-11-13)
 pt	d6b443d120b9c7db	model
 pt	d6bc7ded4dbcf7f2	model
@@ -57722,6 +57751,7 @@ pt	d987c255b0df5439	model
 pt	d9993bd2bb86c668	model
 pt	d9b3aace0ab23c21	model
 pt	d9b3d43580879740	model
+pt	d9bd1b256161d725	model (verified in sysmanage-professional-plus)
 pt	d9c19fa2898f4bc7	model
 pt	d9d2b94d5273fdbe	model
 pt	d9dd5e9f2c36d5d4	model
@@ -59605,6 +59635,7 @@ ru	2a51fa4508ee980a	model
 ru	2a642b84028285e3	model
 ru	2a6807c236cecdea	model
 ru	2a823006ac1bb2db	model
+ru	2a83fbcbf9e74559	model (verified in sysmanage-professional-plus)
 ru	2a883ee023696ab1	model
 ru	2a8b3223f38b92b3	model
 ru	2a98b9b460274961	model
@@ -60116,6 +60147,7 @@ ru	3fcfe285c9ccf315	model
 ru	3fd2fcbc500af6c2	model
 ru	3fda374c17444804	model
 ru	3fe9925cd0f2f5d6	model
+ru	3feeee670e3a7d7b	model
 ru	40046fbe5874db8d	model
 ru	4010f8fd9d77ae50	model
 ru	401356abb6ed2db0	model
@@ -63170,6 +63202,7 @@ ru	c46473a8a714074e	model
 ru	c482abeb87381841	model
 ru	c495995923fbc86e	model
 ru	c49d5a6d91a68e8f	model
+ru	c4ab8c020a2a29e2	model
 ru	c4bbe27adae51a8c	model
 ru	c4d392e94ba5d776	model
 ru	c4d543d3098e2ddb	model
@@ -65374,6 +65407,7 @@ zh_CN	2252cf5c26e55239	model
 zh_CN	2270e594c8e214e4	model
 zh_CN	227e4aa61e82337b	model
 zh_CN	2291de4d45bc8651	model
+zh_CN	229c04e6e6fa14c9	model
 zh_CN	22ae9e6c1781bd5a	model
 zh_CN	22c6de012c3dbc48	model
 zh_CN	22cc00bc4dbfb01d	model
@@ -66051,6 +66085,7 @@ zh_CN	3ebe03431379928d	model
 zh_CN	3ec484866bbf400f	model
 zh_CN	3ecaf99cf1474896	model
 zh_CN	3edfe8150dcb4228	model
+zh_CN	3ee3a65b2bfe0c30	model
 zh_CN	3ee89bdf0851626f	model
 zh_CN	3f05b2679ff89744	model
 zh_CN	3f0805ca12f49977	model
@@ -66067,6 +66102,7 @@ zh_CN	3fac1316333b01dd	model
 zh_CN	3fb87518b4280152	model
 zh_CN	3fbd0a2e2363b2d6	model
 zh_CN	3fbea340bc2b88d0	model
+zh_CN	3fc1e7634757c877	model
 zh_CN	3fc8b02c606e633e	model
 zh_CN	3fc9539ab7efb20b	model
 zh_CN	3fd0b6900a69b0bb	model
@@ -71293,6 +71329,7 @@ zh_TW	26da7ae66b2ade20	model
 zh_TW	26e00c5d535117a5	model
 zh_TW	26f4e667f357f2a2	model
 zh_TW	2704dc70eb4733c0	model
+zh_TW	2709f09f60901644	model
 zh_TW	270b42aa9e8c6755	model
 zh_TW	270dba2abd43fad0	model
 zh_TW	271881072b691b23	model
@@ -72209,6 +72246,7 @@ zh_TW	4e5e602219fe26d1	model
 zh_TW	4e5ee2b43f9a61a5	model
 zh_TW	4e6d2fa7874def29	model
 zh_TW	4e79fb0267841f37	model
+zh_TW	4e7cb052c6d2f5fb	model
 zh_TW	4ea51bba4cf64721	model
 zh_TW	4eac57930b516ccc	model
 zh_TW	4ed16831716b2965	model
@@ -72445,6 +72483,7 @@ zh_TW	5904a5b949951912	model
 zh_TW	5906cbe3542d9425	model
 zh_TW	590c974014bde80a	model
 zh_TW	59237659ca6f3977	model
+zh_TW	5924e541cb9bdcc5	model
 zh_TW	5943472028e6e5ef	model
 zh_TW	594948dba406ebb1	model
 zh_TW	595074e655a5a94e	model

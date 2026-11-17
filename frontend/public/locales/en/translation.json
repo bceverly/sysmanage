@@ -4649,12 +4649,15 @@
       "warning": "Only for addresses that never change, such as a virtual IP or a load balancer. It covers whatever device holds this address, so an ordinary device given addresses by DHCP will reappear after its next lease."
     },
     "type": {
+      "camera": "Camera",
       "computer": "Computer",
       "iot": "IoT device",
       "media": "TV, speaker or media player",
       "networkEquipment": "Network equipment",
+      "phone": "Phone",
       "phoneOrTablet": "Phone or tablet",
       "printer": "Printer",
+      "tablet": "Tablet",
       "unknown": "Unknown",
       "virtualAddress": "Virtual router address",
       "virtualMachine": "Virtual machine"

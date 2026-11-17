@@ -4649,12 +4649,15 @@
       "warning": "Uniquement pour les adresses qui ne changent jamais, comme une IP virtuelle ou un répartiteur de charge. L'enregistrement s'applique à tout appareil qui détient cette adresse : un appareil ordinaire qui reçoit ses adresses par DHCP réapparaîtra donc après son prochain bail."
     },
     "type": {
+      "camera": "Caméra",
       "computer": "Ordinateur",
       "iot": "Appareil IoT",
       "media": "Téléviseur, enceinte ou lecteur multimédia",
       "networkEquipment": "Équipement réseau",
+      "phone": "Téléphone",
       "phoneOrTablet": "Téléphone ou tablette",
       "printer": "Imprimante",
+      "tablet": "Tablette",
       "unknown": "Inconnu",
       "virtualAddress": "Adresse de routeur virtuel",
       "virtualMachine": "Machine virtuelle"

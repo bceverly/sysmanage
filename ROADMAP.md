@@ -14768,7 +14768,7 @@ Built 2026-11-17 (all repos).
 
 #### 26.8 Dependency upkeep (Community / OSS) (added 2026-11-09, Bryan)
 
-- [ ] **Playwright 1.65.0, for the Brotli decoder out-of-bounds write
+- [x] **Playwright 1.65.0, for the Brotli decoder out-of-bounds write
       (code scanning #2177, Semgrep `ssc-9c34c675-756b-44e8-9512-28718930fef2`,
       found 2026-11-09):** `playwright-core` 1.64.1 bundles a Brotli 1.0.3 to
       1.2.0 decoder, likely CVE-2026-111497 (disclosed 2026-10-21).  It
@@ -14787,7 +14787,7 @@ Built 2026-11-17 (all repos).
       a full `make screenshots` pass.  If the next scan still flags 1.65.0,
       dismiss #2177 in GitHub as "used in tests" with that reason.  Done when
       #2177 is closed (fixed or dismissed with the reason) and both runs pass
-      2026-11-16: both lockfiles on 1.65.1 (accepted narrowly in `.semgrep-accepted.json`); `make test-e2e` 158/158 on it, after fixing what it found -- every page load on a licensed server whose federation role is "none" got a 503 from the federation stubs ("module not currently available"); they answer 409 with the role needed now (`feature_gate.role_mismatch_error`).  Left: #2177 closed in GitHub, and a full `make screenshots` pass on 1.65.1
+      2026-11-16: both lockfiles on 1.65.1 (accepted narrowly in `.semgrep-accepted.json`); `make test-e2e` 158/158 on it, after fixing what it found -- every page load on a licensed server whose federation role is "none" got a 503 from the federation stubs ("module not currently available"); they answer 409 with the role needed now (`feature_gate.role_mismatch_error`).  2026-11-17: sysmanage-docs moved to Playwright 1.65.1 too (its screenshot capture ran 1.64.0, with the same bundled decoder); a full `make screenshots` pass on 1.65.1, all three tiers: 176 of 176 captured, none failed. #2177 is closed (Bryan, 2026-11-17)
 
 #### 26.9 Alert on a new device on the network (Enterprise) (added 2026-11-16, Bryan)
 
@@ -14800,11 +14800,11 @@ notification channels (email, webhook, Slack, Teams).  This is a new
 condition plus its settings, not a new subsystem.  Enterprise, because the
 discovery engine it reads is Enterprise.
 
-- [ ] **The condition:** a new alerting-engine condition, `new_network_device`,
+- [x] **The condition:** a new alerting-engine condition, `new_network_device`,
       that fires once per device the first time discovery sees it -- unmanaged
       (not a host, child host, hypervisor port or VIP) and not excluded.  It
       is never re-notified: a device is new once
-      BUILT 2026-11-16 (lab proof below still to do): `alerting_engine/alerting_new_device.pxi`, judged once per
+      BUILT 2026-11-16: `alerting_engine/alerting_new_device.pxi`, judged once per
       rule per pass (`RULE_LEVEL_CONDITIONS`, a new branch in
       `evaluate_all_rules`), each device recorded in `new_device_alert_mark`
       (tenant migration q93newdevicealert: alerted / baseline / filtered),
@@ -14817,40 +14817,40 @@ discovery engine it reads is Enterprise.
       `NewDeviceTypePicker.test.tsx` (3) and `AlertRulesPage.test.tsx`;
       frontend `AssetDiscovery.test.tsx` (`?search=`).  Strings: 6 engine
       strings and 2 plugin strings by hand in 13 locales; the type labels
-      reuse the discovery page's
-- [ ] **New device, not new lease:** identity is the device (its MAC, the
+      reuse the discovery page's -- LAB-PROVEN 2026-11-17 (dev server, lab tenant; test devices made as macvlan interfaces on autoupd-lab3 inside a separate network namespace -- so its agent does not report them and they are not matched to the host -- each taking a DHCP lease from the router): four new devices (three with random, locally administered MACs, one with a fixed Xen MAC) were judged once by each of four rules and brought one alert per rule, emailed (`notification_sent`); a fifth, alone, brought its own. Found doing it: interfaces of a managed host are that host, not new devices -- the first try, with the interfaces in the host's own namespace, was rightly filtered as managed
+- [x] **New device, not new lease:** identity is the device (its MAC, the
       21.6 rule), so a known device renumbered by DHCP does not alert; an
       option on the rule, off by default, also alerts when a known device
       appears on an address it has never used.  A device seen only by IP
       (no MAC; the labeled `ip:` fallback) is new per address, and the email
-      says so
-- [ ] **Filter by type:** the rule picks the device types it alerts on, from
+      says so -- LAB-PROVEN 2026-11-17: the known Xen-MAC device moved from .141 to .199: the default rule stayed silent, and a rule with `new_address` on alerted under "Known devices on an address they never used". A device seen only by IP is new per address; the email now says so ("no MAC seen: it may be a known device on a new address", added 2026-11-17, 13 locales, engine test) -- not lab-run (needs a device across a router)
+- [x] **Filter by type:** the rule picks the device types it alerts on, from
       the engine's own list -- computer, phone or tablet, printer, media, IoT,
       network equipment, virtual machine, unknown (virtual addresses are left
       out: they are VIPs, not devices) -- and optionally the networks
       (segments) it covers.  "Unknown" is on by default: a device nothing can
-      identify is the one an administrator most wants to hear about
-- [ ] **Wait for the type before deciding:** the type often arrives after the
+      identify is the one an administrator most wants to hear about -- LAB-PROVEN 2026-11-17: an "IoT only" rule filtered all five (phone or tablet, virtual machine) while the default rule alerted; the networks option is covered by tests (`test_network_filter`)
+- [x] **Wait for the type before deciding:** the type often arrives after the
       first sighting (mDNS evidence took 20 to 70 seconds in the 21.6 spike),
       so a new device is judged after a settle time (default 5 minutes) with
       the best classification by then, rather than alerting or filtering on
-      "unknown" too early
-- [ ] **No flood on day one:** when discovery or the rule is first turned on,
+      "unknown" too early -- LAB-PROVEN 2026-11-17 (settle 2 minutes): first seen 19:45:21, judged and alerted 19:48:03-19:48:11
+- [x] **No flood on day one:** when discovery or the rule is first turned on,
       the devices already present are the baseline and are not "new"; a burst
       (many new devices in one pass, for example a new segment's agent coming
-      online) goes out as one email listing them, not one email each
-- [ ] **Randomized MACs:** phones and tablets rotate their MAC (19% of the
+      online) goes out as one email listing them, not one email each -- LAB-PROVEN 2026-11-17: two rules created on the running lab were each first passed with all 77 known devices recorded as baseline, no alert; the burst of four new devices came as one alert (one email) per rule, listing all four. An agent's first hour as its baseline is covered by tests (`test_an_agents_first_hour_is_its_baseline`)
+- [x] **Randomized MACs:** phones and tablets rotate their MAC (19% of the
       devices on Bryan's LAN in the 21.6 spike); a locally administered MAC is
       labeled in the email ("address may change"), and the rule has an option
-      to leave such devices out
-- [ ] **The email:** the address(es), MAC and vendor, the guessed type with its
+      to leave such devices out -- LAB-PROVEN 2026-11-17: the three locally administered MACs were labeled "address may change" and the fixed MAC was not; a rule with `ignore_randomized` alerted only on the fixed-MAC device
+- [x] **The email:** the address(es), MAC and vendor, the guessed type with its
       confidence and reasons, any names, which agent saw it on which network,
       first seen, and a link to the device on the Network Discovery page,
-      where it can be excluded ("this is a printer, fine")
-- [ ] **402-clean:** without Enterprise (or with discovery off), the
-      condition is not offered, and the alert rules page says why
-- [ ] **Docs and i18n:** the Network Discovery and Alerts docs pages, a
-      `make screenshots` capture of the rule, every string in 14 locales
+      where it can be excluded ("this is a printer, fine") -- LAB-PROVEN 2026-11-17: addresses, MAC and vendor (Xensource), type and confidence, names (from DHCP), the agent and network, first seen; the link opens the Network Discovery page on the device when the alert has one (`?search=<MAC>`), the page itself for a burst. Found doing it: the reasons for the type guess were recorded but not in the email -- added ("evidence: mac:xen", the codes the page shows; 13 locales, engine test)
+- [x] **402-clean:** without Enterprise (or with discovery off), the
+      condition is not offered, and the alert rules page says why -- 2026-11-17: without the discovery engine, or with discovery turned off, the condition is listed but disabled, saying why ("needs network discovery, Enterprise" / "network discovery is off"); before, it was only hidden when unlicensed, and offered with discovery off (plugin `newDeviceUnavailable`, tests; 13 locales). Unlicensed there is no alerting at all: alerting is Enterprise too, and the Community server proven on 2026-11-17 has no Alert Rules page
+- [x] **Docs and i18n:** the Network Discovery and Alerts docs pages, a
+      `make screenshots` capture of the rule, every string in 14 locales -- 2026-11-17: Network Discovery and Alerting pages (the email bullet now names the evidence and when the link opens the device; the condition needs discovery), `make screenshots` capture `ent-new-device-rule` (from 2026-11-16, unchanged UI), every string in 14 locales, verified
 
 #### 26.10 Better device types: phones, tablets, cameras (Enterprise) (added 2026-11-16, Bryan)
 
@@ -14862,31 +14862,31 @@ Printers are already their own type (`printer`); phones share
 `phone_or_tablet` with tablets, and there is no camera type.  The types feed
 the Network Discovery page and the 26.9 alert's filter.
 
-- [ ] **New types:** `phone`, `tablet` and `camera` in the engine's
+- [x] **New types:** `phone`, `tablet` and `camera` in the engine's
       `DEVICE_TYPES` (`asset_discovery_engine/classify.pxi`); `phone_or_tablet`
       stays as the fallback when nothing tells a phone from a tablet, so a
-      guess is never dressed up as more than it is
-- [ ] **mDNS device-info model:** the `model=` value Apple devices announce
+      guess is never dressed up as more than it is -- BUILT 2026-11-17: `phone`, `tablet`, `camera` in `DEVICE_TYPES`; `phone_or_tablet` kept as the fallback (an iPhone with only its services and no model is still "phone or tablet"); engine tests `TestDeviceTypes2610`
+- [x] **mDNS device-info model:** the `model=` value Apple devices announce
       (`iPhone15,2`, `iPad13,1`, `MacBookAir10,1`) decides phone, tablet or
       computer outright (high confidence); Android and others where they
-      announce one
-- [ ] **DHCP fingerprinting:** the agents already hear DHCP on the segment
+      announce one -- BUILT 2026-11-17: the agent now reads mDNS TXT records and reports only `model=` (_device-info) and `rpMd=` (_companion-link) as `evidence.mdns_models` (agent `network_names.mdns_models`); the engine decides on it first, high confidence: iPhone phone, iPad tablet, Mac computer, AppleTV and AudioAccessory (HomePod) media, an Apple Watch left to other evidence. It fixes what Bryan's LAN showed on 2026-11-17: iPhones filed as media (they advertise AirPlay) or as computers (the Mac rule). LAB-PROVEN 2026-11-17 (agent patched on autoupd-lab3): three Apple TVs (Family-Room, Bedroom, Basement) announced `AppleTV6,2` / `AppleTV5,3` and were classified media, high, `model:AppleTV6,2`. No Android device on the LAN announced a model
+- [x] **DHCP fingerprinting:** the agents already hear DHCP on the segment
       (21.6 device-hostnames work): the option 55 parameter request list and
       option 60 vendor class (`android-dhcp-14`, `MSFT 5.0`, ...) matched
       against a shipped fingerprint table (air-gap clean, like the OUI table),
-      for phone vs computer vs IoT
-- [ ] **Cameras:** RTSP / ONVIF evidence -- an mDNS or SSDP announcement of
+      for phone vs computer vs IoT -- BUILT 2026-11-17: the agent keeps options 55 and 60 (`evidence.dhcp`: `prl:1,121,3,...`, `vendor:android-dhcp-14`), also from a DHCP request that carries no host name; the engine matches the vendor class (android-dhcp, MSFT 5.0, udhcp) and a shipped table of common request lists, as low-confidence hints (an Android TV says android-dhcp too; iOS and tvOS share a list). LAB: the first fingerprint arrived from t14 (a Linux client, not in the table, so no verdict); the table is to be checked against the phones and tablets on Bryan's LAN
+- [x] **Cameras:** RTSP / ONVIF evidence -- an mDNS or SSDP announcement of
       `_rtsp._tcp` or an ONVIF device type, a camera vendor's OUI (Axis,
       Hikvision, Dahua, Reolink, Amcrest, ...); with Phase 37's port probe,
-      554 open adds weight (the probe stays there)
-- [ ] **Host names as weak evidence:** "iPhone", "Galaxy-S24", "iPad",
-      "Galaxy-Tab", "Pixel" in a DHCP or mDNS name -- low confidence on its own
-- [ ] **Everywhere the types show:** the Network Discovery page's labels and
+      554 open adds weight (the probe stays there) -- BUILT 2026-11-17: mDNS `_rtsp`, `_axis-video`, `_onvif`, `_nvr` and SSDP NetworkCamera / IPCamera / DigitalSecurityCamera (high), a camera maker's MAC vendor -- Axis, Hikvision, Dahua, Reolink, Amcrest, Foscam, Vivotek, Hanwha, Uniview, Lorex, Arlo, Mobotix -- as a hint (low); tests. Not seen on the lab LAN. ONVIF's own WS-Discovery (UDP 3702) is not listened to; the 554 port probe stays in Phase 37
+- [x] **Host names as weak evidence:** "iPhone", "Galaxy-S24", "iPad",
+      "Galaxy-Tab", "Pixel" in a DHCP or mDNS name -- low confidence on its own -- BUILT 2026-11-17: iPad / Galaxy-Tab / Kindle / Fire-HD tablet, iPhone / Galaxy / Pixel / OnePlus phone, Android phone or tablet, ipcam / camera / doorbell camera -- all low; tests
+- [x] **Everywhere the types show:** the Network Discovery page's labels and
       filter, the 26.9 alert's type chips (a rule listing `phone_or_tablet`
       also matches `phone` and `tablet`, so existing rules keep working), the
-      posture punch-list counts; strings in 14 locales
+      posture punch-list counts; strings in 14 locales -- BUILT 2026-11-17: Network Discovery labels (the page has no type filter; its per-type counts follow the stored types), the 26.9 alert's type chips (Phone, Tablet, Phone or tablet, Camera), and a rule listing `phone_or_tablet` also matches `phone` and `tablet` (engine test); the posture punch list counts unmanaged devices in total, not by type, so nothing changed there; labels in 14 locales, verified ("Tablet" in de / it / nl / pt and "Camera" in nl allowed as the standard words); docs (Network Discovery: how types are told apart, mDNS / SSDP / DHCP, the alert's types) in 14 locales
 - [ ] **Proof:** on Bryan's LAN, a phone, a tablet and a camera each shown as
-      such, with the evidence that decided it
+      such, with the evidence that decided it -- 2026-11-17 PARTLY PROVEN: on Bryan's LAN three Apple TVs were classified by their announced models (media, high); a phone and a tablet are still to be seen announcing theirs (the iPhones there were idle, and Bryan's was away with him) -- the patched agent on autoupd-lab3 keeps collecting. Cameras: Bryan's LAN has two SimpliSafe cameras (Bryan confirmed both on 2026-11-17: 28:ed:e0:db:08:9e and 08:e9:f6:a8:ad:ba -- each an AMPAK Wi-Fi module with a 32-hex-character host name). Both stay "unknown", and rightly: a cloud camera announces nothing locally (no RTSP / ONVIF, no mDNS or SSDP), AMPAK is a module maker, not a camera brand, and a rule fitted to one house's hex names would mislabel other devices. The camera evidence that does exist (RTSP / ONVIF mDNS, SSDP camera types, camera makers) is proven by tests only. Their DHCP fingerprint is being watched (one was last heard 2026-11-05, likely asleep on battery; the other was heard today): if it carries something that identifies SimpliSafe, it goes in the shipped table
 
 ### Licensing summary
 
@@ -14915,11 +14915,11 @@ the Network Discovery page and the 26.9 alert's filter.
 
 **New device alert (26.9)**
 
-- [ ] In the lab, a device new to the network (never seen before) brings one email within the settle time naming its type; a rule set to "IoT only" stays quiet for a new computer; a known device renumbered by DHCP sends nothing; turning the rule on in production sends no backlog of the devices already there -- 2026-11-16 LAB PART PROVEN (dev server, lab tenant, observer autoupd-lab, Gmail channel): a brand-new VM booted on beast's bridge (52:54:00:b2:24:11, first seen 20:52:04) brought one alert and one email at 20:54:26 (settle 2 minutes), naming its address, MAC, type virtual_machine (high), network, announced name and "address may change"; a second new VM alerted on the default rule and was recorded `filtered` by an "IoT only" rule, whose own first pass made every device already present its baseline. Not yet proven: a DHCP renumber of a known device in the lab (covered by `tests/services/test_new_device_alert.py`), and no backlog when the rule is turned on in production (needs the release deployed)
+- [ ] In the lab, a device new to the network (never seen before) brings one email within the settle time naming its type; a rule set to "IoT only" stays quiet for a new computer; a known device renumbered by DHCP sends nothing; turning the rule on in production sends no backlog of the devices already there -- 2026-11-16 LAB PART PROVEN (dev server, lab tenant, observer autoupd-lab, Gmail channel): a brand-new VM booted on beast's bridge (52:54:00:b2:24:11, first seen 20:52:04) brought one alert and one email at 20:54:26 (settle 2 minutes), naming its address, MAC, type virtual_machine (high), network, announced name and "address may change"; a second new VM alerted on the default rule and was recorded `filtered` by an "IoT only" rule, whose own first pass made every device already present its baseline. 2026-11-17 LAB REST PROVEN: a known device renumbered (.141 to .199) sent nothing on the default rule (and alerted only on a rule with `new_address` on); two rules turned on in the running lab took all 77 known devices as baseline and sent no backlog. Still to prove: no backlog when the rule is turned on in production (needs the release deployed)
 
 **Dependency upkeep (26.8)**
 
-- [ ] Playwright on 1.65.0 or later in `frontend/` and the FreeBSD port's copy, the e2e tests and `make screenshots` passing on it, and code scanning #2177 closed
+- [x] Playwright on 1.65.0 or later in `frontend/` and the FreeBSD port's copy, the e2e tests and `make screenshots` passing on it, and code scanning #2177 closed -- DONE 2026-11-17: both lockfiles (and sysmanage-docs) on 1.65.1; `make test-e2e` 158/158 (2026-11-16); full `make screenshots` 176/176; #2177 closed
 
 **Every phase**
 

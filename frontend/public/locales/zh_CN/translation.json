@@ -4649,12 +4649,15 @@
       "warning": "仅适用于永不变化的地址，例如虚拟 IP 或负载均衡器。注册适用于持有此地址的任何设备，因此通过 DHCP 获取地址的普通设备会在下次租约后重新出现。"
     },
     "type": {
+      "camera": "摄像头",
       "computer": "计算机",
       "iot": "IoT 设备",
       "media": "电视、音箱或媒体播放器",
       "networkEquipment": "网络设备",
+      "phone": "手机",
       "phoneOrTablet": "手机或平板电脑",
       "printer": "打印机",
+      "tablet": "平板电脑",
       "unknown": "未知",
       "virtualAddress": "虚拟路由器地址",
       "virtualMachine": "虚拟机"

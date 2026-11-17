@@ -296,3 +296,10 @@ backups.transport.viaNfs
 # --- 26.4: "host" is the product's own word in es/nl/pt, so "{{count}} host(s)"
 # reads the same as the English there --------------------------------------
 autoUpdates.fleet.hosts
+
+# --- loanwords that ARE the word in these languages (26.10 device types) -----
+# "Tablet" in German, Italian, Dutch and Portuguese (as in each one's
+# phoneOrTablet label) and "Camera" in Dutch are the standard words there.
+# Hand-reviewed.
+de,it,nl,pt: assetDiscovery.type.tablet
+nl: assetDiscovery.type.camera

@@ -4649,12 +4649,15 @@
       "warning": "Solo per indirizzi che non cambiano mai, come un IP virtuale o un bilanciatore di carico. Vale per qualsiasi dispositivo che abbia questo indirizzo, quindi un normale dispositivo che riceve gli indirizzi tramite DHCP ricomparirà dopo il suo prossimo lease."
     },
     "type": {
+      "camera": "Telecamera",
       "computer": "Computer",
       "iot": "Dispositivo IoT",
       "media": "TV, altoparlante o lettore multimediale",
       "networkEquipment": "Apparecchiature di rete",
+      "phone": "Telefono",
       "phoneOrTablet": "Telefono o tablet",
       "printer": "Stampante",
+      "tablet": "Tablet",
       "unknown": "Sconosciuto",
       "virtualAddress": "Indirizzo di router virtuale",
       "virtualMachine": "Macchina virtuale"

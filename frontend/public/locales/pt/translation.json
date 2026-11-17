@@ -4649,12 +4649,15 @@
       "warning": "Somente para endereços que nunca mudam, como um IP virtual ou um balanceador de carga. Vale para qualquer dispositivo que tenha este endereço, então um dispositivo comum que recebe endereços por DHCP reaparecerá após a próxima concessão."
     },
     "type": {
+      "camera": "Câmera",
       "computer": "Computador",
       "iot": "Dispositivo IoT",
       "media": "TV, alto-falante ou reprodutor de mídia",
       "networkEquipment": "Equipamento de rede",
+      "phone": "Telefone",
       "phoneOrTablet": "Telefone ou tablet",
       "printer": "Impressora",
+      "tablet": "Tablet",
       "unknown": "Desconhecido",
       "virtualAddress": "Endereço de roteador virtual",
       "virtualMachine": "Máquina virtual"

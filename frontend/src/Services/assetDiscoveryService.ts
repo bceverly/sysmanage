@@ -20,7 +20,10 @@ export type DeviceStatus = "unmanaged" | "managed" | "excluded" | "all";
 export type DeviceType =
   | "printer"
   | "media"
+  | "phone"
+  | "tablet"
   | "phone_or_tablet"
+  | "camera"
   | "computer"
   | "network_equipment"
   | "iot"
