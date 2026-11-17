@@ -46,6 +46,15 @@ force_kill_process() {
 }
 
 # Check for orphaned bao/vault processes (running but no PID file)
+# A PID file naming a process that is gone says nothing about the OpenBAO
+# that may be running: clean it up and sweep for orphans below.  Exiting
+# here left a running OpenBAO that no PID file named, so the next
+# "make start" failed on port 8200 (2026-11-17).
+if [ -f "$PID_FILE" ] && ! kill -0 "$(cat "$PID_FILE" 2>/dev/null)" 2>/dev/null; then
+    echo "OpenBAO process (PID $(cat "$PID_FILE" 2>/dev/null)) is not running, cleaning up PID file"
+    rm -f "$PID_FILE"
+fi
+
 if [ ! -f "$PID_FILE" ]; then
     echo "No PID file found, checking for orphaned OpenBAO processes..."
 

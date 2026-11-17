@@ -57,6 +57,27 @@ else
     exit 0  # Exit gracefully so make start continues
 fi
 
+# An OpenBAO for this project already running without a PID file (lost, or
+# started some other way): adopt it instead of starting a second one, which
+# can only fail on port 8200 ("make start", 2026-11-17).
+RUNNING_PID=$(pgrep -f "server -config=$PROJECT_DIR/openbao.hcl" 2>/dev/null | head -1)
+if [ -z "$RUNNING_PID" ]; then
+    RUNNING_PID=$(pgrep -f "server -dev -dev-root-token-id=dev-only-token-change-me" 2>/dev/null | head -1)
+fi
+if [ -n "$RUNNING_PID" ]; then
+    echo "OpenBAO is already running with PID $RUNNING_PID (no PID file); adopting it"
+    echo "$RUNNING_PID" > "$PID_FILE"
+    if [ -f "$PROJECT_DIR/.vault_credentials" ]; then
+        . "$PROJECT_DIR/.vault_credentials"
+        export BAO_ADDR="http://127.0.0.1:8200"
+        if "$BAO_CMD" status 2>&1 | grep -q "Sealed.*true"; then
+            echo "Unsealing vault..."
+            "$BAO_CMD" operator unseal "$UNSEAL_KEY"
+        fi
+    fi
+    exit 0
+fi
+
 echo "Starting OpenBAO development server..."
 echo "Log file: $LOG_FILE"
 echo "PID file: $PID_FILE"

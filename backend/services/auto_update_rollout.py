@@ -98,7 +98,7 @@ def _audit(db, rollout, description, username=None, details=None) -> None:
     AuditService.log(
         db=db,
         action_type=ActionType.EXECUTE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.UPDATE_POLICY,
         entity_id=str(rollout.id),
         entity_name=rollout.profile_name,
         description=description,

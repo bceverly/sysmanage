@@ -90,3 +90,31 @@ def bridge_loaded_engine(module) -> bool:
         logger.debug("Could not read multitenancy_engine module info: %s", exc)
     logger.info("Bridged multitenancy_engine v%s into the multi-tenancy seam.", version)
     return True
+
+
+def release_tenant_engines() -> int:
+    """Revoke this process's OpenBAO database leases and close its tenant
+    connection pools (server shutdown).
+
+    Each worker leases one temporary PostgreSQL user per tenant database, for
+    an hour, renewed while it runs.  Nothing revoked them at shutdown, so
+    every stopped worker left its users alive until they expired -- 76 live
+    leases on the dev server where the running workers needed 12
+    (2026-11-17).  The engine has always had the revoke-all; this calls it.
+
+    Returns how many tenant engines were released (0 when no engine is loaded
+    or the engine predates the hook).  Never raises: shutdown must finish.
+    """
+    module = seam.engine_module()
+    get_manager = getattr(module, "get_manager", None) if module else None
+    if not callable(get_manager):
+        return 0
+    try:
+        manager = get_manager()
+        count = len(getattr(manager, "_entries", {}) or {})
+        manager.shutdown()
+    except Exception:  # pylint: disable=broad-except
+        logger.exception("Could not release tenant database leases at shutdown")
+        return 0
+    logger.info("Released %d tenant database lease(s) at shutdown", count)
+    return count

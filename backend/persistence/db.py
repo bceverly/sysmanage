@@ -150,7 +150,9 @@ def _sized_engine(url, the_config):
         tenants = 0
         if is_multitenancy_enabled():
             tenants = max(1, pool_sizing.tenant_count(engine))
-        fitted, reason = pool_sizing.fit(pool, limit, workers, tenants)
+        fitted, reason = pool_sizing.fit(
+            pool, limit, workers, tenants, pool_sizing.held_back(engine, tenants)
+        )
         if reason:
             logger.warning("Database pool reduced to fit the server: %s", reason)
         if fitted != pool:

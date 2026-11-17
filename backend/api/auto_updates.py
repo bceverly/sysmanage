@@ -150,7 +150,7 @@ async def hold_all(
             if request.hold
             else _("Released the hold on every automatic update policy")
         ),
-        EntityType.SETTING,
+        EntityType.UPDATE_POLICY,
         row.id,
         "auto_update_settings",
     )
@@ -178,7 +178,7 @@ async def put_settings(
         db,
         current_user,
         _("Changed the automatic update settings"),
-        EntityType.SETTING,
+        EntityType.UPDATE_POLICY,
         row.id,
         "auto_update_settings",
         details=request.model_dump(exclude_none=True),
@@ -215,7 +215,7 @@ async def hold_profile(
             if request.hold
             else _("Released the hold on automatic update policy '%s'") % profile.name
         ),
-        EntityType.SETTING,
+        EntityType.UPDATE_POLICY,
         profile.id,
         profile.name,
     )

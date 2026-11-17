@@ -191,6 +191,36 @@ def test_the_most_specific_policy_wins(session, automation):
     assert [p["package_name"] for p in run.packages] == ["openssl"]
 
 
+def test_a_disabled_policy_claims_no_host(session, automation):
+    # Lab, 2026-11-17: a disabled policy listing the host, and more
+    # conservative (security only), still won it, so the enabled policy left
+    # the host alone and nothing ever patched it.
+    host = _host(session)
+    _update(session, host, "vim", kind="enhancement")
+    off = _policy(session, name="old nightly", security_only=True)
+    off.enabled = False
+    session.add(models.UpgradeProfileHost(profile_id=off.id, host_id=host.id))
+    mine = _policy(session, name="rollout")
+    session.add(models.UpgradeProfileHost(profile_id=mine.id, host_id=host.id))
+    session.commit()
+    _tick(session, automation)
+    run = session.query(models.AutoUpdateRun).one()
+    assert run.profile_id == mine.id and run.status == "queued"
+
+
+def test_a_held_policy_still_claims_its_hosts(session, automation):
+    host = _host(session)
+    _update(session, host, "openssl")
+    held = _policy(session, name="frozen", security_only=True, held=True,
+                   hold_reason="change freeze")  # fmt: skip
+    session.add(models.UpgradeProfileHost(profile_id=held.id, host_id=host.id))
+    other = _policy(session, name="everything else")
+    session.add(models.UpgradeProfileHost(profile_id=other.id, host_id=host.id))
+    session.commit()
+    _tick(session, automation)
+    assert session.query(models.AutoUpdateRun).count() == 0
+
+
 @pytest.mark.asyncio
 async def test_results_close_the_run_and_a_needed_reboot_is_queued(
     session, automation, mock_connection
@@ -283,6 +313,8 @@ def test_a_run_that_never_reports_times_out(session, automation):
     assert session.query(models.AutoUpdateRun).one().status == "timed_out"
     log = session.query(models.UpdateExecutionLog).one()
     assert log.execution_status == "failed"
+    # Not left "updating": a later run may try it again (lab, 2026-11-17).
+    assert session.query(models.PackageUpdate).one().status == "failed"
 
 
 def test_without_the_engine_nothing_runs(session, monkeypatch):

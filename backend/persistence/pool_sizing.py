@@ -71,15 +71,25 @@ import argparse
 import logging
 import os
 import sys
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from backend.config.config_target import resolve_config_target
 
 logger = logging.getLogger(__name__)
 
 CONFIG_KEY = "database_pool"
-# Connections kept free of SysManage's pools for everything else.
+# Connections kept free of SysManage's pools for everything else: psql,
+# migrations, backup tools, scripts.
 RESERVED_CONNECTIONS = 10
+# OpenBAO's database secrets engine keeps a pool per tenant database it issues
+# credentials for; 4 is its default (``max_open_connections``, sdk connutil),
+# and the multi-tenancy engine sets it explicitly when it provisions a tenant.
+# Not counted, the server's pools and OpenBAO's together could take every
+# connection PostgreSQL allows (dev server, 2026-11-17).
+OPENBAO_CONNECTIONS_PER_TENANT = 4
+# PostgreSQL's default superuser_reserved_connections: slots ordinary roles
+# never get (the server reads the real value at startup; see held_back).
+POSTGRES_SUPERUSER_SLOTS = 3
 DEFAULT_TIMEOUT = 30
 DEFAULT_RECYCLE = 1800
 DEFAULT_TENANT_SIZE = 2
@@ -238,14 +248,21 @@ def set_tenant_budget(per_worker: Optional[int]) -> None:
 
 
 def fit(
-    pool: Dict[str, int], max_connections: int, workers: int, tenants: int = 0
+    pool: Dict[str, int],
+    max_connections: int,
+    workers: int,
+    tenants: int = 0,
+    held_back: int = 0,
 ) -> Tuple[Dict[str, int], Optional[str]]:
     """Shrink ``pool`` so every worker's pools fit under the server's limit.
 
     ``tenants``: tenant databases whose pools share the server (multi-
-    tenancy).  Returns the pool to use and, when it had to change, why;
-    records the tenant pools' share for ``tenant_engine_kwargs``."""
-    allowed = (max_connections - RESERVED_CONNECTIONS) // max(1, workers)
+    tenancy).  ``held_back``: connections that are not SysManage's to use
+    beyond ``RESERVED_CONNECTIONS`` (PostgreSQL's reserved slots, OpenBAO's
+    pools -- see ``held_back``).  Returns the pool to use and, when it had to
+    change, why; records the tenant pools' share for ``tenant_engine_kwargs``."""
+    reserved = RESERVED_CONNECTIONS + max(0, held_back)
+    allowed = (max_connections - reserved) // max(1, workers)
     planned = pool["size"] + pool["max_overflow"]
     tenant_planned = tenants * (pool["tenant_size"] + pool["tenant_max_overflow"])
     set_tenant_budget(None)
@@ -275,7 +292,7 @@ def fit(
         each = max(1, _tenant_budget["per_worker"] // tenants)
         return fitted, (
             f"PostgreSQL max_connections is {max_connections}; with {workers} "
-            f"worker(s), {tenants} tenant database(s) and {RESERVED_CONNECTIONS} "
+            f"worker(s), {tenants} tenant database(s) and {reserved} "
             f"reserved, each worker may use {allowed}, but {CONFIG_KEY} asks for "
             f"{planned} + {tenants} x {pool['tenant_size'] + pool['tenant_max_overflow']}. "
             f"Using {fitted['size']} + {fitted['max_overflow']} for the bootstrap "
@@ -286,7 +303,7 @@ def fit(
         )
     reason = (
         f"PostgreSQL max_connections is {max_connections}; with {workers} worker(s) "
-        f"and {RESERVED_CONNECTIONS} reserved, each worker may use {allowed}, but "
+        f"and {reserved} reserved, each worker may use {allowed}, but "
         f"{CONFIG_KEY} asks for {planned} ({pool['size']} + {pool['max_overflow']}). "
         f"Using {fitted['size']} + {fitted['max_overflow']}. Raise max_connections "
         f"in postgresql.conf or lower {CONFIG_KEY} in sysmanage.yaml."
@@ -310,10 +327,87 @@ def server_max_connections(engine) -> Optional[int]:
         return None
 
 
+def held_back(engine, tenants: int) -> int:
+    """Connections beyond ``RESERVED_CONNECTIONS`` that SysManage's pools must
+    leave alone: PostgreSQL's own reserved slots (``superuser_reserved_
+    connections``, and ``reserved_connections`` on 16+), which ordinary roles
+    can never use, and OpenBAO's pool for each tenant database."""
+    from sqlalchemy import text  # pylint: disable=import-outside-toplevel
+
+    slots = 0
+    if engine.dialect.name == "postgresql":
+        for query in (
+            "SHOW superuser_reserved_connections",
+            "SHOW reserved_connections",
+        ):
+            try:
+                with engine.connect() as conn:
+                    slots += int(conn.execute(text(query)).scalar() or 0)
+            except Exception:  # pylint: disable=broad-exception-caught
+                pass  # reserved_connections does not exist before PostgreSQL 16
+    return slots + OPENBAO_CONNECTIONS_PER_TENANT * max(0, tenants)
+
+
 # -- install time --------------------------------------------------------------
 
 
-def config_block(pool: Dict[str, int], cpus: int, memory_gb: Optional[float]) -> str:
+def needed_max_connections(
+    pool: Dict[str, int],
+    workers: int,
+    tenants: int = 0,
+    postgres_reserved: int = POSTGRES_SUPERUSER_SLOTS,
+) -> int:
+    """The PostgreSQL ``max_connections`` at which ``fit`` shrinks nothing --
+    every worker's pools in full, the reserve, PostgreSQL's own reserved
+    slots and, with multi-tenancy, OpenBAO's pool per tenant database."""
+    planned = pool["size"] + pool["max_overflow"]
+    per_worker = planned
+    if tenants:
+        tenant_planned = tenants * (pool["tenant_size"] + pool["tenant_max_overflow"])
+        # The main pool may take only its share of a worker's connections.
+        per_worker = max(
+            planned + tenant_planned,
+            int(-(-planned // BOOTSTRAP_SHARE_WITH_TENANTS)),
+        )
+    return (
+        max(1, workers) * per_worker
+        + RESERVED_CONNECTIONS
+        + postgres_reserved
+        + OPENBAO_CONNECTIONS_PER_TENANT * max(0, tenants)
+    )
+
+
+def _install_workers(cpus: int, memory_gb: Optional[float]) -> int:
+    """The worker count the server will choose on this machine (api.workers
+    unset), for the install-time max_connections advice."""
+    from backend.startup import workers  # pylint: disable=import-outside-toplevel
+
+    return workers.recommend(cpus, memory_gb)
+
+
+def max_connections_advice(
+    pool: Dict[str, int], cpus: int, memory_gb: Optional[float], tenants: int = 0
+) -> str:
+    """One line for the installer: the max_connections this machine needs."""
+    count = _install_workers(cpus, memory_gb)
+    needed = needed_max_connections(pool, count, tenants)
+    scope = f", {tenants} tenant database(s)" if tenants else ""
+    more = (
+        ""
+        if tenants
+        else "  With multi-tenancy, get the number for N tenant databases from "
+        "`python -m backend.persistence.pool_sizing --print --tenants N`."
+    )
+    return (
+        f"Set PostgreSQL's max_connections to at least {needed} for this pool "
+        f"({count} server worker(s){scope}), then restart PostgreSQL; the "
+        f"server shrinks its pools, with a warning, when they do not fit.{more}"
+    )
+
+
+def config_block(
+    pool: Dict[str, int], cpus: int, memory_gb: Optional[float], tenants: int = 0
+) -> str:
     """The YAML an installer appends -- commented, so an admin knows what it is."""
     memory = f"{memory_gb:.1f} GB RAM" if memory_gb else "unknown RAM"
     notes = {
@@ -333,8 +427,22 @@ def config_block(pool: Dict[str, int], cpus: int, memory_gb: Optional[float]) ->
         f"# ({cpus} CPUs, {memory}).  Edit freely; the server checks these against\n"
         "# PostgreSQL's max_connections at startup and shrinks them (with a warning)\n"
         "# if every worker's pool would not fit.  Per server worker.\n"
-        f"{CONFIG_KEY}:\n" + "\n".join(lines) + "\n"
+        + "".join(
+            f"# {line}\n"
+            for line in _wrap(
+                max_connections_advice(pool, cpus, memory_gb, tenants), 74
+            )
+        )
+        + f"{CONFIG_KEY}:\n"
+        + "\n".join(lines)
+        + "\n"
     )
+
+
+def _wrap(text: str, width: int) -> List[str]:
+    import textwrap  # pylint: disable=import-outside-toplevel
+
+    return textwrap.wrap(text, width)
 
 
 def apply_to_file(path: str) -> str:
@@ -348,12 +456,16 @@ def apply_to_file(path: str) -> str:
     if any(line.startswith(f"{CONFIG_KEY}:") for line in existing.splitlines()):
         return f"{path} already has {CONFIG_KEY}; left unchanged"
     cpus, memory_gb = machine_capacity()
-    block = config_block(recommend(cpus, memory_gb), cpus, memory_gb)
+    pool = recommend(cpus, memory_gb)
+    block = config_block(pool, cpus, memory_gb)
     with open(path, "a", encoding="utf-8") as handle:
         if existing and not existing.endswith("\n"):
             handle.write("\n")
         handle.write(block)
-    return f"{path}: added {CONFIG_KEY} sized for {cpus} CPUs"
+    return (
+        f"{path}: added {CONFIG_KEY} sized for {cpus} CPUs\n"
+        f"{max_connections_advice(pool, cpus, memory_gb)}"
+    )
 
 
 def main(argv=None) -> int:
@@ -367,6 +479,14 @@ def main(argv=None) -> int:
     group.add_argument(
         "--apply", metavar="CONFIG", help="add them to this sysmanage.yaml if absent"
     )
+    parser.add_argument(
+        "--tenants",
+        type=int,
+        default=0,
+        metavar="N",
+        help="with multi-tenancy: size PostgreSQL's max_connections for N "
+        "tenant databases",
+    )
     args = parser.parse_args(argv)
     if args.apply:
         try:
@@ -376,9 +496,10 @@ def main(argv=None) -> int:
             return 1
         return 0
     cpus, memory_gb = machine_capacity()
-    print(
-        config_block(recommend(cpus, memory_gb), cpus, memory_gb).lstrip("\n"), end=""
+    block = config_block(
+        recommend(cpus, memory_gb), cpus, memory_gb, max(0, args.tenants)
     )
+    print(block.lstrip("\n"), end="")
     return 0
 
 

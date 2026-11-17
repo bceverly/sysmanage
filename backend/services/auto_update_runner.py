@@ -126,10 +126,17 @@ def profile_dict(profile, host_ids=None) -> Dict[str, Any]:
 
 
 def auto_profiles(db) -> List[Dict[str, Any]]:
-    """Every policy that applies automatically, as dicts (for resolution)."""
+    """Every enabled policy that applies automatically, as dicts (for
+    resolution).  A disabled policy claims no host: it used to take part,
+    so a disabled but more conservative policy won the host and nothing
+    patched it (lab, 2026-11-17).  A held policy still claims its hosts --
+    a hold pauses them, it does not hand them to another policy."""
     rows = (
         db.query(models.UpgradeProfile)
-        .filter(models.UpgradeProfile.auto_apply.is_(True))
+        .filter(
+            models.UpgradeProfile.auto_apply.is_(True),
+            models.UpgradeProfile.enabled.is_(True),
+        )
         .all()
     )
     hosts = profile_host_ids(db, [r.id for r in rows])
@@ -540,6 +547,15 @@ def expire_stale_runs(db, now) -> int:
             log.execution_status = "failed"
             log.error_log = _("The host never reported the result")
             log.completed_at = log.updated_at = now
+            # As a reported failure does: left "updating", every later run
+            # skipped the update as already_updating until the host's next
+            # update scan (lab, 2026-11-17).
+            db.query(models.PackageUpdate).filter(
+                models.PackageUpdate.host_id == run.host_id,
+                models.PackageUpdate.package_name == log.package_name,
+                models.PackageUpdate.package_manager == log.package_manager,
+                models.PackageUpdate.status == "updating",
+            ).update({"status": "failed"}, synchronize_session=False)
         expired += 1
     return expired
 

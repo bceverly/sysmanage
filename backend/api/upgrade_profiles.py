@@ -343,7 +343,7 @@ async def create_profile(
     AuditService.log(
         db=db,
         action_type=ActionType.CREATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.UPDATE_POLICY,
         entity_id=str(profile.id),
         entity_name=profile.name,
         description=_("Created upgrade profile '%s'") % profile.name,
@@ -412,7 +412,7 @@ async def update_profile(
     AuditService.log(
         db=db,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.UPDATE_POLICY,
         entity_id=str(profile.id),
         entity_name=profile.name,
         description=_("Updated upgrade profile '%s'") % profile.name,
@@ -445,7 +445,7 @@ async def delete_profile(
     AuditService.log(
         db=db,
         action_type=ActionType.DELETE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.UPDATE_POLICY,
         entity_id=str(pid),
         entity_name=name,
         description=_("Deleted upgrade profile '%s'") % name,
@@ -493,7 +493,7 @@ async def trigger_profile(
     AuditService.log(
         db=db,
         action_type=ActionType.EXECUTE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.UPDATE_POLICY,
         entity_id=str(profile.id),
         entity_name=profile.name,
         description=_("Ran upgrade profile '%s' now") % profile.name,

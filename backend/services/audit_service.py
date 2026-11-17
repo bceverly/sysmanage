@@ -83,6 +83,10 @@ class EntityType(str, Enum):
     AUTHENTICATION = "authentication"
     TENANT = "tenant"
     MAINTENANCE_WINDOW = "maintenance_window"
+    # Automatic update policies, holds, settings and rollouts (Phase 26):
+    # tenant data, so audited in the tenant's own log -- as SETTING they were
+    # routed to the server-wide one (2026-11-17).
+    UPDATE_POLICY = "update_policy"
     POSTURE_WAIVER = "posture_waiver"
     DISCOVERED_ASSET = "discovered_asset"
     NETWORK_SWEEP = "network_sweep"

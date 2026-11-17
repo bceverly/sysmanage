@@ -979,4 +979,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
 
         heartbeat_batch.flush()  # heartbeats recorded since the last flush (22.2)
         await leadership.stop()  # releases the leader lock for the next worker
+        # Last: every task above is stopped, so no one still uses the tenant
+        # pools; revoke this worker's OpenBAO database leases.
+        from backend.multitenancy import bridge  # noqa: PLC0415
+
+        bridge.release_tenant_engines()
         logger.info("=== FASTAPI LIFESPAN SHUTDOWN COMPLETE ===")
