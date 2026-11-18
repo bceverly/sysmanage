@@ -125,11 +125,10 @@ def test_needed_max_connections_is_exactly_what_fit_accepts(tenants, workers, si
     needed = ps.needed_max_connections(pool, workers, tenants)
     held = ps.POSTGRES_SUPERUSER_SLOTS + ps.OPENBAO_CONNECTIONS_PER_TENANT * tenants
     assert ps.fit(pool, needed, workers, tenants, held_back=held) == (pool, None)
-    shrunk, reason = ps.fit(pool, needed - workers, workers, tenants, held_back=held)
+    _shrunk, reason = ps.fit(pool, needed - workers, workers, tenants, held_back=held)
     # One connection per worker fewer is too few: the server warns (and trims
     # the main pool or the tenant pools' share).
     assert reason
-    del shrunk
 
 
 def test_the_installer_prints_the_number(tmp_path, monkeypatch):
