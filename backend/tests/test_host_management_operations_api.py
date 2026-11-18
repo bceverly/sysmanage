@@ -149,227 +149,88 @@ def create_mock_session_context(mock_session):
 
 
 class TestHostOperations:
-    """Test cases for host operations (reboot, shutdown, etc.)."""
+    """Test cases for host operations (reboot, shutdown, etc.).
 
-    @pytest.mark.asyncio
-    async def test_reboot_host_success(self, mock_config, mock_admin_user, mock_host):
+    The handlers are plain ``def`` (FastAPI runs them in its thread pool) and
+    audit on the request's own tenant session -- one connection each, never a
+    wait on the event loop (production, 2026-11-18)."""
+
+    @staticmethod
+    def _tenant_db(host):
+        tenant_db = MagicMock()
+        tenant_db.query.return_value.filter.return_value.first.return_value = host
+        return tenant_db
+
+    def _succeeds(self, handler, mock_host, user):
+        tenant_db = self._tenant_db(mock_host)
+        with patch("backend.api.host_operations.queue_ops") as mock_queue, patch(
+            "backend.api.host_operations.AuditService"
+        ) as mock_audit:
+            result = handler(str(mock_host.id), tenant_db=tenant_db, current_user=user)
+        assert result["result"] is True
+        mock_queue.enqueue_message.assert_called_once()
+        # The audit entry goes through the request's own session.
+        assert mock_audit.log.call_args.kwargs["db"] is tenant_db
+
+    def test_reboot_host_success(self, mock_config, mock_admin_user, mock_host):
         """Test requesting host reboot successfully."""
         from backend.api.host_operations import reboot_host
 
-        with patch("backend.api.host_operations.db_module") as mock_db, patch(
-            "backend.api.host_operations.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        self._succeeds(reboot_host, mock_host, mock_admin_user)
 
-            # Tenant-routed session returns the host.
-            tenant_db = MagicMock()
-            tenant_db.query.return_value.filter.return_value.first.return_value = (
-                mock_host
-            )
-
-            mock_session = MagicMock()
-
-            with patch(
-                "backend.api.host_operations.sessionmaker"
-            ) as mock_sessionmaker, patch("backend.api.host_operations.AuditService"):
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
-
-                result = await reboot_host(
-                    str(mock_host.id),
-                    tenant_db=tenant_db,
-                    current_user=mock_admin_user,
-                )
-
-                assert result["result"] is True
-                mock_queue.enqueue_message.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_reboot_host_without_permission(
-        self, mock_config, mock_user, mock_host
-    ):
+    def test_reboot_host_without_permission(self, mock_config, mock_user, mock_host):
         """Test reboot host without REBOOT_HOST permission."""
         from backend.api.host_operations import reboot_host
 
         mock_user.has_role = MagicMock(return_value=False)
+        with pytest.raises(HTTPException) as exc_info:
+            reboot_host(
+                str(mock_host.id), tenant_db=MagicMock(), current_user=mock_user
+            )
+        assert exc_info.value.status_code == 403
 
-        with patch("backend.api.host_operations.db_module") as mock_db:
-            mock_db.get_engine.return_value = MagicMock()
-
-            tenant_db = MagicMock()
-
-            with patch("backend.api.host_operations.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    MagicMock()
-                )
-
-                with pytest.raises(HTTPException) as exc_info:
-                    await reboot_host(
-                        str(mock_host.id),
-                        tenant_db=tenant_db,
-                        current_user=mock_user,
-                    )
-
-                assert exc_info.value.status_code == 403
-
-    @pytest.mark.asyncio
-    async def test_shutdown_host_success(self, mock_config, mock_admin_user, mock_host):
+    def test_shutdown_host_success(self, mock_config, mock_admin_user, mock_host):
         """Test requesting host shutdown successfully."""
         from backend.api.host_operations import shutdown_host
 
-        with patch("backend.api.host_operations.db_module") as mock_db, patch(
-            "backend.api.host_operations.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        self._succeeds(shutdown_host, mock_host, mock_admin_user)
 
-            tenant_db = MagicMock()
-            tenant_db.query.return_value.filter.return_value.first.return_value = (
-                mock_host
-            )
-
-            mock_session = MagicMock()
-
-            with patch(
-                "backend.api.host_operations.sessionmaker"
-            ) as mock_sessionmaker, patch("backend.api.host_operations.AuditService"):
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
-
-                result = await shutdown_host(
-                    str(mock_host.id),
-                    tenant_db=tenant_db,
-                    current_user=mock_admin_user,
-                )
-
-                assert result["result"] is True
-                mock_queue.enqueue_message.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_shutdown_host_without_permission(
-        self, mock_config, mock_user, mock_host
-    ):
+    def test_shutdown_host_without_permission(self, mock_config, mock_user, mock_host):
         """Test shutdown host without SHUTDOWN_HOST permission."""
         from backend.api.host_operations import shutdown_host
 
         mock_user.has_role = MagicMock(return_value=False)
+        with pytest.raises(HTTPException) as exc_info:
+            shutdown_host(
+                str(mock_host.id), tenant_db=MagicMock(), current_user=mock_user
+            )
+        assert exc_info.value.status_code == 403
 
-        with patch("backend.api.host_operations.db_module") as mock_db:
-            mock_db.get_engine.return_value = MagicMock()
-
-            tenant_db = MagicMock()
-
-            with patch("backend.api.host_operations.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    MagicMock()
-                )
-
-                with pytest.raises(HTTPException) as exc_info:
-                    await shutdown_host(
-                        str(mock_host.id),
-                        tenant_db=tenant_db,
-                        current_user=mock_user,
-                    )
-
-                assert exc_info.value.status_code == 403
-
-    @pytest.mark.asyncio
-    async def test_refresh_host_software_success(
+    def test_refresh_host_software_success(
         self, mock_config, mock_admin_user, mock_host
     ):
         """Test requesting software inventory refresh successfully."""
         from backend.api.host_operations import refresh_host_software
 
-        with patch("backend.api.host_operations.db_module") as mock_db, patch(
-            "backend.api.host_operations.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        self._succeeds(refresh_host_software, mock_host, mock_admin_user)
 
-            tenant_db = MagicMock()
-            tenant_db.query.return_value.filter.return_value.first.return_value = (
-                mock_host
-            )
-
-            mock_session = MagicMock()
-
-            with patch(
-                "backend.api.host_operations.sessionmaker"
-            ) as mock_sessionmaker, patch("backend.api.host_operations.AuditService"):
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
-
-                result = await refresh_host_software(
-                    str(mock_host.id),
-                    tenant_db=tenant_db,
-                    current_user=mock_admin_user,
-                )
-
-                assert result["result"] is True
-                mock_queue.enqueue_message.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_request_packages_success(
-        self, mock_config, mock_admin_user, mock_host
-    ):
+    def test_request_packages_success(self, mock_config, mock_admin_user, mock_host):
         """Test requesting package collection successfully."""
         from backend.api.host_operations import request_packages
 
-        with patch("backend.api.host_operations.db_module") as mock_db, patch(
-            "backend.api.host_operations.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        self._succeeds(request_packages, mock_host, mock_admin_user)
 
-            tenant_db = MagicMock()
-            tenant_db.query.return_value.filter.return_value.first.return_value = (
-                mock_host
-            )
-
-            mock_session = MagicMock()
-
-            with patch(
-                "backend.api.host_operations.sessionmaker"
-            ) as mock_sessionmaker, patch("backend.api.host_operations.AuditService"):
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
-
-                result = await request_packages(
-                    str(mock_host.id),
-                    tenant_db=tenant_db,
-                    current_user=mock_admin_user,
-                )
-
-                assert result["result"] is True
-                mock_queue.enqueue_message.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_operations_host_not_found(self, mock_config, mock_admin_user):
+    def test_operations_host_not_found(self, mock_config, mock_admin_user):
         """Test operations on non-existent host."""
         from backend.api.host_operations import reboot_host
 
-        with patch("backend.api.host_operations.db_module") as mock_db:
-            mock_db.get_engine.return_value = MagicMock()
-
-            tenant_db = MagicMock()
-            tenant_db.query.return_value.filter.return_value.first.return_value = (
-                None  # Host not found
+        with pytest.raises(HTTPException) as exc_info:
+            reboot_host(
+                str(uuid.uuid4()),
+                tenant_db=self._tenant_db(None),
+                current_user=mock_admin_user,
             )
-
-            with patch("backend.api.host_operations.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    MagicMock()
-                )
-
-                with pytest.raises(HTTPException) as exc_info:
-                    await reboot_host(
-                        str(uuid.uuid4()),
-                        tenant_db=tenant_db,
-                        current_user=mock_admin_user,
-                    )
-
-                assert exc_info.value.status_code == 404
+        assert exc_info.value.status_code == 404
 
 
 # =============================================================================
