@@ -128,7 +128,7 @@ jobs:
   test-backend:
     name: Backend Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    # 180, not 45 (2026-11-15): the macos-15 leg was canceled at 99% of
+    # 180, not 45 (2026-11-15): the macOS leg (then macos-15) was canceled at 99% of
     # tests/ once the tier walk (800+ routes per edition) joined the suite,
     # then again at 75 minutes during the post-job pip cache save.
     timeout-minutes: 180
@@ -139,7 +139,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-15]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.12']
 
     steps:
@@ -333,7 +333,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-15]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         node-version: ['22']
 
     steps:
@@ -418,7 +418,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-15]
+        os: [windows-latest, macos-latest]
         python-version: ['3.12']
         node-version: ['22']
 
