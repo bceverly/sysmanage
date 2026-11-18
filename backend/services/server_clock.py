@@ -49,6 +49,23 @@ def _reference() -> str:
     return str(ref).strip() if ref is not None else ""
 
 
+def _usable_reply(data: bytes) -> bool:
+    """True when an SNTP reply may be used (RFC 4330 section 5): a server's
+    (mode 4) or broadcast (5) reply, synchronized (leap indicator not 3), from
+    stratum 1-15 (0 is a "kiss-o'-death", e.g. RATE from a pool server that is
+    limiting us), with nonzero receive and transmit timestamps.  Production
+    once took a reply with a zero receive timestamp at face value and warned
+    that its own clock was 2,001,988,484,884 ms (63 years) off (2026-11-18)."""
+    if len(data) < 48:
+        return False
+    first, stratum = data[0], data[1]
+    leap, mode = first >> 6, first & 0x07
+    if mode not in (4, 5) or leap == 3 or not 1 <= stratum <= 15:
+        return False
+    recv_s, tx_s = struct.unpack("!I4xI", data[32:44])  # the seconds of each
+    return recv_s != 0 and tx_s != 0
+
+
 def sntp_offset_ms(server: str) -> Optional[float]:
     """This machine's clock minus ``server``'s, in ms (median of a few
     SNTP queries), or None when the server cannot be reached."""
@@ -64,7 +81,8 @@ def sntp_offset_ms(server: str) -> Optional[float]:
         except OSError as exc:
             logger.debug("server clock: SNTP to %s failed: %s", server, exc)
             continue
-        if len(data) < 48:
+        if not _usable_reply(data):
+            logger.debug("server clock: unusable SNTP reply from %s", server)
             continue
         recv_s, recv_f, tx_s, tx_f = struct.unpack("!IIII", data[32:48])
         t2 = recv_s - _NTP_EPOCH + recv_f / 2**32

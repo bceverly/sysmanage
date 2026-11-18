@@ -124,24 +124,18 @@ class MockSessionLocal:
 class TestRefreshHostSoftware:
     """Test refresh_host_software function."""
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db_module")
     @patch("backend.api.host_operations.create_command_message")
     @patch("backend.api.host_operations.queue_ops")
-    async def test_refresh_host_software_success(
-        self, mock_queue_ops, mock_create_msg, mock_db, mock_sessionmaker
-    ):
+    def test_refresh_host_software_success(self, mock_queue_ops, mock_create_msg):
         """Test successful software refresh request."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
         mock_create_msg.return_value = {"command": "update_software_inventory"}
         mock_queue_ops.enqueue_message = Mock(
             return_value="550e8400-e29b-41d4-a716-446655440000"
         )
 
-        result = await refresh_host_software(
+        result = refresh_host_software(
             1, tenant_db=mock_session, current_user=MockUser()
         )
 
@@ -152,20 +146,12 @@ class TestRefreshHostSoftware:
         )
         mock_queue_ops.enqueue_message.assert_called_once()
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db_module")
-    async def test_refresh_host_software_host_not_found(
-        self, mock_db, mock_sessionmaker
-    ):
+    def test_refresh_host_software_host_not_found(self):
         """Test software refresh when host not found."""
         mock_session = MockSession([])  # Empty hosts list
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await refresh_host_software(
-                999, tenant_db=mock_session, current_user=MockUser()
-            )
+            refresh_host_software(999, tenant_db=mock_session, current_user=MockUser())
 
         assert exc_info.value.status_code == 404
         assert "Host not found" in str(exc_info.value.detail)
@@ -174,24 +160,18 @@ class TestRefreshHostSoftware:
 class TestRebootHost:
     """Test reboot_host function."""
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db_module")
     @patch("backend.api.host_operations.create_command_message")
     @patch("backend.api.host_operations.queue_ops")
-    async def test_reboot_host_success(
-        self, mock_queue_ops, mock_create_msg, mock_db, mock_sessionmaker
-    ):
+    def test_reboot_host_success(self, mock_queue_ops, mock_create_msg):
         """Test successful reboot request."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
         mock_create_msg.return_value = {"command": "reboot_system"}
         mock_queue_ops.enqueue_message = Mock(
             return_value="550e8400-e29b-41d4-a716-446655440000"
         )
 
-        result = await reboot_host(1, tenant_db=mock_session, current_user=MockUser())
+        result = reboot_host(1, tenant_db=mock_session, current_user=MockUser())
 
         assert result["result"] is True
         assert "System reboot requested" in result["message"]
@@ -200,16 +180,12 @@ class TestRebootHost:
         )
         mock_queue_ops.enqueue_message.assert_called_once()
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db_module")
-    async def test_reboot_host_host_not_found(self, mock_db, mock_sessionmaker):
+    def test_reboot_host_host_not_found(self):
         """Test reboot when host not found."""
         mock_session = MockSession([])  # Empty hosts list
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await reboot_host(999, tenant_db=mock_session, current_user=MockUser())
+            reboot_host(999, tenant_db=mock_session, current_user=MockUser())
 
         assert exc_info.value.status_code == 404
         assert "Host not found" in str(exc_info.value.detail)
@@ -218,24 +194,18 @@ class TestRebootHost:
 class TestShutdownHost:
     """Test shutdown_host function."""
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db_module")
     @patch("backend.api.host_operations.create_command_message")
     @patch("backend.api.host_operations.queue_ops")
-    async def test_shutdown_host_success(
-        self, mock_queue_ops, mock_create_msg, mock_db, mock_sessionmaker
-    ):
+    def test_shutdown_host_success(self, mock_queue_ops, mock_create_msg):
         """Test successful shutdown request."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
         mock_create_msg.return_value = {"command": "shutdown_system"}
         mock_queue_ops.enqueue_message = Mock(
             return_value="550e8400-e29b-41d4-a716-446655440000"
         )
 
-        result = await shutdown_host(1, tenant_db=mock_session, current_user=MockUser())
+        result = shutdown_host(1, tenant_db=mock_session, current_user=MockUser())
 
         assert result["result"] is True
         assert "System shutdown requested" in result["message"]
@@ -244,16 +214,12 @@ class TestShutdownHost:
         )
         mock_queue_ops.enqueue_message.assert_called_once()
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db_module")
-    async def test_shutdown_host_host_not_found(self, mock_db, mock_sessionmaker):
+    def test_shutdown_host_host_not_found(self):
         """Test shutdown when host not found."""
         mock_session = MockSession([])  # Empty hosts list
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await shutdown_host(999, tenant_db=mock_session, current_user=MockUser())
+            shutdown_host(999, tenant_db=mock_session, current_user=MockUser())
 
         assert exc_info.value.status_code == 404
         assert "Host not found" in str(exc_info.value.detail)
@@ -262,65 +228,53 @@ class TestShutdownHost:
 class TestHostOperationsIntegration:
     """Integration tests for host operations module."""
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db_module")
     @patch("backend.api.host_operations.create_command_message")
     @patch("backend.api.host_operations.queue_ops")
-    async def test_all_operations_same_host(
-        self, mock_queue_ops, mock_create_msg, mock_db, mock_sessionmaker
-    ):
+    def test_all_operations_same_host(self, mock_queue_ops, mock_create_msg):
         """Test that all operations work for the same host."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
         mock_user = MockUser()
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
         mock_queue_ops.enqueue_message = Mock(
             return_value="550e8400-e29b-41d4-a716-446655440000"
         )
 
         # Test software refresh
         mock_create_msg.return_value = {"command": "update_software_inventory"}
-        result1 = await refresh_host_software(
+        result1 = refresh_host_software(
             1, tenant_db=mock_session, current_user=mock_user
         )
         assert result1["result"] is True
 
         # Test reboot
         mock_create_msg.return_value = {"command": "reboot_system"}
-        result2 = await reboot_host(1, tenant_db=mock_session, current_user=mock_user)
+        result2 = reboot_host(1, tenant_db=mock_session, current_user=mock_user)
         assert result2["result"] is True
 
         # Test shutdown
         mock_create_msg.return_value = {"command": "shutdown_system"}
-        result3 = await shutdown_host(1, tenant_db=mock_session, current_user=mock_user)
+        result3 = shutdown_host(1, tenant_db=mock_session, current_user=mock_user)
         assert result3["result"] is True
 
         # Verify all commands were enqueued
         assert mock_queue_ops.enqueue_message.call_count == 3
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db_module")
-    async def test_all_operations_host_not_found(self, mock_db, mock_sessionmaker):
+    def test_all_operations_host_not_found(self):
         """Test that all operations fail consistently when host not found."""
         mock_session = MockSession([])  # Empty hosts list
         mock_user = MockUser()
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         # All operations should fail with 404
         with pytest.raises(HTTPException) as exc_info1:
-            await refresh_host_software(
-                999, tenant_db=mock_session, current_user=mock_user
-            )
+            refresh_host_software(999, tenant_db=mock_session, current_user=mock_user)
         assert exc_info1.value.status_code == 404
 
         with pytest.raises(HTTPException) as exc_info2:
-            await reboot_host(999, tenant_db=mock_session, current_user=mock_user)
+            reboot_host(999, tenant_db=mock_session, current_user=mock_user)
         assert exc_info2.value.status_code == 404
 
         with pytest.raises(HTTPException) as exc_info3:
-            await shutdown_host(999, tenant_db=mock_session, current_user=mock_user)
+            shutdown_host(999, tenant_db=mock_session, current_user=mock_user)
         assert exc_info3.value.status_code == 404
 
     def test_command_message_parameters(self):
@@ -360,3 +314,45 @@ class TestHostOperationsIntegration:
 
         # This ensures we maintain consistent error messaging
         assert 404 in expected_errors
+
+
+class TestOneConnectionOffTheEventLoop:
+    """Production 2026-11-18: asking every host to upgrade its agent stalled
+    the server 30 s.  The handlers were ``async def`` waiting for a pooled
+    connection on the event loop, and each took two from a 2 + 6 tenant pool."""
+
+    def test_every_handler_runs_in_the_thread_pool(self):
+        import inspect  # pylint: disable=import-outside-toplevel
+
+        from backend.api import (
+            host_operations,
+        )  # pylint: disable=import-outside-toplevel
+
+        for name in ("refresh_host_software", "reboot_host", "shutdown_host",
+                     "update_agent", "request_packages"):  # fmt: skip
+            handler = getattr(host_operations, name)
+            assert not inspect.iscoroutinefunction(handler), name
+
+    @patch("backend.api.host_operations.create_command_message")
+    @patch("backend.api.host_operations.queue_ops")
+    def test_update_agent_audits_on_the_request_session(
+        self, mock_queue_ops, mock_create_msg
+    ):
+        from backend.api.host_operations import (
+            update_agent,
+        )  # pylint: disable=import-outside-toplevel
+        from backend.persistence import (
+            models,
+        )  # pylint: disable=import-outside-toplevel
+
+        mock_session = MockSession([MockHost()])
+        mock_create_msg.return_value = {"command": "update_agent"}
+        mock_queue_ops.enqueue_message = Mock(return_value="id")
+        with patch("sqlalchemy.orm.sessionmaker") as other_sessions:
+            result = update_agent("1", tenant_db=mock_session, current_user=MockUser())
+        assert result["result"] is True
+        audits = [
+            o for o in mock_session.added_objects if isinstance(o, models.AuditLog)
+        ]
+        assert len(audits) == 1 and "agent update" in audits[0].description
+        other_sessions.assert_not_called()
