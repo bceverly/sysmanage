@@ -72,16 +72,14 @@ class TestConfigurePrometheusDatasourceEarlyReturns:
     @pytest.mark.asyncio
     async def test_no_grafana_url_logs_and_returns(self):
         # No httpx mock needed -- function should bail before any HTTP call.
-        with patch("backend.api.grafana_integration.httpx.AsyncClient") as cls:
-            await configure_prometheus_datasource(
-                _settings(grafana_url=None), MagicMock()
-            )
+        with patch("backend.api.grafana_integration.httpx.Client") as cls:
+            configure_prometheus_datasource(_settings(grafana_url=None), MagicMock())
         cls.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_no_api_key_vault_token_returns(self):
-        with patch("backend.api.grafana_integration.httpx.AsyncClient") as cls:
-            await configure_prometheus_datasource(
+        with patch("backend.api.grafana_integration.httpx.Client") as cls:
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token=None),
                 MagicMock(),
             )
@@ -92,9 +90,9 @@ class TestConfigurePrometheusDatasourceEarlyReturns:
         session = MagicMock()
         session.query.return_value.filter.return_value.first.return_value = None
         with patch("backend.api.grafana_integration.VaultService"), patch(
-            "backend.api.grafana_integration.httpx.AsyncClient"
+            "backend.api.grafana_integration.httpx.Client"
         ) as cls:
-            await configure_prometheus_datasource(
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,
             )
@@ -107,10 +105,10 @@ class TestConfigurePrometheusDatasourceEarlyReturns:
             vault_path="vault/path"
         )
         with patch("backend.api.grafana_integration.VaultService") as cls, patch(
-            "backend.api.grafana_integration.httpx.AsyncClient"
+            "backend.api.grafana_integration.httpx.Client"
         ) as httpx_cls:
             cls.return_value.retrieve_secret.side_effect = RuntimeError("vault down")
-            await configure_prometheus_datasource(
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,
             )
@@ -133,26 +131,26 @@ class _FakeAsyncResponse:
 
 
 class _FakeAsyncClient:
-    """httpx.AsyncClient stand-in supporting the get/post/put we exercise."""
+    """httpx.Client stand-in supporting the get/post/put we exercise."""
 
     def __init__(self, get_response=None, post_response=None, put_response=None):
         self._get = get_response
         self._post = post_response
         self._put = put_response
 
-    async def __aenter__(self):
+    def __enter__(self):
         return self
 
-    async def __aexit__(self, *a):
+    def __exit__(self, *a):
         return False
 
-    async def get(self, url, headers=None):
+    def get(self, url, headers=None):
         return self._get
 
-    async def post(self, url, headers=None, json=None):
+    def post(self, url, headers=None, json=None):
         return self._post
 
-    async def put(self, url, headers=None, json=None):
+    def put(self, url, headers=None, json=None):
         return self._put
 
 
@@ -179,10 +177,10 @@ class TestConfigurePrometheusDatasourceApiKeyExtraction:
         with patch(
             "backend.api.grafana_integration.VaultService", return_value=vault
         ), patch(
-            "backend.api.grafana_integration.httpx.AsyncClient",
+            "backend.api.grafana_integration.httpx.Client",
             return_value=client,
         ):
-            await configure_prometheus_datasource(
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,
             )
@@ -197,10 +195,8 @@ class TestConfigurePrometheusDatasourceApiKeyExtraction:
         )
         with patch(
             "backend.api.grafana_integration.VaultService", return_value=vault
-        ), patch(
-            "backend.api.grafana_integration.httpx.AsyncClient", return_value=client
-        ):
-            await configure_prometheus_datasource(
+        ), patch("backend.api.grafana_integration.httpx.Client", return_value=client):
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,
             )
@@ -215,10 +211,8 @@ class TestConfigurePrometheusDatasourceApiKeyExtraction:
         )
         with patch(
             "backend.api.grafana_integration.VaultService", return_value=vault
-        ), patch(
-            "backend.api.grafana_integration.httpx.AsyncClient", return_value=client
-        ):
-            await configure_prometheus_datasource(
+        ), patch("backend.api.grafana_integration.httpx.Client", return_value=client):
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,
             )
@@ -229,8 +223,8 @@ class TestConfigurePrometheusDatasourceApiKeyExtraction:
         vault = _settings_with_secret(session, {"data": {}})
         with patch(
             "backend.api.grafana_integration.VaultService", return_value=vault
-        ), patch("backend.api.grafana_integration.httpx.AsyncClient") as httpx_cls:
-            await configure_prometheus_datasource(
+        ), patch("backend.api.grafana_integration.httpx.Client") as httpx_cls:
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,
             )
@@ -256,10 +250,8 @@ class TestConfigurePrometheusDatasourceHttp:
         )
         with patch(
             "backend.api.grafana_integration.VaultService", return_value=vault
-        ), patch(
-            "backend.api.grafana_integration.httpx.AsyncClient", return_value=client
-        ):
-            await configure_prometheus_datasource(
+        ), patch("backend.api.grafana_integration.httpx.Client", return_value=client):
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,
             )
@@ -276,11 +268,9 @@ class TestConfigurePrometheusDatasourceHttp:
         )
         with patch(
             "backend.api.grafana_integration.VaultService", return_value=vault
-        ), patch(
-            "backend.api.grafana_integration.httpx.AsyncClient", return_value=client
-        ):
+        ), patch("backend.api.grafana_integration.httpx.Client", return_value=client):
             # Function returns None whether or not create succeeded -- must not raise.
-            await configure_prometheus_datasource(
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,
             )
@@ -303,10 +293,8 @@ class TestConfigurePrometheusDatasourceHttp:
         )
         with patch(
             "backend.api.grafana_integration.VaultService", return_value=vault
-        ), patch(
-            "backend.api.grafana_integration.httpx.AsyncClient", return_value=client
-        ):
-            await configure_prometheus_datasource(
+        ), patch("backend.api.grafana_integration.httpx.Client", return_value=client):
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,
             )
@@ -329,10 +317,8 @@ class TestConfigurePrometheusDatasourceHttp:
         )
         with patch(
             "backend.api.grafana_integration.VaultService", return_value=vault
-        ), patch(
-            "backend.api.grafana_integration.httpx.AsyncClient", return_value=client
-        ):
-            await configure_prometheus_datasource(
+        ), patch("backend.api.grafana_integration.httpx.Client", return_value=client):
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,
             )
@@ -346,7 +332,7 @@ class TestConfigurePrometheusDatasourceHttp:
         captured = {}
 
         class _CapturingClient(_FakeAsyncClient):
-            async def post(self, url, headers=None, json=None):
+            def post(self, url, headers=None, json=None):
                 captured["json"] = json
                 return _FakeAsyncResponse(201)
 
@@ -356,10 +342,8 @@ class TestConfigurePrometheusDatasourceHttp:
         )
         with patch(
             "backend.api.grafana_integration.VaultService", return_value=vault
-        ), patch(
-            "backend.api.grafana_integration.httpx.AsyncClient", return_value=client
-        ):
-            await configure_prometheus_datasource(
+        ), patch("backend.api.grafana_integration.httpx.Client", return_value=client):
+            configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,
             )

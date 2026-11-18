@@ -98,7 +98,7 @@ def apply_repository_to_host(
         )
 
 
-async def apply_repository_to_matching_hosts(
+def apply_repository_to_matching_hosts(
     db_session: Session, os_name: str, repository_url: str, action: str = "add"
 ):
     """
@@ -134,7 +134,7 @@ async def apply_repository_to_matching_hosts(
 
         # Queue commands for each host
         for host in hosts:
-            await apply_repository_to_host(db_session, host, repository_url, action)
+            apply_repository_to_host(db_session, host, repository_url, action)
 
     except Exception as e:
         logger.exception(
@@ -144,7 +144,7 @@ async def apply_repository_to_matching_hosts(
         )
 
 
-async def apply_default_repositories_to_host(db_session: Session, host: models.Host):
+def apply_default_repositories_to_host(db_session: Session, host: models.Host):
     """
     Apply all default repositories for a host's operating system.
     Called when a new host is approved.
@@ -199,7 +199,7 @@ async def apply_default_repositories_to_host(db_session: Session, host: models.H
 
         # Queue add commands for each default repository
         for repo in default_repos:
-            await apply_repository_to_host(
+            apply_repository_to_host(
                 db_session, host, repo.repository_url, action="add"
             )
 
@@ -401,7 +401,7 @@ def get_default_repositories(
 
 
 @router.post("/", response_model=DefaultRepositoryResponse, status_code=201)
-async def create_default_repository(
+def create_default_repository(
     repo_data: DefaultRepositoryCreate,
     request: Request,
     db_session: Session = Depends(get_tenant_db),
@@ -462,7 +462,7 @@ async def create_default_repository(
             )
 
         # Apply this repository to all existing hosts with matching OS
-        await apply_repository_to_matching_hosts(
+        apply_repository_to_matching_hosts(
             db_session, repo_data.os_name, repo_data.repository_url, action="add"
         )
 
@@ -482,7 +482,7 @@ async def create_default_repository(
 
 
 @router.delete("/{repo_id}")
-async def delete_default_repository(
+def delete_default_repository(
     repo_id: str,
     request: Request,
     db_session: Session = Depends(get_tenant_db),
@@ -560,7 +560,7 @@ async def delete_default_repository(
             )
 
         # Remove this repository from all existing hosts with matching OS
-        await apply_repository_to_matching_hosts(
+        apply_repository_to_matching_hosts(
             db_session, repo_os_name, repo_url, action="delete"
         )
 

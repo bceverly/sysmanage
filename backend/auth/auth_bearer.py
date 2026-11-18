@@ -50,7 +50,14 @@ class JWTBearer(HTTPBearer):
                     detail=_("Invalid authentication scheme."),
                     headers=AUTH_FAILURE_HEADERS,
                 )
-            if not self.verify_jwt(credentials.credentials):
+            token = credentials.credentials
+            # A JWT is checked right here (CPU only); an API key is looked up in
+            # the database, so in the thread pool -- never on the event loop.
+            if looks_like_api_key(token):
+                valid = await run_in_threadpool(self.verify_jwt, token)
+            else:
+                valid = self.verify_jwt(token)
+            if not valid:
                 raise HTTPException(status_code=401, detail=_("Expired token."))
 
             return credentials.credentials

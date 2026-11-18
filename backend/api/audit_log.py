@@ -10,7 +10,6 @@ Advanced audit features (CSV/JSON/CEF/LEEF export, retention policies, archival)
 are provided by the audit_engine Professional+ module.
 """
 
-import asyncio
 import logging
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -244,7 +243,7 @@ def list_audit_logs(
 # including the viewer's CSV and PDF buttons -- failed with 400 "Invalid audit
 # log ID format" (found 2026-11-05).
 @router.get("/export")
-async def export_audit_logs(
+def export_audit_logs(
     filters: AuditLogFilters = Depends(),
     fmt: str = Query(
         "csv", description=_("Export format: csv, pdf (OSS); json/cef/leef (Pro+)")
@@ -278,17 +277,9 @@ async def export_audit_logs(
     # thread pool so the synchronous reportlab build does NOT stall the event
     # loop -- a blocking build here freezes EVERY other request (including the
     # page waiting on this very download), which is what made the export hang.
-    loop = asyncio.get_event_loop()
     # The active tenant is a ContextVar, which does not cross into the worker
     # thread: capture it here and hand it over.
-    return await loop.run_in_executor(
-        None,
-        _build_audit_export,
-        filters,
-        fmt_lower,
-        current_user,
-        get_active_tenant(),
-    )
+    return _build_audit_export(filters, fmt_lower, current_user, get_active_tenant())
 
 
 def _build_audit_export(filters, fmt_lower, current_user, tenant_id=None):

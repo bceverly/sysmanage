@@ -37,7 +37,6 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -270,7 +269,7 @@ def get_rule_hosts(
 
 
 @router.post("/advisor/evaluate")
-async def evaluate_now(
+def evaluate_now(
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
@@ -280,7 +279,7 @@ async def evaluate_now(
     hosts, which is running something on them.
     """
     _require_role(current_user, SecurityRoles.RUN_SCRIPT)
-    return await run_in_threadpool(tick.evaluate_database, db, "api")
+    return tick.evaluate_database(db, "api")
 
 
 # ---------------------------------------------------------------------------

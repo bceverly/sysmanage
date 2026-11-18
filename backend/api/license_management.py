@@ -13,6 +13,7 @@ the respective Cython modules via proplus_routes.py.
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -91,18 +92,8 @@ def get_license_info(current_user: str = Depends(get_current_user)):
     )
 
 
-@router.post("/license", response_model=LicenseInstallResponse)
-async def install_license(
-    request: LicenseInstallRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
-):
-    """
-    Install a new Pro+ license key.
-
-    Requires admin privileges.
-    """
-    # Check if user is admin
+def _require_admin(current_user: str) -> None:
+    """401 / 403 unless ``current_user`` is an administrator."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db_module.get_engine()
     )
@@ -120,6 +111,22 @@ async def install_license(
                 status_code=403,
                 detail=_("Administrator privileges required to install license"),
             )
+
+
+@router.post("/license", response_model=LicenseInstallResponse)
+async def install_license(
+    request: LicenseInstallRequest,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Install a new Pro+ license key.
+
+    Requires admin privileges.
+    """
+    # The admin check is a database query: in the thread pool, so it never
+    # waits for a pooled connection on the event loop.
+    await run_in_threadpool(_require_admin, current_user)
 
     # Install the license
     try:

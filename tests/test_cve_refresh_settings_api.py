@@ -426,7 +426,7 @@ class TestTriggerRefresh:
     async def _refresh(self, db, source=None, service=None):
         service = service or _Service()
         with _licensed(), service:
-            out = await cve.trigger_cve_refresh(
+            out = cve.trigger_cve_refresh(
                 background_tasks=None,
                 source=source,
                 db=db,

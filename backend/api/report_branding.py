@@ -122,7 +122,7 @@ def update_branding(
 
 
 @router.post("/logo", response_model=BrandingResponse)
-async def upload_logo(
+def upload_logo(
     file: UploadFile = File(...),
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -139,7 +139,7 @@ async def upload_logo(
             detail=_("Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"),
         )
 
-    contents = await file.read()
+    contents = file.file.read()  # a plain handler reads the spooled upload directly
     if not contents:
         raise HTTPException(status_code=400, detail=_("Empty file"))
     if len(contents) > _MAX_LOGO_BYTES:

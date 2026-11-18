@@ -85,7 +85,7 @@ def _require_advisory_license() -> None:
 
 
 @router.post("/advisory/host/{host_id}/install")
-async def install_by_advisory(
+def install_by_advisory(
     host_id: str,
     body: AdvisoryInstallRequest,
     db: Session = Depends(get_tenant_db),
@@ -122,4 +122,4 @@ async def install_by_advisory(
     request = PackageInstallRequest(
         package_names=package_names, requested_by=current_user
     )
-    return await install_packages_operation(host_id, request, db, current_user)
+    return install_packages_operation(host_id, request, db, current_user)

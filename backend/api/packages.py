@@ -353,7 +353,7 @@ def refresh_packages_for_os_version(
 
 
 @router.post("/install/{host_id}", response_model=PackageInstallResponse)
-async def install_packages(
+def install_packages(
     host_id: str,
     request: PackageInstallRequest,
     db: Session = Depends(get_tenant_db),
@@ -365,11 +365,11 @@ async def install_packages(
     Creates a single installation request with multiple packages grouped under one UUID.
     The agent will receive this UUID and return it when reporting completion.
     """
-    return await install_packages_operation(host_id, request, db, current_user)
+    return install_packages_operation(host_id, request, db, current_user)
 
 
 @router.post("/uninstall/{host_id}", response_model=PackageUninstallResponse)
-async def uninstall_packages(
+def uninstall_packages(
     host_id: str,
     request: PackageUninstallRequest,
     db: Session = Depends(get_tenant_db),
@@ -381,7 +381,7 @@ async def uninstall_packages(
     Creates a single uninstallation request with multiple packages grouped under one UUID.
     The agent will receive this UUID and return it when reporting completion.
     """
-    return await uninstall_packages_operation(host_id, request, db, current_user)
+    return uninstall_packages_operation(host_id, request, db, current_user)
 
 
 @router.get("/installation-history/{host_id}")

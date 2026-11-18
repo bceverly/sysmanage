@@ -737,7 +737,7 @@ def lock_user(user_id: str, current_user: str = Depends(get_current_user)):
 
 
 @router.post("/user/{user_id}/image", dependencies=[Depends(JWTBearer())])
-async def upload_user_profile_image(user_id: str, file: UploadFile = File(...)):
+def upload_user_profile_image(user_id: str, file: UploadFile = File(...)):
     """
     Upload a profile image for a specific user (admin function).
 
@@ -753,7 +753,9 @@ async def upload_user_profile_image(user_id: str, file: UploadFile = File(...)):
 
     # Read file content
     try:
-        file_content = await file.read()
+        file_content = (
+            file.file.read()
+        )  # a plain handler reads the spooled upload directly
     except Exception as exc:
         raise HTTPException(
             status_code=400, detail=_("Error reading uploaded file")

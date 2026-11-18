@@ -11,7 +11,7 @@ for managing repositories that are automatically applied to new hosts.
 
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -286,9 +286,9 @@ class TestApplyRepositoryToMatchingHosts:
 
         with patch(
             "backend.api.default_repositories.apply_repository_to_host",
-            new_callable=AsyncMock,
+            new_callable=MagicMock,
         ) as mock_apply:
-            await apply_repository_to_matching_hosts(
+            apply_repository_to_matching_hosts(
                 mock_session, "Ubuntu", "ppa:test/ppa", action="add"
             )
 
@@ -304,9 +304,9 @@ class TestApplyRepositoryToMatchingHosts:
 
         with patch(
             "backend.api.default_repositories.apply_repository_to_host",
-            new_callable=AsyncMock,
+            new_callable=MagicMock,
         ) as mock_apply:
-            await apply_repository_to_matching_hosts(
+            apply_repository_to_matching_hosts(
                 mock_session, "Ubuntu", "ppa:test/ppa", action="add"
             )
 
@@ -334,9 +334,9 @@ class TestApplyDefaultRepositoriesToHost:
 
         with patch(
             "backend.api.default_repositories.apply_repository_to_host",
-            new_callable=AsyncMock,
+            new_callable=MagicMock,
         ) as mock_apply:
-            await apply_default_repositories_to_host(mock_session, mock_host)
+            apply_default_repositories_to_host(mock_session, mock_host)
 
             mock_apply.assert_called_once_with(
                 mock_session, mock_host, "ppa:test/ppa", action="add"
@@ -353,9 +353,9 @@ class TestApplyDefaultRepositoriesToHost:
 
         with patch(
             "backend.api.default_repositories.apply_repository_to_host",
-            new_callable=AsyncMock,
+            new_callable=MagicMock,
         ) as mock_apply:
-            await apply_default_repositories_to_host(mock_session, mock_host)
+            apply_default_repositories_to_host(mock_session, mock_host)
 
             mock_apply.assert_not_called()
 
@@ -372,8 +372,42 @@ class TestApplyDefaultRepositoriesToHost:
 
         with patch(
             "backend.api.default_repositories.apply_repository_to_host",
-            new_callable=AsyncMock,
+            new_callable=MagicMock,
         ) as mock_apply:
-            await apply_default_repositories_to_host(mock_session, mock_host)
+            apply_default_repositories_to_host(mock_session, mock_host)
 
             mock_apply.assert_not_called()
+
+
+class TestEveryHostAndEveryRepository:
+    """Until 2026-11-18 both loops awaited ``apply_repository_to_host``, a plain
+    function: the first call queued its command, awaiting its ``None`` raised,
+    the broad ``except`` logged it and the loop stopped -- so only the FIRST
+    host (or default repository) ever got its command.  The tests mocked the
+    function with ``AsyncMock``, which is why none of them noticed."""
+
+    def test_a_repository_reaches_every_matching_host(self):
+        session = MagicMock()
+        hosts = [MagicMock(fqdn=f"h{i}.example.com") for i in range(3)]
+        session.query.return_value.filter.return_value.all.return_value = hosts
+        with patch(
+            "backend.api.default_repositories.apply_repository_to_host"
+        ) as apply:
+            apply_repository_to_matching_hosts(
+                session, "Ubuntu", "ppa:x/y", action="add"
+            )
+        assert [c.args[1] for c in apply.call_args_list] == hosts
+
+    def test_an_approved_host_gets_every_default_repository(self):
+        session = MagicMock()
+        host = MagicMock(fqdn="new.example.com", platform="Ubuntu",
+                         platform_release="Ubuntu 22.04")  # fmt: skip
+        repos = [MagicMock(repository_url=f"ppa:team/r{i}") for i in range(3)]
+        session.query.return_value.filter.return_value.all.return_value = repos
+        with patch(
+            "backend.api.default_repositories.apply_repository_to_host"
+        ) as apply:
+            apply_default_repositories_to_host(session, host)
+        assert [c.args[2] for c in apply.call_args_list] == [
+            r.repository_url for r in repos
+        ]

@@ -100,9 +100,7 @@ def _policy_verdict(db: Session, host) -> Optional[Dict[str, Any]]:
 
 
 @router.get("/host/{host_id}/clock")
-async def host_clock(
-    host_id: str, db: Session = Depends(get_tenant_db)
-) -> Dict[str, Any]:
+def host_clock(host_id: str, db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """One host's clock: measured, claimed, and its recent history."""
     try:
         key = uuid.UUID(host_id)
@@ -123,9 +121,7 @@ async def host_clock(
         .order_by(models.HostClockSample.measured_at)
         .all()
     )
-    server, [(_host, bounds, status)] = await asyncio.to_thread(
-        clock_status.evaluate, db, [host]
-    )
+    server, [(_host, bounds, status)] = clock_status.evaluate(db, [host])
     return {
         "status": status,
         "bounds": bounds,
@@ -201,11 +197,11 @@ def _counts(rows) -> Dict[str, int]:
 
 
 @router.get("/time-sync/hosts")
-async def fleet_clocks(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def fleet_clocks(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """Every approved host's clock against its bounds, worst first, with its
     site and tags so the page can filter by them."""
     hosts = _approved(db)
-    server, rows = await asyncio.to_thread(clock_status.evaluate, db, hosts)
+    server, rows = clock_status.evaluate(db, hosts)
     rank = {status: i for i, status in enumerate(clock_status.STATUS_ORDER)}
     rows.sort(
         key=lambda r: (
@@ -245,10 +241,10 @@ async def fleet_clocks(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
 
 
 @router.get("/time-sync/summary")
-async def fleet_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def fleet_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """Counts per status only -- what the dashboard tile polls."""
     hosts = _approved(db)
-    server, rows = await asyncio.to_thread(clock_status.evaluate, db, hosts)
+    server, rows = clock_status.evaluate(db, hosts)
     return {"server": server, "total": len(rows), "counts": _counts(rows)}
 
 

@@ -71,6 +71,8 @@ class MockUploadFile:
     def __init__(self, content=b"test content", filename="test.png"):
         self.content = content
         self.filename = filename
+        # Like FastAPI's UploadFile: the spooled file a plain handler reads.
+        self.file = io.BytesIO(content)
 
     async def read(self):
         """Return the file content."""
@@ -317,7 +319,7 @@ class TestImageUpload:
 
         file = MockUploadFile()
 
-        result = await upload_profile_image(file, "test@example.com")
+        result = upload_profile_image(file, "test@example.com")
 
         assert result["message"] is not None
         assert result["image_format"] == "png"
@@ -329,7 +331,7 @@ class TestImageUpload:
     async def test_upload_profile_image_no_file(self):
         """Test profile image upload with no file."""
         with pytest.raises(HTTPException) as exc_info:
-            await upload_profile_image(None, "test@example.com")
+            upload_profile_image(None, "test@example.com")
 
         assert exc_info.value.status_code == 400
         assert "No file provided" in str(exc_info.value.detail)
@@ -353,7 +355,7 @@ class TestImageUpload:
         file = MockUploadFile()
 
         with pytest.raises(HTTPException) as exc_info:
-            await upload_profile_image(file, "nonexistent@example.com")
+            upload_profile_image(file, "nonexistent@example.com")
 
         assert exc_info.value.status_code == 404
         assert "User not found" in str(exc_info.value.detail)
@@ -362,10 +364,10 @@ class TestImageUpload:
     async def test_upload_profile_image_read_error(self):
         """Test profile image upload with file read error."""
         file = Mock()
-        file.read.side_effect = Exception("Read error")
+        file.file.read.side_effect = Exception("Read error")
 
         with pytest.raises(HTTPException) as exc_info:
-            await upload_profile_image(file, "test@example.com")
+            upload_profile_image(file, "test@example.com")
 
         assert exc_info.value.status_code == 400
         assert "Error reading uploaded file" in str(exc_info.value.detail)

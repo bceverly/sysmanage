@@ -777,7 +777,7 @@ class TestHostApproval:
                 mock_cert_obj.serial_number = 12345
                 mock_x509.load_pem_x509_certificate.return_value = mock_cert_obj
 
-                result = await approve_host(str(mock_pending_host.id), mock_admin_user)
+                result = approve_host(str(mock_pending_host.id), mock_admin_user)
 
                 assert mock_pending_host.approval_status == "approved"
                 mock_session.commit.assert_called()
@@ -805,7 +805,7 @@ class TestHostApproval:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await approve_host(str(mock_host.id), mock_admin_user)
+                    approve_host(str(mock_host.id), mock_admin_user)
 
                 assert exc_info.value.status_code == 400
 
@@ -832,7 +832,7 @@ class TestHostApproval:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await approve_host(str(mock_pending_host.id), mock_user)
+                    approve_host(str(mock_pending_host.id), mock_user)
 
                 assert exc_info.value.status_code == 403
 
@@ -909,6 +909,6 @@ class TestHostApproval:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await approve_host(str(uuid.uuid4()), mock_admin_user)
+                    approve_host(str(uuid.uuid4()), mock_admin_user)
 
                 assert exc_info.value.status_code == 404

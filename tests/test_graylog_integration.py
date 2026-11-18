@@ -158,21 +158,21 @@ class _Response:
 
 
 def _client(responses):
-    """Fake httpx.AsyncClient returning ``responses`` in order."""
+    """Fake httpx.Client returning ``responses`` in order."""
     calls = []
 
     class _Client:
-        async def get(self, url, headers=None):
+        def get(self, url, headers=None):
             calls.append(url)
             return responses[len(calls) - 1]
 
-        async def __aenter__(self):
+        def __enter__(self):
             return self
 
-        async def __aexit__(self, *_exc):
+        def __exit__(self, *_exc):
             return False
 
-    return patch(f"{MOD}.httpx.AsyncClient", return_value=_Client()), calls
+    return patch(f"{MOD}.httpx.Client", return_value=_Client()), calls
 
 
 def _sockets(open_ports=()):
@@ -438,7 +438,7 @@ class TestCheckHealth:
         vault = SimpleNamespace(retrieve_secret=lambda path, token: secret)
         with maker, engine, client_patch, _sockets(open_ports):
             with patch(f"{MOD}.VaultService", return_value=vault):
-                out = await gl.check_graylog_health()
+                out = gl.check_graylog_health()
         return out, calls
 
     def _session(self, settings=None, secrets=()):
@@ -568,7 +568,7 @@ class TestCheckHealth:
         )
         with maker, engine, client_patch, _sockets():
             with patch(f"{MOD}.VaultService", return_value=vault):
-                out = await gl.check_graylog_health()
+                out = gl.check_graylog_health()
         # Health is still useful without the token; failing the whole check
         # would hide a server that is up.
         assert out.healthy is True
@@ -604,18 +604,18 @@ class TestCheckHealth:
     )
     async def test_each_transport_failure_gets_its_own_message(self, error, fragment):
         class _Client:
-            async def get(self, url, headers=None):
+            def get(self, url, headers=None):
                 raise error
 
-            async def __aenter__(self):
+            def __enter__(self):
                 return self
 
-            async def __aexit__(self, *_exc):
+            def __exit__(self, *_exc):
                 return False
 
         maker, engine = _bound(self._session(_settings_row()))
-        with maker, engine, patch(f"{MOD}.httpx.AsyncClient", return_value=_Client()):
-            out = await gl.check_graylog_health()
+        with maker, engine, patch(f"{MOD}.httpx.Client", return_value=_Client()):
+            out = gl.check_graylog_health()
         assert out.healthy is False
         assert fragment in out.error
 
@@ -634,7 +634,7 @@ class TestCheckHealth:
         maker, engine = _bound(self._session(_Exploding()))
         with maker, engine:
             with pytest.raises(HTTPException) as exc:
-                await gl.check_graylog_health()
+                gl.check_graylog_health()
         assert exc.value.status_code == 500
 
     @pytest.mark.asyncio
@@ -646,7 +646,7 @@ class TestCheckHealth:
         client_patch, _calls = _client([_Response()])
         with maker, engine, client_patch:
             with patch("socket.socket", side_effect=OSError("no sockets")):
-                out = await gl.check_graylog_health()
+                out = gl.check_graylog_health()
         assert out.healthy is True
         assert out.has_gelf_tcp is False
         assert out.has_syslog_tcp is False
@@ -664,6 +664,6 @@ class TestCheckHealth:
         )
         with maker, engine, client_patch, _sockets():
             with patch(f"{MOD}.VaultService", return_value=vault):
-                out = await gl.check_graylog_health()
+                out = gl.check_graylog_health()
         assert out.healthy is True
         assert len(calls) == 1

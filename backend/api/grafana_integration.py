@@ -34,7 +34,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-async def configure_prometheus_datasource(  # NOSONAR
+def configure_prometheus_datasource(  # NOSONAR
     settings: "models.GrafanaIntegrationSettings", session
 ) -> None:
     """
@@ -115,14 +115,14 @@ async def configure_prometheus_datasource(  # NOSONAR
         return
 
     # Configure Prometheus data source in Grafana
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    with httpx.Client(timeout=30.0) as client:
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
 
         # Check if data source already exists
-        datasources_response = await client.get(
+        datasources_response = client.get(
             f"{grafana_url}/api/datasources", headers=headers
         )
 
@@ -154,7 +154,7 @@ async def configure_prometheus_datasource(  # NOSONAR
             # Update existing data source
             datasource_config["id"] = existing_datasource["id"]
             datasource_config["uid"] = existing_datasource["uid"]
-            response = await client.put(
+            response = client.put(
                 f"{grafana_url}/api/datasources/{existing_datasource['id']}",
                 headers=headers,
                 json=datasource_config,
@@ -169,7 +169,7 @@ async def configure_prometheus_datasource(  # NOSONAR
                 )
         else:
             # Create new data source
-            response = await client.post(
+            response = client.post(
                 f"{grafana_url}/api/datasources",
                 headers=headers,
                 json=datasource_config,
@@ -290,7 +290,7 @@ def get_grafana_integration_settings():  # NOSONAR
 
 
 @router.post("/settings", dependencies=[Depends(JWTBearer())])
-async def update_grafana_integration_settings(  # NOSONAR
+def update_grafana_integration_settings(  # NOSONAR
     request: GrafanaIntegrationRequest,
     req: Request,
     current_user=Depends(get_current_user),
@@ -426,7 +426,7 @@ async def update_grafana_integration_settings(  # NOSONAR
         if settings.enabled and settings.api_key_vault_token:
             logger.info("Configuring Prometheus data source in Grafana...")
             try:
-                await configure_prometheus_datasource(settings, session)
+                configure_prometheus_datasource(settings, session)
                 logger.info("Prometheus data source configuration completed")
             except Exception as e:  # pylint: disable=broad-except
                 logger.warning("Failed to configure Prometheus data source: %s", e)
@@ -456,7 +456,7 @@ async def update_grafana_integration_settings(  # NOSONAR
 
 
 @router.get("/health", dependencies=[Depends(JWTBearer())])
-async def check_grafana_health():  # NOSONAR
+def check_grafana_health():  # NOSONAR
     """
     Check the health status of the configured Grafana server.
     """
@@ -528,9 +528,9 @@ async def check_grafana_health():  # NOSONAR
 
             # Try to get Grafana health endpoint
             logger.info("Checking Grafana health at URL: %s/api/health", grafana_url)
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            with httpx.Client(timeout=10.0) as client:
                 # Try health API first
-                health_response = await client.get(f"{grafana_url}/api/health")
+                health_response = client.get(f"{grafana_url}/api/health")
 
                 if health_response.status_code == 200:
                     health_response.json()  # NOSONAR
@@ -544,7 +544,7 @@ async def check_grafana_health():  # NOSONAR
                             headers["Authorization"] = f"Bearer {api_key}"
 
                         # Try to get build info for version details
-                        build_response = await client.get(
+                        build_response = client.get(
                             f"{grafana_url}/api/frontend/settings", headers=headers
                         )
                         if build_response.status_code == 200:

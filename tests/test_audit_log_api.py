@@ -415,7 +415,7 @@ class TestExportAuditLogs:
         maker, _ = _authorized(user)
         with maker:
             with patch(f"{MOD}._build_audit_export", return_value="rendered") as build:
-                out = await al.export_audit_logs(
+                out = al.export_audit_logs(
                     filters=filters or _filters(),
                     fmt=fmt,
                     db_session=_FakeSession(),
@@ -437,7 +437,7 @@ class TestExportAuditLogs:
         with maker:
             with patch(f"{MOD}.module_loader.get_module", return_value=None):
                 with pytest.raises(HTTPException) as exc:
-                    await al.export_audit_logs(
+                    al.export_audit_logs(
                         filters=_filters(),
                         fmt=fmt,
                         db_session=_FakeSession(),

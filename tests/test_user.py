@@ -8,7 +8,7 @@ Tests user management functionality for SysManage server.
 """
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -626,10 +626,10 @@ class TestUploadUserProfileImage:
 
         file_content = b"fake_image_data"
         mock_file = Mock()
-        mock_file.read = AsyncMock(return_value=file_content)
+        mock_file.file.read = MagicMock(return_value=file_content)
         mock_file.filename = "profile.jpg"
 
-        result = await upload_user_profile_image(1, mock_file)
+        result = upload_user_profile_image(1, mock_file)
 
         assert "Profile image uploaded successfully" in result["message"]
         assert result["image_format"] == "jpeg"
@@ -639,7 +639,7 @@ class TestUploadUserProfileImage:
     async def test_upload_user_profile_image_no_file(self):
         """Test upload without file."""
         with pytest.raises(HTTPException) as exc_info:
-            await upload_user_profile_image(1, None)
+            upload_user_profile_image(1, None)
 
         assert exc_info.value.status_code == 400
 
@@ -647,10 +647,10 @@ class TestUploadUserProfileImage:
     async def test_upload_user_profile_image_read_error(self):
         """Test upload with file read error."""
         mock_file = Mock()
-        mock_file.read = AsyncMock(side_effect=Exception("Read error"))
+        mock_file.file.read = MagicMock(side_effect=Exception("Read error"))
 
         with pytest.raises(HTTPException) as exc_info:
-            await upload_user_profile_image(1, mock_file)
+            upload_user_profile_image(1, mock_file)
 
         assert exc_info.value.status_code == 400
 
@@ -667,11 +667,11 @@ class TestUploadUserProfileImage:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         mock_file = Mock()
-        mock_file.read = AsyncMock(return_value=b"fake_image_data")
+        mock_file.file.read = MagicMock(return_value=b"fake_image_data")
         mock_file.filename = "profile.jpg"
 
         with pytest.raises(HTTPException) as exc_info:
-            await upload_user_profile_image(999, mock_file)
+            upload_user_profile_image(999, mock_file)
 
         assert exc_info.value.status_code == 404
 

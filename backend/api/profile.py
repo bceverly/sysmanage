@@ -292,7 +292,7 @@ def validate_and_process_image(file_content: bytes, filename: str) -> tuple[byte
 
 
 @router.post("/profile/image", dependencies=[Depends(JWTBearer())])
-async def upload_profile_image(
+def upload_profile_image(
     file: UploadFile = File(...), current_user: str = Depends(get_current_user)
 ):
     """
@@ -310,7 +310,9 @@ async def upload_profile_image(
 
     # Read file content
     try:
-        file_content = await file.read()
+        file_content = (
+            file.file.read()
+        )  # a plain handler reads the spooled upload directly
     except Exception as exc:
         raise HTTPException(
             status_code=400, detail=_("Error reading uploaded file")

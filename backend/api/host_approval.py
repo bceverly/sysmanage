@@ -37,7 +37,7 @@ queue_ops = QueueOperations()
 
 
 @router.put("/host/{host_id}/approve", dependencies=[Depends(JWTBearer())])
-async def approve_host(  # NOSONAR
+def approve_host(  # NOSONAR
     host_id: str, current_user=Depends(require_authenticated_user)
 ):  # pylint: disable=duplicate-code
     """
@@ -224,7 +224,7 @@ async def approve_host(  # NOSONAR
                 apply_default_repositories_to_host,
             )
 
-            await apply_default_repositories_to_host(session, host)
+            apply_default_repositories_to_host(session, host)
         except Exception as e:  # pylint: disable=broad-exception-caught
             # Don't fail the approval process if we can't apply default repos
             logger.warning(

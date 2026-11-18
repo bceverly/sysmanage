@@ -14,7 +14,6 @@ Every request is audited.  The first wave is released at once, so a single
 host does not wait for the tick.
 """
 
-import asyncio
 import uuid
 from typing import Any, Dict, List, Optional
 
@@ -83,7 +82,7 @@ def _host_or_404(db: Session, host_id: str):
 
 
 @router.post("/host/{host_id}/clock/resync")
-async def resync_host(
+def resync_host(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -94,7 +93,7 @@ async def resync_host(
     rows, skipped = clock_resync.request(db, [host], current_user.userid)
     if skipped:
         raise HTTPException(status_code=409, detail={"code": "already_running"})
-    await asyncio.to_thread(clock_resync.release, db)
+    clock_resync.release(db)
     _audit(
         db,
         current_user,
@@ -107,7 +106,7 @@ async def resync_host(
 
 
 @router.post("/time-sync/resync")
-async def resync_fleet(
+def resync_fleet(
     body: BulkBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -127,13 +126,13 @@ async def resync_fleet(
                 status_code=422, detail={"code": "bad_host_ids"}
             ) from exc
         query = query.filter(models.Host.id.in_(ids))
-    _server, evaluated = await asyncio.to_thread(clock_status.evaluate, db, query.all())
+    _server, evaluated = clock_status.evaluate(db, query.all())
     targets = [host for host, _b, status in evaluated if status in statuses]
     batch_id = uuid.uuid4()
     rows, skipped = clock_resync.request(
         db, targets, current_user.userid, batch_id=batch_id
     )
-    await asyncio.to_thread(clock_resync.release, db)
+    clock_resync.release(db)
     counts: Dict[str, int] = {}
     for row in rows:
         db.refresh(row)

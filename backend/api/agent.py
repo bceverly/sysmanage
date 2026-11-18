@@ -36,12 +36,13 @@ from backend.api.message_handlers import (
 from backend.config.config_push import config_push_manager
 from backend.i18n import _
 from backend.persistence.db import get_db
-from backend.persistence.models import Host, InstallationPackage, InstallationRequest
+from backend.persistence.models import Host, InstallationRequest
 from backend.security.agent_identity import verified_host_id
 from backend.security.client_address import request_client_address
 from backend.security.communication_security import websocket_security
 from backend.services import clock_tracking
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.async_bridge import run_to_completion
 from backend.utils.verbosity_logger import get_logger, sanitize_log
 from backend.websocket import admission
 from backend.websocket import delivery_confirmation as delivery
@@ -876,7 +877,7 @@ class InstallationCompletionRequest(BaseModel):
 
 
 @router.post("/agent/installation-complete")
-async def handle_installation_completion(
+def handle_installation_completion(
     request: InstallationCompletionRequest,
     agent_request: Request,
     db: Session = Depends(get_db),
@@ -910,9 +911,16 @@ async def handle_installation_completion(
                     agent_request.client.host if agent_request.client else "unknown"
                 )
 
-        # Validate host authentication
-        validation_result = await validate_host_authentication(
-            db, MockConnection(), message_data
+            async def send_message(self, _message):
+                # There is no WebSocket here: this HTTP route answers the
+                # refusal itself (403 below).  Without this an unknown host
+                # token raised AttributeError and the agent got a 500.
+                return None
+
+        # Validate host authentication (a coroutine: run on a loop of its own,
+        # since this plain handler is in FastAPI's thread pool)
+        validation_result = run_to_completion(
+            validate_host_authentication(db, MockConnection(), message_data)
         )
         is_valid = validation_result[0]
         if not is_valid:
@@ -939,17 +947,9 @@ async def handle_installation_completion(
         installation_request.status = "completed" if request.success else "failed"
         installation_request.result_log = request.result_log
 
-        # Update individual package statuses
-        packages = (
-            db.query(InstallationPackage)
-            .filter(InstallationPackage.installation_request_id == request.request_id)
-            .all()
-        )
-
-        for package in packages:
-            package.status = "completed" if request.success else "failed"
-            package.completed_at = now
-
+        # The outcome is the request's: InstallationPackage only lists the
+        # packages (it has no status or completed_at columns -- this used to
+        # set both on each package, and neither was ever saved).
         db.commit()
 
         logger.info(

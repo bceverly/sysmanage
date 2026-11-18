@@ -302,7 +302,7 @@ def update_graylog_integration_settings(  # NOSONAR
 
 
 @router.get("/health", dependencies=[Depends(JWTBearer())])
-async def check_graylog_health():  # NOSONAR
+def check_graylog_health():  # NOSONAR
     """
     Check the health status of the configured Graylog server.
     """
@@ -392,13 +392,13 @@ async def check_graylog_health():  # NOSONAR
                     api_token = None
 
             # Try to get Graylog health endpoint
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            with httpx.Client(timeout=10.0) as client:
                 # First try the unauthenticated load balancer status endpoint
                 logger.info(
                     "Checking Graylog health at URL: %s/api/system/lbstatus",
                     graylog_url,
                 )
-                lb_response = await client.get(f"{graylog_url}/api/system/lbstatus")
+                lb_response = client.get(f"{graylog_url}/api/system/lbstatus")
 
                 if lb_response.status_code == 200:
                     # LB status endpoint returns "ALIVE" or similar
@@ -418,7 +418,7 @@ async def check_graylog_health():  # NOSONAR
                             "Authorization": f"Bearer {api_token}",
                             "X-Requested-By": "sysmanage",
                         }
-                        system_response = await client.get(
+                        system_response = client.get(
                             f"{graylog_url}/api/system", headers=headers
                         )
                         if system_response.status_code == 200:

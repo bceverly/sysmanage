@@ -6,7 +6,7 @@
 
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -38,7 +38,7 @@ def _seed(db, host_id, advisory_id, packages, status="applicable", source=None):
 async def test_unlicensed_is_402(db_session):
     with patch.object(mod.license_service, "has_feature", return_value=False):
         with pytest.raises(HTTPException) as exc:
-            await install_by_advisory(
+            install_by_advisory(
                 str(uuid.uuid4()),
                 AdvisoryInstallRequest(advisory_id=str(uuid.uuid4())),
                 db=db_session,
@@ -51,7 +51,7 @@ async def test_unlicensed_is_402(db_session):
 async def test_no_applicable_rows_is_404(db_session):
     with patch.object(mod.license_service, "has_feature", return_value=True):
         with pytest.raises(HTTPException) as exc:
-            await install_by_advisory(
+            install_by_advisory(
                 str(uuid.uuid4()),
                 AdvisoryInstallRequest(advisory_id=str(uuid.uuid4())),
                 db=db_session,
@@ -69,9 +69,9 @@ async def test_dispatches_package_set(db_session):
     with patch.object(
         mod.license_service, "has_feature", return_value=True
     ), patch.object(
-        mod, "install_packages_operation", new=AsyncMock(return_value={"ok": True})
+        mod, "install_packages_operation", new=MagicMock(return_value={"ok": True})
     ) as install:
-        result = await install_by_advisory(
+        result = install_by_advisory(
             str(host_id),
             AdvisoryInstallRequest(advisory_id=str(advisory_id)),
             db=db_session,
@@ -109,7 +109,7 @@ async def test_openbsd_dispatches_syspatch_not_install(db_session):
     with patch.object(
         mod.license_service, "has_feature", return_value=True
     ), patch.object(
-        mod, "install_packages_operation", new=AsyncMock()
+        mod, "install_packages_operation", new=MagicMock()
     ) as install, patch(
         "backend.websocket.queue_operations.QueueOperations",
         return_value=_FakeQueue(),
@@ -117,7 +117,7 @@ async def test_openbsd_dispatches_syspatch_not_install(db_session):
         "backend.websocket.messages.create_command_message",
         side_effect=lambda ct, params: {"command_type": ct, "parameters": params},
     ):
-        result = await install_by_advisory(
+        result = install_by_advisory(
             str(host_id),
             AdvisoryInstallRequest(advisory_id=str(advisory_id)),
             db=db_session,
@@ -143,7 +143,7 @@ async def test_ignores_non_applicable_status(db_session):
 
     with patch.object(mod.license_service, "has_feature", return_value=True):
         with pytest.raises(HTTPException) as exc:
-            await install_by_advisory(
+            install_by_advisory(
                 str(host_id),
                 AdvisoryInstallRequest(advisory_id=str(advisory_id)),
                 db=db_session,

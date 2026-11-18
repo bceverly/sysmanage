@@ -30,6 +30,7 @@ from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.partitions import get_shared_db
 from backend.services.audit_service import AuditService, EntityType
+from backend.utils.async_bridge import run_to_completion
 from backend.vulnerability.cve_refresh_service import (
     CVE_SOURCES,
     CveRefreshError,
@@ -351,7 +352,7 @@ def get_ingestion_history(
 
 
 @router.post("/refresh", response_model=RefreshResultResponse)
-async def trigger_cve_refresh(
+def trigger_cve_refresh(
     background_tasks: BackgroundTasks,
     source: Optional[str] = None,
     db: Session = Depends(get_shared_db),
@@ -363,6 +364,11 @@ async def trigger_cve_refresh(
 
     If source is specified, only refresh from that source.
     Otherwise, refresh from all enabled sources.
+
+    A plain ``def``: FastAPI runs it in its thread pool, and each refresh runs
+    on an event loop of its own (``run_to_completion``).  It downloads feeds and
+    writes the CVE database for minutes; on the server's event loop, its
+    blocking database calls would stall every other request meanwhile.
     """
     _check_vuln_engine_module()
     # Check user permissions - require admin for CVE refresh
@@ -385,8 +391,10 @@ async def trigger_cve_refresh(
         # Run the refresh (this can take a while)
         if source:
             settings = cve_refresh_service.get_settings(db)
-            result = await cve_refresh_service.refresh_from_source(
-                db, source, settings.nvd_api_key
+            result = run_to_completion(
+                cve_refresh_service.refresh_from_source(
+                    db, source, settings.nvd_api_key
+                )
             )
             return RefreshResultResponse(
                 started_at=datetime.now().isoformat(),
@@ -410,8 +418,10 @@ async def trigger_cve_refresh(
 
             for src in enabled_sources:
                 try:
-                    src_result = await cve_refresh_service.refresh_from_source(
-                        db, src, settings.nvd_api_key
+                    src_result = run_to_completion(
+                        cve_refresh_service.refresh_from_source(
+                            db, src, settings.nvd_api_key
+                        )
                     )
                     all_sources[src] = {"status": "success", **src_result}
                     total_vulns += src_result.get("vulnerabilities_processed", 0)

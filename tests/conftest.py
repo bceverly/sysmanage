@@ -392,9 +392,11 @@ def client(engine, db_session, mock_config):
         with patch("backend.auth.auth_bearer.JWTBearer.__call__", new=mock_jwt_call):
             with TestClient(app) as test_client:
                 yield test_client
-
-        app.dependency_overrides.clear()
     finally:
+        # In ``finally``: a teardown that raises must never leave these on the
+        # real app -- a leaked get_current_user override turns off auth for
+        # every later test in the process.
+        app.dependency_overrides.clear()
         app.router.lifespan_context = original_lifespan
 
 
@@ -627,9 +629,9 @@ def authenticated_client(db_session, mock_config):
         with patch("backend.auth.auth_bearer.JWTBearer.__call__", new=mock_jwt_auth):
             with TestClient(app) as test_client:
                 yield test_client
-
-        app.dependency_overrides.clear()
     finally:
+        # In ``finally`` (see above): never leave an auth override behind.
+        app.dependency_overrides.clear()
         # Restore original lifespan
         app.router.lifespan_context = original_lifespan
 

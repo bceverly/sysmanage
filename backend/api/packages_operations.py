@@ -32,7 +32,7 @@ from backend.websocket.queue_manager import (
 )
 
 
-async def install_packages_operation(  # NOSONAR
+def install_packages_operation(  # NOSONAR
     host_id: str,
     request: PackageInstallRequest,
     db: Session,
@@ -211,7 +211,7 @@ async def install_packages_operation(  # NOSONAR
         ) from e
 
 
-async def uninstall_packages_operation(  # NOSONAR
+def uninstall_packages_operation(  # NOSONAR
     host_id: str,
     request: PackageUninstallRequest,
     db: Session,

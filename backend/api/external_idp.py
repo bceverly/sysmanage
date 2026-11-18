@@ -23,6 +23,7 @@ import uuid
 from typing import List, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import RedirectResponse, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -752,12 +753,20 @@ async def saml_acs(provider_id: str, request: Request, db: Session = Depends(get
 
 async def _saml_sign_in(provider_id: str, request: Request, db: Session):
     """Verify the assertion and resolve the account: (userid, tenant_id), or
-    an HTTPException saying why not."""
+    an HTTPException saying why not.  Only reading the POSTed form awaits;
+    everything after it (the RelayState claim, the engine's signature check,
+    the account and role queries) blocks, so it runs in the thread pool, off
+    the event loop."""
+    form = await request.form()
+    return await run_in_threadpool(
+        _saml_verify, provider_id, form.get("SAMLResponse"), form.get("RelayState"), db
+    )
+
+
+def _saml_verify(provider_id: str, saml_response, relay_state, db: Session):
+    """The blocking half of ``_saml_sign_in``: (userid, tenant_id)."""
     engine = _check_idp_module()
     provider = _get_provider_or_404(db, provider_id)
-    form = await request.form()
-    saml_response = form.get("SAMLResponse")
-    relay_state = form.get("RelayState")
     if not saml_response or not relay_state:
         raise HTTPException(
             status_code=400, detail=_("Missing SAMLResponse or RelayState.")
