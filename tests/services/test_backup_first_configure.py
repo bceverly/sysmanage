@@ -107,15 +107,13 @@ async def test_prepare_needs_only_the_storage_side(session, sent):
     s = _new_host(session)
     s.policy.storage_acked_version = 1
     session.commit()
-    out = await api.backup_now(
+    out = api.backup_now(
         str(s.host.id), api.RunBody(action="prepare"), session, MANAGER
     )
     assert out["action"] == "prepare"
     assert sent[-1][0] == str(s.nas.id)
     with pytest.raises(HTTPException) as caught:
-        await api.backup_now(
-            str(s.host.id), api.RunBody(action="capture"), session, MANAGER
-        )
+        api.backup_now(str(s.host.id), api.RunBody(action="capture"), session, MANAGER)
     assert caught.value.status_code == 409
 
 
@@ -123,9 +121,7 @@ async def test_prepare_needs_only_the_storage_side(session, sent):
 async def test_prepare_still_waits_for_the_storage_side(session, sent):
     s = _new_host(session)
     with pytest.raises(HTTPException) as caught:
-        await api.backup_now(
-            str(s.host.id), api.RunBody(action="prepare"), session, MANAGER
-        )
+        api.backup_now(str(s.host.id), api.RunBody(action="prepare"), session, MANAGER)
     assert caught.value.status_code == 409
 
 

@@ -145,7 +145,7 @@ def _get_user(db: Session, current_user: str) -> models.User:
 
 
 @router.get("", response_model=List[ScheduleResponse])
-async def list_schedules(db: Session = Depends(get_db)):
+def list_schedules(db: Session = Depends(get_db)):
     _check_collector_module()
     rows = (
         db.query(models.AirgapCollectionSchedule)
@@ -156,7 +156,7 @@ async def list_schedules(db: Session = Depends(get_db)):
 
 
 @router.post("", response_model=ScheduleResponse)
-async def create_schedule(
+def create_schedule(
     request: ScheduleCreateRequest,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -201,7 +201,7 @@ async def create_schedule(
 
 
 @router.get("/{schedule_id}", response_model=ScheduleResponse)
-async def get_schedule(schedule_id: str, db: Session = Depends(get_db)):
+def get_schedule(schedule_id: str, db: Session = Depends(get_db)):
     _check_collector_module()
     try:
         sid = uuid.UUID(schedule_id)
@@ -221,7 +221,7 @@ async def get_schedule(schedule_id: str, db: Session = Depends(get_db)):
 
 
 @router.put("/{schedule_id}", response_model=ScheduleResponse)
-async def update_schedule(
+def update_schedule(
     schedule_id: str,
     request: ScheduleUpdateRequest,
     db: Session = Depends(get_db),
@@ -277,7 +277,7 @@ async def update_schedule(
 
 
 @router.delete("/{schedule_id}")
-async def delete_schedule(
+def delete_schedule(
     schedule_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -316,7 +316,7 @@ async def delete_schedule(
 
 
 @router.post("/tick")
-async def tick(db: Session = Depends(get_db)):
+def tick(db: Session = Depends(get_db)):
     """Driver hook for an external scheduler.
 
     Selects every enabled schedule whose ``next_run <= now``, fires it

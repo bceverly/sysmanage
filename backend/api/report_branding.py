@@ -79,14 +79,14 @@ def _get_or_create_branding(db: Session) -> models.ReportBranding:
 
 
 @router.get("", response_model=BrandingResponse)
-async def get_branding(db: Session = Depends(get_tenant_db)):
+def get_branding(db: Session = Depends(get_tenant_db)):
     """Return current branding (without logo bytes)."""
     row = _get_or_create_branding(db)
     return BrandingResponse(**row.to_dict())
 
 
 @router.put("", response_model=BrandingResponse)
-async def update_branding(
+def update_branding(
     request: BrandingUpdateRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -172,7 +172,7 @@ async def upload_logo(
 
 
 @router.get("/logo")
-async def get_logo(db: Session = Depends(get_tenant_db)):
+def get_logo(db: Session = Depends(get_tenant_db)):
     """Stream the logo bytes.  Used by the frontend preview AND by the
     Pro+ reporting engine to embed the logo in PDFs/HTML."""
     row = (
@@ -190,7 +190,7 @@ async def get_logo(db: Session = Depends(get_tenant_db)):
 
 
 @router.delete("/logo", response_model=BrandingResponse)
-async def delete_logo(
+def delete_logo(
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
 ):

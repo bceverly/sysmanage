@@ -203,7 +203,7 @@ class Host(BaseModel):
 
 
 @auth_router.delete("/host/{host_id}", dependencies=[Depends(JWTBearer())])
-async def delete_host(host_id: str, current_user: str = Depends(get_current_user)):
+def delete_host(host_id: str, current_user: str = Depends(get_current_user)):
     """
     This function deletes a single host given an id
     """
@@ -270,7 +270,7 @@ async def delete_host(host_id: str, current_user: str = Depends(get_current_user
 
 
 @auth_router.get("/host/{host_id}", dependencies=[Depends(JWTBearer())])
-async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
+def get_host(host_id: str, current_user: str = Depends(get_current_user)):
     """
     This function retrieves a single host by its id
     """
@@ -370,7 +370,7 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
 
 
 @auth_router.get("/host/by_fqdn/{fqdn}", dependencies=[Depends(JWTBearer())])
-async def get_host_by_fqdn_endpoint(fqdn: str):
+def get_host_by_fqdn_endpoint(fqdn: str):
     """
     This function retrieves a single host by fully qualified domain name
     """
@@ -656,7 +656,7 @@ async def get_host_geolocations():
 
 
 @auth_router.post("/host", dependencies=[Depends(JWTBearer())])
-async def add_host(new_host: Host, current_user: str = Depends(get_current_user)):
+def add_host(new_host: Host, current_user: str = Depends(get_current_user)):
     """
     This function adds a new host to the system.
     """
@@ -907,7 +907,7 @@ def register_host(registration_data: HostRegistration):
 
 
 @auth_router.put("/host/{host_id}", dependencies=[Depends(JWTBearer())])
-async def update_host(
+def update_host(
     host_id: str, host_data: Host, current_user: str = Depends(get_current_user)
 ):
     """

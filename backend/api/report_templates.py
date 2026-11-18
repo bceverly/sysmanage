@@ -237,13 +237,13 @@ def _validate_template_payload(
 
 
 @router.get("", response_model=List[TemplateResponse])
-async def list_templates(db: Session = Depends(get_tenant_db)):
+def list_templates(db: Session = Depends(get_tenant_db)):
     rows = db.query(models.ReportTemplate).order_by(models.ReportTemplate.name).all()
     return [TemplateResponse(**r.to_dict()) for r in rows]
 
 
 @router.post("", response_model=TemplateResponse)
-async def create_template(
+def create_template(
     request: TemplateCreateRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -279,7 +279,7 @@ async def create_template(
 
 
 @router.get("/fields/{base_report_type}")
-async def list_fields_for_base_type(base_report_type: str):
+def list_fields_for_base_type(base_report_type: str):
     """Return the catalog of field codes the renderer recognizes for
     the given base report type.  The frontend uses this to populate the
     field-picker UI."""
@@ -295,13 +295,13 @@ async def list_fields_for_base_type(base_report_type: str):
 
 
 @router.get("/base-types")
-async def list_base_types():
+def list_base_types():
     """List the base report types that templates can be built on."""
     return {"base_types": list(_VALID_BASE_TYPES)}
 
 
 @router.get("/{template_id}", response_model=TemplateResponse)
-async def get_template(template_id: str, db: Session = Depends(get_tenant_db)):
+def get_template(template_id: str, db: Session = Depends(get_tenant_db)):
     tid = _parse_uuid_or_400(template_id, "template_id")
     template = (
         db.query(models.ReportTemplate).filter(models.ReportTemplate.id == tid).first()
@@ -312,7 +312,7 @@ async def get_template(template_id: str, db: Session = Depends(get_tenant_db)):
 
 
 @router.put("/{template_id}", response_model=TemplateResponse)
-async def update_template(
+def update_template(
     template_id: str,
     request: TemplateUpdateRequest,
     db: Session = Depends(get_tenant_db),
@@ -369,7 +369,7 @@ async def update_template(
 
 
 @router.delete("/{template_id}")
-async def delete_template(
+def delete_template(
     template_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

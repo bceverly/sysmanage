@@ -31,7 +31,7 @@ class ChangeHostnameRequest(BaseModel):
 
 
 @router.post("/host/{host_id}/change-hostname", dependencies=[Depends(JWTBearer())])
-async def change_hostname(
+def change_hostname(
     host_id: str,
     request: ChangeHostnameRequest,
     current_user=Depends(require_authenticated_user),

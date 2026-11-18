@@ -212,7 +212,7 @@ class TestGetGraylogServers:
             f"{MOD}.iter_host_databases",
             return_value=[("bootstrap", None, a), ("tenant", "t", b)],
         ):
-            out = await gl.get_graylog_servers()
+            out = gl.get_graylog_servers()
         # A tenant-bound host's HostRole lives in the tenant DB; a bootstrap-
         # only query would silently show an empty server list.
         assert [s.fqdn for s in out["graylog_servers"]] == ["a.invalid", "b.invalid"]
@@ -234,7 +234,7 @@ class TestGetGraylogServers:
             f"{MOD}.iter_host_databases",
             return_value=[("bad", None, bad), ("good", None, good)],
         ):
-            out = await gl.get_graylog_servers()
+            out = gl.get_graylog_servers()
         assert len(out["graylog_servers"]) == 1
         assert bad.closed and good.closed
 
@@ -244,7 +244,7 @@ class TestGetGraylogServers:
         with patch(
             f"{MOD}.iter_host_databases", return_value=[("bootstrap", None, session)]
         ):
-            assert await gl.get_graylog_servers() == {"graylog_servers": []}
+            assert gl.get_graylog_servers() == {"graylog_servers": []}
 
 
 # ---------------------------------------------------------------------------
@@ -258,13 +258,13 @@ class TestGetSettings:
         session = _FakeSession(GraylogIntegrationSettings=[_settings_row()])
         maker, engine = _bound(session)
         with maker, engine:
-            assert await gl.get_graylog_integration_settings() == {"enabled": True}
+            assert gl.get_graylog_integration_settings() == {"enabled": True}
 
     @pytest.mark.asyncio
     async def test_an_unconfigured_server_reports_safe_defaults(self):
         maker, engine = _bound(_FakeSession())
         with maker, engine:
-            out = await gl.get_graylog_integration_settings()
+            out = gl.get_graylog_integration_settings()
         # Defaults must be disabled: a default-on integration would start
         # shipping logs to nowhere.
         assert out["enabled"] is False
@@ -290,7 +290,7 @@ class TestUpdateSettings:
         with maker, engine, vault_patch:
             with patch(f"{MOD}.validate_host_approval_status"):
                 with patch(f"{MOD}.AuditService.log_update") as audit:
-                    out = await gl.update_graylog_integration_settings(
+                    out = gl.update_graylog_integration_settings(
                         request or _request(),
                         _http_request(),
                         current_user="admin@invalid",
@@ -406,7 +406,7 @@ class TestUpdateSettings:
             with maker, engine:
                 with patch(f"{MOD}.validate_host_approval_status"):
                     with patch(f"{MOD}.AuditService.log_update"):
-                        await gl.update_graylog_integration_settings(
+                        gl.update_graylog_integration_settings(
                             _request(api_token=token),
                             _http_request(),
                             current_user="admin@invalid",

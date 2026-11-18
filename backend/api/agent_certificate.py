@@ -66,7 +66,7 @@ def _current_not_presented(host, request: Request) -> bool:
 
 
 @router.post("/agent/certificate")
-async def agent_certificate(
+def agent_certificate(
     request: Request,
     payload: CertificateRequest,
     authorization: Optional[str] = Header(default=None),
@@ -127,7 +127,7 @@ async def agent_certificate(
 
 
 @router.get("/agent/server-identity")
-async def agent_server_identity() -> JSONResponse:
+def agent_server_identity() -> JSONResponse:
     """This server's signed statement of the TLS keys it serves."""
     spki = agent_mtls.served_tls_spki()
     if not spki:

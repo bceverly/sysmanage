@@ -26,7 +26,7 @@ class RepairBody(BaseModel):
 
 
 @router.post("/hosts/repair-package-manager")
-async def repair_package_managers(
+def repair_package_managers(
     body: RepairBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

@@ -225,7 +225,7 @@ async def list_third_party_repositories(
 
 
 @router.post("/hosts/{host_id}/third-party-repos", response_model=AddRepositoryResponse)
-async def add_third_party_repository(
+def add_third_party_repository(
     host_id: str,
     request: AddRepositoryRequest,
     db: Session = Depends(get_tenant_db),
@@ -340,7 +340,7 @@ async def add_third_party_repository(
 @router.delete(
     "/hosts/{host_id}/third-party-repos", response_model=DeleteRepositoriesResponse
 )
-async def delete_third_party_repositories(  # NOSONAR
+def delete_third_party_repositories(  # NOSONAR
     host_id: str,
     request: DeleteRepositoriesRequest,
     db: Session = Depends(get_tenant_db),
@@ -487,7 +487,7 @@ async def delete_third_party_repositories(  # NOSONAR
     "/hosts/{host_id}/third-party-repos/enable",
     response_model=EnableDisableRepositoriesResponse,
 )
-async def enable_third_party_repositories(
+def enable_third_party_repositories(
     host_id: str,
     request: EnableDisableRepositoriesRequest,
     db: Session = Depends(get_tenant_db),
@@ -605,7 +605,7 @@ async def enable_third_party_repositories(
     "/hosts/{host_id}/third-party-repos/disable",
     response_model=EnableDisableRepositoriesResponse,
 )
-async def disable_third_party_repositories(
+def disable_third_party_repositories(
     host_id: str,
     request: EnableDisableRepositoriesRequest,
     db: Session = Depends(get_tenant_db),

@@ -112,7 +112,7 @@ def _parse_tag_uuid_or_400(value: Optional[str]) -> Optional[uuid.UUID]:
 
 
 @router.post("", response_model=BroadcastResponse)
-async def broadcast_to_fleet(
+def broadcast_to_fleet(
     request: BroadcastRequest,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),

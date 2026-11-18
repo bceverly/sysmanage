@@ -66,7 +66,7 @@ class DiagnosticResponse(BaseModel):
 
 
 @router.post("/host/{host_id}/collect-diagnostics", dependencies=[Depends(JWTBearer())])
-async def collect_diagnostics(
+def collect_diagnostics(
     host_id: str,
     request: DiagnosticRequest = None,
     current_user=Depends(require_authenticated_user),
@@ -202,7 +202,7 @@ async def collect_diagnostics(
 
 
 @router.get("/host/{host_id}/diagnostics", dependencies=[Depends(JWTBearer())])
-async def get_host_diagnostics(
+def get_host_diagnostics(
     host_id: str,
     limit: int = Query(default=10, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
@@ -289,7 +289,7 @@ async def get_host_diagnostics(
 
 
 @router.get("/diagnostic/{diagnostic_id}", dependencies=[Depends(JWTBearer())])
-async def get_diagnostic_report(diagnostic_id: str):
+def get_diagnostic_report(diagnostic_id: str):
     """
     Get a specific diagnostic report with full data.
     """
@@ -365,7 +365,7 @@ async def get_diagnostic_report(diagnostic_id: str):
 
 
 @router.get("/diagnostic/{diagnostic_id}/status", dependencies=[Depends(JWTBearer())])
-async def get_diagnostic_status(diagnostic_id: str):
+def get_diagnostic_status(diagnostic_id: str):
     """
     Get the current status of a diagnostic collection.
     """
@@ -416,7 +416,7 @@ async def get_diagnostic_status(diagnostic_id: str):
 
 
 @router.delete("/diagnostic/{diagnostic_id}", dependencies=[Depends(JWTBearer())])
-async def delete_diagnostic_report(  # NOSONAR
+def delete_diagnostic_report(  # NOSONAR
     diagnostic_id: str,
 ):
     """

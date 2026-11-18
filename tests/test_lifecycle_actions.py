@@ -44,7 +44,7 @@ def _fake_engine(job):
 async def test_unlicensed_is_402(db_session):
     with patch.object(mod.license_service, "has_feature", return_value=False):
         with pytest.raises(HTTPException) as exc:
-            await upgrade_host_release(
+            upgrade_host_release(
                 str(uuid.uuid4()),
                 ReleaseUpgradeRequest(),
                 tenant_db=db_session,
@@ -62,7 +62,7 @@ async def test_missing_host_is_404(db_session):
         mod.module_loader, "get_module", return_value=_fake_engine({})
     ):
         with pytest.raises(HTTPException) as exc:
-            await upgrade_host_release(
+            upgrade_host_release(
                 str(uuid.uuid4()),
                 ReleaseUpgradeRequest(),
                 tenant_db=db_session,
@@ -92,7 +92,7 @@ async def test_creates_job_and_dispatches_command(db_session):
     ) as enqueue, patch.object(
         mod.AuditService, "log"
     ):
-        result = await upgrade_host_release(
+        result = upgrade_host_release(
             str(host_id),
             ReleaseUpgradeRequest(to_version="24.04"),
             tenant_db=db_session,

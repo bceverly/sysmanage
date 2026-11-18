@@ -161,7 +161,7 @@ class TestEnrollStart:
     async def test_a_first_enrollment_creates_the_row(self):
         db = _FakeSession(User=[_user()])
         with _Service():
-            out = await mfa.enroll_start(db=db, current_user="admin@invalid")
+            out = mfa.enroll_start(db=db, current_user="admin@invalid")
         assert out.secret == "SECRET123"
         assert out.provisioning_uri.startswith("otpauth://totp/admin@invalid")
         assert out.issuer == "SysManage"
@@ -175,7 +175,7 @@ class TestEnrollStart:
         enrollment = _enrollment()
         db = _FakeSession(User=[_user()])
         with _Service(enrollment=enrollment):
-            await mfa.enroll_start(db=db, current_user="admin@invalid")
+            mfa.enroll_start(db=db, current_user="admin@invalid")
         assert db.added == []
         assert enrollment.totp_secret_encrypted != b"enc"
         # The old backup codes belong to the old secret; leaving them live
@@ -188,7 +188,7 @@ class TestEnrollStart:
     async def test_an_unknown_user_is_a_404(self):
         with _Service():
             with pytest.raises(HTTPException) as exc:
-                await mfa.enroll_start(db=_FakeSession(), current_user="ghost")
+                mfa.enroll_start(db=_FakeSession(), current_user="ghost")
         assert exc.value.status_code == 404
 
 
@@ -196,7 +196,7 @@ class TestEnrollComplete:
     async def _complete(self, code, enrollment=None, db=None, **svc_kwargs):
         db = db or _FakeSession(User=[_user()])
         with _Service(enrollment=enrollment, **svc_kwargs):
-            out = await mfa.enroll_complete(
+            out = mfa.enroll_complete(
                 mfa.EnrollCompleteRequest(code=code),
                 db=db,
                 current_user="admin@invalid",
@@ -253,7 +253,7 @@ class TestMfaVerify:
                         "backend.api.auth._default_tenant_id_for_user",
                         return_value="tenant-1",
                     ):
-                        out = await mfa.mfa_verify(
+                        out = mfa.mfa_verify(
                             mfa.VerifyRequest(pending_token=token or "x", code=code),
                             db=db,
                         )
@@ -278,7 +278,7 @@ class TestMfaVerify:
                         "backend.api.auth._default_tenant_id_for_user",
                         return_value="tenant-9",
                     ):
-                        await mfa.mfa_verify(
+                        mfa.mfa_verify(
                             mfa.VerifyRequest(pending_token="p", code="123456"), db=db
                         )
         # Skipping this drops an MFA user into the bootstrap tenant, where
@@ -325,7 +325,7 @@ class TestMfaEmailRequest:
         with service:
             with patch(f"{MOD}.decode_mfa_pending_token") as decode:
                 decode.return_value = {"user_id": "admin@invalid"} if token else None
-                out = await mfa.mfa_email_request(
+                out = mfa.mfa_email_request(
                     mfa.EmailRequestRequest(pending_token="p"),
                     fastapi_request=SimpleNamespace(
                         client=SimpleNamespace(host="10.0.0.9")
@@ -365,7 +365,7 @@ class TestMfaEmailRequest:
                 f"{MOD}.decode_mfa_pending_token",
                 return_value={"user_id": "admin@invalid"},
             ):
-                out = await mfa.mfa_email_request(
+                out = mfa.mfa_email_request(
                     mfa.EmailRequestRequest(pending_token="p"),
                     fastapi_request=SimpleNamespace(client=None),
                     db=db,
@@ -435,7 +435,7 @@ class TestMfaDisable:
                 else _raise(VerifyMismatchError("nope"))
             )
             with patch(f"{MOD}.argon2_hasher", SimpleNamespace(verify=verify)):
-                out = await mfa.mfa_disable(
+                out = mfa.mfa_disable(
                     mfa.DisableRequest(password="pw"),
                     db=db,
                     current_user="admin@invalid",
@@ -486,7 +486,7 @@ class TestMfaStatus:
     async def test_an_unenrolled_user_reports_the_policy_only(self):
         db = _FakeSession(User=[_user()])
         with _Service(settings=_settings(admin_required=True, grace_period_days=7)):
-            out = await mfa.mfa_status(db=db, current_user="admin@invalid")
+            out = mfa.mfa_status(db=db, current_user="admin@invalid")
         assert out.enrolled is False
         assert out.remaining_backup_codes == 0
         # The policy still has to reach the UI, or an unenrolled user is
@@ -498,7 +498,7 @@ class TestMfaStatus:
     async def test_an_enrolled_user_reports_usage_and_remaining_codes(self):
         db = _FakeSession(User=[_user()])
         with _Service(enrollment=_enrollment()):
-            out = await mfa.mfa_status(db=db, current_user="admin@invalid")
+            out = mfa.mfa_status(db=db, current_user="admin@invalid")
         assert out.enrolled is True
         assert out.enrolled_at == "2026-01-01T00:00:00"
         assert out.last_used_at == "2026-02-01T00:00:00"
@@ -510,7 +510,7 @@ class TestMfaStatus:
         enrollment = _enrollment(enrolled_at=None, last_used_at=None)
         db = _FakeSession(User=[_user()])
         with _Service(enrollment=enrollment):
-            out = await mfa.mfa_status(db=db, current_user="admin@invalid")
+            out = mfa.mfa_status(db=db, current_user="admin@invalid")
         assert out.enrolled_at is None
         assert out.last_used_at is None
 
@@ -518,7 +518,7 @@ class TestMfaStatus:
     async def test_an_unknown_user_is_a_404(self):
         with _Service():
             with pytest.raises(HTTPException) as exc:
-                await mfa.mfa_status(db=_FakeSession(), current_user="ghost")
+                mfa.mfa_status(db=_FakeSession(), current_user="ghost")
         assert exc.value.status_code == 404
 
 
@@ -526,7 +526,7 @@ class TestRegenerateBackupCodes:
     async def _regen(self, code, enrollment=None, db=None):
         db = db or _FakeSession(User=[_user()])
         with _Service(enrollment=enrollment):
-            out = await mfa.regenerate_backup_codes(
+            out = mfa.regenerate_backup_codes(
                 mfa.RegenerateRequest(code=code), db=db, current_user="admin@invalid"
             )
         return out, db
@@ -567,16 +567,14 @@ class TestMfaSettings:
         # The login UI needs the issuer name and grace policy before it knows
         # anything about the user's roles.
         with _Service():
-            out = await mfa.get_mfa_settings(
-                db=_FakeSession(), current_user="anyone@invalid"
-            )
+            out = mfa.get_mfa_settings(db=_FakeSession(), current_user="anyone@invalid")
         assert out == {"issuer_name": "SysManage"}
 
     async def _update(self, request, db=None, has_role=True, settings=None):
         db = db or _FakeSession(User=[_user()])
         with _Service(settings=settings):
             with patch(f"{MOD}._user_has_role", return_value=has_role):
-                out = await mfa.update_mfa_settings(
+                out = mfa.update_mfa_settings(
                     request, db=db, current_user="admin@invalid"
                 )
         return out, db

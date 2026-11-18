@@ -77,21 +77,19 @@ def test_hours_across_midnight_and_the_whole_day():
 async def test_setting_rules_needs_the_role_and_the_engine(session, sent, licensed):
     s = _on_proxy(session)
     target_id = str(s.target.id)
-    assert await _status(transport_api.set_proxy_bandwidth(
+    assert await _status(lambda: transport_api.set_proxy_bandwidth(
         target_id, _rules("2MiB/s"), session, NOBODY)) == 403  # fmt: skip
-    assert await _status(transport_api.set_proxy_bandwidth(
+    assert await _status(lambda: transport_api.set_proxy_bandwidth(
         target_id, _rules("2 MiB/s"), session, MANAGER)) == 422  # fmt: skip
     licensed["on"] = False
-    assert await _status(transport_api.set_proxy_bandwidth(
+    assert await _status(lambda: transport_api.set_proxy_bandwidth(
         target_id, _rules("2MiB/s"), session, MANAGER)) == 402  # fmt: skip
     # Clearing never needs the license.
-    view = await transport_api.set_proxy_bandwidth(
-        target_id, _rules(), session, MANAGER
-    )
+    view = transport_api.set_proxy_bandwidth(target_id, _rules(), session, MANAGER)
     assert view["proxy_bandwidth"]["rules"] == [] and s.target.proxy_bandwidth is None
     licensed["on"] = True
     before = s.policy.config_version
-    view = await transport_api.set_proxy_bandwidth(
+    view = transport_api.set_proxy_bandwidth(
         target_id, _rules("08-18 2MiB/s", "20MiB/s"), session, MANAGER
     )
     assert json.loads(s.target.proxy_bandwidth) == ["08-18 2MiB/s", "20MiB/s"]

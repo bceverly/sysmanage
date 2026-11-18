@@ -84,7 +84,7 @@ class AntivirusStatusResponse(BaseModel):
     "/hosts/{host_id}/antivirus-status",
     response_model=Optional[AntivirusStatusResponse],
 )
-async def get_antivirus_status(
+def get_antivirus_status(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
@@ -151,7 +151,7 @@ class AntivirusDeployResponse(BaseModel):
 
 
 @router.post("/deploy", response_model=AntivirusDeployResponse)
-async def deploy_antivirus(  # NOSONAR
+def deploy_antivirus(  # NOSONAR
     deploy_request: AntivirusDeployRequest,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -360,7 +360,7 @@ async def deploy_antivirus(  # NOSONAR
     "/hosts/{host_id}/antivirus/enable",
     dependencies=[Depends(JWTBearer())],
 )
-async def enable_antivirus(
+def enable_antivirus(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -429,7 +429,7 @@ async def enable_antivirus(
     "/hosts/{host_id}/antivirus/disable",
     dependencies=[Depends(JWTBearer())],
 )
-async def disable_antivirus(
+def disable_antivirus(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -496,7 +496,7 @@ async def disable_antivirus(
     "/hosts/{host_id}/antivirus/remove",
     dependencies=[Depends(JWTBearer())],
 )
-async def remove_antivirus(
+def remove_antivirus(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -591,7 +591,7 @@ class AntivirusCoverageResponse(BaseModel):
     response_model=AntivirusCoverageResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def get_antivirus_coverage(db: Session = Depends(get_tenant_db)):
+def get_antivirus_coverage(db: Session = Depends(get_tenant_db)):
     """Get antivirus coverage statistics across all registered hosts."""
     try:
         total_hosts = db.query(models.Host).count()

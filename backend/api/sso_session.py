@@ -120,7 +120,7 @@ def _module_loaded() -> bool:
 
 
 @router.get("/api/auth/sso/providers")
-async def list_sso_providers(db: Session = Depends(get_db)) -> List[Dict[str, Any]]:
+def list_sso_providers(db: Session = Depends(get_db)) -> List[Dict[str, Any]]:
     """The server-wide OIDC/SAML providers (anonymous).
 
     Never a tenant's: on a shared console that would show visitors the names
@@ -172,7 +172,7 @@ def _tenants_for_domain(domain: str) -> List[uuid.UUID]:
 
 
 @router.post("/api/auth/login/discover")
-async def discover_login_methods(
+def discover_login_methods(
     body: LoginDiscoveryRequest, db: Session = Depends(get_db)
 ) -> Dict[str, Any]:
     """Step one of the login page: how can this email address sign in?
@@ -218,7 +218,7 @@ def _provider_entry(row) -> Dict[str, Any]:
 
 
 @router.post("/api/auth/sso/session")
-async def take_sso_session(request: Request, response: Response) -> Dict[str, Any]:
+def take_sso_session(request: Request, response: Response) -> Dict[str, Any]:
     """Hand the console the session an SSO callback just created -- once.
 
     The cookie is deleted whatever happens, and the refresh cookie is set the

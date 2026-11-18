@@ -107,9 +107,7 @@ async def _callback(db, engine, state="state-1", issued=True):
         external_idp, "_resolve_secret", return_value="client-secret"
     ):
         loader.get_module.return_value = engine
-        return await external_idp.oidc_callback(
-            str(OIDC_ID), _callback_request(state), db
-        )
+        return external_idp.oidc_callback(str(OIDC_ID), _callback_request(state), db)
 
 
 @pytest.mark.asyncio
@@ -198,7 +196,7 @@ def test_http_console_gets_no_secure_flag():
 @pytest.mark.asyncio
 async def test_providers_lists_enabled_server_wide_sso_only(db):
     with patch.object(sso_session, "_module_loaded", return_value=True):
-        listed = await sso_session.list_sso_providers(db)
+        listed = sso_session.list_sso_providers(db)
     assert [(p["name"], p["type"]) for p in listed] == [
         ("Azure", "saml"),
         ("Okta", "oidc"),
@@ -211,14 +209,14 @@ async def test_providers_lists_enabled_server_wide_sso_only(db):
 async def test_a_tenants_providers_are_never_listed_here(db):
     """Only through login discovery, for an email in the tenant's domains."""
     with patch.object(sso_session, "_module_loaded", return_value=True):
-        listed = await sso_session.list_sso_providers(db)
+        listed = sso_session.list_sso_providers(db)
     assert "Tenant IdP" not in [p["name"] for p in listed]
 
 
 @pytest.mark.asyncio
 async def test_providers_empty_without_license(db):
     with patch.object(sso_session, "_module_loaded", return_value=False):
-        assert await sso_session.list_sso_providers(db) == []
+        assert sso_session.list_sso_providers(db) == []
 
 
 def _request_with(cookie):
@@ -232,7 +230,7 @@ async def test_take_session_hands_over_once_and_sets_refresh_cookie():
     token = sign_jwt("user@acme.com", tenant_id=str(TENANT_ID))
     response = Response()
     with patch("backend.api.auth._set_refresh_cookie") as refresh:
-        body = await sso_session.take_sso_session(_request_with(token), response)
+        body = sso_session.take_sso_session(_request_with(token), response)
     assert body == {"Authorization": token, "userid": "user@acme.com"}
     refresh.assert_called_once()
     # The hand-off cookie is cleared in the same response.
@@ -245,7 +243,7 @@ async def test_take_session_hands_over_once_and_sets_refresh_cookie():
 @pytest.mark.parametrize("cookie", [None, "not-a-jwt"])
 async def test_take_session_without_valid_cookie_is_401(cookie):
     with pytest.raises(HTTPException) as exc:
-        await sso_session.take_sso_session(_request_with(cookie), Response())
+        sso_session.take_sso_session(_request_with(cookie), Response())
     assert exc.value.status_code == 401
 
 
@@ -283,10 +281,8 @@ def _discover(db, email, tenants=()):
     with patch.object(sso_session, "_module_loaded", return_value=True), patch.object(
         sso_session, "_tenants_for_domain", return_value=list(tenants)
     ):
-        return asyncio.run(
-            sso_session.discover_login_methods(
-                sso_session.LoginDiscoveryRequest(email=email), db
-            )
+        return sso_session.discover_login_methods(
+            sso_session.LoginDiscoveryRequest(email=email), db
         )
 
 

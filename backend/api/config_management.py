@@ -75,7 +75,7 @@ class ServerConfigRequest(BaseModel):
 
 
 @router.post("/config/push", dependencies=[Depends(JWTBearer())])
-async def push_configuration(
+def push_configuration(
     request: ConfigUpdateRequest, current_user=Depends(get_current_user)
 ):
     """
@@ -196,7 +196,7 @@ async def push_configuration(
 
 
 @router.post("/config/logging", dependencies=[Depends(JWTBearer())])
-async def update_logging_config(
+def update_logging_config(
     request: LoggingConfigRequest, current_user=Depends(get_current_user)
 ):
     """
@@ -212,11 +212,11 @@ async def update_logging_config(
         push_to_all=request.push_to_all,
     )
 
-    return await push_configuration(config_request, current_user)
+    return push_configuration(config_request, current_user)
 
 
 @router.post("/config/websocket", dependencies=[Depends(JWTBearer())])
-async def update_websocket_config(
+def update_websocket_config(
     request: WebSocketConfigRequest, current_user=Depends(get_current_user)
 ):
     """
@@ -233,11 +233,11 @@ async def update_websocket_config(
         push_to_all=request.push_to_all,
     )
 
-    return await push_configuration(config_request, current_user)
+    return push_configuration(config_request, current_user)
 
 
 @router.post("/config/server", dependencies=[Depends(JWTBearer())])
-async def update_server_config(
+def update_server_config(
     request: ServerConfigRequest, current_user=Depends(get_current_user)
 ):
     """
@@ -253,11 +253,11 @@ async def update_server_config(
         push_to_all=request.push_to_all,
     )
 
-    return await push_configuration(config_request, current_user)
+    return push_configuration(config_request, current_user)
 
 
 @router.get("/config/pending", dependencies=[Depends(JWTBearer())])
-async def get_pending_configs():
+def get_pending_configs():
     """
     Get all pending configuration pushes.
     """
@@ -267,7 +267,7 @@ async def get_pending_configs():
 
 
 @router.post("/config/acknowledge", dependencies=[Depends(JWTBearer())])
-async def acknowledge_config(
+def acknowledge_config(
     hostname: str, version: int, success: bool, error: Optional[str] = None
 ):
     """

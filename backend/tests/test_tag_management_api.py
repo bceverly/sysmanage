@@ -299,7 +299,7 @@ class TestCreateTag:
 
                 mock_db.refresh = mock_refresh
 
-                result = await create_tag(tag_data, mock_db, mock_admin_user)
+                result = create_tag(tag_data, mock_db, mock_admin_user)
 
                 assert result.name == "new-tag"
                 assert result.description == "A new tag"
@@ -335,7 +335,7 @@ class TestCreateTag:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await create_tag(tag_data, mock_db, mock_admin_user)
+                    create_tag(tag_data, mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 400
 
@@ -367,7 +367,7 @@ class TestCreateTag:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await create_tag(tag_data, mock_db, mock_user_no_tag_permission)
+                    create_tag(tag_data, mock_db, mock_user_no_tag_permission)
 
                 assert exc_info.value.status_code == 403
 
@@ -427,7 +427,7 @@ class TestCreateTag:
 
                 mock_db.refresh = mock_refresh
 
-                result = await create_tag(tag_data, mock_db, mock_admin_user)
+                result = create_tag(tag_data, mock_db, mock_admin_user)
 
                 assert result.name == "minimal-tag"
                 assert result.description is None
@@ -474,7 +474,7 @@ class TestUpdateTag:
                     mock_auth_session
                 )
 
-                result = await update_tag(
+                result = update_tag(
                     str(mock_tag.id), update_data, mock_db, mock_admin_user
                 )
 
@@ -511,7 +511,7 @@ class TestUpdateTag:
                     mock_auth_session
                 )
 
-                result = await update_tag(
+                result = update_tag(
                     str(mock_tag.id), update_data, mock_db, mock_admin_user
                 )
 
@@ -545,9 +545,7 @@ class TestUpdateTag:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await update_tag(
-                        str(uuid.uuid4()), update_data, mock_db, mock_admin_user
-                    )
+                    update_tag(str(uuid.uuid4()), update_data, mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 404
 
@@ -585,9 +583,7 @@ class TestUpdateTag:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await update_tag(
-                        str(mock_tag.id), update_data, mock_db, mock_admin_user
-                    )
+                    update_tag(str(mock_tag.id), update_data, mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 400
 
@@ -619,7 +615,7 @@ class TestUpdateTag:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await update_tag(
+                    update_tag(
                         str(mock_tag.id),
                         update_data,
                         mock_db,
@@ -664,7 +660,7 @@ class TestDeleteTag:
                 )
 
                 # Should return None (204 No Content)
-                result = await delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
+                result = delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
 
                 # Verify SQL deletion was called
                 assert mock_db.execute.call_count == 2  # DELETE host_tags, DELETE tags
@@ -695,7 +691,7 @@ class TestDeleteTag:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await delete_tag(str(uuid.uuid4()), mock_db, mock_admin_user)
+                    delete_tag(str(uuid.uuid4()), mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 404
 
@@ -725,9 +721,7 @@ class TestDeleteTag:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await delete_tag(
-                        str(mock_tag.id), mock_db, mock_user_no_tag_permission
-                    )
+                    delete_tag(str(mock_tag.id), mock_db, mock_user_no_tag_permission)
 
                 assert exc_info.value.status_code == 403
 
@@ -759,7 +753,7 @@ class TestDeleteTag:
                     mock_auth_session
                 )
 
-                await delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
+                delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
 
                 # Verify host_tags deletion was called first
                 calls = mock_db.execute.call_args_list

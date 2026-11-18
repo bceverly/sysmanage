@@ -77,7 +77,7 @@ class TestEmailRoutes:
 
         # Mock current user
         mock_user = Mock()
-        result = await get_email_config(current_user=mock_user)
+        result = get_email_config(current_user=mock_user)
 
         assert result.enabled is True
         assert result.smtp_host == "smtp.test.com"
@@ -108,7 +108,7 @@ class TestEmailRoutes:
 
         # Mock current user
         mock_user = Mock()
-        result = await get_email_config(current_user=mock_user)
+        result = get_email_config(current_user=mock_user)
 
         assert result.enabled is False
         assert result.smtp_host == ""
@@ -130,7 +130,7 @@ class TestEmailRoutes:
 
         # Should raise HTTPException due to configuration error
         with pytest.raises(HTTPException) as exc_info:
-            await get_email_config(current_user=mock_user)
+            get_email_config(current_user=mock_user)
 
         assert exc_info.value.status_code == 500
         assert "Failed to get email configuration" in str(exc_info.value.detail)
@@ -150,7 +150,7 @@ class TestEmailRoutes:
         from backend.api.email import test_email_config
 
         request = EmailTestRequest(to_address="recipient@test.com")
-        result = await test_email_config(request, current_user=mock_user)
+        result = test_email_config(request, current_user=mock_user)
 
         assert result.success is True
         assert "Test email sent successfully" in result.message
@@ -169,7 +169,7 @@ class TestEmailRoutes:
         from backend.api.email import test_email_config
 
         request = EmailTestRequest(to_address="recipient@test.com")
-        result = await test_email_config(request, current_user=mock_user)
+        result = test_email_config(request, current_user=mock_user)
 
         assert result.success is False
         assert "Email service is disabled" in result.message
@@ -188,7 +188,7 @@ class TestEmailRoutes:
         from backend.api.email import test_email_config
 
         request = EmailTestRequest(to_address="recipient@test.com")
-        result = await test_email_config(request, current_user=mock_user)
+        result = test_email_config(request, current_user=mock_user)
 
         assert result.success is False
         assert "Failed to send test email" in result.message
@@ -209,7 +209,7 @@ class TestEmailRoutes:
         from backend.api.email import test_email_config
 
         request = EmailTestRequest(to_address="recipient@test.com")
-        result = await test_email_config(request, current_user=mock_user)
+        result = test_email_config(request, current_user=mock_user)
 
         assert result.success is False
         assert "Error sending test email" in result.message

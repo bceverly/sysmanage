@@ -116,14 +116,14 @@ class TestList:
             Host=[host()],
             ConfigProfileRun=[run(changed=False), run(changed=False)],
         )
-        out = await api.list_config_profile_runs(str(HOST_ID), 25, session)
+        out = api.list_config_profile_runs(str(HOST_ID), 25, session)
         assert len(out) == 2
         assert all(r.changed is False for r in out)
 
     @pytest.mark.asyncio
     async def test_results_are_ordered_and_limited(self):
         session = _Session(Host=[host()], ConfigProfileRun=[run() for _ in range(10)])
-        out = await api.list_config_profile_runs(str(HOST_ID), 3, session)
+        out = api.list_config_profile_runs(str(HOST_ID), 3, session)
         assert len(out) == 3
         runs_query = session.queries[-1]
         assert runs_query.ordered is True
@@ -134,7 +134,7 @@ class TestList:
         # Without this a browser renders the naive value as local time and the
         # run appears to have happened in the future.
         session = _Session(Host=[host()], ConfigProfileRun=[run()])
-        out = await api.list_config_profile_runs(str(HOST_ID), 25, session)
+        out = api.list_config_profile_runs(str(HOST_ID), 25, session)
         assert out[0].completed_at.tzinfo is timezone.utc
 
     @pytest.mark.asyncio
@@ -143,30 +143,30 @@ class TestList:
             Host=[host()],
             ConfigProfileRun=[run(success=False, reason="executor_missing")],
         )
-        out = await api.list_config_profile_runs(str(HOST_ID), 25, session)
+        out = api.list_config_profile_runs(str(HOST_ID), 25, session)
         assert out[0].success is False and out[0].reason == "executor_missing"
 
     @pytest.mark.asyncio
     async def test_check_mode_runs_are_distinguishable(self):
         session = _Session(Host=[host()], ConfigProfileRun=[run(check_mode=True)])
-        out = await api.list_config_profile_runs(str(HOST_ID), 25, session)
+        out = api.list_config_profile_runs(str(HOST_ID), 25, session)
         assert out[0].check_mode is True
 
     @pytest.mark.asyncio
     async def test_a_host_with_no_runs_returns_an_empty_list(self):
         session = _Session(Host=[host()], ConfigProfileRun=[])
-        assert await api.list_config_profile_runs(str(HOST_ID), 25, session) == []
+        assert api.list_config_profile_runs(str(HOST_ID), 25, session) == []
 
     @pytest.mark.asyncio
     async def test_malformed_host_id_is_a_400(self):
         with pytest.raises(HTTPException) as exc:
-            await api.list_config_profile_runs("nope", 25, _Session())
+            api.list_config_profile_runs("nope", 25, _Session())
         assert exc.value.status_code == 400
 
     @pytest.mark.asyncio
     async def test_unknown_host_is_a_404(self):
         with pytest.raises(HTTPException) as exc:
-            await api.list_config_profile_runs(str(HOST_ID), 25, _Session(Host=[]))
+            api.list_config_profile_runs(str(HOST_ID), 25, _Session(Host=[]))
         assert exc.value.status_code == 404
 
 
@@ -175,7 +175,7 @@ class TestDetail:
     async def test_detail_decodes_the_task_list(self):
         tasks = [{"task": "t", "status": "changed", "changed": True}]
         session = _Session(ConfigProfileRun=[run(task_detail=json.dumps(tasks))])
-        out = await api.get_config_profile_run(str(RUN_ID), session)
+        out = api.get_config_profile_run(str(RUN_ID), session)
         assert out.tasks == tasks
 
     @pytest.mark.asyncio
@@ -184,26 +184,26 @@ class TestDetail:
         # playbook's JSON is EXPECTED to be unparsable. A run that really ran
         # must still be viewable.
         session = _Session(ConfigProfileRun=[run(task_detail='[{"task": "t"')])
-        out = await api.get_config_profile_run(str(RUN_ID), session)
+        out = api.get_config_profile_run(str(RUN_ID), session)
         assert out.tasks == []
         assert out.success is True
 
     @pytest.mark.asyncio
     async def test_non_list_detail_is_ignored(self):
         session = _Session(ConfigProfileRun=[run(task_detail='{"not": "a list"}')])
-        out = await api.get_config_profile_run(str(RUN_ID), session)
+        out = api.get_config_profile_run(str(RUN_ID), session)
         assert out.tasks == []
 
     @pytest.mark.asyncio
     async def test_missing_run_is_a_404(self):
         with pytest.raises(HTTPException) as exc:
-            await api.get_config_profile_run(str(RUN_ID), _Session(ConfigProfileRun=[]))
+            api.get_config_profile_run(str(RUN_ID), _Session(ConfigProfileRun=[]))
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_malformed_run_id_is_a_400(self):
         with pytest.raises(HTTPException) as exc:
-            await api.get_config_profile_run("nope", _Session())
+            api.get_config_profile_run("nope", _Session())
         assert exc.value.status_code == 400
 
 
@@ -285,7 +285,7 @@ class TestApply:
         session = _Session(Host=[_host()])
         with _Env():
             with pytest.raises(HTTPException) as exc:
-                await api.apply_config_profile(
+                api.apply_config_profile(
                     str(HOST_ID), _req(playbook="- hosts: all"), session, _user()
                 )
         assert exc.value.status_code == 403
@@ -297,7 +297,7 @@ class TestApply:
         session = _Session(Host=[_host(active=False)])
         with _Env() as env:
             with pytest.raises(HTTPException) as exc:
-                await api.apply_config_profile(
+                api.apply_config_profile(
                     str(HOST_ID),
                     _req(playbook="- hosts: all"),
                     session,
@@ -310,7 +310,7 @@ class TestApply:
     async def test_a_posix_host_gets_its_playbook_queued(self):
         session = _Session(Host=[_host()])
         with _Env() as env:
-            out = await api.apply_config_profile(
+            out = api.apply_config_profile(
                 str(HOST_ID),
                 _req(playbook="- hosts: all", profile_name="baseline"),
                 session,
@@ -331,7 +331,7 @@ class TestApply:
         # this suite, which is why it is now here.
         session = _Session(Host=[_host()])
         with _Env() as env:
-            await api.apply_config_profile(
+            api.apply_config_profile(
                 str(HOST_ID),
                 _req(playbook="- hosts: all"),
                 session,
@@ -344,7 +344,7 @@ class TestApply:
     async def test_a_windows_host_gets_its_resources_queued(self):
         session = _Session(Host=[_host(platform="Windows", release="")])
         with _Env() as env:
-            await api.apply_config_profile(
+            api.apply_config_profile(
                 str(HOST_ID),
                 _req(resources=[{"name": "n", "type": "T"}]),
                 session,
@@ -360,7 +360,7 @@ class TestApply:
         session = _Session(Host=[_host(platform="Windows", release="")])
         with _Env() as env:
             with pytest.raises(HTTPException) as exc:
-                await api.apply_config_profile(
+                api.apply_config_profile(
                     str(HOST_ID),
                     _req(playbook="- hosts: all"),
                     session,
@@ -374,7 +374,7 @@ class TestApply:
         session = _Session(Host=[_host()])
         with _Env() as env:
             with pytest.raises(HTTPException) as exc:
-                await api.apply_config_profile(
+                api.apply_config_profile(
                     str(HOST_ID),
                     _req(resources=[{"name": "n"}]),
                     session,
@@ -388,7 +388,7 @@ class TestApply:
         session = _Session(Host=[_host()])
         with _Env():
             with pytest.raises(HTTPException) as exc:
-                await api.apply_config_profile(
+                api.apply_config_profile(
                     str(HOST_ID),
                     _req(playbook="   "),
                     session,
@@ -400,7 +400,7 @@ class TestApply:
     async def test_check_mode_is_passed_through_and_reported(self):
         session = _Session(Host=[_host()])
         with _Env() as env:
-            out = await api.apply_config_profile(
+            out = api.apply_config_profile(
                 str(HOST_ID),
                 _req(playbook="- hosts: all", check_mode=True),
                 session,
@@ -417,7 +417,7 @@ class TestApply:
         secret = "- hosts: all\n  vars:\n    db_password: hunter2\n"
         session = _Session(Host=[_host()])
         with _Env() as env:
-            await api.apply_config_profile(
+            api.apply_config_profile(
                 str(HOST_ID),
                 _req(playbook=secret),
                 session,
@@ -431,7 +431,7 @@ class TestApply:
     async def test_unknown_host_is_a_404(self):
         with _Env():
             with pytest.raises(HTTPException) as exc:
-                await api.apply_config_profile(
+                api.apply_config_profile(
                     str(HOST_ID),
                     _req(playbook="- hosts: all"),
                     _Session(Host=[]),
@@ -451,7 +451,7 @@ class TestApplyLicensing:
     async def test_ansible_needs_no_license(self):
         session = _Session(Host=[_host()])
         with _Env() as env:
-            out = await api.apply_config_profile(
+            out = api.apply_config_profile(
                 str(HOST_ID),
                 _req(playbook="- hosts: all"),
                 session,
@@ -468,7 +468,7 @@ class TestApplyLicensing:
             side_effect=HTTPException(status_code=402, detail="pro_plus_required"),
         ):
             with pytest.raises(HTTPException) as exc:
-                await api.apply_config_profile(
+                api.apply_config_profile(
                     str(HOST_ID),
                     _req(playbook="class x {}", engine="puppet"),
                     session,
@@ -489,7 +489,7 @@ class TestApplyLicensing:
             "backend.api.config_mgmt_runs.spec_shim.build_licensed_spec",
             return_value={"engine": "puppet", "argv": ["puppet", "apply"]},
         ):
-            out = await api.apply_config_profile(
+            out = api.apply_config_profile(
                 str(HOST_ID),
                 _req(playbook="class x {}", engine="puppet"),
                 session,
@@ -504,7 +504,7 @@ class TestApplyLicensing:
         session = _Session(Host=[_host()])
         with _Env() as env:
             with pytest.raises(HTTPException) as exc:
-                await api.apply_config_profile(
+                api.apply_config_profile(
                     str(HOST_ID),
                     _req(playbook="x", engine="terraform"),
                     session,
@@ -522,7 +522,7 @@ class TestApplyLicensing:
             "backend.api.config_mgmt_runs.spec_shim.build_licensed_spec",
             return_value={"engine": "salt", "argv": ["salt-call"]},
         ):
-            await api.apply_config_profile(
+            api.apply_config_profile(
                 str(HOST_ID),
                 _req(playbook="x", engine="salt"),
                 session,
@@ -550,7 +550,7 @@ class TestApplySpecDispatch:
             "backend.api.config_mgmt_runs.spec_shim.build_licensed_spec",
             return_value=spec,
         ):
-            await api.apply_config_profile(
+            api.apply_config_profile(
                 str(HOST_ID),
                 _req(playbook="class x {}", engine="puppet"),
                 session,
@@ -570,7 +570,7 @@ class TestApplySpecDispatch:
             return_value=None,
         ):
             with pytest.raises(HTTPException) as exc:
-                await api.apply_config_profile(
+                api.apply_config_profile(
                     str(HOST_ID),
                     _req(playbook="class x {}", engine="puppet"),
                     session,
@@ -587,7 +587,7 @@ class TestApplySpecDispatch:
         with _Env() as env, patch(
             "backend.api.config_mgmt_runs.spec_shim.build_licensed_spec"
         ) as builder:
-            await api.apply_config_profile(
+            api.apply_config_profile(
                 str(HOST_ID),
                 _req(playbook="- hosts: all"),
                 session,
@@ -605,7 +605,7 @@ class TestApplySpecDispatch:
             "backend.api.config_mgmt_runs.spec_shim.build_licensed_spec",
             return_value={"engine": "salt", "argv": ["salt-call"]},
         ) as builder:
-            await api.apply_config_profile(
+            api.apply_config_profile(
                 str(HOST_ID),
                 _req(playbook="state:", engine="salt", check_mode=True, timeout=99),
                 session,

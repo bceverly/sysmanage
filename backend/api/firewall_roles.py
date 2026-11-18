@@ -61,7 +61,7 @@ router = APIRouter()
     response_model=CommonPortsResponse,
     responses={401: {"description": "Authentication required"}},
 )
-async def get_common_ports(
+def get_common_ports(
     dependencies: Annotated[dict, Depends(JWTBearer())],
 ):
     """Get list of common ports for the dropdown."""
@@ -69,7 +69,7 @@ async def get_common_ports(
 
 
 @router.get("/", response_model=List[FirewallRoleResponse])
-async def get_firewall_roles(
+def get_firewall_roles(
     db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
     current_user=Depends(require_authenticated_user),
@@ -102,7 +102,7 @@ async def get_firewall_roles(
 
 
 @router.get("/{role_id}", response_model=FirewallRoleResponse)
-async def get_firewall_role(
+def get_firewall_role(
     role_id: str,
     db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
@@ -154,7 +154,7 @@ async def get_firewall_role(
 
 
 @router.post("/", response_model=FirewallRoleResponse, status_code=201)
-async def create_firewall_role(  # NOSONAR
+def create_firewall_role(  # NOSONAR
     role_data: FirewallRoleCreate,
     request: Request,
     db_session: Session = Depends(get_tenant_db),
@@ -246,7 +246,7 @@ async def create_firewall_role(  # NOSONAR
 
 
 @router.put("/{role_id}", response_model=FirewallRoleResponse)
-async def update_firewall_role(  # NOSONAR
+def update_firewall_role(  # NOSONAR
     role_id: str,
     role_data: FirewallRoleUpdate,
     request: Request,
@@ -367,7 +367,7 @@ async def update_firewall_role(  # NOSONAR
 
 
 @router.delete("/{role_id}")
-async def delete_firewall_role(
+def delete_firewall_role(
     role_id: str,
     request: Request,
     db_session: Session = Depends(get_tenant_db),
@@ -449,7 +449,7 @@ async def delete_firewall_role(
 
 
 @router.get("/host/{host_id}/roles", response_model=List[HostFirewallRoleResponse])
-async def get_host_firewall_roles(  # NOSONAR
+def get_host_firewall_roles(  # NOSONAR
     host_id: str,
     db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
@@ -515,7 +515,7 @@ async def get_host_firewall_roles(  # NOSONAR
 
 
 @router.get("/host/{host_id}/expected-ports")
-async def get_host_expected_ports(  # NOSONAR
+def get_host_expected_ports(  # NOSONAR
     host_id: str,
     db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
@@ -607,7 +607,7 @@ async def get_host_expected_ports(  # NOSONAR
     response_model=HostFirewallRoleResponse,
     status_code=201,
 )
-async def assign_firewall_role_to_host(
+def assign_firewall_role_to_host(
     host_id: str,
     role_data: HostFirewallRoleCreate,
     request: Request,
@@ -734,7 +734,7 @@ async def assign_firewall_role_to_host(
 
 
 @router.delete("/host/{host_id}/roles/{assignment_id}")
-async def remove_firewall_role_from_host(
+def remove_firewall_role_from_host(
     host_id: str,
     assignment_id: str,
     request: Request,

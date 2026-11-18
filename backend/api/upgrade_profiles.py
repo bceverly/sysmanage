@@ -289,14 +289,14 @@ def _set_hosts(db: Session, profile, host_ids: Optional[List[str]]) -> None:
 
 
 @router.get("", response_model=List[UpgradeProfileResponse])
-async def list_profiles(db: Session = Depends(get_tenant_db)):
+def list_profiles(db: Session = Depends(get_tenant_db)):
     _check_automation_module()
     rows = db.query(models.UpgradeProfile).order_by(models.UpgradeProfile.name).all()
     return [_response(r, db) for r in rows]
 
 
 @router.post("", response_model=UpgradeProfileResponse)
-async def create_profile(
+def create_profile(
     request: UpgradeProfileCreateRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -356,7 +356,7 @@ async def create_profile(
 
 
 @router.get("/{profile_id}", response_model=UpgradeProfileResponse)
-async def get_profile(profile_id: str, db: Session = Depends(get_tenant_db)):
+def get_profile(profile_id: str, db: Session = Depends(get_tenant_db)):
     _check_automation_module()
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
@@ -368,7 +368,7 @@ async def get_profile(profile_id: str, db: Session = Depends(get_tenant_db)):
 
 
 @router.put("/{profile_id}", response_model=UpgradeProfileResponse)
-async def update_profile(
+def update_profile(
     profile_id: str,
     request: UpgradeProfileUpdateRequest,
     db: Session = Depends(get_tenant_db),
@@ -425,7 +425,7 @@ async def update_profile(
 
 
 @router.delete("/{profile_id}")
-async def delete_profile(
+def delete_profile(
     profile_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -457,7 +457,7 @@ async def delete_profile(
 
 
 @router.post("/{profile_id}/trigger")
-async def trigger_profile(
+def trigger_profile(
     profile_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -511,7 +511,7 @@ async def trigger_profile(
 
 
 @router.post("/tick")
-async def tick():
+def tick():
     """One pass of the automatic update driver, now (26.1: the server runs it
     every minute on its own; this endpoint is for tests and operators)."""
     _check_automation_module()

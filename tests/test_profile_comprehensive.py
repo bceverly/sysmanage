@@ -105,7 +105,7 @@ class TestPasswordChange:
 
         password_data = MockPasswordChange()
 
-        result = await change_password(password_data, "test@example.com")
+        result = change_password(password_data, "test@example.com")
 
         assert result["message"] is not None
         mock_hasher.verify.assert_called_once()
@@ -118,7 +118,7 @@ class TestPasswordChange:
         password_data = MockPasswordChange(confirm_password="different123")
 
         with pytest.raises(HTTPException) as exc_info:
-            await change_password(password_data, "test@example.com")
+            change_password(password_data, "test@example.com")
 
         assert exc_info.value.status_code == 400
         assert "do not match" in str(exc_info.value.detail)
@@ -135,7 +135,7 @@ class TestPasswordChange:
         password_data = MockPasswordChange()
 
         with pytest.raises(HTTPException) as exc_info:
-            await change_password(password_data, "test@example.com")
+            change_password(password_data, "test@example.com")
 
         assert exc_info.value.status_code == 400
         assert "Password too short" in str(exc_info.value.detail)
@@ -159,7 +159,7 @@ class TestPasswordChange:
         password_data = MockPasswordChange()
 
         with pytest.raises(HTTPException) as exc_info:
-            await change_password(password_data, "nonexistent@example.com")
+            change_password(password_data, "nonexistent@example.com")
 
         assert exc_info.value.status_code == 404
         assert "User not found" in str(exc_info.value.detail)
@@ -189,7 +189,7 @@ class TestPasswordChange:
         password_data = MockPasswordChange()
 
         with pytest.raises(HTTPException) as exc_info:
-            await change_password(password_data, "test@example.com")
+            change_password(password_data, "test@example.com")
 
         assert exc_info.value.status_code == 400
         assert "incorrect" in str(exc_info.value.detail)
@@ -392,7 +392,7 @@ class TestImageGet:
             mock_user
         )
 
-        result = await get_profile_image("test@example.com")
+        result = get_profile_image("test@example.com")
 
         assert result.body == b"image_bytes"
         assert result.media_type == "image/png"
@@ -418,7 +418,7 @@ class TestImageGet:
             mock_user
         )
 
-        result = await get_profile_image("test@example.com")
+        result = get_profile_image("test@example.com")
 
         assert result.media_type == "image/jpeg"
 
@@ -437,7 +437,7 @@ class TestImageGet:
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_profile_image("nonexistent@example.com")
+            get_profile_image("nonexistent@example.com")
 
         assert exc_info.value.status_code == 404
         assert "User not found" in str(exc_info.value.detail)
@@ -459,7 +459,7 @@ class TestImageGet:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_profile_image("test@example.com")
+            get_profile_image("test@example.com")
 
         assert exc_info.value.status_code == 404
         assert "No profile image found" in str(exc_info.value.detail)
@@ -488,7 +488,7 @@ class TestImageDelete:
             mock_user
         )
 
-        result = await delete_profile_image("test@example.com")
+        result = delete_profile_image("test@example.com")
 
         assert result["message"] is not None
         assert mock_user.profile_image is None
@@ -511,7 +511,7 @@ class TestImageDelete:
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
         with pytest.raises(HTTPException) as exc_info:
-            await delete_profile_image("nonexistent@example.com")
+            delete_profile_image("nonexistent@example.com")
 
         assert exc_info.value.status_code == 404
         assert "User not found" in str(exc_info.value.detail)
@@ -535,7 +535,7 @@ class TestImageDelete:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await delete_profile_image("test@example.com")
+            delete_profile_image("test@example.com")
 
         assert exc_info.value.status_code == 404
         assert "No profile image to delete" in str(exc_info.value.detail)

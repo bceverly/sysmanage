@@ -473,7 +473,7 @@ class TestListDefaultMirrorAssignments:
             MirrorRepository=[_mirror(known_version_id=assigned.id)],
         )
         with _licensed():
-            out = await api.list_default_mirror_assignments(db=db, shared_db=shared_db)
+            out = api.list_default_mirror_assignments(db=db, shared_db=shared_db)
         assert [r["version_key"] for r in out] == ["noble", "jammy"]
         assert out[0]["current_mirror_id"] == str(MIRROR_UUID)
         assert out[1]["current_mirror_id"] is None
@@ -497,7 +497,7 @@ class TestSetDefaultMirrorAssignment:
                 f"{API}._dispatch_default_mirror_change",
                 return_value=[{"host_id": "h1", "message_id": "m1"}],
             ):
-                out = await api.set_default_mirror_assignment(
+                out = api.set_default_mirror_assignment(
                     "apt",
                     "noble",
                     "ubuntu",
@@ -519,7 +519,7 @@ class TestSetDefaultMirrorAssignment:
         db = _FakeSession(HostDefaultMirror=[row])
         with _licensed():
             with patch(f"{API}._dispatch_default_mirror_change", return_value=[]):
-                out = await api.set_default_mirror_assignment(
+                out = api.set_default_mirror_assignment(
                     "apt",
                     "noble",
                     "ubuntu",
@@ -535,7 +535,7 @@ class TestSetDefaultMirrorAssignment:
     async def test_an_unknown_catalog_tuple_is_a_404(self):
         with _licensed():
             with pytest.raises(HTTPException) as exc:
-                await api.set_default_mirror_assignment(
+                api.set_default_mirror_assignment(
                     "apt",
                     "gone",
                     "ubuntu",
@@ -555,7 +555,7 @@ class TestSetDefaultMirrorAssignment:
         )
         with _licensed():
             with pytest.raises(HTTPException) as exc:
-                await api.set_default_mirror_assignment(
+                api.set_default_mirror_assignment(
                     "apt",
                     "noble",
                     "ubuntu",
@@ -582,7 +582,7 @@ class TestUpdateMirrorSettingsCreatesTheSingleton:
 
         db = _NotContaining()
         with _licensed(), patch(f"{API}._get_settings", return_value=row):
-            await api.update_mirror_settings(
+            api.update_mirror_settings(
                 MirrorSettingsRequest(mirror_root_path="/new"), db=db, current_user="u"
             )
         # _get_settings hands back an unsaved instance the first time; without

@@ -237,19 +237,13 @@ async def test_saving_the_key_needs_the_engine_and_refuses_a_secret_key(session)
     )
     with patch.object(escrow, "backup_engine", return_value=None):
         with pytest.raises(HTTPException) as no_engine:
-            await api.save_escrow_key(
-                api.EscrowKeyBody(public_key=PUBLIC), session, user
-            )
+            api.save_escrow_key(api.EscrowKeyBody(public_key=PUBLIC), session, user)
     assert no_engine.value.status_code == 402
     with _engine(), patch.object(api, "_audit") as audit:
         with pytest.raises(HTTPException) as secret:
-            await api.save_escrow_key(
-                api.EscrowKeyBody(public_key=SECRET), session, user
-            )
+            api.save_escrow_key(api.EscrowKeyBody(public_key=SECRET), session, user)
         assert secret.value.status_code == 422
-        saved = await api.save_escrow_key(
-            api.EscrowKeyBody(public_key=PUBLIC), session, user
-        )
+        saved = api.save_escrow_key(api.EscrowKeyBody(public_key=PUBLIC), session, user)
     audit.assert_called_once()  # the refused secret key was never audited as saved
     assert audit.call_args.args[5] == "Backup break-glass escrow key saved"
     assert saved["fingerprint"] == "F" * 40 and s.target.escrow_fingerprint == "F" * 40

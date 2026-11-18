@@ -136,7 +136,7 @@ def _change_fips(host_id: str, enable: bool, body, tenant_db, current_user):
 
 
 @router.post("/fips/host/{host_id}/enable")
-async def enable_fips(
+def enable_fips(
     host_id: str,
     body: FipsChangeRequest,
     tenant_db: Session = Depends(get_tenant_db),
@@ -147,7 +147,7 @@ async def enable_fips(
 
 
 @router.post("/fips/host/{host_id}/disable")
-async def disable_fips(
+def disable_fips(
     host_id: str,
     body: FipsChangeRequest,
     tenant_db: Session = Depends(get_tenant_db),
@@ -158,7 +158,7 @@ async def disable_fips(
 
 
 @router.get("/fips/host/{host_id}")
-async def host_fips_status(
+def host_fips_status(
     host_id: str,
     tenant_db: Session = Depends(get_tenant_db),
     current_user=Depends(get_current_user),  # noqa: ARG001
@@ -190,7 +190,7 @@ async def host_fips_status(
 
 
 @router.get("/fips/fleet")
-async def fleet_fips_posture(
+def fleet_fips_posture(
     tenant_db: Session = Depends(get_tenant_db),
     current_user=Depends(get_current_user),  # noqa: ARG001
 ):

@@ -297,7 +297,7 @@ class TestChildHostControlEndpoints:
             from backend.api.child_host_control import start_child_host
 
             with pytest.raises(HTTPException) as exc_info:
-                await start_child_host("host-id", "child-id", "user@test.com")
+                start_child_host("host-id", "child-id", "user@test.com")
 
             assert exc_info.value.status_code == 402
 
@@ -313,7 +313,7 @@ class TestChildHostControlEndpoints:
             from backend.api.child_host_control import stop_child_host
 
             with pytest.raises(HTTPException) as exc_info:
-                await stop_child_host("host-id", "child-id", "user@test.com")
+                stop_child_host("host-id", "child-id", "user@test.com")
 
             assert exc_info.value.status_code == 402
 
@@ -329,7 +329,7 @@ class TestChildHostControlEndpoints:
             from backend.api.child_host_control import restart_child_host
 
             with pytest.raises(HTTPException) as exc_info:
-                await restart_child_host("host-id", "child-id", "user@test.com")
+                restart_child_host("host-id", "child-id", "user@test.com")
 
             assert exc_info.value.status_code == 402
 
@@ -375,7 +375,7 @@ class TestChildHostCrudEndpoints:
 
             from backend.api.child_host_crud import list_child_hosts
 
-            result = await list_child_hosts(str(mock_host.id), "admin@sysmanage.org")
+            result = list_child_hosts(str(mock_host.id), "admin@sysmanage.org")
 
             assert len(result) == 1
             assert result[0].child_name == mock_child_host.child_name
@@ -400,7 +400,7 @@ class TestChildHostCrudEndpoints:
 
             from backend.api.child_host_crud import list_child_hosts
 
-            result = await list_child_hosts(str(mock_host.id), "admin@sysmanage.org")
+            result = list_child_hosts(str(mock_host.id), "admin@sysmanage.org")
 
             assert len(result) == 0
 
@@ -428,7 +428,7 @@ class TestChildHostCrudEndpoints:
 
             from backend.api.child_host_crud import get_child_host
 
-            result = await get_child_host(
+            result = get_child_host(
                 str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
             )
 
@@ -460,7 +460,7 @@ class TestChildHostCrudEndpoints:
             from backend.api.child_host_crud import get_child_host
 
             with pytest.raises(HTTPException) as exc_info:
-                await get_child_host(
+                get_child_host(
                     str(mock_host.id), str(uuid.uuid4()), "admin@sysmanage.org"
                 )
 
@@ -492,7 +492,7 @@ class TestChildHostCrudEndpoints:
             mock_get_host.return_value = mock_host
             from backend.api.child_host_crud import refresh_child_hosts
 
-            result = await refresh_child_hosts(str(mock_host.id), "admin@sysmanage.org")
+            result = refresh_child_hosts(str(mock_host.id), "admin@sysmanage.org")
 
             assert result["result"] is True
 
@@ -517,7 +517,7 @@ class TestChildHostDeleteEndpoints:
             from backend.api.child_host_crud import delete_child_host
 
             with pytest.raises(HTTPException) as exc_info:
-                await delete_child_host("host-id", "child-id", "user@test.com")
+                delete_child_host("host-id", "child-id", "user@test.com")
 
             assert exc_info.value.status_code == 402
 
@@ -564,7 +564,7 @@ class TestVirtualizationStatusEndpoints:
                 get_virtualization_support,
             )
 
-            result = await get_virtualization_support(
+            result = get_virtualization_support(
                 str(mock_host.id), "admin@sysmanage.org"
             )
 
@@ -596,7 +596,7 @@ class TestVirtualizationStatusEndpoints:
                 get_virtualization_status,
             )
 
-            result = await get_virtualization_status(
+            result = get_virtualization_status(
                 str(mock_windows_host.id), "admin@sysmanage.org"
             )
 
@@ -631,9 +631,7 @@ class TestVirtualizationStatusEndpoints:
                 get_virtualization_status,
             )
 
-            result = await get_virtualization_status(
-                str(mock_host.id), "admin@sysmanage.org"
-            )
+            result = get_virtualization_status(str(mock_host.id), "admin@sysmanage.org")
 
             assert "lxd" in result["supported_types"]
             assert "kvm" in result["supported_types"]
@@ -667,7 +665,7 @@ class TestVirtualizationStatusEndpoints:
                 get_virtualization_status,
             )
 
-            result = await get_virtualization_status(
+            result = get_virtualization_status(
                 str(mock_openbsd_host.id), "admin@sysmanage.org"
             )
 
@@ -713,7 +711,7 @@ class TestVirtualizationEnableEndpoints:
 
             from backend.api.child_host_virtualization_enable import enable_wsl
 
-            result = await enable_wsl(str(mock_windows_host.id), "admin@sysmanage.org")
+            result = enable_wsl(str(mock_windows_host.id), "admin@sysmanage.org")
 
             assert result["result"] is True
 
@@ -746,7 +744,7 @@ class TestVirtualizationEnableEndpoints:
             from backend.api.child_host_virtualization_enable import enable_wsl
 
             with pytest.raises(HTTPException) as exc_info:
-                await enable_wsl(str(mock_host.id), "admin@sysmanage.org")
+                enable_wsl(str(mock_host.id), "admin@sysmanage.org")
 
             assert exc_info.value.status_code == 400
 
@@ -779,7 +777,7 @@ class TestVirtualizationEnableEndpoints:
 
             from backend.api.child_host_virtualization_enable import initialize_lxd
 
-            result = await initialize_lxd(str(mock_host.id), "admin@sysmanage.org")
+            result = initialize_lxd(str(mock_host.id), "admin@sysmanage.org")
 
             assert result["result"] is True
 
@@ -814,9 +812,7 @@ class TestVirtualizationEnableEndpoints:
 
             from backend.api.child_host_virtualization_enable import initialize_vmm
 
-            result = await initialize_vmm(
-                str(mock_openbsd_host.id), "admin@sysmanage.org"
-            )
+            result = initialize_vmm(str(mock_openbsd_host.id), "admin@sysmanage.org")
 
             assert result["result"] is True
 
@@ -849,7 +845,7 @@ class TestVirtualizationEnableEndpoints:
 
             from backend.api.child_host_virtualization_enable import initialize_kvm
 
-            result = await initialize_kvm(str(mock_host.id), "admin@sysmanage.org")
+            result = initialize_kvm(str(mock_host.id), "admin@sysmanage.org")
 
             assert result["result"] is True
 
@@ -884,9 +880,7 @@ class TestVirtualizationEnableEndpoints:
 
             from backend.api.child_host_virtualization_enable import initialize_bhyve
 
-            result = await initialize_bhyve(
-                str(mock_freebsd_host.id), "admin@sysmanage.org"
-            )
+            result = initialize_bhyve(str(mock_freebsd_host.id), "admin@sysmanage.org")
 
             assert result["result"] is True
 
@@ -921,6 +915,6 @@ class TestVirtualizationEnableEndpoints:
             from backend.api.child_host_virtualization_enable import initialize_lxd
 
             with pytest.raises(HTTPException) as exc_info:
-                await initialize_lxd(str(mock_host.id), "admin@sysmanage.org")
+                initialize_lxd(str(mock_host.id), "admin@sysmanage.org")
 
             assert exc_info.value.status_code == 400

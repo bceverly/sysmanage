@@ -140,7 +140,7 @@ def _refuse(problems: List[str]) -> None:
 
 
 @router.get("/query-packs/catalog")
-async def list_catalog(
+def list_catalog(
     include_deprecated: bool = False,
 ) -> List[Dict[str, Any]]:
     """The curated catalog -- global reference data, one copy for everyone."""
@@ -148,7 +148,7 @@ async def list_catalog(
 
 
 @router.get("/query-packs")
-async def list_packs(
+def list_packs(
     db: Session = Depends(get_tenant_db),
 ) -> List[Dict[str, Any]]:
     """Packs this customer wrote."""
@@ -156,7 +156,7 @@ async def list_packs(
 
 
 @router.get("/query-packs/{pack_id}")
-async def get_pack(
+def get_pack(
     pack_id: str,
     db: Session = Depends(get_tenant_db),
 ) -> Dict[str, Any]:
@@ -167,7 +167,7 @@ async def get_pack(
 
 
 @router.post("/query-packs")
-async def create_pack(
+def create_pack(
     request: PackCreateRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -188,7 +188,7 @@ async def create_pack(
 
 
 @router.put("/query-packs/{pack_id}")
-async def update_pack(
+def update_pack(
     pack_id: str,
     request: PackUpdateRequest,
     db: Session = Depends(get_tenant_db),
@@ -211,7 +211,7 @@ async def update_pack(
 
 
 @router.delete("/query-packs/{pack_id}")
-async def delete_pack(
+def delete_pack(
     pack_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -226,7 +226,7 @@ async def delete_pack(
 
 
 @router.post("/query-packs/validate")
-async def validate_pack(
+def validate_pack(
     request: PackCreateRequest,
 ) -> Dict[str, Any]:
     """Check a pack without storing it, so the editor can say why.
@@ -241,14 +241,14 @@ async def validate_pack(
 
 
 @router.get("/query-packs/assignments/all")
-async def list_assignments(
+def list_assignments(
     db: Session = Depends(get_tenant_db),
 ) -> List[Dict[str, Any]]:
     return [svc.assignment_dict(a) for a in svc.list_assignments(db)]
 
 
 @router.post("/query-packs/assignments")
-async def create_assignment(
+def create_assignment(
     request: AssignmentCreateRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -271,7 +271,7 @@ async def create_assignment(
 
 
 @router.delete("/query-packs/assignments/{assignment_id}")
-async def delete_assignment(
+def delete_assignment(
     assignment_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -293,7 +293,7 @@ async def delete_assignment(
 
 
 @router.post("/query-packs/live")
-async def create_live_query(
+def create_live_query(
     request: LiveQueryRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -362,7 +362,7 @@ def _live_targets(db: Session, request: LiveQueryRequest) -> List[Any]:
 
 
 @router.get("/query-packs/live/{live_id}")
-async def get_live_query(
+def get_live_query(
     live_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -381,7 +381,7 @@ async def get_live_query(
 
 
 @router.get("/query-packs/live")
-async def list_live_queries(
+def list_live_queries(
     limit: int = 25,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -397,7 +397,7 @@ async def list_live_queries(
 
 
 @router.post("/query-packs/live/{live_id}/cancel")
-async def cancel_live_query(
+def cancel_live_query(
     live_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -430,7 +430,7 @@ def _load_live(db: Session, live_id: str):
 
 
 @router.get("/query-packs/runs/recent")
-async def list_runs(
+def list_runs(
     host_id: Optional[str] = None,
     limit: int = 50,
     db: Session = Depends(get_tenant_db),
@@ -451,7 +451,7 @@ async def list_runs(
 
 
 @router.get("/query-packs/runs/{run_id}")
-async def get_run(
+def get_run(
     run_id: str,
     db: Session = Depends(get_tenant_db),
 ) -> Dict[str, Any]:

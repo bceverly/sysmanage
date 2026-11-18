@@ -243,7 +243,7 @@ def _render_exposition() -> str:
 
 
 @router.get("/metrics/custom-metrics")
-async def custom_metrics_exposition() -> Response:
+def custom_metrics_exposition() -> Response:
     """Prometheus text-exposition of the latest ok custom-metric values.
 
     UNAUTHENTICATED (Prometheus-scrape convention) -- see the module docstring:

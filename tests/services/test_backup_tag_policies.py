@@ -214,18 +214,18 @@ async def test_the_api_creates_applies_changes_and_removes(session, sent):
     host = _host(session, fqdn="api.lab")
     tag = _tag(session, "api")
     _tag_host(session, host, tag)
-    made = await api.create_tag_policy(_body(tag), session, MANAGER)
+    made = api.create_tag_policy(_body(tag), session, MANAGER)
     assert made["tag_policy"]["hosts_applied"] == 1
     assert [a["fqdn"] for a in made["applied"]["applied"]] == ["api.lab"]
     row_id = made["tag_policy"]["id"]
-    changed = await api.update_tag_policy(
+    changed = api.update_tag_policy(
         row_id, _body(tag, settings={"keep_last": 21}), session, MANAGER
     )
     assert changed["tag_policy"]["settings"]["keep_last"] == 21
     assert _policy(session, host).keep_last == 21
-    listed = await api.list_tag_policies(session, MANAGER)
+    listed = api.list_tag_policies(session, MANAGER)
     assert [p["name"] for p in listed["tag_policies"]] == ["Nightly"]
-    gone = await api.delete_tag_policy(row_id, session, MANAGER)
+    gone = api.delete_tag_policy(row_id, session, MANAGER)
     assert gone["deleted"]
     left = _policy(session, host)  # kept, paused, now the host's own
     assert left.enabled is False and left.tag_policy_id is None and left.keep_last == 21
@@ -238,18 +238,18 @@ async def test_the_api_refuses_bad_input_and_runs_only_with_the_engine(session, 
     _setup(session)
     tag = _tag(session, "refuse")
     with pytest.raises(HTTPException) as bad:
-        await api.create_tag_policy(_body(tag, priority=5000), session, MANAGER)
+        api.create_tag_policy(_body(tag, priority=5000), session, MANAGER)
     assert bad.value.status_code == 422
-    await api.create_tag_policy(_body(tag), session, MANAGER)
+    api.create_tag_policy(_body(tag), session, MANAGER)
     with pytest.raises(HTTPException) as taken:
-        await api.create_tag_policy(_body(tag), session, MANAGER)
+        api.create_tag_policy(_body(tag), session, MANAGER)
     assert taken.value.status_code == 409
     with pytest.raises(HTTPException) as no_tag:
-        await api.create_tag_policy(
+        api.create_tag_policy(
             _body(tag, name="Other", tag_id=str(uuid.uuid4())), session, MANAGER
         )
     assert no_tag.value.status_code == 422
     with patch.object(tag_policies, "engine_loaded", return_value=False):
         with pytest.raises(HTTPException) as unlicensed:
-            await api.list_tag_policies(session, MANAGER)
+            api.list_tag_policies(session, MANAGER)
     assert unlicensed.value.status_code == 402

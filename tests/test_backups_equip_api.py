@@ -53,7 +53,7 @@ def sent():
 @pytest.mark.asyncio
 async def test_check_again_asks_the_agent_for_its_capabilities(session, sent):
     s = _setup(session)
-    answer = await equip.backup_recheck(str(s.host.id), session, MANAGER)
+    answer = equip.backup_recheck(str(s.host.id), session, MANAGER)
     assert answer["command_id"]
     assert sent[-1][:2] == (str(s.host.id), "get_capabilities")
 
@@ -61,9 +61,13 @@ async def test_check_again_asks_the_agent_for_its_capabilities(session, sent):
 @pytest.mark.asyncio
 async def test_check_again_needs_the_manage_backups_role(session, sent):
     s = _setup(session)
-    assert await _status(equip.backup_recheck(str(s.host.id), session, NOBODY)) == 403
     assert (
-        await _status(equip.backup_recheck(str(uuid.uuid4()), session, MANAGER)) == 404
+        await _status(lambda: equip.backup_recheck(str(s.host.id), session, NOBODY))
+        == 403
+    )
+    assert (
+        await _status(lambda: equip.backup_recheck(str(uuid.uuid4()), session, MANAGER))
+        == 404
     )
     assert sent == []
 
@@ -140,7 +144,7 @@ async def test_equip_is_offered_for_a_missing_nfs_client(session, sent):
     assert not capabilities.is_limited(
         {"unavailable": {"backup": "missing_nfs_client"}}
     )
-    answer = await equip.backup_equip(str(s.host.id), session, MANAGER)
+    answer = equip.backup_equip(str(s.host.id), session, MANAGER)
     assert answer["equip"]["status"] == "running"
 
 
@@ -148,7 +152,7 @@ async def test_equip_is_offered_for_a_missing_nfs_client(session, sent):
 async def test_equip_asks_the_agent_to_install_restate(session, sent):
     s = _setup(session)
     _needs_restate(s.host)
-    answer = await equip.backup_equip(str(s.host.id), session, MANAGER)
+    answer = equip.backup_equip(str(s.host.id), session, MANAGER)
     assert sent[-1][:2] == (str(s.host.id), "equip_backup")
     assert sent[-1][2] == {}  # nothing but the request: the agent decides how
     assert answer["equip"]["status"] == "running"
@@ -169,8 +173,14 @@ async def test_equip_says_why_it_cannot_start(session, sent, report, code):
     if report is not None:
         _needs_restate(s.host, report)
     assert backup_equip.blocker(session, s.host) == code
-    assert await _status(equip.backup_equip(str(s.host.id), session, MANAGER)) == 409
-    assert await _status(equip.backup_equip(str(s.host.id), session, NOBODY)) == 403
+    assert (
+        await _status(lambda: equip.backup_equip(str(s.host.id), session, MANAGER))
+        == 409
+    )
+    assert (
+        await _status(lambda: equip.backup_equip(str(s.host.id), session, NOBODY))
+        == 403
+    )
     assert sent == []
 
 
@@ -178,7 +188,7 @@ async def test_equip_says_why_it_cannot_start(session, sent, report, code):
 async def test_one_equip_at_a_time_until_it_goes_stale(session, sent):
     s = _setup(session)
     _needs_restate(s.host)
-    await equip.backup_equip(str(s.host.id), session, MANAGER)
+    equip.backup_equip(str(s.host.id), session, MANAGER)
     assert backup_equip.blocker(session, s.host) == "in_progress"
     later = jobs.now() + backup_equip.STALE_AFTER + timedelta(minutes=1)
     assert backup_equip.state(session, s.host.id, later)["reason"] == "no_answer"
@@ -208,7 +218,7 @@ async def test_the_hour_to_answer_starts_when_the_command_is_sent(session, sent)
 
     s = _setup(session)
     _needs_restate(s.host)
-    answer = await equip.backup_equip(str(s.host.id), session, MANAGER)
+    answer = equip.backup_equip(str(s.host.id), session, MANAGER)
     queued = _queue_row(session, s.host.id, answer["command_id"],
                         error_message=DEFERRED_MARKER)  # fmt: skip
     days_later = jobs.now() + timedelta(days=3)
@@ -231,7 +241,7 @@ async def test_the_hour_to_answer_starts_when_the_command_is_sent(session, sent)
 async def test_a_command_waiting_for_an_offline_agent_does_not_go_stale(session, sent):
     s = _setup(session)
     _needs_restate(s.host)
-    answer = await equip.backup_equip(str(s.host.id), session, MANAGER)
+    answer = equip.backup_equip(str(s.host.id), session, MANAGER)
     _queue_row(session, s.host.id, answer["command_id"])
     later = jobs.now() + timedelta(days=1)
     state = backup_equip.state(session, s.host.id, later)
@@ -242,7 +252,7 @@ async def test_a_command_waiting_for_an_offline_agent_does_not_go_stale(session,
 async def test_a_command_that_expired_unsent_counts_from_the_request(session, sent):
     s = _setup(session)
     _needs_restate(s.host)
-    answer = await equip.backup_equip(str(s.host.id), session, MANAGER)
+    answer = equip.backup_equip(str(s.host.id), session, MANAGER)
     _queue_row(session, s.host.id, answer["command_id"], status="expired")
     later = jobs.now() + backup_equip.STALE_AFTER + timedelta(minutes=1)
     assert backup_equip.state(session, s.host.id, later)["reason"] == "no_answer"
@@ -257,9 +267,7 @@ def _equip_result(command_id, success=True, **outcome):
 async def test_a_good_install_asks_for_a_fresh_capability_report(session, sent):
     s = _setup(session)
     _needs_restate(s.host)
-    command_id = (await equip.backup_equip(str(s.host.id), session, MANAGER))[
-        "command_id"
-    ]
+    command_id = (equip.backup_equip(str(s.host.id), session, MANAGER))["command_id"]
     assert backup_equip.record_result(
         session, s.host.id, _equip_result(command_id, installed="2.2.0.6")
     )
@@ -272,9 +280,7 @@ async def test_a_good_install_asks_for_a_fresh_capability_report(session, sent):
 async def test_a_failed_install_keeps_the_reason_and_output(session, sent):
     s = _setup(session)
     _needs_restate(s.host)
-    command_id = (await equip.backup_equip(str(s.host.id), session, MANAGER))[
-        "command_id"
-    ]
+    command_id = (equip.backup_equip(str(s.host.id), session, MANAGER))["command_id"]
     backup_equip.record_result(session, s.host.id, _equip_result(
         command_id, success=False, reason="checksum_mismatch", detail="restate-x.pkg"))  # fmt: skip
     state = backup_equip.state(session, s.host.id)
@@ -287,9 +293,7 @@ async def test_a_failed_install_keeps_the_reason_and_output(session, sent):
 async def test_a_result_from_another_host_or_command_is_ignored(session, sent):
     s = _setup(session)
     _needs_restate(s.host)
-    command_id = (await equip.backup_equip(str(s.host.id), session, MANAGER))[
-        "command_id"
-    ]
+    command_id = (equip.backup_equip(str(s.host.id), session, MANAGER))["command_id"]
     assert not backup_equip.record_result(session, s.nas.id, _equip_result(command_id))
     assert not backup_equip.record_result(session, s.host.id, _equip_result("x"))
     assert backup_equip.state(session, s.host.id)["status"] == "running"
@@ -299,7 +303,7 @@ async def test_a_result_from_another_host_or_command_is_ignored(session, sent):
 async def test_bulk_equip_starts_what_it_can_and_says_why_not(session, sent):
     s = _setup(session)
     _needs_restate(s.host)
-    answer = await equip.bulk_backup_equip(
+    answer = equip.bulk_backup_equip(
         equip.BulkEquipBody(host_ids=[str(s.host.id), str(s.nas.id), str(uuid.uuid4())]),
         session, MANAGER,
     )  # fmt: skip

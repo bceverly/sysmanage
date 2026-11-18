@@ -71,7 +71,7 @@ async def test_repair_is_queued_only_where_it_can_run(session, sent):
     )
     session.commit()
     body = api.RepairBody(host_ids=[str(s.host.id), str(other.id), str(dnf.id), "nope"])
-    answer = await api.repair_package_managers(body, session, PATCHER)
+    answer = api.repair_package_managers(body, session, PATCHER)
     assert answer["started"] == 1
     reasons = {row["fqdn"]: row["reason"] for row in answer["skipped"]}
     assert reasons == {
@@ -86,7 +86,9 @@ async def test_repair_is_queued_only_where_it_can_run(session, sent):
 async def test_repair_needs_the_apply_updates_role(session, sent):
     s = _setup(session)
     body = api.RepairBody(host_ids=[str(s.host.id)])
-    assert await _status(api.repair_package_managers(body, session, NOBODY)) == 403
+    assert (
+        await _status(lambda: api.repair_package_managers(body, session, NOBODY)) == 403
+    )
 
 
 def test_an_older_agent_is_told_to_upgrade(session):

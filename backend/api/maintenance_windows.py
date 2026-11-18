@@ -267,7 +267,7 @@ def _serialize(session: Session, windows: List[MaintenanceWindow]) -> List[dict]
 
 
 @router.get("/maintenance-windows", dependencies=[Depends(JWTBearer())])
-async def list_maintenance_windows(
+def list_maintenance_windows(
     current_user=Depends(require_authenticated_user),
 ):
     """List all maintenance windows (with their scopes)."""
@@ -282,7 +282,7 @@ async def list_maintenance_windows(
 
 
 @router.post("/maintenance-windows", dependencies=[Depends(JWTBearer())])
-async def create_maintenance_window(
+def create_maintenance_window(
     payload: MaintenanceWindowIn,
     current_user=Depends(require_authenticated_user),
 ):
@@ -301,7 +301,7 @@ async def create_maintenance_window(
 
 
 @router.put("/maintenance-windows/{window_id}", dependencies=[Depends(JWTBearer())])
-async def update_maintenance_window(
+def update_maintenance_window(
     window_id: str,
     payload: MaintenanceWindowIn,
     current_user=Depends(require_authenticated_user),
@@ -327,7 +327,7 @@ async def update_maintenance_window(
 
 
 @router.delete("/maintenance-windows/{window_id}", dependencies=[Depends(JWTBearer())])
-async def delete_maintenance_window(
+def delete_maintenance_window(
     window_id: str,
     current_user=Depends(require_authenticated_user),
 ):
@@ -353,7 +353,7 @@ async def delete_maintenance_window(
 
 
 @router.post("/maintenance-windows/overrides", dependencies=[Depends(JWTBearer())])
-async def create_override(
+def create_override(
     payload: OverrideIn,
     current_user=Depends(require_authenticated_user),
 ):
@@ -414,7 +414,7 @@ async def create_override(
     "/maintenance-windows/host/{host_id}/status",
     dependencies=[Depends(JWTBearer())],
 )
-async def host_window_status(
+def host_window_status(
     host_id: str,
     current_user=Depends(require_authenticated_user),
 ):
@@ -438,7 +438,7 @@ async def host_window_status(
 
 
 @router.get("/maintenance-windows/held", dependencies=[Depends(JWTBearer())])
-async def list_held_commands(
+def list_held_commands(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0, le=1_000_000),
     current_user=Depends(require_authenticated_user),
@@ -466,7 +466,7 @@ def _require_cancel_rights(current_user) -> None:
     "/maintenance-windows/held/{message_id}/cancel",
     dependencies=[Depends(JWTBearer())],
 )
-async def cancel_held_command(
+def cancel_held_command(
     message_id: str,
     current_user=Depends(require_authenticated_user),
 ):

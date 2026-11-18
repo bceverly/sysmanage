@@ -81,7 +81,7 @@ async def get_packages_summary():
 
 
 @router.get("/managers", response_model=List[str])
-async def get_package_managers(
+def get_package_managers(
     os_name: Optional[str] = Query(None, description=FILTER_BY_OS_NAME),
     os_version: Optional[str] = Query(None, description=FILTER_BY_OS_VERSION),
     db: Session = Depends(get_tenant_db),
@@ -193,7 +193,7 @@ async def search_packages(
 
 
 @router.get("/os-versions", response_model=List[dict])
-async def get_os_versions(db: Session = Depends(get_tenant_db)):
+def get_os_versions(db: Session = Depends(get_tenant_db)):
     """
     Get list of available OS name/version combinations.
 
@@ -238,7 +238,7 @@ async def get_os_versions(db: Session = Depends(get_tenant_db)):
 
 
 @router.get("/by-manager/{manager_name}", response_model=List[PackageInfo])
-async def get_packages_by_manager(
+def get_packages_by_manager(
     manager_name: str,
     *,
     os_name: Optional[str] = Query(None, description=FILTER_BY_OS_NAME),
@@ -291,7 +291,7 @@ async def get_packages_by_manager(
 
 
 @router.post("/refresh/{os_name}/{os_version:path}")
-async def refresh_packages_for_os_version(
+def refresh_packages_for_os_version(
     os_name: str, os_version: str, db: Session = Depends(get_tenant_db)
 ):
     """
@@ -385,7 +385,7 @@ async def uninstall_packages(
 
 
 @router.get("/installation-history/{host_id}")
-async def get_installation_history(
+def get_installation_history(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     limit: int = Query(50, ge=1, le=100),
@@ -460,7 +460,7 @@ async def get_installation_history(
 
 
 @router.post("/installation-complete")
-async def handle_installation_completion(
+def handle_installation_completion(
     request: InstallationCompletionRequest,
     # Agent-called (no logged-in user → no active-tenant context), so this stays
     # on the main engine until the inbound queue/processor tenant-routing lands.
@@ -508,7 +508,7 @@ async def handle_installation_completion(
 
 
 @router.delete("/installation-history/{request_id}")
-async def delete_installation_record(
+def delete_installation_record(
     request_id: str,
     db: Session = Depends(get_tenant_db),
 ):

@@ -63,7 +63,7 @@ def _prev_published(shared_db: Session, cv, version: int):
     "/content-lifecycle/content-views/{cv_id}/versions/{version}/diff",
     dependencies=[Depends(JWTBearer())],
 )
-async def compute_version_diff(
+def compute_version_diff(
     cv_id: str,
     version: int,
     shared_db: Session = Depends(get_shared_db),
@@ -105,7 +105,7 @@ async def compute_version_diff(
     "/content-lifecycle/content-views/{cv_id}/versions/{version}/diff",
     dependencies=[Depends(JWTBearer())],
 )
-async def get_version_diff(
+def get_version_diff(
     cv_id: str,
     version: int,
     shared_db: Session = Depends(get_shared_db),

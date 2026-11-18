@@ -218,7 +218,7 @@ def _host_session(host_id: str, db: Session) -> Session:
 # tells FastAPI (>= 0.89) what to serialize, and stating it twice means the two
 # can drift.
 @router.post("/agent/poll")
-async def agent_poll(
+def agent_poll(
     request: Request,
     payload: PollRequest,
     authorization: Optional[str] = Header(default=None),

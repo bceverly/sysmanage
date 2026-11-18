@@ -299,7 +299,7 @@ class TestUserLogin:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await login(login_data, mock_request, mock_response)
+                result = login(login_data, mock_request, mock_response)
 
                 assert "Authorization" in result
                 mock_login_security.record_successful_login.assert_called()
@@ -334,7 +334,7 @@ class TestUserLogin:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await login(login_data, mock_request, mock_response)
+                result = login(login_data, mock_request, mock_response)
 
                 assert "Authorization" in result
 
@@ -373,7 +373,7 @@ class TestUserLogin:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await login(login_data, mock_request, mock_response)
+                    login(login_data, mock_request, mock_response)
 
                 assert exc_info.value.status_code == 401
 
@@ -412,7 +412,7 @@ class TestUserLogin:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await login(login_data, mock_request, mock_response)
+                    login(login_data, mock_request, mock_response)
 
                 assert exc_info.value.status_code == 401
 
@@ -453,7 +453,7 @@ class TestUserLogin:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await login(login_data, mock_request, mock_response)
+                    login(login_data, mock_request, mock_response)
 
                 assert exc_info.value.status_code == 423  # Account locked
 
@@ -474,7 +474,7 @@ class TestUserLogin:
             _stub_auth_config_getters(mock_config_module)
 
             with pytest.raises(HTTPException) as exc_info:
-                await login(login_data, mock_request, mock_response)
+                login(login_data, mock_request, mock_response)
 
             assert exc_info.value.status_code == 429
 
@@ -510,7 +510,7 @@ class TestUserLogout:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await logout(mock_request, "test@example.com")
+                result = logout(mock_request, "test@example.com")
 
                 assert "message" in result
                 mock_audit.log.assert_called_once()

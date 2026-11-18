@@ -171,7 +171,7 @@ class TestDistributionEndpoints:
 
             from backend.api.child_host_crud import list_distributions
 
-            result = await list_distributions(None, "admin@sysmanage.org")
+            result = list_distributions(None, "admin@sysmanage.org")
 
             assert len(result) == 1
             assert result[0].distribution_name == "Ubuntu"
@@ -192,7 +192,7 @@ class TestDistributionEndpoints:
 
             from backend.api.child_host_crud import list_distributions
 
-            result = await list_distributions("lxd", "admin@sysmanage.org")
+            result = list_distributions("lxd", "admin@sysmanage.org")
 
             assert len(result) == 1
             assert result[0].child_type == "lxd"
@@ -216,9 +216,7 @@ class TestDistributionEndpoints:
 
             from backend.api.child_host_crud import get_distribution
 
-            result = await get_distribution(
-                str(mock_distribution.id), "admin@sysmanage.org"
-            )
+            result = get_distribution(str(mock_distribution.id), "admin@sysmanage.org")
 
             assert result.distribution_name == "Ubuntu"
             assert result.distribution_version == "22.04"
@@ -243,7 +241,7 @@ class TestDistributionEndpoints:
             from backend.api.child_host_crud import get_distribution
 
             with pytest.raises(HTTPException) as exc_info:
-                await get_distribution(str(uuid.uuid4()), "admin@sysmanage.org")
+                get_distribution(str(uuid.uuid4()), "admin@sysmanage.org")
 
             assert exc_info.value.status_code == 404
 
@@ -293,7 +291,7 @@ class TestKvmNetworkingEndpoints:
                 configure_kvm_networking,
             )
 
-            result = await configure_kvm_networking(
+            result = configure_kvm_networking(
                 str(mock_host.id), request, "admin@sysmanage.org"
             )
 
@@ -336,7 +334,7 @@ class TestKvmNetworkingEndpoints:
                 configure_kvm_networking,
             )
 
-            result = await configure_kvm_networking(
+            result = configure_kvm_networking(
                 str(mock_host.id), request, "admin@sysmanage.org"
             )
 
@@ -377,7 +375,7 @@ class TestKvmNetworkingEndpoints:
             )
 
             with pytest.raises(HTTPException) as exc_info:
-                await configure_kvm_networking(
+                configure_kvm_networking(
                     str(mock_host.id), request, "admin@sysmanage.org"
                 )
 
@@ -421,7 +419,7 @@ class TestKvmModuleEndpoints:
 
             from backend.api.child_host_virtualization_enable import enable_kvm_modules
 
-            result = await enable_kvm_modules(str(mock_host.id), "admin@sysmanage.org")
+            result = enable_kvm_modules(str(mock_host.id), "admin@sysmanage.org")
 
             assert result["result"] is True
 
@@ -454,7 +452,7 @@ class TestKvmModuleEndpoints:
 
             from backend.api.child_host_virtualization_enable import disable_kvm_modules
 
-            result = await disable_kvm_modules(str(mock_host.id), "admin@sysmanage.org")
+            result = disable_kvm_modules(str(mock_host.id), "admin@sysmanage.org")
 
             assert result["result"] is True
 
@@ -496,9 +494,7 @@ class TestBhyveEndpoints:
 
             from backend.api.child_host_virtualization_enable import disable_bhyve
 
-            result = await disable_bhyve(
-                str(mock_freebsd_host.id), "admin@sysmanage.org"
-            )
+            result = disable_bhyve(str(mock_freebsd_host.id), "admin@sysmanage.org")
 
             assert result["result"] is True
 
@@ -531,6 +527,6 @@ class TestBhyveEndpoints:
             from backend.api.child_host_virtualization_enable import disable_bhyve
 
             with pytest.raises(HTTPException) as exc_info:
-                await disable_bhyve(str(mock_host.id), "admin@sysmanage.org")
+                disable_bhyve(str(mock_host.id), "admin@sysmanage.org")
 
             assert exc_info.value.status_code == 400

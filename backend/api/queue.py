@@ -100,7 +100,7 @@ async def get_failed_messages(
 
 
 @router.delete("/failed")
-async def delete_failed_messages(
+def delete_failed_messages(
     message_ids: List[str],
     db_session: Session = Depends(get_db),
     current_user=Depends(get_current_user),

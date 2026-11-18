@@ -219,7 +219,7 @@ class TestApi:
 
     def test_viewing_needs_view_host_details(self, db):
         with pytest.raises(HTTPException) as excinfo:
-            asyncio.run(api.get_summary(db, self._user()))
+            api.get_summary(db, self._user())
         assert excinfo.value.status_code == 403
 
     def test_excluding_needs_the_discovery_role_and_is_audited(self, db, lan):
@@ -228,10 +228,10 @@ class TestApi:
         )
         viewer = self._user(api.SecurityRoles.VIEW_HOST_DETAILS)
         with pytest.raises(HTTPException):
-            asyncio.run(api.post_exclusions(request, db, viewer))
+            api.post_exclusions(request, db, viewer)
         manager = self._user(api.SecurityRoles.MANAGE_NETWORK_DISCOVERY)
         with patch.object(api.AuditService, "log_create") as audit:
-            result = asyncio.run(api.post_exclusions(request, db, manager))
+            result = api.post_exclusions(request, db, manager)
         assert result["excluded"] == 1
         assert audit.call_args.kwargs["entity_name"] == lan.printer.identity
 
@@ -241,24 +241,22 @@ class TestApi:
             asset_ids=["not-a-uuid"], category="printer", reason="x"
         )
         with pytest.raises(HTTPException) as excinfo:
-            asyncio.run(api.post_exclusions(bad, db, manager))
+            api.post_exclusions(bad, db, manager)
         assert excinfo.value.status_code == 400
         viewer = self._user(api.SecurityRoles.VIEW_HOST_DETAILS)
         with pytest.raises(HTTPException) as excinfo:
-            asyncio.run(api.get_devices("nope", None, None, 100, 0, db, viewer))
+            api.get_devices("nope", None, None, 100, 0, db, viewer)
         assert excinfo.value.status_code == 400
 
     def test_revoke_is_audited(self, db, lan):
         made = review.exclude(db, [lan.printer.id], "printer", "Front office", "op@x")
         manager = self._user(api.SecurityRoles.MANAGE_NETWORK_DISCOVERY)
         with patch.object(api.AuditService, "log_update") as audit:
-            row = asyncio.run(
-                api.post_revoke(
-                    made["exclusions"][0]["id"],
-                    api.RevokeRequest(reason="replaced"),
-                    db,
-                    manager,
-                )
+            row = api.post_revoke(
+                made["exclusions"][0]["id"],
+                api.RevokeRequest(reason="replaced"),
+                db,
+                manager,
             )
         assert row["revoked_by"] == "op@example.com"
         assert audit.call_args.kwargs["details"]["revoked"] is True

@@ -128,7 +128,7 @@ def _current() -> MtlsSettings:
 
 
 @router.get("/agent-certificates", dependencies=[Depends(JWTBearer())])
-async def get_agent_certificates(
+def get_agent_certificates(
     _user: str = Depends(get_current_user),
 ) -> MtlsSettings:
     """The rollout mode and the fleet's certificate status."""
@@ -136,7 +136,7 @@ async def get_agent_certificates(
 
 
 @router.put("/agent-certificates", dependencies=[Depends(JWTBearer())])
-async def update_agent_certificates(
+def update_agent_certificates(
     payload: MtlsUpdate,
     user: str = Depends(get_current_user),
 ) -> MtlsSettings:

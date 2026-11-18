@@ -6,6 +6,7 @@
 every Pro+ backup surface refuses with 402 rather than failing or quietly
 succeeding (ROADMAP 24.11 edition audit, 2026-11-03)."""
 
+import inspect
 import json
 
 import pytest
@@ -43,9 +44,14 @@ def _actions(sent_calls):
     return [p.get("action") for _h, _c, p in sent_calls if p.get("action")]
 
 
-async def _code(coro):
+async def _code(call):
+    """The status code ``call()`` is refused with.  Takes a callable, not
+    the call's result: a plain-def handler raises the moment it is called,
+    before ``pytest.raises`` could catch it (async handlers still work)."""
     with pytest.raises(HTTPException) as refused:
-        await coro
+        result = call()
+        if inspect.isawaitable(result):
+            await result
     return refused.value.status_code
 
 
@@ -57,7 +63,7 @@ async def test_community_backs_up_and_restores_with_no_engine(session, sent):
     host = str(s.host.id)
 
     # Back up now -> the capture result -> the storage chain (prune, du).
-    run = await api.backup_now(host, api.RunBody(action="capture"), session, MANAGER)
+    run = api.backup_now(host, api.RunBody(action="capture"), session, MANAGER)
     capture = session.query(models.BackupRun).filter_by(id=run["id"]).one()
     results.record_result(session, s.host.id, _result(capture, snapshot="s1"))
     assert capture.status == "ok"
@@ -67,8 +73,8 @@ async def test_community_backs_up_and_restores_with_no_engine(session, sent):
 
     # Restore: the preview, then the real run (unsigned, acknowledged).
     body = {"snapshot": "s1", "include": ["/etc/hostname"]}
-    preview = await api.backup_restore(host, api.RestoreBody(**body), session, RESTORER)
-    real = await api.backup_restore(
+    preview = api.backup_restore(host, api.RestoreBody(**body), session, RESTORER)
+    real = api.backup_restore(
         host,
         api.RestoreBody(**body, dry_run=False, acknowledge_unsigned=True),
         session,
@@ -80,10 +86,10 @@ async def test_community_backs_up_and_restores_with_no_engine(session, sent):
     ).get("needs_key")
 
     # Browse a snapshot and ask what changed since it.
-    listing = await browse.browse_snapshot(
+    listing = browse.browse_snapshot(
         host, browse.BrowseBody(snapshot="s1"), session, RESTORER
     )
-    changes = await browse.backup_changes(host, None, session, MANAGER)
+    changes = browse.backup_changes(host, None, session, MANAGER)
     assert listing["action"] == jobs.LIST and changes["status"] == "queued"
 
 
@@ -94,11 +100,13 @@ async def test_every_pro_plus_backup_surface_is_402_without_the_engine(session):
     host = str(s.host.id)
     # Grandfather-father-son retention and its preview, scheduled
     # verification, package restore, the drift timeline and tag policies.
-    assert await _code(retention.retention_preview(host, 3, 7, db=session)) == 402
+    assert (
+        await _code(lambda: retention.retention_preview(host, 3, 7, db=session)) == 402
+    )
     gfs = api.PolicyBody(keep_last=7, keep_daily=14)
-    assert await _code(api.put_policy(host, gfs, session, MANAGER)) == 402
+    assert await _code(lambda: api.put_policy(host, gfs, session, MANAGER)) == 402
     verify = api.PolicyBody(keep_last=7, verify_interval_days=30)
-    assert await _code(api.put_policy(host, verify, session, MANAGER)) == 402
+    assert await _code(lambda: api.put_policy(host, verify, session, MANAGER)) == 402
     packages = api.RestoreBody(
         snapshot="s1", include=["/etc"], dry_run=True, in_place=True, packages=True
     )
@@ -109,13 +117,19 @@ async def test_every_pro_plus_backup_surface_is_402_without_the_engine(session):
         )
     )  # fmt: skip
     session.commit()
-    assert await _code(api.backup_restore(host, packages, session, RESTORER)) == 402
     assert (
-        await _code(drift_api.drift_timeline(host, db=session, current_user=RESTORER))
+        await _code(lambda: api.backup_restore(host, packages, session, RESTORER))
         == 402
     )
     assert (
-        await _code(tag_api.list_tag_policies(db=session, current_user=MANAGER)) == 402
+        await _code(
+            lambda: drift_api.drift_timeline(host, db=session, current_user=RESTORER)
+        )
+        == 402
+    )
+    assert (
+        await _code(lambda: tag_api.list_tag_policies(db=session, current_user=MANAGER))
+        == 402
     )
 
 
@@ -176,17 +190,17 @@ async def test_a_lapse_never_locks_anyone_out_of_their_encrypted_backups(
     s = _encrypted_lapsed(session)
     host = str(s.host.id)
     body = {"snapshot": "e1", "include": ["/etc/hostname"]}
-    preview = await api.backup_restore(host, api.RestoreBody(**body), session, RESTORER)
-    real = await api.backup_restore(
+    preview = api.backup_restore(host, api.RestoreBody(**body), session, RESTORER)
+    real = api.backup_restore(
         host,
         api.RestoreBody(**body, dry_run=False, acknowledge_unsigned=True),
         session,
         RESTORER,
     )
-    listing = await browse.browse_snapshot(
+    listing = browse.browse_snapshot(
         host, browse.BrowseBody(snapshot="e1"), session, RESTORER
     )
-    changes = await browse.backup_changes(host, None, session, MANAGER)
+    changes = browse.backup_changes(host, None, session, MANAGER)
     for out in (preview, real, listing, changes):
         needs_key, _run = _needs_key(session, out["id"])
         assert needs_key is True
@@ -239,13 +253,13 @@ async def test_the_break_glass_export_works_after_a_lapse(session, monkeypatch):
         "seal_bundle",
         lambda bundle, public, fingerprint: "-----BEGIN PGP MESSAGE-----\nx\n",
     )
-    info = await breakglass_api.break_glass_info(db=session)
+    info = breakglass_api.break_glass_info(db=session)
     assert info["available"] is True and info["encrypted_hosts"] == 1
     body = breakglass_api.BreakGlassBody(
         recipient_key="-----BEGIN PGP PUBLIC KEY BLOCK-----\nop\n",
         reason="annual DR escrow after the lapse",
     )
-    response = await breakglass_api.break_glass_export(body, session, RESTORER)
+    response = breakglass_api.break_glass_export(body, session, RESTORER)
     assert response.body.startswith(b"-----BEGIN PGP MESSAGE-----")
     assert "sysmanage-backup-keys-" in response.headers["content-disposition"]
     audited = (
@@ -255,5 +269,5 @@ async def test_the_break_glass_export_works_after_a_lapse(session, monkeypatch):
     )
     assert [a.entity_name for a in audited] == [s.host.fqdn]
     with pytest.raises(HTTPException) as refused:  # Manage Backups alone
-        await breakglass_api.break_glass_export(body, session, MANAGER)
+        breakglass_api.break_glass_export(body, session, MANAGER)
     assert refused.value.status_code == 403

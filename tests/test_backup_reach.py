@@ -113,15 +113,18 @@ async def test_policy_backup_now_and_bulk_actions_refuse_an_unreachable_host(
 ):
     s = _ready(session)
     _unreachable(session, s, sent)
-    assert await _status(api.backup_now(str(s.host.id), None, session, MANAGER)) == 409
-    check = await api.backup_now(
+    assert (
+        await _status(lambda: api.backup_now(str(s.host.id), None, session, MANAGER))
+        == 409
+    )
+    check = api.backup_now(
         str(s.host.id), api.RunBody(action="check"), session, MANAGER
     )
     assert check["host_id"] == str(s.nas.id)  # the storage side still runs
-    assert await _status(
+    assert await _status(lambda:
         api.put_policy(str(s.host.id), api.PolicyBody(), session, MANAGER)
     ) == 409  # fmt: skip
-    answer = await api.bulk_backup_now(
+    answer = api.bulk_backup_now(
         api.BulkBackupBody(host_ids=[str(s.host.id)]), session, MANAGER
     )
     assert answer["skipped"][0]["reason"] == "storage_unreachable"
@@ -134,12 +137,19 @@ async def test_restore_preview_and_browsing_refuse_an_unreachable_host(session, 
     _unreachable(session, s, sent)
     host_id = str(s.host.id)
     restore = api.RestoreBody(snapshot="20261029T140053Z", include=["/etc/hostname"])
-    assert await _status(api.backup_restore(host_id, restore, session, RESTORER)) == 409
+    assert (
+        await _status(lambda: api.backup_restore(host_id, restore, session, RESTORER))
+        == 409
+    )
     look = browse.BrowseBody(snapshot="20261029T140053Z", path="/etc")
     assert (
-        await _status(browse.browse_snapshot(host_id, look, session, RESTORER)) == 409
+        await _status(lambda: browse.browse_snapshot(host_id, look, session, RESTORER))
+        == 409
     )
-    assert await _status(browse.backup_changes(host_id, None, session, RESTORER)) == 409
+    assert (
+        await _status(lambda: browse.backup_changes(host_id, None, session, RESTORER))
+        == 409
+    )
     queued = [c for c in sent if c[1] != "check_backup_storage"]
     assert queued == []  # nothing went to the host
 
@@ -150,7 +160,7 @@ async def test_bulk_setup_and_equip_skip_an_unreachable_host(session, sent):
     fresh = _host(session, fqdn="fresh.lab", caps=CAN_CHECK)
     command_id = reach.start(session, fresh)
     _answer(session, fresh, command_id, False)
-    answer = await setup.bulk_backup_setup(
+    answer = setup.bulk_backup_setup(
         setup.BulkSetupBody(host_ids=[str(fresh.id)]), session, MANAGER
     )
     assert answer["skipped"][0]["reason"] == "storage_unreachable"
@@ -160,7 +170,10 @@ async def test_bulk_setup_and_equip_skip_an_unreachable_host(session, sent):
     command_id = reach.start(session, bare)
     _answer(session, bare, command_id, False)
     assert backup_equip.blocker(session, bare) == backup_equip.STORAGE_UNREACHABLE
-    assert await _status(equip_api.backup_equip(str(bare.id), session, MANAGER)) == 409
+    assert (
+        await _status(lambda: equip_api.backup_equip(str(bare.id), session, MANAGER))
+        == 409
+    )
     assert s.host is not None
 
 
@@ -168,11 +181,13 @@ async def test_bulk_setup_and_equip_skip_an_unreachable_host(session, sent):
 async def test_check_again_asks_now(session, sent):
     s = _ready(session)
     _unreachable(session, s, sent)
-    answer = await equip_api.backup_reach_check(str(s.host.id), session, MANAGER)
+    answer = equip_api.backup_reach_check(str(s.host.id), session, MANAGER)
     assert answer["command_id"] and sent[-1][1] == "check_backup_storage"
     old = _host(session, fqdn="old.lab")
     assert (
-        await _status(equip_api.backup_reach_check(str(old.id), session, MANAGER))
+        await _status(
+            lambda: equip_api.backup_reach_check(str(old.id), session, MANAGER)
+        )
         == 409
     )
 

@@ -148,7 +148,7 @@ ROUTES = [
 async def _call(route, db, user, args=None, kwargs=None):
     env = _Env()
     with env:
-        out = await getattr(ham, route)(
+        out = getattr(ham, route)(
             *(args or []), db=db, current_user=user, **(kwargs or {})
         )
     return out, env
@@ -179,7 +179,7 @@ class TestGuardLadder:
         env = _Env()
         with env:
             with pytest.raises(HTTPException) as exc:
-                await getattr(ham, route)(
+                getattr(ham, route)(
                     *args, db=_FakeSession(), current_user=_user(other), **kwargs
                 )
         assert exc.value.status_code == 403
@@ -192,7 +192,7 @@ class TestGuardLadder:
         env = _Env()
         with env:
             with pytest.raises(HTTPException) as exc:
-                await getattr(ham, route)(
+                getattr(ham, route)(
                     *args, db=_FakeSession(), current_user=_user(role), **kwargs
                 )
         assert exc.value.status_code == 404
@@ -206,9 +206,7 @@ class TestGuardLadder:
         env = _Env()
         with env:
             with pytest.raises(HTTPException) as exc:
-                await getattr(ham, route)(
-                    *args, db=db, current_user=_user(role), **kwargs
-                )
+                getattr(ham, route)(*args, db=db, current_user=_user(role), **kwargs)
         assert exc.value.status_code == 400
         # Queuing for a decommissioned host leaves a command that fires if the
         # host is ever reactivated.
@@ -222,9 +220,7 @@ class TestGuardLadder:
         env = _Env()
         with env:
             with pytest.raises(HTTPException) as exc:
-                await getattr(ham, route)(
-                    *args, db=db, current_user=_user(role), **kwargs
-                )
+                getattr(ham, route)(*args, db=db, current_user=_user(role), **kwargs)
         assert exc.value.status_code == 400
         assert env.queued == []
         assert db.commits == 0

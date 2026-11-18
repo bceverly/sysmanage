@@ -77,7 +77,7 @@ def needs_first_admin(current_user: str) -> bool:
 
 
 @router.post("/first-admin", dependencies=[Depends(JWTBearer())])
-async def create_first_admin(
+def create_first_admin(
     body: FirstAdminRequest, current_user: str = Depends(get_current_user)
 ):
     """Create the first administrator, with every security role."""

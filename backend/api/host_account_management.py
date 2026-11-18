@@ -55,7 +55,7 @@ class CreateHostGroupRequest(BaseModel):
 
 
 @router.post("/host/{host_id}/accounts", dependencies=[Depends(JWTBearer())])
-async def create_host_user(  # NOSONAR
+def create_host_user(  # NOSONAR
     host_id: str,
     request: CreateHostUserRequest,
     db: Session = Depends(get_tenant_db),
@@ -177,7 +177,7 @@ async def create_host_user(  # NOSONAR
 
 
 @router.post("/host/{host_id}/groups", dependencies=[Depends(JWTBearer())])
-async def create_host_group(
+def create_host_group(
     host_id: str,
     request: CreateHostGroupRequest,
     db: Session = Depends(get_tenant_db),
@@ -283,7 +283,7 @@ async def create_host_group(
 @router.delete(
     "/host/{host_id}/accounts/{username}", dependencies=[Depends(JWTBearer())]
 )
-async def delete_host_user(
+def delete_host_user(
     host_id: str,
     username: str,
     delete_default_group: bool = True,
@@ -387,7 +387,7 @@ async def delete_host_user(
 @router.delete(
     "/host/{host_id}/groups/{group_name}", dependencies=[Depends(JWTBearer())]
 )
-async def delete_host_group(
+def delete_host_group(
     host_id: str,
     group_name: str,
     db: Session = Depends(get_tenant_db),

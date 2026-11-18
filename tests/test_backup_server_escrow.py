@@ -76,7 +76,9 @@ async def test_pro_without_an_escrow_key_refuses_the_server_policy(
 ):
     s = _server(session, escrow=False)
     assert (
-        await _status(server_api.put_server_policy(_body(s.server), session, MANAGER))
+        await _status(
+            lambda: server_api.put_server_policy(_body(s.server), session, MANAGER)
+        )
         == 409
     )
     assert backup_server.marked(session) is None and proplus.calls == []
@@ -85,11 +87,11 @@ async def test_pro_without_an_escrow_key_refuses_the_server_policy(
 @pytest.mark.asyncio
 async def test_pro_encrypts_the_server_policy_to_the_escrow_key(session, proplus, sent):
     s = _server(session)
-    await server_api.put_server_policy(_body(s.server), session, MANAGER)
+    server_api.put_server_policy(_body(s.server), session, MANAGER)
     assert proplus.calls == [(s.server.id, "E" * 40, False)]
     policy = backup_server.marked(session)
     assert jobs.escrow_keyed(policy)
-    found = await server_api.server_backup(None, session)
+    found = server_api.server_backup(None, session)
     assert found["encryption"] == {"available": True, "escrow_fingerprint": "E" * 40,
                                    "encrypted": True}  # fmt: skip
 
@@ -97,9 +99,9 @@ async def test_pro_encrypts_the_server_policy_to_the_escrow_key(session, proplus
 @pytest.mark.asyncio
 async def test_community_backs_the_server_up_unencrypted(session, sent):
     s = _server(session, escrow=False)
-    await server_api.put_server_policy(_body(s.server), session, MANAGER)
+    server_api.put_server_policy(_body(s.server), session, MANAGER)
     assert not jobs.encrypted(backup_server.marked(session))
-    assert (await server_api.server_backup(None, session))["encryption"] == {
+    assert (server_api.server_backup(None, session))["encryption"] == {
         "available": False
     }
 
@@ -107,10 +109,10 @@ async def test_community_backs_the_server_up_unencrypted(session, sent):
 @pytest.mark.asyncio
 async def test_a_new_escrow_key_moves_the_server_backup_to_it(session, proplus, sent):
     s = _server(session)
-    await server_api.put_server_policy(_body(s.server), session, MANAGER)
+    server_api.put_server_policy(_body(s.server), session, MANAGER)
     with patch.object(backup_breakglass, "inspect_recipient",
                       lambda key: ("F" * 40, "Escrow <e@example.lab>")):  # fmt: skip
-        await escrow_api.save_escrow_key(escrow_api.EscrowKeyBody(public_key=PUBLIC),
+        escrow_api.save_escrow_key(escrow_api.EscrowKeyBody(public_key=PUBLIC),
                                          session, MANAGER)  # fmt: skip
     assert proplus.calls[-1] == (s.server.id, "F" * 40, False)
     audit = session.query(models.AuditLog).all()

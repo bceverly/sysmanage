@@ -231,7 +231,7 @@ class TestHostCRUD:
                 mock_sessionmaker.return_value = ctx
                 mock_rsm.return_value = ctx
 
-                result = await get_host(str(mock_host.id), "test@example.com")
+                result = get_host(str(mock_host.id), "test@example.com")
 
                 assert result["fqdn"] == mock_host.fqdn
                 assert result["id"] == str(mock_host.id)
@@ -258,7 +258,7 @@ class TestHostCRUD:
                 mock_rsm.return_value = ctx
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await get_host(str(uuid.uuid4()), "test@example.com")
+                    get_host(str(uuid.uuid4()), "test@example.com")
 
                 assert exc_info.value.status_code == 404
 
@@ -283,7 +283,7 @@ class TestHostCRUD:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await get_host(str(uuid.uuid4()), "test@example.com")
+                    get_host(str(uuid.uuid4()), "test@example.com")
 
                 assert exc_info.value.status_code == 403
 
@@ -305,7 +305,7 @@ class TestHostCRUD:
                     mock_session
                 )
 
-                result = await get_host_by_fqdn_endpoint(mock_host.fqdn)
+                result = get_host_by_fqdn_endpoint(mock_host.fqdn)
 
                 assert result["fqdn"] == mock_host.fqdn
 
@@ -328,7 +328,7 @@ class TestHostCRUD:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await get_host_by_fqdn_endpoint("nonexistent.example.com")
+                    get_host_by_fqdn_endpoint("nonexistent.example.com")
 
                 assert exc_info.value.status_code == 404
 
@@ -379,7 +379,7 @@ class TestHostCRUD:
                     mock_session
                 )
 
-                result = await add_host(new_host_data, "admin@example.com")
+                result = add_host(new_host_data, "admin@example.com")
 
                 assert result["fqdn"] == new_host_data.fqdn
                 assert result["approval_status"] == "approved"
@@ -415,7 +415,7 @@ class TestHostCRUD:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await add_host(new_host_data, "admin@example.com")
+                    add_host(new_host_data, "admin@example.com")
 
                 assert exc_info.value.status_code == 409
 
@@ -445,7 +445,7 @@ class TestHostCRUD:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await add_host(new_host_data, "unknown@example.com")
+                    add_host(new_host_data, "unknown@example.com")
 
                 assert exc_info.value.status_code == 401
 
@@ -486,7 +486,7 @@ class TestHostCRUD:
                     mock_session
                 )
 
-                result = await update_host(
+                result = update_host(
                     str(mock_host.id), updated_data, "admin@example.com"
                 )
 
@@ -520,9 +520,7 @@ class TestHostCRUD:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await update_host(
-                        str(uuid.uuid4()), updated_data, "admin@example.com"
-                    )
+                    update_host(str(uuid.uuid4()), updated_data, "admin@example.com")
 
                 assert exc_info.value.status_code == 404
 
@@ -549,7 +547,7 @@ class TestHostCRUD:
                 mock_sessionmaker.return_value = ctx
                 mock_rsm.return_value = ctx
 
-                result = await delete_host(str(mock_host.id), "admin@example.com")
+                result = delete_host(str(mock_host.id), "admin@example.com")
 
                 assert result["result"] is True
                 mock_session.commit.assert_called()
@@ -576,7 +574,7 @@ class TestHostCRUD:
                 mock_rsm.return_value = ctx
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await delete_host(str(uuid.uuid4()), "admin@example.com")
+                    delete_host(str(uuid.uuid4()), "admin@example.com")
 
                 assert exc_info.value.status_code == 404
 
@@ -601,7 +599,7 @@ class TestHostCRUD:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await delete_host(str(uuid.uuid4()), "test@example.com")
+                    delete_host(str(uuid.uuid4()), "test@example.com")
 
                 assert exc_info.value.status_code == 403
 
@@ -860,7 +858,7 @@ class TestHostApproval:
                     mock_session
                 )
 
-                result = await reject_host(str(mock_pending_host.id), mock_admin_user)
+                result = reject_host(str(mock_pending_host.id), mock_admin_user)
 
                 assert mock_pending_host.approval_status == "rejected"
                 mock_session.commit.assert_called()
@@ -888,7 +886,7 @@ class TestHostApproval:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await reject_host(str(mock_host.id), mock_admin_user)
+                    reject_host(str(mock_host.id), mock_admin_user)
 
                 assert exc_info.value.status_code == 400
 

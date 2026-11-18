@@ -79,7 +79,7 @@ def _lifecycle_engine():
 
 
 @router.post("/lifecycle/host/{host_id}/upgrade")
-async def upgrade_host_release(
+def upgrade_host_release(
     host_id: str,
     body: ReleaseUpgradeRequest,
     tenant_db: Session = Depends(get_tenant_db),

@@ -127,7 +127,7 @@ def _require_host(db_session: Session, host_id: str):
     response_model=List[ConfigProfileRunResponse],
     dependencies=[Depends(JWTBearer())],
 )
-async def list_config_profile_runs(
+def list_config_profile_runs(
     host_id: str,
     limit: int = Query(DEFAULT_LIMIT, ge=1, le=MAX_LIMIT),
     db_session: Session = Depends(get_tenant_db),
@@ -149,7 +149,7 @@ async def list_config_profile_runs(
     response_model=ConfigProfileRunDetailResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def get_config_profile_run(
+def get_config_profile_run(
     run_id: str,
     db_session: Session = Depends(get_tenant_db),
 ):
@@ -348,7 +348,7 @@ def _build_parameters(
     "/hosts/{host_id}/config-management/apply",
     response_model=ConfigProfileApplyResponse,
 )
-async def apply_config_profile(
+def apply_config_profile(
     host_id: str,
     request: ConfigProfileApplyRequest,
     db_session: Session = Depends(get_tenant_db),

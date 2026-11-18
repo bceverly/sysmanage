@@ -74,7 +74,7 @@ def _get_active_host(db: Session, host_id: str) -> models.Host:
     "/host/{host_id}/processes",
     dependencies=[Depends(JWTBearer())],
 )
-async def get_host_processes(
+def get_host_processes(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -120,7 +120,7 @@ async def get_host_processes(
     "/host/{host_id}/processes/refresh",
     dependencies=[Depends(JWTBearer())],
 )
-async def refresh_host_processes(
+def refresh_host_processes(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -154,7 +154,7 @@ async def refresh_host_processes(
     "/host/{host_id}/processes/{pid}/kill",
     dependencies=[Depends(JWTBearer())],
 )
-async def kill_host_process(
+def kill_host_process(
     host_id: str,
     pid: int,
     request: KillProcessRequest = KillProcessRequest(),

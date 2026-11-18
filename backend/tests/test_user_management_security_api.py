@@ -543,7 +543,7 @@ class TestErrorHandling:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await get_logged_in_user(mock_request)
+                    get_logged_in_user(mock_request)
 
                 assert exc_info.value.status_code == 404
 
@@ -576,9 +576,7 @@ class TestErrorHandling:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await update_user(
-                        str(uuid.uuid4()), updated_data, "admin@example.com"
-                    )
+                    update_user(str(uuid.uuid4()), updated_data, "admin@example.com")
 
                 assert exc_info.value.status_code == 404
 
@@ -605,7 +603,7 @@ class TestErrorHandling:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await delete_user(str(uuid.uuid4()), "admin@example.com")
+                    delete_user(str(uuid.uuid4()), "admin@example.com")
 
                 assert exc_info.value.status_code == 404
 
@@ -632,7 +630,7 @@ class TestErrorHandling:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await lock_user(str(uuid.uuid4()), "admin@example.com")
+                    lock_user(str(uuid.uuid4()), "admin@example.com")
 
                 assert exc_info.value.status_code == 404
 
@@ -659,6 +657,6 @@ class TestErrorHandling:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await unlock_user(str(uuid.uuid4()), "admin@example.com")
+                    unlock_user(str(uuid.uuid4()), "admin@example.com")
 
                 assert exc_info.value.status_code == 404

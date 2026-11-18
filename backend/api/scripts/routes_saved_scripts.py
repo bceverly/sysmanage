@@ -97,7 +97,7 @@ async def get_saved_scripts(
 
 
 @router.post("/", response_model=SavedScriptResponse)
-async def create_saved_script(
+def create_saved_script(
     script_data: SavedScriptCreate,
     current_user=Depends(get_current_user),
 ):
@@ -199,7 +199,7 @@ async def create_saved_script(
 
 
 @router.get("/{script_id}", response_model=SavedScriptResponse)
-async def get_saved_script(
+def get_saved_script(
     script_id: str,
     current_user=Depends(get_current_user),
 ):
@@ -242,7 +242,7 @@ async def get_saved_script(
 
 
 @router.put("/{script_id}", response_model=SavedScriptResponse)
-async def update_saved_script(
+def update_saved_script(
     script_id: str,
     script_data: SavedScriptUpdate,
     current_user=Depends(get_current_user),
@@ -356,7 +356,7 @@ async def update_saved_script(
 
 
 @router.delete("/{script_id}")
-async def delete_saved_script(
+def delete_saved_script(
     script_id: str,
     current_user=Depends(get_current_user),
 ):

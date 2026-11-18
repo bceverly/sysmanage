@@ -265,19 +265,17 @@ class TestApi:
     def test_changing_it_needs_its_own_role(self, db):
         user = self._user(api.SecurityRoles.VIEW_HOST_DETAILS)
         with pytest.raises(HTTPException) as excinfo:
-            asyncio.run(api.put_policy(api.PolicyRequest(enabled=True), db, user))
+            api.put_policy(api.PolicyRequest(enabled=True), db, user)
         assert excinfo.value.status_code == 403
 
     def test_a_change_is_audited_and_applied_at_once(self, db, sent):
         _host(db, "a1")
         user = self._user(api.SecurityRoles.MANAGE_NETWORK_DISCOVERY)
         with patch.object(api.AuditService, "log_update") as audit:
-            reply = asyncio.run(
-                api.put_policy(
-                    api.PolicyRequest(enabled=True, report_interval_seconds=120),
-                    db,
-                    user,
-                )
+            reply = api.put_policy(
+                api.PolicyRequest(enabled=True, report_interval_seconds=120),
+                db,
+                user,
             )
         assert reply["enabled"] is True and reply["report_interval_seconds"] == 120
         assert reply["dispatch"]["queued"] == 1 and len(sent) == 1
@@ -289,8 +287,6 @@ class TestApi:
 
     def test_reading_it_needs_view_host_details(self, db):
         with pytest.raises(HTTPException):
-            asyncio.run(api.get_policy(db, self._user()))
-        reply = asyncio.run(
-            api.get_policy(db, self._user(api.SecurityRoles.VIEW_HOST_DETAILS))
-        )
+            api.get_policy(db, self._user())
+        reply = api.get_policy(db, self._user(api.SecurityRoles.VIEW_HOST_DETAILS))
         assert reply["enabled"] is False

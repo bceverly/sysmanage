@@ -184,7 +184,7 @@ def _sessionmaker():
 # Admin routes
 # --------------------------------------------------------------------------- #
 @router.post("", dependencies=[Depends(JWTBearer())])
-async def create_invitation(
+def create_invitation(
     body: CreateInvitationRequest,
     request: Request,
     current_user: str = Depends(get_current_user),
@@ -214,7 +214,7 @@ async def create_invitation(
 
 
 @router.get("", dependencies=[Depends(JWTBearer())])
-async def list_invitations(
+def list_invitations(
     pending_only: bool = False,
     current_user: str = Depends(get_current_user),
 ) -> List[InvitationResponse]:
@@ -226,7 +226,7 @@ async def list_invitations(
 
 
 @router.delete("/{invitation_id}", dependencies=[Depends(JWTBearer())])
-async def revoke_invitation(
+def revoke_invitation(
     invitation_id: str,
     current_user: str = Depends(get_current_user),
 ) -> SimpleResponse:
@@ -242,7 +242,7 @@ async def revoke_invitation(
 
 
 @router.post("/{invitation_id}/resend", dependencies=[Depends(JWTBearer())])
-async def resend_invitation(
+def resend_invitation(
     invitation_id: str,
     request: Request,
     current_user: str = Depends(get_current_user),
@@ -274,7 +274,7 @@ async def resend_invitation(
 # Public (tokened) routes
 # --------------------------------------------------------------------------- #
 @router.get("/validate/{token}")
-async def validate_invitation(token: str) -> InvitationResponse:
+def validate_invitation(token: str) -> InvitationResponse:
     """Validate an invitation token (used by the accept page on load)."""
     with _sessionmaker()() as session:
         inv = invitation_service.get_valid_invitation(session, token)
@@ -286,7 +286,7 @@ async def validate_invitation(token: str) -> InvitationResponse:
 
 
 @router.post("/accept")
-async def accept_invitation(body: AcceptInvitationRequest) -> SimpleResponse:
+def accept_invitation(body: AcceptInvitationRequest) -> SimpleResponse:
     """Accept an invitation: create the account, assign roles, set the password."""
     if body.password != body.confirm_password:
         raise HTTPException(status_code=400, detail=_("Passwords do not match"))

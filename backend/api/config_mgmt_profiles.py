@@ -166,7 +166,7 @@ def _load_profile(db_session: Session, profile_id: str) -> models.ConfigProfile:
 
 
 @router.get("/config-management/profiles", response_model=List[ProfileResponse])
-async def list_profiles(
+def list_profiles(
     engine: Optional[str] = None,
     db_session: Session = Depends(get_tenant_db),
 ):
@@ -179,7 +179,7 @@ async def list_profiles(
 
 
 @router.post("/config-management/profiles", response_model=ProfileResponse)
-async def create_profile(
+def create_profile(
     request: ProfileCreateRequest,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -219,7 +219,7 @@ async def create_profile(
 
 
 @router.get("/config-management/profiles/{profile_id}", response_model=ProfileResponse)
-async def get_profile(
+def get_profile(
     profile_id: str,
     db_session: Session = Depends(get_tenant_db),
 ):
@@ -228,7 +228,7 @@ async def get_profile(
 
 
 @router.put("/config-management/profiles/{profile_id}", response_model=ProfileResponse)
-async def update_profile(
+def update_profile(
     profile_id: str,
     request: ProfileUpdateRequest,
     db_session: Session = Depends(get_tenant_db),
@@ -257,7 +257,7 @@ async def update_profile(
 
 
 @router.delete("/config-management/profiles/{profile_id}")
-async def delete_profile(
+def delete_profile(
     profile_id: str,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -280,7 +280,7 @@ async def delete_profile(
     "/config-management/profiles/{profile_id}/versions",
     response_model=List[ProfileVersionResponse],
 )
-async def list_profile_versions(
+def list_profile_versions(
     profile_id: str,
     db_session: Session = Depends(get_tenant_db),
 ):
@@ -299,7 +299,7 @@ async def list_profile_versions(
     "/config-management/profiles/{profile_id}/assignments",
     response_model=List[AssignmentResponse],
 )
-async def list_assignments(
+def list_assignments(
     profile_id: str,
     db_session: Session = Depends(get_tenant_db),
 ):
@@ -317,7 +317,7 @@ async def list_assignments(
     "/config-management/profiles/{profile_id}/assignments",
     response_model=AssignmentResponse,
 )
-async def create_assignment(
+def create_assignment(
     profile_id: str,
     request: AssignmentCreateRequest,
     db_session: Session = Depends(get_tenant_db),
@@ -363,7 +363,7 @@ async def create_assignment(
 
 
 @router.delete("/config-management/assignments/{assignment_id}")
-async def delete_assignment(
+def delete_assignment(
     assignment_id: str,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

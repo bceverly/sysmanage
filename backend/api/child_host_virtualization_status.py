@@ -75,7 +75,7 @@ def _try_check_virtualization_support_plan(host_id: str) -> bool:
     "/host/{host_id}/virtualization",
     dependencies=[Depends(JWTBearer())],
 )
-async def get_virtualization_support(
+def get_virtualization_support(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -111,7 +111,7 @@ async def get_virtualization_support(
     "/host/{host_id}/virtualization/status",
     dependencies=[Depends(JWTBearer())],
 )
-async def get_virtualization_status(
+def get_virtualization_status(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):

@@ -242,7 +242,7 @@ def _name_taken(db_session: Session, name: str, exclude_id=None) -> bool:
 
 
 @router.get("/config-management/job-templates", response_model=List[TemplateResponse])
-async def list_templates(db_session: Session = Depends(get_tenant_db)):
+def list_templates(db_session: Session = Depends(get_tenant_db)):
     """Every job template, by name."""
     rows = (
         db_session.query(models.ConfigJobTemplate)
@@ -253,7 +253,7 @@ async def list_templates(db_session: Session = Depends(get_tenant_db)):
 
 
 @router.post("/config-management/job-templates", response_model=TemplateResponse)
-async def create_template(
+def create_template(
     request: TemplateRequest,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -303,7 +303,7 @@ async def create_template(
 @router.get(
     "/config-management/job-templates/{template_id}", response_model=TemplateResponse
 )
-async def get_template(template_id: str, db_session: Session = Depends(get_tenant_db)):
+def get_template(template_id: str, db_session: Session = Depends(get_tenant_db)):
     """One job template."""
     return TemplateResponse(
         **fleet.template_to_dict(_load_template(db_session, template_id))
@@ -313,7 +313,7 @@ async def get_template(template_id: str, db_session: Session = Depends(get_tenan
 @router.put(
     "/config-management/job-templates/{template_id}", response_model=TemplateResponse
 )
-async def update_template(
+def update_template(
     template_id: str,
     request: TemplateUpdateRequest,
     db_session: Session = Depends(get_tenant_db),
@@ -370,7 +370,7 @@ async def update_template(
 
 
 @router.delete("/config-management/job-templates/{template_id}")
-async def delete_template(
+def delete_template(
     template_id: str,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -393,7 +393,7 @@ async def delete_template(
 @router.post(
     "/config-management/job-templates/{template_id}/launch", response_model=JobResponse
 )
-async def launch_template(
+def launch_template(
     template_id: str,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -446,7 +446,7 @@ async def launch_template(
 
 
 @router.get("/config-management/jobs", response_model=List[JobResponse])
-async def list_jobs(
+def list_jobs(
     status: Optional[str] = None,
     limit: int = Query(DEFAULT_JOB_LIMIT, ge=1, le=MAX_JOB_LIMIT),
     db_session: Session = Depends(get_tenant_db),
@@ -460,7 +460,7 @@ async def list_jobs(
 
 
 @router.get("/config-management/jobs/{job_id}", response_model=JobResponse)
-async def get_job(job_id: str, db_session: Session = Depends(get_tenant_db)):
+def get_job(job_id: str, db_session: Session = Depends(get_tenant_db)):
     """One job."""
     return JobResponse(**fleet.job_to_dict(_load_job(db_session, job_id)))
 
@@ -469,7 +469,7 @@ async def get_job(job_id: str, db_session: Session = Depends(get_tenant_db)):
     "/config-management/jobs/{job_id}/targets",
     response_model=List[JobTargetResponse],
 )
-async def list_job_targets(
+def list_job_targets(
     job_id: str,
     status: Optional[str] = None,
     limit: int = Query(DEFAULT_TARGET_LIMIT, ge=1, le=MAX_TARGET_LIMIT),
@@ -505,7 +505,7 @@ async def list_job_targets(
 
 
 @router.post("/config-management/jobs/{job_id}/cancel", response_model=JobResponse)
-async def cancel_job(
+def cancel_job(
     job_id: str,
     request: CancelRequest,
     db_session: Session = Depends(get_tenant_db),

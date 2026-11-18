@@ -77,19 +77,21 @@ async def test_the_transport_needs_the_role_and_resends_every_job(session, sent)
     s = _setup(session)
     target_id = str(s.target.id)
     assert (
-        await _status(transport_api.set_transport(target_id, _body(), session, NOBODY))
+        await _status(
+            lambda: transport_api.set_transport(target_id, _body(), session, NOBODY)
+        )
         == 403
     )
     assert (
         await _status(
-            transport_api.set_transport(
+            lambda: transport_api.set_transport(
                 target_id, _body(proxy_port=0), session, MANAGER
             )
         )
         == 422
     )
     before = s.policy.config_version
-    view = await transport_api.set_transport(target_id, _body(), session, MANAGER)
+    view = transport_api.set_transport(target_id, _body(), session, MANAGER)
     assert view["transport"] == {
         "transport": "proxy", "proxy_host": "nas.example.lan", "proxy_port": 8443,
         "proxy_pin_sha256": None, "proxy_ca": False,
@@ -231,16 +233,16 @@ async def test_a_saved_ca_is_kept_unless_removed(session, sent):
 
     s = _setup(session)
     target_id = str(s.target.id)
-    await transport_api.set_transport(
+    transport_api.set_transport(
         target_id, _body(proxy_ca_pem=ca_pem()), session, MANAGER
     )
     saved = s.target.proxy_ca_pem
     assert saved.startswith("-----BEGIN CERTIFICATE-----")
-    view = await transport_api.set_transport(
+    view = transport_api.set_transport(
         target_id, _body(proxy_port=9443), session, MANAGER
     )
     assert s.target.proxy_ca_pem == saved and view["transport"]["proxy_ca"] is True
-    await transport_api.set_transport(
+    transport_api.set_transport(
         target_id, _body(remove_proxy_ca=True), session, MANAGER
     )
     assert s.target.proxy_ca_pem is None

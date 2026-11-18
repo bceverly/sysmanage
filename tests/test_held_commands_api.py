@@ -7,6 +7,7 @@ list shows only this tenant's held rows, cancel is audited and refused for
 anything not held, and non-administrators need the right role."""
 
 import asyncio
+import inspect
 import json
 import uuid
 from datetime import datetime, timezone
@@ -74,8 +75,9 @@ def _held_row(engine, host_id, held=True, token="C1-SECRET"):
         return row.id
 
 
-def _run(coro):
-    return asyncio.run(coro)
+def _run(result):
+    """The handler's result -- awaited when it is still a coroutine."""
+    return asyncio.run(result) if inspect.isawaitable(result) else result
 
 
 def test_host_status_carries_the_held_count(tenant):

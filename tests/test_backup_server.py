@@ -202,19 +202,21 @@ async def test_the_server_policy_needs_the_role_and_is_marked_and_paused(
 ):
     s = _server(session)
     assert (
-        await _status(server_api.put_server_policy(_body(s.server), session, NOBODY))
+        await _status(
+            lambda: server_api.put_server_policy(_body(s.server), session, NOBODY)
+        )
         == 403
     )
-    saved = await server_api.put_server_policy(
+    saved = server_api.put_server_policy(
         _body(s.server, quiesce=False), session, MANAGER
     )
     assert saved["server_preset"] is True and saved["quiesce"] is True
-    found = await server_api.server_backup(None, session)
+    found = server_api.server_backup(None, session)
     assert found["status"] == "no_good_backup" and found["warn"]
     # An ordinary Configure is refused there: the server dialog changes it.
     assert (
         await _status(
-            api.put_policy(str(s.server.id), api.PolicyBody(), session, MANAGER)
+            lambda: api.put_policy(str(s.server.id), api.PolicyBody(), session, MANAGER)
         )
         == 409
     )
@@ -232,14 +234,14 @@ async def test_the_servers_host_is_never_configured_as_an_ordinary_host(
     assert backup_server.server_host_id(session) == str(s.server.id)
     assert (
         await _status(
-            api.put_policy(str(s.server.id), api.PolicyBody(), session, MANAGER)
+            lambda: api.put_policy(str(s.server.id), api.PolicyBody(), session, MANAGER)
         )
         == 409
     )
     assert (
         session.query(models.BackupPolicy).filter_by(host_id=s.server.id).count() == 0
     )
-    await api.put_policy(str(s.host.id), api.PolicyBody(), session, MANAGER)
+    api.put_policy(str(s.host.id), api.PolicyBody(), session, MANAGER)
     row = views.host_status(session, s.host)
     assert row["server_host"] is False and row["needs_server_policy"] is False
 
@@ -261,7 +263,7 @@ async def test_an_ordinary_policy_already_on_the_servers_host_is_flagged(
         overview["server"]["status"] == "ordinary_policy" and overview["server"]["warn"]
     )
     # The server dialog makes it the server's policy, and the flag goes.
-    await server_api.put_server_policy(_body(s.server), session, MANAGER)
+    server_api.put_server_policy(_body(s.server), session, MANAGER)
     row = views.host_status(session, s.server)
     assert row["server_host"] and not row["needs_server_policy"]
 
@@ -278,13 +280,13 @@ def test_a_tag_policy_never_takes_the_servers_host(session, named):
 @pytest.mark.asyncio
 async def test_a_good_capture_clears_the_warning(session, named, sent):
     s = _server(session)
-    await server_api.put_server_policy(_body(s.server), session, MANAGER)
+    server_api.put_server_policy(_body(s.server), session, MANAGER)
     policy = backup_server.marked(session)
     session.add(models.BackupRun(id=uuid.uuid4(), policy_id=policy.id, host_id=s.server.id,
                                  action="capture", status="ok", queued_at=jobs.now(),
                                  finished_at=jobs.now()))  # fmt: skip
     session.commit()
-    found = await server_api.server_backup(None, session)
+    found = server_api.server_backup(None, session)
     assert found["status"] == "ok" and not found["warn"]
     assert views.attention_count(views.overview(session)) == 0
 
@@ -292,8 +294,8 @@ async def test_a_good_capture_clears_the_warning(session, named, sent):
 @pytest.mark.asyncio
 async def test_marking_another_host_moves_the_mark_and_says_so(session, named, sent):
     s = _server(session)
-    await server_api.put_server_policy(_body(s.host), session, MANAGER)
-    await server_api.put_server_policy(_body(s.server), session, MANAGER)
+    server_api.put_server_policy(_body(s.host), session, MANAGER)
+    server_api.put_server_policy(_body(s.server), session, MANAGER)
     marked = session.query(models.BackupPolicy).filter_by(server_preset=True).all()
     assert [p.host_id for p in marked] == [s.server.id]
     audit = session.query(models.AuditLog).all()
@@ -303,7 +305,7 @@ async def test_marking_another_host_moves_the_mark_and_says_so(session, named, s
 @pytest.mark.asyncio
 async def test_the_summary_says_the_server_is_unprotected(session, named):
     _server(session)
-    assert (await api.backups_summary(session))["server_unprotected"] is True
+    assert (api.backups_summary(session))["server_unprotected"] is True
 
 
 @pytest.mark.asyncio
@@ -312,6 +314,9 @@ async def test_the_preset_for_a_picked_host_leaves_its_mirror_out(session):
     session.add(models.MirrorPlatformConfig(id=uuid.uuid4(), platform="linux",
                                             host_id=s.host.id, mirror_root_path="/srv/mirror"))  # fmt: skip
     session.commit()
-    found = await server_api.server_backup(str(s.host.id), session)
+    found = server_api.server_backup(str(s.host.id), session)
     assert "/srv/mirror" in found["preset"]["skip_paths"]
-    assert await _status(server_api.server_backup(str(uuid.uuid4()), session)) == 404
+    assert (
+        await _status(lambda: server_api.server_backup(str(uuid.uuid4()), session))
+        == 404
+    )

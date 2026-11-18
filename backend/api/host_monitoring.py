@@ -142,7 +142,7 @@ async def get_host_certificates(host_id: str):
     "/host/{host_id}/request-certificates-collection",
     dependencies=[Depends(JWTBearer())],
 )
-async def request_certificates_collection(host_id: str):
+def request_certificates_collection(host_id: str):
     """
     Request an agent to collect SSL certificates from the system.
     This sends a message via WebSocket to the agent requesting certificate collection.
@@ -291,7 +291,7 @@ async def get_host_roles(host_id: str):
     "/host/{host_id}/request-roles-collection",
     dependencies=[Depends(JWTBearer())],
 )
-async def request_roles_collection(host_id: str):
+def request_roles_collection(host_id: str):
     """
     Request an agent to collect server roles from the system.
     This sends a message via WebSocket to the agent requesting role collection.
@@ -346,7 +346,7 @@ async def request_roles_collection(host_id: str):
 
 
 @router.post("/host/{host_id}/service-control", dependencies=[Depends(JWTBearer())])
-async def control_services(
+def control_services(
     host_id: str,
     request: ServiceControlRequest,
     current_user=Depends(require_authenticated_user),

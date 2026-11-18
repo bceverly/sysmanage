@@ -177,7 +177,7 @@ class TestUpdateRequests:
                     mock_session
                 )
 
-                result = await request_os_version_update(str(mock_host.id))
+                result = request_os_version_update(str(mock_host.id))
 
                 assert result["result"] is True
                 mock_queue.enqueue_message.assert_called_once()
@@ -201,7 +201,7 @@ class TestUpdateRequests:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await request_os_version_update(str(uuid.uuid4()))
+                    request_os_version_update(str(uuid.uuid4()))
 
                 assert exc_info.value.status_code == 404
 
@@ -225,7 +225,7 @@ class TestUpdateRequests:
                     mock_session
                 )
 
-                result = await request_updates_check(str(mock_host.id))
+                result = request_updates_check(str(mock_host.id))
 
                 assert result["result"] is True
                 mock_queue.enqueue_message.assert_called_once()
@@ -251,7 +251,7 @@ class TestUpdateRequests:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await request_updates_check(str(mock_pending_host.id))
+                    request_updates_check(str(mock_pending_host.id))
 
                 # Should fail due to unapproved status
                 assert exc_info.value.status_code == 400
@@ -284,7 +284,7 @@ class TestErrorHandling:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await get_host(str(uuid.uuid4()), "unknown@example.com")
+                    get_host(str(uuid.uuid4()), "unknown@example.com")
 
                 assert exc_info.value.status_code == 401
 
@@ -314,9 +314,7 @@ class TestErrorHandling:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await update_host(
-                        str(uuid.uuid4()), updated_data, "unknown@example.com"
-                    )
+                    update_host(str(uuid.uuid4()), updated_data, "unknown@example.com")
 
                 assert exc_info.value.status_code == 401
 
@@ -339,7 +337,7 @@ class TestErrorHandling:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await delete_host(str(uuid.uuid4()), "unknown@example.com")
+                    delete_host(str(uuid.uuid4()), "unknown@example.com")
 
                 assert exc_info.value.status_code == 401
 
@@ -437,7 +435,7 @@ class TestHostResponseFormat:
                 mock_sessionmaker.return_value = ctx
                 mock_rsm.return_value = ctx
 
-                result = await get_host(str(mock_host.id), "test@example.com")
+                result = get_host(str(mock_host.id), "test@example.com")
 
                 # Verify all expected fields are present
                 expected_fields = [
@@ -531,7 +529,7 @@ class TestHostResponseFormat:
                     mock_session
                 )
 
-                result = await add_host(new_host_data, "admin@example.com")
+                result = add_host(new_host_data, "admin@example.com")
 
                 # Verify response has expected minimal fields
                 assert "id" in result

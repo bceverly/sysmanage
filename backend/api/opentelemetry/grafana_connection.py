@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
     dependencies=[Depends(JWTBearer())],
     response_model=OpenTelemetryDeployResponse,
 )
-async def connect_opentelemetry_to_grafana(
+def connect_opentelemetry_to_grafana(
     host_id: str,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
@@ -176,7 +176,7 @@ async def connect_opentelemetry_to_grafana(
     dependencies=[Depends(JWTBearer())],
     response_model=OpenTelemetryDeployResponse,
 )
-async def disconnect_opentelemetry_from_grafana(
+def disconnect_opentelemetry_from_grafana(
     host_id: str,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),

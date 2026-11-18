@@ -166,14 +166,14 @@ def _replace_constraints(db: Session, profile, specs: List[ConstraintSpec]):
 
 
 @router.get("")
-async def list_profiles(db: Session = Depends(get_tenant_db)):
+def list_profiles(db: Session = Depends(get_tenant_db)):
     _check_compliance_module()
     rows = db.query(models.PackageProfile).order_by(models.PackageProfile.name).all()
     return [r.to_dict() for r in rows]
 
 
 @router.post("")
-async def create_profile(
+def create_profile(
     request: PackageProfileCreateRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -206,7 +206,7 @@ async def create_profile(
 
 
 @router.get("/{profile_id}")
-async def get_profile(profile_id: str, db: Session = Depends(get_tenant_db)):
+def get_profile(profile_id: str, db: Session = Depends(get_tenant_db)):
     _check_compliance_module()
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
@@ -218,7 +218,7 @@ async def get_profile(profile_id: str, db: Session = Depends(get_tenant_db)):
 
 
 @router.put("/{profile_id}")
-async def update_profile(
+def update_profile(
     profile_id: str,
     request: PackageProfileUpdateRequest,
     db: Session = Depends(get_tenant_db),
@@ -258,7 +258,7 @@ async def update_profile(
 
 
 @router.delete("/{profile_id}")
-async def delete_profile(
+def delete_profile(
     profile_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -288,7 +288,7 @@ async def delete_profile(
 
 
 @router.post("/{profile_id}/scan/{host_id}")
-async def scan_host_against_profile(
+def scan_host_against_profile(
     profile_id: str,
     host_id: str,
     db: Session = Depends(get_tenant_db),
@@ -394,7 +394,7 @@ async def scan_host_against_profile(
 
 
 @router.get("/status/host/{host_id}")
-async def list_host_statuses(host_id: str, db: Session = Depends(get_tenant_db)):
+def list_host_statuses(host_id: str, db: Session = Depends(get_tenant_db)):
     """Latest compliance status for one host across all profiles."""
     _check_compliance_module()
     hid = _parse_uuid_or_400(host_id, "host_id")
@@ -407,7 +407,7 @@ async def list_host_statuses(host_id: str, db: Session = Depends(get_tenant_db))
 
 
 @router.post("/{profile_id}/dispatch/{host_id}")
-async def dispatch_compliance_check_to_agent(
+def dispatch_compliance_check_to_agent(
     profile_id: str,
     host_id: str,
     db: Session = Depends(get_tenant_db),

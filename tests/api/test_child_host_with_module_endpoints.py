@@ -190,7 +190,7 @@ class TestChildHostControlWithModule:
             )
             from backend.api.child_host_control import start_child_host
 
-            result = await start_child_host(
+            result = start_child_host(
                 str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
             )
 
@@ -231,7 +231,7 @@ class TestChildHostControlWithModule:
             )
             from backend.api.child_host_control import stop_child_host
 
-            result = await stop_child_host(
+            result = stop_child_host(
                 str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
             )
 
@@ -272,7 +272,7 @@ class TestChildHostControlWithModule:
             )
             from backend.api.child_host_control import restart_child_host
 
-            result = await restart_child_host(
+            result = restart_child_host(
                 str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
             )
 
@@ -313,7 +313,7 @@ class TestChildHostControlWithModule:
             from backend.api.child_host_control import start_child_host
 
             with pytest.raises(HTTPException) as exc_info:
-                await start_child_host(
+                start_child_host(
                     str(mock_host.id), str(uuid.uuid4()), "admin@sysmanage.org"
                 )
 
@@ -353,7 +353,7 @@ class TestChildHostControlWithModule:
             from backend.api.child_host_control import start_child_host
 
             with pytest.raises(HTTPException) as exc_info:
-                await start_child_host(
+                start_child_host(
                     str(mock_host.id), str(uuid.uuid4()), "admin@sysmanage.org"
                 )
 
@@ -399,7 +399,7 @@ class TestChildHostDeleteWithModule:
             )
             from backend.api.child_host_crud import delete_child_host
 
-            result = await delete_child_host(
+            result = delete_child_host(
                 str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
             )
 
@@ -439,7 +439,7 @@ class TestChildHostDeleteWithModule:
             from backend.api.child_host_crud import delete_child_host
 
             with pytest.raises(HTTPException) as exc_info:
-                await delete_child_host(
+                delete_child_host(
                     str(mock_host.id), str(uuid.uuid4()), "admin@sysmanage.org"
                 )
 
@@ -480,7 +480,7 @@ class TestChildHostDeleteWithModule:
             )
             from backend.api.child_host_crud import delete_child_host
 
-            result = await delete_child_host(
+            result = delete_child_host(
                 str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
             )
 
@@ -544,7 +544,7 @@ class TestDistributionCrudWithModule:
 
             from backend.api.child_host_crud import create_distribution
 
-            result = await create_distribution(request, "admin@sysmanage.org")
+            result = create_distribution(request, "admin@sysmanage.org")
 
             assert result.distribution_name == "Ubuntu"
             assert result.distribution_version == "24.04"
@@ -588,7 +588,7 @@ class TestDistributionCrudWithModule:
             from backend.api.child_host_crud import create_distribution
 
             with pytest.raises(HTTPException) as exc_info:
-                await create_distribution(request, "admin@sysmanage.org")
+                create_distribution(request, "admin@sysmanage.org")
 
             assert exc_info.value.status_code == 409
 
@@ -619,7 +619,7 @@ class TestDistributionCrudWithModule:
 
             from backend.api.child_host_crud import update_distribution
 
-            result = await update_distribution(
+            result = update_distribution(
                 str(mock_distribution.id), request, "admin@sysmanage.org"
             )
 
@@ -654,9 +654,7 @@ class TestDistributionCrudWithModule:
             from backend.api.child_host_crud import update_distribution
 
             with pytest.raises(HTTPException) as exc_info:
-                await update_distribution(
-                    str(uuid.uuid4()), request, "admin@sysmanage.org"
-                )
+                update_distribution(str(uuid.uuid4()), request, "admin@sysmanage.org")
 
             assert exc_info.value.status_code == 404
 
@@ -683,7 +681,7 @@ class TestDistributionCrudWithModule:
 
             from backend.api.child_host_crud import delete_distribution
 
-            result = await delete_distribution(
+            result = delete_distribution(
                 str(mock_distribution.id), "admin@sysmanage.org"
             )
 
@@ -714,6 +712,6 @@ class TestDistributionCrudWithModule:
             from backend.api.child_host_crud import delete_distribution
 
             with pytest.raises(HTTPException) as exc_info:
-                await delete_distribution(str(uuid.uuid4()), "admin@sysmanage.org")
+                delete_distribution(str(uuid.uuid4()), "admin@sysmanage.org")
 
             assert exc_info.value.status_code == 404

@@ -158,7 +158,7 @@ def _name_taken(db_session: Session, model, name: str, exclude_id=None) -> bool:
 
 
 @router.get("/config-management/inventories", response_model=List[InventoryResponse])
-async def list_inventories(db_session: Session = Depends(get_tenant_db)):
+def list_inventories(db_session: Session = Depends(get_tenant_db)):
     """Every inventory, with the host count each currently resolves to."""
     rows = (
         db_session.query(models.ConfigInventory)
@@ -176,7 +176,7 @@ async def list_inventories(db_session: Session = Depends(get_tenant_db)):
 
 
 @router.post("/config-management/inventories", response_model=InventoryResponse)
-async def create_inventory(
+def create_inventory(
     request: InventoryRequest,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -224,9 +224,7 @@ async def create_inventory(
 @router.get(
     "/config-management/inventories/{inventory_id}", response_model=InventoryResponse
 )
-async def get_inventory(
-    inventory_id: str, db_session: Session = Depends(get_tenant_db)
-):
+def get_inventory(inventory_id: str, db_session: Session = Depends(get_tenant_db)):
     """One inventory."""
     row = _load_inventory(db_session, inventory_id)
     return InventoryResponse(
@@ -239,7 +237,7 @@ async def get_inventory(
 @router.put(
     "/config-management/inventories/{inventory_id}", response_model=InventoryResponse
 )
-async def update_inventory(
+def update_inventory(
     inventory_id: str,
     request: InventoryUpdateRequest,
     db_session: Session = Depends(get_tenant_db),
@@ -281,7 +279,7 @@ async def update_inventory(
 
 
 @router.delete("/config-management/inventories/{inventory_id}")
-async def delete_inventory(
+def delete_inventory(
     inventory_id: str,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -318,7 +316,7 @@ async def delete_inventory(
     "/config-management/inventories/{inventory_id}/members",
     response_model=List[MemberResponse],
 )
-async def list_members(inventory_id: str, db_session: Session = Depends(get_tenant_db)):
+def list_members(inventory_id: str, db_session: Session = Depends(get_tenant_db)):
     """The selectors this inventory is built from."""
     row = _load_inventory(db_session, inventory_id)
     members = (
@@ -333,7 +331,7 @@ async def list_members(inventory_id: str, db_session: Session = Depends(get_tena
     "/config-management/inventories/{inventory_id}/members",
     response_model=MemberResponse,
 )
-async def add_member(
+def add_member(
     inventory_id: str,
     request: MemberRequest,
     db_session: Session = Depends(get_tenant_db),
@@ -374,7 +372,7 @@ async def add_member(
 
 
 @router.delete("/config-management/inventory-members/{member_id}")
-async def delete_member(
+def delete_member(
     member_id: str,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -400,9 +398,7 @@ async def delete_member(
     "/config-management/inventories/{inventory_id}/hosts",
     response_model=List[str],
 )
-async def preview_inventory(
-    inventory_id: str, db_session: Session = Depends(get_tenant_db)
-):
+def preview_inventory(inventory_id: str, db_session: Session = Depends(get_tenant_db)):
     """The hostnames this inventory resolves to right now.
 
     A preview, and the reason resolution is never cached: it answers "who am I

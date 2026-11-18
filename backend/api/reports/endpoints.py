@@ -419,7 +419,7 @@ def _build_report_pdf(reporting_engine, report_type, template_id, tenant_id):
 @router.get("/screenshots/{report_id}")
 @router.head("/screenshots/{report_id}")
 @router.options("/screenshots/{report_id}")
-async def get_report_screenshot(report_id: str):
+def get_report_screenshot(report_id: str):
     """
     Serve report screenshots for the UI cards.
 

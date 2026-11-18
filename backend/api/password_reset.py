@@ -282,7 +282,7 @@ SysManage System""",
 
 
 @router.post("/forgot-password")
-async def forgot_password(
+def forgot_password(
     request_data: ForgotPasswordRequest, request: Request
 ) -> PasswordResetResponse:
     """
@@ -325,7 +325,7 @@ async def forgot_password(
 
 
 @router.post("/reset-password")
-async def reset_password(request_data: ResetPasswordRequest) -> PasswordResetResponse:
+def reset_password(request_data: ResetPasswordRequest) -> PasswordResetResponse:
     """
     Handle password reset using a valid token.
     """
@@ -377,7 +377,7 @@ async def reset_password(request_data: ResetPasswordRequest) -> PasswordResetRes
 
 
 @router.get("/validate-reset-token/{token}")
-async def validate_reset_token(token: str) -> PasswordResetResponse:
+def validate_reset_token(token: str) -> PasswordResetResponse:
     """
     Validate a password reset token without using it.
     """
@@ -399,7 +399,7 @@ async def validate_reset_token(token: str) -> PasswordResetResponse:
 @admin_router.post(
     "/admin/reset-user-password/{user_id}", dependencies=[Depends(JWTBearer())]
 )
-async def admin_reset_user_password(
+def admin_reset_user_password(
     user_id: str, request: Request, current_user: str = Depends(get_current_user)
 ) -> PasswordResetResponse:
     """

@@ -152,7 +152,7 @@ async def get_tags(current_user: str = Depends(get_current_user)):
 
 
 @router.post("/tags", response_model=TagResponse, status_code=status.HTTP_201_CREATED)
-async def create_tag(
+def create_tag(
     tag_data: TagCreate,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -229,7 +229,7 @@ async def create_tag(
 
 
 @router.put("/tags/{tag_id}", response_model=TagResponse)
-async def update_tag(
+def update_tag(
     tag_id: str,
     tag_data: TagUpdate,
     db: Session = Depends(get_tenant_db),
@@ -312,7 +312,7 @@ async def update_tag(
 
 
 @router.delete("/tags/{tag_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_tag(
+def delete_tag(
     tag_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -466,7 +466,7 @@ async def get_tag_hosts(
 
 
 @router.post("/hosts/{host_id}/tags/{tag_id}", status_code=status.HTTP_201_CREATED)
-async def add_tag_to_host(
+def add_tag_to_host(
     host_id: str,
     tag_id: str,
     db: Session = Depends(get_tenant_db),
@@ -562,7 +562,7 @@ async def add_tag_to_host(
 
 
 @router.delete("/hosts/{host_id}/tags/{tag_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def remove_tag_from_host(
+def remove_tag_from_host(
     host_id: str,
     tag_id: str,
     db: Session = Depends(get_tenant_db),
@@ -634,7 +634,7 @@ async def remove_tag_from_host(
 
 
 @router.get("/hosts/{host_id}/tags", response_model=List[TagResponse])
-async def get_host_tags(
+def get_host_tags(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),

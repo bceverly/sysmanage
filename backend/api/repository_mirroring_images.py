@@ -47,7 +47,7 @@ def _image_mirror_or_404(db: Session, mirror_id: str) -> models.MirrorRepository
 @router.get(
     "/mirror-repositories/{mirror_id}/images", dependencies=[Depends(JWTBearer())]
 )
-async def list_tracked_images(mirror_id: str, db: Session = Depends(get_tenant_db)):
+def list_tracked_images(mirror_id: str, db: Session = Depends(get_tenant_db)):
     _check_oci_proxy_module()
     row = _image_mirror_or_404(db, mirror_id)
     rows = (
@@ -62,7 +62,7 @@ async def list_tracked_images(mirror_id: str, db: Session = Depends(get_tenant_d
 @router.post(
     "/mirror-repositories/{mirror_id}/images", dependencies=[Depends(JWTBearer())]
 )
-async def track_image(
+def track_image(
     mirror_id: str,
     request: ImageTrackRequest,
     db: Session = Depends(get_tenant_db),
@@ -105,7 +105,7 @@ async def track_image(
     "/mirror-repositories/{mirror_id}/images/{image_content_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def untrack_image(
+def untrack_image(
     mirror_id: str, image_content_id: str, db: Session = Depends(get_tenant_db)
 ):
     _check_oci_proxy_module()
@@ -130,7 +130,7 @@ async def untrack_image(
     "/mirror-repositories/{mirror_id}/capture-images",
     dependencies=[Depends(JWTBearer())],
 )
-async def capture_images(mirror_id: str, db: Session = Depends(get_tenant_db)):
+def capture_images(mirror_id: str, db: Session = Depends(get_tenant_db)):
     engine = _check_oci_proxy_module()
     row = _image_mirror_or_404(db, mirror_id)
     settings = _get_settings(db)

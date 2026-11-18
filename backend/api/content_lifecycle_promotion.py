@@ -220,7 +220,7 @@ def _binding_lane_entry(env, binding, versions: dict) -> dict:
     "/content-lifecycle/content-views/{cv_id}/bindings",
     dependencies=[Depends(JWTBearer())],
 )
-async def list_content_view_bindings(
+def list_content_view_bindings(
     cv_id: str,
     shared_db: Session = Depends(get_shared_db),
     tenant_db: Session = Depends(get_tenant_db),
@@ -250,7 +250,7 @@ async def list_content_view_bindings(
     "/content-lifecycle/content-views/{cv_id}/promote",
     dependencies=[Depends(JWTBearer())],
 )
-async def promote_content_view(
+def promote_content_view(
     cv_id: str,
     body: PromoteRequest,
     shared_db: Session = Depends(get_shared_db),
@@ -305,7 +305,7 @@ async def promote_content_view(
     "/content-lifecycle/content-views/{cv_id}/rollback",
     dependencies=[Depends(JWTBearer())],
 )
-async def rollback_environment(
+def rollback_environment(
     cv_id: str,
     body: RollbackRequest,
     shared_db: Session = Depends(get_shared_db),
@@ -360,7 +360,7 @@ async def rollback_environment(
     "/content-lifecycle/content-views/{cv_id}/audit",
     dependencies=[Depends(JWTBearer())],
 )
-async def list_content_view_audit(
+def list_content_view_audit(
     cv_id: str,
     shared_db: Session = Depends(get_shared_db),
     tenant_db: Session = Depends(get_tenant_db),
@@ -470,7 +470,7 @@ def _build_repoint_plan(
     "/content-lifecycle/content-views/{cv_id}/serve",
     dependencies=[Depends(JWTBearer())],
 )
-async def enable_content_serving(
+def enable_content_serving(
     cv_id: str,
     shared_db: Session = Depends(get_shared_db),
     tenant_db: Session = Depends(get_tenant_db),
@@ -519,7 +519,7 @@ def _serving_fqdn_or_400(tenant_db: Session, host_id) -> str:
     "/content-lifecycle/content-views/{cv_id}/repoint",
     dependencies=[Depends(JWTBearer())],
 )
-async def repoint_host_to_environment(
+def repoint_host_to_environment(
     cv_id: str,
     body: RepointRequest,
     shared_db: Session = Depends(get_shared_db),
@@ -553,7 +553,7 @@ async def repoint_host_to_environment(
     "/content-lifecycle/content-views/{cv_id}/repoint-snaps",
     dependencies=[Depends(JWTBearer())],
 )
-async def repoint_host_snaps(
+def repoint_host_snaps(
     cv_id: str,
     body: RepointSnapsRequest,
     shared_db: Session = Depends(get_shared_db),
@@ -605,7 +605,7 @@ def _cv_captured_images(cv, tenant_db: Session) -> list:
     "/content-lifecycle/content-views/{cv_id}/repoint-images",
     dependencies=[Depends(JWTBearer())],
 )
-async def repoint_host_images(
+def repoint_host_images(
     cv_id: str,
     body: RepointImagesRequest,
     shared_db: Session = Depends(get_shared_db),

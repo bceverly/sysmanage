@@ -411,12 +411,12 @@ async def test_enforcing_with_hosts_not_ready_needs_confirmation(monkeypatch):
     )  # fmt: skip
     monkeypatch.setattr(agent_mtls_settings, "_current", lambda: "current")
     with pytest.raises(HTTPException) as refused:
-        await agent_mtls_settings.update_agent_certificates(
+        agent_mtls_settings.update_agent_certificates(
             agent_mtls_settings.MtlsUpdate(mode="enforced"), user="ops"
         )
     assert refused.value.status_code == 409
     assert refused.value.detail["count"] == 2 and not stored
-    await agent_mtls_settings.update_agent_certificates(
+    agent_mtls_settings.update_agent_certificates(
         agent_mtls_settings.MtlsUpdate(mode="enforced", force=True), user="ops"
     )
     assert stored == {agent_mtls.MODE_SETTING: "enforced"}
@@ -425,7 +425,7 @@ async def test_enforcing_with_hosts_not_ready_needs_confirmation(monkeypatch):
 @pytest.mark.asyncio
 async def test_an_unknown_mode_is_refused():
     with pytest.raises(HTTPException) as refused:
-        await agent_mtls_settings.update_agent_certificates(
+        agent_mtls_settings.update_agent_certificates(
             agent_mtls_settings.MtlsUpdate(mode="strict"), user="ops"
         )
     assert refused.value.status_code == 422

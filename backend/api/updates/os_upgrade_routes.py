@@ -34,7 +34,7 @@ router = APIRouter()
 
 
 @router.get("/os-upgrades")
-async def get_os_upgrades(
+def get_os_upgrades(
     host_id: Optional[str] = Query(None), dependencies=Depends(JWTBearer())
 ):
     """Get available OS version upgrades for all hosts or a specific host."""
@@ -101,7 +101,7 @@ async def get_os_upgrades(
 
 
 @router.get("/os-upgrades/summary")
-async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
+def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
     """Get summary of OS upgrades across all hosts."""
     try:
         session_factory = request_sessionmaker()
@@ -168,7 +168,7 @@ async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
 
 
 @router.post("/execute-os-upgrades")
-async def execute_os_upgrades(  # NOSONAR
+def execute_os_upgrades(  # NOSONAR
     request: UpdateExecutionRequest,
     dependencies=Depends(JWTBearer()),
     current_user: str = Depends(get_current_user),

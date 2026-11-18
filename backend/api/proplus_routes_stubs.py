@@ -78,7 +78,7 @@ def _mount_backup_stubs(app, results: dict) -> int:
     @router.get("/host/{host_id}")
     @router.post("/host/{host_id}")
     @router.post("/host/{host_id}/rotate")
-    async def backup_encryption_host_stub(
+    def backup_encryption_host_stub(
         host_id: str, current_user=Depends(get_current_user)
     ):
         del host_id
@@ -89,7 +89,7 @@ def _mount_backup_stubs(app, results: dict) -> int:
     @router.get("/signing")
     @router.post("/signing")
     @router.post("/break-glass")
-    async def backup_encryption_stub(current_user=Depends(get_current_user)):
+    def backup_encryption_stub(current_user=Depends(get_current_user)):
         raise _unlicensed()
 
     app.include_router(router, prefix="/api")
@@ -131,13 +131,13 @@ def _mount_provisioning_stubs(app, results: dict) -> int:
     @router.get("/compute-resources")
     @router.get("/templates")
     @router.get("/jobs")
-    async def provisioning_read_stub(current_user=Depends(get_current_user)):
+    def provisioning_read_stub(current_user=Depends(get_current_user)):
         _unlicensed()
 
     @router.post("/compute-resources")
     @router.post("/templates")
     @router.post("/provision")
-    async def provisioning_write_stub(current_user=Depends(get_current_user)):
+    def provisioning_write_stub(current_user=Depends(get_current_user)):
         _unlicensed()
 
     # 18.2 -- bare metal: catalog, per-MAC assignment, discovery, boot media
@@ -145,12 +145,12 @@ def _mount_provisioning_stubs(app, results: dict) -> int:
     @router.get("/install-assignments")
     @router.get("/discovered-hosts")
     @router.get("/bootdisk/status")
-    async def baremetal_read_stub(current_user=Depends(get_current_user)):
+    def baremetal_read_stub(current_user=Depends(get_current_user)):
         _unlicensed()
 
     @router.post("/install-sources")
     @router.post("/install-assignments")
-    async def baremetal_write_stub(current_user=Depends(get_current_user)):
+    def baremetal_write_stub(current_user=Depends(get_current_user)):
         _unlicensed()
 
     app.include_router(router, prefix="/api")
@@ -168,13 +168,13 @@ def _mount_stub_group_a(app, results: dict) -> int:
         router = APIRouter(prefix="/v1/audit", tags=["audit-stubs"])
 
         @router.get("/statistics")
-        async def audit_statistics_stub(
+        def audit_statistics_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("audit_engine")
 
         @router.post("/export")
-        async def audit_export_stub(
+        def audit_export_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("audit_engine")
@@ -187,25 +187,25 @@ def _mount_stub_group_a(app, results: dict) -> int:
         router = APIRouter(prefix="/v1/secrets", tags=["secrets-stubs"])
 
         @router.get("/statistics")
-        async def secrets_statistics_stub(
+        def secrets_statistics_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("secrets_engine")
 
         @router.get("/access-logs")
-        async def secrets_access_logs_stub(
+        def secrets_access_logs_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("secrets_engine")
 
         @router.get("/rotation-schedules")
-        async def secrets_rotation_schedules_stub(
+        def secrets_rotation_schedules_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("secrets_engine")
 
         @router.get("/{secret_id}/versions")
-        async def secrets_versions_stub(
+        def secrets_versions_stub(
             secret_id: str,
             current_user=Depends(get_current_user),
         ):
@@ -215,47 +215,47 @@ def _mount_stub_group_a(app, results: dict) -> int:
         # moat).  Without the engine, these sub-paths serve the licensed-stub so
         # /api/v1/secrets/gpg-keys* answers 402 rather than 404.
         @router.get("/gpg-keys")
-        async def gpg_keys_list_stub(
+        def gpg_keys_list_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("secrets_engine")
 
         @router.post("/gpg-keys")
-        async def gpg_keys_upload_stub(
+        def gpg_keys_upload_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("secrets_engine")
 
         @router.get("/gpg-keys/{key_id}")
-        async def gpg_keys_get_stub(
+        def gpg_keys_get_stub(
             key_id: str,
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("secrets_engine")
 
         @router.delete("/gpg-keys/{key_id}")
-        async def gpg_keys_delete_stub(
+        def gpg_keys_delete_stub(
             key_id: str,
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("secrets_engine")
 
         @router.get("/gpg-keys/{key_id}/assignments")
-        async def gpg_keys_list_assignments_stub(
+        def gpg_keys_list_assignments_stub(
             key_id: str,
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("secrets_engine")
 
         @router.post("/gpg-keys/{key_id}/assignments")
-        async def gpg_keys_create_assignment_stub(
+        def gpg_keys_create_assignment_stub(
             key_id: str,
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("secrets_engine")
 
         @router.delete("/gpg-keys/{key_id}/assignments/{assignment_id}")
-        async def gpg_keys_delete_assignment_stub(
+        def gpg_keys_delete_assignment_stub(
             key_id: str,
             assignment_id: str,
             current_user=Depends(get_current_user),
@@ -270,26 +270,26 @@ def _mount_stub_group_a(app, results: dict) -> int:
         router = APIRouter(prefix="/v1/containers", tags=["container-stubs"])
 
         @router.get("/statistics")
-        async def containers_statistics_stub(
+        def containers_statistics_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("container_engine")
 
         @router.post("/create")
-        async def containers_create_stub(
+        def containers_create_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("container_engine")
 
         @router.post("/{container_id}/action")
-        async def containers_action_stub(
+        def containers_action_stub(
             container_id: str,
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("container_engine")
 
         @router.post("/{container_id}/network")
-        async def containers_network_stub(
+        def containers_network_stub(
             container_id: str,
             current_user=Depends(get_current_user),
         ):
@@ -303,14 +303,14 @@ def _mount_stub_group_a(app, results: dict) -> int:
         router = APIRouter(prefix="/v1/reports", tags=["reporting-stubs"])
 
         @router.get("/generate/{report_type}")
-        async def reports_generate_stub(
+        def reports_generate_stub(
             report_type: str,
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("reporting_engine")
 
         @router.get("/view/{report_type}")
-        async def reports_view_stub(
+        def reports_view_stub(
             report_type: str,
             current_user=Depends(get_current_user),
         ):
@@ -324,50 +324,50 @@ def _mount_stub_group_a(app, results: dict) -> int:
         router = APIRouter(prefix="/v1/av", tags=["av-management-stubs"])
 
         @router.get("/status/{host_id}")
-        async def av_status_stub(
+        def av_status_stub(
             host_id: str,
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("av_management_engine")
 
         @router.post("/deploy")
-        async def av_deploy_stub(
+        def av_deploy_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("av_management_engine")
 
         @router.post("/uninstall")
-        async def av_uninstall_stub(
+        def av_uninstall_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("av_management_engine")
 
         @router.post("/scan")
-        async def av_scan_stub(
+        def av_scan_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("av_management_engine")
 
         @router.get("/commercial/fleet-report")
-        async def av_commercial_fleet_report_stub(
+        def av_commercial_fleet_report_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("av_management_engine")
 
         @router.get("/policies")
-        async def av_list_policies_stub(
+        def av_list_policies_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("av_management_engine")
 
         @router.post("/policies")
-        async def av_create_policy_stub(
+        def av_create_policy_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("av_management_engine")
 
         @router.post("/policies/{policy_id}/apply")
-        async def av_apply_policy_stub(
+        def av_apply_policy_stub(
             policy_id: str,
             current_user=Depends(get_current_user),
         ):
@@ -381,44 +381,44 @@ def _mount_stub_group_a(app, results: dict) -> int:
         router = APIRouter(prefix="/v1/firewall", tags=["firewall-orchestration-stubs"])
 
         @router.get("/status/{host_id}")
-        async def fw_status_stub(
+        def fw_status_stub(
             host_id: str,
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.post("/deploy")
-        async def fw_deploy_stub(
+        def fw_deploy_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.get("/roles")
-        async def fw_list_roles_stub(
+        def fw_list_roles_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.post("/roles")
-        async def fw_create_role_stub(
+        def fw_create_role_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.post("/compliance-check")
-        async def fw_compliance_stub(
+        def fw_compliance_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.post("/fleet/deploy")
-        async def fw_fleet_deploy_stub(
+        def fw_fleet_deploy_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("firewall_orchestration_engine")
 
         @router.get("/compliance/report")
-        async def fw_compliance_report_stub(
+        def fw_compliance_report_stub(
             current_user=Depends(get_current_user),
         ):
             raise refuse_unlicensed("firewall_orchestration_engine")

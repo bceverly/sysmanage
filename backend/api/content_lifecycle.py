@@ -69,7 +69,7 @@ def _check_clm_module():
 
 
 @router.get("/content-lifecycle/environments", dependencies=[Depends(JWTBearer())])
-async def list_environments(db: Session = Depends(get_shared_db)):
+def list_environments(db: Session = Depends(get_shared_db)):
     """List the lifecycle environments along the ordered path."""
     _check_clm_module()
     rows = (
@@ -81,7 +81,7 @@ async def list_environments(db: Session = Depends(get_shared_db)):
 
 
 @router.get("/content-lifecycle/content-views", dependencies=[Depends(JWTBearer())])
-async def list_content_views(db: Session = Depends(get_shared_db)):
+def list_content_views(db: Session = Depends(get_shared_db)):
     """List the content views (with a lightweight version summary each)."""
     _check_clm_module()
     rows = (
@@ -136,9 +136,7 @@ def _get_env_or_404(db: Session, env_id: str):
 
 
 @router.post("/content-lifecycle/environments", dependencies=[Depends(JWTBearer())])
-async def create_environment(
-    body: EnvironmentCreate, db: Session = Depends(get_shared_db)
-):
+def create_environment(body: EnvironmentCreate, db: Session = Depends(get_shared_db)):
     """Create an environment (appended to the path; the very first one becomes
     the Library -- the publish target / path root)."""
     _check_clm_module()
@@ -164,7 +162,7 @@ async def create_environment(
 @router.put(
     "/content-lifecycle/environments/{env_id}", dependencies=[Depends(JWTBearer())]
 )
-async def update_environment(
+def update_environment(
     env_id: str, body: EnvironmentUpdate, db: Session = Depends(get_shared_db)
 ):
     """Rename / re-describe an environment (position changes via reorder)."""
@@ -194,7 +192,7 @@ async def update_environment(
 @router.delete(
     "/content-lifecycle/environments/{env_id}", dependencies=[Depends(JWTBearer())]
 )
-async def delete_environment(env_id: str, db: Session = Depends(get_shared_db)):
+def delete_environment(env_id: str, db: Session = Depends(get_shared_db)):
     """Delete an environment. The Library (path root) cannot be deleted."""
     _check_clm_module()
     env = _get_env_or_404(db, env_id)
@@ -211,7 +209,7 @@ async def delete_environment(env_id: str, db: Session = Depends(get_shared_db)):
 @router.post(
     "/content-lifecycle/environments/reorder", dependencies=[Depends(JWTBearer())]
 )
-async def reorder_environments(
+def reorder_environments(
     body: EnvironmentReorder, db: Session = Depends(get_shared_db)
 ):
     """Reassign the ordered path. ``ordered_ids`` must list every environment
@@ -437,9 +435,7 @@ def _cv_detail_dict(cv) -> dict:
 
 
 @router.post("/content-lifecycle/content-views", dependencies=[Depends(JWTBearer())])
-async def create_content_view(
-    body: ContentViewCreate, db: Session = Depends(get_shared_db)
-):
+def create_content_view(body: ContentViewCreate, db: Session = Depends(get_shared_db)):
     """Create a content view (a named selection of repository mirrors)."""
     _check_clm_module()
     name = _norm_cv_name(body.name)
@@ -472,7 +468,7 @@ async def create_content_view(
 @router.get(
     "/content-lifecycle/content-views/{cv_id}", dependencies=[Depends(JWTBearer())]
 )
-async def get_content_view(cv_id: str, db: Session = Depends(get_shared_db)):
+def get_content_view(cv_id: str, db: Session = Depends(get_shared_db)):
     """Content-view detail: membership + published-version history."""
     _check_clm_module()
     return _cv_detail_dict(_get_cv_or_404(db, cv_id))
@@ -481,7 +477,7 @@ async def get_content_view(cv_id: str, db: Session = Depends(get_shared_db)):
 @router.put(
     "/content-lifecycle/content-views/{cv_id}", dependencies=[Depends(JWTBearer())]
 )
-async def update_content_view(
+def update_content_view(
     cv_id: str, body: ContentViewUpdate, db: Session = Depends(get_shared_db)
 ):
     """Update a content view. ``repos``, when provided, replaces membership."""
@@ -525,7 +521,7 @@ async def update_content_view(
 @router.delete(
     "/content-lifecycle/content-views/{cv_id}", dependencies=[Depends(JWTBearer())]
 )
-async def delete_content_view(cv_id: str, db: Session = Depends(get_shared_db)):
+def delete_content_view(cv_id: str, db: Session = Depends(get_shared_db)):
     """Delete a content view (cascades to its members, filters, and versions)."""
     _check_clm_module()
     cv = _get_cv_or_404(db, cv_id)
@@ -917,7 +913,7 @@ def _build_composite_publish(engine, cv, shared_db, tenant_db, next_version):
     "/content-lifecycle/content-views/{cv_id}/publish",
     dependencies=[Depends(JWTBearer())],
 )
-async def publish_content_view(
+def publish_content_view(
     cv_id: str,
     shared_db: Session = Depends(get_shared_db),
     tenant_db: Session = Depends(get_tenant_db),
@@ -963,7 +959,7 @@ async def publish_content_view(
     "/content-lifecycle/content-views/{cv_id}/versions",
     dependencies=[Depends(JWTBearer())],
 )
-async def list_content_view_versions(cv_id: str, db: Session = Depends(get_shared_db)):
+def list_content_view_versions(cv_id: str, db: Session = Depends(get_shared_db)):
     """List a content view's versions, newest first (drives the version history
     + the in-flight publish spinner)."""
     _check_clm_module()

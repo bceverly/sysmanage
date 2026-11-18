@@ -257,7 +257,7 @@ def _try_lifecycle_plan_dispatch(
     "/host/{host_id}/children/{child_id}/start",
     dependencies=[Depends(JWTBearer())],
 )
-async def start_child_host(
+def start_child_host(
     host_id: str,
     child_id: str,
     current_user: str = Depends(get_current_user),
@@ -317,7 +317,7 @@ async def start_child_host(
     "/host/{host_id}/children/{child_id}/stop",
     dependencies=[Depends(JWTBearer())],
 )
-async def stop_child_host(
+def stop_child_host(
     host_id: str,
     child_id: str,
     current_user: str = Depends(get_current_user),
@@ -377,7 +377,7 @@ async def stop_child_host(
     "/host/{host_id}/children/{child_id}/restart",
     dependencies=[Depends(JWTBearer())],
 )
-async def restart_child_host(
+def restart_child_host(
     host_id: str,
     child_id: str,
     current_user: str = Depends(get_current_user),
@@ -437,7 +437,7 @@ async def restart_child_host(
     "/host/{host_id}/children/{child_id}/update-agent",
     dependencies=[Depends(JWTBearer())],
 )
-async def update_child_agent(
+def update_child_agent(
     host_id: str,
     child_id: str,
     current_user: str = Depends(get_current_user),

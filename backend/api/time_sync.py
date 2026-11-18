@@ -253,7 +253,7 @@ async def fleet_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
 
 
 @router.get("/time-sync/bounds")
-async def get_bounds(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def get_bounds(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     return {
         "server": clock_status.server_bounds(),
         "overrides": clock_status.overrides(db),
@@ -287,7 +287,7 @@ def _audit(db, current_user, name: str, description: str, details) -> None:
 
 
 @router.put("/time-sync/bounds/server")
-async def set_server_bounds(
+def set_server_bounds(
     body: BoundsBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -322,7 +322,7 @@ def _check_scope(db: Session, scope_kind: str, scope_ref: str) -> None:
 
 
 @router.put("/time-sync/bounds/override")
-async def set_override(
+def set_override(
     body: OverrideBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -351,7 +351,7 @@ async def set_override(
 
 
 @router.delete("/time-sync/bounds/override")
-async def clear_override(
+def clear_override(
     scope_kind: str,
     scope_ref: str = "",
     db: Session = Depends(get_tenant_db),

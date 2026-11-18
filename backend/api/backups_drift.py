@@ -67,7 +67,7 @@ def _engine_or_402():
 
 
 @router.get("/host/{host_id}/backup-drift")
-async def drift_timeline(
+def drift_timeline(
     host_id: str,
     hide_expected: bool = True,
     path: Optional[str] = None,
@@ -87,7 +87,7 @@ async def drift_timeline(
 
 
 @router.post("/host/{host_id}/backup-drift/compute")
-async def drift_compute(
+def drift_compute(
     host_id: str,
     body: Optional[ComputeBody] = None,
     db: Session = Depends(get_tenant_db),
@@ -125,7 +125,7 @@ async def drift_compute(
 
 
 @router.put("/host/{host_id}/backup-drift/ignore")
-async def drift_ignore(
+def drift_ignore(
     host_id: str,
     body: IgnoreBody,
     db: Session = Depends(get_tenant_db),

@@ -104,14 +104,14 @@ def _scheme_or_422(body: SchemeBody) -> schemes.Scheme:
 
 
 @router.get("/asset-tags/scheme")
-async def get_scheme(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def get_scheme(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """The scheme, a preview, examples, the next free tag and the tags that do
     not conform to it."""
     return _report(db, load_scheme(db))
 
 
 @router.post("/asset-tags/scheme/preview")
-async def preview_scheme(
+def preview_scheme(
     body: SchemeBody, db: Session = Depends(get_tenant_db)
 ) -> Dict[str, Any]:
     """What a DRAFT scheme would do -- the builder's live preview.  Saves
@@ -120,7 +120,7 @@ async def preview_scheme(
 
 
 @router.put("/asset-tags/scheme")
-async def save_scheme(
+def save_scheme(
     body: SchemeBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -162,7 +162,7 @@ def _duplicate(db: Session, tag: str, machine_id: Optional[str] = None) -> bool:
 
 
 @router.get("/asset-tags/check")
-async def check_tag(
+def check_tag(
     tag: str, machine_id: Optional[str] = None, db: Session = Depends(get_tenant_db)
 ) -> Dict[str, Any]:
     """Entry-time feedback: does ``tag`` fit the scheme, and is it free?"""
@@ -173,7 +173,7 @@ async def check_tag(
 
 
 @router.put("/machine/{machine_id}/asset-tag")
-async def set_machine_tag(
+def set_machine_tag(
     machine_id: str,
     body: TagBody,
     db: Session = Depends(get_tenant_db),

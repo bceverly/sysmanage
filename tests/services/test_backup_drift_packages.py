@@ -8,6 +8,7 @@ the timeline served through the engine, and a package restore that is
 plan-first, in place only and confirmed.  The diff result is cut from a real
 restate 2.2.0.16 run on the lab's t14 (2026-11-02)."""
 
+import inspect
 import json
 import uuid
 from datetime import datetime
@@ -185,7 +186,7 @@ async def test_comparing_the_servers_own_backup_is_refused(session, sent, fake_e
     _able(session, s, "diff")
     _escrow_keyed(session, s)
     with pytest.raises(HTTPException) as refused:
-        await drift_api.drift_compute(str(s.host.id), None, session, MANAGER)
+        drift_api.drift_compute(str(s.host.id), None, session, MANAGER)
     assert refused.value.status_code == 409
     assert refused.value.detail == api.ESCROW_ONLY
     assert not _diffs_sent(sent)
@@ -234,9 +235,7 @@ async def test_the_timeline_goes_through_the_engine(session, sent, fake_engine):
     results.record_result(session, s.host.id, _result(run, "different", **DIFF))
     s.policy.drift_ignore = json.dumps(["/home/*/dev"])
     session.commit()
-    view = await drift_api.drift_timeline(
-        str(s.host.id), True, "/etc", 30, session, RESTORER
-    )
+    view = drift_api.drift_timeline(str(s.host.id), True, "/etc", 30, session, RESTORER)
     rows, ignore, hide, path = FakeEngine.seen  # pylint: disable=unpacking-non-sequence
     assert rows[0]["to"] == "20261102T181741Z" and ignore == ["/home/*/dev"]
     assert hide is True and path == "/etc"
@@ -248,18 +247,9 @@ async def test_the_timeline_needs_the_engine_and_the_restore_role(
     session, sent, no_engine
 ):
     s = _setup(session)
-    for call, code in (
-        (
-            drift_api.drift_timeline(str(s.host.id), True, None, 30, session, RESTORER),
-            402,
-        ),
-        (
-            drift_api.drift_timeline(str(s.host.id), True, None, 30, session, MANAGER),
-            403,
-        ),
-    ):
+    for user, code in ((RESTORER, 402), (MANAGER, 403)):
         with pytest.raises(HTTPException) as refused:
-            await call
+            drift_api.drift_timeline(str(s.host.id), True, None, 30, session, user)
         assert refused.value.status_code == code
 
 
@@ -267,25 +257,25 @@ async def test_the_timeline_needs_the_engine_and_the_restore_role(
 async def test_compute_and_ignore(session, sent, fake_engine):
     s = _setup(session)
     with pytest.raises(HTTPException) as refused:
-        await drift_api.drift_compute(str(s.host.id), None, session, MANAGER)
+        drift_api.drift_compute(str(s.host.id), None, session, MANAGER)
     assert refused.value.status_code == 409  # restate cannot diff yet
     _able(session, s, "diff")
-    out = await drift_api.drift_compute(
+    out = drift_api.drift_compute(
         str(s.host.id), drift_api.ComputeBody(from_snapshot="a", to_snapshot="b"),
         session, MANAGER,
     )  # fmt: skip
     assert out["action"] == jobs.DIFF and _diffs_sent(sent)[-1]["from"] == "a"
     with pytest.raises(HTTPException) as busy:
-        await drift_api.drift_compute(str(s.host.id), None, session, MANAGER)
+        drift_api.drift_compute(str(s.host.id), None, session, MANAGER)
     assert busy.value.status_code == 409
-    saved = await drift_api.drift_ignore(
+    saved = drift_api.drift_ignore(
         str(s.host.id), drift_api.IgnoreBody(patterns=[" /srv/scratch ", ""]),
         session, MANAGER,
     )  # fmt: skip
     assert saved["ignore"] == ["/srv/scratch"]
     assert drift.ignore_patterns(s.policy) == ["/srv/scratch"]
     with pytest.raises(HTTPException) as bad:
-        await drift_api.drift_ignore(
+        drift_api.drift_ignore(
             str(s.host.id), drift_api.IgnoreBody(patterns=["/a/../b"]), session, MANAGER
         )
     assert bad.value.status_code == 422
@@ -302,8 +292,12 @@ def _restore_body(name, **over):
 
 
 async def _status(call):
+    """200, or the status ``call()`` is refused with -- a callable, so a
+    plain-def handler's refusal is caught here, not while building the call."""
     try:
-        await call
+        result = call()
+        if inspect.isawaitable(result):
+            await result
     except HTTPException as refused:
         return refused.status_code
     return 200
@@ -317,10 +311,15 @@ async def test_a_package_restore_needs_the_engine_and_the_ability(
     _snapshot(session, s, "20261102T181741Z")
     host = str(s.host.id)
     body = _restore_body("20261102T181741Z")
-    assert await _status(api.backup_restore(host, body, session, RESTORER)) == 402
+    assert (
+        await _status(lambda: api.backup_restore(host, body, session, RESTORER)) == 402
+    )
     with patch.object(package_restore.module_loader, "get_module",
                       return_value=FakeEngine()):  # fmt: skip
-        assert await _status(api.backup_restore(host, body, session, RESTORER)) == 409
+        assert (
+            await _status(lambda: api.backup_restore(host, body, session, RESTORER))
+            == 409
+        )
 
 
 @pytest.mark.asyncio
@@ -331,7 +330,7 @@ async def test_a_package_restore_is_planned_then_confirmed_in_place(
     _snapshot(session, s, "20261102T181741Z")
     _able(session, s, "packages")
     host = str(s.host.id)
-    plan = await api.backup_restore(
+    plan = api.backup_restore(
         host, _restore_body("20261102T181741Z"), session, RESTORER
     )
     assert sent[-1][2]["packages"] is True and sent[-1][2]["dry_run"] is True
@@ -339,7 +338,7 @@ async def test_a_package_restore_is_planned_then_confirmed_in_place(
     real = {"dry_run": False}
     assert (
         await _status(
-            api.backup_restore(
+            lambda: api.backup_restore(
                 host, _restore_body("20261102T181741Z", **real), session, RESTORER
             )
         )
@@ -349,14 +348,14 @@ async def test_a_package_restore_is_planned_then_confirmed_in_place(
     real["acknowledge_in_place"] = True
     assert (
         await _status(
-            api.backup_restore(
+            lambda: api.backup_restore(
                 host, _restore_body("20261102T181741Z", **real), session, RESTORER
             )
         )
         == 409
     )
     real["acknowledge_packages"] = True
-    out = await api.backup_restore(
+    out = api.backup_restore(
         host, _restore_body("20261102T181741Z", **real), session, RESTORER
     )
     assert sent[-1][2]["packages"] is True and sent[-1][2]["in_place"] is True

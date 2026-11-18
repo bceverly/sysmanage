@@ -49,7 +49,7 @@ class BreakGlassBody(BaseModel):
 
 
 @router.get("/backups/break-glass")
-async def break_glass_info(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def break_glass_info(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     target = jobs.the_target(db)
     pairs = breakglass.encrypted_pairs(db)
     return {
@@ -60,7 +60,7 @@ async def break_glass_info(db: Session = Depends(get_tenant_db)) -> Dict[str, An
 
 
 @router.post("/backups/break-glass")
-async def break_glass_export(
+def break_glass_export(
     body: BreakGlassBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

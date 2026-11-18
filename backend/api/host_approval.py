@@ -340,7 +340,7 @@ async def approve_host(  # NOSONAR
 
 
 @router.put("/host/{host_id}/reject", dependencies=[Depends(JWTBearer())])
-async def reject_host(
+def reject_host(
     host_id: str, current_user=Depends(require_authenticated_user)
 ):  # pylint: disable=duplicate-code
     """
@@ -401,7 +401,7 @@ async def reject_host(
 
 
 @router.post("/host/{host_id}/reenroll", dependencies=[Depends(JWTBearer())])
-async def reenroll_host(host_id: str, current_user=Depends(require_authenticated_user)):
+def reenroll_host(host_id: str, current_user=Depends(require_authenticated_user)):
     """Re-enroll a host whose agent lost its credential (Phase 22.0).
 
     A reinstalled agent has no token, and a host that has one refuses every
@@ -448,7 +448,7 @@ async def reenroll_host(host_id: str, current_user=Depends(require_authenticated
 
 
 @router.post("/host/{host_id}/request-os-update", dependencies=[Depends(JWTBearer())])
-async def request_os_version_update(host_id: str):
+def request_os_version_update(host_id: str):
     """
     Request an agent to update its OS version information.
     This sends a message via WebSocket to the agent requesting fresh OS data.
@@ -491,7 +491,7 @@ async def request_os_version_update(host_id: str):
 @router.post(
     "/host/{host_id}/request-updates-check", dependencies=[Depends(JWTBearer())]
 )
-async def request_updates_check(host_id: str):
+def request_updates_check(host_id: str):
     """
     Request an agent to check for available updates.
     This sends a message via WebSocket to the agent requesting an update check.

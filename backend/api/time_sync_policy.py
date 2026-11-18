@@ -92,7 +92,7 @@ def _audit(db, current_user, description: str, details) -> None:
 
 
 @router.get("/time-sync/ntp-policies")
-async def list_policies(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def list_policies(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     rows = db.query(models.NtpPolicy).order_by(
         models.NtpPolicy.scope_kind, models.NtpPolicy.scope_ref
     )
@@ -103,7 +103,7 @@ async def list_policies(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
 
 
 @router.put("/time-sync/ntp-policies")
-async def set_policy(
+def set_policy(
     body: PolicyBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -130,7 +130,7 @@ async def set_policy(
 
 
 @router.delete("/time-sync/ntp-policies")
-async def clear_policy(
+def clear_policy(
     scope_kind: str,
     scope_ref: str = "",
     db: Session = Depends(get_tenant_db),
@@ -149,7 +149,7 @@ async def clear_policy(
 
 
 @router.get("/time-sync/ntp-compliance")
-async def compliance(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def compliance(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """Every approved host against its policy, with where applying stands."""
     _engine()
     hosts = (

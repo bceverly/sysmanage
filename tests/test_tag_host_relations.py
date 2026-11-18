@@ -246,7 +246,7 @@ class TestAddTagToHost:
             ]
         )
 
-        result = await add_tag_to_host(
+        result = add_tag_to_host(
             "550e8400-e29b-41d4-a716-446655440011",
             "550e8400-e29b-41d4-a716-446655440001",
             mock_db,
@@ -287,7 +287,7 @@ class TestAddTagToHost:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await add_tag_to_host(
+            add_tag_to_host(
                 "550e8400-e29b-41d4-a716-446655440999",
                 "550e8400-e29b-41d4-a716-446655440001",
                 mock_db,
@@ -331,7 +331,7 @@ class TestAddTagToHost:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await add_tag_to_host(
+            add_tag_to_host(
                 "550e8400-e29b-41d4-a716-446655440011",
                 "550e8400-e29b-41d4-a716-446655440999",
                 mock_db,
@@ -380,7 +380,7 @@ class TestAddTagToHost:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await add_tag_to_host(
+            add_tag_to_host(
                 "550e8400-e29b-41d4-a716-446655440011",
                 "550e8400-e29b-41d4-a716-446655440001",
                 mock_db,
@@ -421,7 +421,7 @@ class TestRemoveTagFromHost:
         existing_association = MockHostTag(1, 1)
         mock_db = MockDB(host_tags=[existing_association])
 
-        await remove_tag_from_host(
+        remove_tag_from_host(
             "550e8400-e29b-41d4-a716-446655440011",
             "550e8400-e29b-41d4-a716-446655440001",
             mock_db,
@@ -459,7 +459,7 @@ class TestRemoveTagFromHost:
         mock_db = MockDB(host_tags=[])  # No associations
 
         with pytest.raises(HTTPException) as exc_info:
-            await remove_tag_from_host(
+            remove_tag_from_host(
                 "550e8400-e29b-41d4-a716-446655440011",
                 "550e8400-e29b-41d4-a716-446655440001",
                 mock_db,
@@ -505,7 +505,7 @@ class TestGetHostTags:
             ]
         )
 
-        result = await get_host_tags(1, mock_db, MockUser())
+        result = get_host_tags(1, mock_db, MockUser())
 
         assert len(result) == 2
         assert result[0].name == "tag1"
@@ -524,7 +524,7 @@ class TestGetHostTags:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_host_tags(999, mock_db, MockUser())
+            get_host_tags(999, mock_db, MockUser())
 
         assert exc_info.value.status_code == 404
 
@@ -566,7 +566,7 @@ class TestGetHostTags:
 
         mock_db.execute = execute_with_error
 
-        result = await get_host_tags(1, mock_db, MockUser())
+        result = get_host_tags(1, mock_db, MockUser())
 
         assert len(result) == 1
         assert result[0].host_count == 0  # Should fallback to 0

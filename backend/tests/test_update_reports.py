@@ -373,7 +373,7 @@ class TestReportUpdatesEndpoint:
                 mock_db_session
             )
 
-            result = await report_updates(mock_host.id, sample_updates_report)
+            result = report_updates(mock_host.id, sample_updates_report)
 
             assert result["status"] == "success"
             assert result["updates_stored"] == 1
@@ -399,7 +399,7 @@ class TestReportUpdatesEndpoint:
                 mock_db_session
             )
 
-            result = await report_updates(mock_host.id, sample_updates_report_multiple)
+            result = report_updates(mock_host.id, sample_updates_report_multiple)
 
             assert result["status"] == "success"
             assert result["updates_stored"] == 3
@@ -423,7 +423,7 @@ class TestReportUpdatesEndpoint:
             )
 
             with pytest.raises(HTTPException) as exc_info:
-                await report_updates("nonexistent-host-id", sample_updates_report)
+                report_updates("nonexistent-host-id", sample_updates_report)
 
             # The implementation wraps the host not found in a 500 error
             # (it catches exceptions and returns 500 with the original message)
@@ -458,7 +458,7 @@ class TestReportUpdatesEndpoint:
                 mock_db_session
             )
 
-            result = await report_updates(mock_host.id, empty_report)
+            result = report_updates(mock_host.id, empty_report)
 
             assert result["status"] == "success"
             assert result["updates_stored"] == 0
@@ -484,7 +484,7 @@ class TestReportUpdatesEndpoint:
                 mock_db_session
             )
 
-            result = await report_updates(mock_host.id, sample_updates_report)
+            result = report_updates(mock_host.id, sample_updates_report)
 
             assert result["status"] == "success"
             # Verify delete was called to clear existing updates
@@ -511,7 +511,7 @@ class TestReportUpdatesEndpoint:
             )
 
             with pytest.raises(HTTPException) as exc_info:
-                await report_updates(mock_host.id, sample_updates_report)
+                report_updates(mock_host.id, sample_updates_report)
 
             assert exc_info.value.status_code == 500
 
@@ -560,7 +560,7 @@ class TestUpdateTypeClassification:
                 mock_db_session
             )
 
-            result = await report_updates(mock_host.id, report)
+            result = report_updates(mock_host.id, report)
 
             assert result["status"] == "success"
             # Verify the PackageUpdate was created with correct update_type
@@ -604,7 +604,7 @@ class TestUpdateTypeClassification:
                 mock_db_session
             )
 
-            result = await report_updates(mock_host.id, report)
+            result = report_updates(mock_host.id, report)
 
             assert result["status"] == "success"
             add_call = mock_db_session.add.call_args
@@ -647,7 +647,7 @@ class TestUpdateTypeClassification:
                 mock_db_session
             )
 
-            result = await report_updates(mock_host.id, report)
+            result = report_updates(mock_host.id, report)
 
             assert result["status"] == "success"
             add_call = mock_db_session.add.call_args
@@ -778,7 +778,7 @@ class TestUpdateMetadata:
                 mock_db_session
             )
 
-            await report_updates(mock_host.id, report)
+            report_updates(mock_host.id, report)
 
             # Verify the stored PackageUpdate has correct metadata
             add_call = mock_db_session.add.call_args

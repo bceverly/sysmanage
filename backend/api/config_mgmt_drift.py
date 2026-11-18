@@ -103,7 +103,7 @@ def _as_uuid(value: str, message: str) -> uuid.UUID:
 
 
 @router.get("/config-management/drift", response_model=List[DriftHostSummary])
-async def list_drifting_hosts(db_session: Session = Depends(get_tenant_db)):
+def list_drifting_hosts(db_session: Session = Depends(get_tenant_db)):
     """Every host with unresolved drift, longest-drifting first.
 
     Ordered by how long the drift has stood rather than by hostname: a host
@@ -157,7 +157,7 @@ async def list_drifting_hosts(db_session: Session = Depends(get_tenant_db)):
     "/hosts/{host_id}/config-management/drift",
     response_model=List[DriftFindingResponse],
 )
-async def list_host_drift(
+def list_host_drift(
     host_id: str,
     db_session: Session = Depends(get_tenant_db),
 ):
@@ -174,7 +174,7 @@ async def list_host_drift(
 
 
 @router.post("/config-management/drift/remediate", response_model=RemediateResponse)
-async def remediate_drift(
+def remediate_drift(
     request: RemediateRequest,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -281,7 +281,7 @@ class BaselineDiffResponse(BaseModel):
     "/hosts/{host_id}/config-management/baseline-diff",
     response_model=BaselineDiffResponse,
 )
-async def compare_against_baseline(
+def compare_against_baseline(
     host_id: str,
     reference_host_id: str,
     categories: Optional[str] = None,
@@ -309,7 +309,7 @@ async def compare_against_baseline(
 
 
 @router.get("/config-management/baseline-categories", response_model=List[str])
-async def list_baseline_categories():
+def list_baseline_categories():
     """The comparison categories this server supports.
 
     Served rather than hard-coded in the UI so a category added server-side

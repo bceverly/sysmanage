@@ -47,7 +47,7 @@ class UbuntuProServiceRequest(BaseModel):
 
 
 @router.post("/host/{host_id}/ubuntu-pro/attach", dependencies=[Depends(JWTBearer())])
-async def attach_ubuntu_pro(
+def attach_ubuntu_pro(
     host_id: str,
     request: UbuntuProAttachRequest,
     current_user=Depends(require_authenticated_user),
@@ -116,9 +116,7 @@ async def attach_ubuntu_pro(
 
 
 @router.post("/host/{host_id}/ubuntu-pro/detach", dependencies=[Depends(JWTBearer())])
-async def detach_ubuntu_pro(
-    host_id: str, current_user=Depends(require_authenticated_user)
-):
+def detach_ubuntu_pro(host_id: str, current_user=Depends(require_authenticated_user)):
     """
     Detach Ubuntu Pro subscription from a host.
     """
@@ -181,7 +179,7 @@ async def detach_ubuntu_pro(
 @router.post(
     "/host/{host_id}/ubuntu-pro/service/enable", dependencies=[Depends(JWTBearer())]
 )
-async def enable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceRequest):
+def enable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceRequest):
     """
     Enable Ubuntu Pro service on a host.
     """
@@ -239,7 +237,7 @@ async def enable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceReque
 @router.post(
     "/host/{host_id}/ubuntu-pro/service/disable", dependencies=[Depends(JWTBearer())]
 )
-async def disable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceRequest):
+def disable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceRequest):
     """
     Disable Ubuntu Pro service on a host.
     """

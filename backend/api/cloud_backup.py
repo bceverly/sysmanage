@@ -171,12 +171,12 @@ def cloud_overview(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
 
 
 @router.get("/backups/cloud/summary")
-async def cloud_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def cloud_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     return views.summary(db)
 
 
 @router.get("/backups/cloud/runs")
-async def cloud_runs(
+def cloud_runs(
     account_id: Optional[str] = Query(default=None),
     limit: int = Query(default=views.RUN_LIMIT, ge=1, le=200),
     db: Session = Depends(get_tenant_db),
@@ -190,7 +190,7 @@ async def cloud_runs(
 
 
 @router.post("/backups/cloud/enable")
-async def cloud_enable(
+def cloud_enable(
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
@@ -229,7 +229,7 @@ def _enabling(db: Session, target_id) -> bool:
 
 
 @router.post("/backups/cloud/accounts")
-async def cloud_account_create(
+def cloud_account_create(
     body: AccountCreate,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -285,7 +285,7 @@ async def cloud_account_create(
 
 
 @router.put("/backups/cloud/accounts/{account_id}")
-async def cloud_account_update(
+def cloud_account_update(
     account_id: str,
     body: AccountUpdate,
     db: Session = Depends(get_tenant_db),
@@ -316,7 +316,7 @@ async def cloud_account_update(
 
 
 @router.delete("/backups/cloud/accounts/{account_id}")
-async def cloud_account_delete(
+def cloud_account_delete(
     account_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -380,7 +380,7 @@ def _run_job(db, current_user, account_id: str, action: str, label: str):
 
 
 @router.post("/backups/cloud/accounts/{account_id}/connect")
-async def cloud_account_connect(
+def cloud_account_connect(
     account_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -391,7 +391,7 @@ async def cloud_account_connect(
 
 
 @router.post("/backups/cloud/accounts/{account_id}/libraries")
-async def cloud_account_libraries(
+def cloud_account_libraries(
     account_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -402,7 +402,7 @@ async def cloud_account_libraries(
 
 
 @router.post("/backups/cloud/accounts/{account_id}/run-now")
-async def cloud_account_run_now(
+def cloud_account_run_now(
     account_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -444,7 +444,7 @@ async def cloud_account_run_now(
 
 
 @router.post("/backups/cloud/runs/{run_id}/code")
-async def cloud_run_code(
+def cloud_run_code(
     run_id: str,
     body: CodeBody,
     db: Session = Depends(get_tenant_db),

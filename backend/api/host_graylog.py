@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("/host/{host_id}/graylog_attachment")
-async def get_host_graylog_attachment(
+def get_host_graylog_attachment(
     host_id: str, current_user: str = Depends(get_current_user)
 ):
     """
@@ -101,7 +101,7 @@ async def get_host_graylog_attachment(
 
 
 @router.post("/host/{host_id}/attach_to_graylog", dependencies=[Depends(JWTBearer())])
-async def attach_host_to_graylog(
+def attach_host_to_graylog(
     host_id: str,
     request: Dict = Body(...),
     current_user: str = Depends(get_current_user),

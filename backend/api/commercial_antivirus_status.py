@@ -64,7 +64,7 @@ class CommercialAntivirusStatusResponse(BaseModel):
     "/hosts/{host_id}/commercial-antivirus-status",
     response_model=Optional[CommercialAntivirusStatusResponse],
 )
-async def get_commercial_antivirus_status(
+def get_commercial_antivirus_status(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),

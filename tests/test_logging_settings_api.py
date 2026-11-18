@@ -106,7 +106,7 @@ async def test_override_off_deletes_and_reverts():
     ), patch.object(
         mod.config, "get_config", return_value={}
     ):
-        result = await update_logging_settings(body, current_user=_admin())
+        result = update_logging_settings(body, current_user=_admin())
 
     assert result == {"ok": True}
     push.assert_called_once()
@@ -134,7 +134,7 @@ async def test_agents_none_does_not_prune():
     ), patch.object(
         mod.config, "get_config", return_value={}
     ):
-        await update_logging_settings(body, current_user=_admin())
+        update_logging_settings(body, current_user=_admin())
 
     delete.assert_not_called()
     assert push.call_args.kwargs["revert_families"] == []
@@ -166,7 +166,7 @@ async def test_kept_family_not_reverted():
     ), patch.object(
         mod.config, "get_config", return_value={}
     ):
-        await update_logging_settings(body, current_user=_admin())
+        update_logging_settings(body, current_user=_admin())
 
     upsert.assert_called_once()  # linux upserted
     # linux kept; the other three families are delete-probed (all absent → False).

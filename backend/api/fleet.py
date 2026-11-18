@@ -72,20 +72,20 @@ class BroadcastRequest(BaseModel):
 
 
 @router.get("/fleet/status")
-async def get_fleet_status(_dependencies=Depends(JWTBearer())):
+def get_fleet_status(_dependencies=Depends(JWTBearer())):
     """Get status of all connected agents."""
     agents = connection_manager.get_active_agents()
     return {"total_agents": len(agents), "agents": agents}
 
 
 @router.get("/fleet/agents")
-async def list_agents(_dependencies=Depends(JWTBearer())):
+def list_agents(_dependencies=Depends(JWTBearer())):
     """List all connected agents with their details."""
     return connection_manager.get_active_agents()
 
 
 @router.get("/fleet/agent/{hostname}")
-async def get_agent(hostname: str, _dependencies=Depends(JWTBearer())):
+def get_agent(hostname: str, _dependencies=Depends(JWTBearer())):
     """Get details of a specific agent by hostname."""
     agent = connection_manager.get_agent_by_hostname(hostname)
     if not agent:
@@ -99,7 +99,7 @@ async def get_agent(hostname: str, _dependencies=Depends(JWTBearer())):
 
 
 @router.post("/fleet/agent/{hostname}/command")
-async def send_command_to_agent(
+def send_command_to_agent(
     hostname: str,
     command: CommandRequest,
     db: Session = Depends(get_tenant_db),
@@ -136,7 +136,7 @@ async def send_command_to_agent(
 
 
 @router.post("/fleet/agent/{hostname}/shell")
-async def execute_shell_command(
+def execute_shell_command(
     hostname: str,
     shell_request: ShellCommandRequest,
     db: Session = Depends(get_tenant_db),
@@ -176,7 +176,7 @@ async def execute_shell_command(
 
 
 @router.post("/fleet/agent/{hostname}/install-package")
-async def install_package(
+def install_package(
     hostname: str,
     package_request: PackageRequest,
     db: Session = Depends(get_tenant_db),
@@ -218,7 +218,7 @@ async def install_package(
 
 
 @router.post("/fleet/agent/{hostname}/restart-service")
-async def restart_service(
+def restart_service(
     hostname: str,
     service_request: ServiceRequest,
     db: Session = Depends(get_tenant_db),
@@ -257,7 +257,7 @@ async def restart_service(
 
 
 @router.post("/fleet/agent/{hostname}/update-system")
-async def update_system(
+def update_system(
     hostname: str,
     db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
@@ -292,7 +292,7 @@ async def update_system(
 
 
 @router.post("/fleet/agent/{hostname}/reboot")
-async def reboot_system(
+def reboot_system(
     hostname: str,
     db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
@@ -361,7 +361,7 @@ def _enqueue_command_for_hosts(db: Session, host_ids: list, message_dict: dict) 
 
 
 @router.post("/fleet/broadcast/command")
-async def broadcast_command(
+def broadcast_command(
     command: CommandRequest,
     db: Session = Depends(get_tenant_db),
     _dependencies=Depends(JWTBearer()),
@@ -388,7 +388,7 @@ async def broadcast_command(
 
 
 @router.post("/fleet/broadcast/shell")
-async def broadcast_shell_command(
+def broadcast_shell_command(
     shell_request: ShellCommandRequest,
     db: Session = Depends(get_tenant_db),
     _dependencies=Depends(JWTBearer()),
@@ -420,7 +420,7 @@ async def broadcast_shell_command(
 
 
 @router.post("/fleet/platform/{platform}/command")
-async def send_command_to_platform(
+def send_command_to_platform(
     platform: str,
     command: CommandRequest,
     db: Session = Depends(get_tenant_db),

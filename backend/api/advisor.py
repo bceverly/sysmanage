@@ -149,7 +149,7 @@ def _refuse_duplicate() -> None:
 
 
 @router.get("/advisor/rules")
-async def list_rules(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def list_rules(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """Curated and tenant rules, each with its validation problems (codes)."""
     rules = feed.all_rules(_engine(), db).values()
     return {
@@ -159,13 +159,13 @@ async def list_rules(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
 
 
 @router.post("/advisor/rules/validate")
-async def validate_rule(request: RuleRequest) -> Dict[str, Any]:
+def validate_rule(request: RuleRequest) -> Dict[str, Any]:
     """Check a rule without storing it, so the editor can say why."""
     return {"errors": list(_engine().validate_rule(request.rule))}
 
 
 @router.post("/advisor/rules")
-async def create_rule(
+def create_rule(
     request: RuleRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -186,7 +186,7 @@ async def create_rule(
 
 
 @router.put("/advisor/rules/{rule_id}")
-async def update_rule(
+def update_rule(
     rule_id: str,
     request: RuleUpdateRequest,
     db: Session = Depends(get_tenant_db),
@@ -220,7 +220,7 @@ async def update_rule(
 
 
 @router.delete("/advisor/rules/{rule_id}")
-async def delete_rule(
+def delete_rule(
     rule_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -241,7 +241,7 @@ async def delete_rule(
 
 
 @router.get("/advisor/feed")
-async def get_feed(
+def get_feed(
     lens: Optional[str] = None, db: Session = Depends(get_tenant_db)
 ) -> Dict[str, Any]:
     """The fleet's recommendations: one entry per rule, worst first, with the
@@ -250,9 +250,7 @@ async def get_feed(
 
 
 @router.get("/advisor/hosts/{host_id}")
-async def get_host(
-    host_id: str, db: Session = Depends(get_tenant_db)
-) -> Dict[str, Any]:
+def get_host(host_id: str, db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     host = db.get(models.Host, _as_uuid(host_id, _("Invalid host ID format")))
     if host is None:
         raise HTTPException(status_code=404, detail=_("Host not found"))
@@ -260,7 +258,7 @@ async def get_host(
 
 
 @router.get("/advisor/rules/{source}/{key}/hosts")
-async def get_rule_hosts(
+def get_rule_hosts(
     source: str,
     key: str,
     outcome: Optional[str] = None,
@@ -306,7 +304,7 @@ def _proposal_out(db: Session, row) -> Dict[str, Any]:
 
 
 @router.get("/advisor/proposals")
-async def list_proposals(
+def list_proposals(
     status: Optional[str] = None,
     host_id: Optional[str] = None,
     db: Session = Depends(get_tenant_db),
@@ -329,7 +327,7 @@ async def list_proposals(
 
 
 @router.post("/advisor/proposals/{proposal_id}/approve")
-async def approve_proposal(
+def approve_proposal(
     proposal_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -358,7 +356,7 @@ async def approve_proposal(
 
 
 @router.post("/advisor/proposals/{proposal_id}/reject")
-async def reject_proposal(
+def reject_proposal(
     proposal_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -393,13 +391,13 @@ class PackChoiceRequest(BaseModel):
 
 
 @router.get("/advisor/packs")
-async def list_packs(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def list_packs(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """The curated catalog with this tenant's effective state, rule by rule."""
     return {"packs": catalog.list_packs(db)}
 
 
 @router.put("/advisor/packs/{slug}")
-async def choose_pack(
+def choose_pack(
     slug: str,
     request: PackChoiceRequest,
     db: Session = Depends(get_tenant_db),

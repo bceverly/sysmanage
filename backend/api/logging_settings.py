@@ -98,7 +98,7 @@ def _build_response(session: Session) -> dict:
 
 
 @router.get("/logging-settings", dependencies=[Depends(JWTBearer())])
-async def get_logging_settings(current_user=Depends(require_authenticated_user)):
+def get_logging_settings(current_user=Depends(require_authenticated_user)):
     """Return server + per-OS agent logging settings, plus valid targets."""
     _require_admin(current_user)
     with _sessionmaker()() as session:
@@ -151,7 +151,7 @@ def _validate_syslog_remote(cfg: "LoggingConfig") -> None:
 
 
 @router.put("/logging-settings", dependencies=[Depends(JWTBearer())])
-async def update_logging_settings(
+def update_logging_settings(
     body: UpdateLoggingSettingsRequest,
     current_user=Depends(require_authenticated_user),
 ):

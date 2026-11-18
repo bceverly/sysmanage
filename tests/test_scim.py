@@ -133,7 +133,7 @@ def _request(token=TOKEN, query=None, url="https://h/api/scim/v2/p/Users/x"):
 async def test_create_user_provisions(env):
     SessionLocal, _ = env
     payload = {"userName": "jdoe@acme.com", "externalId": "ext-1", "active": True}
-    resp = await scim.scim_create_user(str(PROVIDER_ID), _request(), payload)
+    resp = scim.scim_create_user(str(PROVIDER_ID), _request(), payload)
     assert isinstance(resp, JSONResponse)
     assert resp.status_code == 201
     with SessionLocal() as s:
@@ -153,7 +153,7 @@ async def test_create_duplicate_returns_409(env):
         u.external_subject = "ext-9"
         s.add(u)
         s.commit()
-    resp = await scim.scim_create_user(
+    resp = scim.scim_create_user(
         str(PROVIDER_ID), _request(), {"userName": "dup@acme.com"}
     )
     assert resp.status_code == 409
@@ -162,7 +162,7 @@ async def test_create_duplicate_returns_409(env):
 @pytest.mark.asyncio
 async def test_bad_token_401(env):
     with pytest.raises(HTTPException) as exc:
-        await scim.scim_create_user(
+        scim.scim_create_user(
             str(PROVIDER_ID), _request(token="wrong"), {"userName": "x@acme.com"}
         )
     assert exc.value.status_code == 401
@@ -171,7 +171,7 @@ async def test_bad_token_401(env):
 @pytest.mark.asyncio
 async def test_missing_token_401(env):
     with pytest.raises(HTTPException) as exc:
-        await scim.scim_list_users(str(PROVIDER_ID), _request(token=None))
+        scim.scim_list_users(str(PROVIDER_ID), _request(token=None))
     assert exc.value.status_code == 401
 
 
@@ -180,7 +180,7 @@ async def test_402_without_engine(env):
     with patch("backend.api.scim.module_loader") as loader:
         loader.get_module.return_value = None
         with pytest.raises(HTTPException) as exc:
-            await scim.scim_list_users(str(PROVIDER_ID), _request())
+            scim.scim_list_users(str(PROVIDER_ID), _request())
     assert exc.value.status_code == 402
 
 
@@ -193,7 +193,7 @@ async def test_scim_disabled_provider_404(env):
         )
         s.commit()
     with pytest.raises(HTTPException) as exc:
-        await scim.scim_list_users(str(PROVIDER_ID), _request())
+        scim.scim_list_users(str(PROVIDER_ID), _request())
     assert exc.value.status_code == 404
 
 
@@ -206,7 +206,7 @@ async def test_list_filter_by_username(env):
         s.add(u)
         s.commit()
     req = _request(query={"filter": 'userName eq "find@acme.com"'})
-    resp = await scim.scim_list_users(str(PROVIDER_ID), req)
+    resp = scim.scim_list_users(str(PROVIDER_ID), req)
     import json
 
     body = json.loads(resp.body.decode())
@@ -224,7 +224,7 @@ async def test_patch_deactivates_user(env):
         s.commit()
         uid = u.id
     payload = {"Operations": [{"op": "replace", "path": "active", "value": False}]}
-    await scim.scim_patch_user(str(PROVIDER_ID), str(uid), _request(), payload)
+    scim.scim_patch_user(str(PROVIDER_ID), str(uid), _request(), payload)
     with SessionLocal() as s:
         assert s.query(models.User).filter_by(id=uid).first().active is False
 
@@ -238,7 +238,7 @@ async def test_delete_deactivates_user(env):
         s.add(u)
         s.commit()
         uid = u.id
-    resp = await scim.scim_delete_user(str(PROVIDER_ID), str(uid), _request())
+    resp = scim.scim_delete_user(str(PROVIDER_ID), str(uid), _request())
     assert resp.status_code == 204
     with SessionLocal() as s:
         assert s.query(models.User).filter_by(id=uid).first().active is False

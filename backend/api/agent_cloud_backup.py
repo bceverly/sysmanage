@@ -54,7 +54,7 @@ def _audit(db: Session, host_id: str, run_id: str, description: str) -> None:
 
 
 @router.post("/agent/cloud-backup-secret")
-async def agent_cloud_backup_secret(
+def agent_cloud_backup_secret(
     request: Request,
     payload: RunRequest,
     authorization: Optional[str] = Header(default=None),
@@ -82,7 +82,7 @@ async def agent_cloud_backup_secret(
 
 
 @router.post("/agent/cloud-backup-code")
-async def agent_cloud_backup_code(
+def agent_cloud_backup_code(
     request: Request,
     payload: RunRequest,
     authorization: Optional[str] = Header(default=None),

@@ -47,7 +47,7 @@ def _mirror_or_404(db: Session, mirror_id: str) -> models.MirrorRepository:
 @router.get(
     "/mirror-repositories/{mirror_id}/snaps", dependencies=[Depends(JWTBearer())]
 )
-async def list_tracked_snaps(mirror_id: str, db: Session = Depends(get_tenant_db)):
+def list_tracked_snaps(mirror_id: str, db: Session = Depends(get_tenant_db)):
     _check_snap_proxy_module()
     row = _mirror_or_404(db, mirror_id)
     rows = (
@@ -62,7 +62,7 @@ async def list_tracked_snaps(mirror_id: str, db: Session = Depends(get_tenant_db
 @router.post(
     "/mirror-repositories/{mirror_id}/snaps", dependencies=[Depends(JWTBearer())]
 )
-async def track_snap(
+def track_snap(
     mirror_id: str,
     request: SnapTrackRequest,
     db: Session = Depends(get_tenant_db),
@@ -103,7 +103,7 @@ async def track_snap(
     "/mirror-repositories/{mirror_id}/snaps/{snap_content_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def untrack_snap(
+def untrack_snap(
     mirror_id: str, snap_content_id: str, db: Session = Depends(get_tenant_db)
 ):
     _check_snap_proxy_module()
@@ -128,7 +128,7 @@ async def untrack_snap(
     "/mirror-repositories/{mirror_id}/capture-snaps",
     dependencies=[Depends(JWTBearer())],
 )
-async def capture_snaps(mirror_id: str, db: Session = Depends(get_tenant_db)):
+def capture_snaps(mirror_id: str, db: Session = Depends(get_tenant_db)):
     engine = _check_snap_proxy_module()
     row = _mirror_or_404(db, mirror_id)
     settings = _get_settings(db)

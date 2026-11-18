@@ -302,7 +302,7 @@ class TestTagErrorHandling:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await create_tag(tag_data, mock_db, mock_admin_user)
+                    create_tag(tag_data, mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 500
 
@@ -340,9 +340,7 @@ class TestTagErrorHandling:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await update_tag(
-                        str(mock_tag.id), update_data, mock_db, mock_admin_user
-                    )
+                    update_tag(str(mock_tag.id), update_data, mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 500
 
@@ -374,7 +372,7 @@ class TestTagErrorHandling:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
+                    delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 500
 
@@ -410,7 +408,7 @@ class TestTagErrorHandling:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await add_tag_to_host(
+                    add_tag_to_host(
                         str(mock_host.id),
                         str(mock_tag.id),
                         mock_db,
@@ -449,7 +447,7 @@ class TestTagErrorHandling:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await remove_tag_from_host(
+                    remove_tag_from_host(
                         str(mock_host.id),
                         str(mock_tag.id),
                         mock_db,
@@ -498,7 +496,7 @@ class TestTagAuditLogging:
                     mock_auth_session
                 )
 
-                await create_tag(tag_data, mock_db, mock_admin_user)
+                create_tag(tag_data, mock_db, mock_admin_user)
 
                 mock_audit.log_create.assert_called_once()
 
@@ -531,9 +529,7 @@ class TestTagAuditLogging:
                     mock_auth_session
                 )
 
-                await update_tag(
-                    str(mock_tag.id), update_data, mock_db, mock_admin_user
-                )
+                update_tag(str(mock_tag.id), update_data, mock_db, mock_admin_user)
 
                 mock_audit.log_update.assert_called_once()
 
@@ -561,7 +557,7 @@ class TestTagAuditLogging:
                     mock_auth_session
                 )
 
-                await delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
+                delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
 
                 mock_audit.log_delete.assert_called_once()
 
@@ -599,7 +595,7 @@ class TestTagAuditLogging:
                     mock_auth_session
                 )
 
-                await add_tag_to_host(
+                add_tag_to_host(
                     str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
@@ -637,7 +633,7 @@ class TestTagAuditLogging:
                     mock_auth_session
                 )
 
-                await remove_tag_from_host(
+                remove_tag_from_host(
                     str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
@@ -690,7 +686,7 @@ class TestBulkTagOperations:
                     ]
 
                     try:
-                        await add_tag_to_host(
+                        add_tag_to_host(
                             str(mock_host.id),
                             str(tag.id),
                             mock_db,
@@ -748,7 +744,7 @@ class TestBulkTagOperations:
                     ]
 
                     try:
-                        await add_tag_to_host(
+                        add_tag_to_host(
                             str(host.id),
                             str(mock_tag.id),
                             mock_db,
@@ -837,7 +833,7 @@ class TestTagEdgeCases:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await create_tag(tag_data, mock_db, mock_admin_user)
+                    create_tag(tag_data, mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 400
                 mock_db.rollback.assert_called()

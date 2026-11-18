@@ -180,7 +180,7 @@ class TestUpdateHostHardware:
             "hardware_details": {"additional": "info"},
         }
 
-        result = await update_host_hardware(1, hardware_data)
+        result = update_host_hardware(1, hardware_data)
 
         assert result["result"] is True
         assert "Hardware information updated successfully" in result["message"]
@@ -222,7 +222,7 @@ class TestUpdateHostHardware:
             ]
         }
 
-        result = await update_host_hardware(1, hardware_data)
+        result = update_host_hardware(1, hardware_data)
 
         assert result["result"] is True
         assert mock_session.committed is True
@@ -261,7 +261,7 @@ class TestUpdateHostHardware:
             ]
         }
 
-        result = await update_host_hardware(1, hardware_data)
+        result = update_host_hardware(1, hardware_data)
 
         assert result["result"] is True
         assert mock_session.committed is True
@@ -290,7 +290,7 @@ class TestUpdateHostHardware:
             ],
         }
 
-        result = await update_host_hardware(1, hardware_data)
+        result = update_host_hardware(1, hardware_data)
 
         assert result["result"] is True
         assert len(mock_session.added_objects) == 2  # Only non-error entries added
@@ -309,7 +309,7 @@ class TestUpdateHostHardware:
             "hardware_details": {"legacy": "hardware_data"},
         }
 
-        result = await update_host_hardware(1, hardware_data)
+        result = update_host_hardware(1, hardware_data)
 
         assert result["result"] is True
         assert mock_host.storage_details == {"legacy": "storage_data"}
@@ -326,7 +326,7 @@ class TestUpdateHostHardware:
         hardware_data = {"cpu_vendor": "Intel"}
 
         with pytest.raises(HTTPException) as exc_info:
-            await update_host_hardware(999, hardware_data)
+            update_host_hardware(999, hardware_data)
 
         assert exc_info.value.status_code == 404
 
@@ -344,7 +344,7 @@ class TestUpdateHostHardware:
             # Missing other fields
         }
 
-        result = await update_host_hardware(1, hardware_data)
+        result = update_host_hardware(1, hardware_data)
 
         assert result["result"] is True
         assert mock_host.cpu_vendor == "AMD"
@@ -362,7 +362,7 @@ class TestGetHostStorage:
         expected_result = [{"name": "sda1", "capacity": 1000}]
         mock_get_storage.return_value = expected_result
 
-        result = await get_host_storage(1)
+        result = get_host_storage(1)
 
         assert result == expected_result
         mock_get_storage.assert_called_once_with(1)
@@ -378,7 +378,7 @@ class TestGetHostNetwork:
         expected_result = [{"name": "eth0", "ip": "192.168.1.1"}]
         mock_get_network.return_value = expected_result
 
-        result = await get_host_network(1)
+        result = get_host_network(1)
 
         assert result == expected_result
         mock_get_network.assert_called_once_with(1)
@@ -402,7 +402,7 @@ class TestRequestHardwareUpdate:
         mock_create_msg.return_value = {"command": "update_hardware"}
         mock_queue_ops.enqueue_message = Mock(return_value="test-message-id-123")
 
-        result = await request_hardware_update(1)
+        result = request_hardware_update(1)
 
         assert result["result"] is True
         assert "Hardware update requested" in result["message"]
@@ -420,7 +420,7 @@ class TestRequestHardwareUpdate:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await request_hardware_update(999)
+            request_hardware_update(999)
 
         assert exc_info.value.status_code == 404
 
@@ -442,7 +442,7 @@ class TestRequestHardwareUpdateBulk:
         mock_create_msg.return_value = {"command": "update_hardware"}
         mock_queue_ops.enqueue_message = Mock(return_value="test-message-id-123")
 
-        result = await request_hardware_update_bulk([1, 2])
+        result = request_hardware_update_bulk([1, 2])
 
         assert len(result["results"]) == 2
         assert all(r["success"] for r in result["results"])
@@ -456,7 +456,7 @@ class TestRequestHardwareUpdateBulk:
         mock_session = MockSession([])  # Empty host list
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
-        result = await request_hardware_update_bulk([999])  # Non-existent host ID
+        result = request_hardware_update_bulk([999])  # Non-existent host ID
 
         assert len(result["results"]) == 1
         assert result["results"][0]["success"] is False
@@ -474,7 +474,7 @@ class TestRequestHardwareUpdateBulk:
         mock_session = MockSession(mock_hosts)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
-        result = await request_hardware_update_bulk([1])
+        result = request_hardware_update_bulk([1])
 
         assert len(result["results"]) == 1
         assert result["results"][0]["success"] is False
@@ -492,7 +492,7 @@ class TestGetHostUsers:
         expected_result = [{"username": "user1", "groups": ["admin"]}]
         mock_get_users.return_value = expected_result
 
-        result = await get_host_users(1)
+        result = get_host_users(1)
 
         assert result == expected_result
         mock_get_users.assert_called_once_with(1)
@@ -508,7 +508,7 @@ class TestGetHostGroups:
         expected_result = [{"groupname": "admin", "gid": 1000}]
         mock_get_groups.return_value = expected_result
 
-        result = await get_host_groups(1)
+        result = get_host_groups(1)
 
         assert result == expected_result
         mock_get_groups.assert_called_once_with(1)
@@ -532,7 +532,7 @@ class TestRequestUserAccessUpdate:
         mock_create_msg.return_value = {"command": "update_user_access"}
         mock_queue_ops.enqueue_message = Mock(return_value="test-message-id-123")
 
-        result = await request_user_access_update(1)
+        result = request_user_access_update(1)
 
         assert result["result"] is True
         assert "User access update requested" in result["message"]
@@ -550,7 +550,7 @@ class TestRequestUserAccessUpdate:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await request_user_access_update(999)
+            request_user_access_update(999)
 
         assert exc_info.value.status_code == 404
 
@@ -565,7 +565,7 @@ class TestGetHostSoftware:
         expected_result = [{"name": "nginx", "version": "1.18.0"}]
         mock_get_software.return_value = expected_result
 
-        result = await get_host_software(1)
+        result = get_host_software(1)
 
         assert result == expected_result
         mock_get_software.assert_called_once_with(1, 1, 100, None)
@@ -581,7 +581,7 @@ class TestGetHostUbuntuPro:
         expected_result = {"status": "enabled", "services": ["esm"]}
         mock_get_ubuntu_pro.return_value = expected_result
 
-        result = await get_host_ubuntu_pro(1)
+        result = get_host_ubuntu_pro(1)
 
         assert result == expected_result
         mock_get_ubuntu_pro.assert_called_once_with(1)

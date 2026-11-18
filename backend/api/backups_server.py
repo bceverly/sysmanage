@@ -45,7 +45,7 @@ class ServerPolicyBody(PolicyBody):
 
 
 @router.get("/backups/server")
-async def server_backup(
+def server_backup(
     host_id: Optional[str] = None, db: Session = Depends(get_tenant_db)
 ) -> Dict[str, Any]:
     """``host_id``: the preset for a host the operator picked instead."""
@@ -61,7 +61,7 @@ async def server_backup(
 
 
 @router.put("/backups/server-policy")
-async def put_server_policy(
+def put_server_policy(
     body: ServerPolicyBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

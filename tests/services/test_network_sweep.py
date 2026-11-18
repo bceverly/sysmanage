@@ -246,33 +246,25 @@ class TestApi:
         _allow(db)
         request = api.SweepRequest(cidr=LAN, rate=50)
         with pytest.raises(HTTPException) as excinfo:
-            asyncio.run(
-                api.post_sweep(
-                    request, db, self._user(api.SecurityRoles.VIEW_HOST_DETAILS)
-                )
-            )
+            api.post_sweep(request, db, self._user(api.SecurityRoles.VIEW_HOST_DETAILS))
         assert excinfo.value.status_code == 403
         manager = self._user(api.SecurityRoles.MANAGE_NETWORK_DISCOVERY)
         with patch.object(api.AuditService, "log_create") as audit:
-            run = asyncio.run(api.post_sweep(request, db, manager))
+            run = api.post_sweep(request, db, manager)
         assert run["status"] == "queued"
         assert audit.call_args.kwargs["entity_type"] == api.EntityType.NETWORK_SWEEP
         assert audit.call_args.kwargs["details"]["cidr"] == LAN
         with pytest.raises(HTTPException) as excinfo:  # the only agent is now busy
-            asyncio.run(api.post_sweep(request, db, manager))
+            api.post_sweep(request, db, manager)
         assert excinfo.value.status_code == 409
 
     def test_the_policy_carries_the_sweep_opt_in(self, db, sent):
         manager = self._user(api.SecurityRoles.MANAGE_NETWORK_DISCOVERY)
         with patch.object(api.AuditService, "log_update"):
-            reply = asyncio.run(
-                api.put_policy(
-                    api.PolicyRequest(enabled=True, sweep_enabled=True), db, manager
-                )
+            reply = api.put_policy(
+                api.PolicyRequest(enabled=True, sweep_enabled=True), db, manager
             )
         assert reply["sweep_enabled"] is True
         with patch.object(api.AuditService, "log_update"):
-            kept = asyncio.run(
-                api.put_policy(api.PolicyRequest(enabled=True), db, manager)
-            )
+            kept = api.put_policy(api.PolicyRequest(enabled=True), db, manager)
         assert kept["sweep_enabled"] is True  # omitted keeps it

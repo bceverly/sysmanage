@@ -110,7 +110,7 @@ def _parse_uuid_or_400(value: str, field: str) -> uuid.UUID:
 
 
 @router.post("/issue", response_model=IssueResponse)
-async def issue(
+def issue(
     request: IssueRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -173,7 +173,7 @@ async def issue(
 
 
 @router.get("/leases", response_model=List[LeaseResponse])
-async def list_leases(
+def list_leases(
     status: Optional[str] = Query(None, description="Filter by status"),
     kind: Optional[str] = Query(None),
     db: Session = Depends(get_tenant_db),
@@ -203,7 +203,7 @@ async def list_leases(
 
 
 @router.get("/leases/{lease_id}", response_model=LeaseResponse)
-async def get_lease(lease_id: str, db: Session = Depends(get_tenant_db)):
+def get_lease(lease_id: str, db: Session = Depends(get_tenant_db)):
     lid = _parse_uuid_or_400(lease_id, "lease_id")
     lease = (
         db.query(models.DynamicSecretLease)
@@ -216,7 +216,7 @@ async def get_lease(lease_id: str, db: Session = Depends(get_tenant_db)):
 
 
 @router.post("/leases/{lease_id}/revoke")
-async def revoke(
+def revoke(
     lease_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -246,7 +246,7 @@ async def revoke(
 
 
 @router.post("/reconcile")
-async def reconcile(db: Session = Depends(get_tenant_db)):
+def reconcile(db: Session = Depends(get_tenant_db)):
     """Mark any ACTIVE leases whose expiry has passed as EXPIRED.
     Safe to call repeatedly.  Intended for cron / scheduler hook."""
     transitioned = reconcile_expired(db)
@@ -254,7 +254,7 @@ async def reconcile(db: Session = Depends(get_tenant_db)):
 
 
 @router.get("/kinds")
-async def list_kinds():
+def list_kinds():
     """Return the supported lease kinds + their human-readable hints."""
     return {
         "kinds": [

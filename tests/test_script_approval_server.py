@@ -43,7 +43,7 @@ def _execute(engine, host_id):
         "request_sessionmaker",
         return_value=sessionmaker(bind=engine),
     ), patch.object(routes_executions, "load_user_on_main", return_value=user):
-        return asyncio.run(routes_executions.execute_script(request, current_user="op"))
+        return routes_executions.execute_script(request, current_user="op")
 
 
 def test_a_one_off_run_to_a_host_that_requires_approval_is_refused(engine, db_session):

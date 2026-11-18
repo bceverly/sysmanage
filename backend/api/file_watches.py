@@ -187,26 +187,26 @@ def _assignment_dict(assignment) -> Dict[str, Any]:
 
 
 @router.get("/file-watches")
-async def list_watches(db: Session = Depends(get_tenant_db)) -> List[Dict[str, Any]]:
+def list_watches(db: Session = Depends(get_tenant_db)) -> List[Dict[str, Any]]:
     """Watch lists this customer wrote."""
     return [_watch_dict(w) for w in db.query(models.FileWatch).all()]
 
 
 @router.get("/file-watches/catalog")
-async def list_catalog(include_deprecated: bool = False) -> List[Dict[str, Any]]:
+def list_catalog(include_deprecated: bool = False) -> List[Dict[str, Any]]:
     """The curated catalog -- global reference data, one copy for everyone."""
     return fws.list_shared_watches(include_deprecated=include_deprecated)
 
 
 @router.get("/file-watches/assignments/all")
-async def list_assignments(
+def list_assignments(
     db: Session = Depends(get_tenant_db),
 ) -> List[Dict[str, Any]]:
     return [_assignment_dict(a) for a in db.query(models.FileWatchAssignment).all()]
 
 
 @router.get("/file-watches/hosts/{host_id}/state")
-async def host_state(
+def host_state(
     host_id: str,
     db: Session = Depends(get_tenant_db),
 ) -> Dict[str, Any]:
@@ -261,7 +261,7 @@ def _state_counts(rows) -> Dict[str, int]:
 
 
 @router.get("/file-watches/{watch_id}")
-async def get_watch(
+def get_watch(
     watch_id: str,
     db: Session = Depends(get_tenant_db),
 ) -> Dict[str, Any]:
@@ -276,7 +276,7 @@ async def get_watch(
 
 
 @router.post("/file-watches")
-async def create_watch(
+def create_watch(
     request: WatchCreateRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -311,7 +311,7 @@ async def create_watch(
 
 
 @router.put("/file-watches/{watch_id}")
-async def update_watch(
+def update_watch(
     watch_id: str,
     request: WatchUpdateRequest,
     db: Session = Depends(get_tenant_db),
@@ -358,7 +358,7 @@ async def update_watch(
 
 
 @router.delete("/file-watches/{watch_id}")
-async def delete_watch(
+def delete_watch(
     watch_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -377,7 +377,7 @@ async def delete_watch(
 
 
 @router.post("/file-watches/assignments")
-async def create_assignment(
+def create_assignment(
     request: AssignmentCreateRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -445,7 +445,7 @@ async def create_assignment(
 
 
 @router.delete("/file-watches/assignments/{assignment_id}")
-async def delete_assignment(
+def delete_assignment(
     assignment_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
     dependencies=[Depends(JWTBearer())],
     response_model=OpenTelemetryStatusResponse,
 )
-async def get_opentelemetry_status(
+def get_opentelemetry_status(
     host_id: str,
     db: Session = Depends(get_db),
 ):
@@ -125,7 +125,7 @@ async def get_opentelemetry_status(
     response_model=OpenTelemetryCoverageResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def get_opentelemetry_coverage(db: Session = Depends(get_tenant_db)):
+def get_opentelemetry_coverage(db: Session = Depends(get_tenant_db)):
     """
     Get OpenTelemetry coverage statistics across all registered hosts.
 

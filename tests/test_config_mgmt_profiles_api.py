@@ -164,7 +164,7 @@ class TestCreate:
     @pytest.mark.asyncio
     async def test_requires_add_script_role(self):
         with pytest.raises(HTTPException) as err:
-            await api.create_profile(
+            api.create_profile(
                 api.ProfileCreateRequest(name="n", engine="ansible-core", content="x"),
                 _Session(),
                 user(),
@@ -175,7 +175,7 @@ class TestCreate:
     async def test_engine_rejection_becomes_400_with_the_engines_words(self):
         with _with_engine(_Engine(problem="engine 'nope' is not supported")):
             with pytest.raises(HTTPException) as err:
-                await api.create_profile(
+                api.create_profile(
                     api.ProfileCreateRequest(name="n", engine="nope", content="x"),
                     _Session(),
                     user(SecurityRoles.ADD_SCRIPT),
@@ -188,7 +188,7 @@ class TestCreate:
         session = _Session(ConfigProfile=[profile()])
         with _with_engine(_Engine()):
             with pytest.raises(HTTPException) as err:
-                await api.create_profile(
+                api.create_profile(
                     api.ProfileCreateRequest(
                         name="baseline", engine="ansible-core", content="x"
                     ),
@@ -203,7 +203,7 @@ class TestCreate:
     async def test_stored_profile_starts_at_version_one_and_is_normalised(self):
         session = _Session()
         with _with_engine(_Engine()):
-            out = await api.create_profile(
+            out = api.create_profile(
                 api.ProfileCreateRequest(
                     name="  baseline  ", engine="Ansible-Core", content="x"
                 ),
@@ -220,7 +220,7 @@ class TestUpdate:
     @pytest.mark.asyncio
     async def test_requires_edit_script_role(self):
         with pytest.raises(HTTPException) as err:
-            await api.update_profile(
+            api.update_profile(
                 str(PROFILE_ID),
                 api.ProfileUpdateRequest(content="y"),
                 _Session(ConfigProfile=[profile()]),
@@ -234,7 +234,7 @@ class TestUpdate:
         row = profile(content="OLD", version=3)
         session = _Session(ConfigProfile=[row])
         with _with_engine(_Engine()):
-            out = await api.update_profile(
+            out = api.update_profile(
                 str(PROFILE_ID),
                 api.ProfileUpdateRequest(content="NEW"),
                 session,
@@ -252,7 +252,7 @@ class TestUpdate:
         # Otherwise the history fills with rows nobody can tell apart.
         session = _Session(ConfigProfile=[profile(version=3)])
         with _with_engine(_Engine()):
-            out = await api.update_profile(
+            out = api.update_profile(
                 str(PROFILE_ID),
                 api.ProfileUpdateRequest(description="new words"),
                 session,
@@ -266,7 +266,7 @@ class TestUpdate:
     async def test_rewriting_content_with_identical_text_is_not_a_new_version(self):
         session = _Session(ConfigProfile=[profile(content="SAME", version=3)])
         with _with_engine(_Engine()):
-            out = await api.update_profile(
+            out = api.update_profile(
                 str(PROFILE_ID),
                 api.ProfileUpdateRequest(content="SAME"),
                 session,
@@ -281,7 +281,7 @@ class TestUpdate:
         engine = _Engine()
         session = _Session(ConfigProfile=[profile(content="EXISTING")])
         with _with_engine(engine):
-            await api.update_profile(
+            api.update_profile(
                 str(PROFILE_ID),
                 api.ProfileUpdateRequest(engine="salt"),
                 session,
@@ -293,7 +293,7 @@ class TestUpdate:
     async def test_unset_fields_are_left_alone(self):
         session = _Session(ConfigProfile=[profile()])
         with _with_engine(_Engine()):
-            out = await api.update_profile(
+            out = api.update_profile(
                 str(PROFILE_ID),
                 api.ProfileUpdateRequest(description="only this"),
                 session,
@@ -309,7 +309,7 @@ class TestUpdate:
         session = _Session(ConfigProfile=[profile(), other])
         with _with_engine(_Engine()):
             with pytest.raises(HTTPException) as err:
-                await api.update_profile(
+                api.update_profile(
                     str(PROFILE_ID),
                     api.ProfileUpdateRequest(name="taken"),
                     session,
@@ -324,7 +324,7 @@ class TestUpdate:
         row = profile()
         session = _Session(ConfigProfile=[row])
         with _with_engine(_Engine()):
-            out = await api.update_profile(
+            out = api.update_profile(
                 str(PROFILE_ID),
                 api.ProfileUpdateRequest(name="baseline", description="d"),
                 session,
@@ -337,31 +337,31 @@ class TestReadAndDelete:
     @pytest.mark.asyncio
     async def test_missing_profile_is_404(self):
         with pytest.raises(HTTPException) as err:
-            await api.get_profile(str(PROFILE_ID), _Session())
+            api.get_profile(str(PROFILE_ID), _Session())
         assert err.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_malformed_id_is_400_not_500(self):
         with pytest.raises(HTTPException) as err:
-            await api.get_profile("not-a-uuid", _Session())
+            api.get_profile("not-a-uuid", _Session())
         assert err.value.status_code == 400
 
     @pytest.mark.asyncio
     async def test_list_is_ordered(self):
         session = _Session(ConfigProfile=[profile(), profile(id=uuid.uuid4())])
-        out = await api.list_profiles(None, session)
+        out = api.list_profiles(None, session)
         assert len(out) == 2
 
     @pytest.mark.asyncio
     async def test_naive_timestamps_come_back_marked_utc(self):
         session = _Session(ConfigProfile=[profile()])
-        out = await api.list_profiles(None, session)
+        out = api.list_profiles(None, session)
         assert out[0].updated_at.tzinfo is timezone.utc
 
     @pytest.mark.asyncio
     async def test_delete_requires_delete_script_role(self):
         with pytest.raises(HTTPException) as err:
-            await api.delete_profile(
+            api.delete_profile(
                 str(PROFILE_ID),
                 _Session(ConfigProfile=[profile()]),
                 user(SecurityRoles.EDIT_SCRIPT),
@@ -372,7 +372,7 @@ class TestReadAndDelete:
     async def test_delete_removes_the_profile(self):
         row = profile()
         session = _Session(ConfigProfile=[row])
-        out = await api.delete_profile(
+        out = api.delete_profile(
             str(PROFILE_ID), session, user(SecurityRoles.DELETE_SCRIPT)
         )
         assert session.deleted == [row]
@@ -387,7 +387,7 @@ class TestAssignments:
             _Engine(problem="assign to exactly one of host, tag or site")
         ):
             with pytest.raises(HTTPException) as err:
-                await api.create_assignment(
+                api.create_assignment(
                     str(PROFILE_ID),
                     api.AssignmentCreateRequest(
                         host_id=str(HOST_ID), tag_id=str(uuid.uuid4())
@@ -404,7 +404,7 @@ class TestAssignments:
         # up an unscheduled assignment and try to parse "".
         session = _Session(ConfigProfile=[profile()])
         with _with_engine(_Engine()):
-            out = await api.create_assignment(
+            out = api.create_assignment(
                 str(PROFILE_ID),
                 api.AssignmentCreateRequest(host_id=str(HOST_ID), schedule="   "),
                 session,
@@ -416,7 +416,7 @@ class TestAssignments:
     async def test_assignment_records_its_target(self):
         session = _Session(ConfigProfile=[profile()])
         with _with_engine(_Engine()):
-            out = await api.create_assignment(
+            out = api.create_assignment(
                 str(PROFILE_ID),
                 api.AssignmentCreateRequest(host_id=str(HOST_ID), schedule="0 3 * * *"),
                 session,
@@ -429,7 +429,7 @@ class TestAssignments:
     @pytest.mark.asyncio
     async def test_deleting_a_missing_assignment_is_404(self):
         with pytest.raises(HTTPException) as err:
-            await api.delete_assignment(
+            api.delete_assignment(
                 str(ASSIGN_ID), _Session(), user(SecurityRoles.EDIT_SCRIPT)
             )
         assert err.value.status_code == 404

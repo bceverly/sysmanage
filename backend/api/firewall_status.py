@@ -110,7 +110,7 @@ class FirewallStatusResponse(BaseModel):
     "/hosts/{host_id}/firewall-status",
     response_model=Optional[FirewallStatusResponse],
 )
-async def get_firewall_status(
+def get_firewall_status(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
@@ -162,7 +162,7 @@ async def get_firewall_status(
     "/hosts/{host_id}/firewall/enable",
     dependencies=[Depends(JWTBearer())],
 )
-async def enable_firewall(
+def enable_firewall(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -212,7 +212,7 @@ async def enable_firewall(
     "/hosts/{host_id}/firewall/disable",
     dependencies=[Depends(JWTBearer())],
 )
-async def disable_firewall(
+def disable_firewall(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -260,7 +260,7 @@ async def disable_firewall(
     "/hosts/{host_id}/firewall/restart",
     dependencies=[Depends(JWTBearer())],
 )
-async def restart_firewall(
+def restart_firewall(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -308,7 +308,7 @@ async def restart_firewall(
     "/hosts/{host_id}/firewall/deploy",
     dependencies=[Depends(JWTBearer())],
 )
-async def deploy_firewall(
+def deploy_firewall(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

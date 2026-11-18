@@ -857,7 +857,7 @@ def register_app_routes(app: FastAPI):
     logger.debug("=== REGISTERING APPLICATION ROUTES ===")
 
     @app.get("/")
-    async def root():
+    def root():
         """
         This function provides the HTTP response to calls to the root path of
         the service.
@@ -869,7 +869,7 @@ def register_app_routes(app: FastAPI):
 
     @app.get("/api/health")
     @app.head("/api/health")
-    async def health_check():
+    def health_check():
         """Liveness check -- intentionally cheap, touches no backing service.
 
         Every connected agent polls this every second and upstream load

@@ -7,6 +7,7 @@ password lives only in OpenBAO, the two-factor relay, results ("Needs
 sign-in" is never "no new photos"), the schedule sharing the target's cap,
 the sign-in expiry warning, and the air gap hiding all of it."""
 
+import inspect
 import json
 import uuid
 from datetime import datetime, timedelta
@@ -74,9 +75,14 @@ def vault(monkeypatch):
     return fake
 
 
-async def _status(coro):
+async def _status(call):
+    """The status code ``call()`` is refused with.  Takes a callable, not
+    the call's result: a plain-def handler raises the moment it is called,
+    before ``pytest.raises`` could catch it (async handlers still work)."""
     with pytest.raises(HTTPException) as caught:
-        await coro
+        result = call()
+        if inspect.isawaitable(result):
+            await result
     return caught.value.status_code
 
 
@@ -95,7 +101,7 @@ async def _account(session, **extra):
         apple_id="family@example.com", display_name="Family", password=PASSWORD,
         **extra,
     )  # fmt: skip
-    made = await api.cloud_account_create(body, session, MANAGER)
+    made = api.cloud_account_create(body, session, MANAGER)
     return session.query(models.CloudBackupAccount).filter_by(id=made["id"]).one()
 
 
@@ -105,15 +111,15 @@ async def _account(session, **extra):
 @pytest.mark.asyncio
 async def test_enable_goes_to_the_storage_host_only(session, sent):
     s = _setup(session)
-    assert await _status(api.cloud_enable(session, BACKUPS_ONLY)) == 403
-    answer = await api.cloud_enable(session, MANAGER)
+    assert await _status(lambda: api.cloud_enable(session, BACKUPS_ONLY)) == 403
+    answer = api.cloud_enable(session, MANAGER)
     assert sent[-1][0] == str(s.nas.id)  # never the backed-up host
     assert sent[-1][1] == "cloud_backup_enable"
     assert sent[-1][2]["storage_path"] == "/srv/backups/restate"
     assert answer["enable"]["status"] == "running"
     assert answer["storage_host"]["fqdn"] == "nas.lab"
     # A second press while it runs is refused; once it ended, it repairs.
-    assert await _status(api.cloud_enable(session, MANAGER)) == 409
+    assert await _status(lambda: api.cloud_enable(session, MANAGER)) == 409
     run = session.query(models.CloudBackupRun).one()
     with patch("backend.services.agent_capability_service.request_refresh") as ask:
         results.record_result(
@@ -124,14 +130,14 @@ async def test_enable_goes_to_the_storage_host_only(session, sent):
     ask.assert_called_once()  # the agent now advertises cloud_backup_run
     session.commit()
     assert cloud.enabled(session, s.target.id)
-    again = await api.cloud_enable(session, MANAGER)
+    again = api.cloud_enable(session, MANAGER)
     assert again["enable"]["status"] == "running"
 
 
 @pytest.mark.asyncio
 async def test_a_failed_enable_keeps_the_tools_reason(session, sent):
     s = _setup(session)
-    await api.cloud_enable(session, MANAGER)
+    api.cloud_enable(session, MANAGER)
     run = session.query(models.CloudBackupRun).one()
     results.record_result(
         session, s.nas.id,
@@ -171,12 +177,12 @@ async def test_account_rules(session, sent, vault):
     s = _setup(session)
     _enabled(session, s)
     bad = api.AccountCreate(apple_id="not-an-email", display_name="x", password="p")
-    assert await _status(api.cloud_account_create(bad, session, MANAGER)) == 422
+    assert await _status(lambda: api.cloud_account_create(bad, session, MANAGER)) == 422
     await _account(session)
     dup = api.AccountCreate(
         apple_id="FAMILY@example.com", display_name="y", password="p"
     )
-    assert await _status(api.cloud_account_create(dup, session, MANAGER)) == 409
+    assert await _status(lambda: api.cloud_account_create(dup, session, MANAGER)) == 409
 
 
 @pytest.mark.asyncio
@@ -186,7 +192,7 @@ async def test_a_new_password_replaces_the_old_in_openbao(session, sent, vault):
     account = await _account(session)
     old = account.password_ref
     body = api.AccountUpdate(display_name="Family", password="new-one")
-    await api.cloud_account_update(str(account.id), body, session, MANAGER)
+    api.cloud_account_update(str(account.id), body, session, MANAGER)
     assert account.password_ref != old and old in vault.deleted
     assert vault.store[account.password_ref] == "new-one"
 
@@ -199,7 +205,7 @@ async def test_deleting_removes_the_sign_in_and_password_keeps_photos(
     _enabled(session, s)
     account = await _account(session)
     reference, dir_name = account.password_ref, account.dir_name
-    answer = await api.cloud_account_delete(str(account.id), session, MANAGER)
+    answer = api.cloud_account_delete(str(account.id), session, MANAGER)
     assert answer == {"deleted": True, "photos_kept": True}
     assert sent[-1][:2] == (str(s.nas.id), "cloud_backup_remove")
     assert sent[-1][2]["dir_name"] == dir_name
@@ -217,7 +223,7 @@ async def test_connect_releases_the_password_once_and_relays_the_code(
     s = _setup(session)
     _enabled(session, s)
     account = await _account(session)
-    run = await api.cloud_account_connect(str(account.id), session, MANAGER)
+    run = api.cloud_account_connect(str(account.id), session, MANAGER)
     command = sent[-1]
     assert command[:2] == (str(s.nas.id), "cloud_backup_run")
     assert command[2]["action"] == "connect"
@@ -235,11 +241,12 @@ async def test_connect_releases_the_password_once_and_relays_the_code(
     assert row.status == "waiting_code"
     assert views.account_dict(session, account)["status"] == "waiting_code"
     bad = api.CodeBody(code="12345x")
-    assert await _status(api.cloud_run_code(run["id"], bad, session, MANAGER)) == 422
+    assert (
+        await _status(lambda: api.cloud_run_code(run["id"], bad, session, MANAGER))
+        == 422
+    )
     with patch.object(api.AuditService, "log") as audit:
-        await api.cloud_run_code(
-            run["id"], api.CodeBody(code="123 456"), session, MANAGER
-        )
+        api.cloud_run_code(run["id"], api.CodeBody(code="123 456"), session, MANAGER)
     assert "123456" not in json.dumps(audit.call_args.kwargs, default=str)
     assert secrets.release_code(session, s.nas.id, run["id"]) == "123456"
     assert row.mfa_code is None and row.status == "running"  # cleared once handed over
@@ -271,13 +278,13 @@ async def test_the_secret_endpoint_answers_no_store_and_audits(session, sent, va
     s = _setup(session)
     _enabled(session, s)
     account = await _account(session)
-    run = await api.cloud_account_connect(str(account.id), session, MANAGER)
+    run = api.cloud_account_connect(str(account.id), session, MANAGER)
     body = agent_api.RunRequest(host_id=str(s.nas.id), run_id=run["id"])
     with patch.object(agent_api, "_authenticated_host_id", return_value=str(s.nas.id)), \
             patch.object(agent_api, "_verify_host"), \
             patch.object(agent_api, "_host_session", return_value=session), \
             patch.object(agent_api.AuditService, "log") as audit:  # fmt: skip
-        answer = await agent_api.agent_cloud_backup_secret(
+        answer = agent_api.agent_cloud_backup_secret(
             None, body, "Bearer t", "h", session
         )
     assert json.loads(answer.body) == {"password": PASSWORD}
@@ -456,7 +463,7 @@ async def test_an_air_gapped_server_hides_it(session, sent, monkeypatch):
         "available": False,
         "reason": "airgapped",
     }
-    assert await _status(api.cloud_enable(session, MANAGER)) == 404
+    assert await _status(lambda: api.cloud_enable(session, MANAGER)) == 404
     assert views.summary(session)["enabled"] is False
     assert tick.reconcile(session, s.target, cloud.now()) == 0
 

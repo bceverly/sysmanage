@@ -115,7 +115,7 @@ def _resolve_user(session, current_user: str) -> models.User:
     dependencies=[Depends(JWTBearer()), Depends(forbid_api_key_auth)],
     summary="Create an API key",
 )
-async def create_api_key(
+def create_api_key(
     payload: ApiKeyCreate,
     current_user: str = Depends(get_current_user),
     tenant_id: Optional[str] = Depends(get_current_tenant),
@@ -150,7 +150,7 @@ async def create_api_key(
     dependencies=[Depends(JWTBearer())],
     summary="List your API keys",
 )
-async def list_api_keys(current_user: str = Depends(get_current_user)):
+def list_api_keys(current_user: str = Depends(get_current_user)):
     """List the authenticated user's API keys (secrets are never returned)."""
     with _session() as session:
         user = _resolve_user(session, current_user)
@@ -169,7 +169,7 @@ async def list_api_keys(current_user: str = Depends(get_current_user)):
     dependencies=[Depends(JWTBearer())],
     summary="Get one of your API keys",
 )
-async def get_api_key(key_id: str, current_user: str = Depends(get_current_user)):
+def get_api_key(key_id: str, current_user: str = Depends(get_current_user)):
     """Fetch a single API key owned by the authenticated user."""
     with _session() as session:
         user = _resolve_user(session, current_user)
@@ -194,7 +194,7 @@ async def get_api_key(key_id: str, current_user: str = Depends(get_current_user)
     dependencies=[Depends(JWTBearer()), Depends(forbid_api_key_auth)],
     summary="Revoke an API key",
 )
-async def revoke_api_key(key_id: str, current_user: str = Depends(get_current_user)):
+def revoke_api_key(key_id: str, current_user: str = Depends(get_current_user)):
     """Revoke (deactivate) an API key owned by the authenticated user.
 
     Idempotent in effect: the key is marked inactive and stamped with a

@@ -40,7 +40,7 @@ def _check_secrets_module():
 
 
 @router.post("/deploy-ssh-keys", dependencies=[Depends(JWTBearer())])
-async def deploy_ssh_keys(
+def deploy_ssh_keys(
     deploy_request: SSHKeyDeployRequest,
     db=Depends(get_db),
     current_user: dict = Depends(get_current_user),
@@ -59,7 +59,7 @@ async def deploy_ssh_keys(
 
 
 @router.post("/deploy-certificates", dependencies=[Depends(JWTBearer())])
-async def deploy_certificates(
+def deploy_certificates(
     deploy_request: CertificateDeployRequest,
     db=Depends(get_db),
     current_user: dict = Depends(get_current_user),

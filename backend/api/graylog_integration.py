@@ -73,7 +73,7 @@ class GraylogHealthStatus(BaseModel):
 
 
 @router.get("/graylog-servers", dependencies=[Depends(JWTBearer())])
-async def get_graylog_servers():
+def get_graylog_servers():
     """
     Get list of hosts that have the Graylog server role.
 
@@ -118,7 +118,7 @@ async def get_graylog_servers():
 
 
 @router.get("/settings", dependencies=[Depends(JWTBearer())])
-async def get_graylog_integration_settings():  # NOSONAR
+def get_graylog_integration_settings():  # NOSONAR
     """
     Get current Graylog integration settings.
     """
@@ -148,7 +148,7 @@ async def get_graylog_integration_settings():  # NOSONAR
 
 
 @router.post("/settings", dependencies=[Depends(JWTBearer())])
-async def update_graylog_integration_settings(  # NOSONAR
+def update_graylog_integration_settings(  # NOSONAR
     request: GraylogIntegrationRequest,
     req: Request,
     current_user=Depends(get_current_user),

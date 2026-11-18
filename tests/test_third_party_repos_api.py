@@ -282,7 +282,7 @@ EMPTY_REQUESTS = {
 async def _call(route, request, db, user):
     env = _Env()
     with env:
-        out = await getattr(tpr, route)(HOST_ID, request, db=db, current_user=user)
+        out = getattr(tpr, route)(HOST_ID, request, db=db, current_user=user)
     return out, env
 
 
@@ -307,7 +307,7 @@ class TestMutatingRoutes:
         _, env = None, _Env()
         with env:
             with pytest.raises(HTTPException) as exc:
-                await getattr(tpr, route)(
+                getattr(tpr, route)(
                     HOST_ID, build(), db=_FakeSession(), current_user=_user(other)
                 )
         assert exc.value.status_code == 403
@@ -321,7 +321,7 @@ class TestMutatingRoutes:
         env = _Env()
         with env:
             with pytest.raises(HTTPException) as exc:
-                await getattr(tpr, route)(
+                getattr(tpr, route)(
                     HOST_ID, build(), db=_FakeSession(), current_user=_user(role)
                 )
         assert exc.value.status_code == 404
@@ -334,9 +334,7 @@ class TestMutatingRoutes:
         env = _Env()
         with env:
             with pytest.raises(HTTPException) as exc:
-                await getattr(tpr, route)(
-                    HOST_ID, build(), db=db, current_user=_user(role)
-                )
+                getattr(tpr, route)(HOST_ID, build(), db=db, current_user=_user(role))
         assert exc.value.status_code == 403
         assert env.queued == []
 
@@ -349,7 +347,7 @@ class TestMutatingRoutes:
         env = _Env()
         with env:
             with pytest.raises(HTTPException) as exc:
-                await getattr(tpr, route)(
+                getattr(tpr, route)(
                     HOST_ID, EMPTY_REQUESTS[route](), db=db, current_user=_user(role)
                 )
         assert exc.value.status_code == 400
@@ -367,7 +365,7 @@ class TestMutatingRoutes:
                 side_effect=RuntimeError("queue down"),
             ):
                 with pytest.raises(HTTPException) as exc:
-                    await getattr(tpr, route)(
+                    getattr(tpr, route)(
                         HOST_ID, build(), db=db, current_user=_user(role)
                     )
         assert exc.value.status_code == 500

@@ -73,7 +73,7 @@ class DataGridColumnPreferenceResponse(BaseModel):
     "/column-preferences/{grid_identifier}",
     response_model=Optional[DataGridColumnPreferenceResponse],
 )
-async def get_column_preferences(
+def get_column_preferences(
     grid_identifier: str,
     db: Session = Depends(get_db),
     dependencies=Depends(JWTBearer()),
@@ -119,7 +119,7 @@ async def get_column_preferences(
 
 
 @router.put("/column-preferences", response_model=DataGridColumnPreferenceResponse)
-async def update_column_preferences(
+def update_column_preferences(
     preference_request: DataGridColumnPreferenceRequest,
     db: Session = Depends(get_db),
     dependencies=Depends(JWTBearer()),
@@ -204,7 +204,7 @@ async def update_column_preferences(
 
 
 @router.delete("/column-preferences/{grid_identifier}")
-async def delete_column_preferences(
+def delete_column_preferences(
     grid_identifier: str,
     db: Session = Depends(get_db),
     dependencies=Depends(JWTBearer()),
@@ -285,7 +285,7 @@ class DashboardCardPreferencesResponse(BaseModel):
     "/dashboard-cards",
     response_model=DashboardCardPreferencesResponse,
 )
-async def get_dashboard_card_preferences(
+def get_dashboard_card_preferences(
     db: Session = Depends(get_db),
     dependencies=Depends(JWTBearer()),
     current_user=Depends(get_current_user),
@@ -325,7 +325,7 @@ async def get_dashboard_card_preferences(
 
 
 @router.put("/dashboard-cards", response_model=DashboardCardPreferencesResponse)
-async def update_dashboard_card_preferences(
+def update_dashboard_card_preferences(
     preference_request: DashboardCardPreferencesRequest,
     db: Session = Depends(get_db),
     dependencies=Depends(JWTBearer()),

@@ -160,7 +160,7 @@ class TestDeleteUser:
         mock_session = MockSession([mock_user])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
-        result = await delete_user(1)
+        result = delete_user(1)
 
         assert result == {"result": True}
         assert mock_session.committed
@@ -174,7 +174,7 @@ class TestDeleteUser:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await delete_user(999)
+            delete_user(999)
 
         assert exc_info.value.status_code == 404
 
@@ -188,7 +188,7 @@ class TestDeleteUser:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await delete_user(1)
+            delete_user(1)
 
         assert exc_info.value.status_code == 404
 
@@ -207,7 +207,7 @@ class TestGetLoggedInUser:
         mock_decode_jwt.return_value = {"user_id": "admin@example.com"}
 
         request = MockRequest({"Authorization": "Bearer token123"})
-        result = await get_logged_in_user(request)
+        result = get_logged_in_user(request)
 
         assert result.userid == "admin@example.com"
         assert result.id == 0
@@ -231,7 +231,7 @@ class TestGetLoggedInUser:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         request = MockRequest({"Authorization": "Bearer token123"})
-        result = await get_logged_in_user(request)
+        result = get_logged_in_user(request)
 
         assert result.userid == "test@example.com"
         assert result.id == 1
@@ -255,7 +255,7 @@ class TestGetLoggedInUser:
         request = MockRequest({"Authorization": "Bearer token123"})
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_logged_in_user(request)
+            get_logged_in_user(request)
 
         assert exc_info.value.status_code == 404
 
@@ -277,7 +277,7 @@ class TestGetLoggedInUser:
         request = MockRequest({})
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_logged_in_user(request)
+            get_logged_in_user(request)
 
         assert exc_info.value.status_code == 404
 
@@ -299,7 +299,7 @@ class TestGetLoggedInUser:
         request = MockRequest({"Authorization": "InvalidToken"})
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_logged_in_user(request)
+            get_logged_in_user(request)
 
         assert exc_info.value.status_code == 404
 
@@ -322,7 +322,7 @@ class TestGetLoggedInUser:
         request = MockRequest({"Authorization": "Bearer invalidtoken"})
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_logged_in_user(request)
+            get_logged_in_user(request)
 
         assert exc_info.value.status_code == 404
 
@@ -345,7 +345,7 @@ class TestGetLoggedInUser:
         request = MockRequest({"Authorization": "Bearer token123"})
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_logged_in_user(request)
+            get_logged_in_user(request)
 
         assert exc_info.value.status_code == 404
 
@@ -362,7 +362,7 @@ class TestGetUser:
         mock_session = MockSession([mock_user])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
-        result = await get_user(1)
+        result = get_user(1)
 
         assert result.id == 1
         assert result.userid == "test@example.com"
@@ -376,7 +376,7 @@ class TestGetUser:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_user(999)
+            get_user(999)
 
         assert exc_info.value.status_code == 404
 
@@ -393,7 +393,7 @@ class TestGetUserByUserid:
         mock_session = MockSession([mock_user])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
-        result = await get_user_by_userid("test@example.com")
+        result = get_user_by_userid("test@example.com")
 
         assert result.userid == "test@example.com"
 
@@ -406,7 +406,7 @@ class TestGetUserByUserid:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_user_by_userid("nonexistent@example.com")
+            get_user_by_userid("nonexistent@example.com")
 
         assert exc_info.value.status_code == 404
 
@@ -469,7 +469,7 @@ class TestAddUser:
         )
         request = MockRequest()
 
-        result = await add_user(user_data, request)
+        result = add_user(user_data, request)
 
         assert result.userid == "new@example.com"
         assert mock_session.committed
@@ -501,7 +501,7 @@ class TestAddUser:
         )
         request = MockRequest()
 
-        result = await add_user(user_data, request)
+        result = add_user(user_data, request)
 
         assert result.userid == "new@example.com"
         assert mock_session.committed
@@ -523,7 +523,7 @@ class TestAddUser:
         request = MockRequest()
 
         with pytest.raises(HTTPException) as exc_info:
-            await add_user(user_data, request)
+            add_user(user_data, request)
 
         assert exc_info.value.status_code == 409
 
@@ -550,7 +550,7 @@ class TestUpdateUser:
             last_name="User",
         )
 
-        result = await update_user(1, user_data)
+        result = update_user(1, user_data)
 
         assert result.userid == "updated@example.com"
         assert result.active is False
@@ -569,7 +569,7 @@ class TestUpdateUser:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await update_user(999, user_data)
+            update_user(999, user_data)
 
         assert exc_info.value.status_code == 404
 
@@ -589,7 +589,7 @@ class TestUnlockUser:
         mock_session = MockSession([mock_user])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
-        result = await unlock_user(1)
+        result = unlock_user(1)
 
         assert result.id == 1
         mock_login_security.unlock_user_account.assert_called_once()
@@ -603,7 +603,7 @@ class TestUnlockUser:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await unlock_user(999)
+            unlock_user(999)
 
         assert exc_info.value.status_code == 404
 
@@ -693,7 +693,7 @@ class TestGetUserProfileImage:
         mock_session = MockSession([mock_user], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
-        result = await get_user_profile_image(1)
+        result = get_user_profile_image(1)
 
         assert result.body == b"image_data"
         assert result.media_type == "image/jpeg"
@@ -710,7 +710,7 @@ class TestGetUserProfileImage:
         mock_session = MockSession([mock_user], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
-        result = await get_user_profile_image(1)
+        result = get_user_profile_image(1)
 
         assert result.body == b"image_data"
         assert result.media_type == "image/png"
@@ -726,7 +726,7 @@ class TestGetUserProfileImage:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_user_profile_image(999)
+            get_user_profile_image(999)
 
         assert exc_info.value.status_code == 404
 
@@ -741,7 +741,7 @@ class TestGetUserProfileImage:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_user_profile_image(1)
+            get_user_profile_image(1)
 
         assert exc_info.value.status_code == 404
 
@@ -761,7 +761,7 @@ class TestDeleteUserProfileImage:
         mock_session = MockSession([mock_user], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
-        result = await delete_user_profile_image(1)
+        result = delete_user_profile_image(1)
 
         assert "Profile image deleted successfully" in result["message"]
         assert mock_session.committed
@@ -777,7 +777,7 @@ class TestDeleteUserProfileImage:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await delete_user_profile_image(999)
+            delete_user_profile_image(999)
 
         assert exc_info.value.status_code == 404
 
@@ -792,7 +792,7 @@ class TestDeleteUserProfileImage:
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
-            await delete_user_profile_image(1)
+            delete_user_profile_image(1)
 
         assert exc_info.value.status_code == 404
 

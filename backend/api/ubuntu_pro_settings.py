@@ -93,7 +93,7 @@ class UbuntuProSettingsUpdate(BaseModel):
 
 
 @router.get("/", response_model=UbuntuProSettingsResponse)
-async def get_ubuntu_pro_settings(
+def get_ubuntu_pro_settings(
     db: Session = Depends(get_tenant_db), dependencies=Depends(JWTBearer())
 ):
     """Get current Ubuntu Pro settings."""
@@ -127,7 +127,7 @@ async def get_ubuntu_pro_settings(
 
 
 @router.put("/", response_model=UbuntuProSettingsResponse)
-async def update_ubuntu_pro_settings(
+def update_ubuntu_pro_settings(
     settings_update: UbuntuProSettingsUpdate,
     db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
@@ -216,7 +216,7 @@ async def update_ubuntu_pro_settings(
 
 
 @router.delete("/master-key")
-async def clear_master_key(
+def clear_master_key(
     db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
     current_user=Depends(require_authenticated_user),
@@ -264,7 +264,7 @@ async def clear_master_key(
 
 
 @router.get("/master-key/status")
-async def get_master_key_status(
+def get_master_key_status(
     db: Session = Depends(get_tenant_db), dependencies=Depends(JWTBearer())
 ):
     """Get the status of the master key (exists or not) without exposing the key."""
@@ -321,7 +321,7 @@ class UbuntuProEnrollmentRequest(BaseModel):
 
 
 @router.post("/enroll")
-async def enroll_hosts_in_ubuntu_pro(
+def enroll_hosts_in_ubuntu_pro(
     request: UbuntuProEnrollmentRequest,
     db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),

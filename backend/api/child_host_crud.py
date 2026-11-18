@@ -78,7 +78,7 @@ def _check_container_module():
     dependencies=[Depends(JWTBearer())],
     response_model=List[ChildHostResponse],
 )
-async def list_child_hosts(
+def list_child_hosts(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -147,7 +147,7 @@ async def list_child_hosts(
     "/host/{host_id}/children",
     dependencies=[Depends(JWTBearer())],
 )
-async def create_child_host(
+def create_child_host(
     host_id: str,
     request: CreateChildHostRequest,
     current_user: str = Depends(get_current_user),
@@ -166,7 +166,7 @@ async def create_child_host(
     dependencies=[Depends(JWTBearer())],
     response_model=ChildHostResponse,
 )
-async def get_child_host(
+def get_child_host(
     host_id: str,
     child_id: str,
     current_user: str = Depends(get_current_user),
@@ -344,7 +344,7 @@ def _try_plan_based_deletion(child, host_id):
     "/host/{host_id}/children/{child_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def delete_child_host(
+def delete_child_host(
     host_id: str,
     child_id: str,
     current_user: str = Depends(get_current_user),
@@ -437,7 +437,7 @@ async def delete_child_host(
     "/host/{host_id}/children/refresh",
     dependencies=[Depends(JWTBearer())],
 )
-async def refresh_child_hosts(
+def refresh_child_hosts(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -495,7 +495,7 @@ async def refresh_child_hosts(
     dependencies=[Depends(JWTBearer())],
     response_model=List[DistributionResponse],
 )
-async def list_distributions(
+def list_distributions(
     child_type: Optional[str] = None,
     current_user: str = Depends(get_current_user),
 ):
@@ -539,7 +539,7 @@ async def list_distributions(
     dependencies=[Depends(JWTBearer())],
     response_model=List[DistributionDetailResponse],
 )
-async def list_all_distributions(
+def list_all_distributions(
     child_type: Optional[str] = None,
     current_user: str = Depends(get_current_user),
 ):
@@ -593,7 +593,7 @@ async def list_all_distributions(
     dependencies=[Depends(JWTBearer())],
     response_model=DistributionDetailResponse,
 )
-async def get_distribution(
+def get_distribution(
     distribution_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -642,7 +642,7 @@ async def get_distribution(
     dependencies=[Depends(JWTBearer())],
     response_model=DistributionDetailResponse,
 )
-async def create_distribution(
+def create_distribution(
     request: CreateDistributionRequest,
     current_user: str = Depends(get_current_user),
 ):
@@ -734,7 +734,7 @@ async def create_distribution(
     dependencies=[Depends(JWTBearer())],
     response_model=DistributionDetailResponse,
 )
-async def update_distribution(
+def update_distribution(
     distribution_id: str,
     request: UpdateDistributionRequest,
     current_user: str = Depends(get_current_user),
@@ -796,7 +796,7 @@ async def update_distribution(
     "/child-host-distributions/{distribution_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def delete_distribution(
+def delete_distribution(
     distribution_id: str,
     current_user: str = Depends(get_current_user),
 ):

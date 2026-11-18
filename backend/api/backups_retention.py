@@ -146,7 +146,7 @@ def apply_gfs(policy: models.BackupPolicy, values: Dict[str, int]) -> None:
 
 
 @router.get("/host/{host_id}/backup-retention-preview")
-async def retention_preview(
+def retention_preview(
     host_id: str,
     keep_last: int,
     keep_daily: int = 0,

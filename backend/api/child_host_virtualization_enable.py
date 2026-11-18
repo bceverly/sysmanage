@@ -125,7 +125,7 @@ def _try_init_plan_dispatch(action: str, host_id: str) -> bool:
     "/host/{host_id}/virtualization/enable-wsl",
     dependencies=[Depends(JWTBearer())],
 )
-async def enable_wsl(
+def enable_wsl(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -187,7 +187,7 @@ async def enable_wsl(
     "/host/{host_id}/virtualization/initialize-lxd",
     dependencies=[Depends(JWTBearer())],
 )
-async def initialize_lxd(
+def initialize_lxd(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -250,7 +250,7 @@ async def initialize_lxd(
     "/host/{host_id}/virtualization/initialize-vmm",
     dependencies=[Depends(JWTBearer())],
 )
-async def initialize_vmm(
+def initialize_vmm(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -313,7 +313,7 @@ async def initialize_vmm(
     "/host/{host_id}/virtualization/initialize-kvm",
     dependencies=[Depends(JWTBearer())],
 )
-async def initialize_kvm(
+def initialize_kvm(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -377,7 +377,7 @@ async def initialize_kvm(
     "/host/{host_id}/virtualization/initialize-bhyve",
     dependencies=[Depends(JWTBearer())],
 )
-async def initialize_bhyve(
+def initialize_bhyve(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -440,7 +440,7 @@ async def initialize_bhyve(
     "/host/{host_id}/virtualization/disable-bhyve",
     dependencies=[Depends(JWTBearer())],
 )
-async def disable_bhyve(
+def disable_bhyve(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -502,7 +502,7 @@ async def disable_bhyve(
     "/host/{host_id}/virtualization/enable-kvm-modules",
     dependencies=[Depends(JWTBearer())],
 )
-async def enable_kvm_modules(
+def enable_kvm_modules(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -565,7 +565,7 @@ async def enable_kvm_modules(
     "/host/{host_id}/virtualization/disable-kvm-modules",
     dependencies=[Depends(JWTBearer())],
 )
-async def disable_kvm_modules(
+def disable_kvm_modules(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -670,7 +670,7 @@ def _try_kvm_network_plan_path(host_id, request) -> bool:
     "/host/{host_id}/virtualization/configure-kvm-networking",
     dependencies=[Depends(JWTBearer())],
 )
-async def configure_kvm_networking(
+def configure_kvm_networking(
     host_id: str,
     request: ConfigureKvmNetworkingRequest,
     current_user: str = Depends(get_current_user),
@@ -752,7 +752,7 @@ async def configure_kvm_networking(
     "/host/{host_id}/virtualization/kvm-networks",
     dependencies=[Depends(JWTBearer())],
 )
-async def list_kvm_networks(
+def list_kvm_networks(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):

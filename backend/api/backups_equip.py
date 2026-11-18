@@ -34,7 +34,7 @@ router = APIRouter(dependencies=[Depends(JWTBearer())])
 
 
 @router.post("/host/{host_id}/backup-recheck")
-async def backup_recheck(
+def backup_recheck(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -74,7 +74,7 @@ def _refusal(code: str) -> HTTPException:
 
 
 @router.post("/host/{host_id}/backup-equip")
-async def backup_equip(
+def backup_equip(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -106,7 +106,7 @@ class BulkEquipBody(BaseModel):
 
 
 @router.post("/backups/equip")
-async def bulk_backup_equip(
+def bulk_backup_equip(
     body: BulkEquipBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -140,7 +140,7 @@ async def bulk_backup_equip(
 
 
 @router.post("/host/{host_id}/backup-reach")
-async def backup_reach_check(
+def backup_reach_check(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

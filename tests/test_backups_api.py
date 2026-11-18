@@ -6,6 +6,7 @@
 back up now, and restores that only ever stage -- with an explicit
 acknowledgment for an unsigned snapshot."""
 
+import inspect
 import json
 import uuid
 from datetime import datetime, timedelta
@@ -54,19 +55,29 @@ def _target_body(**extra):
     return api.TargetBody(name="nas", host_mount_point="/mnt/backups", **extra)
 
 
-async def _status(coro):
+async def _status(call):
+    """The status code ``call()`` is refused with.  Takes a callable, not
+    the call's result: a plain-def handler raises the moment it is called,
+    before ``pytest.raises`` could catch it (async handlers still work)."""
     with pytest.raises(HTTPException) as caught:
-        await coro
+        result = call()
+        if inspect.isawaitable(result):
+            await result
     return caught.value.status_code
 
 
 @pytest.mark.asyncio
 async def test_targets_need_the_role_and_community_has_one(session):
-    assert await _status(api.create_target(_target_body(), session, NOBODY)) == 403
-    made = await api.create_target(_target_body(), session, MANAGER)
+    assert (
+        await _status(lambda: api.create_target(_target_body(), session, NOBODY)) == 403
+    )
+    made = api.create_target(_target_body(), session, MANAGER)
     assert made["warnings"] == ["no_storage_host", "not_sealed"]
     assert made["problem"] is True
-    assert await _status(api.create_target(_target_body(), session, MANAGER)) == 409
+    assert (
+        await _status(lambda: api.create_target(_target_body(), session, MANAGER))
+        == 409
+    )
     audit = session.query(models.AuditLog).all()
     assert any("Backup target created" in a.description for a in audit)
 
@@ -98,7 +109,7 @@ def _bad_btrfs_bodies(nas_id):
 @pytest.mark.asyncio
 async def test_a_btrfs_target_is_accepted_and_sends_its_seal(session):
     nas = _host(session, fqdn="nas.lab")
-    made = await api.create_target(_btrfs(str(nas.id)), session, MANAGER)
+    made = api.create_target(_btrfs(str(nas.id)), session, MANAGER)
     assert made["seal_mode"] == "btrfs_snapshot"
     assert made["btrfs_snapshot_dir"] == "/srv/backups/.snapshots"
     target = session.query(models.BackupTarget).one()
@@ -129,10 +140,10 @@ async def test_moving_the_storage_path_forgets_the_filesystem(session):
     same = _target_body(
         storage_host_id=str(s.nas.id), storage_path="/srv/backups/restate"
     )
-    await api.update_target(str(s.target.id), same, session, MANAGER)
+    api.update_target(str(s.target.id), same, session, MANAGER)
     assert s.target.storage_fs_type == "ext4"
     moved = _target_body(storage_host_id=str(s.nas.id), storage_path="/srv/new")
-    await api.update_target(str(s.target.id), moved, session, MANAGER)
+    api.update_target(str(s.target.id), moved, session, MANAGER)
     assert s.target.storage_fs_type is None and s.target.storage_fs_checked_at is None
 
 
@@ -148,8 +159,8 @@ async def test_target_validation(session):
         _target_body(storage_host_id=str(nas.id)),  # no storage path
         *_bad_btrfs_bodies(str(nas.id)),
     ):
-        assert await _status(api.create_target(body, session, MANAGER)) == 422
-    sealed = await api.create_target(
+        assert await _status(lambda: api.create_target(body, session, MANAGER)) == 422
+    sealed = api.create_target(
         _target_body(
             storage_host_id=str(nas.id), storage_path="/srv/b",
             seal_mode="zfs_snapshot", zfs_dataset="tank/b",
@@ -164,20 +175,26 @@ async def test_target_validation(session):
 async def test_changing_the_target_resends_every_hosts_job_files(session):
     s = _setup(session)
     body = _target_body(storage_host_id=str(s.nas.id), storage_path="/srv/new")
-    await api.update_target(str(s.target.id), body, session, MANAGER)
+    api.update_target(str(s.target.id), body, session, MANAGER)
     assert s.policy.config_version == 2
-    assert await _status(api.delete_target(str(s.target.id), session, MANAGER)) == 409
+    assert (
+        await _status(lambda: api.delete_target(str(s.target.id), session, MANAGER))
+        == 409
+    )
 
 
 @pytest.mark.asyncio
 async def test_a_policy_needs_a_target_and_bumps_its_version(session):
     host = _host(session)
     body = api.PolicyBody(interval_hours=12, quiesce_with=["postgres"])
-    assert await _status(api.put_policy(str(host.id), body, session, MANAGER)) == 409
-    await api.create_target(_target_body(), session, MANAGER)
-    made = await api.put_policy(str(host.id), body, session, MANAGER)
+    assert (
+        await _status(lambda: api.put_policy(str(host.id), body, session, MANAGER))
+        == 409
+    )
+    api.create_target(_target_body(), session, MANAGER)
+    made = api.put_policy(str(host.id), body, session, MANAGER)
     assert (made["config_version"], made["configured"]) == (1, False)
-    again = await api.put_policy(str(host.id), body, session, MANAGER)
+    again = api.put_policy(str(host.id), body, session, MANAGER)
     assert again["config_version"] == 2 and again["quiesce_with"] == ["postgres"]
     for bad in (
         api.PolicyBody(interval_hours=0),
@@ -186,8 +203,14 @@ async def test_a_policy_needs_a_target_and_bumps_its_version(session):
         api.PolicyBody(check_interval_days=91),
         api.PolicyBody(quiesce_with=["Bad Name"]),
     ):
-        assert await _status(api.put_policy(str(host.id), bad, session, MANAGER)) == 422
-    assert await _status(api.put_policy(str(host.id), body, session, NOBODY)) == 403
+        assert (
+            await _status(lambda: api.put_policy(str(host.id), bad, session, MANAGER))
+            == 422
+        )
+    assert (
+        await _status(lambda: api.put_policy(str(host.id), body, session, NOBODY))
+        == 403
+    )
 
 
 def test_a_mac_mounts_its_storage_under_volumes(session, sent):
@@ -208,14 +231,14 @@ async def test_path_rules_reach_the_hosts_capture_and_estimate(session, sent):
     body = api.PolicyBody(
         keep_paths=["/home/*/Downloads"], skip_paths=["**/previews", "/var/tmp"]
     )
-    saved = await api.put_policy(str(s.host.id), body, session, MANAGER)
+    saved = api.put_policy(str(s.host.id), body, session, MANAGER)
     assert saved["keep_paths"] == ["/home/*/Downloads"]
     assert saved["skip_paths"] == ["**/previews", "/var/tmp"]
     config = jobs.host_configuration(s.policy, s.target, s.host)
     for action in ("capture", "estimate"):
         assert config["jobs"][action]["keep_paths"] == ["/home/*/Downloads"]
         assert config["jobs"][action]["skip_paths"] == ["**/previews", "/var/tmp"]
-    cleared = await api.put_policy(str(s.host.id), api.PolicyBody(), session, MANAGER)
+    cleared = api.put_policy(str(s.host.id), api.PolicyBody(), session, MANAGER)
     assert cleared["keep_paths"] == [] and cleared["skip_paths"] == []
     config = jobs.host_configuration(s.policy, s.target, s.host)
     assert "skip_paths" not in config["jobs"]["capture"]
@@ -231,7 +254,10 @@ async def test_path_rules_reach_the_hosts_capture_and_estimate(session, sent):
 async def test_a_path_rule_that_could_break_the_rules_file_is_refused(session, pattern):
     s = _setup(session)
     body = api.PolicyBody(skip_paths=[pattern])
-    assert await _status(api.put_policy(str(s.host.id), body, session, MANAGER)) == 422
+    assert (
+        await _status(lambda: api.put_policy(str(s.host.id), body, session, MANAGER))
+        == 422
+    )
 
 
 @pytest.mark.asyncio
@@ -240,7 +266,7 @@ async def test_saving_a_policy_sends_its_job_files_at_once(session, sent):
     # now" needs the job files (24.0 lab, 2026-10-20).
     s = _setup(session)
     body = api.PolicyBody(enabled=False)
-    await api.put_policy(str(s.host.id), body, session, MANAGER)
+    api.put_policy(str(s.host.id), body, session, MANAGER)
     configured = sorted((h, p["role"]) for h, c, p in sent if c == "backup_configure")
     assert configured == sorted([(str(s.host.id), "host"), (str(s.nas.id), "storage")])
     assert not [c for _h, c, p in sent if c == "backup_run"]
@@ -249,18 +275,24 @@ async def test_saving_a_policy_sends_its_job_files_at_once(session, sent):
 @pytest.mark.asyncio
 async def test_backup_now(session, sent):
     s = _setup(session)
-    run = await api.backup_now(str(s.host.id), None, session, MANAGER)
+    run = api.backup_now(str(s.host.id), None, session, MANAGER)
     assert run["action"] == "capture" and sent[0][0] == str(s.host.id)
-    assert await _status(api.backup_now(str(s.host.id), None, session, MANAGER)) == 409
-    check = await api.backup_now(
+    assert (
+        await _status(lambda: api.backup_now(str(s.host.id), None, session, MANAGER))
+        == 409
+    )
+    check = api.backup_now(
         str(s.host.id), api.RunBody(action="check"), session, MANAGER
     )
     assert check["host_id"] == str(s.nas.id)
-    assert await _status(
+    assert await _status(lambda:
         api.backup_now(str(s.host.id), api.RunBody(action="prune"), session, MANAGER)
     ) == 422  # fmt: skip
     s.host.agent_capabilities = None
-    assert await _status(api.backup_now(str(s.host.id), None, session, MANAGER)) == 409
+    assert (
+        await _status(lambda: api.backup_now(str(s.host.id), None, session, MANAGER))
+        == 409
+    )
 
 
 @pytest.mark.asyncio
@@ -273,20 +305,25 @@ async def test_restore_stages_and_needs_the_unsigned_acknowledgment(session, sen
     session.commit()
     body = api.RestoreBody(snapshot="2026-10-20T010000Z", include=["/etc/nginx"])
     assert (
-        await _status(api.backup_restore(str(s.host.id), body, session, MANAGER)) == 403
+        await _status(
+            lambda: api.backup_restore(str(s.host.id), body, session, MANAGER)
+        )
+        == 403
     )
     # A preview writes nothing: it needs no acknowledgment (2026-10-30).
-    await api.backup_restore(str(s.host.id), body, session, RESTORER)
+    api.backup_restore(str(s.host.id), body, session, RESTORER)
     assert sent[-1][2]["dry_run"] is True
     real = api.RestoreBody(
         snapshot="2026-10-20T010000Z", include=["/etc/nginx"], dry_run=False
     )
     assert (
-        await _status(api.backup_restore(str(s.host.id), real, session, RESTORER))
+        await _status(
+            lambda: api.backup_restore(str(s.host.id), real, session, RESTORER)
+        )
         == 409
     )
     body.acknowledge_unsigned = True
-    out = await api.backup_restore(str(s.host.id), body, session, RESTORER)
+    out = api.backup_restore(str(s.host.id), body, session, RESTORER)
     _, command, params = sent[-1]
     assert command == "backup_restore"
     assert params["dry_run"] is True and params["allow_unverified"] is True
@@ -301,12 +338,16 @@ async def test_restore_stages_and_needs_the_unsigned_acknowledgment(session, sen
         api.RestoreBody(snapshot="ok", exclude=["etc/x"], acknowledge_unsigned=True),
     ):
         assert (
-            await _status(api.backup_restore(str(s.host.id), bad, session, RESTORER))
+            await _status(
+                lambda: api.backup_restore(str(s.host.id), bad, session, RESTORER)
+            )
             == 422
         )
     missing = api.RestoreBody(snapshot="nope", acknowledge_unsigned=True)
     assert (
-        await _status(api.backup_restore(str(s.host.id), missing, session, RESTORER))
+        await _status(
+            lambda: api.backup_restore(str(s.host.id), missing, session, RESTORER)
+        )
         == 404
     )
 
@@ -324,12 +365,12 @@ async def test_runs_are_paginated_and_overview_counts(session, sent):
     rows = {r["host_id"]: r for r in overview["hosts"]}
     assert rows[str(s.host.id)]["status"] == "never"
     assert rows[str(s.nas.id)]["status"] == "no_policy"
-    summary = await api.backups_summary(session)
+    summary = api.backups_summary(session)
     assert summary["configured"] is True and summary["attention"] == 0
     assert summary["target_problem"] is False
     s.target.storage_host_id = None  # no storage host: one problem
     session.commit()
-    summary = await api.backups_summary(session)
+    summary = api.backups_summary(session)
     assert summary["attention"] == 1 and summary["target_problem"] is True
 
 
@@ -344,7 +385,7 @@ async def test_the_dashboard_flags_incomplete_and_failed_backups(
     as much as an overdue or failed one (Phase 24 exit criterion)."""
     s = _setup(session)
     _capture(session, s, status, 1)
-    summary = await api.backups_summary(session)
+    summary = api.backups_summary(session)
     assert summary["counts"].get(status) == 1
     assert summary["attention"] == flagged
 
@@ -462,7 +503,7 @@ async def test_bulk_backup_now_starts_up_to_the_cap_and_queues_the_rest(session,
     h2, _p2 = _another_policy(session, s, "two.lab")
     h3, p3 = _another_policy(session, s, "three.lab")
     bare = _host(session, fqdn="bare.lab")
-    answer = await api.bulk_backup_now(
+    answer = api.bulk_backup_now(
         api.BulkBackupBody(host_ids=[str(s.host.id), str(h2.id), str(h3.id),
                                      str(bare.id), "not-a-uuid", str(h2.id)]),
         session, MANAGER,
@@ -493,12 +534,12 @@ async def test_bulk_backup_now_skips_a_running_host_and_needs_the_role(session, 
     s = _setup(session)
     jobs.queue_run(session, s.policy, s.host.id, "capture")
     session.commit()
-    answer = await api.bulk_backup_now(
+    answer = api.bulk_backup_now(
         api.BulkBackupBody(host_ids=[str(s.host.id)]), session, MANAGER
     )
     assert answer["requested"] == 0 and answer["skipped"][0]["reason"] == "running"
     body = api.BulkBackupBody(host_ids=[str(s.host.id)])
-    assert await _status(api.bulk_backup_now(body, session, NOBODY)) == 403
+    assert await _status(lambda: api.bulk_backup_now(body, session, NOBODY)) == 403
 
 
 def test_a_request_the_host_can_no_longer_run_is_dropped(session, sent, caplog):
@@ -524,7 +565,7 @@ async def test_clear_hides_finished_runs_but_keeps_pending_and_history(session, 
     _capture(session, s, "failed", 2)
     jobs.queue_run(session, s.policy, s.host.id, "capture")  # still queued
     session.commit()
-    answer = await api.clear_runs(session, MANAGER)
+    answer = api.clear_runs(session, MANAGER)
     assert answer == {"cleared": 2}
     listed = api.list_runs(None, None, 50, 0, session)
     assert [r["status"] for r in listed["runs"]] == ["queued"]
@@ -532,7 +573,7 @@ async def test_clear_hides_finished_runs_but_keeps_pending_and_history(session, 
     assert everything["total"] == 3
     # history still drives the page: the last good capture is still known
     assert views.host_status(session, s.host)["last_good_capture"] is not None
-    assert await _status(api.clear_runs(session, NOBODY)) == 403
+    assert await _status(lambda: api.clear_runs(session, NOBODY)) == 403
 
 
 def test_retention_deletes_old_runs_but_keeps_each_kinds_newest(session):
@@ -576,21 +617,21 @@ async def test_a_restore_into_place_needs_specific_paths_and_a_confirmation(
 
     host = str(s.host.id)
     for include in ([], ["/"], ["/*"], ["**/x"], ["etc/nginx"]):
-        assert await _status(
+        assert await _status(lambda:
             api.backup_restore(host, body(include=include), session, RESTORER)
         ) == 422  # fmt: skip
     # A preview needs no confirmation; the real thing does.
-    preview = await api.backup_restore(host, body(), session, RESTORER)
+    preview = api.backup_restore(host, body(), session, RESTORER)
     assert preview["in_place"] is True and preview["staging_path"] is None
     assert sent[-1][2]["in_place"] is True and sent[-1][2]["dry_run"] is True
-    assert await _status(
+    assert await _status(lambda:
         api.backup_restore(host, body(dry_run=False), session, RESTORER)
     ) == 409  # fmt: skip
-    out = await api.backup_restore(
+    out = api.backup_restore(
         host, body(dry_run=False, acknowledge_in_place=True), session, RESTORER
     )
     assert sent[-1][2]["in_place"] is True and sent[-1][2]["dry_run"] is False
-    fetched = await api.get_run(out["id"], session)
+    fetched = api.get_run(out["id"], session)
     assert fetched["in_place"] is True and fetched["staging_path"] is None
 
 
@@ -604,33 +645,29 @@ async def test_a_restores_staging_path_is_where_restate_put_it(session, sent):
     )  # fmt: skip
     session.add(run)
     session.commit()
-    got = await api.get_run(str(run.id), session)
+    got = api.get_run(str(run.id), session)
     assert got["staging_path"] == "/home/me/dev/sysmanage-agent/restore/r1"
     run.result = json.dumps({})  # an older result: the computed default
     session.commit()
-    got = await api.get_run(str(run.id), session)
+    got = api.get_run(str(run.id), session)
     assert got["staging_path"] == jobs.staging_dir(run.id)
 
 
 @pytest.mark.asyncio
 async def test_repack_now_goes_to_the_storage_host(session, sent):
     s = _setup(session)
-    run = await api.backup_now(
-        str(s.host.id), api.RunBody(action="repack"), session, MANAGER
-    )
+    run = api.backup_now(str(s.host.id), api.RunBody(action="repack"), session, MANAGER)
     assert run["action"] == "repack" and run["host_id"] == str(s.nas.id)
 
 
 @pytest.mark.asyncio
 async def test_the_service_account_is_validated_and_kept(session):
-    good = await api.create_target(
-        _target_body(service_account="backup_1"), session, MANAGER
-    )
+    good = api.create_target(_target_body(service_account="backup_1"), session, MANAGER)
     assert good["service_account"] == "backup_1"
     with pytest.raises(ValueError):  # too long: refused by the request model
         _target_body(service_account="a" * 40)
     for bad in ("Root!", "-mapall", "9lives"):
-        assert await _status(
+        assert await _status(lambda:
             api.update_target(good["id"], _target_body(service_account=bad), session, MANAGER)
         ) == 422  # fmt: skip
 
@@ -638,13 +675,13 @@ async def test_the_service_account_is_validated_and_kept(session):
 @pytest.mark.asyncio
 async def test_prepare_storage_goes_to_the_storage_host(session, sent):
     s = _setup(session)
-    run = await api.backup_now(
+    run = api.backup_now(
         str(s.host.id), api.RunBody(action="prepare"), session, MANAGER
     )
     assert run["action"] == "prepare" and run["host_id"] == str(s.nas.id)
     assert (
         await _status(
-            api.backup_now(
+            lambda: api.backup_now(
                 str(s.host.id), api.RunBody(action="prepare"), session, MANAGER
             )
         )
@@ -654,24 +691,24 @@ async def test_prepare_storage_goes_to_the_storage_host(session, sent):
 
 @pytest.mark.asyncio
 async def test_seal_keep_days_is_validated_and_kept(session):
-    good = await api.create_target(_target_body(seal_keep_days=30), session, MANAGER)
+    good = api.create_target(_target_body(seal_keep_days=30), session, MANAGER)
     assert good["seal_keep_days"] == 30
     for bad in (0, 3651):
-        assert await _status(
+        assert await _status(lambda:
             api.update_target(good["id"], _target_body(seal_keep_days=bad), session, MANAGER)
         ) == 422  # fmt: skip
-    cleared = await api.update_target(good["id"], _target_body(), session, MANAGER)
+    cleared = api.update_target(good["id"], _target_body(), session, MANAGER)
     assert cleared["seal_keep_days"] == 14  # the default
 
 
 @pytest.mark.asyncio
 async def test_space_thresholds_are_validated_and_kept(session):
-    made = await api.create_target(
+    made = api.create_target(
         _target_body(space_low_percent=80, space_critical_percent=90), session, MANAGER
     )
     assert (made["space_low_percent"], made["space_critical_percent"]) == (80, 90)
     for low, critical in ((95, 90), (40, 90), (80, 101)):
-        assert await _status(api.update_target(
+        assert await _status(lambda: api.update_target(
             made["id"], _target_body(space_low_percent=low, space_critical_percent=critical),
             session, MANAGER,
         )) in (400, 422)  # fmt: skip

@@ -46,7 +46,7 @@ def command_package(update) -> dict:
 
 
 @router.post("/execute")
-async def execute_updates(  # NOSONAR
+def execute_updates(  # NOSONAR
     request: UpdateExecutionRequest,
     dependencies=Depends(JWTBearer()),
     current_user: str = Depends(get_current_user),
@@ -254,7 +254,7 @@ async def execute_updates(  # NOSONAR
 
 
 @router.get("/execution-log/{host_id}")
-async def get_execution_log(
+def get_execution_log(
     host_id: UUID,  # typed: a malformed id is a 422, not a 500 (Lucky 13)
     limit: Optional[int] = Query(50, ge=1, le=1000),
     offset: Optional[int] = Query(0, ge=0, le=2**31 - 1),

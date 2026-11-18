@@ -173,7 +173,7 @@ class TestAttachUbuntuPro:
         mock_queue_manager.enqueue_message.return_value = "queue-123"
 
         request = UbuntuProAttachRequest(token="C123456789abcdef")
-        result = await attach_ubuntu_pro(1, request, current_user=MockUser())
+        result = attach_ubuntu_pro(1, request, current_user=MockUser())
 
         # Verify result
         assert result["result"] is True
@@ -199,7 +199,7 @@ class TestAttachUbuntuPro:
         request = UbuntuProAttachRequest(token="   ")
 
         with pytest.raises(HTTPException) as exc_info:
-            await attach_ubuntu_pro(1, request, current_user=MockUser())
+            attach_ubuntu_pro(1, request, current_user=MockUser())
 
         assert exc_info.value.status_code == 400
         assert "Ubuntu Pro token is required" in str(exc_info.value.detail)
@@ -210,7 +210,7 @@ class TestAttachUbuntuPro:
         request = UbuntuProAttachRequest(token="C123456789abcdef")
 
         with pytest.raises(HTTPException) as exc_info:
-            await attach_ubuntu_pro(1, request, current_user=MockUserNoPerm())
+            attach_ubuntu_pro(1, request, current_user=MockUserNoPerm())
 
         assert exc_info.value.status_code == 403
 
@@ -235,7 +235,7 @@ class TestAttachUbuntuPro:
         request = UbuntuProAttachRequest(token="C123456789abcdef")
 
         with pytest.raises(HTTPException) as exc_info:
-            await attach_ubuntu_pro(999, request, current_user=MockUser())
+            attach_ubuntu_pro(999, request, current_user=MockUser())
 
         assert exc_info.value.status_code == 404
 
@@ -266,7 +266,7 @@ class TestAttachUbuntuPro:
         request = UbuntuProAttachRequest(token="C123456789abcdef")
 
         with pytest.raises(HTTPException) as exc_info:
-            await attach_ubuntu_pro(1, request, current_user=MockUser())
+            attach_ubuntu_pro(1, request, current_user=MockUser())
 
         assert exc_info.value.status_code == 500
         assert "Failed to request Ubuntu Pro attach" in str(exc_info.value.detail)
@@ -303,7 +303,7 @@ class TestDetachUbuntuPro:
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.return_value = "queue-456"
 
-        result = await detach_ubuntu_pro(1, current_user=MockUser())
+        result = detach_ubuntu_pro(1, current_user=MockUser())
 
         # Verify result
         assert result["result"] is True
@@ -319,7 +319,7 @@ class TestDetachUbuntuPro:
     async def test_detach_permission_denied(self):
         """Test detach when user lacks the DETACH_UBUNTU_PRO role."""
         with pytest.raises(HTTPException) as exc_info:
-            await detach_ubuntu_pro(1, current_user=MockUserNoPerm())
+            detach_ubuntu_pro(1, current_user=MockUserNoPerm())
 
         assert exc_info.value.status_code == 403
 
@@ -342,7 +342,7 @@ class TestDetachUbuntuPro:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await detach_ubuntu_pro(999, current_user=MockUser())
+            detach_ubuntu_pro(999, current_user=MockUser())
 
         assert exc_info.value.status_code == 404
 
@@ -371,7 +371,7 @@ class TestDetachUbuntuPro:
         mock_queue_manager.enqueue_message.side_effect = Exception("Queue error")
 
         with pytest.raises(HTTPException) as exc_info:
-            await detach_ubuntu_pro(1, current_user=MockUser())
+            detach_ubuntu_pro(1, current_user=MockUser())
 
         assert exc_info.value.status_code == 500
         assert "Failed to request Ubuntu Pro detach" in str(exc_info.value.detail)
@@ -409,7 +409,7 @@ class TestEnableUbuntuProService:
         mock_queue_manager.enqueue_message.return_value = "queue-789"
 
         request = UbuntuProServiceRequest(service="esm-infra")
-        result = await enable_ubuntu_pro_service(1, request)
+        result = enable_ubuntu_pro_service(1, request)
 
         # Verify result
         assert result["result"] is True
@@ -427,7 +427,7 @@ class TestEnableUbuntuProService:
         request = UbuntuProServiceRequest(service="   ")
 
         with pytest.raises(HTTPException) as exc_info:
-            await enable_ubuntu_pro_service(1, request)
+            enable_ubuntu_pro_service(1, request)
 
         assert exc_info.value.status_code == 400
         assert "Service name is required" in str(exc_info.value.detail)
@@ -455,7 +455,7 @@ class TestEnableUbuntuProService:
         request = UbuntuProServiceRequest(service="esm-infra")
 
         with pytest.raises(HTTPException) as exc_info:
-            await enable_ubuntu_pro_service(999, request)
+            enable_ubuntu_pro_service(999, request)
 
         assert exc_info.value.status_code == 404
 
@@ -488,7 +488,7 @@ class TestEnableUbuntuProService:
         request = UbuntuProServiceRequest(service="esm-infra")
 
         with pytest.raises(HTTPException) as exc_info:
-            await enable_ubuntu_pro_service(1, request)
+            enable_ubuntu_pro_service(1, request)
 
         assert exc_info.value.status_code == 500
         assert "Failed to request Ubuntu Pro service enable" in str(
@@ -528,7 +528,7 @@ class TestDisableUbuntuProService:
         mock_queue_manager.enqueue_message.return_value = "queue-012"
 
         request = UbuntuProServiceRequest(service="esm-apps")
-        result = await disable_ubuntu_pro_service(1, request)
+        result = disable_ubuntu_pro_service(1, request)
 
         # Verify result
         assert result["result"] is True
@@ -546,7 +546,7 @@ class TestDisableUbuntuProService:
         request = UbuntuProServiceRequest(service="   ")
 
         with pytest.raises(HTTPException) as exc_info:
-            await disable_ubuntu_pro_service(1, request)
+            disable_ubuntu_pro_service(1, request)
 
         assert exc_info.value.status_code == 400
         assert "Service name is required" in str(exc_info.value.detail)
@@ -574,7 +574,7 @@ class TestDisableUbuntuProService:
         request = UbuntuProServiceRequest(service="esm-apps")
 
         with pytest.raises(HTTPException) as exc_info:
-            await disable_ubuntu_pro_service(999, request)
+            disable_ubuntu_pro_service(999, request)
 
         assert exc_info.value.status_code == 404
 
@@ -607,7 +607,7 @@ class TestDisableUbuntuProService:
         request = UbuntuProServiceRequest(service="esm-apps")
 
         with pytest.raises(HTTPException) as exc_info:
-            await disable_ubuntu_pro_service(1, request)
+            disable_ubuntu_pro_service(1, request)
 
         assert exc_info.value.status_code == 500
         assert "Failed to request Ubuntu Pro service disable" in str(
@@ -661,26 +661,24 @@ class TestUbuntuProIntegration:
 
         # Test attach
         attach_request = UbuntuProAttachRequest(token="C123456789abcdef")
-        attach_result = await attach_ubuntu_pro(
-            1, attach_request, current_user=MockUser()
-        )
+        attach_result = attach_ubuntu_pro(1, attach_request, current_user=MockUser())
         assert attach_result["result"] is True
         assert attach_result["queue_id"] == "attach-123"
 
         # Test enable service
         enable_request = UbuntuProServiceRequest(service="esm-infra")
-        enable_result = await enable_ubuntu_pro_service(1, enable_request)
+        enable_result = enable_ubuntu_pro_service(1, enable_request)
         assert enable_result["result"] is True
         assert enable_result["queue_id"] == "enable-456"
 
         # Test disable service
         disable_request = UbuntuProServiceRequest(service="esm-apps")
-        disable_result = await disable_ubuntu_pro_service(1, disable_request)
+        disable_result = disable_ubuntu_pro_service(1, disable_request)
         assert disable_result["result"] is True
         assert disable_result["queue_id"] == "disable-789"
 
         # Test detach
-        detach_result = await detach_ubuntu_pro(1, current_user=MockUser())
+        detach_result = detach_ubuntu_pro(1, current_user=MockUser())
         assert detach_result["result"] is True
         assert detach_result["queue_id"] == "detach-012"
 
@@ -748,7 +746,7 @@ class TestUbuntuProIntegration:
 
         # Test attach command structure
         attach_request = UbuntuProAttachRequest(token="test-token")
-        await attach_ubuntu_pro(1, attach_request, current_user=MockUser())
+        attach_ubuntu_pro(1, attach_request, current_user=MockUser())
 
         # Verify attach command data
         attach_call = mock_queue_manager.enqueue_message.call_args
@@ -761,7 +759,7 @@ class TestUbuntuProIntegration:
 
         # Test service enable command structure
         enable_request = UbuntuProServiceRequest(service="esm-infra")
-        await enable_ubuntu_pro_service(1, enable_request)
+        enable_ubuntu_pro_service(1, enable_request)
 
         # Verify enable command data
         enable_call = mock_queue_manager.enqueue_message.call_args

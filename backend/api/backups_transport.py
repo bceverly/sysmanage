@@ -70,7 +70,7 @@ class TransportBody(BaseModel):
 
 
 @router.put("/backups/targets/{target_id}/transport")
-async def set_transport(
+def set_transport(
     target_id: str,
     body: TransportBody,
     db: Session = Depends(get_tenant_db),
@@ -142,7 +142,7 @@ class BandwidthBody(BaseModel):
 
 
 @router.put("/backups/targets/{target_id}/proxy-bandwidth")
-async def set_proxy_bandwidth(
+def set_proxy_bandwidth(
     target_id: str,
     body: BandwidthBody,
     db: Session = Depends(get_tenant_db),

@@ -100,7 +100,7 @@ def _user_by_id(session, user_id: str):
 
 
 @router.delete("/user/{user_id}", dependencies=[Depends(JWTBearer())])
-async def delete_user(user_id: str, current_user: str = Depends(get_current_user)):
+def delete_user(user_id: str, current_user: str = Depends(get_current_user)):
     """
     This function deletes a single user given an id
     """
@@ -206,7 +206,7 @@ def get_user_permissions(current_user: str = Depends(get_current_user)):
 
 
 @router.get("/user/me", dependencies=[Depends(JWTBearer())])
-async def get_logged_in_user(request: Request):
+def get_logged_in_user(request: Request):
     """
     This function retrieves the user record for the currently logged in
     user.
@@ -263,7 +263,7 @@ async def get_logged_in_user(request: Request):
 
 
 @router.get("/user/{user_id}", dependencies=[Depends(JWTBearer())])
-async def get_user(user_id: str):
+def get_user(user_id: str):
     """
     This function retrieves a single user by its id
     """
@@ -296,7 +296,7 @@ async def get_user(user_id: str):
 
 
 @router.get("/user/by_userid/{userid}", dependencies=[Depends(JWTBearer())])
-async def get_user_by_userid(userid: str):
+def get_user_by_userid(userid: str):
     """
     This function retrieves a single user by userid
     """
@@ -372,7 +372,7 @@ async def get_all_users():
 
 
 @router.post("/user", dependencies=[Depends(JWTBearer())])
-async def add_user(
+def add_user(
     new_user: User, request: Request, current_user: str = Depends(get_current_user)
 ):
     """
@@ -488,7 +488,7 @@ async def add_user(
 
 
 @router.put("/user/{user_id}", dependencies=[Depends(JWTBearer())])
-async def update_user(
+def update_user(
     user_id: str, user_data: User, current_user: str = Depends(get_current_user)
 ):
     """
@@ -583,7 +583,7 @@ async def update_user(
 
 
 @router.put("/user/{user_id}/admin", dependencies=[Depends(JWTBearer())])
-async def set_user_admin(
+def set_user_admin(
     user_id: str, flag: AdminFlag, current_user: str = Depends(get_current_user)
 ):
     """Grant or remove administrator rights (``is_admin``).
@@ -636,7 +636,7 @@ async def set_user_admin(
 
 
 @router.post("/user/{user_id}/unlock", dependencies=[Depends(JWTBearer())])
-async def unlock_user(user_id: str, current_user: str = Depends(get_current_user)):
+def unlock_user(user_id: str, current_user: str = Depends(get_current_user)):
     """
     This function unlocks a user account manually
     """
@@ -687,7 +687,7 @@ async def unlock_user(user_id: str, current_user: str = Depends(get_current_user
 
 
 @router.post("/user/{user_id}/lock", dependencies=[Depends(JWTBearer())])
-async def lock_user(user_id: str, current_user: str = Depends(get_current_user)):
+def lock_user(user_id: str, current_user: str = Depends(get_current_user)):
     """
     This function locks a user account manually
     """
@@ -791,7 +791,7 @@ async def upload_user_profile_image(user_id: str, file: UploadFile = File(...)):
 
 
 @router.get("/user/{user_id}/image", dependencies=[Depends(JWTBearer())])
-async def get_user_profile_image(user_id: str):
+def get_user_profile_image(user_id: str):
     """
     Get a specific user's profile image (admin function).
     """
@@ -832,7 +832,7 @@ async def get_user_profile_image(user_id: str):
 
 
 @router.delete("/user/{user_id}/image", dependencies=[Depends(JWTBearer())])
-async def delete_user_profile_image(user_id: str):
+def delete_user_profile_image(user_id: str):
     """
     Delete a specific user's profile image (admin function).
     """

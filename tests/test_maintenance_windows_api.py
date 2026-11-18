@@ -116,7 +116,7 @@ async def test_non_admin_is_forbidden(patched_sm):
     user = MagicMock()
     user.is_admin = False
     with pytest.raises(HTTPException) as exc:
-        await list_maintenance_windows(current_user=user)
+        list_maintenance_windows(current_user=user)
     assert exc.value.status_code == 403
 
 
@@ -124,17 +124,17 @@ async def test_non_admin_is_forbidden(patched_sm):
 async def test_create_list_update_delete_roundtrip(patched_sm):
     admin = _admin()
 
-    created = await create_maintenance_window(_daily(), current_user=admin)
+    created = create_maintenance_window(_daily(), current_user=admin)
     assert created["name"] == "Nightly"
     assert created["scopes"][0]["scope_type"] == "all"
     window_id = created["id"]
 
-    listed = await list_maintenance_windows(current_user=admin)
+    listed = list_maintenance_windows(current_user=admin)
     assert len(listed["windows"]) == 1
 
     # Update: switch to a weekly window scoped to a specific host.
     host_id = str(uuid.uuid4())
-    updated = await update_maintenance_window(
+    updated = update_maintenance_window(
         window_id,
         _daily(
             name="Weekly",
@@ -151,17 +151,15 @@ async def test_create_list_update_delete_roundtrip(patched_sm):
     assert set(updated["days_of_week"]) == {"mon", "wed"}
     assert updated["scopes"][0]["host_id"] == host_id
 
-    deleted = await delete_maintenance_window(window_id, current_user=admin)
+    deleted = delete_maintenance_window(window_id, current_user=admin)
     assert deleted["status"] == "deleted"
-    assert (await list_maintenance_windows(current_user=admin))["windows"] == []
+    assert (list_maintenance_windows(current_user=admin))["windows"] == []
 
 
 @pytest.mark.asyncio
 async def test_update_missing_returns_404(patched_sm):
     with pytest.raises(HTTPException) as exc:
-        await update_maintenance_window(
-            str(uuid.uuid4()), _daily(), current_user=_admin()
-        )
+        update_maintenance_window(str(uuid.uuid4()), _daily(), current_user=_admin())
     assert exc.value.status_code == 404
 
 
@@ -169,7 +167,7 @@ async def test_update_missing_returns_404(patched_sm):
 async def test_emergency_override_is_created_and_audited(patched_sm):
     admin = _admin()
     host_id = str(uuid.uuid4())
-    out = await create_override(
+    out = create_override(
         OverrideIn(host_id=host_id, reason="ship the hotfix", duration_minutes=30),
         current_user=admin,
     )
@@ -194,7 +192,7 @@ async def test_emergency_override_is_created_and_audited(patched_sm):
 @pytest.mark.asyncio
 async def test_override_requires_reason(patched_sm):
     with pytest.raises(HTTPException) as exc:
-        await create_override(
+        create_override(
             OverrideIn(host_id=str(uuid.uuid4()), reason="  ", duration_minutes=30),
             current_user=_admin(),
         )
@@ -209,19 +207,17 @@ async def test_every_change_releases_held_messages(patched_sm, monkeypatch, chan
     admin = _admin()
     window_id = None
     if change in ("update", "delete"):
-        window_id = (await create_maintenance_window(_daily(), current_user=admin))[
-            "id"
-        ]
+        window_id = (create_maintenance_window(_daily(), current_user=admin))["id"]
     released = MagicMock(return_value=0)
     monkeypatch.setattr(mod.mw, "release_deferred", released)
     if change == "create":
-        await create_maintenance_window(_daily(), current_user=admin)
+        create_maintenance_window(_daily(), current_user=admin)
     elif change == "update":
-        await update_maintenance_window(window_id, _daily(name="B"), current_user=admin)
+        update_maintenance_window(window_id, _daily(name="B"), current_user=admin)
     elif change == "delete":
-        await delete_maintenance_window(window_id, current_user=admin)
+        delete_maintenance_window(window_id, current_user=admin)
     else:
-        await create_override(
+        create_override(
             OverrideIn(host_id=str(uuid.uuid4()), reason="hotfix", duration_minutes=5),
             current_user=admin,
         )

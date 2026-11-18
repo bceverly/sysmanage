@@ -65,7 +65,7 @@ class PasswordChange(BaseModel):
 
 
 @router.get("/profile", dependencies=[Depends(JWTBearer())])
-async def get_profile(current_user: str = Depends(get_current_user)):
+def get_profile(current_user: str = Depends(get_current_user)):
     """
     Get the current user's profile information.
     """
@@ -97,7 +97,7 @@ async def get_profile(current_user: str = Depends(get_current_user)):
 
 
 @router.put("/profile", dependencies=[Depends(JWTBearer())])
-async def update_profile(
+def update_profile(
     profile_data: ProfileUpdate, current_user: str = Depends(get_current_user)
 ):
     """
@@ -145,7 +145,7 @@ async def update_profile(
 
 
 @router.put("/profile/password", dependencies=[Depends(JWTBearer())])
-async def change_password(
+def change_password(
     password_data: PasswordChange, current_user: str = Depends(get_current_user)
 ):
     """
@@ -353,7 +353,7 @@ async def upload_profile_image(
 
 
 @router.get("/profile/image", dependencies=[Depends(JWTBearer())])
-async def get_profile_image(current_user: str = Depends(get_current_user)):
+def get_profile_image(current_user: str = Depends(get_current_user)):
     """
     Get the current user's profile image.
     """
@@ -394,7 +394,7 @@ async def get_profile_image(current_user: str = Depends(get_current_user)):
 
 
 @router.delete("/profile/image", dependencies=[Depends(JWTBearer())])
-async def delete_profile_image(current_user: str = Depends(get_current_user)):
+def delete_profile_image(current_user: str = Depends(get_current_user)):
     """
     Delete the current user's profile image.
     """

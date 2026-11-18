@@ -121,9 +121,7 @@ def _grant_into_tenant(provider, email: str) -> None:
 
 
 @router.post("/api/scim/v2/{provider_id}/Users")
-async def scim_create_user(
-    provider_id: str, request: Request, payload: dict = Body(...)
-):
+def scim_create_user(provider_id: str, request: Request, payload: dict = Body(...)):
     engine = _engine()
     db: Session = next(get_db())
     try:
@@ -179,7 +177,7 @@ async def scim_create_user(
 
 
 @router.get("/api/scim/v2/{provider_id}/Users")
-async def scim_list_users(provider_id: str, request: Request):
+def scim_list_users(provider_id: str, request: Request):
     engine = _engine()
     db: Session = next(get_db())
     try:
@@ -230,7 +228,7 @@ def _get_user_or_404(db, provider, user_id):
 
 
 @router.get("/api/scim/v2/{provider_id}/Users/{user_id}", name="scim_get_user")
-async def scim_get_user(provider_id: str, user_id: str, request: Request):
+def scim_get_user(provider_id: str, user_id: str, request: Request):
     engine = _engine()
     db: Session = next(get_db())
     try:
@@ -247,7 +245,7 @@ async def scim_get_user(provider_id: str, user_id: str, request: Request):
 
 
 @router.put("/api/scim/v2/{provider_id}/Users/{user_id}")
-async def scim_replace_user(
+def scim_replace_user(
     provider_id: str, user_id: str, request: Request, payload: dict = Body(...)
 ):
     engine = _engine()
@@ -274,7 +272,7 @@ async def scim_replace_user(
 
 
 @router.patch("/api/scim/v2/{provider_id}/Users/{user_id}")
-async def scim_patch_user(
+def scim_patch_user(
     provider_id: str, user_id: str, request: Request, payload: dict = Body(...)
 ):
     engine = _engine()
@@ -303,7 +301,7 @@ async def scim_patch_user(
 
 
 @router.delete("/api/scim/v2/{provider_id}/Users/{user_id}")
-async def scim_delete_user(provider_id: str, user_id: str, request: Request):
+def scim_delete_user(provider_id: str, user_id: str, request: Request):
     """Deprovision -- soft-deactivate (preserve the audit trail), 204."""
     _engine()
     db: Session = next(get_db())

@@ -43,7 +43,7 @@ class PrometheusStatus(BaseModel):
 
 
 @router.get("/opentelemetry/status", dependencies=[Depends(JWTBearer())])
-async def get_opentelemetry_status():
+def get_opentelemetry_status():
     """
     Get OpenTelemetry instrumentation status.
     """

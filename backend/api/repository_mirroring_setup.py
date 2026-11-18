@@ -52,7 +52,7 @@ from backend.persistence.partitions import get_tenant_db
     "/mirror-repositories/setup-status/{host_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def get_mirror_setup_status(host_id: str, db: Session = Depends(get_tenant_db)):
+def get_mirror_setup_status(host_id: str, db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     pid = _parse_uuid(host_id, "host_id")
     row = (
@@ -88,9 +88,7 @@ async def get_mirror_setup_status(host_id: str, db: Session = Depends(get_tenant
     "/mirror-repositories/setup-status/{host_id}/refresh",
     dependencies=[Depends(JWTBearer())],
 )
-async def refresh_mirror_setup_status(
-    host_id: str, db: Session = Depends(get_tenant_db)
-):
+def refresh_mirror_setup_status(host_id: str, db: Session = Depends(get_tenant_db)):
     """Queue a tool-presence probe.  The probe's command_result lands
     asynchronously in the inbound queue handler and updates the row.
     """
@@ -115,7 +113,7 @@ async def refresh_mirror_setup_status(
     "/mirror-repositories/setup-install/{host_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def install_mirror_tools(
+def install_mirror_tools(
     host_id: str,
     request: MirrorSetupInstallRequest = Body(...),
     db: Session = Depends(get_tenant_db),
@@ -174,7 +172,7 @@ class PlatformConfigRequest(BaseModel):
 
 
 @router.get("/mirror-platform-configs", dependencies=[Depends(JWTBearer())])
-async def list_platform_configs(db: Session = Depends(get_tenant_db)):
+def list_platform_configs(db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     rows = (
         db.query(models.MirrorPlatformConfig)
@@ -185,7 +183,7 @@ async def list_platform_configs(db: Session = Depends(get_tenant_db)):
 
 
 @router.post("/mirror-platform-configs", dependencies=[Depends(JWTBearer())])
-async def create_platform_config(
+def create_platform_config(
     request: PlatformConfigRequest = Body(...),
     db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
@@ -225,7 +223,7 @@ async def create_platform_config(
 
 
 @router.get("/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())])
-async def get_platform_config(cfg_id: str, db: Session = Depends(get_tenant_db)):
+def get_platform_config(cfg_id: str, db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     pid = _parse_uuid(cfg_id, "cfg_id")
     row = (
@@ -239,7 +237,7 @@ async def get_platform_config(cfg_id: str, db: Session = Depends(get_tenant_db))
 
 
 @router.put("/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())])
-async def update_platform_config(
+def update_platform_config(
     cfg_id: str,
     request: PlatformConfigRequest = Body(...),
     db: Session = Depends(get_tenant_db),
@@ -279,7 +277,7 @@ async def update_platform_config(
 
 
 @router.delete("/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())])
-async def delete_platform_config(
+def delete_platform_config(
     cfg_id: str,
     db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument

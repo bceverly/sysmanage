@@ -206,7 +206,7 @@ def _parse_uuid_or_400(value: Optional[str], field_name: str) -> Optional[uuid.U
 
 
 @groups_router.get("", response_model=List[AccessGroupResponse])
-async def list_access_groups(db: Session = Depends(get_db)):
+def list_access_groups(db: Session = Depends(get_db)):
     """List every access group (flat).  Tree assembly is the client's
     job -- each row carries ``parent_id``."""
     rows = db.query(models.AccessGroup).order_by(models.AccessGroup.name).all()
@@ -214,7 +214,7 @@ async def list_access_groups(db: Session = Depends(get_db)):
 
 
 @groups_router.post("", response_model=AccessGroupResponse)
-async def create_access_group(
+def create_access_group(
     request: AccessGroupCreateRequest,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -259,7 +259,7 @@ async def create_access_group(
 
 
 @groups_router.get("/{group_id}", response_model=AccessGroupResponse)
-async def get_access_group(group_id: str, db: Session = Depends(get_db)):
+def get_access_group(group_id: str, db: Session = Depends(get_db)):
     group_uuid = _parse_uuid_or_400(group_id, "group_id")
     group = (
         db.query(models.AccessGroup).filter(models.AccessGroup.id == group_uuid).first()
@@ -270,7 +270,7 @@ async def get_access_group(group_id: str, db: Session = Depends(get_db)):
 
 
 @groups_router.put("/{group_id}", response_model=AccessGroupResponse)
-async def update_access_group(
+def update_access_group(
     group_id: str,
     request: AccessGroupUpdateRequest,
     db: Session = Depends(get_db),
@@ -315,7 +315,7 @@ async def update_access_group(
 
 
 @groups_router.delete("/{group_id}")
-async def delete_access_group(
+def delete_access_group(
     group_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -350,7 +350,7 @@ async def delete_access_group(
 
 
 @keys_router.get("", response_model=List[RegistrationKeyResponse])
-async def list_registration_keys(db: Session = Depends(get_db)):
+def list_registration_keys(db: Session = Depends(get_db)):
     """List every registration key (without the secret).  The raw
     ``key`` value is only ever returned at create time."""
     rows = (
@@ -363,7 +363,7 @@ async def list_registration_keys(db: Session = Depends(get_db)):
 
 
 @keys_router.post("", response_model=RegistrationKeyResponse)
-async def create_registration_key(
+def create_registration_key(
     request: RegistrationKeyCreateRequest,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -424,7 +424,7 @@ async def create_registration_key(
 
 
 @keys_router.post("/{key_id}/revoke")
-async def revoke_registration_key(
+def revoke_registration_key(
     key_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -458,7 +458,7 @@ async def revoke_registration_key(
 
 
 @keys_router.delete("/{key_id}")
-async def delete_registration_key(
+def delete_registration_key(
     key_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),

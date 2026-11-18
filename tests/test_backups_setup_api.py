@@ -37,7 +37,7 @@ async def test_equipped_hosts_without_a_policy_get_the_defaults(session, sent):
     body = setup.BulkSetupBody(host_ids=[str(fresh.id), str(s.host.id), str(bare.id),
                                          "00000000-0000-4000-8000-000000000000"])  # fmt: skip
     with patch.object(retention, "_engine", return_value=object()):
-        answer = await setup.bulk_backup_setup(body, session, MANAGER)
+        answer = setup.bulk_backup_setup(body, session, MANAGER)
     assert answer["created"] == 1
     reasons = {s_["fqdn"]: s_["reason"] for s_ in answer["skipped"]}
     assert reasons == {
@@ -60,7 +60,7 @@ async def test_no_years_where_the_storage_host_cannot_keep_them(session, sent):
     session.flush()
     fresh = _host(session, fqdn="fresh.lab")
     with patch.object(retention, "_engine", return_value=object()):
-        await setup.bulk_backup_setup(
+        setup.bulk_backup_setup(
             setup.BulkSetupBody(host_ids=[str(fresh.id)]), session, MANAGER
         )
     policy = _policy(session, fresh)
@@ -72,7 +72,7 @@ async def test_without_the_engine_a_month_of_dailies(session, sent):
     _setup(session)
     fresh = _host(session, fqdn="fresh.lab")
     with patch.object(retention, "_engine", return_value=None):
-        await setup.bulk_backup_setup(
+        setup.bulk_backup_setup(
             setup.BulkSetupBody(host_ids=[str(fresh.id)]), session, MANAGER
         )
     policy = _policy(session, fresh)
@@ -83,5 +83,5 @@ async def test_without_the_engine_a_month_of_dailies(session, sent):
 async def test_needs_the_role_and_a_target(session, sent):
     fresh = _host(session, fqdn="fresh.lab")
     body = setup.BulkSetupBody(host_ids=[str(fresh.id)])
-    assert await _status(setup.bulk_backup_setup(body, session, NOBODY)) == 403
-    assert await _status(setup.bulk_backup_setup(body, session, MANAGER)) == 409
+    assert await _status(lambda: setup.bulk_backup_setup(body, session, NOBODY)) == 403
+    assert await _status(lambda: setup.bulk_backup_setup(body, session, MANAGER)) == 409

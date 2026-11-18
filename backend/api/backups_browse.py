@@ -80,7 +80,7 @@ def _snapshot_or_404(db: Session, policy, name: str) -> models.BackupSnapshot:
 
 
 @router.post("/host/{host_id}/backup-browse")
-async def browse_snapshot(
+def browse_snapshot(
     host_id: str,
     body: BrowseBody,
     db: Session = Depends(get_tenant_db),
@@ -108,7 +108,7 @@ async def browse_snapshot(
 
 
 @router.post("/host/{host_id}/backup-changes")
-async def backup_changes(
+def backup_changes(
     host_id: str,
     body: Optional[ChangesBody] = None,
     db: Session = Depends(get_tenant_db),

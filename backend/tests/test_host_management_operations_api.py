@@ -265,7 +265,7 @@ class TestHostDataUpdates:
         ) as mock_sessionmaker:
             mock_sessionmaker.return_value = create_mock_session_context(mock_session)
 
-            result = await update_host_hardware(str(mock_host.id), hardware_data)
+            result = update_host_hardware(str(mock_host.id), hardware_data)
 
             assert result["result"] is True
             mock_session.commit.assert_called()
@@ -286,7 +286,7 @@ class TestHostDataUpdates:
             mock_sessionmaker.return_value = create_mock_session_context(mock_session)
 
             with pytest.raises(HTTPException) as exc_info:
-                await update_host_hardware(str(uuid.uuid4()), hardware_data)
+                update_host_hardware(str(uuid.uuid4()), hardware_data)
 
             assert exc_info.value.status_code == 404
 
@@ -309,7 +309,7 @@ class TestHostDataUpdates:
                     mock_session
                 )
 
-                result = await request_hardware_update(str(mock_host.id))
+                result = request_hardware_update(str(mock_host.id))
 
                 assert result["result"] is True
                 mock_queue.enqueue_message.assert_called_once()
@@ -333,7 +333,7 @@ class TestHostDataUpdates:
                     mock_session
                 )
 
-                result = await request_system_info(str(mock_host.id))
+                result = request_system_info(str(mock_host.id))
 
                 assert result["result"] is True
                 # Should enqueue two messages (system info and virtualization check)
@@ -358,7 +358,7 @@ class TestHostDataUpdates:
                     mock_session
                 )
 
-                result = await request_user_access_update(str(mock_host.id))
+                result = request_user_access_update(str(mock_host.id))
 
                 assert result["result"] is True
                 mock_queue.enqueue_message.assert_called_once()
@@ -390,7 +390,7 @@ class TestHostDataUpdates:
                     mock_session
                 )
 
-                result = await request_hardware_update_bulk(host_ids)
+                result = request_hardware_update_bulk(host_ids)
 
                 assert len(result["results"]) == 2
                 assert result["results"][0]["success"] is True
@@ -446,7 +446,7 @@ class TestHostTagging:
                     mock_auth_session
                 )
 
-                result = await add_tag_to_host(
+                result = add_tag_to_host(
                     str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
@@ -482,7 +482,7 @@ class TestHostTagging:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await add_tag_to_host(
+                    add_tag_to_host(
                         str(mock_host.id), str(mock_tag.id), mock_db, mock_user
                     )
 
@@ -526,7 +526,7 @@ class TestHostTagging:
                 )
 
                 # Should return None (204 No Content)
-                result = await remove_tag_from_host(
+                result = remove_tag_from_host(
                     str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
@@ -560,7 +560,7 @@ class TestHostTagging:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await remove_tag_from_host(
+                    remove_tag_from_host(
                         str(mock_host.id),
                         str(uuid.uuid4()),
                         mock_db,

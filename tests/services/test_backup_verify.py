@@ -200,19 +200,23 @@ async def test_setting_the_cadence_needs_the_engine(session):
     body = api.PolicyBody(keep_last=7, verify_interval_days=30)
     with patch.object(retention, "_engine", return_value=None):
         assert (
-            await _status(api.put_policy(str(s.host.id), body, session, MANAGER)) == 402
+            await _status(
+                lambda: api.put_policy(str(s.host.id), body, session, MANAGER)
+            )
+            == 402
         )
     with patch.object(retention, "_engine", return_value=object()):
-        saved = await api.put_policy(str(s.host.id), body, session, MANAGER)
+        saved = api.put_policy(str(s.host.id), body, session, MANAGER)
         assert saved["verify_interval_days"] == 30
         bad = api.PolicyBody(keep_last=7, verify_interval_days=366)
         assert (
-            await _status(api.put_policy(str(s.host.id), bad, session, MANAGER)) == 422
+            await _status(lambda: api.put_policy(str(s.host.id), bad, session, MANAGER))
+            == 422
         )
     # a lapsed licence keeps the cadence and can still save other settings
     with patch.object(retention, "_engine", return_value=None):
         same = api.PolicyBody(keep_last=7, interval_hours=12, verify_interval_days=30)
-        saved = await api.put_policy(str(s.host.id), same, session, MANAGER)
+        saved = api.put_policy(str(s.host.id), same, session, MANAGER)
         assert saved["interval_hours"] == 12 and saved["verify_interval_days"] == 30
 
 

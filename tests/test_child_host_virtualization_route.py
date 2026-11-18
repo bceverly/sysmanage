@@ -167,7 +167,7 @@ def _session_with(host=None, existing=(), distribution=None):
 async def _create(session, ref, request=None, plan_accepted=True):
     harness = _Harness(session, ref, plan_accepted)
     with harness:
-        result = await chv.create_child_host_request(
+        result = chv.create_child_host_request(
             "host-1", request or _request(), current_user="admin@invalid"
         )
     return result, harness
@@ -322,7 +322,7 @@ class TestCreateChildHostRequest:
         harness2 = _Harness(session2, ref2)
         with harness2:
             with patch(f"{MOD}.get_config", return_value={"api": plain}):
-                await chv.create_child_host_request(
+                chv.create_child_host_request(
                     "host-1", _request(), current_user="admin@invalid"
                 )
         assert harness2.plan_calls[0]["use_https"] is False

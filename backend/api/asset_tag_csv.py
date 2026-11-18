@@ -50,7 +50,7 @@ def _rows_or_422(db: Session, body: CsvBody, run) -> Dict[str, Any]:
 
 
 @router.post("/asset-tags/import/preview")
-async def preview_import(
+def preview_import(
     body: CsvBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -65,7 +65,7 @@ async def preview_import(
 
 
 @router.post("/asset-tags/import/apply")
-async def apply_import(
+def apply_import(
     body: CsvBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -89,7 +89,7 @@ async def apply_import(
 
 
 @router.get("/asset-tags/export")
-async def export_tags(db: Session = Depends(get_tenant_db)) -> Response:
+def export_tags(db: Session = Depends(get_tenant_db)) -> Response:
     """Every machine and held tag as CSV -- re-importable as it stands."""
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     return Response(
@@ -102,7 +102,7 @@ async def export_tags(db: Session = Depends(get_tenant_db)) -> Response:
 
 
 @router.get("/asset-tags/held")
-async def list_held(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def list_held(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """Tags waiting for a machine to report in."""
     holds = db.query(models.HeldAssetTag).order_by(models.HeldAssetTag.asset_tag).all()
     return {
@@ -121,7 +121,7 @@ async def list_held(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
 
 
 @router.delete("/asset-tags/held/{held_id}")
-async def release_held(
+def release_held(
     held_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

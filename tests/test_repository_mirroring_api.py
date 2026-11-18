@@ -51,7 +51,7 @@ class TestListMirrors:
     async def test_all_mirrors_are_serialized(self):
         db = _FakeSession(MirrorRepository=[_mirror()])
         with _licensed():
-            out = await api.list_mirrors(db=db)
+            out = api.list_mirrors(db=db)
         assert out == [{"id": str(MIRROR_UUID), "name": "ubuntu-noble"}]
 
     @pytest.mark.asyncio
@@ -59,14 +59,14 @@ class TestListMirrors:
         db = _FakeSession(MirrorRepository=[])
         with _licensed():
             with pytest.raises(HTTPException) as exc:
-                await api.list_mirrors(platform_config_id="not-a-uuid", db=db)
+                api.list_mirrors(platform_config_id="not-a-uuid", db=db)
         assert exc.value.status_code == 400
 
     @pytest.mark.asyncio
     async def test_a_valid_platform_config_filter_is_accepted(self):
         db = _FakeSession(MirrorRepository=[_mirror()])
         with _licensed():
-            out = await api.list_mirrors(platform_config_id=str(uuid.uuid4()), db=db)
+            out = api.list_mirrors(platform_config_id=str(uuid.uuid4()), db=db)
         assert len(out) == 1
 
 
@@ -86,7 +86,7 @@ class TestCreateMirror:
     async def test_a_valid_mirror_is_persisted_under_a_platform_config(self):
         db = _FakeSession(Host=[SimpleNamespace(id=HOST_UUID)], MirrorPlatformConfig=[])
         with _licensed():
-            out = await api.create_mirror(_create_request(), db=db, current_user="u")
+            out = api.create_mirror(_create_request(), db=db, current_user="u")
         # A config is auto-created so the table never holds unparented rows.
         assert any(isinstance(r, models.MirrorPlatformConfig) for r in db.added)
         assert any(isinstance(r, models.MirrorRepository) for r in db.added)
@@ -100,7 +100,7 @@ class TestCreateMirror:
             Host=[SimpleNamespace(id=HOST_UUID)], MirrorPlatformConfig=[cfg]
         )
         with _licensed():
-            await api.create_mirror(_create_request(), db=db, current_user="u")
+            api.create_mirror(_create_request(), db=db, current_user="u")
         assert db.flushes == 0
         assert not any(isinstance(r, models.MirrorPlatformConfig) for r in db.added)
 
@@ -111,7 +111,7 @@ class TestCreateMirror:
         db = _FakeSession(Host=[SimpleNamespace(id=HOST_UUID)])
         with _licensed(engine):
             with pytest.raises(HTTPException) as exc:
-                await api.create_mirror(_create_request(), db=db, current_user="u")
+                api.create_mirror(_create_request(), db=db, current_user="u")
         assert exc.value.status_code == 400
         # Surfaced verbatim: the engine knows which field is wrong, we don't.
         assert "suite is required" in exc.value.detail
@@ -121,7 +121,7 @@ class TestCreateMirror:
         db = _FakeSession(Host=[])
         with _licensed():
             with pytest.raises(HTTPException) as exc:
-                await api.create_mirror(_create_request(), db=db, current_user="u")
+                api.create_mirror(_create_request(), db=db, current_user="u")
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
@@ -129,7 +129,7 @@ class TestCreateMirror:
         kv_id = uuid.uuid4()
         db = _FakeSession(Host=[SimpleNamespace(id=HOST_UUID)], MirrorPlatformConfig=[])
         with _licensed():
-            await api.create_mirror(
+            api.create_mirror(
                 _create_request(known_version_id=str(kv_id)), db=db, current_user="u"
             )
         row = [r for r in db.added if isinstance(r, models.MirrorRepository)][0]
@@ -141,9 +141,7 @@ class TestGetUpdateDeleteMirror:
     async def test_a_known_mirror_is_returned(self):
         db = _FakeSession(MirrorRepository=[_mirror()])
         with _licensed():
-            assert (await api.get_mirror(str(MIRROR_UUID), db=db))["name"] == (
-                "ubuntu-noble"
-            )
+            assert (api.get_mirror(str(MIRROR_UUID), db=db))["name"] == ("ubuntu-noble")
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -160,7 +158,7 @@ class TestGetUpdateDeleteMirror:
             kwargs["current_user"] = "u"
         with _licensed():
             with pytest.raises(HTTPException) as exc:
-                await getattr(api, call)(*args, **kwargs)
+                getattr(api, call)(*args, **kwargs)
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
@@ -168,7 +166,7 @@ class TestGetUpdateDeleteMirror:
         row = _mirror(components="main")
         db = _FakeSession(MirrorRepository=[row])
         with _licensed():
-            await api.update_mirror(
+            api.update_mirror(
                 str(MIRROR_UUID),
                 MirrorUpdateRequest(suite="oracular"),
                 db=db,
@@ -184,7 +182,7 @@ class TestGetUpdateDeleteMirror:
         row = _mirror()
         db = _FakeSession(MirrorRepository=[row])
         with _licensed():
-            await api.update_mirror(
+            api.update_mirror(
                 str(MIRROR_UUID),
                 MirrorUpdateRequest(known_version_id=str(kv_id)),
                 db=db,
@@ -197,7 +195,7 @@ class TestGetUpdateDeleteMirror:
         row = _mirror()
         db = _FakeSession(MirrorRepository=[row])
         with _licensed():
-            out = await api.delete_mirror(str(MIRROR_UUID), db=db, current_user="u")
+            out = api.delete_mirror(str(MIRROR_UUID), db=db, current_user="u")
         assert db.deleted == [row]
         assert out["id"] == str(MIRROR_UUID)
 
@@ -213,7 +211,7 @@ class TestSyncMirror:
         row = _mirror()
         db = _FakeSession(MirrorRepository=[row])
         with _licensed(), _settings(), _dispatching("msg-7"):
-            out = await api.sync_mirror(str(MIRROR_UUID), db=db)
+            out = api.sync_mirror(str(MIRROR_UUID), db=db)
         assert out["message_id"] == "msg-7"
         assert row.last_sync_status == "DISPATCHED"
         assert row.last_sync_message_id == "msg-7"
@@ -226,7 +224,7 @@ class TestSyncMirror:
         db = _FakeSession(MirrorRepository=[row])
         with _licensed(), _settings(), _dispatching():
             with pytest.raises(HTTPException) as exc:
-                await api.sync_mirror(str(MIRROR_UUID), db=db)
+                api.sync_mirror(str(MIRROR_UUID), db=db)
         assert exc.value.status_code == 400
         # Nothing stamped -- a marker with no plan behind it never clears.
         assert row.last_sync_message_id is None
@@ -235,7 +233,7 @@ class TestSyncMirror:
     async def test_a_missing_mirror_is_a_404(self):
         with _licensed():
             with pytest.raises(HTTPException) as exc:
-                await api.sync_mirror(str(MIRROR_UUID), db=_FakeSession())
+                api.sync_mirror(str(MIRROR_UUID), db=_FakeSession())
         assert exc.value.status_code == 404
 
 
@@ -245,7 +243,7 @@ class TestSnapshotAndRestore:
         row = _mirror()
         db = _FakeSession(MirrorRepository=[row])
         with _licensed(), _settings(), _dispatching("msg-8"):
-            out = await api.snapshot_mirror(str(MIRROR_UUID), db=db)
+            out = api.snapshot_mirror(str(MIRROR_UUID), db=db)
         placeholders = [r for r in db.added if isinstance(r, models.MirrorSnapshot)]
         assert len(placeholders) == 1
         # The result handler finds this row by "most recent for the mirror",
@@ -258,7 +256,7 @@ class TestSnapshotAndRestore:
         row = _mirror()
         db = _FakeSession(MirrorRepository=[row])
         with _licensed(), _settings(), _dispatching("msg-9"):
-            out = await api.restore_mirror(str(MIRROR_UUID), "20260101T000000", db=db)
+            out = api.restore_mirror(str(MIRROR_UUID), "20260101T000000", db=db)
         assert out == {"snapshot_id": "20260101T000000", "message_id": "msg-9"}
         assert row.last_restore_status == "DISPATCHED"
         assert row.last_sync_status == "SUCCESS"
@@ -271,7 +269,7 @@ class TestSnapshotAndRestore:
             args.append("snap-1")
         with _licensed():
             with pytest.raises(HTTPException) as exc:
-                await getattr(api, call)(*args, db=_FakeSession())
+                getattr(api, call)(*args, db=_FakeSession())
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
@@ -279,7 +277,7 @@ class TestSnapshotAndRestore:
         snap = SimpleNamespace(to_dict=lambda: {"snapshot_id": "s1"})
         db = _FakeSession(MirrorSnapshot=[snap])
         with _licensed():
-            assert await api.list_snapshots(str(MIRROR_UUID), db=db) == [
+            assert api.list_snapshots(str(MIRROR_UUID), db=db) == [
                 {"snapshot_id": "s1"}
             ]
 
@@ -297,7 +295,7 @@ class TestTickMirrors:
                     f"{API}._tick_mirrors_one_db",
                     side_effect=[(["m1"], []), (["m2"], ["m3"])],
                 ):
-                    out = await api.tick_mirrors()
+                    out = api.tick_mirrors()
         # A tenant host's mirrors live in the tenant DB; a bootstrap-only
         # sweep would never fire them.
         assert out["fired"] == ["m1", "m2"]
@@ -316,7 +314,7 @@ class TestTickMirrors:
                     f"{API}._tick_mirrors_one_db",
                     side_effect=[RuntimeError("db gone"), (["m2"], [])],
                 ):
-                    out = await api.tick_mirrors()
+                    out = api.tick_mirrors()
         assert bad.rolled_back is True
         assert bad.closed and good.closed
         assert out["fired"] == ["m2"]
@@ -325,7 +323,7 @@ class TestTickMirrors:
     async def test_a_missing_automation_engine_is_a_502(self):
         with _licensed(), patch(f"{API}.module_loader.get_module", return_value=None):
             with pytest.raises(HTTPException) as exc:
-                await api.tick_mirrors()
+                api.tick_mirrors()
         assert exc.value.status_code == 502
 
 
@@ -333,7 +331,7 @@ class TestMirrorSettings:
     @pytest.mark.asyncio
     async def test_the_singleton_is_returned(self):
         with _licensed(), _settings("/srv/mirror"):
-            assert await api.get_mirror_settings(db=_FakeSession()) == {
+            assert api.get_mirror_settings(db=_FakeSession()) == {
                 "mirror_root_path": "/srv/mirror"
             }
 
@@ -344,7 +342,7 @@ class TestMirrorSettings:
         )
         db = _FakeSession()
         with _licensed(), patch(f"{API}._get_settings", return_value=row):
-            await api.update_mirror_settings(
+            api.update_mirror_settings(
                 MirrorSettingsRequest(mirror_root_path="/new"), db=db, current_user="u"
             )
         assert row.mirror_root_path == "/new"
@@ -357,11 +355,11 @@ class TestListKnownVersions:
         kv = SimpleNamespace(to_dict=lambda: {"version_key": "noble"})
         db = _FakeSession(MirrorKnownVersion=[kv])
         with _licensed():
-            assert await api.list_known_versions(db=db) == [{"version_key": "noble"}]
+            assert api.list_known_versions(db=db) == [{"version_key": "noble"}]
 
     @pytest.mark.asyncio
     async def test_a_platform_filter_is_accepted(self):
         kv = SimpleNamespace(to_dict=lambda: {"version_key": "noble"})
         db = _FakeSession(MirrorKnownVersion=[kv])
         with _licensed():
-            assert len(await api.list_known_versions(platform="apt", db=db)) == 1
+            assert len(api.list_known_versions(platform="apt", db=db)) == 1

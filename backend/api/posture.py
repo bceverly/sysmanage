@@ -114,7 +114,7 @@ def _model_out(row) -> Dict[str, Any]:
 
 
 @router.get("/advisor/threat-model/questionnaire")
-async def get_questionnaire() -> Dict[str, Any]:
+def get_questionnaire() -> Dict[str, Any]:
     """The newest curated questionnaire (prose is looked up by key in the UI)."""
     questionnaire = threat_model_catalog.load_questionnaire(posture.QUESTIONNAIRE_SLUG)
     if questionnaire is None:
@@ -126,7 +126,7 @@ async def get_questionnaire() -> Dict[str, Any]:
 
 
 @router.get("/advisor/threat-model")
-async def get_threat_model(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def get_threat_model(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """The current model and the list of every saved version."""
     current = posture.current_threat_model(db)
     versions = (
@@ -153,7 +153,7 @@ async def get_threat_model(db: Session = Depends(get_tenant_db)) -> Dict[str, An
 
 
 @router.post("/advisor/threat-model")
-async def save_threat_model(
+def save_threat_model(
     request: ThreatModelRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -174,7 +174,7 @@ async def save_threat_model(
 
 
 @router.get("/advisor/posture")
-async def get_posture(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def get_posture(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """The punch list under the current threat model."""
     current = posture.current_threat_model(db)
     if current is None:
@@ -284,7 +284,7 @@ def _waiver_call(action):
 
 
 @router.post("/advisor/posture/{rule_key}/waiver")
-async def waive_item(
+def waive_item(
     rule_key: str,
     request: WaiverRequest,
     db: Session = Depends(get_tenant_db),
@@ -304,7 +304,7 @@ async def waive_item(
 
 
 @router.delete("/advisor/posture/{rule_key}/waiver")
-async def revoke_waiver(
+def revoke_waiver(
     rule_key: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -318,7 +318,7 @@ async def revoke_waiver(
 
 
 @router.post("/advisor/posture/{rule_key}/waiver/reaffirm")
-async def reaffirm_waiver(
+def reaffirm_waiver(
     rule_key: str,
     # Optional BODY, not just an optional field: re-affirming with no new
     # reason is the common case, and FastAPI requires a body for a model.
@@ -346,7 +346,7 @@ async def reaffirm_waiver(
 
 
 @router.get("/advisor/posture/{rule_key}/remedy")
-async def preview_remedy(
+def preview_remedy(
     rule_key: str, db: Session = Depends(get_tenant_db)
 ) -> Dict[str, Any]:
     """Exactly what applying the remedy would change, and whether it can."""
@@ -355,7 +355,7 @@ async def preview_remedy(
 
 
 @router.post("/advisor/posture/{rule_key}/remedy")
-async def apply_remedy(
+def apply_remedy(
     rule_key: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -401,7 +401,7 @@ async def apply_remedy(
 
 
 @router.get("/advisor/posture/history")
-async def posture_history(
+def posture_history(
     limit: int = 200, db: Session = Depends(get_tenant_db)
 ) -> Dict[str, Any]:
     """Every punch-list change, newest first, each classified."""
@@ -409,7 +409,7 @@ async def posture_history(
 
 
 @router.get("/advisor/posture/{rule_key}/history")
-async def item_history(
+def item_history(
     rule_key: str, limit: int = 200, db: Session = Depends(get_tenant_db)
 ) -> Dict[str, Any]:
     """One item's timeline."""
@@ -417,7 +417,7 @@ async def item_history(
 
 
 @router.get("/advisor/threat-model/diff")
-async def threat_model_diff(
+def threat_model_diff(
     from_version: int, to_version: int, db: Session = Depends(get_tenant_db)
 ) -> Dict[str, Any]:
     """What changed between two model versions, and what it did to the list."""

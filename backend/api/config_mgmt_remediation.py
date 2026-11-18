@@ -205,7 +205,7 @@ def _serialise(db_session: Session, rows) -> List[RuleResponse]:
 
 
 @router.get("/config-management/remediation-rules", response_model=List[RuleResponse])
-async def list_rules(db_session: Session = Depends(get_tenant_db)):
+def list_rules(db_session: Session = Depends(get_tenant_db)):
     """Every rule, in the order the engine would consider them.
 
     Ordered by precedence rather than by name so the list reads as what it is:
@@ -224,7 +224,7 @@ async def list_rules(db_session: Session = Depends(get_tenant_db)):
 
 
 @router.post("/config-management/remediation-rules", response_model=RuleResponse)
-async def create_rule(
+def create_rule(
     request: RuleRequest,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -280,7 +280,7 @@ async def create_rule(
 @router.put(
     "/config-management/remediation-rules/{rule_id}", response_model=RuleResponse
 )
-async def update_rule(
+def update_rule(
     rule_id: str,
     request: RuleUpdateRequest,
     db_session: Session = Depends(get_tenant_db),
@@ -338,7 +338,7 @@ async def update_rule(
 
 
 @router.delete("/config-management/remediation-rules/{rule_id}")
-async def delete_rule(
+def delete_rule(
     rule_id: str,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -360,7 +360,7 @@ async def delete_rule(
     "/config-management/drift/findings/{finding_id}/remediation",
     response_model=RemediationMatchResponse,
 )
-async def match_finding(finding_id: str, db_session: Session = Depends(get_tenant_db)):
+def match_finding(finding_id: str, db_session: Session = Depends(get_tenant_db)):
     """What would repair this finding, without doing it.
 
     The preview comes from the ENGINE rather than being assembled here, so the
@@ -395,7 +395,7 @@ async def match_finding(finding_id: str, db_session: Session = Depends(get_tenan
     "/config-management/drift/findings/{finding_id}/remediate",
     response_model=RepairResponse,
 )
-async def repair_finding(
+def repair_finding(
     finding_id: str,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

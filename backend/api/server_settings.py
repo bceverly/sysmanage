@@ -269,7 +269,7 @@ def _all_items() -> List[SettingItem]:
     "/settings",
     dependencies=[Depends(JWTBearer())],
 )
-async def get_settings(_user: str = Depends(get_current_user)) -> SettingsResponse:
+def get_settings(_user: str = Depends(get_current_user)) -> SettingsResponse:
     """Return the editable server settings with their current effective values."""
     return SettingsResponse(settings=_all_items())
 
@@ -300,7 +300,7 @@ def _store_setting(desc: dict, tenant_id, key: str, value) -> None:
     "/settings",
     dependencies=[Depends(JWTBearer())],
 )
-async def update_settings(
+def update_settings(
     payload: UpdateSettingsRequest,
     _user: str = Depends(get_current_user),
 ) -> SettingsResponse:

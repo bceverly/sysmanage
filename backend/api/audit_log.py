@@ -196,7 +196,7 @@ def _default_date_range(filters: AuditLogFilters) -> AuditLogFilters:
 
 
 @router.get("/list", response_model=AuditLogListResponse)
-async def list_audit_logs(
+def list_audit_logs(
     filters: AuditLogFilters = Depends(),
     limit: int = Query(
         100, ge=1, le=1000, description=_("Number of entries to return")
@@ -522,7 +522,7 @@ def _stream_audit_pdf(entries):
 
 
 @router.get("/{audit_id}", response_model=AuditLogEntryResponse)
-async def get_audit_log_entry(
+def get_audit_log_entry(
     audit_id: str,
     db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),

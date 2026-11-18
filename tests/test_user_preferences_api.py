@@ -172,9 +172,7 @@ class TestGetColumnPreferences:
     @pytest.mark.asyncio
     async def test_a_stored_preference_is_returned(self):
         db = _FakeSession(User=[_user()], UserDataGridColumnPreference=[_column_pref()])
-        out = await up.get_column_preferences(
-            "hosts", db=db, current_user="admin@invalid"
-        )
+        out = up.get_column_preferences("hosts", db=db, current_user="admin@invalid")
         assert out.grid_identifier == "hosts"
         assert out.hidden_columns == ["ip"]
         assert out.user_id == str(USER_UUID)
@@ -185,18 +183,14 @@ class TestGetColumnPreferences:
         # toast the first time anyone opens any grid.
         db = _FakeSession(User=[_user()])
         assert (
-            await up.get_column_preferences(
-                "hosts", db=db, current_user="admin@invalid"
-            )
+            up.get_column_preferences("hosts", db=db, current_user="admin@invalid")
             is None
         )
 
     @pytest.mark.asyncio
     async def test_an_unknown_user_is_a_404(self):
         with pytest.raises(HTTPException) as exc:
-            await up.get_column_preferences(
-                "hosts", db=_FakeSession(), current_user="ghost"
-            )
+            up.get_column_preferences("hosts", db=_FakeSession(), current_user="ghost")
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
@@ -204,16 +198,14 @@ class TestGetColumnPreferences:
         db = _FakeSession()
         db.query = MagicMock(side_effect=RuntimeError("db gone"))
         with pytest.raises(HTTPException) as exc:
-            await up.get_column_preferences(
-                "hosts", db=db, current_user="admin@invalid"
-            )
+            up.get_column_preferences("hosts", db=db, current_user="admin@invalid")
         assert exc.value.status_code == 500
 
 
 class TestUpdateColumnPreferences:
     async def _put(self, db, grid="hosts", hidden=None):
         with _audit():
-            return await up.update_column_preferences(
+            return up.update_column_preferences(
                 up.DataGridColumnPreferenceRequest(
                     grid_identifier=grid, hidden_columns=hidden or []
                 ),
@@ -275,7 +267,7 @@ class TestUpdateColumnPreferences:
 class TestDeleteColumnPreferences:
     async def _delete(self, db, grid="hosts"):
         with _audit():
-            return await up.delete_column_preferences(
+            return up.delete_column_preferences(
                 grid, db=db, current_user="admin@invalid"
             )
 
@@ -325,9 +317,7 @@ class TestGetDashboardCardPreferences:
                 _card_pref("cve-feed", False),
             ],
         )
-        out = await up.get_dashboard_card_preferences(
-            db=db, current_user="admin@invalid"
-        )
+        out = up.get_dashboard_card_preferences(db=db, current_user="admin@invalid")
         assert [(p.card_identifier, p.visible) for p in out.preferences] == [
             ("fleet-health", True),
             ("cve-feed", False),
@@ -336,17 +326,13 @@ class TestGetDashboardCardPreferences:
     @pytest.mark.asyncio
     async def test_a_user_with_no_stored_cards_gets_an_empty_list(self):
         db = _FakeSession(User=[_user()])
-        out = await up.get_dashboard_card_preferences(
-            db=db, current_user="admin@invalid"
-        )
+        out = up.get_dashboard_card_preferences(db=db, current_user="admin@invalid")
         assert out.preferences == []
 
     @pytest.mark.asyncio
     async def test_an_unknown_user_is_a_404(self):
         with pytest.raises(HTTPException) as exc:
-            await up.get_dashboard_card_preferences(
-                db=_FakeSession(), current_user="ghost"
-            )
+            up.get_dashboard_card_preferences(db=_FakeSession(), current_user="ghost")
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
@@ -354,7 +340,7 @@ class TestGetDashboardCardPreferences:
         db = _FakeSession()
         db.query = MagicMock(side_effect=RuntimeError("db gone"))
         with pytest.raises(HTTPException) as exc:
-            await up.get_dashboard_card_preferences(db=db, current_user="admin@invalid")
+            up.get_dashboard_card_preferences(db=db, current_user="admin@invalid")
         assert exc.value.status_code == 500
 
 
@@ -367,7 +353,7 @@ class TestUpdateDashboardCardPreferences:
             ]
         )
         with _audit():
-            return await up.update_dashboard_card_preferences(
+            return up.update_dashboard_card_preferences(
                 request, db=db, current_user="admin@invalid"
             )
 

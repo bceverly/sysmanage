@@ -194,7 +194,7 @@ class TestAddTagToHost:
                     mock_auth_session
                 )
 
-                result = await add_tag_to_host(
+                result = add_tag_to_host(
                     str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
@@ -229,7 +229,7 @@ class TestAddTagToHost:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await add_tag_to_host(
+                    add_tag_to_host(
                         str(uuid.uuid4()),
                         str(mock_tag.id),
                         mock_db,
@@ -268,7 +268,7 @@ class TestAddTagToHost:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await add_tag_to_host(
+                    add_tag_to_host(
                         str(mock_host.id),
                         str(uuid.uuid4()),
                         mock_db,
@@ -308,7 +308,7 @@ class TestAddTagToHost:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await add_tag_to_host(
+                    add_tag_to_host(
                         str(mock_host.id),
                         str(mock_tag.id),
                         mock_db,
@@ -343,7 +343,7 @@ class TestAddTagToHost:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await add_tag_to_host(
+                    add_tag_to_host(
                         str(mock_host.id),
                         str(mock_tag.id),
                         mock_db,
@@ -396,7 +396,7 @@ class TestRemoveTagFromHost:
                 )
 
                 # Should return None (204 No Content)
-                result = await remove_tag_from_host(
+                result = remove_tag_from_host(
                     str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
@@ -430,7 +430,7 @@ class TestRemoveTagFromHost:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await remove_tag_from_host(
+                    remove_tag_from_host(
                         str(mock_host.id),
                         str(uuid.uuid4()),
                         mock_db,
@@ -465,7 +465,7 @@ class TestRemoveTagFromHost:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await remove_tag_from_host(
+                    remove_tag_from_host(
                         str(mock_host.id),
                         str(mock_tag.id),
                         mock_db,
@@ -514,9 +514,7 @@ class TestGetHostTags:
             mock_get_db.return_value = mock_db
 
             with patch("backend.api.tag.sessionmaker"):
-                result = await get_host_tags(
-                    str(mock_host.id), mock_db, "admin@example.com"
-                )
+                result = get_host_tags(str(mock_host.id), mock_db, "admin@example.com")
 
                 assert len(result) == 2
 
@@ -536,9 +534,7 @@ class TestGetHostTags:
             mock_get_db.return_value = mock_db
 
             with patch("backend.api.tag.sessionmaker"):
-                result = await get_host_tags(
-                    str(mock_host.id), mock_db, "admin@example.com"
-                )
+                result = get_host_tags(str(mock_host.id), mock_db, "admin@example.com")
 
                 assert len(result) == 0
 
@@ -558,7 +554,7 @@ class TestGetHostTags:
 
             with patch("backend.api.tag.sessionmaker"):
                 with pytest.raises(HTTPException) as exc_info:
-                    await get_host_tags(str(uuid.uuid4()), mock_db, "admin@example.com")
+                    get_host_tags(str(uuid.uuid4()), mock_db, "admin@example.com")
 
                 assert exc_info.value.status_code == 404
 

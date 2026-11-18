@@ -93,7 +93,7 @@ def _require_role(user, role) -> None:
 
 
 @router.get("/asset-discovery/policy")
-async def get_policy(
+def get_policy(
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
@@ -103,7 +103,7 @@ async def get_policy(
 
 
 @router.put("/asset-discovery/policy")
-async def put_policy(
+def put_policy(
     request: PolicyRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -164,7 +164,7 @@ def _uuids(values: List[str]) -> List[uuid.UUID]:
 
 
 @router.get("/asset-discovery/summary")
-async def get_summary(
+def get_summary(
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
@@ -174,7 +174,7 @@ async def get_summary(
 
 
 @router.get("/asset-discovery/devices")
-async def get_devices(  # pylint: disable=too-many-positional-arguments
+def get_devices(  # pylint: disable=too-many-positional-arguments
     status: str = "unmanaged",
     network: Optional[str] = None,
     search: Optional[str] = None,
@@ -192,7 +192,7 @@ async def get_devices(  # pylint: disable=too-many-positional-arguments
 
 
 @router.get("/asset-discovery/exclusions")
-async def get_exclusions(
+def get_exclusions(
     include_revoked: bool = False,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -203,7 +203,7 @@ async def get_exclusions(
 
 
 @router.post("/asset-discovery/exclusions")
-async def post_exclusions(
+def post_exclusions(
     request: ExcludeRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -232,7 +232,7 @@ async def post_exclusions(
 
 
 @router.post("/asset-discovery/exclusions/address")
-async def post_address_exclusion(
+def post_address_exclusion(
     request: AddressExclusionRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -260,7 +260,7 @@ async def post_address_exclusion(
 
 
 @router.post("/asset-discovery/exclusions/{exclusion_id}/revoke")
-async def post_revoke(
+def post_revoke(
     exclusion_id: str,
     request: RevokeRequest,
     db: Session = Depends(get_tenant_db),
@@ -292,7 +292,7 @@ async def post_revoke(
 
 
 @router.get("/asset-discovery/sweeps")
-async def get_sweeps(
+def get_sweeps(
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
@@ -302,7 +302,7 @@ async def get_sweeps(
 
 
 @router.post("/asset-discovery/sweeps")
-async def post_sweep(
+def post_sweep(
     request: SweepRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

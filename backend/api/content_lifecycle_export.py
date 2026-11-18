@@ -90,7 +90,7 @@ def _published_version_or_400(shared_db, cv, version: int):
     "/content-lifecycle/content-views/{cv_id}/versions/{version}/export",
     dependencies=[Depends(JWTBearer())],
 )
-async def export_version_to_media(
+def export_version_to_media(
     cv_id: str,
     version: int,
     shared_db: Session = Depends(get_shared_db),
@@ -169,7 +169,7 @@ async def export_version_to_media(
     "/content-lifecycle/content-views/{cv_id}/exports",
     dependencies=[Depends(JWTBearer())],
 )
-async def list_exports(
+def list_exports(
     cv_id: str,
     shared_db: Session = Depends(get_shared_db),
     tenant_db: Session = Depends(get_tenant_db),

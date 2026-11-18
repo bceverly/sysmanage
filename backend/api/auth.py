@@ -116,7 +116,7 @@ class UserLogin(BaseModel):
 
 
 @router.post("/login")
-async def login(login_data: UserLogin, request: Request, response: Response):  # NOSONAR
+def login(login_data: UserLogin, request: Request, response: Response):  # NOSONAR
     """
     This function provides login ability to the SysManage server with enhanced security.
     """
@@ -607,7 +607,7 @@ def _default_tenant_id_for_user(userid: str) -> Optional[str]:
 
 
 @router.get("/auth/accounts", dependencies=[Depends(JWTBearer())])
-async def list_accounts(current_user: str = Depends(get_current_user)):
+def list_accounts(current_user: str = Depends(get_current_user)):
     """List the tenants the current user can switch to (their live grants).
 
     Multi-tenancy only -- returns 400 when the feature is disabled.
@@ -649,7 +649,7 @@ async def list_accounts(current_user: str = Depends(get_current_user)):
 
 
 @router.post("/auth/switch-account", dependencies=[Depends(JWTBearer())])
-async def switch_account(
+def switch_account(
     payload: SwitchAccountRequest,
     response: Response,
     current_user: str = Depends(get_current_user),
@@ -696,7 +696,7 @@ async def switch_account(
 
 
 @router.post("/logout", dependencies=[Depends(JWTBearer())])
-async def logout(request: Request, current_user: str = Depends(get_current_user)):
+def logout(request: Request, current_user: str = Depends(get_current_user)):
     """
     Log user logout for audit purposes.
     The actual logout is handled client-side by discarding the JWT token.

@@ -457,7 +457,7 @@ def _user_in_docker_group() -> bool:
 
 @router.get("/resource-status")
 @requires_feature(_BUNDLE_FEATURE)
-async def resource_status(
+def resource_status(
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ) -> ResourceStatusResponse:
     return ResourceStatusResponse(**_check_build_resources())
@@ -470,7 +470,7 @@ async def resource_status(
 
 @router.post("", status_code=202)
 @requires_feature(_BUNDLE_FEATURE)
-async def create_bundle(
+def create_bundle(
     req: BundleCreateRequest, current_user: str = Depends(get_current_user)
 ) -> BundleResponse:
     if req.product not in models.BUNDLE_PRODUCTS:
@@ -526,7 +526,7 @@ async def create_bundle(
 
 @router.get("")
 @requires_feature(_BUNDLE_FEATURE)
-async def list_bundles(
+def list_bundles(
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ) -> List[BundleResponse]:
     session_local = sessionmaker(
@@ -548,7 +548,7 @@ async def list_bundles(
 
 @router.get("/{bundle_id}")
 @requires_feature(_BUNDLE_FEATURE)
-async def get_bundle(
+def get_bundle(
     bundle_id: uuid.UUID,
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ) -> BundleResponse:
@@ -608,7 +608,7 @@ def _bundle_file_response(bundle_id: uuid.UUID) -> FileResponse:
 
 @router.get("/{bundle_id}/download")
 @requires_feature(_BUNDLE_FEATURE)
-async def download_bundle(
+def download_bundle(
     bundle_id: uuid.UUID,
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ):
@@ -618,7 +618,7 @@ async def download_bundle(
 
 @router.post("/{bundle_id}/download-token")
 @requires_feature(_BUNDLE_FEATURE)
-async def mint_bundle_download_token(
+def mint_bundle_download_token(
     bundle_id: uuid.UUID,
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ):
@@ -635,7 +635,7 @@ async def mint_bundle_download_token(
 
 @download_router.get("/{bundle_id}/download-stream")
 @requires_feature(_BUNDLE_FEATURE)
-async def download_bundle_stream(bundle_id: uuid.UUID, token: str = ""):
+def download_bundle_stream(bundle_id: uuid.UUID, token: str = ""):
     """Token-authed streaming bundle download (no Authorization header).
 
     Authorised by the short-lived single-bundle token from POST
@@ -656,7 +656,7 @@ async def download_bundle_stream(bundle_id: uuid.UUID, token: str = ""):
 
 @router.delete("/{bundle_id}", status_code=204)
 @requires_feature(_BUNDLE_FEATURE)
-async def delete_bundle(
+def delete_bundle(
     bundle_id: uuid.UUID,
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ):

@@ -319,7 +319,7 @@ class OSPackageManagersResponse(BaseModel):
 
 
 @router.get("/os-options", response_model=OSPackageManagersResponse)
-async def get_os_options(
+def get_os_options(
     dependencies=Depends(JWTBearer()),
 ):
     """Get available operating systems and their package managers."""
@@ -330,7 +330,7 @@ async def get_os_options(
 
 
 @router.get("/by-os/{os_name}", response_model=List[DefaultRepositoryResponse])
-async def get_default_repositories_by_os(
+def get_default_repositories_by_os(
     os_name: str,
     db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
@@ -366,7 +366,7 @@ async def get_default_repositories_by_os(
 
 
 @router.get("/", response_model=List[DefaultRepositoryResponse])
-async def get_default_repositories(
+def get_default_repositories(
     db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
     current_user=Depends(require_authenticated_user),

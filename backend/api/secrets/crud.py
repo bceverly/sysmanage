@@ -52,7 +52,7 @@ def _check_secrets_module():
 
 
 @router.get("", dependencies=[Depends(JWTBearer())])
-async def list_secrets(
+def list_secrets(
     db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)
 ):
     """List all secrets (metadata only, no content)."""
@@ -68,7 +68,7 @@ async def list_secrets(
     response_model=List[SecretResponse],
     dependencies=[Depends(JWTBearer())],
 )
-async def list_ssh_keys(
+def list_ssh_keys(
     db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)
 ):
     """List SSH key secrets."""
@@ -87,7 +87,7 @@ async def list_ssh_keys(
     response_model=SecretResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def get_secret_metadata(
+def get_secret_metadata(
     secret_id: str,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
@@ -105,7 +105,7 @@ async def get_secret_metadata(
     response_model=SecretWithContent,
     dependencies=[Depends(JWTBearer())],
 )
-async def get_secret_content(
+def get_secret_content(
     secret_id: str,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
@@ -136,7 +136,7 @@ async def get_secret_content(
 
 
 @router.post("", response_model=SecretResponse, dependencies=[Depends(JWTBearer())])
-async def create_secret(
+def create_secret(
     secret_data: SecretCreate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
@@ -183,7 +183,7 @@ async def create_secret(
     response_model=SecretResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def update_secret(
+def update_secret(
     secret_id: str,
     secret_data: SecretUpdate,
     db: Session = Depends(get_db),
@@ -240,7 +240,7 @@ async def update_secret(
 
 
 @router.delete("/{secret_id}", dependencies=[Depends(JWTBearer())])
-async def delete_secret(
+def delete_secret(
     secret_id: str,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
@@ -268,7 +268,7 @@ async def delete_secret(
 
 
 @router.delete("", dependencies=[Depends(JWTBearer())])
-async def delete_multiple_secrets(
+def delete_multiple_secrets(
     secret_ids: List[str],
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),

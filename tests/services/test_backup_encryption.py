@@ -135,9 +135,9 @@ async def test_a_restore_reads_the_repository_that_holds_the_snapshot(
 ):
     s = _setup(session)
     host = _keyed(session, s)
-    await api.backup_restore(host, _restore("20261020T010000Z"), session, RESTORER)
+    api.backup_restore(host, _restore("20261020T010000Z"), session, RESTORER)
     assert sent[-1][2]["previous"] is True and "needs_key" not in sent[-1][2]
-    await api.backup_restore(host, _restore("20261025T130000Z"), session, RESTORER)
+    api.backup_restore(host, _restore("20261025T130000Z"), session, RESTORER)
     params = sent[-1][2]
     assert params["needs_key"] is True and "previous" not in params
     # The key itself never goes in the command (the queue) or the run row.
@@ -156,9 +156,7 @@ async def test_without_the_engine_an_encrypted_snapshot_still_restores(
     monkeypatch.setattr(module_loader, "get_module", lambda _code: None)
     s = _setup(session)
     host = _keyed(session, s)
-    out = await api.backup_restore(
-        host, _restore("20261025T130000Z"), session, RESTORER
-    )
+    out = api.backup_restore(host, _restore("20261025T130000Z"), session, RESTORER)
     run = session.query(models.BackupRun).filter_by(id=out["id"]).one()
     assert json.loads(run.parameters)["needs_key"] is True
 
@@ -168,7 +166,7 @@ async def test_a_restate_that_cannot_decrypt_is_refused(session, sent, loaded_en
     s = _setup(session)
     host = _keyed(session, s, abilities=("list", "status"))
     with pytest.raises(HTTPException) as refused:
-        await api.backup_restore(host, _restore("20261025T130000Z"), session, RESTORER)
+        api.backup_restore(host, _restore("20261025T130000Z"), session, RESTORER)
     assert (
         refused.value.status_code == 409 and "upgrade restate" in refused.value.detail
     )
@@ -178,15 +176,15 @@ async def test_a_restate_that_cannot_decrypt_is_refused(session, sent, loaded_en
 async def test_browsing_and_what_changed_ask_for_the_key(session, sent, loaded_engine):
     s = _setup(session)
     host = _keyed(session, s)
-    await browse.browse_snapshot(
+    browse.browse_snapshot(
         host, browse.BrowseBody(snapshot="20261020T010000Z"), session, RESTORER
     )
     assert sent[-1][2]["previous"] is True and "needs_key" not in sent[-1][2]
-    await browse.browse_snapshot(
+    browse.browse_snapshot(
         host, browse.BrowseBody(snapshot="20261025T130000Z"), session, RESTORER
     )
     assert sent[-1][2]["needs_key"] is True
-    await browse.backup_changes(host, None, session, MANAGER)
+    browse.backup_changes(host, None, session, MANAGER)
     assert sent[-1][2]["action"] == jobs.STATUS and sent[-1][2]["needs_key"] is True
 
 
@@ -274,8 +272,6 @@ async def test_an_encrypted_repository_is_never_repacked_on_the_storage_host(
     s = _setup(session)
     _encrypt(session, s)
     with pytest.raises(HTTPException) as refused:
-        await api.backup_now(
-            str(s.host.id), api.RunBody(action="repack"), session, MANAGER
-        )
+        api.backup_now(str(s.host.id), api.RunBody(action="repack"), session, MANAGER)
     assert refused.value.status_code == 409
     assert not [p for _h, _c, p in sent if p.get("action") == "repack"]

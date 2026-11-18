@@ -249,15 +249,13 @@ class TestApi:
             address="10.0.0.1", category="virtual_address", reason="Core VIP"
         )
         with pytest.raises(HTTPException) as excinfo:
-            asyncio.run(
-                api.post_address_exclusion(
-                    request, db, self._user(api.SecurityRoles.VIEW_HOST_DETAILS)
-                )
+            api.post_address_exclusion(
+                request, db, self._user(api.SecurityRoles.VIEW_HOST_DETAILS)
             )
         assert excinfo.value.status_code == 403
         manager = self._user(api.SecurityRoles.MANAGE_NETWORK_DISCOVERY)
         with patch.object(api.AuditService, "log_create") as audit:
-            row = asyncio.run(api.post_address_exclusion(request, db, manager))
+            row = api.post_address_exclusion(request, db, manager)
         assert (
             row["identity"] == "ip:10.0.0.1"
             and audit.call_args.kwargs["details"]["static"] is True
@@ -266,9 +264,7 @@ class TestApi:
     def test_an_unsupported_retention_is_a_400(self, db):
         manager = self._user(api.SecurityRoles.MANAGE_NETWORK_DISCOVERY)
         with pytest.raises(HTTPException) as excinfo:
-            asyncio.run(
-                api.put_policy(
-                    api.PolicyRequest(enabled=True, retention_days=12), db, manager
-                )
+            api.put_policy(
+                api.PolicyRequest(enabled=True, retention_days=12), db, manager
             )
         assert excinfo.value.status_code == 400

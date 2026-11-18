@@ -201,7 +201,7 @@ class TestGetAvailableSources:
     @pytest.mark.asyncio
     async def test_every_configured_source_is_described(self):
         with _licensed():
-            out = await cve.get_available_sources()
+            out = cve.get_available_sources()
         assert set(out) == {
             "nvd",
             "ubuntu",
@@ -220,7 +220,7 @@ class TestGetAvailableSources:
         # CveSourceInfo deliberately projects three fields; the upstream URL
         # is operational config, not something the UI needs.
         with _licensed():
-            out = await cve.get_available_sources()
+            out = cve.get_available_sources()
         assert not hasattr(out["nvd"], "base_url")
 
 
@@ -260,7 +260,7 @@ class TestGetSettings:
     @pytest.mark.asyncio
     async def test_the_settings_are_returned_without_the_key(self):
         with _licensed(), _Service():
-            out = await cve.get_cve_refresh_settings(db=_FakeSession())
+            out = cve.get_cve_refresh_settings(db=_FakeSession())
         assert out.id == str(SETTINGS_ID)
         assert out.enabled is True
         assert out.enabled_sources == ["nvd", "ubuntu"]
@@ -271,13 +271,13 @@ class TestGetSettings:
     @pytest.mark.asyncio
     async def test_no_stored_key_reports_false(self):
         with _licensed(), _Service(settings=_settings(nvd_api_key=None)):
-            out = await cve.get_cve_refresh_settings(db=_FakeSession())
+            out = cve.get_cve_refresh_settings(db=_FakeSession())
         assert out.has_nvd_api_key is False
 
     @pytest.mark.asyncio
     async def test_null_sources_normalise_to_an_empty_list(self):
         with _licensed(), _Service(settings=_settings(enabled_sources=None)):
-            out = await cve.get_cve_refresh_settings(db=_FakeSession())
+            out = cve.get_cve_refresh_settings(db=_FakeSession())
         assert out.enabled_sources == []
 
     @pytest.mark.asyncio
@@ -287,7 +287,7 @@ class TestGetSettings:
 
         with _licensed(), _Service(get_settings=_boom):
             with pytest.raises(HTTPException) as exc:
-                await cve.get_cve_refresh_settings(db=_FakeSession())
+                cve.get_cve_refresh_settings(db=_FakeSession())
         assert exc.value.status_code == 500
 
 
@@ -295,7 +295,7 @@ class TestUpdateSettings:
     async def _put(self, db, update=None, service=None):
         service = service or _Service()
         with _licensed(), service:
-            out = await cve.update_cve_refresh_settings(
+            out = cve.update_cve_refresh_settings(
                 update or cve.CveRefreshSettingsUpdate(enabled=False),
                 db=db,
                 current_user="admin@invalid",
@@ -361,7 +361,7 @@ class TestDatabaseStats:
     @pytest.mark.asyncio
     async def test_the_service_stats_are_projected(self):
         with _licensed(), _Service():
-            out = await cve.get_database_stats(db=_FakeSession())
+            out = cve.get_database_stats(db=_FakeSession())
         assert out.total_cves == 10
         assert out.total_package_mappings == 20
         assert out.severity_counts == {"HIGH": 5}
@@ -373,7 +373,7 @@ class TestDatabaseStats:
 
         with _licensed(), _Service(get_database_stats=_boom):
             with pytest.raises(HTTPException) as exc:
-                await cve.get_database_stats(db=_FakeSession())
+                cve.get_database_stats(db=_FakeSession())
         assert exc.value.status_code == 500
 
 
@@ -381,7 +381,7 @@ class TestIngestionHistory:
     @pytest.mark.asyncio
     async def test_history_entries_are_serialized(self):
         with _licensed(), _Service():
-            out = await cve.get_ingestion_history(db=_FakeSession())
+            out = cve.get_ingestion_history(db=_FakeSession())
         assert len(out) == 1
         assert out[0].source == "nvd"
         assert out[0].vulnerabilities_processed == 100
@@ -392,7 +392,7 @@ class TestIngestionHistory:
             status="error", error_message="429 rate limited", completed_at=None
         )
         with _licensed(), _Service(get_ingestion_history=lambda db, limit: [failed]):
-            out = await cve.get_ingestion_history(db=_FakeSession())
+            out = cve.get_ingestion_history(db=_FakeSession())
         assert out[0].status == "error"
         assert out[0].error_message == "429 rate limited"
         assert out[0].completed_at is None
@@ -402,17 +402,14 @@ class TestIngestionHistory:
     async def test_an_out_of_range_limit_is_a_400(self, limit):
         with _licensed(), _Service():
             with pytest.raises(HTTPException) as exc:
-                await cve.get_ingestion_history(limit=limit, db=_FakeSession())
+                cve.get_ingestion_history(limit=limit, db=_FakeSession())
         assert exc.value.status_code == 400
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("limit", [1, 100])
     async def test_the_limit_boundaries_are_inclusive(self, limit):
         with _licensed(), _Service():
-            assert (
-                await cve.get_ingestion_history(limit=limit, db=_FakeSession())
-                is not None
-            )
+            assert cve.get_ingestion_history(limit=limit, db=_FakeSession()) is not None
 
     @pytest.mark.asyncio
     async def test_a_service_failure_is_a_500(self):
@@ -421,7 +418,7 @@ class TestIngestionHistory:
 
         with _licensed(), _Service(get_ingestion_history=_boom):
             with pytest.raises(HTTPException) as exc:
-                await cve.get_ingestion_history(db=_FakeSession())
+                cve.get_ingestion_history(db=_FakeSession())
         assert exc.value.status_code == 500
 
 
@@ -543,7 +540,7 @@ class TestClearNvdApiKey:
     async def _clear(self, db, service=None):
         service = service or _Service()
         with _licensed(), service:
-            out = await cve.clear_nvd_api_key(db=db, current_user="admin@invalid")
+            out = cve.clear_nvd_api_key(db=db, current_user="admin@invalid")
         return out, service
 
     @pytest.mark.asyncio

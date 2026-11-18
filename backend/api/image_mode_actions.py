@@ -180,7 +180,7 @@ def _dispatch(
 
 
 @router.post("/image-mode/host/{host_id}/stage")
-async def stage_host_image(
+def stage_host_image(
     host_id: str,
     body: StageImageRequest = StageImageRequest(),
     tenant_db: Session = Depends(get_tenant_db),
@@ -198,7 +198,7 @@ async def stage_host_image(
 
 
 @router.post("/image-mode/host/{host_id}/apply")
-async def apply_host_image(
+def apply_host_image(
     host_id: str,
     body: ApplyImageRequest = ApplyImageRequest(),
     tenant_db: Session = Depends(get_tenant_db),
@@ -216,7 +216,7 @@ async def apply_host_image(
 
 
 @router.post("/image-mode/host/{host_id}/rollback")
-async def rollback_host_image(
+def rollback_host_image(
     host_id: str,
     tenant_db: Session = Depends(get_tenant_db),
     current_user=Depends(get_current_user),

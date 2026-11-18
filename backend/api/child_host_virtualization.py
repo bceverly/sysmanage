@@ -493,7 +493,7 @@ def _build_command_params(
     "/host/{host_id}/virtualization/create-child",
     dependencies=[Depends(JWTBearer())],
 )
-async def create_child_host_request(
+def create_child_host_request(
     host_id: str,
     request: CreateWslChildHostRequest,
     current_user: str = Depends(get_current_user),

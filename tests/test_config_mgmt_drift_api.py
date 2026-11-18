@@ -125,7 +125,7 @@ class TestFleetView:
             ConfigDriftFinding=[finding(), finding(task_name="other")],
             Host=[host()],
         )
-        out = await api.list_drifting_hosts(session)
+        out = api.list_drifting_hosts(session)
         assert len(out) == 1
         assert out[0].finding_count == 2
 
@@ -141,7 +141,7 @@ class TestFleetView:
             ],
             Host=[host()],
         )
-        out = await api.list_drifting_hosts(session)
+        out = api.list_drifting_hosts(session)
         assert out[0].drifting_since == oldest.replace(tzinfo=timezone.utc)
 
     @pytest.mark.asyncio
@@ -155,7 +155,7 @@ class TestFleetView:
             ],
             Host=[host(HOST), host(HOST2)],
         )
-        out = await api.list_drifting_hosts(session)
+        out = api.list_drifting_hosts(session)
         assert out[0].host_id == str(HOST2)
 
     @pytest.mark.asyncio
@@ -164,18 +164,18 @@ class TestFleetView:
             ConfigDriftFinding=[finding(), finding(task_name="b")],
             Host=[host()],
         )
-        out = await api.list_drifting_hosts(session)
+        out = api.list_drifting_hosts(session)
         assert out[0].profile_names == ["baseline"]
 
     @pytest.mark.asyncio
     async def test_a_clean_fleet_is_an_empty_list_not_an_error(self):
-        out = await api.list_drifting_hosts(_Session(ConfigDriftFinding=[]))
+        out = api.list_drifting_hosts(_Session(ConfigDriftFinding=[]))
         assert out == []
 
     @pytest.mark.asyncio
     async def test_timestamps_come_back_marked_utc(self):
         session = _Session(ConfigDriftFinding=[finding()], Host=[host()])
-        out = await api.list_drifting_hosts(session)
+        out = api.list_drifting_hosts(session)
         assert out[0].drifting_since.tzinfo is timezone.utc
 
 
@@ -183,19 +183,19 @@ class TestHostView:
     @pytest.mark.asyncio
     async def test_a_missing_host_is_404(self):
         with pytest.raises(HTTPException) as err:
-            await api.list_host_drift(str(HOST), _Session(Host=[]))
+            api.list_host_drift(str(HOST), _Session(Host=[]))
         assert err.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_a_malformed_id_is_400_not_500(self):
         with pytest.raises(HTTPException) as err:
-            await api.list_host_drift("not-a-uuid", _Session())
+            api.list_host_drift("not-a-uuid", _Session())
         assert err.value.status_code == 400
 
     @pytest.mark.asyncio
     async def test_findings_carry_the_detail_an_operator_acts_on(self):
         session = _Session(Host=[host()], ConfigDriftFinding=[finding()])
-        out = await api.list_host_drift(str(HOST), session)
+        out = api.list_host_drift(str(HOST), session)
         assert out[0].task_name == "ensure sshd config"
         assert out[0].detail == "would set 0600"
 
@@ -206,7 +206,7 @@ class TestRemediation:
         # It runs the profile for real; a softer permission for the same
         # capability would be an escalation path.
         with pytest.raises(HTTPException) as err:
-            await api.remediate_drift(
+            api.remediate_drift(
                 api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
                 _Session(),
                 user(),
@@ -217,7 +217,7 @@ class TestRemediation:
     async def test_an_inactive_host_is_refused(self):
         session = _Session(Host=[host(active=False)])
         with pytest.raises(HTTPException) as err:
-            await api.remediate_drift(
+            api.remediate_drift(
                 api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
                 session,
                 user(SecurityRoles.RUN_SCRIPT),
@@ -230,7 +230,7 @@ class TestRemediation:
         # decision rather than enforce one.
         session = _Session(Host=[host()], ConfigProfile=[profile(is_active=False)])
         with pytest.raises(HTTPException) as err:
-            await api.remediate_drift(
+            api.remediate_drift(
                 api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
                 session,
                 user(SecurityRoles.RUN_SCRIPT),
@@ -241,7 +241,7 @@ class TestRemediation:
     async def test_a_missing_profile_is_404(self):
         session = _Session(Host=[host()], ConfigProfile=[])
         with pytest.raises(HTTPException) as err:
-            await api.remediate_drift(
+            api.remediate_drift(
                 api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
                 session,
                 user(SecurityRoles.RUN_SCRIPT),
@@ -256,7 +256,7 @@ class TestRemediation:
         queued = {}
 
         with _queue_patch(queued):
-            out = await api.remediate_drift(
+            out = api.remediate_drift(
                 api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
                 session,
                 user(SecurityRoles.RUN_SCRIPT),
@@ -278,7 +278,7 @@ class TestRemediation:
         queued = {}
 
         with _queue_patch(queued):
-            await api.remediate_drift(
+            api.remediate_drift(
                 api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
                 session,
                 user(SecurityRoles.RUN_SCRIPT),
@@ -293,7 +293,7 @@ class TestRemediation:
         session = _Session(Host=[host()], ConfigProfile=[profile()])
 
         with _queue_patch({}):
-            out = await api.remediate_drift(
+            out = api.remediate_drift(
                 api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
                 session,
                 user(SecurityRoles.RUN_SCRIPT),
@@ -307,7 +307,7 @@ class TestRemediation:
             Host=[host()], ConfigProfile=[profile(engine="dsc", content="{not json")]
         )
         with pytest.raises(HTTPException) as err:
-            await api.remediate_drift(
+            api.remediate_drift(
                 api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
                 session,
                 user(SecurityRoles.RUN_SCRIPT),

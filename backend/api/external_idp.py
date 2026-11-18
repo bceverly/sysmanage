@@ -246,7 +246,7 @@ class IdpSettingsRequest(BaseModel):
 
 
 @mgmt_router.get("/idp-providers", dependencies=[Depends(JWTBearer())])
-async def list_providers(db: Session = Depends(get_db)):
+def list_providers(db: Session = Depends(get_db)):
     _check_idp_module()
     rows = (
         db.query(models.ExternalIdpProvider)
@@ -279,9 +279,7 @@ def _fill_endpoint_defaults(row) -> None:
 
 
 @mgmt_router.post("/idp-providers", dependencies=[Depends(JWTBearer())])
-async def create_provider(
-    request: ProviderCreateRequest, db: Session = Depends(get_db)
-):
+def create_provider(request: ProviderCreateRequest, db: Session = Depends(get_db)):
     _check_idp_module()
     row = models.ExternalIdpProvider(**request.model_dump())
     _fill_endpoint_defaults(row)
@@ -292,13 +290,13 @@ async def create_provider(
 
 
 @mgmt_router.get("/idp-providers/{provider_id}", dependencies=[Depends(JWTBearer())])
-async def get_provider(provider_id: str, db: Session = Depends(get_db)):
+def get_provider(provider_id: str, db: Session = Depends(get_db)):
     _check_idp_module()
     return _get_provider_or_404(db, provider_id).to_dict()
 
 
 @mgmt_router.put("/idp-providers/{provider_id}", dependencies=[Depends(JWTBearer())])
-async def update_provider(
+def update_provider(
     provider_id: str,
     request: ProviderUpdateRequest,
     db: Session = Depends(get_db),
@@ -314,7 +312,7 @@ async def update_provider(
 
 
 @mgmt_router.delete("/idp-providers/{provider_id}", dependencies=[Depends(JWTBearer())])
-async def delete_provider(provider_id: str, db: Session = Depends(get_db)):
+def delete_provider(provider_id: str, db: Session = Depends(get_db)):
     _check_idp_module()
     row = _get_provider_or_404(db, provider_id)
     db.delete(row)
@@ -331,7 +329,7 @@ async def delete_provider(provider_id: str, db: Session = Depends(get_db)):
     "/api/idp-providers/{provider_id}/role-mappings",
     dependencies=[Depends(JWTBearer())],
 )
-async def list_mappings(provider_id: str, db: Session = Depends(get_db)):
+def list_mappings(provider_id: str, db: Session = Depends(get_db)):
     _check_idp_module()
     pid = _parse_uuid(provider_id, "provider_id")
     rows = (
@@ -347,7 +345,7 @@ async def list_mappings(provider_id: str, db: Session = Depends(get_db)):
     "/api/idp-providers/{provider_id}/role-mappings",
     dependencies=[Depends(JWTBearer())],
 )
-async def create_mapping(
+def create_mapping(
     provider_id: str,
     request: RoleMappingCreateRequest,
     db: Session = Depends(get_db),
@@ -386,9 +384,7 @@ async def create_mapping(
     "/api/idp-providers/{provider_id}/role-mappings/{mapping_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def delete_mapping(
-    provider_id: str, mapping_id: str, db: Session = Depends(get_db)
-):
+def delete_mapping(provider_id: str, mapping_id: str, db: Session = Depends(get_db)):
     _check_idp_module()
     pid = _parse_uuid(provider_id, "provider_id")
     mid = _parse_uuid(mapping_id, "mapping_id")
@@ -413,13 +409,13 @@ async def delete_mapping(
 
 
 @mgmt_router.get("/settings/idp", dependencies=[Depends(JWTBearer())])
-async def get_idp_settings(db: Session = Depends(get_db)):
+def get_idp_settings(db: Session = Depends(get_db)):
     _check_idp_module()
     return _get_settings(db).to_dict()
 
 
 @mgmt_router.put("/settings/idp", dependencies=[Depends(JWTBearer())])
-async def update_idp_settings(
+def update_idp_settings(
     request: IdpSettingsRequest = Body(...), db: Session = Depends(get_db)
 ):
     _check_idp_module()
@@ -444,7 +440,7 @@ async def update_idp_settings(
 
 
 @router.get("/api/auth/oidc/{provider_id}/start")
-async def oidc_start(provider_id: str, db: Session = Depends(get_db)):
+def oidc_start(provider_id: str, db: Session = Depends(get_db)):
     """Build the IdP redirect URL and return it to the client.
 
     Anonymous endpoint -- the browser is mid-login when it arrives here.
@@ -499,7 +495,7 @@ def _refuse(provider, protocol: str, result: dict):
 
 
 @router.get("/api/auth/oidc/{provider_id}/callback")
-async def oidc_callback(
+def oidc_callback(
     provider_id: str,
     request: Request,
     db: Session = Depends(get_db),
@@ -685,7 +681,7 @@ def _saml_config(provider) -> dict:
 
 
 @router.get("/api/auth/saml/{provider_id}/metadata")
-async def saml_metadata(provider_id: str, db: Session = Depends(get_db)):
+def saml_metadata(provider_id: str, db: Session = Depends(get_db)):
     """Return our SP metadata XML, for the IdP administrator (anonymous)."""
     engine = _check_idp_module()
     provider = _get_provider_or_404(db, provider_id)
@@ -706,7 +702,7 @@ async def saml_metadata(provider_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/api/auth/saml/{provider_id}/start")
-async def saml_start(provider_id: str, db: Session = Depends(get_db)):
+def saml_start(provider_id: str, db: Session = Depends(get_db)):
     """Build the SP-initiated SSO redirect to the IdP (anonymous)."""
     engine = _check_idp_module()
     provider = _get_provider_or_404(db, provider_id)

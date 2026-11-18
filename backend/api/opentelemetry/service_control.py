@@ -47,7 +47,7 @@ _ENGINE_REQUIRED_DETAIL = N_(
     dependencies=[Depends(JWTBearer())],
     response_model=OpenTelemetryDeployResponse,
 )
-async def start_opentelemetry(
+def start_opentelemetry(
     host_id: str,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
@@ -157,7 +157,7 @@ async def start_opentelemetry(
     dependencies=[Depends(JWTBearer())],
     response_model=OpenTelemetryDeployResponse,
 )
-async def stop_opentelemetry(
+def stop_opentelemetry(
     host_id: str,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
@@ -263,7 +263,7 @@ async def stop_opentelemetry(
     dependencies=[Depends(JWTBearer())],
     response_model=OpenTelemetryDeployResponse,
 )
-async def restart_opentelemetry(
+def restart_opentelemetry(
     host_id: str,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),

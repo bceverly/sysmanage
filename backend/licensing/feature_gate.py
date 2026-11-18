@@ -28,15 +28,39 @@ from backend.utils.verbosity_logger import get_logger
 logger = get_logger("backend.licensing.feature_gate")
 
 
-class LicenseRequiredError(Exception):
-    """Exception raised when a Pro+ license is required but not available."""
+class LicenseRequiredError(HTTPException):
+    """A Pro+ license (or its engine) is required but not available.
 
-    def __init__(
-        self, message: str, feature: Optional[str] = None, module: Optional[str] = None
+    An ``HTTPException`` carrying exactly the status and body the async gates
+    send -- 402 ``pro_plus_required``, or 503 ``module_not_available`` -- so a
+    route answers the same whether its handler is ``def`` or ``async def``.
+    It used to be a plain ``Exception``, which FastAPI turned into a 500: when
+    the route handlers became plain ``def`` (2026-11-18, so their blocking
+    calls leave the event loop) every gated route would have answered 500.
+    """
+
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        message: str,
+        feature: Optional[str] = None,
+        module: Optional[str] = None,
+        *,
+        status_code: int = status.HTTP_402_PAYMENT_REQUIRED,
+        error: str = "pro_plus_required",
     ):
-        super().__init__(message)
+        detail = {"error": error, "message": message}
+        if feature is not None:
+            detail["feature"] = feature
+        if module is not None:
+            detail["module"] = module
+        super().__init__(status_code=status_code, detail=detail)
+        self.args = (message,)
+        self.message = message
         self.feature = feature
         self.module = module
+
+    def __str__(self) -> str:
+        return self.message
 
 
 def requires_feature(feature: FeatureCode | str) -> Callable:
@@ -227,6 +251,8 @@ def _check_module_loaded_sync(module_code: ModuleCode) -> None:
         raise LicenseRequiredError(
             f"The '{module_code.value}' module is not currently available",
             module=module_code.value,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            error="module_not_available",
         )
 
 

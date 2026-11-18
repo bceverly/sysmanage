@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
     dependencies=[Depends(JWTBearer())],
     response_model=OpenTelemetryDeployResponse,
 )
-async def deploy_opentelemetry(
+def deploy_opentelemetry(
     host_id: str,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
@@ -101,9 +101,7 @@ async def deploy_opentelemetry(
             validate_host_approval_status(host)
 
             # Check eligibility
-            eligibility = await check_opentelemetry_eligibility(
-                host_id, current_user, db
-            )
+            eligibility = check_opentelemetry_eligibility(host_id, current_user, db)
 
             if not eligibility.eligible:
                 raise HTTPException(
@@ -195,7 +193,7 @@ async def deploy_opentelemetry(
     dependencies=[Depends(JWTBearer())],
     response_model=OpenTelemetryDeployResponse,
 )
-async def remove_opentelemetry(
+def remove_opentelemetry(
     host_id: str,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),

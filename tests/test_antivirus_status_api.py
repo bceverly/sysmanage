@@ -202,25 +202,25 @@ class TestGetAntivirusStatus:
     async def test_a_recorded_status_is_returned(self):
         status = SimpleNamespace(id="s1")
         db = _FakeSession(Host=[_host()], AntivirusStatus=[status])
-        assert await av.get_antivirus_status(str(HOST_ID), db=db) is status
+        assert av.get_antivirus_status(str(HOST_ID), db=db) is status
 
     @pytest.mark.asyncio
     async def test_a_host_that_has_never_reported_returns_null_not_404(self):
         # "No AV data yet" is a normal state for a freshly enrolled host; a
         # 404 here would render as an error banner on every new host.
         db = _FakeSession(Host=[_host()])
-        assert await av.get_antivirus_status(str(HOST_ID), db=db) is None
+        assert av.get_antivirus_status(str(HOST_ID), db=db) is None
 
     @pytest.mark.asyncio
     async def test_a_malformed_host_id_is_a_400(self):
         with pytest.raises(HTTPException) as exc:
-            await av.get_antivirus_status("not-a-uuid", db=_FakeSession())
+            av.get_antivirus_status("not-a-uuid", db=_FakeSession())
         assert exc.value.status_code == 400
 
     @pytest.mark.asyncio
     async def test_an_unknown_host_is_a_404(self):
         with pytest.raises(HTTPException) as exc:
-            await av.get_antivirus_status(str(HOST_ID), db=_FakeSession())
+            av.get_antivirus_status(str(HOST_ID), db=_FakeSession())
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
@@ -228,7 +228,7 @@ class TestGetAntivirusStatus:
         db = _FakeSession()
         db.query = MagicMock(side_effect=RuntimeError("db gone"))
         with pytest.raises(HTTPException) as exc:
-            await av.get_antivirus_status(str(HOST_ID), db=db)
+            av.get_antivirus_status(str(HOST_ID), db=db)
         assert exc.value.status_code == 500
 
 
@@ -236,7 +236,7 @@ class TestDeployAntivirus:
     async def _deploy(self, host_ids, db, user=None, env=None, **request):
         env = env or _Env()
         with env:
-            out = await av.deploy_antivirus(
+            out = av.deploy_antivirus(
                 av.AntivirusDeployRequest(host_ids=host_ids, **request),
                 db_session=db,
                 current_user=user or _user(SecurityRoles.DEPLOY_ANTIVIRUS),
@@ -365,7 +365,7 @@ class TestDeployAntivirus:
                 f"{MOD}.queue_ops.enqueue_message",
                 side_effect=RuntimeError("queue down"),
             ):
-                out = await av.deploy_antivirus(
+                out = av.deploy_antivirus(
                     av.AntivirusDeployRequest(host_ids=[str(HOST_ID)]),
                     db_session=db,
                     current_user=_user(SecurityRoles.DEPLOY_ANTIVIRUS),
@@ -389,9 +389,7 @@ class TestSingleHostActions:
         db = _FakeSession(Host=[_host()])
         env = _Env()
         with env:
-            out = await getattr(av, route)(
-                str(HOST_ID), db=db, current_user=_user(role)
-            )
+            out = getattr(av, route)(str(HOST_ID), db=db, current_user=_user(role))
         assert word in out["message"]
         assert env.enqueued[0]["host_id"] == str(HOST_ID)
         assert db.commits == 1
@@ -412,7 +410,7 @@ class TestSingleHostActions:
         # re-enable what an operator took off on purpose.
         db = _FakeSession(Host=[_host()])
         with _Env():
-            await getattr(av, route)(str(HOST_ID), db=db, current_user=_user(role))
+            getattr(av, route)(str(HOST_ID), db=db, current_user=_user(role))
         (record,) = db._by_key["AntivirusAutoDeploy"]
         assert record.status == "opted_out" and record.host_id == HOST_ID
 
@@ -421,7 +419,7 @@ class TestSingleHostActions:
         opted = models.AntivirusAutoDeploy(host_id=HOST_ID, status="opted_out")
         db = _FakeSession(Host=[_host()], AntivirusAutoDeploy=[opted])
         with _Env():
-            await av.enable_antivirus(
+            av.enable_antivirus(
                 str(HOST_ID), db=db, current_user=_user(SecurityRoles.ENABLE_ANTIVIRUS)
             )
         assert db._by_key["AntivirusAutoDeploy"] == []
@@ -433,7 +431,7 @@ class TestSingleHostActions:
         # allowed to remove it.
         other = next(r for _, r, _ in self.ACTIONS if r != role)
         with pytest.raises(HTTPException) as exc:
-            await getattr(av, route)(
+            getattr(av, route)(
                 str(HOST_ID), db=_FakeSession(), current_user=_user(other)
             )
         assert exc.value.status_code == 403
@@ -444,7 +442,7 @@ class TestSingleHostActions:
         env = _Env()
         with env:
             with pytest.raises(HTTPException) as exc:
-                await getattr(av, route)(
+                getattr(av, route)(
                     str(HOST_ID), db=_FakeSession(), current_user=_user(role)
                 )
         assert exc.value.status_code == 404
@@ -460,7 +458,7 @@ class TestSingleHostActions:
                 side_effect=RuntimeError("queue down"),
             ):
                 with pytest.raises(HTTPException) as exc:
-                    await av.remove_antivirus(
+                    av.remove_antivirus(
                         str(HOST_ID),
                         db=db,
                         current_user=_user(SecurityRoles.REMOVE_ANTIVIRUS),
@@ -471,7 +469,7 @@ class TestSingleHostActions:
 class TestAntivirusCoverage:
     @pytest.mark.asyncio
     async def test_an_empty_fleet_reports_zero_rather_than_dividing_by_zero(self):
-        out = await av.get_antivirus_coverage(db=_FakeSession())
+        out = av.get_antivirus_coverage(db=_FakeSession())
         assert out.total_hosts == 0
         assert out.coverage_percentage == 0.0
 
@@ -485,7 +483,7 @@ class TestAntivirusCoverage:
                 "CommercialAntivirusStatus.host_id": [(both,)],
             },
         )
-        out = await av.get_antivirus_coverage(db=db)
+        out = av.get_antivirus_coverage(db=db)
         # A host running both must count once; summing would report 3/4 here
         # and could exceed 100% on a mixed fleet.
         assert out.hosts_with_antivirus == 2
@@ -498,7 +496,7 @@ class TestAntivirusCoverage:
             Host=[_host()] * 3,
             **{"AntivirusStatus.host_id": [(uuid.uuid4(),)]},
         )
-        out = await av.get_antivirus_coverage(db=db)
+        out = av.get_antivirus_coverage(db=db)
         assert out.coverage_percentage == 33.33
 
     @pytest.mark.asyncio
@@ -506,5 +504,5 @@ class TestAntivirusCoverage:
         db = _FakeSession()
         db.query = MagicMock(side_effect=RuntimeError("db gone"))
         with pytest.raises(HTTPException) as exc:
-            await av.get_antivirus_coverage(db=db)
+            av.get_antivirus_coverage(db=db)
         assert exc.value.status_code == 500

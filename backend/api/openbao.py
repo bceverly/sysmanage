@@ -734,7 +734,7 @@ def unseal_openbao() -> Dict[str, Any]:
 
 
 @router.get("/openbao/status", dependencies=[Depends(JWTBearer())])
-async def get_status():
+def get_status():
     """
     Get the current status of the OpenBAO server.
     """
@@ -742,7 +742,7 @@ async def get_status():
 
 
 @router.post("/openbao/start", dependencies=[Depends(JWTBearer())])
-async def start_server():
+def start_server():
     """
     Start the OpenBAO development server.
     """
@@ -764,7 +764,7 @@ async def start_server():
 
 
 @router.post("/openbao/stop", dependencies=[Depends(JWTBearer())])
-async def stop_server():
+def stop_server():
     """
     Stop the OpenBAO development server.
     """
@@ -786,7 +786,7 @@ async def stop_server():
 
 
 @router.get("/openbao/config", dependencies=[Depends(JWTBearer())])
-async def get_config():
+def get_config():
     """
     Get the current OpenBAO configuration from sysmanage settings.
     """
@@ -807,7 +807,7 @@ async def get_config():
 
 
 @router.post("/openbao/seal", dependencies=[Depends(JWTBearer())])
-async def seal_vault():
+def seal_vault():
     """
     Seal the OpenBAO vault.
     """
@@ -829,7 +829,7 @@ async def seal_vault():
 
 
 @router.post("/openbao/unseal", dependencies=[Depends(JWTBearer())])
-async def unseal_vault():
+def unseal_vault():
     """
     Unseal the OpenBAO vault.
     """

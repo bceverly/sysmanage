@@ -49,11 +49,14 @@ async def test_years_need_a_storage_host_that_can_keep_them(session):
     with patch.object(retention, "_engine", return_value=ENGINE):
         _storage_reports(session, s, [])
         assert (
-            await _status(api.put_policy(str(s.host.id), body, session, MANAGER)) == 409
+            await _status(
+                lambda: api.put_policy(str(s.host.id), body, session, MANAGER)
+            )
+            == 409
         )
         _storage_reports(session, s, ["keep_yearly", "something_else"])
         assert json.loads(s.policy.storage_abilities) == ["keep_yearly"]
-        saved = await api.put_policy(str(s.host.id), body, session, MANAGER)
+        saved = api.put_policy(str(s.host.id), body, session, MANAGER)
     assert saved["keep_yearly"] == 5 and saved["yearly_supported"] is True
     assert jobs.prune_keep(s.policy) == {"keep_last": 7, "keep_yearly": 5}
 
@@ -68,7 +71,7 @@ async def test_a_policy_that_has_years_keeps_them_whatever_the_storage_side(sess
     _storage_reports(session, s, [])
     body = api.PolicyBody(keep_last=7, interval_hours=12, keep_yearly=3)
     with patch.object(retention, "_engine", return_value=None):
-        saved = await api.put_policy(str(s.host.id), body, session, MANAGER)
+        saved = api.put_policy(str(s.host.id), body, session, MANAGER)
     assert saved["keep_yearly"] == 3 and saved["yearly_supported"] is False
     assert jobs.prune_keep(s.policy)["keep_yearly"] == 3
 
@@ -82,7 +85,7 @@ async def test_a_first_policy_takes_years_before_any_report(session):
     session.flush()
     body = api.PolicyBody(keep_last=7, keep_monthly=12, keep_yearly=3)
     with patch.object(retention, "_engine", return_value=ENGINE):
-        saved = await api.put_policy(str(s.host.id), body, session, MANAGER)
+        saved = api.put_policy(str(s.host.id), body, session, MANAGER)
     assert saved["keep_yearly"] == 3
 
 
@@ -110,7 +113,10 @@ async def test_years_are_bounded_and_go_to_the_preview(session):
     with patch.object(retention, "_engine", return_value=ENGINE):
         body = api.PolicyBody(keep_last=7, keep_yearly=101)
         assert (
-            await _status(api.put_policy(str(s.host.id), body, session, MANAGER)) == 422
+            await _status(
+                lambda: api.put_policy(str(s.host.id), body, session, MANAGER)
+            )
+            == 422
         )
     seen = {}
 
@@ -120,7 +126,7 @@ async def test_years_are_bounded_and_go_to_the_preview(session):
 
     with patch.object(retention, "_engine",
                       return_value=SimpleNamespace(retention_preview=preview)):  # fmt: skip
-        await retention.retention_preview(
+        retention.retention_preview(
             str(s.host.id), keep_last=2, keep_yearly=4, db=session
         )
     assert seen["keep_yearly"] == 4

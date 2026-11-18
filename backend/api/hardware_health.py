@@ -92,7 +92,7 @@ def _host_or_404(db: Session, host_id: str) -> models.Host:
 
 
 @router.get("/host/{host_id}/hardware-health")
-async def host_hardware_health(
+def host_hardware_health(
     host_id: str, db: Session = Depends(get_tenant_db)
 ) -> Dict[str, Any]:
     host = _host_or_404(db, host_id)
@@ -137,7 +137,7 @@ def _counts(statuses) -> Dict[str, int]:
 
 
 @router.get("/hardware-health/hosts")
-async def fleet_hardware_health(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def fleet_hardware_health(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """Every approved host, worst first."""
     hosts = _approved(db)
     ids = [h.id for h in hosts]
@@ -183,7 +183,7 @@ async def fleet_hardware_health(db: Session = Depends(get_tenant_db)) -> Dict[st
 
 
 @router.get("/hardware-health/summary")
-async def fleet_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def fleet_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     hosts = _approved(db)
     with_parts = hardware_health.hosts_with_components(db, [h.id for h in hosts])
     statuses = [
@@ -194,7 +194,7 @@ async def fleet_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
 
 
 @router.get("/hardware-health/events")
-async def fleet_events(
+def fleet_events(
     db: Session = Depends(get_tenant_db),
     open_only: bool = Query(False, alias="open"),
     host_id: Optional[str] = None,
@@ -259,7 +259,7 @@ def _change(db, event_id, body, current_user, action):
 
 
 @router.post("/hardware-health/events/{event_id}/acknowledge")
-async def acknowledge_event(
+def acknowledge_event(
     event_id: str,
     body: EventNote,
     db: Session = Depends(get_tenant_db),
@@ -269,7 +269,7 @@ async def acknowledge_event(
 
 
 @router.post("/hardware-health/events/{event_id}/resolve")
-async def resolve_event(
+def resolve_event(
     event_id: str,
     body: EventNote,
     db: Session = Depends(get_tenant_db),
@@ -326,7 +326,7 @@ def _bulk(db, body: BulkEvents, current_user, action: str) -> Dict[str, Any]:
 
 
 @router.post("/hardware-health/events/acknowledge")
-async def acknowledge_events(
+def acknowledge_events(
     body: BulkEvents,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -335,7 +335,7 @@ async def acknowledge_events(
 
 
 @router.post("/hardware-health/events/resolve")
-async def resolve_events(
+def resolve_events(
     body: BulkEvents,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -344,7 +344,7 @@ async def resolve_events(
 
 
 @router.put("/host/{host_id}/hardware-health/temperature-limit")
-async def set_temperature_limit(
+def set_temperature_limit(
     host_id: str,
     body: TemperatureLimit,
     db: Session = Depends(get_tenant_db),
@@ -383,7 +383,7 @@ async def set_temperature_limit(
 
 
 @router.get("/hardware-health/smartmontools")
-async def smartmontools_status(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def smartmontools_status(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     hosts = smartmontools_install.recommended_hosts(db)
     installs = smartmontools_install.installs_by_host(db, [h.id for h in hosts])
     return {
@@ -412,7 +412,7 @@ def _require_install_roles(current_user) -> None:
 
 
 @router.post("/hardware-health/smartmontools/install")
-async def install_smartmontools(
+def install_smartmontools(
     body: InstallRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -441,7 +441,7 @@ async def install_smartmontools(
 
 
 @router.put("/hardware-health/smartmontools")
-async def set_smartmontools_auto(
+def set_smartmontools_auto(
     body: AutoInstall,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

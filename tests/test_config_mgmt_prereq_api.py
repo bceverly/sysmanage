@@ -131,13 +131,13 @@ class TestHostLookup:
     @pytest.mark.asyncio
     async def test_malformed_host_id_is_a_400_not_a_500(self):
         with pytest.raises(HTTPException) as exc:
-            await api.get_config_mgmt_prerequisite("not-a-uuid", _FakeSession())
+            api.get_config_mgmt_prerequisite("not-a-uuid", _FakeSession())
         assert exc.value.status_code == 400
 
     @pytest.mark.asyncio
     async def test_unknown_host_is_a_404(self):
         with pytest.raises(HTTPException) as exc:
-            await api.get_config_mgmt_prerequisite(str(HOST_ID), _FakeSession(Host=[]))
+            api.get_config_mgmt_prerequisite(str(HOST_ID), _FakeSession(Host=[]))
         assert exc.value.status_code == 404
 
 
@@ -183,7 +183,7 @@ class TestStatusRoute:
         session = _FakeSession(
             Host=[_host()], SoftwarePackage=[_pkg("ansible-core", "2.20.1")]
         )
-        result = await api.get_config_mgmt_prerequisite(str(HOST_ID), session)
+        result = api.get_config_mgmt_prerequisite(str(HOST_ID), session)
         assert result.status == "satisfied"
         assert result.installed_version == "2.20.1"
         assert result.can_install is False
@@ -192,14 +192,14 @@ class TestStatusRoute:
     @pytest.mark.asyncio
     async def test_bare_host_reports_missing_with_a_button(self):
         session = _FakeSession(Host=[_host()], SoftwarePackage=[])
-        result = await api.get_config_mgmt_prerequisite(str(HOST_ID), session)
+        result = api.get_config_mgmt_prerequisite(str(HOST_ID), session)
         assert result.status == "missing"
         assert result.can_install is True
 
     @pytest.mark.asyncio
     async def test_windows_reports_not_required_and_offers_nothing(self):
         session = _FakeSession(Host=[_host(platform="Windows")], SoftwarePackage=[])
-        result = await api.get_config_mgmt_prerequisite(str(HOST_ID), session)
+        result = api.get_config_mgmt_prerequisite(str(HOST_ID), session)
         assert result.status == "not_required"
         assert result.executor == "dsc"
         assert result.can_install is False
@@ -209,7 +209,7 @@ class TestStatusRoute:
         session = _FakeSession(
             Host=[_host()], SoftwarePackage=[_pkg("ansible-core", "2.14.2")]
         )
-        result = await api.get_config_mgmt_prerequisite(str(HOST_ID), session)
+        result = api.get_config_mgmt_prerequisite(str(HOST_ID), session)
         assert result.status == "too_old"
         assert result.installed_version == "2.14.2"
         assert result.minimum_version == "2.20"
@@ -220,7 +220,7 @@ class TestInstallRoute:
     async def test_install_requires_the_add_package_role(self):
         with _Env():
             with pytest.raises(HTTPException) as exc:
-                await api.install_config_mgmt_prerequisite(
+                api.install_config_mgmt_prerequisite(
                     str(HOST_ID), _FakeSession(Host=[_host()]), _user()
                 )
         assert exc.value.status_code == 403
@@ -229,7 +229,7 @@ class TestInstallRoute:
     async def test_install_queues_a_deployment_plan_for_the_host(self):
         session = _FakeSession(Host=[_host()])
         with _Env() as env:
-            result = await api.install_config_mgmt_prerequisite(
+            result = api.install_config_mgmt_prerequisite(
                 str(HOST_ID), session, _user(SecurityRoles.ADD_PACKAGE)
             )
         assert result.queued is True
@@ -248,7 +248,7 @@ class TestInstallRoute:
         # Ordering matters: the refresh has to be queued BEHIND the install or
         # it re-reports the old inventory and the card stays wrong.
         with _Env() as env:
-            await api.install_config_mgmt_prerequisite(
+            api.install_config_mgmt_prerequisite(
                 str(HOST_ID),
                 _FakeSession(Host=[_host()]),
                 _user(SecurityRoles.ADD_PACKAGE),
@@ -259,7 +259,7 @@ class TestInstallRoute:
     @pytest.mark.asyncio
     async def test_install_is_audited(self):
         with _Env() as env:
-            await api.install_config_mgmt_prerequisite(
+            api.install_config_mgmt_prerequisite(
                 str(HOST_ID),
                 _FakeSession(Host=[_host()]),
                 _user(SecurityRoles.ADD_PACKAGE),
@@ -273,7 +273,7 @@ class TestInstallRoute:
         session = _FakeSession(Host=[_host(platform="Windows")])
         with _Env() as env:
             with pytest.raises(HTTPException) as exc:
-                await api.install_config_mgmt_prerequisite(
+                api.install_config_mgmt_prerequisite(
                     str(HOST_ID), session, _user(SecurityRoles.ADD_PACKAGE)
                 )
         assert exc.value.status_code == 400
@@ -286,7 +286,7 @@ class TestInstallRoute:
         session = _FakeSession(Host=[_host(platform_release="SomeVendorOS 1.0")])
         with _Env() as env:
             with pytest.raises(HTTPException) as exc:
-                await api.install_config_mgmt_prerequisite(
+                api.install_config_mgmt_prerequisite(
                     str(HOST_ID), session, _user(SecurityRoles.ADD_PACKAGE)
                 )
         assert exc.value.status_code == 400
@@ -307,7 +307,7 @@ class TestEnginesEndpoint:
             Host=[_host()],
             SoftwarePackage=[_pkg("puppet-agent", "8.10.0", "apt")],
         )
-        out = await api.list_config_mgmt_engines(str(HOST_ID), session)
+        out = api.list_config_mgmt_engines(str(HOST_ID), session)
         assert out.host_id == str(HOST_ID)
         assert out.default_engine == "ansible-core"
         names = [e.engine for e in out.engines]
@@ -318,7 +318,7 @@ class TestEnginesEndpoint:
     @pytest.mark.asyncio
     async def test_windows_leads_with_the_bundled_engine(self):
         session = _FakeSession(Host=[_host(platform="Windows")], SoftwarePackage=[])
-        out = await api.list_config_mgmt_engines(str(HOST_ID), session)
+        out = api.list_config_mgmt_engines(str(HOST_ID), session)
         assert out.default_engine == "dsc"
         assert out.engines[0].engine == "dsc"
         assert out.engines[0].status == "not_required"
@@ -328,7 +328,7 @@ class TestEnginesEndpoint:
         # Four engines apply on Linux but they do not need four reads; the
         # route collapses duplicate patterns first.
         session = _FakeSession(Host=[_host()], SoftwarePackage=[])
-        await api.list_config_mgmt_engines(str(HOST_ID), session)
+        api.list_config_mgmt_engines(str(HOST_ID), session)
         package_queries = [q for q in session.queries if q is not session.queries[0]]
         assert (
             len(package_queries) <= 3
@@ -337,13 +337,13 @@ class TestEnginesEndpoint:
     @pytest.mark.asyncio
     async def test_malformed_host_id_is_a_400(self):
         with pytest.raises(HTTPException) as exc:
-            await api.list_config_mgmt_engines("nope", _FakeSession())
+            api.list_config_mgmt_engines("nope", _FakeSession())
         assert exc.value.status_code == 400
 
     @pytest.mark.asyncio
     async def test_unknown_host_is_a_404(self):
         with pytest.raises(HTTPException) as exc:
-            await api.list_config_mgmt_engines(str(HOST_ID), _FakeSession(Host=[]))
+            api.list_config_mgmt_engines(str(HOST_ID), _FakeSession(Host=[]))
         assert exc.value.status_code == 404
 
 
@@ -360,7 +360,7 @@ class TestEngineAwareInstall:
     async def test_omitting_the_engine_installs_the_platform_default(self):
         session = _FakeSession(Host=[_host()])
         with _Env() as env:
-            await api.install_config_mgmt_prerequisite(
+            api.install_config_mgmt_prerequisite(
                 str(HOST_ID), session, _user(SecurityRoles.ADD_PACKAGE)
             )
         plan = env.enqueued[0]["message_data"]["data"]["parameters"]["plan"]
@@ -372,7 +372,7 @@ class TestEngineAwareInstall:
         with _Env() as env, patch(
             "backend.api.config_mgmt_prereq.require_module", return_value=None
         ):
-            await api.install_config_mgmt_prerequisite(
+            api.install_config_mgmt_prerequisite(
                 str(HOST_ID),
                 session,
                 _user(SecurityRoles.ADD_PACKAGE),
@@ -389,7 +389,7 @@ class TestEngineAwareInstall:
             side_effect=HTTPException(status_code=402, detail="pro_plus_required"),
         ):
             with pytest.raises(HTTPException) as exc:
-                await api.install_config_mgmt_prerequisite(
+                api.install_config_mgmt_prerequisite(
                     str(HOST_ID),
                     session,
                     _user(SecurityRoles.ADD_PACKAGE),
@@ -402,7 +402,7 @@ class TestEngineAwareInstall:
     async def test_the_free_engine_never_consults_the_licence(self):
         session = _FakeSession(Host=[_host()])
         with _Env(), patch("backend.api.config_mgmt_prereq.require_module") as gate:
-            await api.install_config_mgmt_prerequisite(
+            api.install_config_mgmt_prerequisite(
                 str(HOST_ID),
                 session,
                 _user(SecurityRoles.ADD_PACKAGE),
@@ -415,7 +415,7 @@ class TestEngineAwareInstall:
         session = _FakeSession(Host=[_host()])
         with _Env() as env:
             with pytest.raises(HTTPException) as exc:
-                await api.install_config_mgmt_prerequisite(
+                api.install_config_mgmt_prerequisite(
                     str(HOST_ID),
                     session,
                     _user(SecurityRoles.ADD_PACKAGE),
@@ -432,7 +432,7 @@ class TestEngineAwareInstall:
         with _Env() as env, patch(
             "backend.api.config_mgmt_prereq.require_module", return_value=None
         ):
-            await api.install_config_mgmt_prerequisite(
+            api.install_config_mgmt_prerequisite(
                 str(HOST_ID), session, _user(SecurityRoles.ADD_PACKAGE), engine="chef"
             )
         assert env.audits[0]["details"]["executor"] == "chef"
@@ -448,7 +448,7 @@ class TestEngineAwareInstall:
             "backend.api.config_mgmt_prereq.require_module", return_value=None
         ):
             with pytest.raises(HTTPException) as exc:
-                await api.install_config_mgmt_prerequisite(
+                api.install_config_mgmt_prerequisite(
                     str(HOST_ID),
                     session,
                     _user(SecurityRoles.ADD_PACKAGE),

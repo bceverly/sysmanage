@@ -164,7 +164,7 @@ def _apply_now(db: Session, current_user) -> Dict[str, Any]:
 
 
 @router.get("/backups/tag-policies")
-async def list_tag_policies(
+def list_tag_policies(
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, List[Dict[str, Any]]]:
@@ -178,7 +178,7 @@ async def list_tag_policies(
 
 
 @router.post("/backups/tag-policies")
-async def create_tag_policy(
+def create_tag_policy(
     body: TagPolicyBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -212,7 +212,7 @@ async def create_tag_policy(
 
 
 @router.put("/backups/tag-policies/{policy_id}")
-async def update_tag_policy(
+def update_tag_policy(
     policy_id: str,
     body: TagPolicyBody,
     db: Session = Depends(get_tenant_db),
@@ -242,7 +242,7 @@ async def update_tag_policy(
 
 
 @router.delete("/backups/tag-policies/{policy_id}")
-async def delete_tag_policy(
+def delete_tag_policy(
     policy_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -261,7 +261,7 @@ async def delete_tag_policy(
 
 
 @router.post("/backups/tag-policies/apply")
-async def apply_tag_policies(
+def apply_tag_policies(
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
@@ -286,7 +286,7 @@ def _handover_refusal(refused: tag_policies.HandoverRefused) -> HTTPException:
 
 
 @router.get("/backups/host/{host_id}/use-tag-policy")
-async def preview_use_tag_policy(
+def preview_use_tag_policy(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -303,7 +303,7 @@ async def preview_use_tag_policy(
 
 
 @router.post("/backups/host/{host_id}/use-tag-policy")
-async def use_tag_policy(
+def use_tag_policy(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

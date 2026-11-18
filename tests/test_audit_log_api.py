@@ -259,7 +259,7 @@ class TestListAuditLogs:
     async def _list(self, session, filters=None, limit=100, offset=0, user=None):
         maker, _ = _authorized(user)
         with maker:
-            return await al.list_audit_logs(
+            return al.list_audit_logs(
                 filters=filters or _filters(),
                 limit=limit,
                 offset=offset,
@@ -327,7 +327,7 @@ class TestGetAuditLogEntry:
     async def _get(self, session, audit_id=str(AUDIT_ID), user=None):
         maker, _ = _authorized(user)
         with maker:
-            return await al.get_audit_log_entry(
+            return al.get_audit_log_entry(
                 audit_id, db_session=session, current_user="admin@invalid"
             )
 

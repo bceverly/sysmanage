@@ -58,7 +58,7 @@ def _license_on():
 async def test_unlicensed_is_402(db_session):
     with patch.object(mod.license_service, "has_feature", return_value=False):
         with pytest.raises(HTTPException) as exc:
-            await enable_fips(
+            enable_fips(
                 str(uuid.uuid4()),
                 FipsChangeRequest(),
                 tenant_db=db_session,
@@ -75,7 +75,7 @@ async def test_module_missing_is_503(db_session):
         mod.module_loader, "get_module", return_value=None
     ):
         with pytest.raises(HTTPException) as exc:
-            await enable_fips(
+            enable_fips(
                 str(uuid.uuid4()),
                 FipsChangeRequest(),
                 tenant_db=db_session,
@@ -92,7 +92,7 @@ async def test_missing_host_is_404(db_session):
         mod.module_loader, "get_module", return_value=_fake_engine({})
     ):
         with pytest.raises(HTTPException) as exc:
-            await enable_fips(
+            enable_fips(
                 str(uuid.uuid4()),
                 FipsChangeRequest(),
                 tenant_db=db_session,
@@ -112,7 +112,7 @@ async def test_engine_rejection_is_400(db_session):
         mod.module_loader, "get_module", return_value=engine
     ):
         with pytest.raises(HTTPException) as exc:
-            await enable_fips(
+            enable_fips(
                 str(host_id),
                 FipsChangeRequest(),
                 tenant_db=db_session,
@@ -141,7 +141,7 @@ async def test_enable_dispatches_command(db_session):
     ) as enqueue, patch.object(
         mod.AuditService, "log"
     ):
-        result = await enable_fips(
+        result = enable_fips(
             str(host_id),
             FipsChangeRequest(),
             tenant_db=db_session,
@@ -181,7 +181,7 @@ async def test_disable_dispatches_command(db_session):
     ) as enqueue, patch.object(
         mod.AuditService, "log"
     ):
-        result = await disable_fips(
+        result = disable_fips(
             str(host_id),
             FipsChangeRequest(),
             tenant_db=db_session,
@@ -201,7 +201,7 @@ async def test_host_status_returns_posture(db_session):
         db_session, fips_status="enabled", fips_enabled=True, fips_vendor="rhel"
     )
     with patch.object(mod.license_service, "has_feature", return_value=True):
-        result = await host_fips_status(
+        result = host_fips_status(
             str(host_id), tenant_db=db_session, current_user="admin@example.com"
         )
     assert result["host_id"] == str(host_id)
@@ -214,7 +214,7 @@ async def test_host_status_returns_posture(db_session):
 async def test_host_status_null_is_not_applicable(db_session):
     host_id = _seed_host(db_session, fips_status=None)
     with patch.object(mod.license_service, "has_feature", return_value=True):
-        result = await host_fips_status(
+        result = host_fips_status(
             str(host_id), tenant_db=db_session, current_user="admin@example.com"
         )
     assert result["fips_status"] == "not_applicable"
@@ -224,7 +224,7 @@ async def test_host_status_null_is_not_applicable(db_session):
 async def test_host_status_missing_is_404(db_session):
     with patch.object(mod.license_service, "has_feature", return_value=True):
         with pytest.raises(HTTPException) as exc:
-            await host_fips_status(
+            host_fips_status(
                 str(uuid.uuid4()),
                 tenant_db=db_session,
                 current_user="admin@example.com",
@@ -236,7 +236,7 @@ async def test_host_status_missing_is_404(db_session):
 async def test_host_status_unlicensed_is_402(db_session):
     with patch.object(mod.license_service, "has_feature", return_value=False):
         with pytest.raises(HTTPException) as exc:
-            await host_fips_status(
+            host_fips_status(
                 str(uuid.uuid4()),
                 tenant_db=db_session,
                 current_user="admin@example.com",
@@ -254,7 +254,7 @@ async def test_fleet_posture_counts(db_session):
     _seed_host(db_session, fqdn="d.example.com", ipv4="10.0.0.4", fips_status=None)
 
     with patch.object(mod.license_service, "has_feature", return_value=True):
-        result = await fleet_fips_posture(
+        result = fleet_fips_posture(
             tenant_db=db_session, current_user="admin@example.com"
         )
 
@@ -270,7 +270,5 @@ async def test_fleet_posture_counts(db_session):
 async def test_fleet_posture_unlicensed_is_402(db_session):
     with patch.object(mod.license_service, "has_feature", return_value=False):
         with pytest.raises(HTTPException) as exc:
-            await fleet_fips_posture(
-                tenant_db=db_session, current_user="admin@example.com"
-            )
+            fleet_fips_posture(tenant_db=db_session, current_user="admin@example.com")
     assert exc.value.status_code == 402

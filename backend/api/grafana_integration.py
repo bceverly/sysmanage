@@ -215,7 +215,7 @@ class GrafanaHealthStatus(BaseModel):
 
 
 @router.get("/grafana-servers", dependencies=[Depends(JWTBearer())])
-async def get_grafana_servers():
+def get_grafana_servers():
     """
     Get list of hosts that have the Grafana server role.
 
@@ -260,7 +260,7 @@ async def get_grafana_servers():
 
 
 @router.get("/settings", dependencies=[Depends(JWTBearer())])
-async def get_grafana_integration_settings():  # NOSONAR
+def get_grafana_integration_settings():  # NOSONAR
     """
     Get current Grafana integration settings.
     """

@@ -133,7 +133,7 @@ class TestOSVersionAPI:
 
             from backend.api.host_approval import request_os_version_update
 
-            result = await request_os_version_update(1)
+            result = request_os_version_update(1)
 
             assert result["result"] is True
             assert "OS version update requested" in result["message"]
@@ -197,7 +197,7 @@ class TestOSVersionAPI:
             from backend.api.host_approval import request_os_version_update
 
             with pytest.raises(HTTPException) as exc_info:
-                await request_os_version_update(999)
+                request_os_version_update(999)
 
             assert exc_info.value.status_code == 404
             assert "Host not found" in str(exc_info.value.detail)
@@ -231,7 +231,7 @@ class TestOSVersionAPI:
             from backend.api.host_approval import request_os_version_update
 
             with pytest.raises(HTTPException) as exc_info:
-                await request_os_version_update(1)
+                request_os_version_update(1)
 
             assert exc_info.value.status_code == 400
             assert "Host is not approved" in str(exc_info.value.detail)

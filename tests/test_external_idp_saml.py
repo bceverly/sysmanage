@@ -94,7 +94,7 @@ async def test_saml_metadata_returns_xml(db):
     engine = _mock_engine()
     p = _patch_engine(engine)
     try:
-        resp = await external_idp.saml_metadata(str(PROVIDER_ID), db)
+        resp = external_idp.saml_metadata(str(PROVIDER_ID), db)
     finally:
         p.stop()
     assert isinstance(resp, Response)
@@ -107,7 +107,7 @@ async def test_saml_start_redirects_and_stores_relaystate(db):
     engine = _mock_engine()
     p = _patch_engine(engine)
     try:
-        resp = await external_idp.saml_start(str(PROVIDER_ID), db)
+        resp = external_idp.saml_start(str(PROVIDER_ID), db)
     finally:
         p.stop()
     assert isinstance(resp, RedirectResponse)
@@ -131,7 +131,7 @@ async def test_saml_start_rejects_non_saml_provider(db):
     p = _patch_engine(engine)
     try:
         with pytest.raises(HTTPException) as exc:
-            await external_idp.saml_start(str(PROVIDER_ID), db)
+            external_idp.saml_start(str(PROVIDER_ID), db)
     finally:
         p.stop()
     assert exc.value.status_code == 400
@@ -240,7 +240,7 @@ async def test_saml_endpoints_402_without_engine(db):
     mock_loader.get_module.return_value = None  # engine not licensed/loaded
     try:
         with pytest.raises(HTTPException) as exc:
-            await external_idp.saml_start(str(PROVIDER_ID), db)
+            external_idp.saml_start(str(PROVIDER_ID), db)
     finally:
         loader.stop()
     assert exc.value.status_code == 402

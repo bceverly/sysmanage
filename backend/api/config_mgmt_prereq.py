@@ -76,7 +76,7 @@ class ConfigMgmtEngineCatalog(BaseModel):
     response_model=ConfigMgmtEngineCatalog,
     dependencies=[Depends(JWTBearer())],
 )
-async def list_config_mgmt_engine_catalog():
+def list_config_mgmt_engine_catalog():
     """The engine catalog, with no host in the question.
 
     Exists so profile AUTHORING has a source for the engine list. The
@@ -213,7 +213,7 @@ def _candidate_packages(
     response_model=ConfigMgmtPrereqResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def get_config_mgmt_prerequisite(
+def get_config_mgmt_prerequisite(
     host_id: str,
     db_session: Session = Depends(get_tenant_db),
 ):
@@ -231,7 +231,7 @@ async def get_config_mgmt_prerequisite(
     "/hosts/{host_id}/config-management/prerequisite/install",
     response_model=ConfigMgmtPrereqInstallResponse,
 )
-async def install_config_mgmt_prerequisite(
+def install_config_mgmt_prerequisite(
     host_id: str,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -351,7 +351,7 @@ async def install_config_mgmt_prerequisite(
     response_model=ConfigMgmtEnginesResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def list_config_mgmt_engines(
+def list_config_mgmt_engines(
     host_id: str,
     db_session: Session = Depends(get_tenant_db),
 ):

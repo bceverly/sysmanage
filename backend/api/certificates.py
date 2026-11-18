@@ -32,7 +32,7 @@ router = public_router  # Default to public router for backward compatibility
 
 
 @public_router.get("/certificates/server-fingerprint")
-async def get_server_fingerprint():
+def get_server_fingerprint():
     """
     Get server certificate fingerprint for client pinning.
     This endpoint is unauthenticated to allow initial agent setup.
@@ -47,7 +47,7 @@ async def get_server_fingerprint():
 
 
 @public_router.get("/certificates/ca-certificate")
-async def get_ca_certificate():
+def get_ca_certificate():
     """
     Get CA certificate for client validation.
     This endpoint is unauthenticated to allow initial agent setup.
@@ -66,7 +66,7 @@ async def get_ca_certificate():
 
 
 @auth_router.get("/certificates/client/{host_id}", dependencies=[Depends(JWTBearer())])
-async def get_client_certificate(host_id: str):  # pylint: disable=duplicate-code
+def get_client_certificate(host_id: str):  # pylint: disable=duplicate-code
     """
     Get client certificate and private key for an approved host.
     This endpoint requires authentication and should only be called
@@ -120,7 +120,7 @@ async def get_client_certificate(host_id: str):  # pylint: disable=duplicate-cod
 
 
 @auth_router.post("/certificates/revoke/{host_id}", dependencies=[Depends(JWTBearer())])
-async def revoke_client_certificate(
+def revoke_client_certificate(
     host_id: str, current_user: str = Depends(get_current_user)
 ):  # pylint: disable=duplicate-code
     """

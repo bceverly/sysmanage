@@ -73,7 +73,7 @@ class UserRolesResponse(BaseModel):
 
 
 @router.get("/groups", response_model=List[SecurityRoleGroupResponse])
-async def get_all_role_groups(
+def get_all_role_groups(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
@@ -133,7 +133,7 @@ async def get_all_role_groups(
 
 
 @router.get("/user/{user_id}", response_model=UserRolesResponse)
-async def get_user_roles(
+def get_user_roles(
     user_id: UUID,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -173,7 +173,7 @@ async def get_user_roles(
 
 
 @router.put("/user/{user_id}", response_model=UserRolesResponse)
-async def update_user_roles(
+def update_user_roles(
     user_id: UUID,
     request: UserRolesRequest,
     db: Session = Depends(get_db),

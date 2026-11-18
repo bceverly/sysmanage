@@ -91,7 +91,7 @@ class AntivirusDefaultsBulkUpdate(BaseModel):
 
 
 @router.get("/", response_model=List[AntivirusDefaultResponse])
-async def get_antivirus_defaults(
+def get_antivirus_defaults(
     db: Session = Depends(get_tenant_db), dependencies=Depends(JWTBearer())
 ):
     """Get all antivirus defaults."""
@@ -108,7 +108,7 @@ async def get_antivirus_defaults(
 
 
 @router.get("/{os_name}", response_model=AntivirusDefaultResponse)
-async def get_antivirus_default_for_os(
+def get_antivirus_default_for_os(
     os_name: str,
     db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
@@ -142,7 +142,7 @@ async def get_antivirus_default_for_os(
 
 
 @router.put("/", response_model=List[AntivirusDefaultResponse])
-async def update_antivirus_defaults(  # NOSONAR
+def update_antivirus_defaults(  # NOSONAR
     bulk_update: AntivirusDefaultsBulkUpdate,
     db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
@@ -242,7 +242,7 @@ async def update_antivirus_defaults(  # NOSONAR
 
 
 @router.delete("/{os_name}")
-async def delete_antivirus_default(
+def delete_antivirus_default(
     os_name: str,
     db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),

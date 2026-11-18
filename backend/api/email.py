@@ -48,7 +48,7 @@ router = APIRouter(prefix="/email", tags=["email"])
 
 
 @router.get("/config", response_model=EmailConfigResponse)
-async def get_email_config(current_user=Depends(get_current_user)):
+def get_email_config(current_user=Depends(get_current_user)):
     """
     Get email configuration status (read-only view for UI).
     Returns configuration details without sensitive information.
@@ -88,7 +88,7 @@ async def get_email_config(current_user=Depends(get_current_user)):
 
 
 @router.post("/test", response_model=EmailTestResponse)
-async def test_email_config(
+def test_email_config(
     request: EmailTestRequest, current_user=Depends(get_current_user)
 ):
     """

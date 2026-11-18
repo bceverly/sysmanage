@@ -187,7 +187,7 @@ class RefreshResultResponse(BaseModel):
 
 
 @router.get("/sources", response_model=Dict[str, CveSourceInfo])
-async def get_available_sources(dependencies=Depends(JWTBearer())):
+def get_available_sources(dependencies=Depends(JWTBearer())):
     """Get list of available CVE data sources."""
     _check_vuln_engine_module()
     return {
@@ -202,7 +202,7 @@ async def get_available_sources(dependencies=Depends(JWTBearer())):
 
 
 @router.get("/settings", response_model=CveRefreshSettingsResponse)
-async def get_cve_refresh_settings(
+def get_cve_refresh_settings(
     db: Session = Depends(get_shared_db), dependencies=Depends(JWTBearer())
 ):
     """Get current CVE refresh settings."""
@@ -229,7 +229,7 @@ async def get_cve_refresh_settings(
 
 
 @router.put("/settings", response_model=CveRefreshSettingsResponse)
-async def update_cve_refresh_settings(
+def update_cve_refresh_settings(
     settings_update: CveRefreshSettingsUpdate,
     db: Session = Depends(get_shared_db),
     dependencies=Depends(JWTBearer()),
@@ -296,7 +296,7 @@ async def update_cve_refresh_settings(
 
 
 @router.get("/stats", response_model=DatabaseStatsResponse)
-async def get_database_stats(
+def get_database_stats(
     db: Session = Depends(get_shared_db), dependencies=Depends(JWTBearer())
 ):
     """Get CVE database statistics."""
@@ -313,7 +313,7 @@ async def get_database_stats(
 
 
 @router.get("/history", response_model=List[IngestionLogResponse])
-async def get_ingestion_history(
+def get_ingestion_history(
     limit: int = 10,
     db: Session = Depends(get_shared_db),
     dependencies=Depends(JWTBearer()),
@@ -445,7 +445,7 @@ async def trigger_cve_refresh(
 
 
 @router.delete("/nvd-api-key")
-async def clear_nvd_api_key(
+def clear_nvd_api_key(
     db: Session = Depends(get_shared_db),
     dependencies=Depends(JWTBearer()),
     current_user=Depends(get_current_user),

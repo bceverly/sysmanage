@@ -79,7 +79,7 @@ def _view(db, rollout) -> dict:
 
 
 @router.get("/rollouts")
-async def list_rollouts(
+def list_rollouts(
     profile_id: Optional[str] = None,
     status: Optional[str] = Query(None, max_length=16),
     limit: int = Query(20, ge=1, le=200),
@@ -108,7 +108,7 @@ def _rollout_or_404(db, rollout_id):
 
 
 @router.post("/rollouts/{rollout_id}/resume")
-async def resume_rollout(
+def resume_rollout(
     rollout_id: str,
     request: RolloutActionRequest,
     db: Session = Depends(get_tenant_db),
@@ -131,7 +131,7 @@ async def resume_rollout(
 
 
 @router.post("/rollouts/{rollout_id}/cancel")
-async def cancel_rollout(
+def cancel_rollout(
     rollout_id: str,
     request: RolloutActionRequest,
     db: Session = Depends(get_tenant_db),

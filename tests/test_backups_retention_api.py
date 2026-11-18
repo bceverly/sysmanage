@@ -36,11 +36,14 @@ async def test_setting_gfs_needs_the_engine(session):
     body = api.PolicyBody(keep_last=7, **GFS)
     with patch.object(retention, "_engine", return_value=None):
         assert (
-            await _status(api.put_policy(str(s.host.id), body, session, MANAGER)) == 402
+            await _status(
+                lambda: api.put_policy(str(s.host.id), body, session, MANAGER)
+            )
+            == 402
         )
     assert s.policy.keep_daily is None
     with patch.object(retention, "_engine", return_value=_engine()):
-        saved = await api.put_policy(str(s.host.id), body, session, MANAGER)
+        saved = api.put_policy(str(s.host.id), body, session, MANAGER)
     assert (saved["keep_daily"], saved["keep_weekly"], saved["keep_monthly"]) == (
         7,
         4,
@@ -55,11 +58,13 @@ async def test_a_lapsed_license_keeps_gfs_and_can_still_save_other_settings(sess
     session.flush()
     unchanged = api.PolicyBody(keep_last=7, interval_hours=12, **GFS)
     with patch.object(retention, "_engine", return_value=None):
-        saved = await api.put_policy(str(s.host.id), unchanged, session, MANAGER)
+        saved = api.put_policy(str(s.host.id), unchanged, session, MANAGER)
         assert saved["interval_hours"] == 12 and saved["keep_daily"] == 7
         cleared = api.PolicyBody(keep_last=7)
         assert (
-            await _status(api.put_policy(str(s.host.id), cleared, session, MANAGER))
+            await _status(
+                lambda: api.put_policy(str(s.host.id), cleared, session, MANAGER)
+            )
             == 402
         )
     assert jobs.prune_keep(s.policy) == {"keep_last": 7, **GFS}  # still honored
@@ -84,7 +89,9 @@ async def test_out_of_range_counts_are_refused(session):
         for bad in ({"keep_daily": 3651}, {"keep_weekly": -1}, {"keep_monthly": 241}):
             body = api.PolicyBody(keep_last=7, **bad)
             assert (
-                await _status(api.put_policy(str(s.host.id), body, session, MANAGER))
+                await _status(
+                    lambda: api.put_policy(str(s.host.id), body, session, MANAGER)
+                )
                 == 422
             )
 
@@ -110,7 +117,7 @@ async def test_the_preview_reads_the_current_repository_only(session):
         return {"kept": [], "removed": []}
 
     with patch.object(retention, "_engine", return_value=_engine(preview)):
-        await retention.retention_preview(
+        retention.retention_preview(
             str(s.host.id), keep_last=2, keep_weekly=3, db=session
         )
     assert seen["names"] == ["20261020T030000Z", "20261021T030000Z", "20261022T030000Z"]
@@ -122,5 +129,5 @@ async def test_the_preview_reads_the_current_repository_only(session):
         "keep_yearly": 0,
     }
     with patch.object(retention, "_engine", return_value=None):
-        assert await _status(retention.retention_preview(str(s.host.id), keep_last=2,
+        assert await _status(lambda: retention.retention_preview(str(s.host.id), keep_last=2,
                                                          db=session)) == 402  # fmt: skip

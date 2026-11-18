@@ -81,7 +81,7 @@ def _skip_reason(db: Session, host: models.Host) -> str:
 
 
 @router.post("/backups/setup")
-async def bulk_backup_setup(
+def bulk_backup_setup(
     body: BulkSetupBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

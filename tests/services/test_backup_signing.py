@@ -170,6 +170,6 @@ async def test_a_signed_snapshot_restores_without_the_acknowledgment(session, se
     session.commit()
     body = api.RestoreBody(snapshot="20261102T120000Z", include=["/etc/nginx"],
                            dry_run=False)  # fmt: skip
-    await api.backup_restore(str(s.host.id), body, session, RESTORER)
+    api.backup_restore(str(s.host.id), body, session, RESTORER)
     _host, command, params = sent[-1]
     assert command == "backup_restore" and params["allow_unverified"] is False

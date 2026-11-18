@@ -42,12 +42,12 @@ class EscrowKeyBody(BaseModel):
 
 
 @router.get("/backups/escrow")
-async def escrow_status(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def escrow_status(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     return escrow.status(db)
 
 
 @router.put("/backups/escrow/key")
-async def save_escrow_key(
+def save_escrow_key(
     body: EscrowKeyBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

@@ -77,9 +77,7 @@ def _status(host: models.Host) -> Dict[str, str]:
 
 
 @router.get("/host/{host_id}/machine")
-async def host_machine(
-    host_id: str, db: Session = Depends(get_tenant_db)
-) -> Dict[str, Any]:
+def host_machine(host_id: str, db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """The host's reported identity, its machine and the other hosts on it."""
     host = _host_or_404(db, host_id)
     machine = db.get(models.Machine, host.machine_id) if host.machine_id else None
@@ -117,7 +115,7 @@ async def host_machine(
 
 
 @router.get("/machines/conflicts")
-async def machine_conflicts(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def machine_conflicts(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     """Every host whose machine link is waiting for an admin's decision."""
     hosts = (
         db.query(models.Host)
@@ -138,7 +136,7 @@ async def machine_conflicts(db: Session = Depends(get_tenant_db)) -> Dict[str, A
 
 
 @router.post("/host/{host_id}/machine/resolve")
-async def resolve_machine_conflict(
+def resolve_machine_conflict(
     host_id: str,
     request: ResolveRequest,
     db: Session = Depends(get_tenant_db),

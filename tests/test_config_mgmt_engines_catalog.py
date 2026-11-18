@@ -23,35 +23,35 @@ from backend.services import config_mgmt_engines as engines
 class TestCatalog:
     @pytest.mark.asyncio
     async def test_lists_every_identity_the_server_accepts(self):
-        out = await api.list_config_mgmt_engine_catalog()
+        out = api.list_config_mgmt_engine_catalog()
         assert [e.engine for e in out.engines] == list(engines.ALL_ENGINES)
 
     @pytest.mark.asyncio
     async def test_licensed_adapters_are_labelled_not_omitted(self):
         # Hiding them would tell a Puppet shop that Puppet is unsupported when
         # it is actually a paid adapter.
-        out = await api.list_config_mgmt_engine_catalog()
+        out = api.list_config_mgmt_engine_catalog()
         licensed = {e.engine for e in out.engines if e.requires_license}
         assert licensed == set(engines.LICENSED_ENGINES)
         assert "puppet" in licensed
 
     @pytest.mark.asyncio
     async def test_open_source_engines_are_not_marked_licensed(self):
-        out = await api.list_config_mgmt_engine_catalog()
+        out = api.list_config_mgmt_engine_catalog()
         free = {e.engine for e in out.engines if not e.requires_license}
         assert free == set(engines.OSS_ENGINES)
 
     @pytest.mark.asyncio
     async def test_dsc_is_reported_as_vendored_and_windows_only(self):
         # It ships with the agent, so the UI must not offer to install it.
-        out = await api.list_config_mgmt_engine_catalog()
+        out = api.list_config_mgmt_engine_catalog()
         dsc = next(e for e in out.engines if e.engine == engines.DSC)
         assert dsc.vendored is True
         assert dsc.windows_only is True
 
     @pytest.mark.asyncio
     async def test_exactly_one_default_and_it_matches_the_registry(self):
-        out = await api.list_config_mgmt_engine_catalog()
+        out = api.list_config_mgmt_engine_catalog()
         defaults = [e.engine for e in out.engines if e.is_default]
         assert defaults == [engines.DEFAULT_ENGINE]
         assert out.default_engine == engines.DEFAULT_ENGINE
@@ -60,7 +60,7 @@ class TestCatalog:
     async def test_identities_are_not_binary_names(self):
         # `chef`, never `chef-client`: the ordered binaries tuple lives in the
         # agent and is what lets Chef move to cinc without a rename here.
-        out = await api.list_config_mgmt_engine_catalog()
+        out = api.list_config_mgmt_engine_catalog()
         names = {e.engine for e in out.engines}
         assert "chef" in names
         assert "chef-client" not in names

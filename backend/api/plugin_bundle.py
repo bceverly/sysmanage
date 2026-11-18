@@ -51,7 +51,7 @@ def _get_modules_path() -> str:
     "/plugins/bundles",
     response_model=PluginBundleListResponse,
 )
-async def list_plugin_bundles(
+def list_plugin_bundles(
     _current_user: dict = Depends(get_current_user),
 ):
     """
@@ -76,7 +76,7 @@ async def list_plugin_bundles(
 
 
 @router.get("/plugins/bundle/{filename}")
-async def get_plugin_bundle(
+def get_plugin_bundle(
     filename: str,
     _current_user: dict = Depends(get_current_user),
 ):

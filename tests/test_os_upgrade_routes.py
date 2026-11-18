@@ -145,7 +145,7 @@ class TestGetOsUpgrades:
     async def test_available_upgrades_are_serialized_with_host_context(self):
         session = _FakeSession(PackageUpdate=[_update()])
         with _bound(session):
-            out = await osr.get_os_upgrades(host_id=None)
+            out = osr.get_os_upgrades(host_id=None)
         assert out["total_count"] == 1
         assert out["hosts_with_upgrades"] == 1
         row = out["os_upgrades"][0]
@@ -160,7 +160,7 @@ class TestGetOsUpgrades:
             PackageUpdate=[_update(host), _update(host), _update(_host("other"))]
         )
         with _bound(session):
-            out = await osr.get_os_upgrades(host_id=None)
+            out = osr.get_os_upgrades(host_id=None)
         # Two upgrades on one host is one host needing attention, not two.
         assert out["total_count"] == 3
         assert out["hosts_with_upgrades"] == 2
@@ -169,7 +169,7 @@ class TestGetOsUpgrades:
     async def test_a_never_discovered_timestamp_serializes_as_null(self):
         session = _FakeSession(PackageUpdate=[_update(discovered_at=None)])
         with _bound(session):
-            out = await osr.get_os_upgrades(host_id=None)
+            out = osr.get_os_upgrades(host_id=None)
         assert out["os_upgrades"][0]["discovered_at"] is None
 
     @pytest.mark.asyncio
@@ -177,20 +177,20 @@ class TestGetOsUpgrades:
         session = _FakeSession(PackageUpdate=[_update()])
         with _bound(session):
             with pytest.raises(HTTPException) as exc:
-                await osr.get_os_upgrades(host_id=HOST_ID)
+                osr.get_os_upgrades(host_id=HOST_ID)
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_filtering_by_a_known_host_succeeds(self):
         session = _FakeSession(PackageUpdate=[_update()], Host=[_host()])
         with _bound(session):
-            out = await osr.get_os_upgrades(host_id=HOST_ID)
+            out = osr.get_os_upgrades(host_id=HOST_ID)
         assert out["total_count"] == 1
 
     @pytest.mark.asyncio
     async def test_an_empty_fleet_reports_zeroes(self):
         with _bound(_FakeSession()):
-            out = await osr.get_os_upgrades(host_id=None)
+            out = osr.get_os_upgrades(host_id=None)
         assert out == {"os_upgrades": [], "total_count": 0, "hosts_with_upgrades": 0}
 
     @pytest.mark.asyncio
@@ -199,7 +199,7 @@ class TestGetOsUpgrades:
         session.query = MagicMock(side_effect=RuntimeError("db gone"))
         with _bound(session):
             with pytest.raises(HTTPException) as exc:
-                await osr.get_os_upgrades(host_id=None)
+                osr.get_os_upgrades(host_id=None)
         assert exc.value.status_code == 500
 
 
@@ -215,7 +215,7 @@ class TestGetOsUpgradesSummary:
             Host=[_host(), _host("h2"), _host("h3")],
         )
         with _bound(session):
-            out = await osr.get_os_upgrades_summary()
+            out = osr.get_os_upgrades_summary()
         assert out["total_os_upgrades"] == 3
         assert out["os_upgrades_by_type"] == {
             "ubuntu-release": 2,
@@ -227,7 +227,7 @@ class TestGetOsUpgradesSummary:
     async def test_the_host_id_set_is_replaced_by_a_count(self):
         session = _FakeSession(PackageUpdate=[_update(), _update()], Host=[_host()])
         with _bound(session):
-            out = await osr.get_os_upgrades_summary()
+            out = osr.get_os_upgrades_summary()
         group = out["os_upgrades_summary"][0]
         # A set is not JSON-serialisable; leaving it in would 500 the route.
         assert "host_ids" not in group
@@ -236,7 +236,7 @@ class TestGetOsUpgradesSummary:
     @pytest.mark.asyncio
     async def test_an_empty_fleet_summarises_to_nothing(self):
         with _bound(_FakeSession()):
-            out = await osr.get_os_upgrades_summary()
+            out = osr.get_os_upgrades_summary()
         assert out["os_upgrades_summary"] == []
         assert out["hosts_with_os_upgrades"] == 0
 
@@ -246,7 +246,7 @@ class TestGetOsUpgradesSummary:
         session.query = MagicMock(side_effect=RuntimeError("db gone"))
         with _bound(session):
             with pytest.raises(HTTPException) as exc:
-                await osr.get_os_upgrades_summary()
+                osr.get_os_upgrades_summary()
         assert exc.value.status_code == 500
 
 
@@ -263,7 +263,7 @@ class TestExecuteOsUpgrades:
         with _bound(session):
             with patch(f"{MOD}.queue_ops.enqueue_message", side_effect=_enqueue):
                 with patch(f"{MOD}.AuditService.log") as audit:
-                    out = await osr.execute_os_upgrades(
+                    out = osr.execute_os_upgrades(
                         request
                         or UpdateExecutionRequest(
                             host_ids=[HOST_ID], package_names=["ubuntu-release-upgrade"]

@@ -108,7 +108,7 @@ def _expires_at(expires_in_days: Optional[int]) -> Optional[datetime]:
 
 
 @router.post("/provisioning/bundle", response_model=ProvisioningBundleResponse)
-async def create_provisioning_bundle(
+def create_provisioning_bundle(
     body: ProvisioningBundleRequest,
     current_user=Depends(get_current_user),
 ):

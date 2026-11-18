@@ -181,7 +181,7 @@ def _audit(
     response_model=EnrollStartResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def enroll_start(
+def enroll_start(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
@@ -229,7 +229,7 @@ async def enroll_start(
     response_model=EnrollCompleteResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def enroll_complete(
+def enroll_complete(
     request: EnrollCompleteRequest,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -281,7 +281,7 @@ async def enroll_complete(
 
 
 @router.post("/api/auth/mfa/verify")
-async def mfa_verify(
+def mfa_verify(
     request: VerifyRequest,
     db: Session = Depends(get_db),
 ):
@@ -332,7 +332,7 @@ async def mfa_verify(
 
 
 @router.post("/api/auth/mfa/email/request")
-async def mfa_email_request(
+def mfa_email_request(
     request: EmailRequestRequest,
     fastapi_request: Request,
     db: Session = Depends(get_db),
@@ -413,7 +413,7 @@ async def mfa_email_request(
 
 
 @router.post("/api/auth/mfa/disable", dependencies=[Depends(JWTBearer())])
-async def mfa_disable(
+def mfa_disable(
     request: DisableRequest,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -445,7 +445,7 @@ async def mfa_disable(
     response_model=StatusResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def mfa_status(
+def mfa_status(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
@@ -479,7 +479,7 @@ async def mfa_status(
     response_model=EnrollCompleteResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def regenerate_backup_codes(
+def regenerate_backup_codes(
     request: RegenerateRequest,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -529,7 +529,7 @@ async def regenerate_backup_codes(
 
 
 @router.get("/api/settings/mfa", dependencies=[Depends(JWTBearer())])
-async def get_mfa_settings(
+def get_mfa_settings(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
 ):
@@ -540,7 +540,7 @@ async def get_mfa_settings(
 
 
 @router.put("/api/settings/mfa", dependencies=[Depends(JWTBearer())])
-async def update_mfa_settings(
+def update_mfa_settings(
     request: MfaSettingsRequest = Body(...),
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),

@@ -273,7 +273,7 @@ class TestRuleEndpoints:
     @pytest.mark.asyncio
     async def test_creating_a_rule_needs_the_add_script_role(self):
         with pytest.raises(HTTPException) as err:
-            await api.create_rule(
+            api.create_rule(
                 api.RuleRequest(
                     name="r",
                     task_pattern="ensure*",
@@ -289,7 +289,7 @@ class TestRuleEndpoints:
         session = _Session(ConfigProfile=[repair_profile()])
         with patch.object(svc.shim, "engine_module", _Engine):
             with pytest.raises(HTTPException) as err:
-                await api.create_rule(
+                api.create_rule(
                     api.RuleRequest(
                         name="r",
                         task_pattern="*",
@@ -307,7 +307,7 @@ class TestRuleEndpoints:
         )
         with patch.object(svc.shim, "engine_module", _Engine):
             with pytest.raises(HTTPException) as err:
-                await api.create_rule(
+                api.create_rule(
                     api.RuleRequest(
                         name="sshd repair",
                         task_pattern="ensure*",
@@ -323,7 +323,7 @@ class TestRuleEndpoints:
         # A name-ordered list of overlapping rules tells an operator nothing
         # about which one will fire.
         session = _Session(ConfigRemediationRule=[rule(name="a"), rule(name="b")])
-        out = await api.list_rules(session)
+        out = api.list_rules(session)
         assert [r.name for r in out] == ["a", "b"]
 
 
@@ -332,7 +332,7 @@ class TestFindingRepair:
     async def test_a_preview_reports_no_match_rather_than_failing(self):
         session = _Session(ConfigDriftFinding=[finding()], ConfigRemediationRule=[])
         with patch.object(svc.shim, "engine_module", _Engine):
-            out = await api.match_finding(str(uuid.uuid4()), session)
+            out = api.match_finding(str(uuid.uuid4()), session)
         assert out.matched is False
 
     @pytest.mark.asyncio
@@ -343,7 +343,7 @@ class TestFindingRepair:
             ConfigProfile=[repair_profile(active=False)],
         )
         with patch.object(svc.shim, "engine_module", _Engine):
-            out = await api.match_finding(str(uuid.uuid4()), session)
+            out = api.match_finding(str(uuid.uuid4()), session)
         assert out.matched is True
         assert out.unavailable is True
 
@@ -358,7 +358,7 @@ class TestFindingRepair:
             ConfigProfile=[repair_profile()],
         )
         with patch.object(svc.shim, "engine_module", lambda: engine):
-            out = await api.match_finding(str(uuid.uuid4()), session)
+            out = api.match_finding(str(uuid.uuid4()), session)
         assert engine.previews == 1
         assert out.preview["rule_name"] == "sshd repair"
 
@@ -367,7 +367,7 @@ class TestFindingRepair:
         # It runs a profile on a host; identical blast radius to an ad-hoc
         # apply, so a softer permission would be an escalation path.
         with pytest.raises(HTTPException) as err:
-            await api.repair_finding(str(uuid.uuid4()), _Session(), user())
+            api.repair_finding(str(uuid.uuid4()), _Session(), user())
         assert err.value.status_code == 403
 
     @pytest.mark.asyncio
@@ -375,7 +375,7 @@ class TestFindingRepair:
         session = _Session(ConfigDriftFinding=[finding()], ConfigRemediationRule=[])
         with patch.object(svc.shim, "engine_module", _Engine):
             with pytest.raises(HTTPException) as err:
-                await api.repair_finding(
+                api.repair_finding(
                     str(uuid.uuid4()), session, user(SecurityRoles.RUN_SCRIPT)
                 )
         assert err.value.status_code == 404
@@ -390,7 +390,7 @@ class TestFindingRepair:
         )
         with patch.object(svc.shim, "engine_module", _Engine):
             with pytest.raises(HTTPException) as err:
-                await api.repair_finding(
+                api.repair_finding(
                     str(uuid.uuid4()), session, user(SecurityRoles.RUN_SCRIPT)
                 )
         assert err.value.status_code == 400
@@ -407,7 +407,7 @@ class TestFindingRepair:
         )
         with patch.object(svc.shim, "engine_module", _Engine):
             with patch.object(svc, "apply_remediation", lambda *_a, **_k: "cmd"):
-                out = await api.repair_finding(
+                out = api.repair_finding(
                     str(uuid.uuid4()), session, user(SecurityRoles.RUN_SCRIPT)
                 )
         assert out.queued is True
@@ -422,7 +422,7 @@ class TestRuleEditing:
             ConfigRemediationRule=[row], ConfigProfile=[repair_profile()]
         )
         with patch.object(svc.shim, "engine_module", _Engine):
-            out = await api.update_rule(
+            out = api.update_rule(
                 str(uuid.uuid4()),
                 api.RuleUpdateRequest(auto_apply=True),
                 session,
@@ -439,7 +439,7 @@ class TestRuleEditing:
         )
         with patch.object(svc.shim, "engine_module", _Engine):
             with pytest.raises(HTTPException) as err:
-                await api.update_rule(
+                api.update_rule(
                     str(uuid.uuid4()),
                     api.RuleUpdateRequest(task_pattern="*"),
                     session,
@@ -450,7 +450,7 @@ class TestRuleEditing:
     @pytest.mark.asyncio
     async def test_editing_needs_the_edit_script_role(self):
         with pytest.raises(HTTPException) as err:
-            await api.update_rule(
+            api.update_rule(
                 str(uuid.uuid4()),
                 api.RuleUpdateRequest(priority=1),
                 _Session(),
@@ -465,7 +465,7 @@ class TestRuleEditing:
             ConfigRemediationRule=[row], ConfigProfile=[repair_profile()]
         )
         with patch.object(svc.shim, "engine_module", _Engine):
-            out = await api.update_rule(
+            out = api.update_rule(
                 str(uuid.uuid4()),
                 api.RuleUpdateRequest(profile_id=None),
                 session,
@@ -476,7 +476,7 @@ class TestRuleEditing:
     @pytest.mark.asyncio
     async def test_deleting_a_rule_leaves_its_profiles_alone(self):
         session = _Session(ConfigRemediationRule=[rule()])
-        out = await api.delete_rule(
+        out = api.delete_rule(
             str(uuid.uuid4()), session, user(SecurityRoles.DELETE_SCRIPT)
         )
         assert out["success"] is True
@@ -487,13 +487,13 @@ class TestRuleEditing:
     @pytest.mark.asyncio
     async def test_deleting_needs_the_delete_script_role(self):
         with pytest.raises(HTTPException) as err:
-            await api.delete_rule(str(uuid.uuid4()), _Session(), user())
+            api.delete_rule(str(uuid.uuid4()), _Session(), user())
         assert err.value.status_code == 403
 
     @pytest.mark.asyncio
     async def test_a_missing_rule_is_404(self):
         with pytest.raises(HTTPException) as err:
-            await api.update_rule(
+            api.update_rule(
                 str(uuid.uuid4()),
                 api.RuleUpdateRequest(priority=1),
                 _Session(ConfigRemediationRule=[]),
@@ -509,5 +509,5 @@ class TestRuleEditing:
             ConfigRemediationRule=[rule(profile_id=PROFILE)],
             ConfigProfile=[repair_profile()],
         )
-        out = await api.list_rules(session)
+        out = api.list_rules(session)
         assert out[0].remediation_profile_name == "sshd fix"

@@ -118,7 +118,7 @@ def _counts(db) -> dict:
 
 
 @router.get("/settings")
-async def get_settings(db: Session = Depends(get_tenant_db)):
+def get_settings(db: Session = Depends(get_tenant_db)):
     _check_automation_module()
     row = runner.settings_row(db)
     db.commit()
@@ -126,7 +126,7 @@ async def get_settings(db: Session = Depends(get_tenant_db)):
 
 
 @router.put("/hold-all")
-async def hold_all(
+def hold_all(
     request: HoldRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -158,7 +158,7 @@ async def hold_all(
 
 
 @router.put("/settings")
-async def put_settings(
+def put_settings(
     request: SettingsRequest,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -187,7 +187,7 @@ async def put_settings(
 
 
 @router.put("/profiles/{profile_id}/hold")
-async def hold_profile(
+def hold_profile(
     profile_id: str,
     request: HoldRequest,
     db: Session = Depends(get_tenant_db),
@@ -223,7 +223,7 @@ async def hold_profile(
 
 
 @router.put("/hosts/{host_id}/opt-out")
-async def opt_out(
+def opt_out(
     host_id: str,
     request: OptOutRequest,
     db: Session = Depends(get_tenant_db),
@@ -305,7 +305,7 @@ def _pending(db, engine, host, profile) -> Optional[dict]:
 
 
 @router.get("/hosts/{host_id}")
-async def host_view(
+def host_view(
     host_id: str,
     limit: int = Query(20, ge=1, le=200),
     db: Session = Depends(get_tenant_db),
@@ -353,7 +353,7 @@ async def host_view(
 
 
 @router.get("/runs")
-async def list_runs(
+def list_runs(
     host_id: Optional[str] = None,
     profile_id: Optional[str] = None,
     status: Optional[str] = Query(None, max_length=16),
@@ -384,7 +384,7 @@ async def list_runs(
 
 
 @router.post("/runs/{run_id}/acknowledge")
-async def acknowledge_run(
+def acknowledge_run(
     run_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),

@@ -219,7 +219,7 @@ def send_enable_package_manager_to_hosts(
 
 
 @router.get("/os-options", response_model=OSOptionsResponse)
-async def get_os_options(
+def get_os_options(
     dependencies=Depends(JWTBearer()),
 ):
     """Get available operating systems and their optional package managers."""
@@ -237,7 +237,7 @@ async def get_os_options(
 
 
 @router.get("/", response_model=List[EnabledPackageManagerResponse])
-async def get_enabled_package_managers(
+def get_enabled_package_managers(
     db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
     current_user=Depends(require_authenticated_user),
@@ -272,7 +272,7 @@ async def get_enabled_package_managers(
 
 
 @router.post("/", response_model=EnabledPackageManagerResponse, status_code=201)
-async def create_enabled_package_manager(
+def create_enabled_package_manager(
     pm_data: EnabledPackageManagerCreate,
     request: Request,
     db_session: Session = Depends(get_tenant_db),
@@ -384,7 +384,7 @@ async def create_enabled_package_manager(
 
 
 @router.delete("/{pm_id}")
-async def delete_enabled_package_manager(
+def delete_enabled_package_manager(
     pm_id: str,
     request: Request,
     db_session: Session = Depends(get_tenant_db),

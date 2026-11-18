@@ -71,12 +71,12 @@ def _keys(session, policy):
 async def test_an_encrypted_host_keeps_its_keys_and_repositories(session, sent):
     s, row = _encrypted_own(session)
     policy_id, version = s.policy.id, s.policy.config_version
-    preview = await api.preview_use_tag_policy(str(s.host.id), session, MANAGER)
+    preview = api.preview_use_tag_policy(str(s.host.id), session, MANAGER)
     assert preview["tag_policy"]["name"] == "Servers nightly"
     replaced = {c["key"] for c in preview["changes"]}
     assert {"keep_last", "keep_daily", "window_start_hour"} <= replaced
 
-    result = await api.use_tag_policy(str(s.host.id), session, MANAGER)
+    result = api.use_tag_policy(str(s.host.id), session, MANAGER)
     policy = _policy(session, s.host)
     assert policy.id == policy_id  # the same row, never deleted
     assert policy.tag_policy_id == row.id
@@ -100,7 +100,7 @@ async def test_an_encrypted_host_keeps_its_keys_and_repositories(session, sent):
 async def test_nothing_to_switch_to_is_refused(session, sent):
     s = _setup(session)  # its own policy, no tag covers it
     with pytest.raises(HTTPException) as refused:
-        await api.use_tag_policy(str(s.host.id), session, MANAGER)
+        api.use_tag_policy(str(s.host.id), session, MANAGER)
     assert refused.value.status_code == 409
     assert "nothing to switch to" in refused.value.detail
     assert _policy(session, s.host).tag_policy_id is None
@@ -109,9 +109,9 @@ async def test_nothing_to_switch_to_is_refused(session, sent):
 @pytest.mark.asyncio
 async def test_a_host_already_on_its_tag_policy_is_refused(session, sent):
     s, _row = _encrypted_own(session)
-    await api.use_tag_policy(str(s.host.id), session, MANAGER)
+    api.use_tag_policy(str(s.host.id), session, MANAGER)
     with pytest.raises(HTTPException) as refused:
-        await api.use_tag_policy(str(s.host.id), session, MANAGER)
+        api.use_tag_policy(str(s.host.id), session, MANAGER)
     assert refused.value.status_code == 409
 
 
@@ -134,12 +134,12 @@ async def test_own_then_tag_then_configure_then_own_again(session, sent):
     assert source["kind"] == "own" and source["tag_policy_available"]["id"] == str(
         row.id
     )
-    await api.use_tag_policy(str(s.host.id), session, MANAGER)
+    api.use_tag_policy(str(s.host.id), session, MANAGER)
     assert tag_policies.source_of(session, policy)["kind"] == "tag"
     tag_policies.resolve(session)  # the next pass keeps it on the tag policy
     assert _policy(session, s.host).tag_policy_id == row.id
     body = backups_api.PolicyBody(**tag_policies.policy_settings(policy))
-    await backups_api.put_policy(str(s.host.id), body, session, MANAGER)
+    backups_api.put_policy(str(s.host.id), body, session, MANAGER)
     policy = _policy(session, s.host)
     assert policy.tag_policy_id is None
     assert policy.encrypt_fingerprint == "A" * 40 and _keys(session, policy) == 1

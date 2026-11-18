@@ -395,3 +395,74 @@ class TestRequiresProPlus:
             test_func()
 
         assert "Pro+" in str(exc_info.value)
+
+
+class TestPlainAndAsyncRoutesAnswerAlike:
+    """2026-11-18: the route handlers became plain ``def`` (blocking calls off
+    the event loop).  The gates' sync wrappers raised a plain exception, which
+    FastAPI answers 500 -- every gated route would have broken.  Both kinds of
+    handler must answer with the same status and body."""
+
+    @staticmethod
+    def _client(module_loaded=True):
+        # pylint: disable=import-outside-toplevel
+        from fastapi import APIRouter, FastAPI
+        from fastapi.testclient import TestClient
+
+        from backend.licensing.feature_gate import requires_module
+
+        router = APIRouter()
+
+        @router.get("/sync-feature")
+        @requires_feature(FeatureCode.HEALTH_ANALYSIS)
+        def sync_feature():
+            return {"ok": True}
+
+        @router.get("/async-feature")
+        @requires_feature(FeatureCode.HEALTH_ANALYSIS)
+        async def async_feature():
+            return {"ok": True}
+
+        @router.get("/sync-module")
+        @requires_module(ModuleCode.HEALTH_ENGINE)
+        def sync_module():
+            return {"ok": True}
+
+        @router.get("/async-module")
+        @requires_module(ModuleCode.HEALTH_ENGINE)
+        async def async_module():
+            return {"ok": True}
+
+        app = FastAPI()
+        app.include_router(router)
+        return TestClient(app)
+
+    @pytest.mark.parametrize("kind", ["feature", "module"])
+    def test_unlicensed_is_the_same_402(self, kind):
+        with patch("backend.licensing.feature_gate.license_service") as svc:
+            svc.has_feature.return_value = False
+            svc.has_module.return_value = False
+            client = self._client()
+            plain = client.get(f"/sync-{kind}")
+            awaited = client.get(f"/async-{kind}")
+        assert plain.status_code == awaited.status_code == 402
+        assert plain.json() == awaited.json()
+        assert plain.json()["detail"]["error"] == "pro_plus_required"
+
+    def test_licensed_but_not_loaded_is_the_same_503(self):
+        with patch("backend.licensing.feature_gate.license_service") as svc, patch(
+            "backend.licensing.module_loader.module_loader"
+        ) as loader:
+            svc.has_module.return_value = True
+            loader.is_module_loaded.return_value = False
+            client = self._client()
+            plain = client.get("/sync-module")
+            awaited = client.get("/async-module")
+        assert plain.status_code == awaited.status_code == 503
+        assert plain.json() == awaited.json()
+        assert plain.json()["detail"]["error"] == "module_not_available"
+
+    def test_the_error_is_still_a_license_required_error(self):
+        error = LicenseRequiredError("needs it", feature="x")
+        assert isinstance(error, HTTPException) and str(error) == "needs it"
+        assert error.status_code == 402 and error.feature == "x"

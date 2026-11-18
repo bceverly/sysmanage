@@ -188,7 +188,7 @@ class TestCollectDiagnostics:
     async def _collect(self, session, host_id=HOST_ID, request=None):
         env = _Env(session)
         with env:
-            out = await diag.collect_diagnostics(
+            out = diag.collect_diagnostics(
                 host_id, request=request, current_user=_user()
             )
         return out, env
@@ -246,7 +246,7 @@ class TestCollectDiagnostics:
         env = _Env(_FakeSession())
         with env:
             with pytest.raises(HTTPException) as exc:
-                await diag.collect_diagnostics(HOST_ID, current_user=_user())
+                diag.collect_diagnostics(HOST_ID, current_user=_user())
         assert exc.value.status_code == 404
         assert env.queued == []
 
@@ -254,7 +254,7 @@ class TestCollectDiagnostics:
     @pytest.mark.parametrize("host_id", ["not-a-uuid", "", "12ab"])
     async def test_a_malformed_host_id_is_a_422(self, host_id):
         with pytest.raises(HTTPException) as exc:
-            await diag.collect_diagnostics(host_id, current_user=_user())
+            diag.collect_diagnostics(host_id, current_user=_user())
         assert exc.value.status_code == 422
 
     @pytest.mark.asyncio
@@ -273,7 +273,7 @@ class TestCollectDiagnostics:
                 side_effect=HTTPException(status_code=400, detail="not approved"),
             ):
                 with pytest.raises(HTTPException) as exc:
-                    await diag.collect_diagnostics(HOST_ID, current_user=_user())
+                    diag.collect_diagnostics(HOST_ID, current_user=_user())
         assert exc.value.status_code == 400
         assert session.added == []
 
@@ -282,7 +282,7 @@ class TestGetHostDiagnostics:
     async def _list(self, session, **kwargs):
         env = _Env(session)
         with env:
-            return await diag.get_host_diagnostics(HOST_ID, **kwargs), env
+            return diag.get_host_diagnostics(HOST_ID, **kwargs), env
 
     @pytest.mark.asyncio
     async def test_reports_are_serialized_with_utc_timestamps(self):
@@ -338,13 +338,13 @@ class TestGetHostDiagnostics:
         env = _Env(_FakeSession())
         with env:
             with pytest.raises(HTTPException) as exc:
-                await diag.get_host_diagnostics(HOST_ID, limit=10, offset=0)
+                diag.get_host_diagnostics(HOST_ID, limit=10, offset=0)
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_a_malformed_host_id_is_a_422(self):
         with pytest.raises(HTTPException) as exc:
-            await diag.get_host_diagnostics("not-a-uuid", limit=10, offset=0)
+            diag.get_host_diagnostics("not-a-uuid", limit=10, offset=0)
         assert exc.value.status_code == 422
 
     @pytest.mark.asyncio
@@ -352,7 +352,7 @@ class TestGetHostDiagnostics:
         session = _FakeSession(Host=[_host()])
         env = _Env(session)
         with env:
-            out = await diag.get_host_diagnostics("42", limit=10, offset=0)
+            out = diag.get_host_diagnostics("42", limit=10, offset=0)
         assert out["host_id"] == "42"
 
 
@@ -360,7 +360,7 @@ class TestGetDiagnosticReport:
     async def _get(self, session, diagnostic_id=DIAG_ID):
         env = _Env(session)
         with env:
-            return await diag.get_diagnostic_report(diagnostic_id)
+            return diag.get_diagnostic_report(diagnostic_id)
 
     @pytest.mark.asyncio
     async def test_the_full_report_includes_every_data_section(self):
@@ -407,7 +407,7 @@ class TestGetDiagnosticReport:
     @pytest.mark.asyncio
     async def test_a_malformed_id_is_a_422(self):
         with pytest.raises(HTTPException) as exc:
-            await diag.get_diagnostic_report("not-a-uuid")
+            diag.get_diagnostic_report("not-a-uuid")
         assert exc.value.status_code == 422
 
 
@@ -417,7 +417,7 @@ class TestGetDiagnosticStatus:
         report = _report(system_logs=json.dumps(["huge"]))
         env = _Env(_FakeSession(DiagnosticReport=[report]))
         with env:
-            out = await diag.get_diagnostic_status(DIAG_ID)
+            out = diag.get_diagnostic_status(DIAG_ID)
         # This is polled while a collection runs; shipping the payload with
         # every poll would move megabytes per second.
         assert "diagnostic_data" not in out
@@ -429,7 +429,7 @@ class TestGetDiagnosticStatus:
         report = _report(collection_status="collecting", completed_at=None)
         env = _Env(_FakeSession(DiagnosticReport=[report]))
         with env:
-            out = await diag.get_diagnostic_status(DIAG_ID)
+            out = diag.get_diagnostic_status(DIAG_ID)
         assert out["status"] == "collecting"
         assert out["completed_at"] is None
 
@@ -438,13 +438,13 @@ class TestGetDiagnosticStatus:
         env = _Env(_FakeSession())
         with env:
             with pytest.raises(HTTPException) as exc:
-                await diag.get_diagnostic_status(DIAG_ID)
+                diag.get_diagnostic_status(DIAG_ID)
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_a_malformed_id_is_a_422(self):
         with pytest.raises(HTTPException) as exc:
-            await diag.get_diagnostic_status("not-a-uuid")
+            diag.get_diagnostic_status("not-a-uuid")
         assert exc.value.status_code == 422
 
 
@@ -455,7 +455,7 @@ class TestDeleteDiagnosticReport:
         session = _FakeSession(DiagnosticReport=[report])
         env = _Env(session)
         with env:
-            out = await diag.delete_diagnostic_report(DIAG_ID)
+            out = diag.delete_diagnostic_report(DIAG_ID)
         assert out["result"] is True
         assert session.deleted == [report]
         # A host with no reports but a live flag shows a spinner nothing will
@@ -468,7 +468,7 @@ class TestDeleteDiagnosticReport:
         session = _FakeSession(DiagnosticReport=[_report(), keep])
         env = _Env(session)
         with env:
-            await diag.delete_diagnostic_report(DIAG_ID)
+            diag.delete_diagnostic_report(DIAG_ID)
         assert session.executed == []
 
     @pytest.mark.asyncio
@@ -476,13 +476,13 @@ class TestDeleteDiagnosticReport:
         env = _Env(_FakeSession())
         with env:
             with pytest.raises(HTTPException) as exc:
-                await diag.delete_diagnostic_report(DIAG_ID)
+                diag.delete_diagnostic_report(DIAG_ID)
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_a_malformed_id_is_a_422(self):
         with pytest.raises(HTTPException) as exc:
-            await diag.delete_diagnostic_report("not-a-uuid")
+            diag.delete_diagnostic_report("not-a-uuid")
         assert exc.value.status_code == 422
 
 

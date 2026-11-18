@@ -21,7 +21,7 @@ router = APIRouter()
 
 
 @router.post("/report/{host_id}")
-async def report_updates(
+def report_updates(
     host_id: str, updates_report: UpdatesReport, dependencies=Depends(JWTBearer())
 ):
     """Receive and store update information from agents."""

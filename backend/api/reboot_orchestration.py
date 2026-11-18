@@ -50,7 +50,7 @@ def _check_container_module():
     "/host/{host_id}/reboot/pre-check",
     dependencies=[Depends(JWTBearer())],
 )
-async def reboot_pre_check(
+def reboot_pre_check(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -95,7 +95,7 @@ async def reboot_pre_check(
     "/host/{host_id}/reboot/orchestrated",
     dependencies=[Depends(JWTBearer())],
 )
-async def orchestrated_reboot(
+def orchestrated_reboot(
     host_id: str,
     current_user: str = Depends(get_current_user),
 ):
@@ -223,7 +223,7 @@ async def orchestrated_reboot(
     "/host/{host_id}/reboot/orchestration/{orchestration_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def get_orchestration_status(
+def get_orchestration_status(
     host_id: str,
     orchestration_id: str,
     current_user: str = Depends(get_current_user),

@@ -50,7 +50,7 @@ def _ready(session, abilities=("list", "status")):
 @pytest.mark.asyncio
 async def test_browsing_sends_a_list_job_for_one_directory(session, sent):
     s = _ready(session)
-    run = await browse.browse_snapshot(
+    run = browse.browse_snapshot(
         str(s.host.id), browse.BrowseBody(snapshot="20261023T161149Z", path="/etc"),
         session, RESTORER,
     )  # fmt: skip
@@ -70,23 +70,29 @@ async def test_browsing_needs_the_restore_role_the_ability_and_a_real_snapshot(
     s = _ready(session, abilities=("status",))
     body = browse.BrowseBody(snapshot="20261023T161149Z", path="/")
     assert (
-        await _status(browse.browse_snapshot(str(s.host.id), body, session, MANAGER))
+        await _status(
+            lambda: browse.browse_snapshot(str(s.host.id), body, session, MANAGER)
+        )
         == 403
     )
     assert (
-        await _status(browse.browse_snapshot(str(s.host.id), body, session, RESTORER))
+        await _status(
+            lambda: browse.browse_snapshot(str(s.host.id), body, session, RESTORER)
+        )
         == 409
     )
     s.policy.host_abilities = json.dumps(["list"])
     gone = browse.BrowseBody(snapshot="20991231T000000Z", path="/")
     assert (
-        await _status(browse.browse_snapshot(str(s.host.id), gone, session, RESTORER))
+        await _status(
+            lambda: browse.browse_snapshot(str(s.host.id), gone, session, RESTORER)
+        )
         == 404
     )
     relative = browse.BrowseBody(snapshot="20261023T161149Z", path="etc")
     assert (
         await _status(
-            browse.browse_snapshot(str(s.host.id), relative, session, RESTORER)
+            lambda: browse.browse_snapshot(str(s.host.id), relative, session, RESTORER)
         )
         == 422
     )
@@ -95,10 +101,12 @@ async def test_browsing_needs_the_restore_role_the_ability_and_a_real_snapshot(
 @pytest.mark.asyncio
 async def test_what_changed_defaults_to_the_newest_and_runs_once(session, sent):
     s = _ready(session)
-    run = await browse.backup_changes(str(s.host.id), None, session, MANAGER)
+    run = browse.backup_changes(str(s.host.id), None, session, MANAGER)
     assert run["action"] == "status" and "snapshot" not in sent[-1][2]
     assert (
-        await _status(browse.backup_changes(str(s.host.id), None, session, MANAGER))
+        await _status(
+            lambda: browse.backup_changes(str(s.host.id), None, session, MANAGER)
+        )
         == 409
     )
 

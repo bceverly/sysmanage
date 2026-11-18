@@ -42,7 +42,7 @@ router = APIRouter()
 
 
 @router.post("/execute", response_model=ScriptExecutionResponse)
-async def execute_script(  # NOSONAR
+def execute_script(  # NOSONAR
     execution_request: ScriptExecutionRequest,
     current_user=Depends(get_current_user),
 ):
@@ -266,7 +266,7 @@ async def execute_script(  # NOSONAR
 
 
 @router.get("/executions/", response_model=ScriptExecutionsResponse)
-async def get_script_executions(
+def get_script_executions(
     current_user=Depends(get_current_user),
     host_id: Optional[str] = Query(None, description="Filter by host ID"),
     status: Optional[str] = Query(None, description="Filter by status"),
@@ -350,7 +350,7 @@ async def get_script_executions(
 
 
 @router.delete("/executions/{execution_id}")
-async def delete_script_execution(
+def delete_script_execution(
     execution_id: str,
     current_user=Depends(get_current_user),
 ):
@@ -420,7 +420,7 @@ async def delete_script_execution(
 
 
 @router.delete("/executions/bulk")
-async def delete_script_executions_bulk(
+def delete_script_executions_bulk(
     execution_ids: List[str] = Body(...),
     current_user=Depends(get_current_user),
 ):
@@ -488,7 +488,7 @@ async def delete_script_executions_bulk(
 
 
 @router.get("/executions/{execution_id}", response_model=ScriptExecutionLogResponse)
-async def get_script_execution(
+def get_script_execution(
     execution_id: str,
     current_user=Depends(get_current_user),
 ):

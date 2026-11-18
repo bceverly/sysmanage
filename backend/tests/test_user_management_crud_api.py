@@ -231,7 +231,7 @@ class TestUserCRUD:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await get_user(str(mock_user.id))
+                result = get_user(str(mock_user.id))
 
                 assert result.userid == mock_user.userid
 
@@ -255,7 +255,7 @@ class TestUserCRUD:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await get_user(str(uuid.uuid4()))
+                    get_user(str(uuid.uuid4()))
 
                 assert exc_info.value.status_code == 404
 
@@ -280,7 +280,7 @@ class TestUserCRUD:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await get_user_by_userid("test@example.com")
+                result = get_user_by_userid("test@example.com")
 
                 assert result.userid == mock_user.userid
 
@@ -315,9 +315,7 @@ class TestUserCRUD:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with patch("backend.api.user.AuditService"):
-                    result = await add_user(
-                        new_user_data, mock_request, "admin@example.com"
-                    )
+                    result = add_user(new_user_data, mock_request, "admin@example.com")
 
                     assert result.userid == "newuser@example.com"
                     mock_session.add.assert_called_once()
@@ -355,7 +353,7 @@ class TestUserCRUD:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await add_user(new_user_data, mock_request, "test@example.com")
+                    add_user(new_user_data, mock_request, "test@example.com")
 
                 assert exc_info.value.status_code == 403
 
@@ -394,7 +392,7 @@ class TestUserCRUD:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await add_user(new_user_data, mock_request, "admin@example.com")
+                    add_user(new_user_data, mock_request, "admin@example.com")
 
                 assert exc_info.value.status_code == 409
 
@@ -431,7 +429,7 @@ class TestUserCRUD:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with patch("backend.api.user.AuditService"):
-                    result = await update_user(
+                    result = update_user(
                         str(mock_user.id), updated_data, "admin@example.com"
                     )
 
@@ -462,7 +460,7 @@ class TestUserCRUD:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with patch("backend.api.user.AuditService"):
-                    result = await delete_user(str(mock_user.id), "admin@example.com")
+                    result = delete_user(str(mock_user.id), "admin@example.com")
 
                     assert result["result"] is True
 
@@ -490,7 +488,7 @@ class TestUserCRUD:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await delete_user(str(uuid.uuid4()), "test@example.com")
+                    delete_user(str(uuid.uuid4()), "test@example.com")
 
                 assert exc_info.value.status_code == 403
 
@@ -527,7 +525,7 @@ class TestAccountLocking:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await lock_user(str(mock_user.id), "admin@example.com")
+                result = lock_user(str(mock_user.id), "admin@example.com")
 
                 mock_login_security.lock_user_account.assert_called_once()
                 assert result.userid == mock_user.userid
@@ -558,7 +556,7 @@ class TestAccountLocking:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await unlock_user(str(mock_user.id), "admin@example.com")
+                result = unlock_user(str(mock_user.id), "admin@example.com")
 
                 mock_login_security.unlock_user_account.assert_called_once()
                 assert result.userid == mock_user.userid
@@ -587,7 +585,7 @@ class TestAccountLocking:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await lock_user(str(uuid.uuid4()), "test@example.com")
+                    lock_user(str(uuid.uuid4()), "test@example.com")
 
                 assert exc_info.value.status_code == 403
 
@@ -703,7 +701,7 @@ class TestPasswordReset:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await forgot_password(request_data, mock_request)
+                result = forgot_password(request_data, mock_request)
 
                 assert result.success is True
 
@@ -732,7 +730,7 @@ class TestPasswordReset:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await forgot_password(request_data, mock_request)
+                result = forgot_password(request_data, mock_request)
 
                 # Should still return success (security - don't reveal if user exists)
                 assert result.success is True
@@ -771,7 +769,7 @@ class TestPasswordReset:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await reset_password(request_data)
+                result = reset_password(request_data)
 
                 assert result.success is True
 
@@ -803,7 +801,7 @@ class TestPasswordReset:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await reset_password(request_data)
+                    reset_password(request_data)
 
                 assert exc_info.value.status_code == 400
 
@@ -817,7 +815,7 @@ class TestPasswordReset:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await reset_password(request_data)
+            reset_password(request_data)
 
         assert exc_info.value.status_code == 400
 
@@ -831,7 +829,7 @@ class TestPasswordReset:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await reset_password(request_data)
+            reset_password(request_data)
 
         assert exc_info.value.status_code == 400
 
@@ -860,7 +858,7 @@ class TestPasswordReset:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await validate_reset_token("valid-token")
+                result = validate_reset_token("valid-token")
 
                 assert result.success is True
 
@@ -886,6 +884,6 @@ class TestPasswordReset:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await validate_reset_token("invalid-token")
+                    validate_reset_token("invalid-token")
 
                 assert exc_info.value.status_code == 400

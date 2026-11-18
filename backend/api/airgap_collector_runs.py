@@ -458,7 +458,7 @@ def _resolve_target_mirrors(
 
 
 @router.post("/runs", response_model=RunResponse)
-async def create_run(
+def create_run(
     request: RunCreateRequest,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -557,7 +557,7 @@ async def create_run(
 
 
 @router.get("/runs", response_model=List[RunResponse])
-async def list_runs(db: Session = Depends(get_db)):
+def list_runs(db: Session = Depends(get_db)):
     _check_collector_module()
     rows = (
         db.query(models.AirgapCollectionRun)
@@ -568,7 +568,7 @@ async def list_runs(db: Session = Depends(get_db)):
 
 
 @router.get("/runs/{run_id}", response_model=RunResponse)
-async def get_run(run_id: str, db: Session = Depends(get_db)):
+def get_run(run_id: str, db: Session = Depends(get_db)):
     _check_collector_module()
     rid = _parse_run_uuid(run_id)
     run = (
@@ -610,7 +610,7 @@ def _list_run_discs(run_id: uuid.UUID) -> List[str]:
 
 
 @router.get("/runs/{run_id}/discs")
-async def list_run_discs(run_id: str, db: Session = Depends(get_db)):
+def list_run_discs(run_id: str, db: Session = Depends(get_db)):
     """List the disc ISOs available for a run (multi-disc runs only).
 
     Used by the UI to render a per-disc download list when
@@ -744,7 +744,7 @@ def _iso_file_response(
 
 
 @router.get("/runs/{run_id}/iso")
-async def download_run_iso(
+def download_run_iso(
     run_id: str,
     disc: Optional[int] = None,
     db: Session = Depends(get_db),
@@ -761,7 +761,7 @@ async def download_run_iso(
 
 
 @router.post("/runs/{run_id}/iso-token")
-async def create_iso_download_token(
+def create_iso_download_token(
     run_id: str,
     current_user: str = Depends(get_current_user),  # noqa: ARG001
     db: Session = Depends(get_db),
@@ -781,7 +781,7 @@ async def create_iso_download_token(
 
 
 @download_router.get("/runs/{run_id}/iso-download")
-async def download_run_iso_streamed(
+def download_run_iso_streamed(
     run_id: str,
     token: str,
     disc: Optional[int] = None,
@@ -806,7 +806,7 @@ async def download_run_iso_streamed(
 
 
 @router.post("/runs/{run_id}/next-disc", response_model=RunResponse)
-async def confirm_next_disc(
+def confirm_next_disc(
     run_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -856,7 +856,7 @@ async def confirm_next_disc(
 
 
 @router.delete("/runs/{run_id}", status_code=204)
-async def delete_run(
+def delete_run(
     run_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -887,11 +887,10 @@ async def delete_run(
         username=current_user,
         result=Result.SUCCESS,
     )
-    return None
 
 
 @router.get("/runs/{run_id}/manifests", response_model=List[ManifestResponse])
-async def list_manifests(run_id: str, db: Session = Depends(get_db)):
+def list_manifests(run_id: str, db: Session = Depends(get_db)):
     _check_collector_module()
     rid = _parse_run_uuid(run_id)
     run = (
@@ -925,7 +924,7 @@ async def list_manifests(run_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/manifests/{manifest_id}/download")
-async def download_manifest_iso(
+def download_manifest_iso(
     manifest_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),  # noqa: ARG001

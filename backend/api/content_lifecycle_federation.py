@@ -66,7 +66,7 @@ def _subscription_for(tenant_db: Session, env_id, site_id):
     "/content-lifecycle/environments/{env_id}/subscriptions",
     dependencies=[Depends(JWTBearer())],
 )
-async def list_subscriptions(
+def list_subscriptions(
     env_id: str,
     shared_db: Session = Depends(get_shared_db),
     tenant_db: Session = Depends(get_tenant_db),
@@ -87,7 +87,7 @@ async def list_subscriptions(
     "/content-lifecycle/environments/{env_id}/subscriptions",
     dependencies=[Depends(JWTBearer())],
 )
-async def create_subscription(
+def create_subscription(
     env_id: str,
     body: SubscriptionCreate,
     shared_db: Session = Depends(get_shared_db),
@@ -114,7 +114,7 @@ async def create_subscription(
     "/content-lifecycle/environments/{env_id}/subscriptions/{site_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def delete_subscription(
+def delete_subscription(
     env_id: str,
     site_id: str,
     shared_db: Session = Depends(get_shared_db),

@@ -214,7 +214,7 @@ class TestInventories:
     @pytest.mark.asyncio
     async def test_creating_needs_the_add_script_role(self):
         with pytest.raises(HTTPException) as err:
-            await inv_api.create_inventory(
+            inv_api.create_inventory(
                 inv_api.InventoryRequest(name="x"), _Session(), user()
             )
         assert err.value.status_code == 403
@@ -224,7 +224,7 @@ class TestInventories:
         # Refusing an empty one at creation would make a multi-tag inventory
         # impossible to build -- there would be no valid first step.
         with _engine():
-            out = await inv_api.create_inventory(
+            out = inv_api.create_inventory(
                 inv_api.InventoryRequest(name="web tier"),
                 _Session(),
                 user(SecurityRoles.ADD_SCRIPT),
@@ -236,7 +236,7 @@ class TestInventories:
     async def test_a_nameless_inventory_is_refused(self):
         with _engine():
             with pytest.raises(HTTPException) as err:
-                await inv_api.create_inventory(
+                inv_api.create_inventory(
                     inv_api.InventoryRequest(name="   "),
                     _Session(),
                     user(SecurityRoles.ADD_SCRIPT),
@@ -248,7 +248,7 @@ class TestInventories:
         session = _Session(ConfigInventory=[inventory()])
         with _engine():
             with pytest.raises(HTTPException) as err:
-                await inv_api.create_inventory(
+                inv_api.create_inventory(
                     inv_api.InventoryRequest(name="web tier"),
                     session,
                     user(SecurityRoles.ADD_SCRIPT),
@@ -264,7 +264,7 @@ class TestInventories:
             ConfigInventory=[inventory()], ConfigJobTemplate=[template()]
         )
         with pytest.raises(HTTPException) as err:
-            await inv_api.delete_inventory(
+            inv_api.delete_inventory(
                 str(INV), session, user(SecurityRoles.DELETE_SCRIPT)
             )
         assert err.value.status_code == 409
@@ -272,7 +272,7 @@ class TestInventories:
     @pytest.mark.asyncio
     async def test_an_unused_inventory_deletes(self):
         session = _Session(ConfigInventory=[inventory()], ConfigJobTemplate=[])
-        out = await inv_api.delete_inventory(
+        out = inv_api.delete_inventory(
             str(INV), session, user(SecurityRoles.DELETE_SCRIPT)
         )
         assert out["success"] is True
@@ -283,7 +283,7 @@ class TestInventories:
         session = _Session(ConfigInventory=[inventory()])
         with _engine():
             with pytest.raises(HTTPException) as err:
-                await inv_api.add_member(
+                inv_api.add_member(
                     str(INV),
                     inv_api.MemberRequest(
                         host_id=str(uuid.uuid4()), tag_id=str(uuid.uuid4())
@@ -296,7 +296,7 @@ class TestInventories:
     @pytest.mark.asyncio
     async def test_a_malformed_id_is_400_not_500(self):
         with pytest.raises(HTTPException) as err:
-            await inv_api.get_inventory("not-a-uuid", _Session())
+            inv_api.get_inventory("not-a-uuid", _Session())
         assert err.value.status_code == 400
 
     @pytest.mark.asyncio
@@ -310,7 +310,7 @@ class TestInventories:
         session = _Session(ConfigInventory=[inventory(all_hosts=True)])
         with _engine():
             with patch.object(fleet, "resolve_hosts", lambda *_a: hosts):
-                out = await inv_api.preview_inventory(str(INV), session)
+                out = inv_api.preview_inventory(str(INV), session)
         assert out == ["a.invalid", "b.invalid"]
 
 
@@ -319,7 +319,7 @@ class TestJobTemplates:
     async def test_an_absurd_concurrency_is_clamped_rather_than_rejected(self):
         session = _Session(ConfigProfile=[profile()], ConfigInventory=[inventory()])
         with _engine():
-            out = await api.create_template(
+            out = api.create_template(
                 api.TemplateRequest(
                     name="t",
                     profile_id=str(PROFILE),
@@ -335,7 +335,7 @@ class TestJobTemplates:
     async def test_an_unspecified_concurrency_gets_the_default(self):
         session = _Session(ConfigProfile=[profile()], ConfigInventory=[inventory()])
         with _engine():
-            out = await api.create_template(
+            out = api.create_template(
                 api.TemplateRequest(
                     name="t", profile_id=str(PROFILE), inventory_id=str(INV)
                 ),
@@ -349,7 +349,7 @@ class TestJobTemplates:
         session = _Session(ConfigProfile=[profile()], ConfigInventory=[inventory()])
         with _engine():
             with pytest.raises(HTTPException) as err:
-                await api.create_template(
+                api.create_template(
                     api.TemplateRequest(
                         name="t",
                         profile_id=str(PROFILE),
@@ -366,7 +366,7 @@ class TestJobTemplates:
         session = _Session(ConfigProfile=[], ConfigInventory=[inventory()])
         with _engine():
             with pytest.raises(HTTPException) as err:
-                await api.create_template(
+                api.create_template(
                     api.TemplateRequest(
                         name="t", profile_id=str(PROFILE), inventory_id=str(INV)
                     ),
@@ -378,7 +378,7 @@ class TestJobTemplates:
     @pytest.mark.asyncio
     async def test_creating_needs_the_add_script_role(self):
         with pytest.raises(HTTPException) as err:
-            await api.create_template(
+            api.create_template(
                 api.TemplateRequest(
                     name="t", profile_id=str(PROFILE), inventory_id=str(INV)
                 ),
@@ -394,7 +394,7 @@ class TestLaunch:
         # Not EDIT_SCRIPT: launching runs executable content on every host the
         # inventory names.
         with pytest.raises(HTTPException) as err:
-            await api.launch_template(
+            api.launch_template(
                 str(TEMPLATE), _Session(), user(SecurityRoles.EDIT_SCRIPT)
             )
         assert err.value.status_code == 403
@@ -407,9 +407,7 @@ class TestLaunch:
             ConfigInventory=[inventory()],
         )
         with pytest.raises(HTTPException) as err:
-            await api.launch_template(
-                str(TEMPLATE), session, user(SecurityRoles.RUN_SCRIPT)
-            )
+            api.launch_template(str(TEMPLATE), session, user(SecurityRoles.RUN_SCRIPT))
         assert err.value.status_code == 400
 
     @pytest.mark.asyncio
@@ -427,7 +425,7 @@ class TestLaunch:
             with patch.object(
                 api.runner, "advance_job", lambda _s, j: advanced.append(j)
             ):
-                out = await api.launch_template(
+                out = api.launch_template(
                     str(TEMPLATE), session, user(SecurityRoles.RUN_SCRIPT)
                 )
         assert advanced == [created]
@@ -447,7 +445,7 @@ class TestLaunch:
         created = job_row(created_at=stamp)
         with patch.object(api.runner, "create_job", lambda *_a: created):
             with patch.object(api.runner, "advance_job", lambda *_a: None):
-                await api.launch_template(
+                api.launch_template(
                     str(TEMPLATE), session, user(SecurityRoles.RUN_SCRIPT)
                 )
         assert tmpl.last_launched_at == stamp
@@ -457,13 +455,13 @@ class TestJobViews:
     @pytest.mark.asyncio
     async def test_a_job_reports_what_is_left_to_do(self):
         session = _Session(ConfigJob=[job_row()])
-        out = await api.get_job(str(JOB), session)
+        out = api.get_job(str(JOB), session)
         assert out.outstanding_count == 5
 
     @pytest.mark.asyncio
     async def test_a_missing_job_is_404(self):
         with pytest.raises(HTTPException) as err:
-            await api.get_job(str(JOB), _Session(ConfigJob=[]))
+            api.get_job(str(JOB), _Session(ConfigJob=[]))
         assert err.value.status_code == 404
 
     def test_failed_sorts_ahead_of_every_other_target_status(self):
@@ -504,7 +502,7 @@ class TestJobViews:
             for n, s in (("a", "succeeded"), ("b", "failed"))
         ]
         session = _Session(ConfigJob=[job_row()], ConfigJobTarget=targets)
-        out = await api.list_job_targets(str(JOB), None, 100, 0, session)
+        out = api.list_job_targets(str(JOB), None, 100, 0, session)
         assert {t.host_fqdn for t in out} == {"a.invalid", "b.invalid"}
 
 
@@ -512,7 +510,7 @@ class TestCancel:
     @pytest.mark.asyncio
     async def test_cancelling_needs_the_run_script_role(self):
         with pytest.raises(HTTPException) as err:
-            await api.cancel_job(
+            api.cancel_job(
                 str(JOB),
                 api.CancelRequest(),
                 _Session(),
@@ -525,7 +523,7 @@ class TestCancel:
         session = _Session(ConfigJob=[job_row(status="completed")])
         with _engine():
             with pytest.raises(HTTPException) as err:
-                await api.cancel_job(
+                api.cancel_job(
                     str(JOB),
                     api.CancelRequest(),
                     session,
@@ -543,7 +541,7 @@ class TestCancel:
                 "cancel_job",
                 lambda _s, j, reason: setattr(j, "detail", reason) or 0,
             ):
-                await api.cancel_job(
+                api.cancel_job(
                     str(JOB),
                     api.CancelRequest(reason="wrong inventory"),
                     session,
@@ -562,7 +560,7 @@ class TestInventoryEditing:
             Host=[SimpleNamespace(id=uuid.uuid4(), fqdn="a.invalid", site_id=None)],
         )
         with _engine():
-            out = await inv_api.list_inventories(session)
+            out = inv_api.list_inventories(session)
         assert out[0].host_count == 1
 
     @pytest.mark.asyncio
@@ -575,7 +573,7 @@ class TestInventoryEditing:
         )
         with _engine():
             with pytest.raises(HTTPException) as err:
-                await inv_api.update_inventory(
+                inv_api.update_inventory(
                     str(INV),
                     inv_api.InventoryUpdateRequest(all_hosts=False),
                     session,
@@ -588,7 +586,7 @@ class TestInventoryEditing:
         session = _Session(ConfigInventory=[inventory(all_hosts=True)])
         with _engine():
             with pytest.raises(HTTPException) as err:
-                await inv_api.update_inventory(
+                inv_api.update_inventory(
                     str(INV),
                     inv_api.InventoryUpdateRequest(name="web tier"),
                     session,
@@ -599,7 +597,7 @@ class TestInventoryEditing:
     @pytest.mark.asyncio
     async def test_editing_needs_the_edit_script_role(self):
         with pytest.raises(HTTPException) as err:
-            await inv_api.update_inventory(
+            inv_api.update_inventory(
                 str(INV), inv_api.InventoryUpdateRequest(name="x"), _Session(), user()
             )
         assert err.value.status_code == 403
@@ -609,7 +607,7 @@ class TestInventoryEditing:
         session = _Session(ConfigInventory=[inventory()])
         host_id = str(uuid.uuid4())
         with _engine():
-            out = await inv_api.add_member(
+            out = inv_api.add_member(
                 str(INV),
                 inv_api.MemberRequest(host_id=host_id),
                 session,
@@ -631,13 +629,13 @@ class TestInventoryEditing:
         session = _Session(
             ConfigInventory=[inventory()], ConfigInventoryMember=[member]
         )
-        out = await inv_api.list_members(str(INV), session)
+        out = inv_api.list_members(str(INV), session)
         assert len(out) == 1
 
     @pytest.mark.asyncio
     async def test_removing_a_missing_member_is_404_not_a_silent_success(self):
         with pytest.raises(HTTPException) as err:
-            await inv_api.delete_member(
+            inv_api.delete_member(
                 str(uuid.uuid4()), _Session(), user(SecurityRoles.EDIT_SCRIPT)
             )
         assert err.value.status_code == 404
@@ -647,13 +645,13 @@ class TestTemplateEditing:
     @pytest.mark.asyncio
     async def test_templates_are_listed(self):
         session = _Session(ConfigJobTemplate=[template()])
-        out = await api.list_templates(session)
+        out = api.list_templates(session)
         assert out[0].name == "nightly baseline"
 
     @pytest.mark.asyncio
     async def test_one_template_is_fetchable(self):
         session = _Session(ConfigJobTemplate=[template()])
-        out = await api.get_template(str(TEMPLATE), session)
+        out = api.get_template(str(TEMPLATE), session)
         assert out.id == str(TEMPLATE)
 
     @pytest.mark.asyncio
@@ -661,7 +659,7 @@ class TestTemplateEditing:
         row = template()
         session = _Session(ConfigJobTemplate=[row])
         with _engine():
-            out = await api.update_template(
+            out = api.update_template(
                 str(TEMPLATE),
                 api.TemplateUpdateRequest(concurrency=99999),
                 session,
@@ -674,7 +672,7 @@ class TestTemplateEditing:
         session = _Session(ConfigJobTemplate=[template()])
         with _engine():
             with pytest.raises(HTTPException) as err:
-                await api.update_template(
+                api.update_template(
                     str(TEMPLATE),
                     api.TemplateUpdateRequest(schedule="nightly please"),
                     session,
@@ -688,7 +686,7 @@ class TestTemplateEditing:
         # denormalised onto every job, so the record that a fleet-wide change
         # happened stays readable.
         session = _Session(ConfigJobTemplate=[template()])
-        out = await api.delete_template(
+        out = api.delete_template(
             str(TEMPLATE), session, user(SecurityRoles.DELETE_SCRIPT)
         )
         assert out["success"] is True
@@ -697,11 +695,11 @@ class TestTemplateEditing:
     @pytest.mark.asyncio
     async def test_deleting_needs_the_delete_script_role(self):
         with pytest.raises(HTTPException) as err:
-            await api.delete_template(str(TEMPLATE), _Session(), user())
+            api.delete_template(str(TEMPLATE), _Session(), user())
         assert err.value.status_code == 403
 
     @pytest.mark.asyncio
     async def test_jobs_can_be_filtered_by_status(self):
         session = _Session(ConfigJob=[job_row()])
-        out = await api.list_jobs("running", 25, session)
+        out = api.list_jobs("running", 25, session)
         assert len(out) == 1

@@ -386,7 +386,7 @@ def backups_overview(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
 
 
 @router.get("/backups/summary")
-async def backups_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def backups_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     data = views.overview(db)
     return {
         "configured": data["target"] is not None,
@@ -403,7 +403,7 @@ async def backups_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any
 
 
 @router.post("/backups/targets")
-async def create_target(
+def create_target(
     body: TargetBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -434,7 +434,7 @@ async def create_target(
 
 
 @router.put("/backups/targets/{target_id}")
-async def update_target(
+def update_target(
     target_id: str,
     body: TargetBody,
     db: Session = Depends(get_tenant_db),
@@ -474,7 +474,7 @@ async def update_target(
 
 
 @router.delete("/backups/targets/{target_id}")
-async def delete_target(
+def delete_target(
     target_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -526,7 +526,7 @@ def _snapshots(db: Session, host: models.Host, include_gone: bool = False):
 
 
 @router.get("/host/{host_id}/backup")
-async def host_backup(host_id: str, db: Session = Depends(get_tenant_db)):
+def host_backup(host_id: str, db: Session = Depends(get_tenant_db)):
     host = _host_or_404(db, host_id)
     view = views.host_status(db, host)
     target = jobs.the_target(db)
@@ -535,7 +535,7 @@ async def host_backup(host_id: str, db: Session = Depends(get_tenant_db)):
 
 
 @router.get("/host/{host_id}/backup-snapshots")
-async def host_snapshots(
+def host_snapshots(
     host_id: str,
     include_gone: bool = False,
     db: Session = Depends(get_tenant_db),
@@ -558,7 +558,7 @@ def _apply_policy(policy: models.BackupPolicy, body: PolicyBody) -> None:
 
 
 @router.put("/host/{host_id}/backup-policy")
-async def put_policy(
+def put_policy(
     host_id: str,
     body: PolicyBody,
     db: Session = Depends(get_tenant_db),
@@ -617,7 +617,7 @@ def save_policy(db, current_user, host, body: PolicyBody, mark=None) -> Dict[str
 
 
 @router.delete("/host/{host_id}/backup-policy")
-async def delete_policy(
+def delete_policy(
     host_id: str,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -680,7 +680,7 @@ def _run_host(db: Session, policy, host: models.Host, action: str):
 
 
 @router.post("/host/{host_id}/backup-now")
-async def backup_now(
+def backup_now(
     host_id: str,
     body: Optional[RunBody] = None,
     db: Session = Depends(get_tenant_db),
@@ -742,7 +742,7 @@ def _bulk_skip_reason(db: Session, host: Optional[models.Host]) -> Optional[str]
 
 
 @router.post("/backups/backup-now")
-async def bulk_backup_now(
+def bulk_backup_now(
     body: BulkBackupBody,
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
@@ -780,7 +780,7 @@ async def bulk_backup_now(
 
 
 @router.post("/host/{host_id}/backup-restore")
-async def backup_restore(
+def backup_restore(
     host_id: str,
     body: RestoreBody,
     db: Session = Depends(get_tenant_db),
@@ -943,7 +943,7 @@ def list_runs(
 
 
 @router.post("/backups/runs/clear")
-async def clear_runs(
+def clear_runs(
     db: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
@@ -969,7 +969,7 @@ async def clear_runs(
 
 
 @router.get("/backups/runs/{run_id}")
-async def get_run(run_id: str, db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def get_run(run_id: str, db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     key = _uuid_or_404(run_id, _("Backup run not found"))
     run = db.query(models.BackupRun).filter(models.BackupRun.id == key).first()
     if run is None:

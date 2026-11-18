@@ -26,7 +26,7 @@ def _body(**kw):
 
 
 def _run(body):
-    return asyncio.run(pb.create_provisioning_bundle(body, current_user="admin@x"))
+    return pb.create_provisioning_bundle(body, current_user="admin@x")
 
 
 def test_bundle_mints_placement_token_and_renders():

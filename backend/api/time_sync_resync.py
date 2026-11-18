@@ -159,7 +159,7 @@ async def resync_fleet(
 
 
 @router.get("/time-sync/resyncs")
-async def list_resyncs(
+def list_resyncs(
     host_id: Optional[str] = None,
     batch_id: Optional[str] = None,
     limit: int = 50,
