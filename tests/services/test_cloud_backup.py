@@ -452,7 +452,7 @@ async def test_an_air_gapped_server_hides_it(session, sent, monkeypatch):
     s = _setup(session)
     _enabled(session, s)
     monkeypatch.setattr(cloud, "airgapped", lambda: True)
-    assert (await api.cloud_overview(session)) == {
+    assert (api.cloud_overview(session)) == {
         "available": False,
         "reason": "airgapped",
     }

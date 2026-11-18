@@ -531,7 +531,7 @@ class TestTokenRefresh:
         refresh_token = sign_refresh_token("test@example.com")
         mock_request.cookies = {"refresh_token": refresh_token}
 
-        result = await refresh(mock_request)
+        result = refresh(mock_request)
 
         assert "Authorization" in result
 
@@ -541,7 +541,7 @@ class TestTokenRefresh:
         mock_request.cookies = {}
 
         with pytest.raises(HTTPException) as exc_info:
-            await refresh(mock_request)
+            refresh(mock_request)
 
         assert exc_info.value.status_code == 403
 
@@ -551,7 +551,7 @@ class TestTokenRefresh:
         mock_request.cookies = {"refresh_token": "invalid.token.here"}
 
         with pytest.raises(HTTPException) as exc_info:
-            await refresh(mock_request)
+            refresh(mock_request)
 
         assert exc_info.value.status_code == 403
 
@@ -571,6 +571,6 @@ class TestTokenRefresh:
         mock_request.cookies = {"refresh_token": expired_token}
 
         with pytest.raises(HTTPException) as exc_info:
-            await refresh(mock_request)
+            refresh(mock_request)
 
         assert exc_info.value.status_code == 403

@@ -728,7 +728,7 @@ async def add_host(new_host: Host, current_user: str = Depends(get_current_user)
 
 
 @public_router.post("/host/register")
-async def register_host(registration_data: HostRegistration):
+def register_host(registration_data: HostRegistration):
     """
     Register a new host (agent) with the system.
     This endpoint does not require authentication for initial registration.

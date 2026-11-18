@@ -166,7 +166,7 @@ def _settings(body: AccountSettings) -> Dict[str, Any]:
 
 
 @router.get("/backups/cloud")
-async def cloud_overview(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def cloud_overview(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     return views.overview(db)
 
 

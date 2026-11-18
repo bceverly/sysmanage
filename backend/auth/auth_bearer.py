@@ -9,6 +9,7 @@ This module ise used to verify the JWT token we use for authentication
 from typing import Optional
 
 from fastapi import Depends, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from backend.auth.api_key import authenticate_api_key, looks_like_api_key
@@ -107,7 +108,9 @@ async def get_current_user(  # NOSONAR
     # Phase 13.2: fall back to API-key auth when the credential is an API key
     # rather than a JWT, so automation resolves to the owning user's identity.
     if looks_like_api_key(token):
-        principal = authenticate_api_key(token)
+        # A database lookup: in the thread pool, never on the event loop
+        # (every API-key request used to wait for a pooled connection there).
+        principal = await run_in_threadpool(authenticate_api_key, token)
         if principal and principal.get("user_id"):
             return principal["user_id"]
 

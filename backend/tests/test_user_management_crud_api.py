@@ -621,7 +621,7 @@ class TestUserPermissions:
                 )
                 mock_sessionmaker.return_value = mock_session_factory
 
-                result = await get_user_permissions("test@example.com")
+                result = get_user_permissions("test@example.com")
 
                 assert "is_admin" in result
                 assert "permissions" in result
@@ -648,7 +648,7 @@ class TestUserPermissions:
                 mock_sessionmaker.return_value = mock_session_factory
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await get_user_permissions("nonexistent@example.com")
+                    get_user_permissions("nonexistent@example.com")
 
                 assert exc_info.value.status_code == 401
 
@@ -658,7 +658,7 @@ class TestUserPermissions:
         # The fixture sets admin_userid = "admin@test.com" with no DB row.
         # Without the shortcut this would raise 401; with it, the user
         # gets is_admin=True and every SecurityRole granted.
-        result = await get_user_permissions("admin@test.com")
+        result = get_user_permissions("admin@test.com")
         assert result["is_admin"] is True
         # Every defined role should be True for the config-admin.
         from backend.security.roles import SecurityRoles  # local import for clarity

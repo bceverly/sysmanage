@@ -131,7 +131,7 @@ async def test_the_endpoint_answers_with_no_store_and_audits(session, sent, load
             patch.object(endpoint, "_verify_host"), \
             patch.object(endpoint, "_host_session", return_value=session), \
             patch.object(endpoint.AuditService, "log") as audit:  # fmt: skip
-        answer = await endpoint.agent_backup_key(None, body, "Bearer t", "h", session)
+        answer = endpoint.agent_backup_key(None, body, "Bearer t", "h", session)
     assert json.loads(answer.body) == {"keys": [SECRET]}
     assert answer.headers["cache-control"] == "no-store"
     assert audit.call_args.kwargs["details"] == {"run_id": str(run.id)}

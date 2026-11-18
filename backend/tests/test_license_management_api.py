@@ -175,7 +175,7 @@ class TestGetLicenseInfoEndpoint:
         ) as mock_license_service:
             mock_license_service.is_pro_plus_active = False
 
-            result = await get_license_info(current_user="test-user")
+            result = get_license_info(current_user="test-user")
 
             assert result.active is False
             assert result.tier is None
@@ -202,7 +202,7 @@ class TestGetLicenseInfoEndpoint:
             mock_license_service.is_pro_plus_active = True
             mock_license_service.get_license_info.return_value = mock_info
 
-            result = await get_license_info(current_user="test-user")
+            result = get_license_info(current_user="test-user")
 
             assert result.active is True
             assert result.tier == "enterprise"
@@ -227,7 +227,7 @@ class TestGetLicenseInfoEndpoint:
             mock_license_service.is_pro_plus_active = True
             mock_license_service.get_license_info.return_value = mock_info
 
-            result = await get_license_info(current_user="test-user")
+            result = get_license_info(current_user="test-user")
 
             assert result.active is True
             assert result.tier == "professional"
@@ -480,7 +480,7 @@ class TestLicenseManagementIntegration:
         ) as mock_license_service:
             # First check - no license
             mock_license_service.is_pro_plus_active = False
-            result1 = await get_license_info(current_user="test-user")
+            result1 = get_license_info(current_user="test-user")
             assert result1.active is False
 
             # Second check - license installed
@@ -489,7 +489,7 @@ class TestLicenseManagementIntegration:
                 "tier": "professional",
                 "license_id": "LIC-001",
             }
-            result2 = await get_license_info(current_user="test-user")
+            result2 = get_license_info(current_user="test-user")
             assert result2.active is True
             assert result2.tier == "professional"
 
@@ -510,7 +510,7 @@ class TestLicenseManagementIntegration:
                     "license_id": f"LIC-{tier.upper()}",
                 }
 
-                result = await get_license_info(current_user="test-user")
+                result = get_license_info(current_user="test-user")
 
                 assert result.tier == tier
 
@@ -536,7 +536,7 @@ class TestLicenseManagementIntegration:
                     "features": features,
                 }
 
-                result = await get_license_info(current_user="test-user")
+                result = get_license_info(current_user="test-user")
 
                 assert result.features == features
                 assert len(result.features) == len(features)

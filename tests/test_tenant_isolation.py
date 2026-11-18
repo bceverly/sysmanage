@@ -20,7 +20,6 @@ the bootstrap / server-scope database.
 
 # pylint: disable=redefined-outer-name
 
-import asyncio
 import uuid
 from types import SimpleNamespace
 
@@ -137,15 +136,13 @@ def _register(fqdn, token):
 
     # The reply is a dict since Phase 22.0 (never the ORM row).
     return SimpleNamespace(
-        **asyncio.run(
-            register_host(
-                HostRegistration(
-                    active=True,
-                    fqdn=fqdn,
-                    hostname=fqdn.split(".")[0],
-                    ipv4="10.0.0.1",
-                    enrollment_token=token,
-                )
+        **register_host(
+            HostRegistration(
+                active=True,
+                fqdn=fqdn,
+                hostname=fqdn.split(".")[0],
+                ipv4="10.0.0.1",
+                enrollment_token=token,
             )
         )
     )

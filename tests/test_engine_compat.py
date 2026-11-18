@@ -308,7 +308,7 @@ class TestApiReportsTheDeferral:
         check_module_compatibility(
             "thing", {"min_oss_alembic_revision": UNKNOWN_REV}, session, ALEMBIC_CFG
         )
-        response = await get_module_compatibility(current_user="u@example.com")
+        response = get_module_compatibility(current_user="u@example.com")
         assert [
             e.kind for e in response.incompatibilities if e.module_code == "thing"
         ] == [KIND_SERVER_TOO_OLD]

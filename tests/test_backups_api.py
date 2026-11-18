@@ -318,9 +318,9 @@ async def test_runs_are_paginated_and_overview_counts(session, sent):
         run = jobs.queue_run(session, s.policy, s.host.id, "estimate")
         run.status = "ok"
     session.commit()
-    page = await api.list_runs(str(s.host.id), None, 2, 0, session)
+    page = api.list_runs(str(s.host.id), None, 2, 0, session)
     assert page["total"] == 3 and len(page["runs"]) == 2
-    overview = await api.backups_overview(session)
+    overview = api.backups_overview(session)
     rows = {r["host_id"]: r for r in overview["hosts"]}
     assert rows[str(s.host.id)]["status"] == "never"
     assert rows[str(s.nas.id)]["status"] == "no_policy"
@@ -526,9 +526,9 @@ async def test_clear_hides_finished_runs_but_keeps_pending_and_history(session, 
     session.commit()
     answer = await api.clear_runs(session, MANAGER)
     assert answer == {"cleared": 2}
-    listed = await api.list_runs(None, None, 50, 0, session)
+    listed = api.list_runs(None, None, 50, 0, session)
     assert [r["status"] for r in listed["runs"]] == ["queued"]
-    everything = await api.list_runs(None, None, 50, 0, session, include_cleared=True)
+    everything = api.list_runs(None, None, 50, 0, session, include_cleared=True)
     assert everything["total"] == 3
     # history still drives the page: the last good capture is still known
     assert views.host_status(session, s.host)["last_good_capture"] is not None

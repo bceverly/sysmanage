@@ -484,7 +484,7 @@ def _handle_failed_password(user, login_data, session, client_ip, user_agent):
 
 
 @router.post("/refresh")
-async def refresh(request: Request):
+def refresh(request: Request):
     """
     This API call looks for refresh token passed in the cookies of the
     request as an http_only cookie (inaccessible to the client).  If present,

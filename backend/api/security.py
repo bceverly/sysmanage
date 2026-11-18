@@ -258,7 +258,7 @@ def _check_security_configuration():
 
 
 @router.get("/default-credentials-status", response_model=SecurityStatusResponse)
-async def get_default_credentials_status(current_user=Depends(get_current_user)):
+def get_default_credentials_status(current_user=Depends(get_current_user)):
     """
     Comprehensive security status check including default credentials, JWT secrets, and password salts.
 

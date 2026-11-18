@@ -1367,7 +1367,7 @@ lint-freebsd-port:
 	@$(PYTHON) scripts/check_freebsd_port.py --port-dir packaging/freebsd-ports/sysutils/sysmanage-canary
 
 
-lint: lint-file-length lint-license-headers lint-test-constraints lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-verify i18n-markup i18n-complete i18n-sync-check lint-version check-migrations lint-freebsd-port roadmap-version
+lint: lint-file-length lint-license-headers lint-test-constraints lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-verify i18n-markup i18n-complete i18n-sync-check lint-version check-migrations lint-freebsd-port roadmap-version lint-async-handlers
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: the per-platform nginx configs are GENERATED from one template.
@@ -1382,6 +1382,18 @@ check-nginx-configs: $(VENV_ACTIVATE)
 # so a collision costs a full release cycle to discover.  The GUIDs are
 # hand-authored and follow a visual pattern, which makes "copy a neighbor and
 # advance it" the natural way to add one, and the natural way to collide.
+# Guard: a route handler that never awaits must be plain `def` -- as `async def`
+# its blocking database calls stall the event loop (production 2026-11-18).
+# Today's offenders are on a frozen allowlist that only shrinks.
+lint-async-handlers: $(VENV_ACTIVATE)
+	@echo "=== async route handlers that never await ==="
+	@$(PYTHON) scripts/check_async_handlers.py
+
+lint-async-handlers-prune: $(VENV_ACTIVATE)
+	@$(PYTHON) scripts/check_async_handlers.py --prune
+
+.PHONY: lint-async-handlers lint-async-handlers-prune
+
 check-msi-guids: $(VENV_ACTIVATE)
 	@echo "=== MSI component GUID uniqueness ==="
 	@$(PYTHON) scripts/check_msi_guids.py

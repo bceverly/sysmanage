@@ -111,7 +111,7 @@ async def test_listings_stay_off_recent_jobs_and_go_after_a_day(session, sent):
     )
     changes = jobs.queue_browse(session, s.policy, s.host, jobs.STATUS, None, None, "u")
     session.commit()
-    shown = await api.list_runs(limit=50, offset=0, db=session)
+    shown = api.list_runs(limit=50, offset=0, db=session)
     actions = [r["action"] for r in shown["runs"]]
     assert "list" not in actions and "status" in actions
     listing.status, changes.status = "ok", "different"

@@ -48,7 +48,7 @@ def _audit(db: Session, host_id: str, run_id: str) -> None:
 
 
 @router.post("/agent/backup-key")
-async def agent_backup_key(
+def agent_backup_key(
     request: Request,
     payload: KeyRequest,
     authorization: Optional[str] = Header(default=None),

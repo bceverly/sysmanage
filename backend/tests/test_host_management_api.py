@@ -650,7 +650,7 @@ class TestHostRegistration:
                     mock_session
                 )
 
-                result = await register_host(registration_data)
+                result = register_host(registration_data)
 
                 mock_session.add.assert_called_once()
                 mock_session.commit.assert_called()
@@ -687,7 +687,7 @@ class TestHostRegistration:
                 )
 
                 with pytest.raises(HTTPException) as exc:
-                    await register_host(registration_data)
+                    register_host(registration_data)
 
                 assert exc.value.status_code == 429
                 mock_session.add.assert_not_called()
@@ -718,7 +718,7 @@ class TestHostRegistration:
                     mock_session
                 )
 
-                result = await register_host(registration_data)
+                result = register_host(registration_data)
 
                 # Should update existing host, not add new one
                 mock_session.add.assert_not_called()

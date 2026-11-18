@@ -113,7 +113,7 @@ def _register(fqdn="agent1.example.com", token=TOKEN):
     )
     # The reply is a dict since Phase 22.0 (never the ORM row); .id keeps
     # these tests reading as before.
-    return SimpleNamespace(**asyncio.run(register_host(reg)))
+    return SimpleNamespace(**register_host(reg))
 
 
 def _count_hosts(eng, fqdn):

@@ -68,7 +68,7 @@ class LicenseInstallResponse(BaseModel):
 
 
 @router.get("/license", response_model=LicenseInfoResponse)
-async def get_license_info(current_user: str = Depends(get_current_user)):
+def get_license_info(current_user: str = Depends(get_current_user)):
     """
     Get current Pro+ license information.
 
@@ -190,7 +190,7 @@ class ModuleCompatibilityResponse(BaseModel):
 
 
 @router.get("/license/module-compat", response_model=ModuleCompatibilityResponse)
-async def get_module_compatibility(
+def get_module_compatibility(
     current_user: str = Depends(get_current_user),
 ):
     """

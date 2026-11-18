@@ -23,7 +23,7 @@ router = APIRouter()
 
 
 @router.get("/summary")
-async def get_update_summary(dependencies=Depends(JWTBearer())):
+def get_update_summary(dependencies=Depends(JWTBearer())):
     """Get summary statistics for package updates across all hosts, including update results."""
     try:
         session_factory = request_sessionmaker()
@@ -105,7 +105,7 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
 
 
 @router.get("/{host_id}")
-async def get_host_updates(
+def get_host_updates(
     host_id: UUID,  # typed: a malformed id is a 422, not a 500 (Lucky 13)
     *,
     package_manager: Optional[str] = Query(None),
@@ -205,7 +205,7 @@ async def get_host_updates(
 
 
 @router.get("/")
-async def get_all_updates(  # pylint: disable=too-many-positional-arguments
+def get_all_updates(  # pylint: disable=too-many-positional-arguments
     security_only: Optional[bool] = Query(None),
     system_only: Optional[bool] = Query(None),
     application_only: Optional[bool] = Query(None),
@@ -307,7 +307,7 @@ async def get_all_updates(  # pylint: disable=too-many-positional-arguments
 
 
 @router.get("/results", response_model=UpdateStatsSummary)
-async def get_update_results(dependencies=Depends(JWTBearer())):
+def get_update_results(dependencies=Depends(JWTBearer())):
     """Get update results."""
     try:
         logger.info("SUCCESS: get_update_results called successfully")
@@ -327,7 +327,7 @@ async def get_update_results(dependencies=Depends(JWTBearer())):
 
 
 @router.get("/update-status")
-async def get_update_status(dependencies=Depends(JWTBearer())):
+def get_update_status(dependencies=Depends(JWTBearer())):
     """Get update status."""
     try:
         import backend.api.agent as agent_module

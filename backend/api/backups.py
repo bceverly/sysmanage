@@ -381,7 +381,7 @@ def _apply_target(target: models.BackupTarget, body: TargetBody, storage_id) -> 
 
 
 @router.get("/backups/overview")
-async def backups_overview(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+def backups_overview(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     return views.overview(db)
 
 
@@ -911,7 +911,7 @@ def _restore_audit_text(body: RestoreBody) -> str:
 
 
 @router.get("/backups/runs")
-async def list_runs(
+def list_runs(
     host_id: Optional[str] = None,
     action: Optional[str] = None,
     limit: int = Query(50, ge=1, le=500),

@@ -159,7 +159,7 @@ async def delete_user(user_id: str, current_user: str = Depends(get_current_user
 
 
 @router.get("/user/permissions", dependencies=[Depends(JWTBearer())])
-async def get_user_permissions(current_user: str = Depends(get_current_user)):
+def get_user_permissions(current_user: str = Depends(get_current_user)):
     """
     Get the current user's security role permissions.
     Returns a dictionary of role names to boolean values.
