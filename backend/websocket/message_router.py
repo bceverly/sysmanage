@@ -193,6 +193,14 @@ async def route_inbound_message(  # NOSONAR
             await handle_time_status_update(db, mock_connection, message_data)
             success = True
 
+        elif message_type == MessageType.PACKAGE_MANAGER_HEALTH:
+            # Its own message (2026-11-19): riding only on the update scan, a
+            # half-configured kernel showed healthy for hours.
+            package_manager_repair.store_for_host(
+                db, getattr(mock_connection, "host_id", None), message_data
+            )
+            success = True
+
         elif message_type == MessageType.HARDWARE_HEALTH_UPDATE:
             await handle_hardware_health_update(db, mock_connection, message_data)
             success = True

@@ -68,6 +68,8 @@ import {
   SiteCommandsCard,
   SiteRollupCard,
 } from "../Components/SiteDetailCards";
+import { SiteBackupCard } from "../Components/SiteBackupCard";
+import type { FederationDashboardWithBackup } from "../Services/federationBackup";
 import {
   formatAbsolute,
   formatRelative,
@@ -723,6 +725,12 @@ const SiteDetail: React.FC = () => {
             the latest AGGREGATE snapshot this site pushed up (per-host
             detail stays on the site). */}
         <SiteRollupCard rollup={rollup} />
+
+        {/* Backup status card (Phase 27.1): the site's backup STATUS --
+            the backups themselves stay on the site's own storage. */}
+        <SiteBackupCard
+          backup={(rollup as FederationDashboardWithBackup | null)?.backup_rollup}
+        />
 
         {/* Active commands card (Phase 12.10 visibility) ---------------
             Shows open dispatched commands targeting this site, with

@@ -253,6 +253,10 @@ def test_community_backups_are_untouched_and_pro_plus_backups_refuse(edition):
     for method, path, response in answers:
         if "backup" not in path or path.startswith("/api/auth/"):
             continue
+        # A federated site's backup STATUS (27.1) is a federation route, gated
+        # with the rest of federation, not a backup route.
+        if "/federation/" in path:
+            continue
         status = response.status_code
         if (method, path) in PRO_PLUS_BACKUP:
             if status != 402:

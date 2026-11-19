@@ -160,6 +160,9 @@ def _hardware_fields(host) -> dict:
         "package_manager_repairable": bool(
             getattr(host, "package_manager_repairable", False)
         ),
+        # Not safe to reboot: it may not boot (2026-11-19).
+        "reboot_unsafe": bool(getattr(host, "reboot_unsafe", False)),
+        "reboot_unsafe_reason": getattr(host, "reboot_unsafe_reason", None),
     }
 
 

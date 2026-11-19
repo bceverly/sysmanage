@@ -19,6 +19,7 @@ from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
+from backend.services import reboot_safety
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import CommandMessage, CommandType, MessageType
 from backend.websocket.queue_enums import QueueDirection
@@ -302,6 +303,7 @@ def reboot_system(
     host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
     if not host:
         raise HTTPException(status_code=404, detail=error_host_not_found())
+    reboot_safety.refuse_if_unsafe(host)  # it may not boot (2026-11-19)
 
     cmd_message = CommandMessage(
         CommandType.REBOOT_SYSTEM, {}, 60

@@ -3456,7 +3456,26 @@
       "vulnCritical": "{{n}} 个关键项",
       "vulnHigh": "{{n}} 高优先级",
       "vulnLow": "{{n}} 低优先级",
-      "vulnMedium": "{{n}} 中等优先级"
+      "vulnMedium": "{{n}} 中等优先级",
+      "backupAttention": "需要关注：{{n}}",
+      "backupAttentionHosts": "需要在站点上查看的主机",
+      "backupCovered": "已覆盖主机：{{n}}",
+      "backupEmpty": "尚未从这个站点同步任何备份状态。",
+      "backupLastGood": "上次成功备份 {{when}}",
+      "backupNever": "从未备份：{{n}}",
+      "backupNeverShort": "从未备份过",
+      "backupNone": "暂无",
+      "backupNotSetUp": "该站点的服务器没有设置备份。",
+      "backupOldest": "最旧的最后一次成功备份：{{when}}",
+      "backupSize": "存储在站点：{{size}}",
+      "backupStaysAtSite": "每个站点都有自己的备份存储；只有这个状态会在这里出现。",
+      "backupStorageProblem": "该站点的备份存储需要关注",
+      "backupTitle": "备份",
+      "backupUnverified": "未验证: {{n}}",
+      "backupVerified": "已验证: {{n}}",
+      "backupVerifyFailed": "验证失败: {{n}}",
+      "backupVerifyOff": "验证已关闭: {{n}}",
+      "backupVerifying": "正在验证：{{n}}"
     },
     "empty": "还没有注册站点。先注册一个下属SysManage服务器开始使用。",
     "enroll": {
@@ -6257,7 +6276,8 @@
       "notBack": "重启后未恢复在线",
       "queued": "正在重启",
       "nextWindow": "需要重启：将在下一个维护窗口进行",
-      "notNeeded": "不再需要重启"
+      "notNeeded": "不再需要重启",
+      "unsafe": "重启等待中：在修复其包管理器之前，主机可能无法启动"
     },
     "result": "结果",
     "rule": {
@@ -6345,5 +6365,12 @@
       "subtitle": "按主机群逐一部署的策略：一次一个主机群，每个主机群健康后才进行下一个。",
       "title": "按主机群分批部署"
     }
+  },
+  "packageRepair": {
+    "failed": "修复无法开始。",
+    "intro": "在修复之前，发送到这些主机的更新都会失败：",
+    "more": "主机页面上还有 {{n}} 台",
+    "title": "包管理器需要修复",
+    "unsafeTitle": "在修复包管理器之前，请勿重启。"
   }
 }

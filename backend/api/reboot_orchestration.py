@@ -22,6 +22,7 @@ from backend.licensing.module_loader import module_loader
 from backend.persistence.models import HostChild, RebootOrchestration
 from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
+from backend.services import reboot_safety
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -117,6 +118,8 @@ def orchestrated_reboot(
 
         if not host.active:
             raise HTTPException(status_code=400, detail=_("Host is not active"))
+        # Before any child is stopped: it may not boot (2026-11-19).
+        reboot_safety.refuse_if_unsafe(host)
 
         # Snapshot running children
         running_children = (

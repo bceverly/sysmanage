@@ -25,6 +25,7 @@ from sqlalchemy.orm import Session
 
 from backend.persistence import models
 from backend.services import agent_capability_service as capabilities
+from backend.services import reboot_safety
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,9 @@ def store(host: Optional[models.Host], health: Any) -> bool:
         bool(health.get("repairable")) and manager is not None
     )
     host.package_manager_checked_at = _now()
-    return bool(before) != needs
+    # ... and whether a reboot would come back (2026-11-19).
+    unsafe_changed = reboot_safety.store(host, health)
+    return bool(before) != needs or unsafe_changed
 
 
 def store_for_host(db: Session, host_id: Any, health: Any) -> None:

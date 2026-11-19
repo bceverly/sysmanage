@@ -24,6 +24,7 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
+from backend.services import reboot_safety
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
@@ -107,6 +108,9 @@ def reboot_host(
     host = tenant_db.query(models.Host).filter(models.Host.id == host_id).first()
     if not host:
         raise HTTPException(status_code=404, detail=error_host_not_found())
+    # A half-configured kernel or a missing initramfs (2026-11-19): it may
+    # not come back.  Repair the package manager first.
+    reboot_safety.refuse_if_unsafe(host)
 
     # Create command message for system reboot
     command_message = create_command_message(

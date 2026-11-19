@@ -3456,7 +3456,26 @@
       "vulnCritical": "{{n}} crítico",
       "vulnHigh": "{{n}} alto",
       "vulnLow": "{{n}} baixo",
-      "vulnMedium": "{{n}} médio"
+      "vulnMedium": "{{n}} médio",
+      "backupAttention": "Precisa de atenção: {{n}}",
+      "backupAttentionHosts": "Hosts a serem verificados no site",
+      "backupCovered": "Hosts cobertos: {{n}}",
+      "backupEmpty": "Ainda não há sincronização do status de backup deste site.",
+      "backupLastGood": "último backup bem-sucedido {{when}}",
+      "backupNever": "Nunca foi feito backup: {{n}}",
+      "backupNeverShort": "nunca foi feito backup",
+      "backupNone": "ainda nenhum",
+      "backupNotSetUp": "Backups não estão configurados neste servidor do site.",
+      "backupOldest": "Último backup bem-sucedido mais antigo: {{when}}",
+      "backupSize": "Armazenado no site: {{size}}",
+      "backupStaysAtSite": "Cada site mantém sua própria área de armazenamento de backup; apenas este status é exibido aqui.",
+      "backupStorageProblem": "A área de armazenamento de backup do site precisa de atenção",
+      "backupTitle": "Backups",
+      "backupUnverified": "Não verificado: {{n}}",
+      "backupVerified": "Verificado: {{n}}",
+      "backupVerifyFailed": "Falha na verificação: {{n}}",
+      "backupVerifyOff": "Verificação desativada: {{n}}",
+      "backupVerifying": "Verificando agora: {{n}}"
     },
     "empty": "Ainda não hâ sites inscritos. Inscreva um servidor SysManage subordinado para iniciar.",
     "enroll": {
@@ -6257,7 +6276,8 @@
       "notBack": "Não retornou após sua reinicialização",
       "queued": "Reiniciando",
       "nextWindow": "Reinicialização necessária: aguarda a próxima janela de manutenção",
-      "notNeeded": "Reinicialização não é mais necessária"
+      "notNeeded": "Reinicialização não é mais necessária",
+      "unsafe": "Reinicialização aguardando: o host pode não inicializar até que seu gerenciador de pacotes seja consertado"
     },
     "result": "Resultado",
     "rule": {
@@ -6345,5 +6365,12 @@
       "subtitle": "Políticas implantadas frota por frota: uma frota de cada vez, cada uma saudável antes da próxima.",
       "title": "Implantações por frota de hosts"
     }
+  },
+  "packageRepair": {
+    "failed": "A reparação não pôde ser iniciada.",
+    "intro": "Atualizações enviadas para esses hosts falham até que ele seja consertado:",
+    "more": "e {{n}} mais na página de Hosts",
+    "title": "O gerenciador de pacotes precisa ser consertado",
+    "unsafeTitle": "Não reinicie até que o gerenciador de pacotes seja consertado"
   }
 }

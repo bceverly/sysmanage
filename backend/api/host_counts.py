@@ -65,6 +65,53 @@ def host_summary(session) -> dict:
         "approved_up": up,
         "approved_down": down,
         "reboot_required": reboot,
+        **_repair_summary(session),
+    }
+
+
+# How many hosts needing a repair the summary names (the rest are counted).
+REPAIR_NAMED = 20
+
+
+def _repair_summary(session) -> dict:
+    """Approved hosts whose package manager needs repair, or that are not safe
+    to reboot (2026-11-19): counted, and the first few named -- not-safe-to-
+    reboot first -- so the dashboard and the Updates page can say which and
+    offer the repair without loading the host list."""
+    host = models.Host
+    flagged = (host.approval_status == "approved") & (
+        host.package_manager_needs_repair.is_(True) | host.reboot_unsafe.is_(True)
+    )
+    count, unsafe = (
+        session.query(
+            func.count(host.id),
+            func.sum(case((host.reboot_unsafe.is_(True), 1), else_=0)),
+        )
+        .filter(flagged)
+        .one()
+    )
+    rows = (
+        session.query(host)
+        .filter(flagged)
+        .order_by(host.reboot_unsafe.desc(), host.fqdn)
+        .limit(REPAIR_NAMED)
+        .all()
+    )
+    return {
+        "package_manager_repair": int(count or 0),
+        "reboot_unsafe": int(unsafe or 0),
+        "repair_hosts": [
+            {
+                "id": str(row.id),
+                "fqdn": row.fqdn,
+                "package_manager_needs_repair": bool(row.package_manager_needs_repair),
+                "package_manager_repair_reason": row.package_manager_repair_reason,
+                "package_manager_repairable": bool(row.package_manager_repairable),
+                "reboot_unsafe": bool(row.reboot_unsafe),
+                "reboot_unsafe_reason": row.reboot_unsafe_reason,
+            }
+            for row in rows
+        ],
     }
 
 

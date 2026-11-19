@@ -27,6 +27,7 @@ import { backupSummaryLevel } from '../Components/Backups/backupLabels';
 import { getCloudSummary, CloudSummary } from '../Services/cloudBackup';
 import { attentionCount, dashboardNote } from '../Components/CloudBackup/cloudBackupLabels';
 import DashboardSettingsDialog from '../Components/DashboardSettingsDialog';
+import PackageManagerRepairNotice from '../Components/PackageManagerRepairNotice';
 
 interface DashboardCardProps {
     title: string;
@@ -447,6 +448,9 @@ const Dashboard = () => {
                     <SettingsIcon />
                 </IconButton>
             </Box>
+
+            {/* Hosts that may not boot, or whose updates fail (2026-11-19). */}
+            <PackageManagerRepairNotice />
 
             <Grid container spacing={3}>
                 {cardVisibility.hosts && (

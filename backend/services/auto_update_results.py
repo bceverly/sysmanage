@@ -25,6 +25,7 @@ from typing import Iterable, Optional
 
 from backend.i18n import _
 from backend.persistence import models
+from backend.services import reboot_safety
 from backend.services.agent_capability_service import host_supports
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import create_command_message
@@ -36,6 +37,10 @@ queue_ops = QueueOperations()
 
 ACTOR = "automatic updates"
 LATE_REBOOT_MINUTES = 30
+
+
+# The reboot waits: the host may not boot (2026-11-19, services/reboot_safety).
+UNSAFE = "unsafe"
 
 
 def naive_utc(value):
@@ -83,6 +88,11 @@ def queue_reboot(db, run, host, now) -> None:
         return
     if host_supports(host, "reboot_system") is False:
         run.reboot_status = "not_wanted"  # this agent cannot take a reboot
+        return
+    if reboot_safety.reason(host):
+        # A half-configured kernel or a missing initramfs (2026-11-19): it
+        # may not come back.  _window_reboots sends it once the host is safe.
+        run.reboot_status = UNSAFE
         return
     queue_ops.enqueue_message(
         message_type="command",
@@ -210,10 +220,11 @@ def _late_reboots(db, eng, now) -> None:
 
 
 def _window_reboots(db, eng, now) -> None:
-    """Reboots waiting for a window (26.2): sent once the host is inside one
-    with time for it; dropped when the host no longer needs one."""
+    """Reboots waiting for a window (26.2), or for the host to be safe to
+    reboot again (2026-11-19): sent once it is inside one with time for it
+    and would come back; dropped when the host no longer needs one."""
     for run in db.query(models.AutoUpdateRun).filter(
-        models.AutoUpdateRun.reboot_status == "next_window"
+        models.AutoUpdateRun.reboot_status.in_(("next_window", UNSAFE))
     ):
         host = db.get(models.Host, run.host_id)
         if host is None or not host.reboot_required:

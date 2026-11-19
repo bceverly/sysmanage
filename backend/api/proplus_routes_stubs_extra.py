@@ -682,6 +682,13 @@ def _mount_stub_group_b(app, results: dict) -> int:
         ):
             raise refuse_unlicensed("federation_controller_engine")
 
+        # Phase 27.1 -- a site's backup status.
+        @router.post("/sites/{site_id}/rollups/backups")
+        def fed_ingest_backup_rollup_stub(  # pylint: disable=unused-argument
+            site_id: str,
+        ):
+            raise refuse_unlicensed("federation_controller_engine")
+
         @router.post("/sites/{site_id}/host-directory")
         def fed_ingest_host_directory_stub(  # pylint: disable=unused-argument
             site_id: str,

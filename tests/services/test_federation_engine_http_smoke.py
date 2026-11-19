@@ -176,3 +176,67 @@ def test_host_directory_ingest_persists(harness):
         headers={"Authorization": f"Bearer {bearer}"},
     )
     assert resp.status_code == 200, resp.text
+
+
+def _post(harness, suffix, body):
+    client, site_id, bearer = harness
+    return client.post(
+        f"/api/v1/federation/sites/{site_id}{suffix}",
+        json=body,
+        headers={"Authorization": f"Bearer {bearer}"},
+    )
+
+
+def _dashboard(harness):
+    client, site_id, _bearer = harness
+    resp = client.get(f"/api/v1/federation/rollups/dashboard?site_id={site_id}")
+    assert resp.status_code == 200, resp.text
+    return resp.json()
+
+
+def test_host_compliance_and_vulnerability_rollups_are_stored(harness):
+    """Regression guard (found 2026-11-19): these three routes passed
+    ``site_id`` positionally to keyword-only service functions, so every
+    push answered 500 TypeError and the coordinator never stored a rollup."""
+    assert (
+        _post(
+            harness, "/rollups/hosts", {"host_count": 3, "active_count": 2}
+        ).status_code
+        == 200
+    )
+    assert _post(harness, "/rollups/compliance", {
+        "baseline": "cis", "score_percent": 80.0, "hosts_in_scope": 5,
+        "hosts_compliant": 4, "hosts_noncompliant": 1,
+    }).status_code == 200  # fmt: skip
+    assert _post(harness, "/rollups/vulnerabilities", {
+        "critical_count": 1, "high_count": 2, "affected_host_count": 2,
+    }).status_code == 200  # fmt: skip
+    data = _dashboard(harness)
+    assert data["host_rollup"]["host_count"] == 3
+    assert data["compliance_rollups"][0]["baseline"] == "cis"
+    assert data["vulnerability_rollup"]["critical_count"] == 1
+
+
+def test_backup_rollup_is_stored_and_shown(harness):
+    """Phase 27.1: a site's backup STATUS reaches the coordinator's site
+    card; nothing else about its backups does."""
+    assert _dashboard(harness)["backup_rollup"] is None
+    resp = _post(harness, "/rollups/backups", {
+        "configured": True, "target_problem": False, "hosts_with_policy": 4,
+        "attention_count": 1, "never_backed_up": 0, "repository_bytes": 1024,
+        "oldest_last_good_at": "2026-11-18T23:00:00+00:00",
+        "status_counts": {"ok": 3, "overdue": 1},
+        "verification_counts": {"verified": 3},
+        "attention_hosts": [{"host_id": "h1", "fqdn": "b.lan", "status": "overdue",
+                             "last_good_at": "2026-11-17T23:00:00"}],
+    })  # fmt: skip
+    assert resp.status_code == 200, resp.text
+    backup = _dashboard(harness)["backup_rollup"]
+    assert backup["hosts_with_policy"] == 4
+    assert backup["oldest_last_good_at"] == "2026-11-18T23:00:00"
+    assert backup["attention_hosts"][0]["fqdn"] == "b.lan"
+
+
+def test_backup_rollup_rejects_a_malformed_body(harness):
+    resp = _post(harness, "/rollups/backups", {"hosts_with_policy": -3})
+    assert resp.status_code == 400, resp.text

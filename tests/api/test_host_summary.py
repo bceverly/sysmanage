@@ -51,7 +51,41 @@ class TestHostsSummary:
             "approved_up": 2,
             "approved_down": 1,
             "reboot_required": 2,
+            "package_manager_repair": 0,
+            "reboot_unsafe": 0,
+            "repair_hosts": [],
         }
+
+    def test_hosts_needing_a_repair_are_counted_and_named(
+        self, client, session, auth_headers
+    ):
+        """2026-11-19: a half-configured kernel showed only as a chip in the
+        Hosts grid; the dashboard and Updates page now name such hosts --
+        not safe to reboot first -- without loading the host list."""
+        broken = _host(session, "a-broken.example.com")
+        broken.package_manager_needs_repair = True
+        broken.package_manager_repairable = True
+        broken.package_manager_repair_reason = "dpkg was interrupted"
+        unsafe = _host(session, "z-unsafe.example.com")
+        unsafe.package_manager_needs_repair = True
+        unsafe.reboot_unsafe = True
+        unsafe.reboot_unsafe_reason = "Not safe to reboot: linux-image-x"
+        pending = _host(session, "pending.example.com", approval="pending")
+        pending.package_manager_needs_repair = True
+        _host(session, "fine.example.com")
+        session.commit()
+
+        data = client.get("/api/v1/hosts/summary", headers=auth_headers).json()
+
+        assert data["package_manager_repair"] == 2
+        assert data["reboot_unsafe"] == 1
+        assert [h["fqdn"] for h in data["repair_hosts"]] == [
+            "z-unsafe.example.com",
+            "a-broken.example.com",
+        ]
+        assert data["repair_hosts"][0]["reboot_unsafe_reason"].startswith(
+            "Not safe to reboot"
+        )
 
     def test_empty(self, client, auth_headers):
         response = client.get("/api/v1/hosts/summary", headers=auth_headers)

@@ -3456,7 +3456,26 @@
       "vulnCritical": "{{n}} kritisch",
       "vulnHigh": "{{n}} hoch",
       "vulnLow": "{{n}} niedrig",
-      "vulnMedium": "{{n}} mittel"
+      "vulnMedium": "{{n}} mittel",
+      "backupAttention": "Benötigt Aufmerksamkeit: {{n}}",
+      "backupAttentionHosts": "Hosts, die am Standort geprüft werden sollten",
+      "backupCovered": "Abgedeckte Hosts: {{n}}",
+      "backupEmpty": "Von diesem Standort wurde noch kein Sicherungsstatus synchronisiert.",
+      "backupLastGood": "letzte erfolgreiche Sicherung {{when}}",
+      "backupNever": "Nie gesichert: {{n}}",
+      "backupNeverShort": "nie gesichert",
+      "backupNone": "noch keine",
+      "backupNotSetUp": "Auf dem Server dieses Standorts sind keine Sicherungen eingerichtet.",
+      "backupOldest": "Älteste letzte erfolgreiche Sicherung: {{when}}",
+      "backupSize": "Am Standort gespeichert: {{size}}",
+      "backupStaysAtSite": "Jeder Standort behält seinen eigenen Sicherungsspeicher; hierher kommt nur dieser Status.",
+      "backupStorageProblem": "Der Sicherungsspeicher des Standorts benötigt Aufmerksamkeit",
+      "backupTitle": "Sicherungen",
+      "backupUnverified": "Nicht verifiziert: {{n}}",
+      "backupVerified": "Verifiziert: {{n}}",
+      "backupVerifyFailed": "Verifizierung fehlgeschlagen: {{n}}",
+      "backupVerifyOff": "Verifizierung deaktiviert: {{n}}",
+      "backupVerifying": "Wird gerade verifiziert: {{n}}"
     },
     "empty": "Noch keine Standorte angemeldet. Melden Sie einen untergeordneten SysManage-Server an, um loszulegen.",
     "enroll": {
@@ -6257,7 +6276,8 @@
       "notBack": "Ist nach seinem Neustart nicht zurückgekehrt",
       "queued": "Neustart",
       "nextWindow": "Neustart erforderlich: wartet auf das nächste Wartungsfenster",
-      "notNeeded": "Neustart nicht mehr erforderlich"
+      "notNeeded": "Neustart nicht mehr erforderlich",
+      "unsafe": "Neustart wartet: Der Host startet möglicherweise nicht, bis seine Paketverwaltung repariert ist"
     },
     "result": "Ergebnis",
     "rule": {
@@ -6345,5 +6365,12 @@
       "subtitle": "Richtlinien, die Flotte für Flotte ausrollen: eine Flotte nach der anderen, jede gesund, bevor die nächste beginnt.",
       "title": "Rollouts Flotte für Flotte"
     }
+  },
+  "packageRepair": {
+    "failed": "Die Reparatur konnte nicht gestartet werden.",
+    "intro": "Updates an diese Hosts schlagen fehl, bis sie repariert ist:",
+    "more": "und {{n}} weitere auf der Hosts-Seite",
+    "title": "Paketverwaltung muss repariert werden",
+    "unsafeTitle": "Nicht neu starten, bis die Paketverwaltung repariert ist"
   }
 }

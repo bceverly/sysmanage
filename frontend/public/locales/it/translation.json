@@ -3456,7 +3456,26 @@
       "vulnCritical": "{{n}} critici",
       "vulnHigh": "{{n}} elevati",
       "vulnLow": "{{n}} bassi",
-      "vulnMedium": "{{n}} medi"
+      "vulnMedium": "{{n}} medi",
+      "backupAttention": "Occorre attenzione: {{n}}",
+      "backupAttentionHosts": "Host da esaminare sul sito",
+      "backupCovered": "Host coperti: {{n}}",
+      "backupEmpty": "Nessuno stato di backup sincronizzato da questo sito finora.",
+      "backupLastGood": "ultimo backup riuscito {{when}}",
+      "backupNever": "Mai eseguito il backup: {{n}}",
+      "backupNeverShort": "mai eseguito il backup",
+      "backupNone": "nessuna ancora",
+      "backupNotSetUp": "I backup non sono configurati su questo server del sito.",
+      "backupOldest": "Ultimo backup riuscito più vecchio: {{when}}",
+      "backupSize": "Archiviato nel sito: {{size}}",
+      "backupStaysAtSite": "Ogni sito mantiene il proprio archivio di backup; qui arriva solo questo stato.",
+      "backupStorageProblem": "L'archivio di backup del sito richiede attenzione",
+      "backupTitle": "Backup",
+      "backupUnverified": "Non verificato: {{n}}",
+      "backupVerified": "Verificato: {{n}}",
+      "backupVerifyFailed": "Verifica fallita: {{n}}",
+      "backupVerifyOff": "Verifica disabilitata: {{n}}",
+      "backupVerifying": "Verifica in corso: {{n}}"
     },
     "empty": "Ancora non ci sono siti federati. Enrolla un server sottordinato SysManage per iniziare.",
     "enroll": {
@@ -6257,7 +6276,8 @@
       "notBack": "Non è tornato online dopo il riavvio",
       "queued": "In riavvio",
       "nextWindow": "Riavvio necessario: attende la prossima finestra di manutenzione",
-      "notNeeded": "Riavvio non più necessario"
+      "notNeeded": "Riavvio non più necessario",
+      "unsafe": "Riavvio in attesa: l'host potrebbe non avviarsi fino a quando il suo gestore di pacchetti non è riparato"
     },
     "result": "Risultato",
     "rule": {
@@ -6345,5 +6365,12 @@
       "subtitle": "Politiche distribuite flotta per flotta: una flotta alla volta, ciascuna integra prima della successiva.",
       "title": "Rollout flotta per flotta"
     }
+  },
+  "packageRepair": {
+    "failed": "La riparazione non è stata avviata.",
+    "intro": "Gli aggiornamenti inviati a questi host falliranno fino a quando non sarà riparato:",
+    "more": "e {{n}} altri sulla pagina degli Host",
+    "title": "Il gestore di pacchetti richiede una riparazione",
+    "unsafeTitle": "Non riavviare fino a quando il gestore di pacchetti non è riparato"
   }
 }

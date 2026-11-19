@@ -98,6 +98,10 @@ type SysManageHost = {
     package_manager_needs_repair?: boolean;
     package_manager_repair_reason?: string | null;
     package_manager_repairable?: boolean;
+    /** Not safe to reboot (2026-11-19): a kernel / initramfs package is part
+     *  way installed, or a kernel has no initramfs -- it may not boot. */
+    reboot_unsafe?: boolean;
+    reboot_unsafe_reason?: string | null;
     /** Agent lost during its own upgrade (2026-11-15): down, and silent since
      *  an update that included the agent's own package was sent to it. */
     agent_lost_in_self_update?: boolean;
@@ -318,6 +322,11 @@ export interface HostsSummary {
     approved_up: number;
     approved_down: number;
     reboot_required: number;
+    /** Approved hosts whose package manager needs repair, or that are not
+     *  safe to reboot, counted and the first few named (2026-11-19). */
+    package_manager_repair?: number;
+    reboot_unsafe?: number;
+    repair_hosts?: SysManageHost[];
 }
 
 const doGetHostsSummary = async (): Promise<HostsSummary> =>

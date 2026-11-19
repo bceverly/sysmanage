@@ -6,8 +6,8 @@
 Federation rollup ingestion service (Phase 12.1.D).
 
 Coordinator-side helpers that accept upstream sync pushes from a
-site server and write them into the three rollup tables plus the
-host-directory tier.  The Pro+ ``federation_controller_engine``
+site server and write them into the rollup tables (hosts, compliance,
+vulnerabilities, backup status) plus the host-directory tier.  The Pro+ ``federation_controller_engine``
 exposes inbound REST endpoints that call these helpers; the OSS
 layer owns the domain logic + validation + dedup-on-replay.
 
@@ -44,6 +44,7 @@ from sqlalchemy import delete, desc, select
 from sqlalchemy.orm import Session
 
 from backend.persistence.models.federation import (
+    FederationBackupRollup,
     FederationComplianceRollup,
     FederationHostDirectory,
     FederationHostRollup,
@@ -347,6 +348,106 @@ def record_vulnerability_rollup_snapshot(
     return row
 
 
+# A site names at most this many hosts needing attention.
+MAX_BACKUP_ATTENTION_HOSTS = 10
+
+
+def _when(value: Any) -> Optional[datetime]:
+    """An ISO timestamp from a site (aware or naive) as naive UTC."""
+    if value in (None, ""):
+        return None
+    when = datetime.fromisoformat(str(value))
+    if when.tzinfo is not None:
+        when = when.astimezone(timezone.utc).replace(tzinfo=None)
+    return when
+
+
+def record_backup_rollup_snapshot(
+    session: Session,
+    *,
+    site_id: Any,
+    body: Dict[str, Any],
+    snapshot_at: Optional[datetime] = None,
+) -> FederationBackupRollup:
+    """Append one backup STATUS snapshot for a site (Phase 27.1).  ``body``
+    is the site's ``backup_rollup`` payload; only counts, sizes, times and a
+    short list of hosts needing attention are kept -- backup data never
+    reaches the coordinator.  Raises ``ValueError`` on a malformed body."""
+    counts = {}
+    for label in (
+        "hosts_with_policy",
+        "attention_count",
+        "never_backed_up",
+        "repository_bytes",
+    ):
+        value = int(body.get(label) or 0)
+        if value < 0:
+            raise ValueError(f"{label} must be non-negative; got {value}")
+        counts[label] = value
+    hosts = body.get("attention_hosts") or []
+    if not isinstance(hosts, list):
+        raise ValueError("attention_hosts must be a list")
+    attention = [
+        {
+            key: (str(entry.get(key)) if entry.get(key) is not None else None)
+            for key in ("host_id", "fqdn", "status", "last_good_at")
+        }
+        for entry in hosts[:MAX_BACKUP_ATTENTION_HOSTS]
+        if isinstance(entry, dict)
+    ]
+    site = _require_site(session, site_id)
+    row = FederationBackupRollup(
+        site_id=site.id,
+        snapshot_at=snapshot_at or _utcnow_naive(),
+        configured=bool(body.get("configured")),
+        target_problem=bool(body.get("target_problem")),
+        oldest_last_good_at=_when(body.get("oldest_last_good_at")),
+        status_counts_json=_json_or_none(_int_map(body.get("status_counts"))),
+        verification_counts_json=_json_or_none(
+            _int_map(body.get("verification_counts"))
+        ),
+        attention_hosts_json=_json_or_none(attention),
+        **counts,
+    )
+    session.add(row)
+    _prune_series(session, FederationBackupRollup, site_id=site.id)
+    return row
+
+
+def _int_map(value: Any) -> Optional[Dict[str, int]]:
+    """``{name: count}`` from a site, or ValueError."""
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise ValueError("expected an object of counts")
+    return {str(key): int(count) for key, count in value.items()}
+
+
+def backup_rollup_dict(row: Optional[FederationBackupRollup]) -> Optional[Dict]:
+    """The latest backup snapshot as the Sites page shows it."""
+    if row is None:
+        return None
+    return {
+        "configured": row.configured,
+        "target_problem": row.target_problem,
+        "hosts_with_policy": row.hosts_with_policy,
+        "attention_count": row.attention_count,
+        "never_backed_up": row.never_backed_up,
+        "repository_bytes": row.repository_bytes,
+        "oldest_last_good_at": (
+            row.oldest_last_good_at.isoformat() if row.oldest_last_good_at else None
+        ),
+        "status_counts": _loads(row.status_counts_json) or {},
+        "verification_counts": _loads(row.verification_counts_json) or {},
+        "attention_hosts": _loads(row.attention_hosts_json) or [],
+        "snapshot_at": row.snapshot_at.isoformat() if row.snapshot_at else None,
+    }
+
+
+def _loads(value: Optional[str]) -> Any:
+    return json.loads(value) if value else None
+
+
 # ---------------------------------------------------------------------
 # Retention sweeper (the append-only rollup tables would grow forever
 # otherwise -- see the module docstring's "retention sweeper" note).
@@ -394,7 +495,7 @@ def prune_rollups(
     keep_per_series: int = DEFAULT_ROLLUP_RETENTION,
     older_than_days: Optional[int] = None,
 ) -> Dict[str, int]:
-    """Explicit retention sweep across ALL sites and all three rollup
+    """Explicit retention sweep across ALL sites and all four rollup
     series.  ``keep_per_series`` bounds each series by count; when
     ``older_than_days`` is also given, snapshots older than that cutoff
     are removed too (count-keep applied first so a slow-syncing site
@@ -404,7 +505,7 @@ def prune_rollups(
     no SQLite/PostgreSQL-specific SQL).  Returns per-table prune counts.
     Caller commits.
     """
-    counts = {"host": 0, "compliance": 0, "vulnerability": 0}
+    counts = {"host": 0, "compliance": 0, "vulnerability": 0, "backup": 0}
 
     # Count-bounded prune, per series.  Compliance is per (site, baseline).
     for site_id in session.execute(select(FederationSite.id)).scalars().all():
@@ -416,6 +517,9 @@ def prune_rollups(
             FederationVulnerabilityRollup,
             site_id=site_id,
             keep=keep_per_series,
+        )
+        counts["backup"] += _prune_series(
+            session, FederationBackupRollup, site_id=site_id, keep=keep_per_series
         )
         baselines = (
             session.execute(
@@ -441,6 +545,7 @@ def prune_rollups(
             ("host", FederationHostRollup),
             ("compliance", FederationComplianceRollup),
             ("vulnerability", FederationVulnerabilityRollup),
+            ("backup", FederationBackupRollup),
         ):
             result = session.execute(delete(model).where(model.snapshot_at < cutoff))
             counts[key] += result.rowcount or 0
@@ -500,6 +605,23 @@ def get_latest_vulnerability_rollup(
             select(FederationVulnerabilityRollup)
             .where(FederationVulnerabilityRollup.site_id == uid)
             .order_by(desc(FederationVulnerabilityRollup.snapshot_at))
+            .limit(1)
+        )
+        .scalars()
+        .first()
+    )
+
+
+def get_latest_backup_rollup(
+    session: Session, site_id: Any
+) -> Optional[FederationBackupRollup]:
+    """Return the most recent backup status snapshot for a site (27.1)."""
+    uid = _coerce_uuid(site_id)
+    return (
+        session.execute(
+            select(FederationBackupRollup)
+            .where(FederationBackupRollup.site_id == uid)
+            .order_by(desc(FederationBackupRollup.snapshot_at))
             .limit(1)
         )
         .scalars()

@@ -231,6 +231,7 @@ async def test_drain_once_routes_each_payload_type_to_correct_endpoint(
         ("host_rollup", "/rollups/hosts"),
         ("compliance_rollup", "/rollups/compliance"),
         ("vulnerability_rollup", "/rollups/vulnerabilities"),
+        ("backup_rollup", "/rollups/backups"),
         ("host_directory", "/host-directory"),
         ("command_result", "/command-results"),
     ]
@@ -241,7 +242,7 @@ async def test_drain_once_routes_each_payload_type_to_correct_endpoint(
     client.post.return_value = _make_response(200)
 
     counts = await engine._drain_once(db_maker, client, logging.getLogger("test"))
-    assert counts == {"sent": 5, "failed": 0, "skipped": 0}
+    assert counts == {"sent": 6, "failed": 0, "skipped": 0}
 
     actual_urls = sorted(c.args[0] for c in client.post.call_args_list)
     expected_urls = sorted(
@@ -341,3 +342,35 @@ async def test_drain_once_records_sync_attempt_on_failure(engine, db_maker):
         assert coord.last_sync_error is not None
     finally:
         next(db_gen, None)
+
+
+def test_backup_rollup_refresh_queues_status_only(engine, db_maker, monkeypatch):
+    """Phase 27.1: the site queues its backup STATUS for the coordinator."""
+    from backend.services import federation_site_backup_rollup as backup_rollup
+
+    _seed_enrolled_coordinator(db_maker)
+    monkeypatch.setattr(backup_rollup, "_last_taken", {})
+    monkeypatch.setattr(
+        backup_rollup,
+        "collect_backup_rollup",
+        lambda _s: {"configured": True, "hosts_with_policy": 2},
+    )
+    log = logging.getLogger("test")
+    assert engine._refresh_backup_rollup_once(db_maker, log) is True
+    # Taken at most once per REFRESH_SECONDS.
+    assert engine._refresh_backup_rollup_once(db_maker, log) is False
+    assert _queue_depth(db_maker) == 1
+
+
+def test_backup_rollup_refresh_never_raises(engine, db_maker, monkeypatch):
+    from backend.services import federation_site_backup_rollup as backup_rollup
+
+    _seed_enrolled_coordinator(db_maker)
+    monkeypatch.setattr(backup_rollup, "_last_taken", {})
+
+    def boom(_s):
+        raise RuntimeError("backups unreadable")
+
+    monkeypatch.setattr(backup_rollup, "collect_backup_rollup", boom)
+    assert engine._refresh_backup_rollup_once(db_maker, logging.getLogger("t")) is False
+    assert _queue_depth(db_maker) == 0

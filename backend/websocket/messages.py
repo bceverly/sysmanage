@@ -56,6 +56,8 @@ class MessageType(str, Enum):
     CUSTOM_METRIC_SAMPLES = "custom_metric_samples"
     HOST_METRICS = "host_metrics"
     TIME_STATUS_UPDATE = "time_status_update"
+    # Package manager health + reboot safety on its own (2026-11-19).
+    PACKAGE_MANAGER_HEALTH = "package_manager_health"
     HARDWARE_HEALTH_UPDATE = "hardware_health_update"
     # ROADMAP 24.4 -- what the compliance checks read (sshd -T, sysctls...).
     COMPLIANCE_EVIDENCE_UPDATE = "compliance_evidence_update"

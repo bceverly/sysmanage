@@ -129,7 +129,7 @@ class AutoUpdateRun(Base):
     reboot_needed = Column(Boolean, nullable=False, default=False)
     # none / not_wanted (the policy did not allow one) / next_window (26.2:
     # waiting for a window it fits in) / not_needed (rebooted meanwhile) /
-    # queued / back / not_back
+    # queued / back / not_back / unsafe (waits: the host may not boot)
     reboot_status = Column(String(12), nullable=False, default="none")
     reboot_queued_at = Column(DateTime, nullable=True)
     reboot_back_at = Column(DateTime, nullable=True)

@@ -3475,7 +3475,26 @@
       "vulnCritical": "{{n}} critical",
       "vulnHigh": "{{n}} high",
       "vulnLow": "{{n}} low",
-      "vulnMedium": "{{n}} medium"
+      "vulnMedium": "{{n}} medium",
+      "backupAttention": "Need attention: {{n}}",
+      "backupAttentionHosts": "Hosts to look at on the site",
+      "backupCovered": "Hosts covered: {{n}}",
+      "backupEmpty": "No backup status synced from this site yet.",
+      "backupLastGood": "last good {{when}}",
+      "backupNever": "Never backed up: {{n}}",
+      "backupNeverShort": "never backed up",
+      "backupNone": "none yet",
+      "backupNotSetUp": "Backups are not set up on this site's server.",
+      "backupOldest": "Oldest last good backup: {{when}}",
+      "backupSize": "Stored at the site: {{size}}",
+      "backupStaysAtSite": "Each site keeps its own backup storage; only this status comes here.",
+      "backupStorageProblem": "The site's backup storage needs attention",
+      "backupTitle": "Backups",
+      "backupUnverified": "Not verified: {{n}}",
+      "backupVerified": "Verified: {{n}}",
+      "backupVerifyFailed": "Verification failed: {{n}}",
+      "backupVerifyOff": "Verification off: {{n}}",
+      "backupVerifying": "Verifying now: {{n}}"
     },
     "empty": "No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {
@@ -6257,7 +6276,8 @@
       "notBack": "Did not come back from its reboot",
       "queued": "Rebooting",
       "nextWindow": "Reboot required: waits for its next window",
-      "notNeeded": "Reboot no longer needed"
+      "notNeeded": "Reboot no longer needed",
+      "unsafe": "Reboot waits: the host may not boot until its package manager is repaired"
     },
     "result": "Result",
     "rule": {
@@ -6345,5 +6365,12 @@
       "subtitle": "Policies that roll out fleet by fleet: one fleet at a time, each healthy before the next.",
       "title": "Fleet-by-fleet rollouts"
     }
+  },
+  "packageRepair": {
+    "failed": "The repair could not be started.",
+    "intro": "Updates sent to these hosts fail until it is repaired:",
+    "more": "and {{n}} more on the Hosts page",
+    "title": "Package manager needs repair",
+    "unsafeTitle": "Do not reboot until the package manager is repaired"
   }
 }

@@ -127,6 +127,7 @@ PUBLIC_ROUTES = {
     ("POST", "/api/v1/federation/sites/{site_id}/rollups/hosts"): _FED_STUB,
     ("POST", "/api/v1/federation/sites/{site_id}/rollups/compliance"): _FED_STUB,
     ("POST", "/api/v1/federation/sites/{site_id}/rollups/vulnerabilities"): _FED_STUB,
+    ("POST", "/api/v1/federation/sites/{site_id}/rollups/backups"): _FED_STUB,
     ("POST", "/api/v1/federation/sites/{site_id}/host-directory"): _FED_STUB,
     ("POST", "/api/v1/federation/sites/{site_id}/command-results"): _FED_STUB,
     ("POST", "/api/v1/federation/sites/{site_id}/metadata"): _FED_STUB,

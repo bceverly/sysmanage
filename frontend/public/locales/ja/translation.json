@@ -3456,7 +3456,26 @@
       "vulnCritical": "{{n}} 著しい",
       "vulnHigh": "{{n}} 高度な",
       "vulnLow": "{{n}} 低い",
-      "vulnMedium": "{{n}} 中程度の"
+      "vulnMedium": "{{n}} 中程度の",
+      "backupAttention": "注意が必要：{{n}}",
+      "backupAttentionHosts": "サイト上の確認対象ホスト",
+      "backupCovered": "対象ホスト: {{n}}",
+      "backupEmpty": "このサイトからバックアップの同期状態はまだ受信されていません。",
+      "backupLastGood": "最終正常バックアップ {{when}}",
+      "backupNever": "バックアップ未実施: {{n}}",
+      "backupNeverShort": "バックアップ未実施",
+      "backupNone": "まだなし",
+      "backupNotSetUp": "このサイトのサーバーにはバックアップが設定されていません。",
+      "backupOldest": "最も古い最終正常バックアップ：{{when}}",
+      "backupSize": "サイトに保存されています: {{size}}",
+      "backupStaysAtSite": "各サイトは独自のバックアップストレージを保持します。このステータスのみがここに表示されます。",
+      "backupStorageProblem": "サイトのバックアップストレージには注意が必要です",
+      "backupTitle": "バックアップ",
+      "backupUnverified": "未検証: {{n}}",
+      "backupVerified": "確認済み: {{n}}",
+      "backupVerifyFailed": "検証に失敗しました: {{n}}",
+      "backupVerifyOff": "検証オフ: {{n}}",
+      "backupVerifying": "現在検証中: {{n}}"
     },
     "empty": "連携サイトはありません。サブオーディナートSysManageサーバーを最初に登録してください。",
     "enroll": {
@@ -6257,7 +6276,8 @@
       "notBack": "再起動後に復帰しませんでした",
       "queued": "再起動中",
       "nextWindow": "再起動が必要: 次のメンテナンスウィンドウで実行します",
-      "notNeeded": "再起動は不要になりました"
+      "notNeeded": "再起動は不要になりました",
+      "unsafe": "再起動待機: ホストは、パッケージマネージャーが修復されるまでブートできない可能性があります。"
     },
     "result": "結果",
     "rule": {
@@ -6345,5 +6365,12 @@
       "subtitle": "フリートごとにロールアウトするポリシー: 一度に1つのフリートずつ、それぞれが正常であることを確認してから次へ進みます。",
       "title": "フリートごとの段階的ロールアウト"
     }
+  },
+  "packageRepair": {
+    "failed": "修復を開始できませんでした。",
+    "intro": "修復されるまで、これらのホストに送信した更新は失敗します：",
+    "more": "ほか{{n}}台はホストページにあります",
+    "title": "パッケージマネージャーの修復が必要",
+    "unsafeTitle": "パッケージマネージャーが修復されるまで再起動しないでください"
   }
 }

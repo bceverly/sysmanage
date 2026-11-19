@@ -144,6 +144,11 @@ class Host(TestBase):
         Boolean, nullable=False, default=False, server_default=false()
     )
     package_manager_checked_at = Column(DateTime, nullable=True)
+    # Not safe to reboot (q98rebootunsafe).
+    reboot_unsafe = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    reboot_unsafe_reason = Column(String(255), nullable=True)
     # Automatic Ubuntu Pro attach, handled once (q90proautoattach).
     ubuntu_pro_auto_attach_at = Column(DateTime, nullable=True)
     auto_update_opt_out = Column(

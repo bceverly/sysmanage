@@ -116,15 +116,18 @@ const HostDetailHeader: React.FC<HostDetailHeaderProps> = ({
                             {t('hosts.requestPackages', 'Request Avail. Packages')}
                         </Button>
                     )}
-                    <Button
-                        variant="outlined"
-                        color="warning"
-                        startIcon={<RestartAltIcon />}
-                        onClick={handleRebootClick}
-                        disabled={!host.active || !host.is_agent_privileged}
-                    >
-                        {t('hosts.reboot', 'Reboot')}
-                    </Button>
+                    {/* Not safe to reboot (2026-11-19): the server refuses it too. */}
+                    <span title={host.reboot_unsafe ? (host.reboot_unsafe_reason ?? '') : undefined}>
+                        <Button
+                            variant="outlined"
+                            color="warning"
+                            startIcon={<RestartAltIcon />}
+                            onClick={handleRebootClick}
+                            disabled={!host.active || !host.is_agent_privileged || Boolean(host.reboot_unsafe)}
+                        >
+                            {t('hosts.reboot', 'Reboot')}
+                        </Button>
+                    </span>
                     <Button
                         variant="outlined"
                         color="error"

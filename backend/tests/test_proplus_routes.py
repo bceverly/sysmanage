@@ -566,6 +566,8 @@ class TestFederationControllerStubRoutes:
         ("POST", "/api/v1/federation/sites/site-1/rollups/hosts"),
         ("POST", "/api/v1/federation/sites/site-1/rollups/compliance"),
         ("POST", "/api/v1/federation/sites/site-1/rollups/vulnerabilities"),
+        # Phase 27.1 -- a site's backup status.
+        ("POST", "/api/v1/federation/sites/site-1/rollups/backups"),
         ("POST", "/api/v1/federation/sites/site-1/host-directory"),
         ("POST", "/api/v1/federation/sites/site-1/command-results"),
         # Phase 12.2 -- site metadata ingest.

@@ -3456,7 +3456,26 @@
       "vulnCritical": "{{n}} 個關鍵事項",
       "vulnHigh": "{{n}} 高級",
       "vulnLow": "{{n}} 低級",
-      "vulnMedium": "{{n}} 中級"
+      "vulnMedium": "{{n}} 中級",
+      "backupAttention": "需要注意：{{n}}",
+      "backupAttentionHosts": "需要在站點上檢查的主機",
+      "backupCovered": "已涵蓋主機：{{n}}",
+      "backupEmpty": "尚未從這個站點同步任何備份狀態。",
+      "backupLastGood": "上次成功備份 {{when}}",
+      "backupNever": "從未備份：{{n}}",
+      "backupNeverShort": "從未備份",
+      "backupNone": "尚無",
+      "backupNotSetUp": "備份未設定在這個站點的伺服器上。",
+      "backupOldest": "最舊的最後一次成功備份：{{when}}",
+      "backupSize": "儲存在站點：{{size}}",
+      "backupStaysAtSite": "每個站點都有自己的備份儲存空間；只有這個狀態會傳送到這裡。",
+      "backupStorageProblem": "該站點的備份儲存空間需要關注",
+      "backupTitle": "備份",
+      "backupUnverified": "未驗證: {{n}}",
+      "backupVerified": "已驗證: {{n}}",
+      "backupVerifyFailed": "驗證失敗: {{n}}",
+      "backupVerifyOff": "驗證關閉: {{n}}",
+      "backupVerifying": "目前驗證中: {{n}}"
     },
     "empty": "還沒有註冊站點。註冊一個下屬 SysManage 伺服器開始使用。",
     "enroll": {
@@ -6257,7 +6276,8 @@
       "notBack": "重新啟動後未恢復上線",
       "queued": "正在重新啟動",
       "nextWindow": "需要重新啟動：將在下一個維護窗口進行",
-      "notNeeded": "不再需要重新啟動"
+      "notNeeded": "不再需要重新啟動",
+      "unsafe": "重新啟動等待中：在修復其套件管理員之前，主機可能無法開機"
     },
     "result": "結果",
     "rule": {
@@ -6345,5 +6365,12 @@
       "subtitle": "按主機群逐一部署的策略：一次一個主機群，每個主機群健康後才進行下一個。",
       "title": "依主機群分批部署"
     }
+  },
+  "packageRepair": {
+    "failed": "修復無法開始。",
+    "intro": "在修復之前，傳送到這些主機的更新都會失敗：",
+    "more": "主機頁面上還有 {{n}} 台",
+    "title": "套件管理員需要修復",
+    "unsafeTitle": "在修復套件管理員之前，請勿重新啟動"
   }
 }

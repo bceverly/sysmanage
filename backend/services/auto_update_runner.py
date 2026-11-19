@@ -569,6 +569,38 @@ def expire_stale_runs(db, now) -> int:
     return expired
 
 
+def expire_stale_manual(db, now) -> int:
+    """A manual "apply updates" whose host never answered (2026-11-19).
+
+    Production: an "update all" whose batch included the agent's own package
+    lost the result on seven of nine hosts, and their packages stayed
+    "updating" with no end -- unlike an automatic run, a manual one had no
+    timeout.  After RUN_TIMEOUT_HOURS its pending log fails with "The host
+    never reported the result" and its package is "failed", as an automatic
+    run's does.  Returns how many logs it closed."""
+    cutoff = now - timedelta(hours=RUN_TIMEOUT_HOURS)
+    stale = (
+        db.query(models.UpdateExecutionLog)
+        .filter(
+            models.UpdateExecutionLog.run_id.is_(None),
+            models.UpdateExecutionLog.execution_status == "pending",
+            models.UpdateExecutionLog.created_at < cutoff,
+        )
+        .all()
+    )
+    for log in stale:
+        log.execution_status = "failed"
+        log.error_log = _("The host never reported the result")
+        log.completed_at = log.updated_at = now
+        db.query(models.PackageUpdate).filter(
+            models.PackageUpdate.host_id == log.host_id,
+            models.PackageUpdate.package_name == log.package_name,
+            models.PackageUpdate.package_manager == log.package_manager,
+            models.PackageUpdate.status == "updating",
+        ).update({"status": "failed"}, synchronize_session=False)
+    return len(stale)
+
+
 def _due(db, now):
     return (
         db.query(models.UpgradeProfile)
@@ -639,12 +671,15 @@ def run_one_tick() -> Dict[str, Any]:
     """One pass over every tenant database.  Never raises."""
     summary: Dict[str, Any] = {"queued": 0, "timed_out": 0, "held": False}
     eng = engine()
-    if eng is None or not hasattr(eng, "plan_host_run"):
-        return summary
+    automatic = eng is not None and hasattr(eng, "plan_host_run")
     now = now_naive()
     for label, _tenant, db in iter_host_databases():
         try:
-            tick_database(db, eng, now, summary)
+            # Manual updates time out in every edition (Community too).
+            summary["timed_out"] += expire_stale_manual(db, now)
+            db.commit()
+            if automatic:
+                tick_database(db, eng, now, summary)
         except Exception:  # pylint: disable=broad-exception-caught
             db.rollback()
             logger.exception("Automatic updates tick failed for database %s", label)

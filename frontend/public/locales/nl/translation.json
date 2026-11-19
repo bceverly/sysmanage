@@ -3456,7 +3456,26 @@
       "vulnCritical": "{{n}} critisch",
       "vulnHigh": "{{n}} hoog",
       "vulnLow": "{{n}} laag",
-      "vulnMedium": "{{n}} gemiddeld"
+      "vulnMedium": "{{n}} gemiddeld",
+      "backupAttention": "Aandacht nodig: {{n}}",
+      "backupAttentionHosts": "Hosts om op de site te controleren",
+      "backupCovered": "Gedekte hosts: {{n}}",
+      "backupEmpty": "Er is nog geen back-upstatus van deze site gesynchroniseerd.",
+      "backupLastGood": "laatste geslaagde back-up {{when}}",
+      "backupNever": "Nooit geback-upt: {{n}}",
+      "backupNeverShort": "nooit geback-upt",
+      "backupNone": "nog geen",
+      "backupNotSetUp": "Back-ups zijn niet ingesteld op de server van deze site.",
+      "backupOldest": "Oudste laatste geslaagde back-up: {{when}}",
+      "backupSize": "Opgeslagen op de site: {{size}}",
+      "backupStaysAtSite": "Elke site houdt zijn eigen back-upopslag bij; alleen de status wordt hier weergegeven.",
+      "backupStorageProblem": "De back-upopslag van de site heeft aandacht nodig",
+      "backupTitle": "Back-ups",
+      "backupUnverified": "Niet geverifieerd: {{n}}",
+      "backupVerified": "Geverifieerd: {{n}}",
+      "backupVerifyFailed": "Verificatie mislukt: {{n}}",
+      "backupVerifyOff": "Verificatie is uitgeschakeld: {{n}}",
+      "backupVerifying": "Verificatie wordt nu uitgevoerd: {{n}}"
     },
     "empty": "Geen sites ingeschreven tot nu toe. Inschrijf eerst een ondergeschikte SysManage-server om aan de slag te gaan.",
     "enroll": {
@@ -6257,7 +6276,8 @@
       "notBack": "Niet teruggekomen na de herstart",
       "queued": "Herstarten",
       "nextWindow": "Herstart vereist: wacht op het volgende onderhoudsvenster",
-      "notNeeded": "Herstart niet langer nodig"
+      "notNeeded": "Herstart niet langer nodig",
+      "unsafe": "Herstart wacht: de host start mogelijk niet op totdat zijn pakketbeheerder is hersteld"
     },
     "result": "Resultaat",
     "rule": {
@@ -6345,5 +6365,12 @@
       "subtitle": "Beleid dat machinegroep na machinegroep uitrolt: één machinegroep tegelijk, elke groep gezond voordat de volgende start.",
       "title": "Uitrollen per machinegroep"
     }
+  },
+  "packageRepair": {
+    "failed": "Het herstel kon niet worden gestart.",
+    "intro": "Updates naar deze hosts mislukken totdat hij is hersteld:",
+    "more": "en {{n}} meer op de Hosts pagina",
+    "title": "Pakketbeheerder moet worden hersteld",
+    "unsafeTitle": "Niet herstarten totdat de pakketbeheerder is hersteld"
   }
 }

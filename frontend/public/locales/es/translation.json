@@ -3456,7 +3456,26 @@
       "vulnCritical": "{{n}} crítico",
       "vulnHigh": "{{n}} alto",
       "vulnLow": "{{n}} bajo",
-      "vulnMedium": "{{n}} medio"
+      "vulnMedium": "{{n}} medio",
+      "backupAttention": "Necesita atención: {{n}}",
+      "backupAttentionHosts": "Hosts para revisar en el sitio",
+      "backupCovered": "Hosts cubiertos: {{n}}",
+      "backupEmpty": "Aún no se ha sincronizado ningún estado de copia de seguridad desde este sitio.",
+      "backupLastGood": "última copia correcta {{when}}",
+      "backupNever": "Nunca se ha realizado una copia de seguridad: {{n}}",
+      "backupNeverShort": "nunca se ha realizado una copia de seguridad",
+      "backupNone": "aún no hay ninguna",
+      "backupNotSetUp": "Las copias de seguridad no están configuradas en este servidor del sitio.",
+      "backupOldest": "Última copia de seguridad correcta más antigua: {{when}}",
+      "backupSize": "Almacenada en el sitio: {{size}}",
+      "backupStaysAtSite": "Cada sitio mantiene su propio almacenamiento de copias de seguridad; solo este estado se muestra aquí.",
+      "backupStorageProblem": "El almacenamiento de copias de seguridad del sitio necesita atención",
+      "backupTitle": "Copias de seguridad",
+      "backupUnverified": "No verificado: {{n}}",
+      "backupVerified": "Verificado: {{n}}",
+      "backupVerifyFailed": "La verificación ha fallado: {{n}}",
+      "backupVerifyOff": "Verificación desactivada: {{n}}",
+      "backupVerifying": "Verificando ahora: {{n}}"
     },
     "empty": "Aún no están inscritos sitios. Inscríba un servidor SysManage subordinado para comenzar.",
     "enroll": {
@@ -6257,7 +6276,8 @@
       "notBack": "No volvió en línea tras su reinicio",
       "queued": "Reiniciando",
       "nextWindow": "Reinicio requerido: espera a su próxima ventana de mantenimiento",
-      "notNeeded": "El reinicio ya no es necesario"
+      "notNeeded": "El reinicio ya no es necesario",
+      "unsafe": "Reinicio en espera: el host podría no arrancar hasta que se repare su gestor de paquetes"
     },
     "result": "Resultado",
     "rule": {
@@ -6345,5 +6365,12 @@
       "subtitle": "Políticas que se despliegan flota por flota: una flota a la vez, cada una en buen estado antes de la siguiente.",
       "title": "Despliegues flota por flota"
     }
+  },
+  "packageRepair": {
+    "failed": "La reparación no pudo iniciarse.",
+    "intro": "Las actualizaciones enviadas a estos hosts fallarán hasta que se repare:",
+    "more": "y {{n}} más en la página de Hosts",
+    "title": "El gestor de paquetes necesita reparación",
+    "unsafeTitle": "No reinicie hasta que se repare el gestor de paquetes"
   }
 }

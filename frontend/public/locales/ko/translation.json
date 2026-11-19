@@ -3456,7 +3456,26 @@
       "vulnCritical": "{{n}} 비상",
       "vulnHigh": "{{n}} 높음",
       "vulnLow": "{{n}} 낮음",
-      "vulnMedium": "{{n}} 중간"
+      "vulnMedium": "{{n}} 중간",
+      "backupAttention": "주의 필요: {{n}}",
+      "backupAttentionHosts": "사이트에서 확인해야 할 호스트",
+      "backupCovered": "포함된 호스트: {{n}}",
+      "backupEmpty": "이 사이트에서 아직 백업 상태가 동기화되지 않았습니다.",
+      "backupLastGood": "마지막 정상 백업 {{when}}",
+      "backupNever": "백업이 전혀 없음: {{n}}",
+      "backupNeverShort": "백업이 전혀 없음",
+      "backupNone": "아직 없음",
+      "backupNotSetUp": "이 사이트 서버에 백업이 설정되지 않았습니다.",
+      "backupOldest": "가장 오래된 마지막 정상 백업: {{when}}",
+      "backupSize": "사이트에 저장됨: {{size}}",
+      "backupStaysAtSite": "각 사이트는 자체 백업 저장소를 유지합니다. 이 상태만 여기에 표시됩니다.",
+      "backupStorageProblem": "사이트의 백업 저장소에 주의가 필요합니다",
+      "backupTitle": "백업",
+      "backupUnverified": "확인이 되지 않음: {{n}}",
+      "backupVerified": "확인됨: {{n}}",
+      "backupVerifyFailed": "확인 실패: {{n}}",
+      "backupVerifyOff": "확인이 비활성화됨: {{n}}",
+      "backupVerifying": "현재 확인 중: {{n}}"
     },
     "empty": "등록된 사이트가 없습니다. 하위 SysManage 서버를 등록하여 시작하세요.",
     "enroll": {
@@ -6257,7 +6276,8 @@
       "notBack": "재부팅 후 다시 온라인 상태가 되지 않았습니다",
       "queued": "재부팅 중",
       "nextWindow": "재부팅 필요: 다음 유지보수 윈도우에서 진행",
-      "notNeeded": "더 이상 재부팅이 필요하지 않음"
+      "notNeeded": "더 이상 재부팅이 필요하지 않음",
+      "unsafe": "재부팅 대기: 패키지 관리자가 복구될 때까지 호스트가 부팅되지 않을 수 있습니다"
     },
     "result": "결과",
     "rule": {
@@ -6345,5 +6365,12 @@
       "subtitle": "플릿별로 롤아웃하는 정책: 한 번에 한 플릿씩, 각 플릿이 정상인지 확인한 후 다음 플릿으로 진행합니다.",
       "title": "플릿별 단계적 롤아웃"
     }
+  },
+  "packageRepair": {
+    "failed": "복구를 시작하지 못했습니다.",
+    "intro": "복구될 때까지 이 호스트로 보낸 업데이트는 실패합니다:",
+    "more": "호스트 페이지에 {{n}}개 더 있음",
+    "title": "패키지 관리자 복구 필요",
+    "unsafeTitle": "패키지 관리자가 복구될 때까지 재부팅하지 마세요"
   }
 }

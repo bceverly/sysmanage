@@ -255,6 +255,7 @@ __all__ = [
     "FederationHostRollup",
     "FederationComplianceRollup",
     "FederationVulnerabilityRollup",
+    "FederationBackupRollup",
     "FederationPolicy",
     "FederationPolicyAssignment",
     "FederationDispatchedCommand",

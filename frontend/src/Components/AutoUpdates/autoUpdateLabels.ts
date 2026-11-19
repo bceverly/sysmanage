@@ -87,6 +87,7 @@ export function rebootLabel(t: TFunction, status: string): string {
     not_back: t('autoUpdates.reboot.notBack', 'Did not come back from its reboot'),
     next_window: t('autoUpdates.reboot.nextWindow', 'Reboot required: waits for its next window'),
     not_needed: t('autoUpdates.reboot.notNeeded', 'Reboot no longer needed'),
+    unsafe: t('autoUpdates.reboot.unsafe', 'Reboot waits: the host may not boot until its package manager is repaired'),
   };
   return labels[status] ?? status;
 }

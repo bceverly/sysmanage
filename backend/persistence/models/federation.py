@@ -48,6 +48,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     Column,
     DateTime,
@@ -344,6 +345,55 @@ class FederationVulnerabilityRollup(Base):
     __table_args__ = (
         Index(
             "ix_federation_vulnerability_rollup_site_snapshot",
+            "site_id",
+            "snapshot_at",
+        ),
+    )
+
+
+class FederationBackupRollup(Base):
+    """A site's backup STATUS, sampled at ``snapshot_at`` (Phase 27.1).
+
+    Each site server owns its own backup target and every byte of its
+    backups; the coordinator holds only this: how many hosts are covered,
+    how many need attention, how old the oldest last good backup is, the
+    repositories' total size and the verification states.  No paths,
+    snapshot names, file lists or keys -- ``attention_hosts_json`` names at
+    most a few hosts (id, name, status, last good backup) so an operator
+    knows where to look on the site.
+    """
+
+    __tablename__ = "federation_backup_rollup"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    site_id = Column(
+        GUID(),
+        ForeignKey(_FK_FEDERATION_SITES_ID, ondelete="CASCADE"),
+        nullable=False,
+    )
+    snapshot_at = Column(DateTime, nullable=False, default=_utcnow_naive)
+    # The site has a backup target set up, and whether its storage side
+    # is broken (no storage host, stale seal / prune / check, full, ...).
+    configured = Column(Boolean, nullable=False, default=False)
+    target_problem = Column(Boolean, nullable=False, default=False)
+    hosts_with_policy = Column(Integer, nullable=False, default=0)
+    attention_count = Column(Integer, nullable=False, default=0)
+    # Hosts with a policy and no good backup yet.
+    never_backed_up = Column(Integer, nullable=False, default=0)
+    repository_bytes = Column(BigInteger, nullable=False, default=0)
+    # The OLDEST "last good backup" among covered hosts: the site's worst
+    # recovery point.
+    oldest_last_good_at = Column(DateTime, nullable=True)
+    # JSON {status: count} -- ok / overdue / failed / incomplete / ...
+    status_counts_json = Column(Text, nullable=True)
+    # JSON {state: count} -- verified / unverified / failed / running / off
+    verification_counts_json = Column(Text, nullable=True)
+    # JSON [{host_id, fqdn, status, last_good_at}], at most a few entries.
+    attention_hosts_json = Column(Text, nullable=True)
+
+    __table_args__ = (
+        Index(
+            "ix_federation_backup_rollup_site_snapshot",
             "site_id",
             "snapshot_at",
         ),

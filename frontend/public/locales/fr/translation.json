@@ -3456,7 +3456,26 @@
       "vulnCritical": "{{n}} critique",
       "vulnHigh": "{{n}} élevé",
       "vulnLow": "{{n}} faible",
-      "vulnMedium": "{{n}} moyen"
+      "vulnMedium": "{{n}} moyen",
+      "backupAttention": "Besoin d'attention : {{n}}",
+      "backupAttentionHosts": "Hôtes à examiner sur le site",
+      "backupCovered": "Hôtes couverts : {{n}}",
+      "backupEmpty": "Aucun statut de sauvegarde synchronisé depuis ce site pour le moment.",
+      "backupLastGood": "dernière sauvegarde réussie {{when}}",
+      "backupNever": "Jamais sauvegardés : {{n}}",
+      "backupNeverShort": "n'a jamais été sauvegardé",
+      "backupNone": "aucune encore",
+      "backupNotSetUp": "Les sauvegardes ne sont pas configurées sur le serveur de ce site.",
+      "backupOldest": "Plus ancienne dernière sauvegarde réussie : {{when}}",
+      "backupSize": "Stocké sur le site : {{size}}",
+      "backupStaysAtSite": "Chaque site conserve son propre stockage de sauvegarde ; seul ce statut arrive ici.",
+      "backupStorageProblem": "Le stockage de sauvegarde du site nécessite une attention",
+      "backupTitle": "Sauvegardes",
+      "backupUnverified": "Non vérifié : {{n}}",
+      "backupVerified": "Vérifié : {{n}}",
+      "backupVerifyFailed": "Vérification échouée : {{n}}",
+      "backupVerifyOff": "Vérification désactivée : {{n}}",
+      "backupVerifying": "Vérification en cours : {{n}}"
     },
     "empty": "Aucun site n'est inscrit encore. Inscription d'un serveur SysManage subordonné pour commencer.",
     "enroll": {
@@ -6257,7 +6276,8 @@
       "notBack": "N'est pas revenu en ligne après son redémarrage",
       "queued": "Redémarrage",
       "nextWindow": "Redémarrage requis : attend sa prochaine fenêtre de maintenance",
-      "notNeeded": "Le redémarrage n'est plus nécessaire"
+      "notNeeded": "Le redémarrage n'est plus nécessaire",
+      "unsafe": "Redémarrage en attente : l'hôte pourrait ne pas démarrer jusqu'à ce que son gestionnaire de paquets soit réparé"
     },
     "result": "Résultat",
     "rule": {
@@ -6345,5 +6365,12 @@
       "subtitle": "Politiques déployées flotte par flotte : une flotte à la fois, chacune saine avant la suivante.",
       "title": "Déploiements flotte par flotte"
     }
+  },
+  "packageRepair": {
+    "failed": "La réparation n'a pas pu être lancée.",
+    "intro": "Les mises à jour envoyées à ces hôtes échouent jusqu'à ce qu'il soit réparé :",
+    "more": "et {{n}} autres sur la page des Hôtes",
+    "title": "Le gestionnaire de paquets nécessite une réparation",
+    "unsafeTitle": "Ne redémarrez pas jusqu'à ce que le gestionnaire de paquets soit réparé"
   }
 }
