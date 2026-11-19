@@ -255,7 +255,12 @@ class AuditService:
         db.add(audit_entry)
         if commit:
             db.commit()
-            db.refresh(audit_entry)
+            # No refresh: every column was set above (none has a server
+            # default), and re-reading the row checked a SECOND connection out
+            # of the pool after the commit had returned the first -- one the
+            # request then held, idle in a transaction, until its session
+            # closed.  A load test (2,000 update-agent requests at once,
+            # 2026-11-18) ran the tenant pool dry that way.
 
         return audit_entry
 

@@ -205,7 +205,24 @@ def _config(port, db, bind_host="127.0.0.1"):
         # Port 0: any free UDP port, so this server can run beside a real one
         # (the beacon's bind failure aborts startup).
         "discovery": {"port": 0},
+        **_tenant_pool(),
     }  # fmt: skip
+
+
+def _tenant_pool():
+    """``LOAD_TENANT_POOL=SIZE+OVERFLOW`` (e.g. ``5+10``) sets the per-tenant
+    pool, for comparing it against the computed default; unset, the server
+    computes it as an installation would."""
+    raw = os.environ.get("LOAD_TENANT_POOL", "").strip()
+    if not raw:
+        return {}
+    size, _plus, overflow = raw.partition("+")
+    return {
+        "database_pool": {
+            "tenant_size": int(size),
+            "tenant_max_overflow": int(overflow or 0),
+        }
+    }
 
 
 def _server_env(config_path, code=REPO, multitenancy=False):

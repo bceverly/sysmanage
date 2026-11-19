@@ -130,6 +130,72 @@ def test_max_uses_enforced(real_engine, db_session):
     assert enrollment_service.validate_and_consume(db_session, plaintext) is None
 
 
+def test_no_use_is_lost_when_registrations_overlap(real_engine, db_session):
+    """Two registrations at once with one shared token (2026-11-19).  The old
+    code read use_count, added one in Python and wrote the result back, so a
+    registration that committed in between was overwritten: uses were lost,
+    and a token limited to N uses could enroll more than N hosts.  Here the
+    other registration lands right after the engine's first statement on the
+    token; every accepted use must still be counted."""
+    from sqlalchemy import event
+
+    from backend.persistence.models import RegistryEnrollmentToken
+
+    tenant = _tenant(db_session)
+    plaintext, row = enrollment_service.generate_token(db_session, tenant.id)
+    token_id = row.id
+    bind = db_session.get_bind()
+    fired = []
+
+    def the_other_registration(_conn, cursor, statement, *_args):
+        if not fired and "registry_enrollment_token" in statement:
+            fired.append(statement.split()[0])
+            cursor.connection.cursor().execute(
+                "UPDATE registry_enrollment_token SET use_count = use_count + 1"
+            )
+
+    event.listen(bind, "after_cursor_execute", the_other_registration)
+    try:
+        assert enrollment_service.validate_and_consume(db_session, plaintext)
+    finally:
+        event.remove(bind, "after_cursor_execute", the_other_registration)
+    assert fired, "the engine never touched the token table"
+    db_session.expire_all()
+    # Ours and the other registration's: both accepted, both counted.
+    assert db_session.get(RegistryEnrollmentToken, token_id).use_count == 2
+
+
+def test_a_registration_queues_for_its_token_before_touching_the_database(real_engine):
+    """Registrations with one shared token take turns per server worker
+    BEFORE their first statement, so a waiting one holds no database
+    connection and PostgreSQL never sees hundreds queued on the token's row
+    (2026-11-19: 2,000 agents enrolling at once held connections 10-12 s)."""
+    import threading
+
+    session = MagicMock()
+    session.execute.return_value.first.return_value = None
+    plaintext = "sme_shared-fleet-token"
+    lock = real_engine._token_lock(
+        real_engine.hash_token(plaintext)
+    )  # pylint: disable=protected-access
+    done = threading.Event()
+
+    def register():
+        enrollment_service.validate_and_consume(session, plaintext)
+        done.set()
+
+    with lock:  # another registration with the same token is in progress
+        worker = threading.Thread(target=register)
+        worker.start()
+        assert not done.wait(0.3)
+        session.execute.assert_not_called()  # no connection taken while it waits
+    assert done.wait(5)
+    worker.join(5)
+    session.execute.assert_called_once()
+    session.commit.assert_called_once()
+    assert not lock.locked()
+
+
 def test_revoke_unknown_returns_false(real_engine, db_session):
     tenant = _tenant(db_session)
     assert enrollment_service.revoke_token(db_session, tenant.id, "no-such-id") is False

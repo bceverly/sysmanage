@@ -124,6 +124,15 @@ def automatic_held(db, host_id, now, gated) -> list:
     return []
 
 
+def _commit(db) -> None:
+    """Commit the pass's session now (None: the queue calls managed their own).
+
+    The outbound pass shares one session across many sends; each change is
+    committed before the next ``await`` so no row lock is ever held across one."""
+    if db is not None:
+        db.commit()
+
+
 async def _send_to_host(db, host_id, now, deadline, seen) -> int:
     """Deliver this host's due messages; returns how many were handled."""
     from backend.persistence.models import Host  # noqa: PLC0415
@@ -158,6 +167,7 @@ async def _send_to_host(db, host_id, now, deadline, seen) -> int:
         logger.warning("%s for host %s; failing its outbound messages", reason, host_id)
         for message in messages:
             server_queue_manager.mark_failed(message.message_id, reason, db=db)
+        _commit(db)  # before the next host's sends await
         return len(messages)
 
     # Maintenance-window gating (Phase 14.2): change actions wait while the
@@ -177,6 +187,10 @@ async def _send_to_host(db, host_id, now, deadline, seen) -> int:
             _defer(gated, now, f"Automatic update held by the window for {host.fqdn}")
     held = {id(m) for m in gated}
     messages = [m for m in messages if id(m) not in held]
+    # Commit the deferrals before any send awaits: an uncommitted row update
+    # is a row lock, and nothing may hold one across an ``await`` (see
+    # ``process_outbound_message``).
+    _commit(db)
 
     sent = 0
     for message in messages:
@@ -320,6 +334,7 @@ async def process_outbound_message(message, host, db: Session) -> None:
             host.fqdn,
             message.message_id,
         )
+        _commit(db)
         return
     try:
         # Mark message as processing
@@ -329,6 +344,15 @@ async def process_outbound_message(message, host, db: Session) -> None:
                 message.message_id,
             )
             return
+        # Commit the claim BEFORE awaiting the send.  This used to stay an
+        # uncommitted UPDATE -- a row lock -- across the ``await`` below and
+        # for the rest of the pass (one commit per cycle): the agent's
+        # acknowledgement of the same row, and another worker's claim of it,
+        # then blocked their event loops on that lock.  A load test (2,000
+        # hosts asked to update their agent at once, 2026-11-18) stalled every
+        # loop ~30 s that way; PostgreSQL showed each waiter blocked by a
+        # session "idle in transaction" after exactly this UPDATE.
+        _commit(db)
 
         # Deserialize message data
         message_data = server_queue_manager.deserialize_message_data(message)
@@ -374,14 +398,19 @@ async def process_outbound_message(message, host, db: Session) -> None:
                 f"Unknown outbound message type: {message.message_type}",
                 db=db,
             )
+        # The outcome, committed now: the next message's send awaits.
+        _commit(db)
 
     except Exception as e:
         logger.exception(
             "Error processing outbound message %s: %s", message.message_id, str(e)
         )
+        if db is not None:
+            db.rollback()
         server_queue_manager.mark_failed(
             message.message_id, f"Processing error: {str(e)}", db=db
         )
+        _commit(db)
 
 
 async def send_command_to_agent(

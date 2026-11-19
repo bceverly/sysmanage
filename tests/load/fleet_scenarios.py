@@ -446,6 +446,7 @@ async def run_remote_fleet(args) -> dict:  # pylint: disable=too-many-locals
     started = time.monotonic()
     observer.start()
     restart_t = None
+    burst = None
     try:
         if storm:
             await asyncio.sleep(args.warmup_seconds)
@@ -465,6 +466,22 @@ async def run_remote_fleet(args) -> dict:  # pylint: disable=too-many-locals
             forget = getattr(args, "forget_on_restart", False)
             await _tell_all(procs, b"RESTART forget\n" if forget else b"RESTART\n")
             await asyncio.gather(*(_expect(p.stdout, "RESTARTED") for p in procs))
+        elif args.scenario == "fleet-command-burst":
+            from tests.load import (
+                burst_scenarios,
+            )  # pylint: disable=import-outside-toplevel
+
+            await asyncio.sleep(args.warmup_seconds)
+            restart_t = round(time.monotonic() - started, 1)
+            observer.mark("command burst")
+            print(
+                f"  t={restart_t}s: asking every host to update its agent at once ...",
+                flush=True,
+            )
+            burst = await burst_scenarios.run_burst(
+                stack.load_state(), args.burst_concurrency
+            )
+            print(f"  burst: {json.dumps(burst)}", flush=True)
         parts = await asyncio.gather(*(_expect(p.stdout, "STATS ") for p in procs))
         stats = fleet_shards.merge([json.loads(part) for part in parts])
     finally:
@@ -478,8 +495,16 @@ async def run_remote_fleet(args) -> dict:  # pylint: disable=too-many-locals
     summary = _summarize(f"{args.scenario}-{args.agents}", fleet, observer, restart_t,
                          args.warmup_seconds)  # fmt: skip
     summary["remote_fleet"] = args.remote_fleet
+    violations = verdict(summary)
+    if args.scenario == "fleet-command-burst":
+        from tests.load import (
+            burst_scenarios,
+        )  # pylint: disable=import-outside-toplevel
+
+        summary["burst"] = burst
+        violations += burst_scenarios.burst_verdict(burst)
     return {"scenario": args.scenario, "scenarios": [summary], "summary": summary,
-            "violations": verdict(summary), "server_samples": observer.samples,
+            "violations": violations, "server_samples": observer.samples,
             "pg_top_statements": observer.top_statements,
             "agent_timeline": fleet.stats.timeline}  # fmt: skip
 

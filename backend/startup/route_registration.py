@@ -869,8 +869,13 @@ def register_app_routes(app: FastAPI):
 
     @app.get("/api/health")
     @app.head("/api/health")
-    def health_check():
+    async def health_check():  # loop-safe: touches nothing; must not wait for a worker thread
         """Liveness check -- intentionally cheap, touches no backing service.
+
+        ``async`` on purpose (2026-11-18): a plain ``def`` handler waits for a
+        thread from FastAPI's pool, so when a burst of database-bound requests
+        held every thread, liveness answered in 30 s -- the load test read it
+        as a stalled server.  Liveness must answer from the event loop alone.
 
         Every connected agent polls this every second and upstream load
         balancers hit it for basic liveness, so it MUST stay dependency-free:

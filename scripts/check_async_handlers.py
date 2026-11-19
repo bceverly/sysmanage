@@ -17,7 +17,9 @@ of 2 + 6, every host asked to upgrade at once).
 
 A handler that awaits nothing gains nothing from ``async``, so the rule is
 simple: no ``await`` (or ``async for`` / ``async with``) in the body means
-plain ``def``.  It does NOT catch a handler that awaits AND makes blocking
+plain ``def`` -- unless the ``def`` line says ``# loop-safe: <reason>``: a
+handler with no blocking call at all that must answer from the event loop
+even when every worker thread is busy (``/api/health``).  It does NOT catch a handler that awaits AND makes blocking
 calls -- those are reviewed one by one (their blocking part goes through
 ``run_in_threadpool``).
 
@@ -67,6 +69,18 @@ def _awaits(node: ast.AsyncFunctionDef) -> bool:
     return False
 
 
+LOOP_SAFE = re.compile(r"#\s*loop-safe:\s*\S")
+
+
+def _loop_safe(lines: List[str], node: ast.AsyncFunctionDef) -> bool:
+    """``async`` on purpose: the ``def`` line says ``# loop-safe: <reason>``.
+
+    For a handler that makes no blocking call at all and must answer from the
+    event loop even when every worker thread is busy -- ``/api/health``, which
+    every agent polls every second (2026-11-18).  The reason is required."""
+    return bool(LOOP_SAFE.search(lines[node.lineno - 1]))
+
+
 def offenders(root: Path | None = None) -> Iterator[str]:
     """``path:function`` for every async route handler that never awaits."""
     root = root or ROOT
@@ -78,9 +92,10 @@ def offenders(root: Path | None = None) -> Iterator[str]:
         except SyntaxError:
             continue
         rel = path.relative_to(REPO).as_posix()
+        lines = path.read_text(encoding="utf-8").splitlines()
         for node in ast.walk(tree):
             if isinstance(node, ast.AsyncFunctionDef) and _is_route(node):
-                if not _awaits(node):
+                if not _awaits(node) and not _loop_safe(lines, node):
                     yield f"{rel}:{node.name}"
 
 

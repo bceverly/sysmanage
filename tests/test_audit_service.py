@@ -225,7 +225,8 @@ class TestAuditServiceLog:
 
         mock_session.add.assert_called_once_with(mock_entry)
         mock_session.commit.assert_called_once()
-        mock_session.refresh.assert_called_once_with(mock_entry)
+        # No re-read after the commit: it took a second pooled connection.
+        mock_session.refresh.assert_not_called()
         assert result == mock_entry
 
     @patch("backend.services.audit_service.AuditLog")

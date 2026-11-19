@@ -810,6 +810,7 @@ def main() -> int:
             "fleet-agent-restart",
             # A fleet-wide push goes out in capped waves (22.3).
             "fleet-wave-push",
+            "fleet-command-burst",
             # Security: can an agent act as another host knowing only its
             # name? (security_scenarios.py)
             "agent-impersonation",
@@ -836,6 +837,10 @@ def main() -> int:
         "--packages", type=int, default=600, help="packages per software inventory"
     )
     fleet.add_argument("--warmup-seconds", type=int, default=120)
+    fleet.add_argument(
+        "--burst-concurrency", type=int, default=50,
+        help="fleet-command-burst: update-agent requests in flight at once",
+    )  # fmt: skip
     fleet.add_argument(
         "--down-seconds",
         type=int,

@@ -96,3 +96,23 @@ def test_prune_never_adds(tree):
     gate.write_allowlist([], tree / "allow.txt")
     gate.main(["--prune"])
     assert gate.read_allowlist(tree / "allow.txt") == []
+
+
+def test_a_loop_safe_marker_with_a_reason_keeps_a_handler_async(tmp_path, monkeypatch):
+    api = tmp_path / "backend" / "api"
+    api.mkdir(parents=True)
+    (api / "health.py").write_text(
+        "from fastapi import APIRouter\nrouter = APIRouter()\n\n"
+        '@router.get("/health")\n'
+        "async def health():  # loop-safe: touches nothing\n"
+        '    return {"ok": True}\n\n'
+        '@router.get("/no-reason")\n'
+        "async def no_reason():  # loop-safe:\n"
+        '    return {"ok": True}\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(gate, "REPO", tmp_path)
+    # A marker without a reason does not count.
+    assert list(gate.offenders(tmp_path / "backend")) == [
+        "backend/api/health.py:no_reason"
+    ]
