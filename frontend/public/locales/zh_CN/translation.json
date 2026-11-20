@@ -6024,16 +6024,16 @@
       "none": "不限速"
     },
     "readiness": {
-      "aboutHours": "关于 {{n}}",
+      "aboutHours": "约 {{n}} 小时",
       "aboutMinute": "大约一分钟",
-      "aboutMinutes": "关于 {{n}} 分钟",
+      "aboutMinutes": "约 {{n}} 分钟",
       "age": "{{age}} 之前一个小时 / {{target}} 一个小时前",
       "allReady": "每个主机都准备就绪：其备份符合目标，且已被证明可读。”]} 注意：",
       "basisCapture": "根据其备份估计",
       "basisRestore": "从一个过去的恢复中",
       "basisVerify": "从完整读取验证中",
       "breached": "恢复点未命中",
-      "drill": "恢复钻孔 {{when}}",
+      "drill": "恢复演练 {{when}}",
       "editRpo": "更改恢复点目标",
       "host": "主机",
       "never": "从未备份",
@@ -6471,5 +6471,13 @@
     "more": "主机页面上还有 {{n}} 台",
     "title": "包管理器需要修复",
     "unsafeTitle": "在修复包管理器之前，请勿重启。"
+  },
+  "diskSpace": {
+    "intro": "在更新前释放这些磁盘的一些空间或扩展它们：",
+    "more": "以及主机页面上的另外 {{n}} 台",
+    "mountLine": "{{mount}} 已用 {{percent}}%（剩余 {{free}}）",
+    "percentLine": "最满的磁盘已用 {{percent}}%",
+    "title": "磁盘几乎满了",
+    "why": "在更新前释放一些空间或扩容磁盘：空间不足的更新会在中途停止。"
   }
 }

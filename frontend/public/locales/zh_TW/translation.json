@@ -6024,16 +6024,16 @@
       "none": "不限速"
     },
     "readiness": {
-      "aboutHours": "關於 {{n}}",
+      "aboutHours": "約 {{n}} 小時",
       "aboutMinute": "大約一分鐘",
-      "aboutMinutes": "關於 {{n}} 分鐘",
+      "aboutMinutes": "約 {{n}} 分鐘",
       "age": "{{age}} 之前一個小時 / {{target}} 一個小時前",
       "allReady": "每台主機都準備就緒：其備份符合目標，且已驗證可讀取。",
       "basisCapture": "根據備份估計",
       "basisRestore": "從一個過去的還原",
       "basisVerify": "從完整讀取驗證",
-      "breached": "備份點未觸發",
-      "drill": "恢復鑽探 {{when}}",
+      "breached": "恢復點已錯過",
+      "drill": "還原演練 {{when}}",
       "editRpo": "更改恢復點目標",
       "host": "主機",
       "never": "從未備份",
@@ -6082,8 +6082,8 @@
       "withdrawn": "撤回"
     },
     "hold": {
-      "button": "法律鎖定",
-      "cardTitle": "法律鎖定",
+      "button": "法律保留",
+      "cardTitle": "法律保留",
       "help": "無論保留規則為何，每次修剪都會保留處於保全狀態的快照，直到解除保全。",
       "host": "主機",
       "owner": "誰的鎖定（一個案例、一個問題、一個人）",
@@ -6471,5 +6471,13 @@
     "more": "主機頁面上還有 {{n}} 台",
     "title": "套件管理員需要修復",
     "unsafeTitle": "在修復套件管理員之前，請勿重新啟動"
+  },
+  "diskSpace": {
+    "intro": "在更新前釋放這些磁碟的空間或擴充它們：",
+    "more": "以及主機頁面上的另外 {{n}} 台",
+    "mountLine": "{{mount}} 已用 {{percent}}%（剩餘 {{free}}）",
+    "percentLine": "最滿的磁碟已用 {{percent}}%",
+    "title": "磁碟快滿了",
+    "why": "在更新前釋出一些空間或擴充磁碟：空間不足的更新會在中途停止。"
   }
 }

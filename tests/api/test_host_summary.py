@@ -54,6 +54,8 @@ class TestHostsSummary:
             "package_manager_repair": 0,
             "reboot_unsafe": 0,
             "repair_hosts": [],
+            "disk_nearly_full": 0,
+            "disk_hosts": [],
         }
 
     def test_hosts_needing_a_repair_are_counted_and_named(

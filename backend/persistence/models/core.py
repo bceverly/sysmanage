@@ -230,6 +230,13 @@ class Host(Base):
         Boolean, nullable=False, default=False, server_default=false()
     )
     reboot_unsafe_reason = Column(String(255), nullable=True)
+    # The host's fullest local filesystem (q104diskspace, 2026-11-20): a
+    # production host sat at 96-99 % for days with nothing said, until an
+    # update ran out of room part-way.  Kept whatever the license.
+    disk_used_percent = Column(Float, nullable=True)
+    disk_fullest_mount = Column(String(255), nullable=True)
+    disk_available_bytes = Column(BigInteger, nullable=True)
+    disk_checked_at = Column(DateTime, nullable=True)
     # Automatic Ubuntu Pro attach, handled once (q90proautoattach).
     ubuntu_pro_auto_attach_at = Column(DateTime, nullable=True)
     # Automatic updates (26.1, q94autoupdate): a host that must never be

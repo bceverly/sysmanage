@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import case, func
 from sqlalchemy.orm import sessionmaker
 
+from backend.services import disk_space
 from backend.auth.auth_bearer import JWTBearer
 from backend.persistence import db, models
 
@@ -66,6 +67,8 @@ def host_summary(session) -> dict:
         "approved_down": down,
         "reboot_required": reboot,
         **_repair_summary(session),
+        # Nearly full disks (2026-11-20).
+        **disk_space.summary(session),
     }
 
 

@@ -102,6 +102,13 @@ type SysManageHost = {
      *  way installed, or a kernel has no initramfs -- it may not boot. */
     reboot_unsafe?: boolean;
     reboot_unsafe_reason?: string | null;
+    /** The fullest local filesystem (2026-11-20): how full, which mount and
+     *  how much is left (the last two only from agents that report sizes). */
+    disk_used_percent?: number | null;
+    disk_fullest_mount?: string | null;
+    disk_available_bytes?: number | null;
+    disk_checked_at?: string | null;
+    disk_nearly_full?: boolean;
     /** Agent lost during its own upgrade (2026-11-15): down, and silent since
      *  an update that included the agent's own package was sent to it. */
     agent_lost_in_self_update?: boolean;
@@ -327,6 +334,9 @@ export interface HostsSummary {
     package_manager_repair?: number;
     reboot_unsafe?: number;
     repair_hosts?: SysManageHost[];
+    /** Hosts whose fullest disk is nearly full, and the fullest named. */
+    disk_nearly_full?: number;
+    disk_hosts?: SysManageHost[];
 }
 
 const doGetHostsSummary = async (): Promise<HostsSummary> =>

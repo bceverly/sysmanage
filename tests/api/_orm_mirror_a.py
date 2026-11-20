@@ -149,6 +149,11 @@ class Host(TestBase):
         Boolean, nullable=False, default=False, server_default=false()
     )
     reboot_unsafe_reason = Column(String(255), nullable=True)
+    # The fullest local filesystem (q104diskspace).
+    disk_used_percent = Column(Float, nullable=True)
+    disk_fullest_mount = Column(String(255), nullable=True)
+    disk_available_bytes = Column(Integer, nullable=True)
+    disk_checked_at = Column(DateTime, nullable=True)
     # Automatic Ubuntu Pro attach, handled once (q90proautoattach).
     ubuntu_pro_auto_attach_at = Column(DateTime, nullable=True)
     auto_update_opt_out = Column(

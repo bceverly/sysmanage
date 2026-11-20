@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from backend.services.storage_sizes import device_sizes
 from backend.api.error_constants import error_host_not_found
 from backend.api.host_utils import (
     get_host_network_interfaces,
@@ -71,15 +72,16 @@ def update_host_hardware(host_id: str, hardware_data: dict):  # NOSONAR
             # Add new storage devices
             for device_data in hardware_data["storage_devices"]:
                 if not device_data.get("error"):  # Skip error entries
+                    sizes = device_sizes(device_data)
                     storage_device = models.StorageDevice(
                         host_id=host_id,
                         device_name=device_data.get("name"),
                         mount_point=device_data.get("mount_point"),
-                        filesystem=device_data.get("file_system"),
+                        filesystem=sizes["filesystem"],
                         device_type=device_data.get("device_type"),
-                        total_size_bytes=device_data.get("capacity_bytes"),
-                        used_size_bytes=device_data.get("used_bytes"),
-                        available_size_bytes=device_data.get("available_bytes"),
+                        total_size_bytes=sizes["total"],
+                        used_size_bytes=sizes["used"],
+                        available_size_bytes=sizes["available"],
                         last_updated=datetime.now(timezone.utc),
                     )
                     session.add(storage_device)

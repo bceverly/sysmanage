@@ -6036,7 +6036,7 @@
       "drill": "esercizio di ripristino {{when}}",
       "editRpo": "Modifica l'obiettivo del punto di recupero",
       "host": "Host",
-      "never": "Mai backuppato",
+      "never": "Mai sottoposto a backup",
       "neverProven": "mai verificato",
       "noBackup": "nessuno / {{target}} h",
       "onlyProblems": "Solo host che necessitano di un controllo",
@@ -6052,8 +6052,8 @@
       "saveFailed": "Impossibile salvare l'obiettivo del punto di recupero.",
       "showAll": "Mostra ogni host",
       "stale": "{{how}} (troppo vecchio)",
-      "state": "Prontitudine",
-      "title": "Prontità al ripristino",
+      "state": "Prontezza",
+      "title": "Prontezza al ripristino",
       "unproven": "Non verificato",
       "verified": "verificato {{when}}"
     },
@@ -6082,8 +6082,8 @@
       "withdrawn": "Ritirato"
     },
     "hold": {
-      "button": "Trattenuta legale",
-      "cardTitle": "Trattenute legali",
+      "button": "Blocco legale",
+      "cardTitle": "Blocchi legali",
       "help": "Ogni operazione di pruning conserva uno snapshot trattenuto, indipendentemente dalle regole di conservazione, fino al rilascio della trattenuta.",
       "host": "Host",
       "owner": "Di chi è la trattenuta (un caso, una questione, una persona)",
@@ -6471,5 +6471,13 @@
     "more": "e {{n}} altri sulla pagina degli Host",
     "title": "Il gestore di pacchetti richiede una riparazione",
     "unsafeTitle": "Non riavviare fino a quando il gestore di pacchetti non è riparato"
+  },
+  "diskSpace": {
+    "intro": "Libera un po' di spazio o espandi questi dischi prima di aggiornarli:",
+    "more": "e altri {{n}} nella pagina Host",
+    "mountLine": "{{mount}} è {{percent}}% pieno ({{free}} libero)",
+    "percentLine": "Il suo disco più pieno è {{percent}}% pieno",
+    "title": "Il disco è quasi pieno",
+    "why": "Libera un po' di spazio o espandi il disco prima di aggiornare: un aggiornamento che esaurisce lo spazio si ferma a metà."
   }
 }

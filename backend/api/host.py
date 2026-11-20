@@ -50,6 +50,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security import agent_identity, agent_mtls
 from backend.security.roles import SecurityRoles
+from backend.services import disk_space
 from backend.services import agent_self_update_loss, maintenance_window_service
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
@@ -163,6 +164,7 @@ def _hardware_fields(host) -> dict:
         # Not safe to reboot: it may not boot (2026-11-19).
         "reboot_unsafe": bool(getattr(host, "reboot_unsafe", False)),
         "reboot_unsafe_reason": getattr(host, "reboot_unsafe_reason", None),
+        **disk_space.view(host),  # the fullest filesystem; nearly full?
     }
 
 

@@ -3510,7 +3510,7 @@
     "hostsLink": "Hosts",
     "lastSync": "Zuletzt synchronisiert {{when}}",
     "mapView": "Karte ansehen",
-    "policiesLink": "Politiken",
+    "policiesLink": "Richtlinien",
     "subtitle": "Untergeordnete SysManage-Server, die mit diesem Koordinator angemeldet sind.",
     "tilesView": "Dashboard",
     "title": "Federation-Sites"
@@ -6024,23 +6024,23 @@
       "none": "kein Limit"
     },
     "readiness": {
-      "aboutHours": "Über {{n}} h",
+      "aboutHours": "etwa {{n}} h",
       "aboutMinute": "ungefähr eine Minute",
-      "aboutMinutes": "über {{n}} Minuten",
+      "aboutMinutes": "etwa {{n}} Minuten",
       "age": "vor {{age}} Stunden / in {{target}} Stunden",
       "allReady": "Jeder Host ist bereit: gesichert innerhalb seines Zwecks und lesbar bewiesen.",
       "basisCapture": "aus seinen Backups geschätzt",
       "basisRestore": "aus einer früheren Wiederherstellung",
       "basisVerify": "aus einer Volllesung der Überprüfung",
-      "breached": "Missed Wiederherstellungspunkt",
-      "drill": "Wiederherstellungs-Befehl für Drill {{when}}",
+      "breached": "Wiederherstellungspunkt verpasst",
+      "drill": "Wiederherstellungsübung {{when}}",
       "editRpo": "Das Wiederherstellungspunktziel ändern",
       "host": "Host",
-      "never": "Nicht gesichert",
+      "never": "Nie gesichert",
       "neverProven": "nie bewiesen",
       "noBackup": "keine / {{target}} h",
       "onlyProblems": "Nur Hosts, die einer Überprüfung bedürfen",
-      "proof": "Beweis",
+      "proof": "Nachweis",
       "ready": "Bereit",
       "rpo": "Letzte gute Sicherung / Ziel",
       "rpoDefault": "Den Standardwert verwenden",
@@ -6053,7 +6053,7 @@
       "showAll": "Alle Hosts anzeigen",
       "stale": "{{how}} (zu alt)",
       "state": "Bereitschaft",
-      "title": "System wiederherstellen",
+      "title": "Wiederherstellungsbereitschaft",
       "unproven": "Nicht getestet",
       "verified": "verifiziert {{when}}"
     },
@@ -6471,5 +6471,13 @@
     "more": "und {{n}} weitere auf der Hosts-Seite",
     "title": "Paketverwaltung muss repariert werden",
     "unsafeTitle": "Nicht neu starten, bis die Paketverwaltung repariert ist"
+  },
+  "diskSpace": {
+    "intro": "Geben Sie Speicherplatz frei oder vergrößern Sie diese Datenträger, bevor Sie sie aktualisieren:",
+    "more": "und {{n}} weitere auf der Hosts-Seite",
+    "mountLine": "{{mount}} ist {{percent}}% gefüllt ({{free}} frei)",
+    "percentLine": "Der vollste Datenträger ist {{percent}}% gefüllt",
+    "title": "Datenträger fast voll",
+    "why": "Geben Sie Speicherplatz frei oder vergrößern Sie den Datenträger, bevor Sie aktualisieren: Ein Update, dem der Platz ausgeht, bricht mittendrin ab."
   }
 }

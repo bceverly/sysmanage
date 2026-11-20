@@ -233,6 +233,20 @@ async def handle_host_metrics(  # NOSONAR
             "message": "Host not registered",
             "data": {},
         }
+    payload = (
+        message_data.get("data") if "metrics" not in message_data else message_data
+    )
+    # The fullest disk is kept on the host whatever the license (2026-11-20):
+    # a nearly full disk is a safety warning, not graph history.
+    try:
+        # pylint: disable-next=import-outside-toplevel
+        from backend.services import disk_space  # noqa: PLC0415
+
+        if disk_space.record_from_metrics(db, host_id, payload):
+            db.commit()
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        db.rollback()
+        logger.warning("Could not keep host %s disk space: %s", host_id, exc)
     if not host_metrics.collecting():
         logger.debug(
             "host_metrics for host %s ignored: %s is not licensed",
@@ -240,9 +254,6 @@ async def handle_host_metrics(  # NOSONAR
             host_metrics.ENGINE,
         )
         return ack
-    payload = (
-        message_data.get("data") if "metrics" not in message_data else message_data
-    )
     try:
         stored = host_metrics.store_host_metrics(db, host_id, payload or {})
         db.commit()

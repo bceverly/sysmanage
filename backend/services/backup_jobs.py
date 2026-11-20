@@ -434,7 +434,17 @@ def storage_configuration(
     return out
 
 
-STORAGE_ABILITIES = ("keep_yearly", "sign", SIGNATURES)
+# Every ability the storage agent reports that the server acts on.  One
+# missing here is silently dropped: until 2026-11-20 that was keep_snapshot
+# (so no legal hold could be placed) and proxy_bandwidth (so no bandwidth
+# rule ever reached a grant), both found in the lab.
+STORAGE_ABILITIES = (
+    "keep_yearly",
+    "keep_snapshot",
+    "sign",
+    SIGNATURES,
+    "proxy_bandwidth",
+)
 
 
 def store_storage_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:

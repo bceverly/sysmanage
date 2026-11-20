@@ -28,6 +28,7 @@ import { hasPermission, SecurityRoles } from '../Services/permissions';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 import './css/Updates.css';
 import PackageManagerRepairNotice from '../Components/PackageManagerRepairNotice';
+import DiskSpaceNotice from '../Components/DiskSpaceNotice';
 
 interface SelectedUpdate {
   hostId: string;
@@ -661,6 +662,7 @@ const Updates: React.FC = () => {
       </div>
       {/* Updates sent to these hosts fail until repaired (2026-11-19). */}
       <PackageManagerRepairNotice />
+      <DiskSpaceNotice />
 
       {/* Statistics Cards */}
       {displayStats && (

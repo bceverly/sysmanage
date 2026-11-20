@@ -6471,5 +6471,13 @@
     "more": "and {{n}} more on the Hosts page",
     "title": "Package manager needs repair",
     "unsafeTitle": "Do not reboot until the package manager is repaired"
+  },
+  "diskSpace": {
+    "intro": "Free some space or grow these disks before updating them:",
+    "more": "and {{n}} more on the Hosts page",
+    "mountLine": "{{mount}} is {{percent}}% full ({{free}} free)",
+    "percentLine": "Its fullest disk is {{percent}}% full",
+    "title": "Disk nearly full",
+    "why": "Free some space or grow the disk before updating: an update that runs out of room stops part-way."
   }
 }

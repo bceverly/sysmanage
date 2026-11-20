@@ -6024,7 +6024,7 @@
       "none": "제한 없음"
     },
     "readiness": {
-      "aboutHours": "{{n}} 시간에 대한",
+      "aboutHours": "약 {{n}}시간",
       "aboutMinute": "약 1분",
       "aboutMinutes": "약 {{n}} 분",
       "age": "{{age}} 시간 전 / {{target}} 시간",
@@ -6032,11 +6032,11 @@
       "basisCapture": "백업으로부터 추정된",
       "basisRestore": "과거 복원으로부터",
       "basisVerify": "전체 읽기 검증에서",
-      "breached": "복구 지점 누락",
-      "drill": "복구 드릴 {{when}}",
+      "breached": "복구 지점 초과",
+      "drill": "복원 훈련 {{when}}",
       "editRpo": "복구 지점 목표 변경",
       "host": "호스트",
-      "never": "절대 백업하지 않음",
+      "never": "백업 기록 없음",
       "neverProven": "증명된 적이 없다",
       "noBackup": "없음 / {{target}}",
       "onlyProblems": "필요에 따라 확인해야 하는 호스트만",
@@ -6083,7 +6083,7 @@
     },
     "hold": {
       "button": "법적 보유",
-      "cardTitle": "법적 보유들",
+      "cardTitle": "법적 보유 목록",
       "help": "보존 조치된 스냅샷은 보존 규칙과 관계없이 보존이 해제될 때까지 모든 정리 작업에서 유지됩니다.",
       "host": "호스트",
       "owner": "누구의 보유 (사안, 사건, 사람)",
@@ -6471,5 +6471,13 @@
     "more": "호스트 페이지에 {{n}}개 더 있음",
     "title": "패키지 관리자 복구 필요",
     "unsafeTitle": "패키지 관리자가 복구될 때까지 재부팅하지 마세요"
+  },
+  "diskSpace": {
+    "intro": "업데이트하기 전에 이 디스크의 공간을 비우거나 확장하세요:",
+    "more": "그리고 호스트 페이지에 {{n}}개 더",
+    "mountLine": "{{mount}} 사용률 {{percent}}% (여유 공간 {{free}})",
+    "percentLine": "가장 많이 찬 디스크의 사용률은 {{percent}}%입니다",
+    "title": "디스크 공간이 거의 없습니다",
+    "why": "업데이트하기 전에 공간을 확보하거나 디스크를 늘리세요. 공간이 부족한 업데이트는 중간에 멈춥니다."
   }
 }

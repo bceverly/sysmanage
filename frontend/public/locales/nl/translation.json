@@ -6026,17 +6026,17 @@
     "readiness": {
       "aboutHours": "ongeveer {{n}} uur",
       "aboutMinute": "ongeveer een minuut",
-      "aboutMinutes": "ongeveer {{n}} minuut",
+      "aboutMinutes": "ongeveer {{n}} minuten",
       "age": "{{age}} uur geleden / {{target}} uur",
       "allReady": "Elke host is klaar: gebackup binnen zijn doel en bewezen leesbaar.",
       "basisCapture": "geschat op basis van zijn back-ups",
       "basisRestore": "van een vorige herstel",
       "basisVerify": "van een volledige leesverificatie",
-      "breached": "Misgepassen herstelpunt",
-      "drill": "herstel oefening {{when}}",
+      "breached": "Herstelpunt gemist",
+      "drill": "hersteloefening {{when}}",
       "editRpo": "Wijzig het herstelpuntdoel",
       "host": "Host",
-      "never": "Nooit gebackup",
+      "never": "Nooit geback-upt",
       "neverProven": "nooit bewezen",
       "noBackup": "geen / {{target}} uur",
       "onlyProblems": "Alleen hosts die aandacht nodig hebben",
@@ -6052,8 +6052,8 @@
       "saveFailed": "Het herstelpuntdoel kon niet worden opgeslagen.",
       "showAll": "Toon elke host",
       "stale": "{{how}} (te oud)",
-      "state": "Klaarheid",
-      "title": "Herstel klaarheid tonen",
+      "state": "Gereedheid",
+      "title": "Herstelgereedheid",
       "unproven": "Onbewezen",
       "verified": "bevestigd {{when}}"
     },
@@ -6471,5 +6471,13 @@
     "more": "en {{n}} meer op de Hosts pagina",
     "title": "Pakketbeheerder moet worden hersteld",
     "unsafeTitle": "Niet herstarten totdat de pakketbeheerder is hersteld"
+  },
+  "diskSpace": {
+    "intro": "Maak ruimte vrij of vergroot deze schijven voordat u ze bijwerkt:",
+    "more": "en {{n}} extra op de Hosts-pagina",
+    "mountLine": "{{mount}} is {{percent}}% vol ({{free}} vrij)",
+    "percentLine": "De volste schijf is {{percent}}% vol",
+    "title": "Schijf bijna vol",
+    "why": "Maak ruimte vrij of vergroot de schijf voordat u bijwerkt: een update die zonder ruimte komt te zitten, stopt halverwege."
   }
 }

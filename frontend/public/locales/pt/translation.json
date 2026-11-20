@@ -6024,16 +6024,16 @@
       "none": "sem limite"
     },
     "readiness": {
-      "aboutHours": "Sobre {{n}} h",
+      "aboutHours": "cerca de {{n}} h",
       "aboutMinute": "aproximadamente um minuto",
-      "aboutMinutes": "sobre {{n}} minutos",
+      "aboutMinutes": "cerca de {{n}} minutos",
       "age": "há {{age}} horas atrás / há {{target}} horas",
       "allReady": "Todos os hosts estão prontos: com backup dentro de seu objetivo e comprovadamente legíveis.",
       "basisCapture": "estimado a partir de seus backups",
       "basisRestore": "de um restauração passada",
       "basisVerify": "de uma verificação de leitura completa",
       "breached": "Ponto de recuperação perdido",
-      "drill": "restaurar perfuração {{when}}",
+      "drill": "exercício de restauração {{when}}",
       "editRpo": "Alterar o objetivo do ponto de recuperação",
       "host": "Host",
       "never": "Nunca fez backup",
@@ -6053,7 +6053,7 @@
       "showAll": "Mostrar todos os hosts",
       "stale": "{{how}} (muito antigo)",
       "state": "Prontidão",
-      "title": "Restaurar prontidão",
+      "title": "Prontidão para restauração",
       "unproven": "Não testado",
       "verified": "Verificado {{when}}"
     },
@@ -6471,5 +6471,13 @@
     "more": "e {{n}} mais na página de Hosts",
     "title": "O gerenciador de pacotes precisa ser consertado",
     "unsafeTitle": "Não reinicie até que o gerenciador de pacotes seja consertado"
+  },
+  "diskSpace": {
+    "intro": "Libere espaço ou aumente estes discos antes de atualizá-los:",
+    "more": "e mais {{n}} na página de Hosts",
+    "mountLine": "{{mount}} está {{percent}}% cheio ({{free}} livres)",
+    "percentLine": "Seu disco mais cheio está {{percent}}% cheio",
+    "title": "O disco está quase cheio",
+    "why": "Libere espaço ou aumente o disco antes de atualizar: uma atualização que fica sem espaço para no meio do caminho."
   }
 }

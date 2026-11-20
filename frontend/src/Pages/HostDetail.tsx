@@ -55,6 +55,7 @@ import { useHostLifecycle } from '../Components/HostDetail/useHostLifecycle';
 import { useHostInventoryFilters } from '../Components/HostDetail/useHostInventoryFilters';
 import { useHostData } from '../Components/HostDetail/useHostData';
 import PackageManagerRepairNotice from '../Components/PackageManagerRepairNotice';
+import DiskSpaceNotice from '../Components/DiskSpaceNotice';
 import { useHostTabNavigation } from '../Components/HostDetail/useHostTabNavigation';
 import { useCertificateGrid } from '../Components/HostDetail/useCertificateGrid';
 
@@ -625,6 +626,7 @@ const HostDetail = () => { // NOSONAR
 
             <AgentLostInSelfUpdateAlert host={host} />
             <PackageManagerRepairNotice host={host} />
+            <DiskSpaceNotice host={host} />
             <HeldCommandsBanner hostId={hostId || ''} status={heldStatus} onReleased={() => { void refreshHeld(); }} />
 
             {/* Two-pane layout: grouped category rail on the left, content on the

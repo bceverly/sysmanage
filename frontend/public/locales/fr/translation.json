@@ -6024,16 +6024,16 @@
       "none": "aucune limite"
     },
     "readiness": {
-      "aboutHours": "À propos de {{n}}",
+      "aboutHours": "environ {{n}} h",
       "aboutMinute": "environ une minute",
-      "aboutMinutes": "à propos de {{n}} minutes",
+      "aboutMinutes": "environ {{n}} minutes",
       "age": "il y a {{age}} heures / {{target}} heures",
       "allReady": "Chaque hôte est prêt : sauvegardé dans son objectif et prouvé lisible.",
       "basisCapture": "estimé à partir de ses sauvegardes",
       "basisRestore": "d'une restauration passée",
       "basisVerify": "d'une vérification de lecture complète",
       "breached": "Point de récupération manqué",
-      "drill": "restaurer le forage {{when}}",
+      "drill": "exercice de restauration {{when}}",
       "editRpo": "Modifier l'objectif du point de récupération",
       "host": "hôte",
       "never": "Jamais de sauvegarde effectuée",
@@ -6052,8 +6052,8 @@
       "saveFailed": "L'objectif de point de récupération n'a pas pu être enregistré.",
       "showAll": "Afficher tous les hôtes",
       "stale": "{{how}} (trop vieux)",
-      "state": "Prêtness",
-      "title": "Restaurer la disponibilité",
+      "state": "État de préparation",
+      "title": "Préparation à la restauration",
       "unproven": "Non testé",
       "verified": "vérifié {{when}}"
     },
@@ -6471,5 +6471,13 @@
     "more": "et {{n}} autres sur la page des Hôtes",
     "title": "Le gestionnaire de paquets nécessite une réparation",
     "unsafeTitle": "Ne redémarrez pas jusqu'à ce que le gestionnaire de paquets soit réparé"
+  },
+  "diskSpace": {
+    "intro": "Libérez de l'espace ou augmentez la taille de ces disques avant de les mettre à jour :",
+    "more": "et {{n}} de plus sur la page des hôtes",
+    "mountLine": "{{mount}} est rempli à {{percent}} % ({{free}} libres)",
+    "percentLine": "Son disque le plus plein est rempli à {{percent}} %",
+    "title": "Le disque est presque plein",
+    "why": "Libérez de l'espace ou augmentez la taille du disque avant de mettre à jour : une mise à jour qui manque d'espace s'arrête en cours de route."
   }
 }

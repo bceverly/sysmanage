@@ -500,6 +500,18 @@ def test_a_storage_agent_newly_listing_signatures_gets_its_job_file(session):
     assert jobs.storage_lists_signatures(s.policy)
 
 
+def test_every_storage_ability_the_server_acts_on_is_kept(session):
+    """The server dropped keep_snapshot and proxy_bandwidth from what the
+    storage agent reported (lab, 2026-11-20): no legal hold could be placed
+    and no bandwidth rule reached a grant."""
+    s = _setup(session)
+    reported = ["keep_yearly", "keep_snapshot", "sign", "signatures"]
+    jobs.store_storage_abilities(s.policy, reported + ["proxy_bandwidth"])
+    kept = json.loads(s.policy.storage_abilities)
+    assert "keep_snapshot" in kept and "proxy_bandwidth" in kept
+    assert "keep_snapshot" in jobs.storage_abilities(s.policy)
+
+
 def test_du_retires_snapshots_it_no_longer_lists(session, sent):
     """A snapshot pruned without the prune's result arriving stayed "live"
     forever; du lists the whole repository, so what it omits is gone (lab,

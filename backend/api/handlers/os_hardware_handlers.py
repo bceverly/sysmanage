@@ -14,6 +14,8 @@ from datetime import datetime, timezone
 from sqlalchemy import delete, update
 from sqlalchemy.orm import Session
 
+from backend.services import disk_space
+from backend.services.storage_sizes import device_sizes
 from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
 from backend.persistence.models import (
@@ -545,20 +547,25 @@ async def handle_hardware_update(  # NOSONAR
                 # Note: Physical vs logical detection is now handled in host_utils.py
                 # This legacy logic is kept for backwards compatibility
 
+                # Every agent's shape (storage_sizes): until 2026-11-20 no
+                # Linux or Windows host's sizes, and no filesystem, landed.
+                sizes = device_sizes(device)
                 storage_device = StorageDevice(
                     host_id=connection.host_id,
                     device_name=device.get("name"),
                     device_type=device_type,
-                    total_size_bytes=device.get("total_size")
-                    or device.get("capacity_bytes"),
-                    used_size_bytes=device.get("used_size") or device.get("used_bytes"),
-                    available_size_bytes=device.get("available_size")
-                    or device.get("available_bytes"),
-                    filesystem=device.get("filesystem"),
+                    total_size_bytes=sizes["total"],
+                    used_size_bytes=sizes["used"],
+                    available_size_bytes=sizes["available"],
+                    filesystem=sizes["filesystem"],
                     mount_point=device.get("mount_point"),
                     last_updated=now,
                 )
                 db.add(storage_device)
+            # Its fullest filesystem, for the nearly-full warning (2026-11-20).
+            disk_space.record_from_storage(
+                db, db.get(Host, connection.host_id), storage_devices
+            )
 
         db.commit()
 

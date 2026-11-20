@@ -28,6 +28,7 @@ import { getCloudSummary, CloudSummary } from '../Services/cloudBackup';
 import { attentionCount, dashboardNote } from '../Components/CloudBackup/cloudBackupLabels';
 import DashboardSettingsDialog from '../Components/DashboardSettingsDialog';
 import PackageManagerRepairNotice from '../Components/PackageManagerRepairNotice';
+import DiskSpaceNotice from '../Components/DiskSpaceNotice';
 
 interface DashboardCardProps {
     title: string;
@@ -451,6 +452,7 @@ const Dashboard = () => {
 
             {/* Hosts that may not boot, or whose updates fail (2026-11-19). */}
             <PackageManagerRepairNotice />
+            <DiskSpaceNotice />
 
             <Grid container spacing={3}>
                 {cardVisibility.hosts && (
