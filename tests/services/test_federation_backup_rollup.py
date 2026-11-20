@@ -303,3 +303,47 @@ def test_prune_covers_the_backup_series(session, site):
     session.commit()
     assert counts["backup"] == 4
     assert session.query(FederationBackupRollup).count() == 2
+
+
+def test_readiness_counts_go_up_where_the_site_has_the_engine(overview, monkeypatch):
+    from backend.services import (
+        backup_readiness,
+    )  # pylint: disable=import-outside-toplevel
+
+    monkeypatch.setattr(backup_readiness, "engine", lambda: None)
+    assert site_backup.collect_backup_rollup(None)["readiness_counts"] is None
+    counts = {"ready": 3, "unproven": 1, "rpo_breached": 0, "never_backed_up": 0}
+    monkeypatch.setattr(backup_readiness, "engine", object)
+    monkeypatch.setattr(
+        backup_readiness, "fleet", lambda _s, _e, _n: {"counts": counts}
+    )
+    assert site_backup.collect_backup_rollup(None)["readiness_counts"] == counts
+
+
+def test_a_readiness_failure_never_fails_the_snapshot(overview, monkeypatch):
+    from backend.services import (
+        backup_readiness,
+    )  # pylint: disable=import-outside-toplevel
+
+    def boom(*_a):
+        raise RuntimeError("engine fault")
+
+    monkeypatch.setattr(backup_readiness, "engine", object)
+    monkeypatch.setattr(backup_readiness, "fleet", boom)
+    assert site_backup.collect_backup_rollup(None)["readiness_counts"] is None
+
+
+def test_the_controller_keeps_readiness_counts(session, site):
+    counts = {"ready": 3, "unproven": 1}
+    rollup_svc.record_backup_rollup_snapshot(
+        session, site_id=site.id, body=_body(readiness_counts=counts)
+    )
+    rollup_svc.record_backup_rollup_snapshot(
+        session, site_id=site.id, body=_body(),
+        snapshot_at=_naive_utcnow() - timedelta(days=1),
+    )  # fmt: skip
+    session.commit()
+    view = rollup_svc.backup_rollup_dict(
+        rollup_svc.get_latest_backup_rollup(session, site.id)
+    )
+    assert view["readiness_counts"] == counts

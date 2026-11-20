@@ -211,6 +211,10 @@ class BackupPolicy(Base):
     # 25.9): the databases are always paused for the capture, and OpenBAO's
     # init material and token are always left out (services/backup_server_paths).
     server_preset = Column(Boolean, nullable=False, default=False)
+    # Restore readiness (27.1, Enterprise backup_ops_engine): the recovery
+    # point objective -- the oldest the last good backup may be -- in hours;
+    # NULL = twice the interval (one missed backup is a breach).
+    rpo_hours = Column(Integer, nullable=True)
     # The SHA-256 of the proxy tokens this policy's host made for itself
     # (q84, 25.5): the host keeps the tokens, the storage host's grants name
     # these.  _old while a rotation is under way; previous for the repository
@@ -437,3 +441,52 @@ class BackupReach(Base):
     peers_command_id = Column(String(36), nullable=True, index=True)
     seen_as = Column(String(255), nullable=True)
     nat_checked_at = Column(DateTime, nullable=True)
+
+
+class BackupRestoreRequest(Base):
+    """A restore waiting for a second approver (four-eyes, 27.2, Enterprise
+    ``backup_ops_engine``): asked for by one person with the restore role,
+    sent only when another approves it.  ``body`` is the restore exactly as
+    asked (the API's RestoreBody, JSON), so what is approved is what runs."""
+
+    __tablename__ = "backup_restore_request"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(
+        GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
+    body = Column(Text, nullable=False)
+    # pending / approved / rejected / withdrawn / expired
+    status = Column(String(16), nullable=False, default="pending", index=True)
+    requested_by = Column(String(255), nullable=False)
+    requested_at = Column(DateTime, nullable=False)
+    decided_by = Column(String(255), nullable=True)
+    decided_at = Column(DateTime, nullable=True)
+    reason = Column(String(500), nullable=True)  # why rejected
+    run_id = Column(GUID(), nullable=True)  # the restore, once approved
+
+
+class BackupLegalHold(Base):
+    """A snapshot under legal hold (27.2, Enterprise ``backup_ops_engine`` to
+    place or release): every prune of its repository keeps it until it is
+    released (restate 3.4.0.0 ``keep_snapshot``).  Honored whatever the
+    license -- a lapse must never delete held data -- with its owner and
+    reason, and who placed and released it, audited."""
+
+    __tablename__ = "backup_legal_hold"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    policy_id = Column(
+        GUID(), ForeignKey(_POLICY_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
+    host_id = Column(
+        GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
+    snapshot = Column(String(255), nullable=False)
+    # Whose hold it is (a matter, a case, a person) and why.
+    owner = Column(String(255), nullable=False)
+    reason = Column(String(1000), nullable=False)
+    placed_by = Column(String(255), nullable=False)
+    placed_at = Column(DateTime, nullable=False)
+    released_by = Column(String(255), nullable=True)
+    released_at = Column(DateTime, nullable=True)

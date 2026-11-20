@@ -137,6 +137,8 @@ const RestoreFilesDialog: React.FC<{
     const [acknowledged, setAcknowledged] = useState(false);
     const [preview, setPreview] = useState<BackupRun | null>(null);
     const [restore, setRestore] = useState<BackupRun | null>(null);
+    // Four-eyes approval (27.2, Enterprise): held for a second approver.
+    const [awaiting, setAwaiting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [browsing, setBrowsing] = useState(false);
     const [inPlace, setInPlace] = useState(false);
@@ -199,6 +201,8 @@ const RestoreFilesDialog: React.FC<{
             if (dryRun) {
                 setPreview(run);
                 setRestore(null);
+            } else if ((run.status as string) === 'awaiting_approval') {
+                setAwaiting(true);
             } else {
                 setRestore(run);
             }
@@ -308,6 +312,11 @@ const RestoreFilesDialog: React.FC<{
                         />
                     )}
                     {preview && <RunOutcome run={preview} />}
+                    {awaiting && (
+                        <Alert severity="info">
+                            {t('backups.restore.awaitingApproval', 'Requested. A restore over the host\'s own files needs a second person with the restore role to approve it; it is sent when they do (Backups page, "Restores awaiting approval").')}
+                        </Alert>
+                    )}
                     {restore && (
                         <Box>
                             <RunOutcome run={restore} />
@@ -326,7 +335,7 @@ const RestoreFilesDialog: React.FC<{
                     {t('backups.restore.preview', 'Preview')}
                 </AsyncButton>
                 <AsyncButton variant="contained" color={inPlace ? 'warning' : 'primary'} onClick={() => send(false)}
-                    disabled={!previewDone || restore !== null || blocked || (inPlace && !placeAck)
+                    disabled={!previewDone || restore !== null || awaiting || blocked || (inPlace && !placeAck)
                         || (packages && !packagesAck)}>
                     {inPlace ? t('backups.restore.confirmPlace', 'Restore into place')
                         : t('backups.restore.confirm', 'Restore to staging')}

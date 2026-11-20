@@ -40,6 +40,7 @@ import {
 import EquipForBackup from './EquipForBackup';
 import StorageReachNote from './StorageReachNote';
 import { VerificationLine } from './VerificationStatus';
+import { LegalHoldButton } from './BackupLegalHolds';
 
 // restate's plaintext write cache on this host (encrypted repositories only;
 // restate 2.1.0.4 reports its size with each capture), against the target's
@@ -195,6 +196,9 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                         <Button size="small" onClick={() => setChanges(true)}>
                             {t('backups.changes.button', 'What changed')}
                         </Button>
+                    )}
+                    {canManage && data.snapshot_count > 0 && (
+                        <LegalHoldButton hostId={hostId} fqdn={data.fqdn} onPlaced={() => void load()} />
                     )}
                     {canRestore && data.snapshot_count > 0 && (
                         <Button size="small" onClick={() => setRestoring(true)} disabled={unreachable(data)}>

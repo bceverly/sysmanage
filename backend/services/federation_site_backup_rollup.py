@@ -99,7 +99,25 @@ def collect_backup_rollup(session: Session) -> Dict[str, Any]:
         "status_counts": status_counts,
         "verification_counts": verification_counts,
         "attention_hosts": _attention_hosts(covered, views.ATTENTION_STATUSES),
+        "readiness_counts": _readiness_counts(session),
     }
+
+
+def _readiness_counts(session: Session) -> Optional[Dict[str, int]]:
+    """Hosts by restore readiness (27.1) where this site has the Enterprise
+    backup_ops_engine; None elsewhere.  Never fails the snapshot."""
+    from backend.services import (  # noqa: PLC0415  # pylint: disable=import-outside-toplevel
+        backup_jobs,
+        backup_readiness,
+    )
+
+    eng = backup_readiness.engine()
+    if eng is None:
+        return None
+    try:
+        return backup_readiness.fleet(session, eng, backup_jobs.now())["counts"]
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
 
 
 def _database_key(session: Session) -> str:

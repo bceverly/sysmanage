@@ -67,6 +67,19 @@ COMMUNITY_LICENSED_FLAG = {
 # backing up, restoring, browsing, the break-glass export, the server's own
 # (unencrypted) backup, restate-proxy as a transport, Equip.
 PRO_PLUS_BACKUP = {
+    # Enterprise backup operations (27.1, backup_ops_engine): restore readiness.
+    ("GET", "/api/v1/backups/readiness"),
+    ("PUT", "/api/v1/host/{host_id}/backup-readiness"),
+    # ... and four-eyes restore approval (27.2).
+    ("GET", "/api/v1/backups/four-eyes"),
+    ("PUT", "/api/v1/backups/four-eyes"),
+    ("POST", "/api/v1/backups/restore-requests/{request_id}/approve"),
+    ("POST", "/api/v1/backups/restore-requests/{request_id}/reject"),
+    ("POST", "/api/v1/backups/restore-requests/{request_id}/withdraw"),
+    # ... and legal hold (27.2): placing and releasing; honoring needs none.
+    ("GET", "/api/v1/backups/legal-holds"),
+    ("POST", "/api/v1/host/{host_id}/backup-snapshots/{snapshot}/hold"),
+    ("POST", "/api/v1/backups/legal-holds/{hold_id}/release"),
     ("GET", "/api/v1/host/{host_id}/backup-drift"),
     ("POST", "/api/v1/host/{host_id}/backup-drift/compute"),
     ("PUT", "/api/v1/host/{host_id}/backup-drift/ignore"),

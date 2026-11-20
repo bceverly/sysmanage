@@ -181,6 +181,9 @@ class FeatureCode(str, Enum):
     SNAP_PROXY_MANAGE = "snap_proxy_manage"
     OCI_PROXY_MANAGE = "oci_proxy_manage"
     IMAGE_MODE_MANAGE = "image_mode_manage"
+    # Phase 27 (Enterprise): fleet backup at scale -- restore readiness, legal
+    # hold, four-eyes approval, and later rebuilds, clones and drills.
+    BACKUP_OPERATIONS = "backup_operations"
 
     # Provisioning & Discovery (Phase 18) -- split-tier gate: template authoring
     # is Pro+ (Professional), actual provisioning / compute / discovery is
@@ -282,6 +285,7 @@ class ModuleCode(str, Enum):
     SNAP_PROXY_ENGINE = "snap_proxy_engine"  # 17.1 snap store proxy
     OCI_PROXY_ENGINE = "oci_proxy_engine"  # 17.2 container image content
     IMAGE_MODE_ENGINE = "image_mode_engine"  # 17.3 bootc / rpm-ostree hosts
+    BACKUP_OPS_ENGINE = "backup_ops_engine"  # Phase 27 backup operations at scale
 
     # Phase 20.1 Enterprise module -- Configuration Management.
     #
@@ -482,6 +486,8 @@ TIER_FEATURES = {
         FeatureCode.SNAP_PROXY_MANAGE,
         FeatureCode.OCI_PROXY_MANAGE,
         FeatureCode.IMAGE_MODE_MANAGE,
+        # Phase 27 -- fleet backup at scale
+        FeatureCode.BACKUP_OPERATIONS,
         # Phase 18 -- Provisioning & Discovery (Enterprise gets both the
         # template surface and the provisioning/compute/discovery surface)
         FeatureCode.PROVISIONING_TEMPLATES_MANAGE,
@@ -574,6 +580,8 @@ TIER_MODULES = {
         ModuleCode.SNAP_PROXY_ENGINE,
         ModuleCode.OCI_PROXY_ENGINE,
         ModuleCode.IMAGE_MODE_ENGINE,
+        # Phase 27 -- fleet backup at scale
+        ModuleCode.BACKUP_OPS_ENGINE,
         # Phase 18 -- Provisioning & Discovery
         ModuleCode.PROVISIONING_ENGINE,
         # Phase 21.2 -- the advisor

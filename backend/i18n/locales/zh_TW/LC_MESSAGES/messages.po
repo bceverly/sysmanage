@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 14:34-0800\n"
+"POT-Creation-Date: 2026-11-19 16:48-0800\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -121,7 +121,7 @@ msgstr "您沒有權限訪問所選的帳戶"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:155
+#: backend/api/posture.py:375 backend/api/backups.py:157
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
@@ -237,8 +237,8 @@ msgstr "主機ID格式無效"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:167
-#: backend/api/backups.py:170 backend/api/auto_updates.py:238
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:169
+#: backend/api/backups.py:172 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
@@ -324,16 +324,16 @@ msgstr "此伺服器上無法使用"
 msgid "Cloud backup account not found"
 msgstr "找不到雲端備份帳號"
 
-#: backend/api/cloud_backup.py:136 backend/api/backups.py:191
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:193
 #, python-format
 msgid "%s is out of range"
 msgstr "%s 超出允許範圍"
 
-#: backend/api/cloud_backup.py:141 backend/api/backups.py:259
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:261
 msgid "Interval (hours)"
 msgstr "間隔（小時）"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:260
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:262
 msgid "Window start hour"
 msgstr "時間窗開始小時"
 
@@ -913,6 +913,34 @@ msgid ""
 " instead of registering server-scoped."
 msgstr "此主機已屬於一個租戶。請使用其入駐令牌重新註冊，而不是進行伺服器範圍的註冊。"
 
+#: backend/api/backups_four_eyes.py:52
+msgid "Four-eyes approval needs the Enterprise backup operations engine"
+msgstr "四眼審核需要企業備份操作引擎"
+
+#: backend/api/backups_four_eyes.py:61
+msgid "This restore request has expired; ask for the restore again"
+msgstr "這個還原請求已經過期；請重新請求還原"
+
+#: backend/api/backups_four_eyes.py:63
+msgid "This restore request has already been decided"
+msgstr "這個還原請求已經被決定過了"
+
+#: backend/api/backups_four_eyes.py:64
+msgid "Permission denied: Restore Files role required"
+msgstr "權限拒絕：需要「還原檔案」角色"
+
+#: backend/api/backups_four_eyes.py:67
+msgid "A restore you asked for must be approved by someone else"
+msgstr "你請求的還原必須由其他人批准"
+
+#: backend/api/backups_four_eyes.py:71
+msgid "Only the person who asked for this restore can withdraw it"
+msgstr "只有請求還原的人才能取消它"
+
+#: backend/api/backups_four_eyes.py:83 backend/api/backups_four_eyes.py:86
+msgid "Restore request not found"
+msgstr "未找到還原請求"
+
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
 msgstr "權限被拒絕：需要 ENABLE_GRAYLOG_INTEGRATION 角色"
@@ -1298,6 +1326,15 @@ msgstr "主機名稱格式無效"
 #: backend/api/host_hostname.py:147
 msgid "Hostname change requested"
 msgstr "請求主機名變更"
+
+#: backend/api/backups_restore_flow.py:51 backend/api/backups_legal_hold.py:50
+#: backend/api/backups_legal_hold.py:135 backend/api/backups_browse.py:78
+msgid "Snapshot not found"
+msgstr "找不到快照"
+
+#: backend/api/backups_restore_flow.py:58
+msgid "This snapshot is not signed; confirm to restore it anyway"
+msgstr "此快照未簽署；請確認以仍然還原它"
 
 #: backend/api/sso_session.py:232
 msgid "The single sign-on session has expired. Sign in again."
@@ -2567,7 +2604,7 @@ msgid "Failed to clear NVD API key"
 msgstr "無法清除 NVD API 金鑰"
 
 #: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:189
-#: backend/api/backups_equip.py:160 backend/api/backups.py:580
+#: backend/api/backups_equip.py:160 backend/api/backups.py:582
 #: backend/services/cloud_backup_jobs.py:128
 msgid "Set up the backup target first"
 msgstr "請先設定備份目標"
@@ -3496,6 +3533,14 @@ msgstr "無法傳送入門命令：%s"
 msgid "Failed to initiate Ubuntu Pro enrollment: %s"
 msgstr "啟動 Ubuntu Pro 入駐時失敗：%s"
 
+#: backend/api/backups_readiness.py:42
+msgid "Restore readiness needs the Enterprise backup operations engine"
+msgstr "恢復狀態需要企業備份操作引擎"
+
+#: backend/api/backups_readiness.py:72
+msgid "This host has no backup policy yet"
+msgstr "這個主機還沒有設定任何備份策略"
+
 #: backend/api/backups_breakglass.py:75
 msgid "Paste the OpenPGP public key to seal the export to"
 msgstr "請貼上用於封存匯出的 OpenPGP 公開金鑰"
@@ -4155,207 +4200,199 @@ msgstr "KVM 網路僅在 Linux 主機上可用"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "已請求 KVM 網路清單。結果將很快顯示。"
 
-#: backend/api/backups.py:186
+#: backend/api/backups.py:188
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s 必須是不含 '..' 的絕對路徑"
 
-#: backend/api/backups.py:195
+#: backend/api/backups.py:197
 msgid "Host mount point"
 msgstr "主機掛載點"
 
-#: backend/api/backups.py:196 backend/api/backups.py:241
+#: backend/api/backups.py:198 backend/api/backups.py:243
 msgid "Storage path"
 msgstr "儲存路徑"
 
-#: backend/api/backups.py:197
+#: backend/api/backups.py:199
 msgid "Concurrent backups"
 msgstr "同時進行的備份數"
 
-#: backend/api/backups.py:198
+#: backend/api/backups.py:200
 msgid "Days to keep sealed snapshots"
 msgstr "封存快照保留天數"
 
-#: backend/api/backups.py:199
+#: backend/api/backups.py:201
 msgid "Write cache budget"
 msgstr "寫入快取預算"
 
-#: backend/api/backups.py:200
+#: backend/api/backups.py:202
 msgid "Storage space warning"
 msgstr "儲存空間警告"
 
-#: backend/api/backups.py:201
+#: backend/api/backups.py:203
 msgid "Storage space critical"
 msgstr "儲存空間嚴重"
 
-#: backend/api/backups.py:205
+#: backend/api/backups.py:207
 msgid "The storage space warning must be below the critical level"
 msgstr "儲存空間警告必須低於嚴重等級"
 
-#: backend/api/backups.py:207
+#: backend/api/backups.py:209
 msgid "The backup service account is not a valid account name"
 msgstr "備份服務帳戶不是有效的帳戶名稱"
 
-#: backend/api/backups.py:209
+#: backend/api/backups.py:211
 msgid "Unknown seal mode"
 msgstr "未知的封存模式"
 
-#: backend/api/backups.py:211
+#: backend/api/backups.py:213
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "使用 ZFS 快照封存需要資料集名稱"
 
-#: backend/api/backups.py:213
+#: backend/api/backups.py:215
 msgid "The ZFS dataset name is not valid"
 msgstr "ZFS 資料集名稱無效"
 
-#: backend/api/backups.py:220
+#: backend/api/backups.py:222
 msgid "A storage host needs the storage path"
 msgstr "儲存主機需要儲存路徑"
 
-#: backend/api/backups.py:237
+#: backend/api/backups.py:239
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr "btrfs 快照封存需要快照目錄"
 
-#: backend/api/backups.py:239
+#: backend/api/backups.py:241
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "btrfs 快照封存需要儲存路徑"
 
-#: backend/api/backups.py:242
+#: backend/api/backups.py:244
 msgid "Snapshot directory"
 msgstr "快照目錄"
 
-#: backend/api/backups.py:247
+#: backend/api/backups.py:249
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
 " trailing '/')"
 msgstr "%s 必須是簡單的絕對路徑（僅限字母、數字、'_'、'.'、'-' 和 '/'；結尾不能有 '/'）"
 
-#: backend/api/backups.py:255
+#: backend/api/backups.py:257
 msgid "The snapshot directory must be outside the storage path"
 msgstr "快照目錄必須位於儲存路徑之外"
 
-#: backend/api/backups.py:261
+#: backend/api/backups.py:263
 msgid "Snapshots to keep"
 msgstr "保留的快照數"
 
-#: backend/api/backups.py:262
+#: backend/api/backups.py:264
 msgid "Check interval (days)"
 msgstr "檢查間隔（天）"
 
-#: backend/api/backups.py:266
+#: backend/api/backups.py:268
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "暫停掛鉤最多 10 個，且須為簡短的小寫名稱"
 
-#: backend/api/backups.py:279
+#: backend/api/backups.py:281
 msgid "At most 50 path rules can be set"
 msgstr "最多可以設定 50 個路徑規則"
 
-#: backend/api/backups.py:290
+#: backend/api/backups.py:292
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 msgstr "每個路徑規則是一行，長度最多為 512 字元，且不能有開頭或結尾的空白字元或開頭的 #"
 
-#: backend/api/backups.py:298 backend/api/backups_drift.py:103
+#: backend/api/backups.py:300 backend/api/backups_drift.py:103
 #: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "快照名稱無效"
 
-#: backend/api/backups.py:300
+#: backend/api/backups.py:302
 msgid "At most 50 paths can be restored at once"
 msgstr "一次最多只能還原 50 個路徑"
 
-#: backend/api/backups.py:303
+#: backend/api/backups.py:305
 msgid "A restore path is empty or too long"
 msgstr "某個還原路徑為空或過長"
 
-#: backend/api/backups.py:305
+#: backend/api/backups.py:307
 msgid "A restore path must not contain '..'"
 msgstr "還原路徑不得包含 '..'"
 
-#: backend/api/backups.py:311
+#: backend/api/backups.py:313
 msgid "A restore path must be absolute, such as /home/alice/notes.txt"
 msgstr "還原路徑必須是絕對路徑，例如 /home/alice/notes.txt"
 
-#: backend/api/backups.py:325
+#: backend/api/backups.py:327
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr "請指定要放回的路徑；無法將整台主機還原到原位置"
 
-#: backend/api/backups.py:331
+#: backend/api/backups.py:333
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr "每個還原到原位置的路徑都必須是具體路徑，例如 /etc/nginx"
 
-#: backend/api/backups.py:336
+#: backend/api/backups.py:338
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "請確認主機上這些路徑中的檔案將被取代"
 
-#: backend/api/backups.py:356 backend/api/backups.py:359
+#: backend/api/backups.py:358 backend/api/backups.py:361
 msgid "Backup target not found"
 msgstr "找不到備份目標"
 
-#: backend/api/backups.py:415
+#: backend/api/backups.py:417
 msgid "This edition supports one backup target; edit the existing one"
 msgstr "此版本僅支援一個備份目標；請編輯現有目標"
 
-#: backend/api/backups.py:492
+#: backend/api/backups.py:494
 msgid "Remove the hosts' backup policies before the target"
 msgstr "請先移除各主機的備份原則，再移除目標"
 
-#: backend/api/backups.py:630
+#: backend/api/backups.py:632
 msgid "No backup policy"
 msgstr "沒有備份原則"
 
-#: backend/api/backups.py:654
+#: backend/api/backups.py:656
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "此主機暫時無法執行備份（%s）"
 
-#: backend/api/backups.py:660
+#: backend/api/backups.py:662
 msgid "This host's backup is not configured yet"
 msgstr "此主機的備份尚未設定"
 
-#: backend/api/backups.py:677
+#: backend/api/backups.py:679
 msgid "The backup storage host is not ready"
 msgstr "備份儲存主機尚未就緒"
 
-#: backend/api/backups.py:692
+#: backend/api/backups.py:694
 msgid "Unknown backup action"
 msgstr "未知的備份操作"
 
-#: backend/api/backups.py:705
+#: backend/api/backups.py:707
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "加密的存放庫無法在儲存主機上重新打包"
 
-#: backend/api/backups.py:709
+#: backend/api/backups.py:711
 msgid "That backup job is already queued or running"
 msgstr "該備份工作已在佇列中或正在執行"
 
-#: backend/api/backups.py:806 backend/api/backups_browse.py:78
-msgid "Snapshot not found"
-msgstr "找不到快照"
-
-#: backend/api/backups.py:813
-msgid "This snapshot is not signed; confirm to restore it anyway"
-msgstr "此快照未簽署；請確認以仍然還原它"
-
-#: backend/api/backups.py:857
+#: backend/api/backups.py:807
 msgid ""
 "This backup is encrypted to your break-glass escrow key, which SysManage "
 "never holds. Restore it by hand with restate and that key, as the server "
 "recovery runbook describes."
 msgstr "此備份使用您的緊急託管金鑰加密，SysManage 從不持有該金鑰。請依伺服器復原手冊所述，使用 restate 和該金鑰手動還原。"
 
-#: backend/api/backups.py:876 backend/api/backups_drift.py:114
+#: backend/api/backups.py:826 backend/api/backups_drift.py:114
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "此主機的 restate 尚不支援此操作；請升級 restate"
 
-#: backend/api/backups.py:888
+#: backend/api/backups.py:838
 msgid "This snapshot's repository is no longer kept"
 msgstr "此快照所在的存放庫已不再保留"
 
-#: backend/api/backups.py:973 backend/api/backups.py:976
+#: backend/api/backups.py:923 backend/api/backups.py:926
 msgid "Backup run not found"
 msgstr "找不到備份工作"
 
@@ -4708,6 +4745,36 @@ msgstr "權限 denied: RUN_SCRIPT 角色所需"
 #: backend/api/config_mgmt_runs.py:435
 msgid "Configuration profile was queued for this host"
 msgstr "這個主機已排隊配置資料夾"
+
+#: backend/api/backups_legal_hold.py:46
+msgid ""
+"The storage host's restate cannot keep a held snapshot through a prune; "
+"upgrade it to 3.4.0.0 or later first"
+msgstr "儲存主機的 restate 無法在修剪時保留處於保全狀態的快照；請先升級到 3.4.0.0 或更新版本"
+
+#: backend/api/backups_legal_hold.py:51
+msgid "This snapshot is already on hold"
+msgstr "這個快照已經被鎖定了"
+
+#: backend/api/backups_legal_hold.py:52
+msgid "Say whose hold this is"
+msgstr "請說明這個保全屬於誰"
+
+#: backend/api/backups_legal_hold.py:53
+msgid "Say why the snapshot is held"
+msgstr "請說明保全此快照的原因"
+
+#: backend/api/backups_legal_hold.py:54
+msgid "This hold has already been released"
+msgstr "這個鎖定已經被釋放了"
+
+#: backend/api/backups_legal_hold.py:64
+msgid "Legal hold needs the Enterprise backup operations engine"
+msgstr "法律保留需要企業備份操作引擎"
+
+#: backend/api/backups_legal_hold.py:189 backend/api/backups_legal_hold.py:192
+msgid "Legal hold not found"
+msgstr "未找到法律保留"
 
 #: backend/api/diagnostics.py:198
 msgid "Diagnostic collection requested"
@@ -6002,7 +6069,7 @@ msgstr "策略 '%(policy)s' 已在 %(host)s 上排入自動更新"
 msgid "The host never reported the result"
 msgstr "主機從未回報結果"
 
-#: backend/services/auto_update_results.py:111
+#: backend/services/auto_update_results.py:112
 #, python-format
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "策略 '%(policy)s' 之後自動重新啟動 %(host)s"
@@ -6089,7 +6156,7 @@ msgstr "此雲端備份執行不接受驗證碼"
 msgid "No two-factor code was entered in time"
 msgstr "未及時輸入雙重認證碼"
 
-#: backend/services/reboot_safety.py:52
+#: backend/services/reboot_safety.py:54
 msgid ""
 "Not safe to reboot: the host may not boot. Repair the package manager first."
 msgstr "重新啟動不安全：主機可能無法開機。請先修復套件管理員。"

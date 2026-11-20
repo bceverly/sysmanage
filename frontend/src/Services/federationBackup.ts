@@ -29,6 +29,9 @@ export interface FederationBackupRollup {
   status_counts: Record<string, number>;
   verification_counts: Record<string, number>;
   attention_hosts: FederationBackupAttentionHost[];
+  /** Hosts by restore readiness (27.1); absent where the site has no
+   *  Enterprise backup operations engine. */
+  readiness_counts?: Record<string, number> | null;
   snapshot_at?: string | null;
 }
 

@@ -407,6 +407,7 @@ def record_backup_rollup_snapshot(
             _int_map(body.get("verification_counts"))
         ),
         attention_hosts_json=_json_or_none(attention),
+        readiness_counts_json=_json_or_none(_int_map(body.get("readiness_counts"))),
         **counts,
     )
     session.add(row)
@@ -440,6 +441,8 @@ def backup_rollup_dict(row: Optional[FederationBackupRollup]) -> Optional[Dict]:
         "status_counts": _loads(row.status_counts_json) or {},
         "verification_counts": _loads(row.verification_counts_json) or {},
         "attention_hosts": _loads(row.attention_hosts_json) or [],
+        # None: the site has no restore readiness (no Enterprise engine).
+        "readiness_counts": _loads(row.readiness_counts_json),
         "snapshot_at": row.snapshot_at.isoformat() if row.snapshot_at else None,
     }
 

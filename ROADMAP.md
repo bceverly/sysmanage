@@ -14939,6 +14939,20 @@ the Network Discovery page and the 26.9 alert's filter.
 
 **Builds on Phases 24 and 25:** the target model, per-host repositories and the storage-side runner with append-only enforcement (24.1, 24.5); restate-proxy, whose per-site proxies and quota hook are this phase's (25.5); the Pro+ `backup_engine` -- policies, OpenBAO-held keys, rotation and break-glass export (24.6); and file restore (24.9).  The design rules and warnings in Phase 24's introduction (hosts append only; tenant data in the tenant partition; nothing needs the public internet) apply here unchanged.
 
+**Sequence (agreed 2026-11-19, Bryan):** ordered by what each step builds on; docs, screenshots and the 14 languages go in with each feature, not at the end.
+
+0. **The NFS / restate-proxy measurements (27.8)** start first: the decision needs about a month of production nights, collected while everything else proceeds (`scripts/backup_transport_report.py`). Retiring NFS still waits for Bryan's go.
+1. **Restore readiness (27.1):** RPO / RTO per policy and "unproven", on the full-read check's evidence now and the restore drill's once step 6 lands; the per-site status at the controller counts unproven hosts.
+2. **Legal hold and four-eyes approval (27.2):** small, self-contained.
+3. **Multiple targets, then per-site targets through federation (27.3):** most of what follows sits on this.
+4. **Off-site replication, immutable copies and the site-loss drill (27.3).**
+5. **Air-gap media, with 27.1's air-gapped sites.**
+6. **Recovery at scale (27.2):** restore drills first (they also feed step 1), then bare-metal rebuild, clone / migrate and restore as a child host, then fleet-wide restore jobs in waves.
+7. **The Glacier cloud copy (27.3, Professional+):** spike (encryption, per-dataset ZFS sends), the copy, the Community restore half, the proof including after a license is removed.  Largely independent; may move earlier.
+8. **Multi-tenancy (27.4):** audit what is already tenant-partitioned, then per-tenant storage and keys, quotas, bring-your-own storage, lifecycle and isolation tests.
+9. **More of iCloud (27.5, Community):** spike, Drive / Contacts / Calendars, Notes from a managed Mac, the second Photos account and incremental runs.  Independent; may slot in anywhere.
+10. **Phase close (27.6, 27.7 and the gates):** docs and editions complete, the 402 sweep, the audit of earlier phases, engines in R2, the exit gate.
+
 #### Carried over from Phase 26 (2026-11-17, Bryan)
 - [x] **The server's own backup, a week of nights:** production's server backs itself up nightly through the server preset (encrypted to the escrow key, PostgreSQL never stopped, OpenBAO's unseal key left out) for seven nights in a row with no failed night -- nights of 2026-11-12 through 2026-11-18 all ok (capture, sign, protect, seal, prune, du every night; last snapshots 20261116T231210Z, 20261117T235939Z, 20261119T005033Z), and the weekly check on 2026-11-19 ok -- DONE 2026-11-19, seven nights in a row with no failed night. Each of those nights also queued a drift `diff` that failed, "the secret key for it is not in the key files": the diff reads both indexes, which are sealed to the escrow key SysManage never holds -- fixed 2026-11-16 (no diff is queued for an escrow-keyed repository, and a manual compare answers 409); it was never part of the backup itself. The backups this phase's automatic updates fall back on include the server's own -- MOVED to Phase 27 (2026-11-17, Bryan; from Phase 26, where it was carried over from Phase 25)
 - [x] **A camera classified on a real LAN** (moved from Phase 26.10's proof, 2026-11-17, Bryan): a camera on Bryan's LAN shown as "camera" by Network Discovery, with the evidence that decided it -- or, for a cloud camera that announces nothing, shown as "unknown" for a stated reason. As of the move: Cameras: Bryan's LAN has two SimpliSafe cameras (Bryan confirmed both on 2026-11-17: 28:ed:e0:db:08:9e and 08:e9:f6:a8:ad:ba -- each an AMPAK Wi-Fi module with a 32-hex-character host name). Both stay "unknown", and rightly: a cloud camera announces nothing locally (no RTSP / ONVIF, no mDNS or SSDP), AMPAK is a module maker, not a camera brand, and a rule fitted to one house's hex names would mislabel other devices. The camera evidence that does exist (RTSP / ONVIF mDNS, SSDP camera types, camera makers) is proven by tests only. DONE 2026-11-19, "unknown" for a stated reason (Bryan): production's Network Discovery holds both cameras' DHCP fingerprints, heard by DHCP, ARP and sweep many times a day -- both send the same requested-option list (`prl:1,28,2,121,15,6,12,40,41,42,26,119,3,121,249,33,252,42`) and no vendor class (option 60); pfSense's Kea leases show them awake and stable (2-hour leases renewed hourly, client ids unchanged since 2026-10-27; the "last heard 2026-11-05" was only the agent not hearing unicast renewals). Nothing local identifies SimpliSafe: the option list belongs to a generic embedded DHCP client shipped in many unrelated devices, so a rule keyed on it would mislabel them, and none is shipped. Camera classification stays proven by tests (RTSP / ONVIF mDNS, SSDP camera types, camera makers)
@@ -14951,7 +14965,7 @@ the Network Discovery page and the 26.9 alert's filter.
 - [x] **Storage per site, not a central SAN.** Backup data is heavy: a first capture moves everything a host keeps, and pulling every site's first backups across the WAN to one SAN is slow, costly, and ties every site's recoverability to one link. Each site has its own target; a host uses **its site's default target** unless a policy overrides it. Disaster recovery is a **second copy** from site to site (later: cloud) run off-hours -- never the primary path. 2026-11-19, design settled (Bryan): **a site is its own server** -- each federated site runs its own SysManage server and database, so its one backup target IS the site's target and its hosts back up there; nothing about targets changes. Several targets on one server (a policy overriding the site's default) stays with 27.3's "Multiple targets". PROVEN 2026-11-19 on beast: VMs fed-ctrl (coordinator), fed-site (site server, also its site's storage host) and fed-host1 (enrolled at the site), packaged 3.14.0.4 with the working tree and the locally built federation engines, site enrolled over verified HTTPS with out-of-band identity keys. fed-host1 backed up to fed-site over NFS and fed-site to itself (capture, protect, prune, du ok); the coordinator's site card showed the site's status (2 covered, 0 needing attention, oldest last good backup 21:39:51, 232 MB at the site), and the earlier snapshot taken during a failed first attempt showed that failure. The coordinator held none of the backups: every backup_* table empty, no backup storage, and a full data dump of its database carries no site path, snapshot or repository name. The repaired host and compliance ingest stored their rollups too (see the Federation item)
 - [x] **Federation:** each site server owns its site's targets and data; the federation controller aggregates **status only** -- last good backup, sizes, failures, verification state -- and **backup data never travels to the controller**. 2026-11-19 BUILT: a `backup_rollup` sync payload, the same pattern as the compliance and vulnerability rollups. The site (OSS `federation_site_backup_rollup`, sent by Pro+ `federation_site_engine`, at most every 5 minutes per database) reports hosts covered, hosts needing attention, never backed up, the oldest last good backup, total repository size, status and verification counts, and at most 10 named hosts (id, name, status, last good backup) -- no paths, snapshot names, file lists or keys, which tests assert. The controller (`federation_controller_engine` `POST /sites/{id}/rollups/backups`, table `federation_backup_rollup`, migration `q97fedbackuprollup`) keeps the newest 90 per site and shows them in a Backups card on the site page (14 locales, verified); the route answers 402 unlicensed. Found and fixed on the way: the controller's host, compliance and vulnerability ingest routes passed `site_id` positionally to keyword-only service functions, so every push since they were written answered 500 and the controller never stored a rollup; the live-engine smoke test now covers all four. PROVEN 2026-11-19 on beast: VMs fed-ctrl (coordinator), fed-site (site server, also its site's storage host) and fed-host1 (enrolled at the site), packaged 3.14.0.4 with the working tree and the locally built federation engines, site enrolled over verified HTTPS with out-of-band identity keys. fed-host1 backed up to fed-site over NFS and fed-site to itself (capture, protect, prune, du ok); the coordinator's site card showed the site's status (2 covered, 0 needing attention, oldest last good backup 21:39:51, 232 MB at the site), and the earlier snapshot taken during a failed first attempt showed that failure. The coordinator held none of the backups: every backup_* table empty, no backup storage, and a full data dump of its database carries no site path, snapshot or repository name. The repaired host and compliance ingest stored their rollups too
 - [ ] **Air-gapped sites:** the target is always local; off-site copies leave on media through the air-gap content workflow (27.3)
-- [ ] **Restore readiness:** per-policy **RPO** (maximum age of the last good snapshot) and **RTO** (expected restore time, from measured throughput); evidence is a passing full-read check (Pro+) or an Enterprise sandbox restore drill (27.2); a host whose evidence is stale shows "unproven"
+- [ ] **Restore readiness:** per-policy **RPO** (maximum age of the last good snapshot) and **RTO** (expected restore time, from measured throughput); evidence is a passing full-read check (Pro+) or an Enterprise sandbox restore drill (27.2); a host whose evidence is stale shows "unproven". 2026-11-19 BUILT (step 1): the NEW Enterprise engine `backup_ops_engine` (Bryan chose a separate engine over feature codes in backup_engine; plan-builders only, the OSS API owns the 402) decides readiness from facts the server gathers -- RPO from the last good capture against the policy's `rpo_hours` (default twice the interval, migration `q99backuprpo`), RTO from the best throughput the host has shown (a restore of 100 MB or more, else a full-read verification, else -- labeled an estimate -- its captures' read rate), proof from a full-read verification within its cadence (drills join at step 6); worst first: never backed up, recovery point missed, unproven, ready. `GET /backups/readiness` and `PUT /host/{id}/backup-readiness` (402 without the engine), a Restore readiness card on the Backups page with the RPO editable, and each federated site's readiness counts in its backup status at the controller. Registered as module `backup_ops_engine` + feature `backup_operations` (Enterprise, both repos). LEFT: a lab proof
 
 #### 27.2 Recovery at scale (Enterprise)
 
@@ -14964,8 +14978,8 @@ the Network Discovery page and the 26.9 alert's filter.
   - **Community / OSS:** "Restore to another host" onto a host the operator built and enrolled by hand (a whole-host restore of one host's snapshot into another enrolled host, gated by the Restore Files role and audited), with the source's hardware and network sheet shown as a checklist to match; and the shut-down option for the source. Building the child, PXE and the migrations are Enterprise; without the license the dialog says so and offers the Community path
   - **Safety:** never two live hosts with one identity or one address -- the child keeps the source's IP only once the source is shut down or wiped, and otherwise gets a new one; every step audited; a failed build or restore leaves the source untouched
 - [ ] **Fleet-wide restore and rebuild jobs (Enterprise):** many hosts restored or rebuilt as a fleet job in waves (20.4), with per-host results and the usual concurrency clamps
-- [ ] **Four-eyes approval (Enterprise):** a restore over existing data, a rebuild or a clone needs a second approver with the restore role; a file restore into staging does not
-- [ ] **Legal hold (Enterprise):** snapshots under hold are excluded from prune (24.5) until released, with the hold, its owner and reason audited
+- [ ] **Four-eyes approval (Enterprise):** a restore over existing data, a rebuild or a clone needs a second approver with the restore role; a file restore into staging does not. 2026-11-19 BUILT for restores (step 2): a per-tenant setting, OFF by default (Bryan: a one-admin site must never be locked out of its own restores); with it on and the Enterprise `backup_ops_engine` licensed, a real restore into place is held as a `backup_restore_request` (migration `q100foureyes`) until someone ELSE with the restore role approves it -- the requester can only withdraw -- and the approval sends exactly the restore asked for, through the same code (`backups_restore_flow`), after checking the host can still take it; a restore into staging and every preview are never held; unapproved requests expire after 24 hours; every request, approval, rejection and withdrawal audited. A "Restores awaiting approval" card on the Backups page (the switch for a backup manager). After a lapse nothing is held. Rebuilds and clones join it when they land (step 6). LEFT: a lab proof
+- [ ] **Legal hold (Enterprise):** snapshots under hold are excluded from prune (24.5) until released, with the hold, its owner and reason audited. 2026-11-19: restate's prune can keep only what its keep-* rules keep; Bryan chose a restate option -- `prune --keep-snapshot NAME` (repeatable, a `keep_snapshot` job key, listed in `restate features`, the kept ones in the prune result) -- proposed to the restate session for his approval there; SysManage passes held snapshots on every prune and refuses a hold on a storage host whose restate cannot honor it. After a license lapse, existing holds keep protecting (OSS honors them); placing and releasing a hold is Enterprise. 2026-11-19 BUILT (step 2): restate 3.4.0.0 ships `prune --keep-snapshot` (job key `keep_snapshot`, one line per snapshot; a hold alone with no keep-* rule is refused, so SysManage always sends keep_last with it; the result's `held` lists what was kept). `backup_legal_hold` (migration `q101legalhold`): owner, reason, who placed and released it. Every prune job carries the policy's unreleased holds (`backup_jobs.prune_keep`, whatever the license); placing or releasing re-sends the storage job. The agent validates the names and reports `keep_snapshot` among the storage abilities; the Enterprise engine refuses a hold where the storage host's restate cannot honor it, on a snapshot that is gone, a second hold, or one without an owner and a reason. A "Legal hold" button on the host's backup card and a "Legal holds" card on the Backups page with Release. LEFT: a lab proof on restate 3.4.0.0 (a hold survives a prune that would have dropped it)
 - [ ] **Automated restore drills (Enterprise):** on a schedule, restore a host's latest snapshot into a sandbox VM (virtualization engine), run a per-policy probe (boots, a service answers, a file hash matches) and record pass / fail as the host's restore evidence (27.1); the VM is destroyed afterwards
 
 #### 27.3 Multi-site and resilience (Enterprise)
@@ -14982,8 +14996,18 @@ the Network Discovery page and the 26.9 alert's filter.
 "Two is one, one is none": a second, encrypted copy of the backup store that
 lives outside every site, for the day the site and its off-site sibling are
 both gone.  It copies the storage host's repositories, never a host's live
-files, so it adds no load to backed-up hosts.  *Tier: to decide (this
-sub-phase is Enterprise; Bryan to confirm when it is sliced).*
+files, so it adds no load to backed-up hosts.  **Tier (decided
+2026-11-19, Bryan): Professional+, with the way back free.**  It is the
+off-site copy a one-site customer has (Enterprise's is site-to-site
+replication above), and it rides on the Pro+ `backup_engine` (OpenBAO-held
+keys released to the storage host per job, GFS, break-glass export).
+*Professional+:* setting up the copy and keeping it running -- schedule,
+fulls and incrementals, retention, exclusions, bandwidth by hour, status and
+alerts, creating and rotating its key -- and the storage host's own OS riding
+along.  *Community / OSS:* reading the manifests, the thaw-and-download
+restore, decrypting with the key, and the break-glass export of that key --
+after a license lapse a customer still gets their data back from the cloud
+and can walk away cleanly ("never hold safety hostage").
 
 - [ ] **Straight from the storage host (design rule, Bryan 2026-10-27):** the
       storage host's own agent reads the repositories, encrypts and uploads
@@ -15083,7 +15107,8 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
       a restore is a two-step job -- request the thaw of the full and its
       incrementals, then pull, decrypt and rebuild the repository on a
       storage host once they are ready -- with its progress and the
-      expected thaw time shown, and the thaw cost estimated before it starts
+      expected thaw time shown, and the thaw cost estimated before it starts.
+      Community / OSS: works with no license and after a lapse
 - [ ] **Status and alerts:** last good cloud copy per repository, bytes
       stored, monthly cost estimate, and an alert (24.6 alerts) when a copy
       is overdue or fails
@@ -15132,6 +15157,7 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
 #### 27.7 Editions
 
 - [ ] **Community / OSS -- the rest of iCloud (27.5):** Drive, Contacts, Calendars and Notes beside Photos, for one or more Apple IDs, in every edition
+- [ ] **Professional+ -- the off-site cloud copy (27.3, decided 2026-11-19):** the S3 Glacier Deep Archive copy of the storage host's repositories -- setup, schedule, fulls and incrementals, retention, exclusions, bandwidth by hour, status and alerts, its key created and rotated in OpenBAO -- with the storage host's own OS carried along; its restore, manifests and key export stay Community
 - [ ] **Enterprise -- multi-site and recovery at scale:**
   - multiple targets; per-site targets through federation; off-site replication (`restate copy`) to a second site; immutable copies; air-gap media for isolated sites (27.3)
   - bare-metal recovery through the provisioning engine (PXE + autoinstall); clone / migrate to a VM or metal (`--as`) (27.2)
@@ -15148,7 +15174,7 @@ out well and Bryan's go is recorded in Phase 25's exit criteria; on a no-go
 this sub-phase is dropped with the reason.  restate is untouched: it keeps
 working over NFS for anyone who mounts a repository by hand.
 
-- [ ] **The measurements this decision needs (moved from Phase 25, 2026-11-14, Bryan):** NFS against restate-proxy on the same storage host -- a large host (nextcloud-sized), a night of the whole fleet within the target's concurrency cap, a capture across the remote route (production's server) timed, a restore while a prune waits, and a month of nightly runs on production with no failed night the proxy caused. Already measured in Phase 25 (25.5): the same-pair LAN numbers (the proxy 10-27% slower in wall time, the same CPU on both ends, 8.4 MB of memory) and the Wi-Fi run that showed the link, not the transport, dominates
+- [ ] **The measurements this decision needs (moved from Phase 25, 2026-11-14, Bryan):** NFS against restate-proxy on the same storage host -- a large host (nextcloud-sized), a night of the whole fleet within the target's concurrency cap, a capture across the remote route (production's server) timed, a restore while a prune waits, and a month of nightly runs on production with no failed night the proxy caused. Already measured in Phase 25 (25.5): the same-pair LAN numbers (the proxy 10-27% slower in wall time, the same CPU on both ends, 8.4 MB of memory) and the Wi-Fi run that showed the link, not the transport, dominates. 2026-11-19, the month started (step 0): production has been on restate-proxy since 2026-11-12 (every host but the storage host itself); `scripts/backup_transport_report.py` reads each capture's own record (an `https://` repository is the proxy) -- theeverlys so far: NFS 84 captures, 0 failed, 2 incomplete, median 66 s, 16.2 MB/s read; proxy 60 captures over 8 nights, 0 failed, 5 incomplete (files a host could not read -- not the transport), median 99 s, 10.2 MB/s (different nights and data mix, not a same-pair figure). Rerun it at the month's end (about 2026-12-12) for the decision; the same-pair large-host and restore-while-prune runs are still to do
 - [ ] **NFS or restate-proxy, decided on numbers (moved from Phase 25's exit criteria):** the measurements above recorded with Phase 25's, and Bryan's go / no-go for removing NFS written here with the reason; nothing below starts without a go
 - [ ] **Every target on restate-proxy first:** production and the lab
       switched and proven for a full retention cycle before any code goes;
@@ -15174,7 +15200,8 @@ working over NFS for anyone who mounts a repository by hand.
 
 ### Licensing summary
 
-- **Community / OSS:** the rest of iCloud -- Drive, Contacts, Calendars and Notes -- beside 24.12's Photos (27.5); on a go from the measurements, restate-proxy as the only backup transport, NFS removed (27.8).
+- **Community / OSS:** the rest of iCloud -- Drive, Contacts, Calendars and Notes -- beside 24.12's Photos (27.5); restoring from the cloud copy, its manifests and the export of its key, with or without a license (27.3); on a go from the measurements, restate-proxy as the only backup transport, NFS removed (27.8).
+- **Professional+:** the off-site cloud copy to S3 Glacier Deep Archive -- setting it up and keeping it running, with the storage host's own OS carried along (27.3).
 - **Enterprise:** multi-site and recovery at scale -- many targets, per-site targets through federation, off-site replication, immutable copies, air-gap media, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes approval, legal hold and automated restore drills.
 - **MULTITENANT_SAAS:** per-tenant storage namespaces and keys, operator storage pools, quotas and usage metering, bring-your-own storage, and tenant lifecycle handling for backup data.
 
@@ -15183,6 +15210,10 @@ working over NFS for anyone who mounts a repository by hand.
 **Community / OSS**
 
 - [ ] **The rest of iCloud proven (27.5):** for one real Apple ID, its Drive, every address book and every calendar downloaded to the storage host and a second run downloading only what changed; its notes exported on a managed Mac and in that Mac's next snapshot; a contact, an event and a note each restored into its app from those files; and nothing in iCloud changed by any of it
+
+**Professional+**
+
+- [ ] **The cloud copy proven (27.3):** its own proof (one repository copied, the site copy destroyed, a file restored from the cloud copy alone), and the same restore done again after the license is removed
 
 **Enterprise**
 
@@ -16341,6 +16372,28 @@ machine; this proof waits for it rather than for a cloud box.
       it runs, re-check with `scripts/i18n_judge_calibrate.py` -- the judge
       now has the glossary, and some of those Hindi rejects may have been
       the judge, not the translation.*
+
+### Adopt an existing VM as a child host (added 2026-11-19, Bryan) (Enterprise)
+
+A hypervisor host often runs VMs that were there before SysManage, or were made by hand afterwards: today only a VM SysManage created is a child host with its lifecycle controls (start / stop / restart / delete, the orchestrated parent reboot, and later 27.2's "restore as a new child host" and migrations), while an existing VM is at best a separate host with no link to the machine it runs on.
+
+- [ ] **Find them:** the parent's agent already lists the VMs its hypervisors report (libvirt / KVM, bhyve, VMM, Hyper-V, VirtualBox, LXD, WSL); the child-host list shows the ones SysManage did not create as "not adopted", with what the hypervisor says about each (name, state, vCPUs, memory, disks)
+- [ ] **Adopt:** the operator adopts one; SysManage records it as a child host of that parent, matched to the managed host already running inside it when there is one (by the hypervisor's VM UUID / SMBIOS UUID and MAC addresses -- never by name alone, per 22.0's "a host is its token"), otherwise offering to install and enroll the agent the same way a SysManage-built child gets one
+- [ ] **Nothing about the VM changes:** adoption only records the relationship -- no restart, no reconfiguration, no disk touched; releasing an adopted VM drops the link and leaves the VM and its host record as they were
+- [ ] **Then it is a child host like any other:** lifecycle controls, the orchestrated reboot of its parent stops and restarts it, inventory shows it under the parent, and backups / restores treat it as the parent's child
+- [ ] **Bulk:** adopt every not-adopted VM on a parent (or across a tag) in one action, each with its own result
+- [ ] **Proof:** on a lab hypervisor, a VM made by hand with an agent already enrolled and one without are both adopted; the first keeps its host id and history, the second gets an agent; an orchestrated reboot of the parent stops and restarts both; releasing one leaves it running and enrolled
+
+### Antivirus: add swap to clear the memory floor (added 2026-11-19, Bryan)
+
+ClamAV is deployed only to hosts reporting at least `av_auto_deploy.MIN_MEMORY_MB` (3,500 MB): its daemon holds the whole signature database resident and briefly two copies while reloading, which took the 2 GB, swapless production droplet down on 2026-10-15.  A smaller host gets no antivirus at all unless an operator overrides the floor by hand (`allow_low_memory`).  Instead, one global setting lets SysManage give such a host the swap it needs:
+
+- [ ] **One global setting** on the antivirus defaults page: "Add swap to hosts below the memory floor" -- off until turned on; with it, the size is chosen for the operator (sane default, nothing else to fill in)
+- [ ] **Sized to the gap:** a swap file big enough that memory plus swap clears the floor with a margin (rounded up to whole GB), and the floor counts swap the host already has, so a host that has enough is left alone
+- [ ] **Only where it is safe:** Linux and the BSDs, on a local filesystem that supports a swap file (not btrfs without its swap-file rules, not ZFS, not a container), and only when the filesystem keeps a stated reserve free afterwards; otherwise the host is held with the reason ("no room for swap", "swap files not supported here") instead of deployed
+- [ ] **Done properly:** the file created with no holes and mode 0600, enabled at once and on every boot (fstab / the BSDs' own swap config), named so it is recognizably SysManage's, and reported in the host's memory inventory; removing antivirus from the host offers to remove the swap it added
+- [ ] **Auto-deploy and manual deploy both use it:** the deploy that a host's memory held back goes ahead once its swap is in place, without a second request
+- [ ] **Proof:** a 2 GB lab VM without swap, with the setting on, gets its swap file and ClamAV, survives a signature reload without memory pressure, and keeps both across a reboot; with the setting off it is held with the reason, as today
 
 ### Sane defaults everywhere (added 2026-10-27, Bryan)
 

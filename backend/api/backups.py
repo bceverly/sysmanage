@@ -52,6 +52,8 @@ from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_escrow
 from backend.services import backup_server
+from backend.api import backups_restore_flow as restore_flow
+from backend.services import backup_four_eyes as four_eyes
 from backend.services import backup_jobs as jobs
 from backend.services import backup_package_restore as package_restore
 from backend.services import backup_reach as reach
@@ -793,63 +795,11 @@ def backup_restore(
     package_restore.check(body, policy)
     # A restore (and its preview) mounts the repository on the host.
     reach.refuse_if_blocked(db, host)
-    snapshot = (
-        db.query(models.BackupSnapshot)
-        .filter(
-            models.BackupSnapshot.policy_id == policy.id,
-            models.BackupSnapshot.name == body.snapshot,
-            models.BackupSnapshot.gone_at.is_(None),
-        )
-        .first()
-    )
-    if snapshot is None:
-        raise HTTPException(status_code=404, detail=_("Snapshot not found"))
-    where = _readable_repository(snapshot, policy, host)
-    # Only a real restore needs the operator to accept an unsigned snapshot: a
-    # preview (dry run) writes nothing on the host (Bryan, 2026-10-30).
-    if not snapshot.signed and not body.dry_run and not body.acknowledge_unsigned:
-        raise HTTPException(
-            status_code=409,
-            detail=_("This snapshot is not signed; confirm to restore it anyway"),
-        )
-    run = jobs.queue_restore(
-        db,
-        policy,
-        host,
-        snapshot.name,
-        body.include,
-        body.dry_run,
-        allow_unverified=not snapshot.signed,
-        actor=current_user.userid,
-        exclude=body.exclude,
-        in_place=body.in_place,
-        previous=where == jobs.PREVIOUS,
-        needs_key=key_needed(where, policy),
-        packages=body.packages,
-    )
-    _audit(
-        db,
-        current_user,
-        EntityType.HOST,
-        host.id,
-        host.fqdn,
-        _restore_audit_text(body),
-        {
-            "run_id": str(run.id),
-            "snapshot": snapshot.name,
-            "include": body.include,
-            "exclude": body.exclude,
-            "dry_run": body.dry_run,
-            "in_place": body.in_place,
-            "packages": body.packages,
-            "unsigned_acknowledged": not snapshot.signed and body.acknowledge_unsigned,
-        },
-    )
-    db.commit()
-    out = views.run_dict(run)
-    out["in_place"] = body.in_place
-    out["staging_path"] = None if body.in_place else jobs.staging_dir(run.id)
-    return out
+    # Four-eyes approval (27.2, Enterprise): held for a second person.
+    held = four_eyes.hold(db, current_user, host, body)
+    if held is not None:
+        return held
+    return restore_flow.perform(db, current_user, host, policy, body)
 
 
 # The server's own backup (25.9): SysManage never holds its key.

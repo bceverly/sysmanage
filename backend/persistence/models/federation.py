@@ -390,6 +390,9 @@ class FederationBackupRollup(Base):
     verification_counts_json = Column(Text, nullable=True)
     # JSON [{host_id, fqdn, status, last_good_at}], at most a few entries.
     attention_hosts_json = Column(Text, nullable=True)
+    # JSON {ready, unproven, rpo_breached, never_backed_up} -- restore
+    # readiness (27.1), from sites with the Enterprise backup_ops_engine.
+    readiness_counts_json = Column(Text, nullable=True)
 
     __table_args__ = (
         Index(

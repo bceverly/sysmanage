@@ -22,6 +22,9 @@ import BackupServerCard from '../Components/Backups/BackupServerCard';
 import CloudBackupSection from '../Components/CloudBackup/CloudBackupSection';
 import { statusColor, statusLabel } from '../Components/Backups/backupLabels';
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
+import BackupReadinessCard from '../Components/Backups/BackupReadinessCard';
+import BackupApprovalsCard from '../Components/Backups/BackupApprovalsCard';
+import BackupLegalHoldsCard from '../Components/Backups/BackupLegalHolds';
 
 const Backups: React.FC = () => {
     const { t } = useTranslation();
@@ -80,6 +83,9 @@ const Backups: React.FC = () => {
             {canManage && <BackupKeyExportCard refreshKey={refreshKey} />}
             <BackupTargetCard target={data.target} hosts={data.hosts} versions={data.restate_versions}
                 canManage={canManage} onChanged={changed} />
+            <BackupReadinessCard canManage={canManage} refreshKey={refreshKey} />
+            <BackupApprovalsCard canManage={canManage} canRestore={canRestore} onChanged={changed} />
+            <BackupLegalHoldsCard canManage={canManage} refreshKey={refreshKey} />
             <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', rowGap: 1 }}>
                 {BACKUP_STATUS_ORDER.filter(s => data.counts[s]).map(s => (
                     <Chip key={s} variant={shown === s ? 'filled' : 'outlined'} color={statusColor(s)}

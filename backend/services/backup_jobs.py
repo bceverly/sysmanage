@@ -691,7 +691,30 @@ def prune_keep(policy: models.BackupPolicy) -> Dict[str, int]:
         value = getattr(policy, key, None)
         if value:
             keep[key] = int(value)
+    # Legal hold (27.2): held snapshots are kept too -- whatever the license,
+    # so a lapse never deletes held data.  Only placed where the storage
+    # host's restate has ``keep_snapshot``; an older one refuses the key.
+    held = held_snapshots(policy)
+    if held:
+        keep["keep_snapshot"] = held
     return keep
+
+
+def held_snapshots(policy: models.BackupPolicy) -> List[str]:
+    """The snapshots under a legal hold not yet released, oldest first."""
+    session = object_session(policy)
+    if session is None or policy.id is None:
+        return []
+    rows = (
+        session.query(models.BackupLegalHold.snapshot)
+        .filter(
+            models.BackupLegalHold.policy_id == policy.id,
+            models.BackupLegalHold.released_at.is_(None),
+        )
+        .order_by(models.BackupLegalHold.snapshot)
+        .all()
+    )
+    return sorted({name for (name,) in rows})
 
 
 def abilities(policy: models.BackupPolicy) -> List[str]:

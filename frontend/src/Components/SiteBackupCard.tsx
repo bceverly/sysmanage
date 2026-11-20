@@ -84,6 +84,24 @@ function BackupSummary({ backup }: Readonly<{ backup: FederationBackupRollup }>)
             })}
           />
         )}
+        {(backup.readiness_counts?.unproven ?? 0) > 0 && (
+          <Chip
+            size="small"
+            color="warning"
+            label={t("sites.detail.backupUnproven", "Unproven: {{n}}", {
+              n: backup.readiness_counts?.unproven,
+            })}
+          />
+        )}
+        {(backup.readiness_counts?.rpo_breached ?? 0) > 0 && (
+          <Chip
+            size="small"
+            color="error"
+            label={t("sites.detail.backupRpoMissed", "Recovery point missed: {{n}}", {
+              n: backup.readiness_counts?.rpo_breached,
+            })}
+          />
+        )}
         {backup.target_problem && (
           <Chip
             size="small"
