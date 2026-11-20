@@ -312,18 +312,14 @@ function Resolve-VcpkgRoot {
 if ($Architecture -eq "arm64") {
     Write-Host "Staging ARM64 libpq runtime DLLs..." -ForegroundColor Cyan
     $LibpqStage = Join-Path $CurrentDir "installer\windows\libpq-arm64"
-    $needed = @("libpq.dll","libcrypto-3-arm64.dll","libssl-3-arm64.dll","z.dll","lz4.dll","legacy.dll")
-    $missing = @($needed | Where-Object { -not (Test-Path (Join-Path $LibpqStage $_)) })
+    . (Join-Path $CurrentDir "installer\windows\libpq-arm64.ps1")
+    $missing = @(Get-LibpqArm64Missing $LibpqStage)
     if ($missing.Count -gt 0) {
         $vcpkgRoot = Resolve-VcpkgRoot
         $vcpkgBin = if ($vcpkgRoot) { Join-Path $vcpkgRoot "installed\arm64-windows\bin" } else { $null }
         if ($vcpkgBin -and (Test-Path (Join-Path $vcpkgBin "libpq.dll"))) {
-            New-Item -ItemType Directory -Path $LibpqStage -Force | Out-Null
-            foreach ($d in $needed) {
-                $src = Join-Path $vcpkgBin $d
-                if (Test-Path $src) { Copy-Item $src -Destination $LibpqStage -Force }
-            }
-            Write-Host "[OK] libpq staged from vcpkg: $vcpkgBin" -ForegroundColor Green
+            $zlib = Copy-LibpqArm64Dlls (Join-Path $vcpkgRoot "installed\arm64-windows") $LibpqStage
+            Write-Host "[OK] libpq staged from vcpkg: $vcpkgBin (zlib: $zlib)" -ForegroundColor Green
         } else {
             Write-Host "ERROR: ARM64 libpq DLLs not found for the MSI." -ForegroundColor Red
             Write-Host "  Provide them at $LibpqStage, or build with: vcpkg install libpq:arm64-windows" -ForegroundColor Yellow
@@ -503,6 +499,10 @@ try {
         "-d"
         "VERSION=$VERSION"
     )
+    if ($Architecture -eq "arm64") {
+        # The zlib DLL under the name libpq was linked against (libpq-arm64.ps1).
+        $wixArgs += @("-d", "LIBPQ_ZLIB=$(Get-LibpqZlibName (Join-Path $CurrentDir 'installer\windows\libpq-arm64'))")
+    }
 
     & wix @wixArgs
 

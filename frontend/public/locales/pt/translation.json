@@ -6110,6 +6110,22 @@
       "pickerHelp": "Onde este backup é armazenado.",
       "pickerUnlicensed": "Escolher outro destino requer a licença Enterprise; um host mantém o destino que possui.",
       "tagHelp": "Onde seus hosts fazem backup. Um host que já tem backups permanece em seu destino."
+    },
+    "offsite": {
+      "behind": "{{n}} para copiar",
+      "change": "Alterar",
+      "empty": "nenhum snapshot copiado ainda",
+      "error": "A cópia off-site não pôde ser alterada.",
+      "failed": "A última cópia off-site não foi concluída: {{error}}",
+      "holds": "Armazena as cópias off-site de: {{names}}",
+      "hostLine": "Cópia off-site em {{target}}",
+      "intro": "Todo repositório neste destino é copiado, após cada backup noturno, para o destino escolhido aqui. Ele deve ser alcançado através do restate-proxy em outro host de armazenamento, para que este site possa adicionar à cópia, mas nunca excluir dela. A cópia mantém os mesmos snapshots e bloqueios legais da origem.",
+      "label": "Cópia off-site",
+      "newest": "snapshot mais recente de {{hours}} h atrás, {{size}}",
+      "none": "Nenhuma",
+      "settingUp": "sendo configurada",
+      "stop": "Nenhuma (parar de copiar; as cópias permanecem onde estão)",
+      "title": "Cópia off-site de {{name}}"
     }
   },
   "cloudBackup": {

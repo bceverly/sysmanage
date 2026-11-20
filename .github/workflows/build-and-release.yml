@@ -1478,20 +1478,20 @@ jobs:
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
         with:
           path: installer/windows/libpq-arm64
-          key: libpq-arm64-v1
+          key: libpq-arm64-v2
 
       - name: Build ARM64 libpq via vcpkg (only on cache miss)
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $needed = @('libpq.dll','libcrypto-3-arm64.dll','libssl-3-arm64.dll','z.dll','lz4.dll','legacy.dll')
+          . .\installer\windows\libpq-arm64.ps1
           $stage  = 'installer\windows\libpq-arm64'
+          $missing = @(Get-LibpqArm64Missing $stage)
+          if ($missing.Count -eq 0) {
+            Write-Host "[OK] libpq restored from cache"
+            exit 0
+          }
           if (Test-Path $stage) {
-            $missing = @($needed | Where-Object { -not (Test-Path (Join-Path $stage $_)) })
-            if ($missing.Count -eq 0) {
-              Write-Host "[OK] libpq restored from cache ($($needed.Count) DLLs)"
-              exit 0
-            }
             Write-Host "cache incomplete (missing: $($missing -join ', ')) - rebuilding"
           }
 
@@ -1505,14 +1505,9 @@ jobs:
           & "$vcpkg\vcpkg.exe" install libpq:arm64-windows
           if ($LASTEXITCODE -ne 0) { throw "vcpkg install libpq:arm64-windows failed" }
 
-          New-Item -ItemType Directory -Force -Path $stage | Out-Null
-          $bin = Join-Path $vcpkg 'installed\arm64-windows\bin'
-          foreach ($d in $needed) {
-            $src = Join-Path $bin $d
-            if (-not (Test-Path $src)) { throw "vcpkg did not produce $d in $bin" }
-            Copy-Item $src (Join-Path $stage $d) -Force
-          }
-          Write-Host "[OK] built and staged $($needed.Count) libpq DLLs"
+          # zlib is staged under the name libpq was linked against.
+          $zlib = Copy-LibpqArm64Dlls (Join-Path $vcpkg 'installed\arm64-windows') $stage
+          Write-Host "[OK] built and staged the libpq DLLs (zlib: $zlib)"
           # Explicit: pwsh in Actions takes the step result from the LAST
           # native exit code.  A step that handled a non-zero result in its
           # own logic still fails unless the code is reset -- that is exactly

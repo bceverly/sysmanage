@@ -6110,6 +6110,22 @@
       "pickerHelp": "Dónde se almacena esta copia de seguridad.",
       "pickerUnlicensed": "Elegir otro destino requiere la licencia Enterprise; un host conserva el destino que tiene.",
       "tagHelp": "Dónde hacen copia de seguridad sus hosts. Un host que ya tiene copias de seguridad permanece en su destino."
+    },
+    "offsite": {
+      "behind": "{{n}} para copiar",
+      "change": "Cambiar",
+      "empty": "aún no se ha copiado ninguna instantánea",
+      "error": "No se pudo cambiar la copia fuera del sitio.",
+      "failed": "La última copia fuera del sitio no terminó: {{error}}",
+      "holds": "Almacena las copias fuera del sitio de: {{names}}",
+      "hostLine": "Copia fuera del sitio en {{target}}",
+      "intro": "Cada repositorio de este destino se copia, después de cada copia de seguridad nocturna, al destino elegido aquí. Debe alcanzarse a través de restate-proxy en otro host de almacenamiento, para que este sitio pueda agregar a la copia pero nunca eliminar de ella. La copia conserva las mismas instantáneas y retenciones legales que el origen.",
+      "label": "Copia fuera del sitio",
+      "newest": "instantánea más reciente de hace {{hours}} h, {{size}}",
+      "none": "Ninguna",
+      "settingUp": "en proceso de configuración",
+      "stop": "Ninguna (dejar de copiar; las copias se quedan donde están)",
+      "title": "Copia fuera del sitio de {{name}}"
     }
   },
   "cloudBackup": {

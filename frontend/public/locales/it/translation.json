@@ -6110,6 +6110,22 @@
       "pickerHelp": "Dove questo backup è memorizzato.",
       "pickerUnlicensed": "La scelta di un altro target richiede la licenza Enterprise; un host mantiene il target che ha.",
       "tagHelp": "Dove i suoi host eseguono il backup. Un host che ha già backup rimane sul suo target."
+    },
+    "offsite": {
+      "behind": "{{n}} da copiare",
+      "change": "Modifica",
+      "empty": "Nessuno snapshot copiato finora",
+      "error": "Non è stato possibile modificare la copia fuori sede.",
+      "failed": "L'ultima copia fuori sede non è stata completata: {{error}}",
+      "holds": "Contiene le copie fuori sede di: {{names}}",
+      "hostLine": "Copia fuori sede su {{target}}",
+      "intro": "Ogni repository su questo target viene copiato, dopo ogni backup notturno, sul target scelto qui. Deve essere raggiunto tramite restate-proxy su un altro host di archiviazione, così questo sito può aggiungere alla copia ma mai eliminarne nulla. La copia mantiene gli stessi snapshot e blocchi legali dell'origine.",
+      "label": "Copia fuori sede",
+      "newest": "snapshot più recente di {{hours}} h fa, {{size}}",
+      "none": "Nessuna",
+      "settingUp": "in fase di configurazione",
+      "stop": "Nessuna (interrompi la copia; le copie restano dove sono)",
+      "title": "Copia fuori sede di {{name}}"
     }
   },
   "cloudBackup": {

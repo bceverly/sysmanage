@@ -6110,6 +6110,22 @@
       "pickerHelp": "Where this backup is stored.",
       "pickerUnlicensed": "Choosing another target needs the Enterprise license; a host keeps the target it has.",
       "tagHelp": "Where its hosts back up. A host that already has backups stays on its target."
+    },
+    "offsite": {
+      "behind": "{{n}} to copy",
+      "change": "Change",
+      "empty": "no snapshot copied yet",
+      "error": "The off-site copy could not be changed.",
+      "failed": "The last off-site copy did not finish: {{error}}",
+      "holds": "Holds the off-site copies of: {{names}}",
+      "hostLine": "Off-site copy at {{target}}",
+      "intro": "Every repository on this target is copied after each night's backup to the target chosen here. It must be reached through restate-proxy on another storage host, so this site can add to the copy but never delete from it. The copy keeps the same snapshots and legal holds as the source.",
+      "label": "Off-site copy",
+      "newest": "newest snapshot {{hours}} h old, {{size}}",
+      "none": "None",
+      "settingUp": "being set up",
+      "stop": "None (stop copying; the copies stay where they are)",
+      "title": "Off-site copy of {{name}}"
     }
   },
   "cloudBackup": {

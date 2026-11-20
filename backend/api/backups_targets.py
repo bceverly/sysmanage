@@ -260,6 +260,14 @@ def delete_target(
             status_code=409,
             detail=_("Make another target the default before deleting this one"),
         )
+    if targets.copies_into(db, target):
+        raise HTTPException(
+            status_code=409,
+            detail=_(
+                "Another target copies off-site to this one; stop its off-site "
+                "copy first"
+            ),
+        )
     _audit(
         db,
         current_user,
@@ -296,5 +304,45 @@ def set_default_target(
         "Backup target made the default",
         {},
     )
+    db.commit()
+    return views.target_dict(target, db)
+
+
+class ReplicaBody(BaseModel):
+    replica_target_id: Optional[str] = Field(default=None, max_length=64)
+
+
+@router.put("/backups/targets/{target_id}/replica")
+def set_replica_target(
+    target_id: str,
+    body: ReplicaBody,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Copy every repository on this target off-site to another target, or
+    stop (Enterprise).  Stopping leaves the copies where they are."""
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    target = _target_or_404(db, target_id)
+    replica = targets.set_replica(db, target, body.replica_target_id)
+    for policy in (
+        db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.target_id == target.id)
+        .all()
+    ):
+        policy.config_version += 1  # the storage host learns where to copy
+    _audit(
+        db,
+        current_user,
+        EntityType.SETTING,
+        target.id,
+        target.name,
+        (
+            "Backup target off-site copy set"
+            if replica
+            else "Backup target off-site copy stopped"
+        ),
+        {"replica_target": replica.name if replica else None},
+    )
+    backup_tick.configure_now(db)
     db.commit()
     return views.target_dict(target, db)

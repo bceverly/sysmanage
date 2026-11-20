@@ -34,6 +34,7 @@ from backend.services import backup_forecast
 from backend.services import backup_jobs as jobs
 from backend.services import backup_package_restore as package_restore
 from backend.services import backup_proxy
+from backend.services import backup_replicas
 from backend.services import backup_proxy_limits
 from backend.services import backup_storage_audit as storage_audit
 from backend.services import backup_storage_health as storage_health
@@ -58,6 +59,20 @@ def _json(text: Optional[str]) -> Any:
         return json.loads(text)
     except ValueError:
         return None
+
+
+def _name(db: Session, target_id: Any) -> Optional[str]:
+    found = db.get(models.BackupTarget, target_id) if target_id else None
+    return found.name if found else None
+
+
+def _copies_from(db: Session, target: models.BackupTarget) -> List[str]:
+    """The targets that copy off-site into ``target``, by name."""
+    return sorted(
+        other.name
+        for other in jobs.targets(db)
+        if str(other.replica_target_id or "") == str(target.id)
+    )
 
 
 def coverage(host: models.Host) -> str:
@@ -118,6 +133,13 @@ def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
         "service_account": target.service_account or jobs.DEFAULT_SERVICE_ACCOUNT,
         # How hosts reach the storage: NFS, or restate-proxy (25.5).
         "transport": backup_proxy.target_view(target),
+        # Off-site copies (27.3): where this target copies to, and whether
+        # another copies into it.
+        "replica_target_id": (
+            str(target.replica_target_id) if target.replica_target_id else None
+        ),
+        "replica_target": _name(db, target.replica_target_id),
+        "copies_from": _copies_from(db, target),
         # Bandwidth by the hour through the proxy (Pro+, 25.7).
         "proxy_bandwidth": backup_proxy_limits.view(
             target, jobs.target_storage_abilities(db, target.id)
@@ -345,6 +367,8 @@ def host_status(
         entry["status"] = "no_policy" if ready else "not_equipped"
         return entry
     _policy_status(db, entry, policy, ready, now)
+    # Off-site copies (27.3): where, how far behind, how big.
+    entry["offsite"] = backup_replicas.view(db, policy, now)
     return entry
 
 

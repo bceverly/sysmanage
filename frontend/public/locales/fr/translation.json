@@ -6110,6 +6110,22 @@
       "pickerHelp": "Où cette sauvegarde est stockée.",
       "pickerUnlicensed": "Le choix d'une autre cible nécessite la licence Entreprise ; un hôte conserve la cible qu'il a.",
       "tagHelp": "Où ses hôtes effectuent des sauvegardes. Un hôte qui a déjà des sauvegardes reste sur sa cible."
+    },
+    "offsite": {
+      "behind": "{{n}} à copier",
+      "change": "Changer",
+      "empty": "aucun instantané copié pour l'instant",
+      "error": "La copie hors site n'a pas pu être modifiée.",
+      "failed": "La dernière copie hors site ne s'est pas terminée : {{error}}",
+      "holds": "Contient les copies hors site de : {{names}}",
+      "hostLine": "Copie hors site sur {{target}}",
+      "intro": "Chaque dépôt de cette cible est copié, après chaque sauvegarde nocturne, vers la cible choisie ici. Elle doit être atteinte via restate-proxy sur un autre hôte de stockage, afin que ce site puisse ajouter à la copie mais jamais rien en supprimer. La copie conserve les mêmes instantanés et conservations légales que la source.",
+      "label": "Copie hors site",
+      "newest": "instantané le plus récent datant de {{hours}} h, {{size}}",
+      "none": "Aucune",
+      "settingUp": "en cours de configuration",
+      "stop": "Aucune (arrêter la copie ; les copies restent où elles sont)",
+      "title": "Copie hors site de {{name}}"
     }
   },
   "cloudBackup": {

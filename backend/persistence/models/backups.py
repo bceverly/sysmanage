@@ -119,6 +119,11 @@ class BackupTarget(Base):
     proxy_clients = Column(Text, nullable=True)
     # Bandwidth by the hour, restate-proxy's grant lines (JSON list, q86; Pro+).
     proxy_bandwidth = Column(Text, nullable=True)
+    # Off-site copies (q105, 27.3, Enterprise): the target each of this
+    # target's repositories is copied to -- a restate-proxy target on
+    # another storage host, which the copies can be added to but never
+    # deleted from.
+    replica_target_id = Column(GUID(), nullable=True)
     created_at = Column(DateTime, nullable=False)
     created_by = Column(String(255), nullable=True)
     updated_at = Column(DateTime, nullable=False)
@@ -502,3 +507,57 @@ class BackupLegalHold(Base):
     placed_at = Column(DateTime, nullable=False)
     released_by = Column(String(255), nullable=True)
     released_at = Column(DateTime, nullable=True)
+
+
+class BackupReplica(Base):
+    """One host's off-site copy (27.3, q105): its repository on the target
+    its own target copies to.  The source storage host copies each snapshot
+    in through restate-proxy with a token of its own (an append-only grant,
+    so the source site can never delete the copy); the off-site storage
+    host prepares, protects, seals, prunes (the source policy's retention
+    and legal holds) and sizes it, configured as a repository of its own
+    under this row's id."""
+
+    __tablename__ = "backup_replica"
+    __table_args__ = (
+        UniqueConstraint(
+            "policy_id", "target_id", name="uq_backup_replica_policy_target"
+        ),
+    )
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    policy_id = Column(
+        GUID(), ForeignKey(_POLICY_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
+    target_id = Column(
+        GUID(),
+        ForeignKey("backup_target.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    repo_dir = Column(String(255), nullable=False)
+    # The off-site storage host's job files: bumped on change, acknowledged
+    # by its configure, as a policy's storage side is.
+    config_version = Column(Integer, nullable=False, default=1)
+    acked_version = Column(Integer, nullable=True)
+    prepared_at = Column(DateTime, nullable=True)
+    # The source storage host's copy token (its SHA-256 only), and the one
+    # before it while a configure carrying the new one is on its way.
+    token_sha256 = Column(String(64), nullable=True)
+    token_sha256_old = Column(String(64), nullable=True)
+    # What the off-site du last listed (JSON names), and what the off-site
+    # prune dropped (JSON names, the latest few hundred) -- never copied
+    # again, or the two prunes would fight.
+    snapshots = Column(Text, nullable=True)
+    pruned = Column(Text, nullable=True)
+    newest_snapshot = Column(String(255), nullable=True)
+    newest_at = Column(DateTime, nullable=True)
+    repository_bytes = Column(BigInteger, nullable=True)
+    last_copy_at = Column(DateTime, nullable=True)
+    last_copy_status = Column(String(32), nullable=True)
+    last_copy_error = Column(String(1000), nullable=True)
+    # What the off-site storage host's restate offers (JSON, its configure
+    # reply): a prune naming held snapshots goes only where it keeps them.
+    abilities = Column(Text, nullable=True)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)

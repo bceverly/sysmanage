@@ -150,6 +150,11 @@ export interface BackupTarget {
   is_default?: boolean;
   /** How many host policies back up to it. */
   hosts?: number;
+  /** The target this one copies off-site to (27.3), and the targets that
+   *  copy into this one. */
+  replica_target_id?: string | null;
+  replica_target?: string | null;
+  copies_from?: string[];
   host_mount_point: string;
   storage_host_id: string | null;
   storage_hostname: string | null;
@@ -337,8 +342,28 @@ export interface PackageSummary {
   truncated: boolean;
 }
 
+/** One off-site copy of a host's repository (27.3, Enterprise to set up). */
+export interface OffsiteCopy {
+  id: string;
+  target_id: string;
+  target: string | null;
+  newest_snapshot: string | null;
+  /** Hours since the newest snapshot in the copy was taken. */
+  lag_hours: number | null;
+  /** Snapshots the source holds that the copy still lacks. */
+  behind: number;
+  bytes: number | null;
+  /** Its grant names the source's token and its repository is made. */
+  ready: boolean;
+  last_copy_at: string | null;
+  last_copy_status: string | null;
+  last_copy_error: string | null;
+}
+
 export interface BackupHost {
   host_id: string;
+  /** Off-site copies of its repository (27.3). */
+  offsite?: OffsiteCopy[];
   fqdn: string;
   platform: string | null;
   platform_release: string | null;
@@ -576,6 +601,16 @@ export const listTargets = async (): Promise<TargetBrief[]> =>
 /** Where new host policies go (Enterprise while there are several). */
 export const setDefaultTarget = async (id: string): Promise<BackupTarget> =>
   (await axiosInstance.put<BackupTarget>(`${base}/backups/targets/${id}/default`)).data;
+
+/** Copy every repository on a target off-site to another target, or stop
+ *  (null).  Enterprise; stopping leaves the copies where they are. */
+export const setReplicaTarget = async (
+  id: string,
+  replicaTargetId: string | null,
+): Promise<BackupTarget> =>
+  (await axiosInstance.put<BackupTarget>(`${base}/backups/targets/${id}/replica`, {
+    replica_target_id: replicaTargetId,
+  })).data;
 
 /** Switch how hosts reach the storage; every host's jobs are re-sent. */
 export const setTransport = async (

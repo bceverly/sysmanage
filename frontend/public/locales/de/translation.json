@@ -6110,6 +6110,22 @@
       "pickerHelp": "Wo dieses Backup gespeichert wird.",
       "pickerUnlicensed": "Für ein anderes Ziel ist die Enterprise-Lizenz nötig; ein Host behält sein bisheriges Ziel.",
       "tagHelp": "Wo seine Hosts Backups speichern. Ein Host, der bereits Backups hat, bleibt bei seinem Ziel."
+    },
+    "offsite": {
+      "behind": "{{n}} zum Kopieren",
+      "change": "Ändern",
+      "empty": "noch kein Snapshot kopiert",
+      "error": "Die Offsite-Kopie konnte nicht geändert werden.",
+      "failed": "Die letzte Offsite-Kopie wurde nicht abgeschlossen: {{error}}",
+      "holds": "Enthält die Offsite-Kopien von: {{names}}",
+      "hostLine": "Offsite-Kopie auf {{target}}",
+      "intro": "Jedes Repository auf diesem Ziel wird nach jeder nächtlichen Sicherung auf das hier gewählte Ziel kopiert. Es muss über restate-proxy auf einem anderen Speicher-Host erreichbar sein, damit dieser Standort der Kopie etwas hinzufügen, aber nie etwas daraus löschen kann. Die Kopie behält dieselben Snapshots und rechtlichen Sperren wie die Quelle.",
+      "label": "Offsite-Kopie",
+      "newest": "neuester Snapshot {{hours}} h alt, {{size}}",
+      "none": "Keine",
+      "settingUp": "wird eingerichtet",
+      "stop": "Keine (Kopieren beenden; die Kopien bleiben, wo sie sind)",
+      "title": "Offsite-Kopie von {{name}}"
     }
   },
   "cloudBackup": {

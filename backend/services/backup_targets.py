@@ -91,6 +91,69 @@ def refuse_clash(db: Session, candidate: Any, own_id: Any = None) -> None:
         raise HTTPException(status_code=status, detail=text())
 
 
+_REPLICA_REFUSALS = {
+    "self": lambda: _("A backup target cannot be its own off-site copy"),
+    "not_proxy": lambda: _(
+        "The off-site copy must be a target reached through restate-proxy, "
+        "so this site can add to it but never delete from it"
+    ),
+    "same_storage_host": lambda: _(
+        "The off-site copy must be on another storage host; one on the same "
+        "storage host is lost with it"
+    ),
+    "cycle": lambda: _(
+        "That target already copies, directly or through others, to this one"
+    ),
+}
+
+
+def _replica_facts(target: models.BackupTarget) -> Dict[str, Any]:
+    return dict(
+        facts(target),
+        transport=getattr(target, "transport", None),
+        proxy_host=getattr(target, "proxy_host", None),
+    )
+
+
+def set_replica(
+    db: Session, target: models.BackupTarget, replica_id: Optional[str]
+) -> Optional[models.BackupTarget]:
+    """Name (or clear) the target ``target`` copies off-site to.  Enterprise
+    either way: after a lapse copies go on as they are, frozen."""
+    eng = engine_or_402()
+    if not replica_id:
+        target.replica_target_id = None
+        return None
+    replica = target_or_404(db, replica_id)
+    replica_of = {
+        str(t.id): str(t.replica_target_id)
+        for t in jobs.targets(db)
+        if getattr(t, "replica_target_id", None) and str(t.id) != str(target.id)
+    }
+    if not hasattr(eng, "replica_refusal"):
+        raise HTTPException(
+            status_code=402,
+            detail=missing_engine_detail(
+                ENGINE, _("Off-site copies need a newer backup operations engine")
+            ),
+        )
+    code = eng.replica_refusal(
+        _replica_facts(target), _replica_facts(replica), replica_of
+    )
+    if code:
+        raise HTTPException(status_code=409, detail=_REPLICA_REFUSALS[code]())
+    target.replica_target_id = replica.id
+    return replica
+
+
+def copies_into(db: Session, target: models.BackupTarget) -> List[models.BackupTarget]:
+    """The targets that copy off-site into ``target``."""
+    return [
+        t for t in jobs.targets(db)
+        if str(getattr(t, "replica_target_id", None) or "") == str(target.id)
+    ]  # fmt: skip
+
+
 def target_or_404(db: Session, target_id: Any) -> models.BackupTarget:
     try:
         key = uuid.UUID(str(target_id))

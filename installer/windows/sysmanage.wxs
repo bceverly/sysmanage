@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <!-- ARM64: the zlib DLL under the name libpq was linked against, from the
+       build script (libpq-arm64.ps1); x64 bundles no libpq. -->
+  <?ifndef LIBPQ_ZLIB ?>
+  <?define LIBPQ_ZLIB = "z.dll" ?>
+  <?endif ?>
   <!--
     SysManage Server Windows Installer
     Creates MSI package for Windows installation with service support
@@ -199,7 +204,7 @@
         <File Id="LibpqDll" Source="libpq-arm64\libpq.dll" KeyPath="yes" />
         <File Source="libpq-arm64\libcrypto-3-arm64.dll" />
         <File Source="libpq-arm64\libssl-3-arm64.dll" />
-        <File Source="libpq-arm64\z.dll" />
+        <File Source="libpq-arm64\$(var.LIBPQ_ZLIB)" />
         <File Source="libpq-arm64\lz4.dll" />
         <File Source="libpq-arm64\legacy.dll" />
       </Component>

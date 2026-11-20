@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 09:21-0800\n"
+"POT-Creation-Date: 2026-11-20 14:42-0800\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -514,6 +514,13 @@ msgstr ""
 msgid "Make another target the default before deleting this one"
 msgstr "Machen Sie ein anderes Ziel zum Standard, bevor Sie dieses löschen"
 
+#: backend/api/backups_targets.py:267
+msgid ""
+"Another target copies off-site to this one; stop its off-site copy first"
+msgstr ""
+"Ein anderes Ziel kopiert offsite auf dieses; beenden Sie zuerst dessen "
+"Offsite-Kopie"
+
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
 msgstr "Nachricht zur Änderung des Hostnamens ohne Host-ID erhalten"
@@ -625,27 +632,27 @@ msgstr "Fehler beim Verarbeiten der Rollendatenaktualisierung: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "Die Verwaltung von Kindhosts erfordert eine Professional+ Lizenz."
 
-#: backend/api/handlers/os_hardware_handlers.py:133
+#: backend/api/handlers/os_hardware_handlers.py:135
 msgid "No host identification available"
 msgstr "Keine Host-Identifikation verfügbar"
 
-#: backend/api/handlers/os_hardware_handlers.py:345
+#: backend/api/handlers/os_hardware_handlers.py:347
 msgid "os_version_updated"
 msgstr "Betriebssystem-Version aktualisiert"
 
-#: backend/api/handlers/os_hardware_handlers.py:351
+#: backend/api/handlers/os_hardware_handlers.py:353
 msgid "No OS information provided"
 msgstr "Keine Informationen zum Betriebssystem angegeben"
 
-#: backend/api/handlers/os_hardware_handlers.py:361
+#: backend/api/handlers/os_hardware_handlers.py:363
 msgid "Failed to update OS version"
 msgstr "OS-Version konnte nicht aktualisiert werden"
 
-#: backend/api/handlers/os_hardware_handlers.py:569
+#: backend/api/handlers/os_hardware_handlers.py:576
 msgid "hardware_updated"
 msgstr "Hardware aktualisiert"
 
-#: backend/api/handlers/os_hardware_handlers.py:578
+#: backend/api/handlers/os_hardware_handlers.py:585
 msgid "Failed to update hardware information"
 msgstr "Hardwareinformation konnte nicht aktualisiert werden"
 
@@ -3352,7 +3359,7 @@ msgstr "%(field)s muss eine ganze Zahl von 0 bis %(max)d sein"
 
 #: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
-#: backend/services/backup_targets.py:121
+#: backend/services/backup_targets.py:182
 msgid "Set up the backup target first"
 msgstr "Richten Sie zuerst das Sicherungsziel ein"
 
@@ -3926,23 +3933,23 @@ msgstr "Fehler beim Zählen der Pakete: %s"
 msgid "Failed to search packages: %s"
 msgstr "Fehler beim Suchen von Paketen: %s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:235
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Zugriff verweigert: DELETE_HOST-Rolle erforderlich"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:299
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Berechtigung abgelehnt: VIEW_HOST_DETAILS Rolle erforderlich"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:688
 msgid "Host already exists"
 msgstr "Host existiert bereits"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registrierung absorbiert: Host wurde kürzlich gelöscht"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -4142,19 +4149,19 @@ msgstr "%d Pakete erfolgreich in Warteschlange für Deinstallation gestellt"
 msgid "Failed to queue package uninstallation: %s"
 msgstr "Fehler beim Anwenden des Befehls zur Paketdeinstallation: %s"
 
-#: backend/api/host_data_updates.py:128
+#: backend/api/host_data_updates.py:130
 msgid "Hardware information updated successfully"
 msgstr "Hardware-Informationen erfolgreich aktualisiert"
 
-#: backend/api/host_data_updates.py:185
+#: backend/api/host_data_updates.py:187
 msgid "Hardware update requested"
 msgstr "Hardware-Update angefordert"
 
-#: backend/api/host_data_updates.py:311
+#: backend/api/host_data_updates.py:313
 msgid "User access update requested"
 msgstr "Benutzerzugriff-Update angefordert"
 
-#: backend/api/host_data_updates.py:365
+#: backend/api/host_data_updates.py:367
 msgid "System info update requested"
 msgstr "Aktualisierung von Systeminformationen angefordert"
 
@@ -6689,12 +6696,40 @@ msgid ""
 msgstr ""
 "Mehr als ein Backup-Ziel erfordert die Enterprise-Engine für Backup-Betrieb"
 
-#: backend/services/backup_targets.py:99
-#: backend/services/backup_targets.py:103
+#: backend/services/backup_targets.py:95
+msgid "A backup target cannot be its own off-site copy"
+msgstr "Ein Backup-Ziel kann nicht seine eigene Offsite-Kopie sein."
+
+#: backend/services/backup_targets.py:97
+msgid ""
+"The off-site copy must be a target reached through restate-proxy, so this "
+"site can add to it but never delete from it"
+msgstr ""
+"Die Offsite-Kopie muss ein über restate-proxy erreichtes Ziel sein, damit "
+"dieser Standort ihr etwas hinzufügen, aber nie etwas daraus löschen kann"
+
+#: backend/services/backup_targets.py:101
+msgid ""
+"The off-site copy must be on another storage host; one on the same storage "
+"host is lost with it"
+msgstr ""
+"Die Offsite-Kopie muss auf einem anderen Speicher-Host liegen; eine Kopie "
+"auf demselben Speicher-Host geht mit ihm verloren"
+
+#: backend/services/backup_targets.py:105
+msgid "That target already copies, directly or through others, to this one"
+msgstr "Jenes Ziel kopiert bereits, direkt oder über andere, auf dieses"
+
+#: backend/services/backup_targets.py:137
+msgid "Off-site copies need a newer backup operations engine"
+msgstr "Offsite-Kopien benötigen eine neuere Engine für Backup-Vorgänge"
+
+#: backend/services/backup_targets.py:160
+#: backend/services/backup_targets.py:164
 msgid "Backup target not found"
 msgstr "Sicherungsziel nicht gefunden"
 
-#: backend/services/backup_targets.py:149
+#: backend/services/backup_targets.py:210
 msgid ""
 "This host already has backups on its target; it cannot move to another "
 "target yet"

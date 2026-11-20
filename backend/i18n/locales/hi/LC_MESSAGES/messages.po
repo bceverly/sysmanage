@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 09:21-0800\n"
+"POT-Creation-Date: 2026-11-20 14:42-0800\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -509,6 +509,13 @@ msgstr "एक टैग नीति अपने होस्ट इस टा
 msgid "Make another target the default before deleting this one"
 msgstr "इस टारगेट को हटाने से पहले किसी दूसरे टारगेट को डिफ़ॉल्ट बनाएँ"
 
+#: backend/api/backups_targets.py:267
+msgid ""
+"Another target copies off-site to this one; stop its off-site copy first"
+msgstr ""
+"एक अन्य टारगेट इस टारगेट पर ऑफ-साइट कॉपी करता है; पहले उसकी ऑफ-साइट कॉपी "
+"रोकें"
+
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
 msgstr ""
@@ -621,27 +628,27 @@ msgstr "रोल डेटा अपडेट प्रक्रिया म�
 msgid "Child host management requires a Professional+ license."
 msgstr "बच्चे मेंस प्रबंधन के लिए एक प्रोफेशनल+ लाइसेंस की आवश्यकता है."
 
-#: backend/api/handlers/os_hardware_handlers.py:133
+#: backend/api/handlers/os_hardware_handlers.py:135
 msgid "No host identification available"
 msgstr "होस्ट पहचान उपलब्ध नहीं है"
 
-#: backend/api/handlers/os_hardware_handlers.py:345
+#: backend/api/handlers/os_hardware_handlers.py:347
 msgid "os_version_updated"
 msgstr "ओएस संस्करण अपडेट किया गया"
 
-#: backend/api/handlers/os_hardware_handlers.py:351
+#: backend/api/handlers/os_hardware_handlers.py:353
 msgid "No OS information provided"
 msgstr "कोई OS जानकारी नहीं प्रदान की गई"
 
-#: backend/api/handlers/os_hardware_handlers.py:361
+#: backend/api/handlers/os_hardware_handlers.py:363
 msgid "Failed to update OS version"
 msgstr "OS भविष्यवाणी का अपडेट वापरे में विफल"
 
-#: backend/api/handlers/os_hardware_handlers.py:569
+#: backend/api/handlers/os_hardware_handlers.py:576
 msgid "hardware_updated"
 msgstr "हार्डवेयर अपडेट किया गया"
 
-#: backend/api/handlers/os_hardware_handlers.py:578
+#: backend/api/handlers/os_hardware_handlers.py:585
 msgid "Failed to update hardware information"
 msgstr "हार्डवेयर सूचना का अपडेट वापरे में विफल"
 
@@ -3281,7 +3288,7 @@ msgstr "%(field)s 0 से %(max)d तक की पूर्ण संख्य
 
 #: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
-#: backend/services/backup_targets.py:121
+#: backend/services/backup_targets.py:182
 msgid "Set up the backup target first"
 msgstr "पहले बैकअप लक्ष्य सेट करें"
 
@@ -3832,23 +3839,23 @@ msgstr "पैकेज गिने फ़ालतू हुई: %s"
 msgid "Failed to search packages: %s"
 msgstr "पैकेज खोजने में विफल: %s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:235
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "प्रवेश नहीं: DELETE_HOST भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:299
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "प्रवेश नहीं: VIEW_HOST_DETAILS भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:688
 msgid "Host already exists"
 msgstr "होस्ट पहले से मौजूद है"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "रजिस्ट्रेशन अवशोषित: होस्ट पहले से ही हटा दिया गया था"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -4045,19 +4052,19 @@ msgstr "%d पैकेज्स को अनइंस्टल करने �
 msgid "Failed to queue package uninstallation: %s"
 msgstr "पैकेज अनइंस्टॉल करने की कोशिश विफल रही: %s"
 
-#: backend/api/host_data_updates.py:128
+#: backend/api/host_data_updates.py:130
 msgid "Hardware information updated successfully"
 msgstr "हार्डवेयर जानकारी सफलतापूर्वक अपडेट की गई"
 
-#: backend/api/host_data_updates.py:185
+#: backend/api/host_data_updates.py:187
 msgid "Hardware update requested"
 msgstr "हार्डवेयर अपडेट का अनुरोध किया गया"
 
-#: backend/api/host_data_updates.py:311
+#: backend/api/host_data_updates.py:313
 msgid "User access update requested"
 msgstr "उपयोगकर्ता एक्सेस अपडेट का अनुरोध किया गया"
 
-#: backend/api/host_data_updates.py:365
+#: backend/api/host_data_updates.py:367
 msgid "System info update requested"
 msgstr "सिस्टम इनफो अपडेट की गर्ड़ी"
 
@@ -6529,12 +6536,41 @@ msgid ""
 msgstr ""
 "एक से अधिक बैकअप टारगेट के लिए एंटरप्राइज़ बैकअप ऑपरेशंस इंजन आवश्यक है"
 
-#: backend/services/backup_targets.py:99
-#: backend/services/backup_targets.py:103
+#: backend/services/backup_targets.py:95
+msgid "A backup target cannot be its own off-site copy"
+msgstr "कोई बैकअप टारगेट अपनी ही ऑफ-साइट कॉपी नहीं हो सकता"
+
+#: backend/services/backup_targets.py:97
+msgid ""
+"The off-site copy must be a target reached through restate-proxy, so this "
+"site can add to it but never delete from it"
+msgstr ""
+"ऑफ-साइट कॉपी restate-proxy के माध्यम से पहुँचा जाने वाला टारगेट होना चाहिए, "
+"ताकि यह साइट उसमें जोड़ सके लेकिन उसमें से कभी कुछ हटा न सके"
+
+#: backend/services/backup_targets.py:101
+msgid ""
+"The off-site copy must be on another storage host; one on the same storage "
+"host is lost with it"
+msgstr ""
+"ऑफ-साइट कॉपी किसी दूसरे स्टोरेज होस्ट पर होनी चाहिए; उसी स्टोरेज होस्ट पर "
+"रखी कॉपी उसके साथ ही खो जाती है"
+
+#: backend/services/backup_targets.py:105
+msgid "That target already copies, directly or through others, to this one"
+msgstr ""
+"वह टारगेट पहले से ही, सीधे या दूसरों के माध्यम से, इस टारगेट पर कॉपी करता है"
+
+#: backend/services/backup_targets.py:137
+msgid "Off-site copies need a newer backup operations engine"
+msgstr "ऑफ-साइट कॉपी के लिए नए बैकअप ऑपरेशन इंजन की आवश्यकता है"
+
+#: backend/services/backup_targets.py:160
+#: backend/services/backup_targets.py:164
 msgid "Backup target not found"
 msgstr "बैकअप लक्ष्य नहीं मिला"
 
-#: backend/services/backup_targets.py:149
+#: backend/services/backup_targets.py:210
 msgid ""
 "This host already has backups on its target; it cannot move to another "
 "target yet"

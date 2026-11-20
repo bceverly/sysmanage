@@ -155,14 +155,24 @@ def store_csr(db: Session, policy: Optional[models.BackupPolicy], reply: Any) ->
     """Sign the storage host's request when the target wants a certificate;
     True when one was issued (every policy on the target is then re-sent, so
     the storage host gets it with its next configure)."""
-    csr = reply.get("proxy_csr") if isinstance(reply, dict) else None
-    if policy is None or not csr:
+    if policy is None:
         return False
     target = (
         db.query(models.BackupTarget)
         .filter(models.BackupTarget.id == policy.target_id)
         .first()
     )
+    return store_csr_for(db, target, reply)
+
+
+def store_csr_for(
+    db: Session, target: Optional[models.BackupTarget], reply: Any
+) -> bool:
+    """``store_csr`` for a target named directly -- an off-site copy's, whose
+    storage host may hold no host of its own (27.3)."""
+    csr = reply.get("proxy_csr") if isinstance(reply, dict) else None
+    if not csr:
+        return False
     if target is None or not managed(target):
         return False  # not ours to issue
     try:

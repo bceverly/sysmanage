@@ -43,8 +43,9 @@ $Wheels = Join-Path $Win 'wheels-arm64'
 $Out    = Join-Path $Win 'arm64-deps-dist'
 $Reqs   = Join-Path $RepoRoot 'requirements-prod.txt'
 
-# Must match the $needed list in build-msi.ps1 (what WiX references at runtime).
-$neededDlls = @("libpq.dll","libcrypto-3-arm64.dll","libssl-3-arm64.dll","z.dll","lz4.dll","legacy.dll")
+# The same set build-msi.ps1 stages and WiX references (libpq-arm64.ps1).
+. (Join-Path $Win 'libpq-arm64.ps1')
+$neededDlls = @(Get-LibpqArm64Dlls $Libpq)
 
 # --- validate inputs -------------------------------------------------------
 if (-not (Test-Path $Libpq)) {

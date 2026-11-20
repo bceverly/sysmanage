@@ -36,6 +36,7 @@ from backend.services import backup_jobs as jobs
 from backend.services import backup_network_mounts as network_mounts
 from backend.services import backup_proxy
 from backend.services import backup_proxy_cert
+from backend.services import backup_replicas
 from backend.services import backup_signing
 from backend.services import backup_storage_status as storage_status
 from backend.services import backup_tick
@@ -301,9 +302,14 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
     if run.status not in jobs.PENDING:
         return True  # backup_result got here first; it is the authority
     if not success:
-        _refused(db, run, str(error or "agent_error"))
+        if backup_replicas.is_replica_run(run):
+            backup_replicas.refused(db, run, str(error or "agent_error"))
+        else:
+            _refused(db, run, str(error or "agent_error"))
         return True
-    if run.action == jobs.CONFIGURE:
+    if run.action == backup_replicas.run_action(jobs.CONFIGURE):
+        backup_replicas.configured(db, run, message_data.get("result"))
+    elif run.action == jobs.CONFIGURE:
         _configured(db, run, message_data.get("result"))
     else:
         run.status = jobs.RUNNING
@@ -338,6 +344,8 @@ def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
             # and Back up now / Prepare wait on its acknowledgment.
             backup_tick.configure_now(db)
         _store_protects(_policy(db, run), reply.get("installed"))
+        if backup_replicas.store_tokens(db, _policy(db, run), reply):
+            backup_tick.configure_now(db)  # the off-site grant takes the token
         if backup_proxy_cert.store_csr(db, _policy(db, run), reply):
             backup_tick.configure_now(db)  # the certificate goes out now
     _reprotect(db, run)
@@ -360,6 +368,8 @@ def _configured_self(db: Session, run: models.BackupRun, reply: Any) -> None:
     network_mounts.store_configured(policy, reply.get("network_mounts"))
     jobs.store_storage_abilities(policy, reply.get("storage_abilities"))
     _store_protects(policy, reply.get("installed"))
+    if backup_replicas.store_tokens(db, policy, reply):
+        backup_tick.configure_now(db)  # the off-site grant takes the token
 
 
 # --- backup_result --------------------------------------------------------
@@ -740,6 +750,8 @@ def _after_du(db: Session, run: models.BackupRun, policy, result) -> None:
     # (lab, t14, 2026-11-02).
     if isinstance(usage.get("snapshots"), list):
         _retire_missing(db, policy, {e["name"] for e in _named(usage["snapshots"])})
+    # The nightly chain is done: copy what is new off-site (27.3).
+    backup_replicas.after_source_chain(db, policy)
 
 
 def _named(entries: Any) -> List[Dict[str, Any]]:
@@ -873,6 +885,9 @@ def record_result(
         logger.info("backup_result for finished run %s ignored (repeat)", run.id)
         return run
     result = _store_outcome(run, payload)
+    if backup_replicas.is_replica_run(run):
+        backup_replicas.after(db, run, result)  # an off-site copy's, not the policy's
+        return run
     policy = _policy(db, run)
     if "storage_audit" in payload and str(run.host_id) != str(
         getattr(policy, "host_id", None)
@@ -921,6 +936,12 @@ def record_storage_audit(db: Session, host_id: Any, payload: Dict[str, Any]) -> 
         if policy is not None
         else None
     )
+    if (
+        policy is None
+        and policy_id
+        and backup_replicas.is_offsite_audit(db, policy_id, host_id)
+    ):
+        return True  # an off-site copy's: the copy's own runs carry what matters
     is_storage = target is not None and str(target.storage_host_id) == str(host_id)
     is_host = policy is not None and str(policy.host_id) == str(host_id)
     version = payload.get("restate_version")

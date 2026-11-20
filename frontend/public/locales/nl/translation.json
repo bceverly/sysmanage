@@ -6110,6 +6110,22 @@
       "pickerHelp": "Waar deze back-up wordt opgeslagen.",
       "pickerUnlicensed": "Het kiezen van een ander doel vereist een Enterprise-licentie; een host behoudt het doel dat het heeft.",
       "tagHelp": "Waar de hosts ervan een back-up maken. Een host die al back-ups heeft, blijft op zijn doel."
+    },
+    "offsite": {
+      "behind": "{{n}} kopiëren",
+      "change": "Wijzigen",
+      "empty": "nog geen snapshot gekopieerd",
+      "error": "De off-site kopie kon niet worden gewijzigd.",
+      "failed": "De laatste off-site kopie is niet voltooid: {{error}}",
+      "holds": "Bevat de off-site kopieën van: {{names}}",
+      "hostLine": "Off-site kopie op {{target}}",
+      "intro": "Elke repository op dit doel wordt na elke nachtelijke back-up gekopieerd naar het hier gekozen doel. Het moet bereikbaar zijn via restate-proxy op een andere opslaghost, zodat deze site aan de kopie kan toevoegen maar er nooit uit kan verwijderen. De kopie behoudt dezelfde snapshots en juridische vasthoudingen als de bron.",
+      "label": "Off-site kopie",
+      "newest": "nieuwste snapshot {{hours}} h oud, {{size}}",
+      "none": "Geen",
+      "settingUp": "wordt ingesteld",
+      "stop": "Geen (stop met kopiëren; de kopieën blijven waar ze zijn)",
+      "title": "Off-site kopie van {{name}}"
     }
   },
   "cloudBackup": {

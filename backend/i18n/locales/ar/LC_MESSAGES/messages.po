@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 09:21-0800\n"
+"POT-Creation-Date: 2026-11-20 14:42-0800\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -505,6 +505,11 @@ msgstr "سياسة وسوم ترسل مضيفيها إلى هذا الهدف؛ �
 msgid "Make another target the default before deleting this one"
 msgstr "اجعل هدفًا آخر هو الافتراضي قبل حذف هذا الهدف"
 
+#: backend/api/backups_targets.py:267
+msgid ""
+"Another target copies off-site to this one; stop its off-site copy first"
+msgstr "هدف آخر ينسخ خارج الموقع إلى هذا الهدف؛ أوقف نسخه خارج الموقع أولًا"
+
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
 msgstr "استلمت رسالة تغيير اسم المضيف بدون host_id"
@@ -613,27 +618,27 @@ msgstr "فشل في معالجة تحديث بيانات الدور: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "تطلب إدارة المضيف الفرعي ترخيصًا مهني+"
 
-#: backend/api/handlers/os_hardware_handlers.py:133
+#: backend/api/handlers/os_hardware_handlers.py:135
 msgid "No host identification available"
 msgstr "لا تتوفر بيانات تعريف المستضياف"
 
-#: backend/api/handlers/os_hardware_handlers.py:345
+#: backend/api/handlers/os_hardware_handlers.py:347
 msgid "os_version_updated"
 msgstr "تم تحديث إصدار نظام التشغيل"
 
-#: backend/api/handlers/os_hardware_handlers.py:351
+#: backend/api/handlers/os_hardware_handlers.py:353
 msgid "No OS information provided"
 msgstr "لم يتم تقديم معلومات النظام الأساسي (OS)"
 
-#: backend/api/handlers/os_hardware_handlers.py:361
+#: backend/api/handlers/os_hardware_handlers.py:363
 msgid "Failed to update OS version"
 msgstr "فشل في تحديث إصدار نظام التشغيل"
 
-#: backend/api/handlers/os_hardware_handlers.py:569
+#: backend/api/handlers/os_hardware_handlers.py:576
 msgid "hardware_updated"
 msgstr "تم تحديث الأجهزة"
 
-#: backend/api/handlers/os_hardware_handlers.py:578
+#: backend/api/handlers/os_hardware_handlers.py:585
 msgid "Failed to update hardware information"
 msgstr "فشل في تحديث معلومات الأجهزة"
 
@@ -3228,7 +3233,7 @@ msgstr "يجب أن يكون %(field)s عددًا صحيحًا من 0 إلى %(m
 
 #: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
-#: backend/services/backup_targets.py:121
+#: backend/services/backup_targets.py:182
 msgid "Set up the backup target first"
 msgstr "أعدّ وجهة النسخ الاحتياطي أولًا"
 
@@ -3772,23 +3777,23 @@ msgstr "فشل في إحصاء الحزم: %s"
 msgid "Failed to search packages: %s"
 msgstr "فشل في البحث عن الحزم: %s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:235
 msgid "Permission denied: DELETE_HOST role required"
 msgstr " رفض الوصول: يتطلب دور DELETE_HOST"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:299
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "تم رفض الإذن: يتطلب دور `VIEW_HOST_DETAILS`"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:688
 msgid "Host already exists"
 msgstr "المضيف موجود بالفعل"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "التسجيل تم امتصاصه: كان المضيف قد حُذف مؤخرا"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -3979,19 +3984,19 @@ msgstr "تم ترحيل حزمتين %d لإلغاء التنصيب بنجاح"
 msgid "Failed to queue package uninstallation: %s"
 msgstr "فشل في ترتيب حذف الحزمة من قائمة الانتظار: %s"
 
-#: backend/api/host_data_updates.py:128
+#: backend/api/host_data_updates.py:130
 msgid "Hardware information updated successfully"
 msgstr "تم تحديث معلومات الأجهزة بنجاح"
 
-#: backend/api/host_data_updates.py:185
+#: backend/api/host_data_updates.py:187
 msgid "Hardware update requested"
 msgstr "تم طلب تحديث الأجهزة"
 
-#: backend/api/host_data_updates.py:311
+#: backend/api/host_data_updates.py:313
 msgid "User access update requested"
 msgstr "تم طلب تحديث وصول المستخدم"
 
-#: backend/api/host_data_updates.py:365
+#: backend/api/host_data_updates.py:367
 msgid "System info update requested"
 msgstr "تم طلب تحديث معلومات النظام"
 
@@ -6404,12 +6409,40 @@ msgstr ""
 "يتطلب استخدام أكثر من هدف نسخ احتياطي محرك عمليات النسخ الاحتياطي للمؤسسات "
 "(Enterprise)"
 
-#: backend/services/backup_targets.py:99
-#: backend/services/backup_targets.py:103
+#: backend/services/backup_targets.py:95
+msgid "A backup target cannot be its own off-site copy"
+msgstr "لا يمكن لهدف النسخ الاحتياطي أن يكون نسخته خارج الموقع الخاصة به"
+
+#: backend/services/backup_targets.py:97
+msgid ""
+"The off-site copy must be a target reached through restate-proxy, so this "
+"site can add to it but never delete from it"
+msgstr ""
+"يجب أن تكون النسخة خارج الموقع هدفًا يتم الوصول إليه عبر restate-proxy، حتى "
+"يتمكن هذا الموقع من الإضافة إليها دون أن يتمكن أبدًا من الحذف منها"
+
+#: backend/services/backup_targets.py:101
+msgid ""
+"The off-site copy must be on another storage host; one on the same storage "
+"host is lost with it"
+msgstr ""
+"يجب أن تكون النسخة خارج الموقع على مضيف تخزين آخر؛ فالنسخة الموجودة على مضيف"
+" التخزين نفسه تضيع معه"
+
+#: backend/services/backup_targets.py:105
+msgid "That target already copies, directly or through others, to this one"
+msgstr "ذلك الهدف ينسخ بالفعل، مباشرة أو عبر أهداف أخرى، إلى هذا الهدف"
+
+#: backend/services/backup_targets.py:137
+msgid "Off-site copies need a newer backup operations engine"
+msgstr "تتطلب النسخ خارج الموقع محركًا أحدث لعمليات النسخ الاحتياطي"
+
+#: backend/services/backup_targets.py:160
+#: backend/services/backup_targets.py:164
 msgid "Backup target not found"
 msgstr "لم يتم العثور على وجهة النسخ الاحتياطي"
 
-#: backend/services/backup_targets.py:149
+#: backend/services/backup_targets.py:210
 msgid ""
 "This host already has backups on its target; it cannot move to another "
 "target yet"

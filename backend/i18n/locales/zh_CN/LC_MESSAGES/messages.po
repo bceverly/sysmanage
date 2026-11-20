@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 09:21-0800\n"
+"POT-Creation-Date: 2026-11-20 14:42-0800\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -495,6 +495,11 @@ msgstr "有标签策略将其主机发送到此目标；请先修改该策略"
 msgid "Make another target the default before deleting this one"
 msgstr "删除此目标之前，请先将另一个目标设为默认"
 
+#: backend/api/backups_targets.py:267
+msgid ""
+"Another target copies off-site to this one; stop its off-site copy first"
+msgstr "另一个目标正在向此目标进行异地复制；请先停止它的异地复制"
+
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
 msgstr "收到没有 host_id 的主机名更改消息"
@@ -601,27 +606,27 @@ msgstr "处理角色数据更新失败：%s"
 msgid "Child host management requires a Professional+ license."
 msgstr "子主机管理需要 Professional+ 许可证。"
 
-#: backend/api/handlers/os_hardware_handlers.py:133
+#: backend/api/handlers/os_hardware_handlers.py:135
 msgid "No host identification available"
 msgstr "没有可用的主机标识信息"
 
-#: backend/api/handlers/os_hardware_handlers.py:345
+#: backend/api/handlers/os_hardware_handlers.py:347
 msgid "os_version_updated"
 msgstr "操作系统版本已更新"
 
-#: backend/api/handlers/os_hardware_handlers.py:351
+#: backend/api/handlers/os_hardware_handlers.py:353
 msgid "No OS information provided"
 msgstr "没有提供操作系统信息"
 
-#: backend/api/handlers/os_hardware_handlers.py:361
+#: backend/api/handlers/os_hardware_handlers.py:363
 msgid "Failed to update OS version"
 msgstr "更新操作系统版本失败"
 
-#: backend/api/handlers/os_hardware_handlers.py:569
+#: backend/api/handlers/os_hardware_handlers.py:576
 msgid "hardware_updated"
 msgstr "硬件已更新"
 
-#: backend/api/handlers/os_hardware_handlers.py:578
+#: backend/api/handlers/os_hardware_handlers.py:585
 msgid "Failed to update hardware information"
 msgstr "更新硬件信息失败"
 
@@ -3135,7 +3140,7 @@ msgstr "%(field)s 必须是 0 到 %(max)d 之间的整数"
 
 #: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
-#: backend/services/backup_targets.py:121
+#: backend/services/backup_targets.py:182
 msgid "Set up the backup target first"
 msgstr "请先设置备份目标"
 
@@ -3650,23 +3655,23 @@ msgstr "计算软件包数量失败：%s"
 msgid "Failed to search packages: %s"
 msgstr "无法搜索软件包：%s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:235
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "缺少 DELETE_HOST 角色，无法执行操作"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:299
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "权限 denied: 需要 VIEW_HOST_DETAILS 角色"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:688
 msgid "Host already exists"
 msgstr "主机已存在"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "注册被吸收：主机最近已被删除"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -3857,19 +3862,19 @@ msgstr "成功排队等待卸载%d个包"
 msgid "Failed to queue package uninstallation: %s"
 msgstr "将软件包卸载请求加入队列失败：%s"
 
-#: backend/api/host_data_updates.py:128
+#: backend/api/host_data_updates.py:130
 msgid "Hardware information updated successfully"
 msgstr "硬件信息更新成功"
 
-#: backend/api/host_data_updates.py:185
+#: backend/api/host_data_updates.py:187
 msgid "Hardware update requested"
 msgstr "已请求硬件更新"
 
-#: backend/api/host_data_updates.py:311
+#: backend/api/host_data_updates.py:313
 msgid "User access update requested"
 msgstr "已请求用户访问更新"
 
-#: backend/api/host_data_updates.py:365
+#: backend/api/host_data_updates.py:367
 msgid "System info update requested"
 msgstr "系统信息更新请求"
 
@@ -6199,12 +6204,36 @@ msgid ""
 "More than one backup target needs the Enterprise backup operations engine"
 msgstr "使用多个备份目标需要企业版备份运维引擎"
 
-#: backend/services/backup_targets.py:99
-#: backend/services/backup_targets.py:103
+#: backend/services/backup_targets.py:95
+msgid "A backup target cannot be its own off-site copy"
+msgstr "备份目标不能作为自身的异地副本"
+
+#: backend/services/backup_targets.py:97
+msgid ""
+"The off-site copy must be a target reached through restate-proxy, so this "
+"site can add to it but never delete from it"
+msgstr "异地副本必须是通过 restate-proxy 访问的目标，这样本站点可以向其添加内容，但永远不能从中删除"
+
+#: backend/services/backup_targets.py:101
+msgid ""
+"The off-site copy must be on another storage host; one on the same storage "
+"host is lost with it"
+msgstr "异地副本必须位于另一个存储主机上；位于同一存储主机上的副本会随之一起丢失"
+
+#: backend/services/backup_targets.py:105
+msgid "That target already copies, directly or through others, to this one"
+msgstr "该目标已经直接或通过其他目标复制到此目标"
+
+#: backend/services/backup_targets.py:137
+msgid "Off-site copies need a newer backup operations engine"
+msgstr "异地副本需要更新的备份操作引擎"
+
+#: backend/services/backup_targets.py:160
+#: backend/services/backup_targets.py:164
 msgid "Backup target not found"
 msgstr "未找到备份目标"
 
-#: backend/services/backup_targets.py:149
+#: backend/services/backup_targets.py:210
 msgid ""
 "This host already has backups on its target; it cannot move to another "
 "target yet"

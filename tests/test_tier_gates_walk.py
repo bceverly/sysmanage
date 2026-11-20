@@ -90,6 +90,8 @@ PRO_PLUS_BACKUP = {
     ("GET", "/api/v1/backups/legal-holds"),
     ("POST", "/api/v1/host/{host_id}/backup-snapshots/{snapshot}/hold"),
     ("POST", "/api/v1/backups/legal-holds/{hold_id}/release"),
+    # ... and off-site copies (27.3): setting or stopping one.
+    ("PUT", "/api/v1/backups/targets/{target_id}/replica"),
     ("GET", "/api/v1/host/{host_id}/backup-drift"),
     ("POST", "/api/v1/host/{host_id}/backup-drift/compute"),
     ("PUT", "/api/v1/host/{host_id}/backup-drift/ignore"),

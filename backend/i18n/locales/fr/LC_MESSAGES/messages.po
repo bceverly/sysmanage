@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 09:21-0800\n"
+"POT-Creation-Date: 2026-11-20 14:42-0800\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -523,6 +523,13 @@ msgstr ""
 "Définissez une autre cible comme cible par défaut avant de supprimer celle-"
 "ci"
 
+#: backend/api/backups_targets.py:267
+msgid ""
+"Another target copies off-site to this one; stop its off-site copy first"
+msgstr ""
+"Une autre cible effectue une copie hors site vers celle-ci ; arrêtez d'abord"
+" sa copie hors site"
+
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
 msgstr "Message de changement de nom d'hôte reçu sans host_id"
@@ -632,27 +639,27 @@ msgstr "Échec du traitement de la mise à jour des données de rôle : %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "La gestion d'un hôte enfant requiert une licence Professional+"
 
-#: backend/api/handlers/os_hardware_handlers.py:133
+#: backend/api/handlers/os_hardware_handlers.py:135
 msgid "No host identification available"
 msgstr "Aucune identification d'hôte disponible"
 
-#: backend/api/handlers/os_hardware_handlers.py:345
+#: backend/api/handlers/os_hardware_handlers.py:347
 msgid "os_version_updated"
 msgstr "Version de l'OS mise à jour"
 
-#: backend/api/handlers/os_hardware_handlers.py:351
+#: backend/api/handlers/os_hardware_handlers.py:353
 msgid "No OS information provided"
 msgstr "Aucune information sur le système d'exploitation fournie"
 
-#: backend/api/handlers/os_hardware_handlers.py:361
+#: backend/api/handlers/os_hardware_handlers.py:363
 msgid "Failed to update OS version"
 msgstr "Échec de la mise à jour de la version du système d'exploitation"
 
-#: backend/api/handlers/os_hardware_handlers.py:569
+#: backend/api/handlers/os_hardware_handlers.py:576
 msgid "hardware_updated"
 msgstr "Matériel mis à jour"
 
-#: backend/api/handlers/os_hardware_handlers.py:578
+#: backend/api/handlers/os_hardware_handlers.py:585
 msgid "Failed to update hardware information"
 msgstr "Échec de la mise à jour des informations matérielles"
 
@@ -3345,7 +3352,7 @@ msgstr "%(field)s doit être un nombre entier de 0 à %(max)d"
 
 #: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
-#: backend/services/backup_targets.py:121
+#: backend/services/backup_targets.py:182
 msgid "Set up the backup target first"
 msgstr "Configurez d'abord la cible de sauvegarde"
 
@@ -3923,23 +3930,23 @@ msgstr "Échec du comptage des paquets : %s"
 msgid "Failed to search packages: %s"
 msgstr "Échec de la recherche de paquets : %s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:235
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Accès refusé : rôle DELETE_HOST requis"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:299
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Permission denied: role VIEW_HOST_DETAILS requis"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:688
 msgid "Host already exists"
 msgstr "L'hôte existe déjà"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Inscription absorbée : l'hôte a été supprimé récemment"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -4146,19 +4153,19 @@ msgid "Failed to queue package uninstallation: %s"
 msgstr ""
 "Échec de l’enregistrement de la commande de suppression de paquet : %s"
 
-#: backend/api/host_data_updates.py:128
+#: backend/api/host_data_updates.py:130
 msgid "Hardware information updated successfully"
 msgstr "Informations matérielles mises à jour avec succès"
 
-#: backend/api/host_data_updates.py:185
+#: backend/api/host_data_updates.py:187
 msgid "Hardware update requested"
 msgstr "Mise à jour matérielle demandée"
 
-#: backend/api/host_data_updates.py:311
+#: backend/api/host_data_updates.py:313
 msgid "User access update requested"
 msgstr "Mise à jour d'accès utilisateur demandée"
 
-#: backend/api/host_data_updates.py:365
+#: backend/api/host_data_updates.py:367
 msgid "System info update requested"
 msgstr "Mise à jour des informations du système demandée"
 
@@ -6688,12 +6695,42 @@ msgstr ""
 "Plus d'une cible de sauvegarde nécessite le moteur Entreprise d'opérations "
 "de sauvegarde"
 
-#: backend/services/backup_targets.py:99
-#: backend/services/backup_targets.py:103
+#: backend/services/backup_targets.py:95
+msgid "A backup target cannot be its own off-site copy"
+msgstr "Une cible de sauvegarde ne peut pas être sa propre copie hors site"
+
+#: backend/services/backup_targets.py:97
+msgid ""
+"The off-site copy must be a target reached through restate-proxy, so this "
+"site can add to it but never delete from it"
+msgstr ""
+"La copie hors site doit être une cible atteinte via restate-proxy, afin que "
+"ce site puisse y ajouter des données mais jamais en supprimer"
+
+#: backend/services/backup_targets.py:101
+msgid ""
+"The off-site copy must be on another storage host; one on the same storage "
+"host is lost with it"
+msgstr ""
+"La copie hors site doit se trouver sur un autre hôte de stockage ; une copie"
+" sur le même hôte de stockage sera perdue avec elle"
+
+#: backend/services/backup_targets.py:105
+msgid "That target already copies, directly or through others, to this one"
+msgstr "Cette cible copie déjà, directement ou via d'autres, vers celle-ci"
+
+#: backend/services/backup_targets.py:137
+msgid "Off-site copies need a newer backup operations engine"
+msgstr ""
+"Les copies hors site nécessitent un moteur d'opérations de sauvegarde plus "
+"récent"
+
+#: backend/services/backup_targets.py:160
+#: backend/services/backup_targets.py:164
 msgid "Backup target not found"
 msgstr "Cible de sauvegarde introuvable"
 
-#: backend/services/backup_targets.py:149
+#: backend/services/backup_targets.py:210
 msgid ""
 "This host already has backups on its target; it cannot move to another "
 "target yet"

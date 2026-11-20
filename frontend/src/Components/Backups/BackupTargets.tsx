@@ -45,7 +45,7 @@ const BackupTargets: React.FC<{
             {every.map(target => (
                 <BackupTargetCard key={target.id} target={target} hosts={data.hosts}
                     versions={data.restate_versions} canManage={canManage} onChanged={onChanged}
-                    several={several} canMakeDefault={licensed} />
+                    several={several} canMakeDefault={licensed} targets={every} />
             ))}
             {canManage && licensed && (
                 <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>

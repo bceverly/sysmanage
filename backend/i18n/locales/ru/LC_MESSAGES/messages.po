@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 09:21-0800\n"
+"POT-Creation-Date: 2026-11-20 14:42-0800\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -518,6 +518,13 @@ msgstr ""
 "Прежде чем удалить эту целевую точку, назначьте целевой точкой по умолчанию "
 "другую"
 
+#: backend/api/backups_targets.py:267
+msgid ""
+"Another target copies off-site to this one; stop its off-site copy first"
+msgstr ""
+"В эту целевую точку копирует другая целевая точка; сначала остановите её "
+"копирование на другую площадку"
+
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
 msgstr "Получено сообщение об изменении имени хоста без host_id"
@@ -627,27 +634,27 @@ msgstr "Не удалось обработать обновление данны
 msgid "Child host management requires a Professional+ license."
 msgstr "Управление дочерними узлами требует лицензии Professional+"
 
-#: backend/api/handlers/os_hardware_handlers.py:133
+#: backend/api/handlers/os_hardware_handlers.py:135
 msgid "No host identification available"
 msgstr "Нет доступной информации об идентификации узла"
 
-#: backend/api/handlers/os_hardware_handlers.py:345
+#: backend/api/handlers/os_hardware_handlers.py:347
 msgid "os_version_updated"
 msgstr "Версия ОС обновлена"
 
-#: backend/api/handlers/os_hardware_handlers.py:351
+#: backend/api/handlers/os_hardware_handlers.py:353
 msgid "No OS information provided"
 msgstr "Не предоставлено информации об ОС"
 
-#: backend/api/handlers/os_hardware_handlers.py:361
+#: backend/api/handlers/os_hardware_handlers.py:363
 msgid "Failed to update OS version"
 msgstr "Не удалось обновить версию ОС"
 
-#: backend/api/handlers/os_hardware_handlers.py:569
+#: backend/api/handlers/os_hardware_handlers.py:576
 msgid "hardware_updated"
 msgstr "Аппаратное обеспечение обновлено"
 
-#: backend/api/handlers/os_hardware_handlers.py:578
+#: backend/api/handlers/os_hardware_handlers.py:585
 msgid "Failed to update hardware information"
 msgstr "Не удалось обновить информацию о оборудовании"
 
@@ -3306,7 +3313,7 @@ msgstr "%(field)s должно быть целым числом от 0 до %(ma
 
 #: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
-#: backend/services/backup_targets.py:121
+#: backend/services/backup_targets.py:182
 msgid "Set up the backup target first"
 msgstr "Сначала настройте цель резервного копирования"
 
@@ -3871,23 +3878,23 @@ msgstr "Не удалось посчитать пакеты: %s"
 msgid "Failed to search packages: %s"
 msgstr "Не удалось найти пакеты: %s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:235
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Доступ запрещен: требуется роль DELETE_HOST"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:299
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Доступ запрещен: требуется роль VIEW_HOST_DETAILS"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:688
 msgid "Host already exists"
 msgstr "Хост уже существует"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Регистрация включена: хост недавно был удален"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -4084,19 +4091,19 @@ msgstr "Успешно добавлено в очередь %d пакетов д
 msgid "Failed to queue package uninstallation: %s"
 msgstr "Не удалось добавить удаление пакета в очередь: %s"
 
-#: backend/api/host_data_updates.py:128
+#: backend/api/host_data_updates.py:130
 msgid "Hardware information updated successfully"
 msgstr "Информация об аппаратном обеспечении успешно обновлена"
 
-#: backend/api/host_data_updates.py:185
+#: backend/api/host_data_updates.py:187
 msgid "Hardware update requested"
 msgstr "Запрошено обновление аппаратного обеспечения"
 
-#: backend/api/host_data_updates.py:311
+#: backend/api/host_data_updates.py:313
 msgid "User access update requested"
 msgstr "Запрошено обновление доступа пользователей"
 
-#: backend/api/host_data_updates.py:365
+#: backend/api/host_data_updates.py:367
 msgid "System info update requested"
 msgstr "Запрошена обновление информации о системе"
 
@@ -6578,12 +6585,45 @@ msgstr ""
 "Для нескольких целевых точек резервного копирования нужен движок Enterprise "
 "для операций резервного копирования"
 
-#: backend/services/backup_targets.py:99
-#: backend/services/backup_targets.py:103
+#: backend/services/backup_targets.py:95
+msgid "A backup target cannot be its own off-site copy"
+msgstr ""
+"Целевая точка резервного копирования не может быть собственной копией на "
+"другой площадке"
+
+#: backend/services/backup_targets.py:97
+msgid ""
+"The off-site copy must be a target reached through restate-proxy, so this "
+"site can add to it but never delete from it"
+msgstr ""
+"Копия на другой площадке должна быть целевой точкой, доступной через "
+"restate-proxy, чтобы эта площадка могла добавлять в неё данные, но никогда "
+"ничего из неё не удаляла"
+
+#: backend/services/backup_targets.py:101
+msgid ""
+"The off-site copy must be on another storage host; one on the same storage "
+"host is lost with it"
+msgstr ""
+"Копия на другой площадке должна находиться на другом хосте хранения; копия "
+"на том же хосте хранения теряется вместе с ним"
+
+#: backend/services/backup_targets.py:105
+msgid "That target already copies, directly or through others, to this one"
+msgstr "Та целевая точка уже копирует, напрямую или через другие, в эту"
+
+#: backend/services/backup_targets.py:137
+msgid "Off-site copies need a newer backup operations engine"
+msgstr ""
+"Для копий на другой площадке нужен более новый движок операций резервного "
+"копирования"
+
+#: backend/services/backup_targets.py:160
+#: backend/services/backup_targets.py:164
 msgid "Backup target not found"
 msgstr "Цель резервного копирования не найдена"
 
-#: backend/services/backup_targets.py:149
+#: backend/services/backup_targets.py:210
 msgid ""
 "This host already has backups on its target; it cannot move to another "
 "target yet"

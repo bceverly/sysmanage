@@ -41,6 +41,7 @@ import { apiDetail, reasonLabel } from './backupLabels';
 import BackupStorageStatus from './BackupStorageStatus';
 import BackupTransport, { TransportDialog } from './BackupTransport';
 import BackupProxyBandwidth, { BandwidthDialog } from './BackupProxyBandwidth';
+import { TargetOffsite } from './BackupOffsite';
 
 // Whether the card's details are open, per viewer (a convenience only).
 const DETAILS_KEY = 'sysmanage.backups.targetDetailsOpen';
@@ -252,7 +253,9 @@ const BackupTargetCard: React.FC<{
     several?: boolean;
     /** The Enterprise engine is licensed: another target may become the default. */
     canMakeDefault?: boolean;
-}> = ({ target, hosts, versions, canManage, onChanged, several = false, canMakeDefault = false }) => {
+    /** Every target, for the off-site copy (27.3). */
+    targets?: BackupTarget[];
+}> = ({ target, hosts, versions, canManage, onChanged, several = false, canMakeDefault = false, targets = [] }) => {
     const { t } = useTranslation();
     const [defaultError, setDefaultError] = useState<string | null>(null);
     const makeDefault = async () => {
@@ -335,6 +338,8 @@ const BackupTargetCard: React.FC<{
                             {target.storage_reason && target.storage_hostname && ` (${reasonLabel(t, target.storage_reason)})`}
                         </Typography>
                         <BackupTransport target={target} canManage={canManage} onChanged={onChanged} inline={false} />
+                        <TargetOffsite target={target} targets={targets}
+                            canChange={canManage && canMakeDefault} onChanged={onChanged} />
                         <BackupStorageStatus target={target} hosts={hosts} canManage={canManage} part="warnings" />
                         <Accordion disableGutters elevation={0} expanded={detailsOpen}
                             onChange={(_e, expanded) => { setDetailsOpen(expanded); writeOpen(expanded); }}

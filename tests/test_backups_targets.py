@@ -398,3 +398,94 @@ def test_a_key_export_names_each_hosts_own_target_and_signer(session):
     files = {h["host"]: h["signing_file"] for h in manifest["hosts"]}
     assert files["other.lab"] == "keys/signing-BBBB.pub.asc"
     assert files[s.host.fqdn] == breakglass.SIGNING_FILE
+
+
+# --- off-site copies (27.3) -----------------------------------------------
+
+
+def _proxy_second(session):
+    return _second(
+        session, transport="proxy", proxy_host="backup.dc2.lab", proxy_port=8443
+    )
+
+
+def test_a_target_copies_off_site_to_a_proxy_target_on_another_host(
+    session, sent, ops_engine
+):
+    s = _setup(session)
+    second, _nas = _proxy_second(session)
+    version = s.policy.config_version
+    data = targets_api.set_replica_target(
+        str(s.target.id),
+        targets_api.ReplicaBody(replica_target_id=str(second.id)),
+        session,
+        MANAGER,
+    )
+    assert data["replica_target"] == "offsite"
+    assert s.policy.config_version == version + 1  # its storage host is told
+    assert views.target_dict(second, session)["copies_from"] == ["nas"]
+
+
+@pytest.mark.asyncio
+async def test_off_site_copies_are_refused_where_they_could_be_lost(
+    session, ops_engine
+):
+    s = _setup(session)
+    nfs, _nas = _second(session)
+    body = targets_api.ReplicaBody(replica_target_id=str(nfs.id))
+    assert (
+        await _status(
+            lambda: targets_api.set_replica_target(
+                str(s.target.id), body, session, MANAGER
+            )
+        )
+        == 409
+    )  # not behind restate-proxy
+    body = targets_api.ReplicaBody(replica_target_id=str(s.target.id))
+    assert (
+        await _status(
+            lambda: targets_api.set_replica_target(
+                str(s.target.id), body, session, MANAGER
+            )
+        )
+        == 409
+    )  # itself
+
+
+@pytest.mark.asyncio
+async def test_off_site_copies_need_the_license_to_change(session, unlicensed):
+    s = _setup(session)
+    second, _nas = _proxy_second(session)
+    body = targets_api.ReplicaBody(replica_target_id=str(second.id))
+    assert (
+        await _status(
+            lambda: targets_api.set_replica_target(
+                str(s.target.id), body, session, MANAGER
+            )
+        )
+        == 402
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_target_holding_copies_cannot_be_deleted(session, sent, ops_engine):
+    s = _setup(session)
+    second, _nas = _proxy_second(session)
+    targets_api.set_replica_target(
+        str(s.target.id),
+        targets_api.ReplicaBody(replica_target_id=str(second.id)),
+        session,
+        MANAGER,
+    )
+    assert (
+        await _status(
+            lambda: targets_api.delete_target(str(second.id), session, MANAGER)
+        )
+        == 409
+    )
+    targets_api.set_replica_target(
+        str(s.target.id), targets_api.ReplicaBody(), session, MANAGER
+    )
+    assert targets_api.delete_target(str(second.id), session, MANAGER) == {
+        "deleted": True
+    }

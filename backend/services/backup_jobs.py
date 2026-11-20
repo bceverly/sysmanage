@@ -444,6 +444,9 @@ STORAGE_ABILITIES = (
     "sign",
     SIGNATURES,
     "proxy_bandwidth",
+    # The storage agent copies into a repository behind restate-proxy and
+    # takes ``replicas`` in its configure (off-site copies, 27.3).
+    "replica_copy",
 )
 
 
@@ -456,9 +459,12 @@ def store_storage_abilities(policy: Optional[models.BackupPolicy], found: Any) -
     if policy is None or not isinstance(found, list):
         return
     could = storage_lists_signatures(policy)
+    copied = "replica_copy" in storage_abilities(policy)
     policy.storage_abilities = json.dumps(sorted(set(found) & set(STORAGE_ABILITIES)))
     if storage_lists_signatures(policy) and not could:
         policy.config_version += 1
+    elif "replica_copy" in storage_abilities(policy) and not copied:
+        policy.config_version += 1  # the next configure names its off-site copies
 
 
 def storage_lists_signatures(policy: models.BackupPolicy) -> bool:
@@ -534,6 +540,30 @@ def _queue(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     return run
 
 
+def queue_command(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    db: Session,
+    policy: models.BackupPolicy,
+    run_host_id: Any,
+    action: str,
+    command_type: CommandType,
+    parameters: Dict[str, Any],
+    record: Optional[Dict[str, Any]] = None,
+) -> models.BackupRun:
+    """Queue a command whose payload the caller built (off-site copies,
+    backup_replicas): stored as ``action``, sent as ``parameters``."""
+    return _queue(
+        db, policy, run_host_id, action, command_type, parameters, SYSTEM_ACTOR,
+        record=record,
+    )  # fmt: skip
+
+
+def as_uuid(value: Any) -> Optional[uuid.UUID]:
+    try:
+        return uuid.UUID(str(value))
+    except (TypeError, ValueError):
+        return None
+
+
 def queue_configure(
     db: Session,
     policy: models.BackupPolicy,
@@ -543,13 +573,22 @@ def queue_configure(
     actor: str = SYSTEM_ACTOR,
 ) -> models.BackupRun:
     """Send the host (or the storage host) this policy's job files."""
+    # pylint: disable=import-outside-toplevel
+    from backend.services import backup_replicas  # noqa: PLC0415
+
     if role == SELF_ROLE:
         payload = self_configuration(policy, target, host)
         run_host = host.id
+        # Off-site copies (27.3): the server's own backup most of all.
+        backup_replicas.ensure(db, policy, target, host)
+        payload.update(backup_replicas.source_block(db, policy))
     elif role == "storage":
         payload = storage_configuration(policy, target, host)
         # restate-proxy (25.5): this host's grants, and the target's clients.
         payload["target"].update(proxy.storage_proxy(db, policy, target, host))
+        # Off-site copies (27.3): where this repository is copied to.
+        backup_replicas.ensure(db, policy, target, host)
+        payload.update(backup_replicas.source_block(db, policy))
         run_host = target.storage_host_id
         policy.storage_client_address = payload["target"]["client_address"]
     else:

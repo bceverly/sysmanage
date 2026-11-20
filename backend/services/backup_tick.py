@@ -45,6 +45,7 @@ from backend.services import backup_escrow
 from backend.services import backup_jobs as jobs
 from backend.services import backup_proxy
 from backend.services import backup_reach as reach
+from backend.services import backup_replicas
 from backend.services import backup_tag_policies as tag_policies
 from backend.services import backup_verify as verify
 from backend.services import cloud_backup_jobs as cloud_jobs
@@ -422,6 +423,7 @@ def configure_now(db: Session) -> None:
             host = _policy_host(db, policy)
             if _eligible(host):
                 _configure(db, policy, target, host, storage_ready)
+    backup_replicas.configure_pending(db)  # off-site copies' job files (27.3)
 
 
 def reconcile(db: Session, now: Optional[datetime] = None) -> int:
@@ -451,6 +453,8 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
     # iCloud Photos to local (24.12), on the default target's storage host:
     # never raises.
     queued += cloud_tick.reconcile(db, default, now)
+    # Off-site copies (27.3): job files, and copies that stalled.
+    backup_replicas.tick(db, now)
     return queued + reach_checks(db, now)
 
 

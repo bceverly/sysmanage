@@ -96,12 +96,14 @@ $pipStatus = $LASTEXITCODE
 $ErrorActionPreference = "Stop"
 if ($pipStatus -ne 0) { Fail "pip could not fetch $($requirements -join ', ') for $Architecture" }
 
+$zlibDefine = @()
 if ($Architecture -eq "arm64") {
-    foreach ($dll in @("libpq.dll", "libcrypto-3-arm64.dll", "libssl-3-arm64.dll", "z.dll", "lz4.dll", "legacy.dll")) {
-        if (-not (Test-Path (Join-Path $WinDir "libpq-arm64\$dll"))) {
-            Fail "installer\windows\libpq-arm64\$dll is missing; run build-msi.ps1 -Architecture arm64 first"
-        }
+    . (Join-Path $WinDir "libpq-arm64.ps1")
+    foreach ($dll in @(Get-LibpqArm64Missing (Join-Path $WinDir "libpq-arm64"))) {
+        Fail "installer\windows\libpq-arm64\$dll is missing; run build-msi.ps1 -Architecture arm64 first"
     }
+    # The zlib DLL under the name libpq was linked against.
+    $zlibDefine = @("-d", "LIBPQ_ZLIB=$(Get-LibpqZlibName (Join-Path $WinDir 'libpq-arm64'))")
 }
 
 # --- zip the payloads -------------------------------------------------------
@@ -147,7 +149,7 @@ Install-WixExtensions
 Push-Location $WinDir
 try {
     & wix build -o $OutputMsi sysmanage-canary.wxs sysmanage-ui.wxs -arch $Architecture `
-        -d "VERSION=$VERSION" -ext WixToolset.UI.wixext -ext WixToolset.Util.wixext
+        -d "VERSION=$VERSION" @zlibDefine -ext WixToolset.UI.wixext -ext WixToolset.Util.wixext
     if ($LASTEXITCODE -ne 0) { Fail "wix build failed" }
 } finally {
     Pop-Location

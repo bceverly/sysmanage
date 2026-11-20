@@ -213,6 +213,15 @@ def trust_ca(target: models.BackupTarget) -> Optional[str]:
     return target.proxy_ca_pem or backup_proxy_cert.host_ca(target)
 
 
+def is_sha256(value: Any) -> bool:
+    return isinstance(value, str) and bool(_SHA256.match(value))
+
+
+def trust(target: models.BackupTarget) -> Dict[str, Any]:
+    """How a client trusts the target's proxy: a pinned key and / or a CA."""
+    return _trust(target)
+
+
 def _trust(target: models.BackupTarget) -> Dict[str, Any]:
     out: Dict[str, Any] = {}
     if target.proxy_pin_sha256:
@@ -355,6 +364,11 @@ def target_clients(db: Session, target: models.BackupTarget) -> List[str]:
         clients.add(client_name(host))
         if policy.previous_repository_dir:
             clients.add(client_name(host) + PREVIOUS_SUFFIX)
+    # Off-site copies into this target (27.3): their grants stay too.
+    # pylint: disable=import-outside-toplevel
+    from backend.services import backup_replicas  # noqa: PLC0415
+
+    clients.update(backup_replicas.target_clients(db, target))
     return sorted(clients)
 
 
@@ -372,6 +386,12 @@ def sync_clients(db: Session, target: models.BackupTarget) -> bool:
         .all()
     ):
         policy.config_version += 1
+    for replica in (
+        db.query(models.BackupReplica)
+        .filter(models.BackupReplica.target_id == target.id)
+        .all()
+    ):
+        replica.config_version += 1
     return True
 
 

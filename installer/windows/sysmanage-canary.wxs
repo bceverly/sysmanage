@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <!-- ARM64: the zlib DLL under the name libpq was linked against, from the
+       build script (libpq-arm64.ps1); x64 bundles no libpq. -->
+  <?ifndef LIBPQ_ZLIB ?>
+  <?define LIBPQ_ZLIB = "z.dll" ?>
+  <?endif ?>
   <!--
     Copyright (c) 2024-2026 Bryan Everly
     Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
@@ -94,7 +99,7 @@
         <File Id="CanaryLibpqDll" Source="libpq-arm64\libpq.dll" KeyPath="yes" />
         <File Id="CanaryLibcrypto" Source="libpq-arm64\libcrypto-3-arm64.dll" />
         <File Id="CanaryLibssl" Source="libpq-arm64\libssl-3-arm64.dll" />
-        <File Id="CanaryZlib" Source="libpq-arm64\z.dll" />
+        <File Id="CanaryZlib" Source="libpq-arm64\$(var.LIBPQ_ZLIB)" />
         <File Id="CanaryLz4" Source="libpq-arm64\lz4.dll" />
         <File Id="CanaryLegacy" Source="libpq-arm64\legacy.dll" />
       </Component>

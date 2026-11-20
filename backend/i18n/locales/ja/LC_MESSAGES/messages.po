@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 09:21-0800\n"
+"POT-Creation-Date: 2026-11-20 14:42-0800\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -498,6 +498,11 @@ msgstr "タグポリシーがそのホストをこのターゲットに送って
 msgid "Make another target the default before deleting this one"
 msgstr "このターゲットを削除する前に、別のターゲットをデフォルトにしてください"
 
+#: backend/api/backups_targets.py:267
+msgid ""
+"Another target copies off-site to this one; stop its off-site copy first"
+msgstr "別のターゲットがこのターゲットへオフサイトコピーしています。先にそのオフサイトコピーを停止してください"
+
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
 msgstr "ホストIDなしでホスト名変更メッセージを受け取りました"
@@ -604,27 +609,27 @@ msgstr "ロールデータ更新の処理に失敗しました: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "子ホスト管理にはProfessional+ライセンスが必要です。"
 
-#: backend/api/handlers/os_hardware_handlers.py:133
+#: backend/api/handlers/os_hardware_handlers.py:135
 msgid "No host identification available"
 msgstr "ホスト識別情報が利用できません"
 
-#: backend/api/handlers/os_hardware_handlers.py:345
+#: backend/api/handlers/os_hardware_handlers.py:347
 msgid "os_version_updated"
 msgstr "OSバージョンが更新されました"
 
-#: backend/api/handlers/os_hardware_handlers.py:351
+#: backend/api/handlers/os_hardware_handlers.py:353
 msgid "No OS information provided"
 msgstr "OS情報が提供されていません"
 
-#: backend/api/handlers/os_hardware_handlers.py:361
+#: backend/api/handlers/os_hardware_handlers.py:363
 msgid "Failed to update OS version"
 msgstr "OSバージョンの更新に失敗しました"
 
-#: backend/api/handlers/os_hardware_handlers.py:569
+#: backend/api/handlers/os_hardware_handlers.py:576
 msgid "hardware_updated"
 msgstr "ハードウェアが更新されました"
 
-#: backend/api/handlers/os_hardware_handlers.py:578
+#: backend/api/handlers/os_hardware_handlers.py:585
 msgid "Failed to update hardware information"
 msgstr "ハードウェア情報の更新に失敗しました"
 
@@ -3176,7 +3181,7 @@ msgstr "%(field)s は 0 から %(max)d までの整数にしてください"
 
 #: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
-#: backend/services/backup_targets.py:121
+#: backend/services/backup_targets.py:182
 msgid "Set up the backup target first"
 msgstr "先にバックアップ先を設定してください"
 
@@ -3700,23 +3705,23 @@ msgstr "パッケージのカウントに失敗しました: %s"
 msgid "Failed to search packages: %s"
 msgstr "パッケージの検索に失敗しました: %s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:235
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "アクセス権限がありません: DELETE_HOST ロールが必要です"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:299
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "許可が拒否されました: VIEW_HOST_DETAILS ロールが必要です"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:688
 msgid "Host already exists"
 msgstr "ホストは既に存在しています"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "登録が吸収されました: ホストは最近削除されました"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -3907,19 +3912,19 @@ msgstr "%d 個のパッケージのアンインストールがキューに追加
 msgid "Failed to queue package uninstallation: %s"
 msgstr "パッケージアンインストールをキューに追加できませんでした: %s"
 
-#: backend/api/host_data_updates.py:128
+#: backend/api/host_data_updates.py:130
 msgid "Hardware information updated successfully"
 msgstr "ハードウェア情報が正常に更新されました"
 
-#: backend/api/host_data_updates.py:185
+#: backend/api/host_data_updates.py:187
 msgid "Hardware update requested"
 msgstr "ハードウェア更新が要求されました"
 
-#: backend/api/host_data_updates.py:311
+#: backend/api/host_data_updates.py:313
 msgid "User access update requested"
 msgstr "ユーザーアクセス更新が要求されました"
 
-#: backend/api/host_data_updates.py:365
+#: backend/api/host_data_updates.py:367
 msgid "System info update requested"
 msgstr "システム情報更新要求"
 
@@ -6281,12 +6286,38 @@ msgid ""
 "More than one backup target needs the Enterprise backup operations engine"
 msgstr "複数のバックアップターゲットを使うには、Enterprise のバックアップ運用エンジンが必要です"
 
-#: backend/services/backup_targets.py:99
-#: backend/services/backup_targets.py:103
+#: backend/services/backup_targets.py:95
+msgid "A backup target cannot be its own off-site copy"
+msgstr "バックアップターゲットを自身のオフサイトコピーにすることはできません"
+
+#: backend/services/backup_targets.py:97
+msgid ""
+"The off-site copy must be a target reached through restate-proxy, so this "
+"site can add to it but never delete from it"
+msgstr ""
+"オフサイトコピーは restate-proxy "
+"を経由して到達するターゲットでなければなりません。これにより、このサイトはコピーに追加できますが、そこから削除することは決してできません"
+
+#: backend/services/backup_targets.py:101
+msgid ""
+"The off-site copy must be on another storage host; one on the same storage "
+"host is lost with it"
+msgstr "オフサイトコピーは別のストレージホスト上に存在する必要があります。同じストレージホスト上のものは、それとともに失われます。"
+
+#: backend/services/backup_targets.py:105
+msgid "That target already copies, directly or through others, to this one"
+msgstr "そのターゲットは、直接または他のターゲットを経由して、すでにこのターゲットへコピーしています"
+
+#: backend/services/backup_targets.py:137
+msgid "Off-site copies need a newer backup operations engine"
+msgstr "オフサイトコピーには、より新しいバックアップオペレーションエンジンが必要です。"
+
+#: backend/services/backup_targets.py:160
+#: backend/services/backup_targets.py:164
 msgid "Backup target not found"
 msgstr "バックアップ先が見つかりません"
 
-#: backend/services/backup_targets.py:149
+#: backend/services/backup_targets.py:210
 msgid ""
 "This host already has backups on its target; it cannot move to another "
 "target yet"
