@@ -91,7 +91,19 @@ def _row_or_404(db: Session, policy_id: str) -> models.BackupTagPolicy:
     return row
 
 
-def _checked_settings(db: Session, body: TagPolicyBody) -> Dict[str, Any]:
+def _local_or_409(row: models.BackupTagPolicy) -> models.BackupTagPolicy:
+    """A tag policy the federation controller pushed is changed there (27.3)."""
+    if row.managed_by == "federation":
+        raise HTTPException(
+            status_code=409,
+            detail=_(
+                "The federation controller manages this tag policy; change it there"
+            ),
+        )
+    return row
+
+
+def checked_settings(db: Session, body: TagPolicyBody) -> Dict[str, Any]:
     """The settings to store, checked as a host's own policy is."""
     if not 0 <= body.priority <= MAX_PRIORITY:
         raise HTTPException(
@@ -149,6 +161,8 @@ def _dict(db: Session, row: models.BackupTagPolicy) -> Dict[str, Any]:
         "enabled": bool(row.enabled),
         "settings": tag_policies.settings_of(row),
         "target_id": str(row.target_id) if row.target_id else None,
+        # "federation": pushed by the controller, changed only there (27.3).
+        "managed_by": row.managed_by,
         "hosts_tagged": _host_count(db, row),
         "hosts_applied": _applied_count(db, row),
         "created_at": row.created_at.isoformat() if row.created_at else None,
@@ -214,7 +228,7 @@ def create_tag_policy(
     name = body.name.strip()
     if _name_taken(db, name):
         raise HTTPException(status_code=409, detail=_("A tag policy has that name"))
-    settings = _checked_settings(db, body)
+    settings = checked_settings(db, body)
     row = models.BackupTagPolicy(
         name=name,
         tag_id=tag.id,
@@ -244,12 +258,12 @@ def update_tag_policy(
 ) -> Dict[str, Any]:
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
     _engine_or_402()
-    row = _row_or_404(db, policy_id)
+    row = _local_or_409(_row_or_404(db, policy_id))
     tag = _tag_or_422(db, body.tag_id)
     name = body.name.strip()
     if _name_taken(db, name, keep=row.id):
         raise HTTPException(status_code=409, detail=_("A tag policy has that name"))
-    settings = _checked_settings(db, body)
+    settings = checked_settings(db, body)
     row.name, row.tag_id, row.priority, row.enabled = (
         name,
         tag.id,
@@ -276,7 +290,7 @@ def delete_tag_policy(
     keep what it gave them as their own policy, paused; never deleted."""
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
     _engine_or_402()
-    row = _row_or_404(db, policy_id)
+    row = _local_or_409(_row_or_404(db, policy_id))
     _audit(db, current_user, row, "Backup tag policy removed", {})
     db.delete(row)
     db.flush()

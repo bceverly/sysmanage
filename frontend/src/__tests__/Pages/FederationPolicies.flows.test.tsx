@@ -132,7 +132,7 @@ describe("listing", () => {
     fireEvent.mouseDown(typeFilter);
     const options = within(screen.getByRole("listbox")).getAllByRole("option").map((o) => o.textContent);
     // Known types plus the one seen in the data, sorted.
-    expect(options).toEqual(["All types", "compliance_baseline", "firewall_role", "update_profile", "zz_custom"]);
+    expect(options).toEqual(["All types", "backup_tag_policy", "compliance_baseline", "firewall_role", "update_profile", "zz_custom"]);
     fireEvent.click(within(screen.getByRole("listbox")).getByRole("option", { name: "zz_custom" }));
     await waitFor(() =>
       expect(doListFederationPolicies).toHaveBeenLastCalledWith({ policy_type: "zz_custom", active_only: true }),
@@ -194,6 +194,21 @@ describe("create", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: "Create" }));
     expect(await within(dialog).findByText("Definition must be a JSON object.")).toBeInTheDocument();
     expect(doCreateFederationPolicy).not.toHaveBeenCalled();
+  });
+
+  test("a backup tag policy starts from a template naming its target (27.3)", async () => {
+    const dialog = await openCreate();
+    setField(dialog, /^Name/, "n");
+    chooseOption(within(dialog).getByRole("combobox"), "backup_tag_policy");
+    const definition = within(dialog).getByLabelText(/Definition/) as HTMLTextAreaElement;
+    await waitFor(() => expect(definition.value).toContain('"tag": "web"'));
+    expect(JSON.parse(definition.value).target).toEqual({ name: "Offsite" });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Create" }));
+    await waitFor(() =>
+      expect(doCreateFederationPolicy).toHaveBeenCalledWith(
+        expect.objectContaining({ policy_type: "backup_tag_policy" }),
+      ),
+    );
   });
 
   test("the Other... type requires a custom type and then uses it", async () => {

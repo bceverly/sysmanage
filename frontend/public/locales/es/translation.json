@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "Verificación desactivada: {{n}}",
       "backupVerifying": "Verificando ahora: {{n}}",
       "backupRpoMissed": "Punto de recuperación perdido: {{n}}",
-      "backupUnproven": "No probado: {{n}}"
+      "backupUnproven": "No probado: {{n}}",
+      "backupTargetDefault": "Predeterminado",
+      "backupTargetHosts": "N.º de hosts: {{n}}",
+      "backupTargetProblem": "Necesita atención",
+      "backupTargetUsed": "{{percent}}% lleno",
+      "backupTargets": "Destinos de respaldo en el sitio"
     },
     "empty": "Aún no están inscritos sitios. Inscríba un servidor SysManage subordinado para comenzar.",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "Etiqueta",
       "tag": "Hosts con la etiqueta",
       "title": "Políticas por etiqueta",
-      "verifyDays": "Comprobación de lectura completa cada (días, 0 = desactivada)"
+      "verifyDays": "Comprobación de lectura completa cada (días, 0 = desactivada)",
+      "fromController": "Desde el controlador de federación"
     },
     "self": {
       "configure": "Configurar la copia de seguridad propia"
@@ -6098,7 +6104,7 @@
       "default": "Predeterminado para hosts nuevos",
       "defaultError": "No se pudo cambiar el destino predeterminado.",
       "followDefault": "El predeterminado ({{name}})",
-      "hostCount": "Hosts: {{n}}",
+      "hostCount": "N.º de hosts: {{n}}",
       "makeDefault": "Hacer predeterminado",
       "picker": "Destino de respaldo",
       "pickerHelp": "Dónde se almacena esta copia de seguridad.",

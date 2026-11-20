@@ -253,3 +253,8 @@ def apply_pending_policies(session: Session, *, limit: int = 100) -> Dict[str, A
 def supported_policy_types() -> List[str]:
     """Policy types with a registered local applier (for diagnostics)."""
     return sorted(_APPLIERS.keys())
+
+
+# Appliers that live in their own modules register themselves on import.
+# pylint: disable-next=wrong-import-position,unused-import,cyclic-import
+from backend.services import federation_backup_policy_apply  # noqa: E402,F401

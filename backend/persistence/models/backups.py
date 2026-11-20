@@ -260,6 +260,9 @@ class BackupTagPolicy(Base):
     # The target its hosts back up to (q102, Enterprise); NULL = the default.
     # Soft reference: a target a tag policy names cannot be deleted.
     target_id = Column(GUID(), nullable=True)
+    # "federation" when the federation controller pushed it to this site
+    # (q103, 27.3): it is changed there, never here.  NULL = this site's own.
+    managed_by = Column(String(32), nullable=True)
     created_at = Column(DateTime, nullable=False)
     created_by = Column(String(255), nullable=True)
     updated_at = Column(DateTime, nullable=False)

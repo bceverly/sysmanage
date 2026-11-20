@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "验证已关闭: {{n}}",
       "backupVerifying": "正在验证：{{n}}",
       "backupRpoMissed": "恢复点未命中：{{n}}",
-      "backupUnproven": "未验证: {{n}}"
+      "backupUnproven": "未验证: {{n}}",
+      "backupTargetDefault": "默认",
+      "backupTargetHosts": "主机: {{n}}",
+      "backupTargetProblem": "需要关注",
+      "backupTargetUsed": "已用 {{percent}}%",
+      "backupTargets": "站点备份目标"
     },
     "empty": "还没有注册站点。先注册一个下属SysManage服务器开始使用。",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "标签",
       "tag": "带有该标签的主机",
       "title": "按标签的策略",
-      "verifyDays": "完整读取检查间隔（天，0 = 关闭）"
+      "verifyDays": "完整读取检查间隔（天，0 = 关闭）",
+      "fromController": "来自联邦控制器"
     },
     "self": {
       "configure": "配置自身备份"

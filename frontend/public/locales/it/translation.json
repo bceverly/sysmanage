@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "Verifica disabilitata: {{n}}",
       "backupVerifying": "Verifica in corso: {{n}}",
       "backupRpoMissed": "Punto di recupero mancato: {{n}}",
-      "backupUnproven": "Non verificato: {{n}}"
+      "backupUnproven": "Non verificato: {{n}}",
+      "backupTargetDefault": "Predefinito",
+      "backupTargetHosts": "Host: {{n}}",
+      "backupTargetProblem": "Richiede attenzione",
+      "backupTargetUsed": "{{percent}}% pieno",
+      "backupTargets": "Target di backup del sito"
     },
     "empty": "Ancora non ci sono siti federati. Enrolla un server sottordinato SysManage per iniziare.",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "Tag",
       "tag": "Host con il tag",
       "title": "Criteri per tag",
-      "verifyDays": "Verifica con lettura completa ogni (giorni, 0 = disattivata)"
+      "verifyDays": "Verifica con lettura completa ogni (giorni, 0 = disattivata)",
+      "fromController": "Dal controller della federazione"
     },
     "self": {
       "configure": "Configura il backup di questo host"

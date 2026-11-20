@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:17-0800\n"
+"POT-Creation-Date: 2026-11-20 09:21-0800\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -2305,13 +2305,13 @@ msgstr "Ausente SAMLResponse ou RelayState."
 msgid "Invalid or expired SAML RelayState."
 msgstr "SAML RelayState inválido ou expirado."
 
-#: backend/api/backups_escrow.py:61
+#: backend/api/backups_escrow.py:60
 msgid "Break-glass escrow needs the Professional+ backup engine"
 msgstr ""
 "A custódia de chaves de emergência precisa do mecanismo de backup "
 "Professional+"
 
-#: backend/api/backups_escrow.py:66
+#: backend/api/backups_escrow.py:65
 msgid "No backup target is set up yet"
 msgstr "Ainda não há um destino de backup configurado"
 
@@ -3276,32 +3276,36 @@ msgstr ""
 msgid "Tag policy not found"
 msgstr "Política de marcador não encontrada"
 
-#: backend/api/backups_tag_policies.py:99 backend/api/backups_retention.py:67
+#: backend/api/backups_tag_policies.py:100
+msgid "The federation controller manages this tag policy; change it there"
+msgstr "O controlador de federação gerencia esta política de tags; mude-a lá"
+
+#: backend/api/backups_tag_policies.py:111 backend/api/backups_retention.py:67
 #: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s deve ser um número inteiro de 0 a %(max)d"
 
-#: backend/api/backups_tag_policies.py:212 backend/api/backups_equip.py:160
+#: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
 #: backend/services/backup_targets.py:121
 msgid "Set up the backup target first"
 msgstr "Configure primeiro o destino de backup"
 
-#: backend/api/backups_tag_policies.py:216
-#: backend/api/backups_tag_policies.py:251
+#: backend/api/backups_tag_policies.py:230
+#: backend/api/backups_tag_policies.py:265
 msgid "A tag policy has that name"
 msgstr "Já existe uma política de marcador com esse nome"
 
-#: backend/api/backups_tag_policies.py:302
+#: backend/api/backups_tag_policies.py:316
 msgid "This host has no backup policy"
 msgstr "Este host não tem uma política de backup"
 
-#: backend/api/backups_tag_policies.py:303
+#: backend/api/backups_tag_policies.py:317
 msgid "This host already follows its tag policy"
 msgstr "Este host já segue sua política de marcador"
 
-#: backend/api/backups_tag_policies.py:305
+#: backend/api/backups_tag_policies.py:319
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr ""
 "Nenhuma política de marcador se aplica a este host; não há nada para onde "

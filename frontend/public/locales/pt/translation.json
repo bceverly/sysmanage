@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "Verificação desativada: {{n}}",
       "backupVerifying": "Verificando agora: {{n}}",
       "backupRpoMissed": "Ponto de recuperação perdido: {{n}}",
-      "backupUnproven": "Não testado: {{n}}"
+      "backupUnproven": "Não testado: {{n}}",
+      "backupTargetDefault": "Padrão",
+      "backupTargetHosts": "Nº de hosts: {{n}}",
+      "backupTargetProblem": "Precisa de atenção",
+      "backupTargetUsed": "{{percent}}% cheio",
+      "backupTargets": "Destinos de backup no site"
     },
     "empty": "Ainda não hâ sites inscritos. Inscreva um servidor SysManage subordinado para iniciar.",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "Marcador",
       "tag": "Hosts com o marcador",
       "title": "Políticas por marcador",
-      "verifyDays": "Verificação com leitura completa a cada (dias, 0 = desativada)"
+      "verifyDays": "Verificação com leitura completa a cada (dias, 0 = desativada)",
+      "fromController": "Do controlador de federação"
     },
     "self": {
       "configure": "Configurar o backup deste host"
@@ -6098,7 +6104,7 @@
       "default": "Padrão para novos hosts",
       "defaultError": "Não foi possível alterar o destino padrão.",
       "followDefault": "O padrão ({{name}})",
-      "hostCount": "Hosts: {{n}}",
+      "hostCount": "Nº de hosts: {{n}}",
       "makeDefault": "Definir como padrão",
       "picker": "Destino de backup",
       "pickerHelp": "Onde este backup é armazenado.",

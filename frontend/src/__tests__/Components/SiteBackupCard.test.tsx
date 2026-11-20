@@ -75,3 +75,19 @@ test("a healthy site shows no warnings", () => {
   expect(screen.queryByText("The site's backup storage needs attention")).not.toBeInTheDocument();
   expect(screen.queryByText("Hosts to look at on the site")).not.toBeInTheDocument();
 });
+
+test("the site's own targets show by name, use and health (27.3)", () => {
+  render(<SiteBackupCard backup={{ ...BACKUP, targets: [
+    { name: "nas", location: "Office", is_default: true, hosts: 3, problem: false, used_percent: 41.6 },
+    { name: "offsite", location: null, is_default: false, hosts: 1, problem: true, used_percent: null },
+  ] }} />);
+  expect(screen.getByText("nas (Office)")).toBeInTheDocument();
+  expect(screen.getByText("Default")).toBeInTheDocument();
+  expect(screen.getByText("Hosts: 3 - 42% full")).toBeInTheDocument();
+  expect(screen.getByText("Needs attention")).toBeInTheDocument();
+});
+
+test("an older site without targets shows none", () => {
+  render(<SiteBackupCard backup={BACKUP} />);
+  expect(screen.queryByTestId("site-backup-targets")).toBeNull();
+});

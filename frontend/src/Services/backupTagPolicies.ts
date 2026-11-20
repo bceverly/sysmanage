@@ -22,6 +22,8 @@ export interface TagPolicy {
   settings: PolicyInput;
   /** The target its hosts back up to; null = whichever is the default. */
   target_id?: string | null;
+  /** "federation" when the federation controller pushed it (changed there). */
+  managed_by?: string | null;
   /** Hosts carrying the tag, and hosts whose policy comes from this one. */
   hosts_tagged: number;
   hosts_applied: number;

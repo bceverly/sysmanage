@@ -74,15 +74,7 @@ import {
 } from "../Services/federation";
 import FederationAlertConfig from "../Components/FederationAlertConfig";
 
-// Operator-visible policy types.  Mirrored from
-// federation_policy_service's docstring -- the engine accepts any
-// string but the UI offers these common shapes as a select.  Free-
-// form input remains available via the "Other..." sentinel.
-const KNOWN_POLICY_TYPES = [
-  "update_profile",
-  "firewall_role",
-  "compliance_baseline",
-];
+import { DEFINITION_TEMPLATES, KNOWN_POLICY_TYPES } from "./federationPolicyTypes";
 const POLICY_TYPE_OTHER = "__other__";
 
 interface PoliciesState {
@@ -685,6 +677,12 @@ const FederationPolicies: React.FC = () => {
                   setCreateDialog((prev) => ({
                     ...prev,
                     policy_type: e.target.value,
+                    // Offer the type's template over an untouched definition.
+                    definition_text:
+                      prev.definition_text.trim() === "{}" ||
+                      Object.values(DEFINITION_TEMPLATES).includes(prev.definition_text)
+                        ? (DEFINITION_TEMPLATES[e.target.value] ?? "{}")
+                        : prev.definition_text,
                   }))
                 }
               >

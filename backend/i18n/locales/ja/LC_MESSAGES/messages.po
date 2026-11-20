@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:17-0800\n"
+"POT-Creation-Date: 2026-11-20 09:21-0800\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -2224,11 +2224,11 @@ msgstr "SAMLResponseまたはRelayStateがありません。"
 msgid "Invalid or expired SAML RelayState."
 msgstr "無効または期限切れのSAML RelayStateです。"
 
-#: backend/api/backups_escrow.py:61
+#: backend/api/backups_escrow.py:60
 msgid "Break-glass escrow needs the Professional+ backup engine"
 msgstr "緊急用の鍵の預託には Professional+ のバックアップエンジンが必要です"
 
-#: backend/api/backups_escrow.py:66
+#: backend/api/backups_escrow.py:65
 msgid "No backup target is set up yet"
 msgstr "バックアップターゲットがまだ設定されていません"
 
@@ -3164,32 +3164,36 @@ msgstr "タグ別のバックアップポリシーには Professional+ のバッ
 msgid "Tag policy not found"
 msgstr "タグポリシーが見つかりません"
 
-#: backend/api/backups_tag_policies.py:99 backend/api/backups_retention.py:67
+#: backend/api/backups_tag_policies.py:100
+msgid "The federation controller manages this tag policy; change it there"
+msgstr "このタグポリシーはフェデレーションコントローラーが管理しています。変更はコントローラーで行ってください"
+
+#: backend/api/backups_tag_policies.py:111 backend/api/backups_retention.py:67
 #: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s は 0 から %(max)d までの整数にしてください"
 
-#: backend/api/backups_tag_policies.py:212 backend/api/backups_equip.py:160
+#: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
 #: backend/services/backup_targets.py:121
 msgid "Set up the backup target first"
 msgstr "先にバックアップ先を設定してください"
 
-#: backend/api/backups_tag_policies.py:216
-#: backend/api/backups_tag_policies.py:251
+#: backend/api/backups_tag_policies.py:230
+#: backend/api/backups_tag_policies.py:265
 msgid "A tag policy has that name"
 msgstr "その名前のタグポリシーはすでにあります"
 
-#: backend/api/backups_tag_policies.py:302
+#: backend/api/backups_tag_policies.py:316
 msgid "This host has no backup policy"
 msgstr "このホストにはバックアップポリシーがありません"
 
-#: backend/api/backups_tag_policies.py:303
+#: backend/api/backups_tag_policies.py:317
 msgid "This host already follows its tag policy"
 msgstr "このホストはすでにタグポリシーに従っています"
 
-#: backend/api/backups_tag_policies.py:305
+#: backend/api/backups_tag_policies.py:319
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr "このホストに適用されるタグポリシーがないため、切り替え先がありません"
 

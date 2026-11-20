@@ -32,7 +32,19 @@ export interface FederationBackupRollup {
   /** Hosts by restore readiness (27.1); absent where the site has no
    *  Enterprise backup operations engine. */
   readiness_counts?: Record<string, number> | null;
+  /** The site's backup targets (27.3); absent from older sites. */
+  targets?: FederationBackupTarget[] | null;
   snapshot_at?: string | null;
+}
+
+/** One of a site's backup targets: names, use and health, never paths. */
+export interface FederationBackupTarget {
+  name: string | null;
+  location: string | null;
+  is_default: boolean;
+  hosts: number;
+  problem: boolean;
+  used_percent: number | null;
 }
 
 /** The dashboard rollup with the site's backup status. */

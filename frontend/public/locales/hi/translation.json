@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "वेरिफिकेशन ऑफ है: {{n}}",
       "backupVerifying": "अभी वेरिफाई कर रहा है: {{n}}",
       "backupRpoMissed": "पुनर्प्राप्ति बिंदु छूट गया: {{n}}",
-      "backupUnproven": "अपरीक्षित: {{n}}"
+      "backupUnproven": "अपरीक्षित: {{n}}",
+      "backupTargetDefault": "डिफ़ॉल्ट",
+      "backupTargetHosts": "होस्ट: {{n}}",
+      "backupTargetProblem": "ध्यान की आवश्यकता है",
+      "backupTargetUsed": "{{percent}}% पूर्ण",
+      "backupTargets": "साइट पर बैकअप टारगेट"
     },
     "empty": "अभी तक कोई साइट एनरोल नहीं हुई है। एक प्रतिगमन SysManage सर्वर एनरोल करें।",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "टैग",
       "tag": "टैग वाले होस्ट",
       "title": "टैग के अनुसार नीतियाँ",
-      "verifyDays": "पूरी तरह पढ़कर जाँच हर (दिन, 0 = बंद)"
+      "verifyDays": "पूरी तरह पढ़कर जाँच हर (दिन, 0 = बंद)",
+      "fromController": "फेडरेशन कंट्रोलर से"
     },
     "self": {
       "configure": "स्वयं का बैकअप कॉन्फ़िगर करें"

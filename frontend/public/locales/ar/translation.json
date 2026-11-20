@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "التحقق غير مفعّل: {{n}}",
       "backupVerifying": "يتم التحقق الآن: {{n}}",
       "backupRpoMissed": "نقطة الاستعادة فاتت: {{n}}",
-      "backupUnproven": "غير مثبت: {{n}}"
+      "backupUnproven": "غير مثبت: {{n}}",
+      "backupTargetDefault": "افتراضي",
+      "backupTargetHosts": "المضيفون: {{n}}",
+      "backupTargetProblem": "يتطلب الانتباه",
+      "backupTargetUsed": "{{percent}}% ممتلئ",
+      "backupTargets": "أهداف النسخ الاحتياطي في الموقع"
     },
     "empty": "لم يتم تسجيل مواقع حتى الآن. انضم إلى خادم SysManage فرعي للبدء.",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "العلامة",
       "tag": "المضيفون الذين يحملون العلامة",
       "title": "السياسات حسب العلامة",
-      "verifyDays": "فحص بقراءة كاملة كل (أيام، 0 = متوقف)"
+      "verifyDays": "فحص بقراءة كاملة كل (أيام، 0 = متوقف)",
+      "fromController": "من وحدة التحكم في الاتحاد"
     },
     "self": {
       "configure": "تهيئة النسخ الاحتياطي الذاتي"

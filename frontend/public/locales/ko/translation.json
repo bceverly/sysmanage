@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "확인이 비활성화됨: {{n}}",
       "backupVerifying": "현재 확인 중: {{n}}",
       "backupRpoMissed": "복구 지점 누락: {{n}}",
-      "backupUnproven": "미확인: {{n}}"
+      "backupUnproven": "미확인: {{n}}",
+      "backupTargetDefault": "기본",
+      "backupTargetHosts": "호스트: {{n}}",
+      "backupTargetProblem": "주의가 필요함",
+      "backupTargetUsed": "{{percent}}% 사용 중",
+      "backupTargets": "사이트의 백업 대상"
     },
     "empty": "등록된 사이트가 없습니다. 하위 SysManage 서버를 등록하여 시작하세요.",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "태그",
       "tag": "태그가 있는 호스트",
       "title": "태그별 정책",
-      "verifyDays": "전체 읽기 검사 주기(일, 0 = 끔)"
+      "verifyDays": "전체 읽기 검사 주기(일, 0 = 끔)",
+      "fromController": "연방 컨트롤러에서"
     },
     "self": {
       "configure": "자체 백업 구성"

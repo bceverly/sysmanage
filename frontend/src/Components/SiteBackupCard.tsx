@@ -147,6 +147,7 @@ function BackupSummary({ backup }: Readonly<{ backup: FederationBackupRollup }>)
           />
         ))}
       </Stack>
+      <SiteTargets targets={backup.targets} />
       {backup.attention_hosts.length > 0 && (
         <Box>
           <Typography variant="caption" color="text.secondary">
@@ -169,6 +170,44 @@ function BackupSummary({ backup }: Readonly<{ backup: FederationBackupRollup }>)
         </Box>
       )}
     </Stack>
+  );
+}
+
+/** The site's own backup targets (27.3): where its hosts back up. */
+function SiteTargets({
+  targets,
+}: Readonly<{ targets: FederationBackupRollup["targets"] }>) {
+  const { t } = useTranslation();
+  if (!targets || targets.length === 0) return null;
+  return (
+    <Box data-testid="site-backup-targets">
+      <Typography variant="caption" color="text.secondary">
+        {t("sites.detail.backupTargets", "Backup targets at the site")}
+      </Typography>
+      {targets.map((target, index) => (
+        <Stack key={`${target.name}-${index}`} direction="row" spacing={1} alignItems="center"
+          sx={{ flexWrap: "wrap" }}>
+          <Typography variant="body2">
+            {target.location ? `${target.name} (${target.location})` : target.name}
+          </Typography>
+          {target.is_default && targets.length > 1 && (
+            <Chip size="small" variant="outlined"
+              label={t("sites.detail.backupTargetDefault", "Default")} />
+          )}
+          <Typography variant="body2" color="text.secondary">
+            {t("sites.detail.backupTargetHosts", "Hosts: {{n}}", { n: target.hosts })}
+            {target.used_percent !== null &&
+              ` - ${t("sites.detail.backupTargetUsed", "{{percent}}% full", {
+                percent: Math.round(target.used_percent),
+              })}`}
+          </Typography>
+          {target.problem && (
+            <Chip size="small" color="error"
+              label={t("sites.detail.backupTargetProblem", "Needs attention")} />
+          )}
+        </Stack>
+      ))}
+    </Box>
   );
 }
 

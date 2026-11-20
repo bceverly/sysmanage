@@ -55,6 +55,14 @@ describe("BackupTagPolicies", () => {
     expect(screen.getByText("2 of 3 tagged")).toBeInTheDocument();
   });
 
+  test("a tag policy from the federation controller is marked and not editable here", async () => {
+    vi.mocked(listTagPolicies).mockResolvedValue([{ ...ROW, managed_by: "federation" }] as never);
+    mount();
+    expect(await screen.findByText("From the federation controller")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Change" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Remove" })).toBeNull();
+  });
+
   test("says what to do when there are no tags yet", async () => {
     vi.mocked(listTagPolicies).mockResolvedValue([]);
     vi.mocked(listHostTags).mockResolvedValue([]);

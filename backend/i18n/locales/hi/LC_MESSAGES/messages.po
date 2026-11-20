@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:17-0800\n"
+"POT-Creation-Date: 2026-11-20 09:21-0800\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -2296,11 +2296,11 @@ msgstr "SAMLResponse या RelayState नहीं मिला।"
 msgid "Invalid or expired SAML RelayState."
 msgstr "वैध या समय सीमा पर होने वाला SAML RelayState।"
 
-#: backend/api/backups_escrow.py:61
+#: backend/api/backups_escrow.py:60
 msgid "Break-glass escrow needs the Professional+ backup engine"
 msgstr "आपातकालीन कुंजी एस्क्रो के लिए Professional+ बैकअप इंजन आवश्यक है"
 
-#: backend/api/backups_escrow.py:66
+#: backend/api/backups_escrow.py:65
 msgid "No backup target is set up yet"
 msgstr "अभी तक कोई बैकअप लक्ष्य सेट नहीं किया गया है"
 
@@ -3269,32 +3269,36 @@ msgstr "टैग के अनुसार बैकअप नीतियो�
 msgid "Tag policy not found"
 msgstr "टैग नीति नहीं मिली"
 
-#: backend/api/backups_tag_policies.py:99 backend/api/backups_retention.py:67
+#: backend/api/backups_tag_policies.py:100
+msgid "The federation controller manages this tag policy; change it there"
+msgstr "इस टैग नीति का प्रबंधन फेडरेशन कंट्रोलर करता है; इसे वहीं बदलें"
+
+#: backend/api/backups_tag_policies.py:111 backend/api/backups_retention.py:67
 #: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s 0 से %(max)d तक की पूर्ण संख्या होनी चाहिए"
 
-#: backend/api/backups_tag_policies.py:212 backend/api/backups_equip.py:160
+#: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
 #: backend/services/backup_targets.py:121
 msgid "Set up the backup target first"
 msgstr "पहले बैकअप लक्ष्य सेट करें"
 
-#: backend/api/backups_tag_policies.py:216
-#: backend/api/backups_tag_policies.py:251
+#: backend/api/backups_tag_policies.py:230
+#: backend/api/backups_tag_policies.py:265
 msgid "A tag policy has that name"
 msgstr "इस नाम की एक टैग नीति पहले से है"
 
-#: backend/api/backups_tag_policies.py:302
+#: backend/api/backups_tag_policies.py:316
 msgid "This host has no backup policy"
 msgstr "इस होस्ट की कोई बैकअप नीति नहीं है"
 
-#: backend/api/backups_tag_policies.py:303
+#: backend/api/backups_tag_policies.py:317
 msgid "This host already follows its tag policy"
 msgstr "यह होस्ट पहले से अपनी टैग नीति का पालन कर रहा है"
 
-#: backend/api/backups_tag_policies.py:305
+#: backend/api/backups_tag_policies.py:319
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr "इस होस्ट पर कोई टैग नीति लागू नहीं होती; बदलने के लिए कुछ नहीं है"
 

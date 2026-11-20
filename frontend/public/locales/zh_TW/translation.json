@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "驗證關閉: {{n}}",
       "backupVerifying": "目前驗證中: {{n}}",
       "backupRpoMissed": "恢復點未命中：{{n}}",
-      "backupUnproven": "未經驗證: {{n}}"
+      "backupUnproven": "未經驗證: {{n}}",
+      "backupTargetDefault": "預設",
+      "backupTargetHosts": "主機: {{n}}",
+      "backupTargetProblem": "需要注意",
+      "backupTargetUsed": "已用 {{percent}}%",
+      "backupTargets": "站點的備份目標"
     },
     "empty": "還沒有註冊站點。註冊一個下屬 SysManage 伺服器開始使用。",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "標籤",
       "tag": "帶有該標籤的主機",
       "title": "依標籤的原則",
-      "verifyDays": "完整讀取檢查間隔（天，0 = 關閉）"
+      "verifyDays": "完整讀取檢查間隔（天，0 = 關閉）",
+      "fromController": "來自聯邦控制器"
     },
     "self": {
       "configure": "設定自身備份"

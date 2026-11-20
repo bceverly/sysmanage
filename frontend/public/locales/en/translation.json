@@ -3496,7 +3496,12 @@
       "backupVerifyOff": "Verification off: {{n}}",
       "backupVerifying": "Verifying now: {{n}}",
       "backupRpoMissed": "Recovery point missed: {{n}}",
-      "backupUnproven": "Unproven: {{n}}"
+      "backupUnproven": "Unproven: {{n}}",
+      "backupTargetDefault": "Default",
+      "backupTargetHosts": "Hosts: {{n}}",
+      "backupTargetProblem": "Needs attention",
+      "backupTargetUsed": "{{percent}}% full",
+      "backupTargets": "Backup targets at the site"
     },
     "empty": "No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "Tag",
       "tag": "Hosts with the tag",
       "title": "Policies by tag",
-      "verifyDays": "Full-read check every (days, 0 = off)"
+      "verifyDays": "Full-read check every (days, 0 = off)",
+      "fromController": "From the federation controller"
     },
     "self": {
       "configure": "Configure self-backup"

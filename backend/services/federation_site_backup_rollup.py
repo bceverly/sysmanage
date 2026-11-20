@@ -10,7 +10,8 @@ gets only this status snapshot, the same way it gets the compliance and
 vulnerability rollups: hosts covered, hosts needing attention, the oldest
 last good backup (the site's worst recovery point), total repository size
 and the verification states, plus a short list of the hosts that need a
-look.  No paths, snapshot names, file lists or keys leave the site.
+look, and (27.3) each of its targets by name, location, use and health.  No
+paths, storage hosts, snapshot names, file lists or keys leave the site.
 
 The snapshot is built from the Backups page's own overview, which reads
 every host's runs; the sync tick runs every few seconds, so a new snapshot
@@ -100,7 +101,32 @@ def collect_backup_rollup(session: Session) -> Dict[str, Any]:
         "verification_counts": verification_counts,
         "attention_hosts": _attention_hosts(covered, views.ATTENTION_STATUSES),
         "readiness_counts": _readiness_counts(session),
+        "targets": _targets(data),
     }
+
+
+# How many of a site's targets are reported (the rest are left out).
+MAX_TARGETS = 20
+
+
+def _targets(data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Each of this site's targets (27.3): its name and location, whether it
+    is the default, how many hosts use it, whether its storage side has a
+    problem, and how full it is -- never its paths or storage host."""
+    found = []
+    for target in (data.get("targets") or [])[:MAX_TARGETS]:
+        space = ((target.get("storage_health") or {}).get("space")) or {}
+        found.append(
+            {
+                "name": target.get("name"),
+                "location": target.get("location"),
+                "is_default": bool(target.get("is_default")),
+                "hosts": int(target.get("hosts") or 0),
+                "problem": bool(target.get("problem")),
+                "used_percent": space.get("used_percent"),
+            }
+        )
+    return found
 
 
 def _readiness_counts(session: Session) -> Optional[Dict[str, int]]:

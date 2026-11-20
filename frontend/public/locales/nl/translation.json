@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "Verificatie is uitgeschakeld: {{n}}",
       "backupVerifying": "Verificatie wordt nu uitgevoerd: {{n}}",
       "backupRpoMissed": "Misgepassen herstelpunt: {{n}}",
-      "backupUnproven": "Onbewezen: {{n}}"
+      "backupUnproven": "Onbewezen: {{n}}",
+      "backupTargetDefault": "Standaard",
+      "backupTargetHosts": "Aantal hosts: {{n}}",
+      "backupTargetProblem": "Vraagt aandacht",
+      "backupTargetUsed": "{{percent}}% vol",
+      "backupTargets": "Back-updoelen op de site"
     },
     "empty": "Geen sites ingeschreven tot nu toe. Inschrijf eerst een ondergeschikte SysManage-server om aan de slag te gaan.",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "Label",
       "tag": "Hosts met het label",
       "title": "Beleid per label",
-      "verifyDays": "Volledige leescontrole elke (dagen, 0 = uit)"
+      "verifyDays": "Volledige leescontrole elke (dagen, 0 = uit)",
+      "fromController": "Vanuit de federatiecontroller"
     },
     "self": {
       "configure": "Eigen back-up configureren"
@@ -6098,7 +6104,7 @@
       "default": "Standaard voor nieuwe hosts",
       "defaultError": "Het standaarddoel kon niet worden gewijzigd.",
       "followDefault": "De standaard ({{name}})",
-      "hostCount": "Hosts: {{n}}",
+      "hostCount": "Aantal hosts: {{n}}",
       "makeDefault": "Als standaard instellen",
       "picker": "Backup-doel",
       "pickerHelp": "Waar deze back-up wordt opgeslagen.",

@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "Vérification désactivée : {{n}}",
       "backupVerifying": "Vérification en cours : {{n}}",
       "backupRpoMissed": "Point de récupération manqué : {{n}}",
-      "backupUnproven": "Non testé : {{n}}"
+      "backupUnproven": "Non testé : {{n}}",
+      "backupTargetDefault": "Par défaut",
+      "backupTargetHosts": "Hôtes : {{n}}",
+      "backupTargetProblem": "Requiert votre attention",
+      "backupTargetUsed": "{{percent}}% plein",
+      "backupTargets": "Cibles de sauvegarde sur le site"
     },
     "empty": "Aucun site n'est inscrit encore. Inscription d'un serveur SysManage subordonné pour commencer.",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "Étiquette",
       "tag": "Hôtes portant l'étiquette",
       "title": "Politiques par étiquette",
-      "verifyDays": "Vérification par lecture complète tous les (jours, 0 = désactivée)"
+      "verifyDays": "Vérification par lecture complète tous les (jours, 0 = désactivée)",
+      "fromController": "Depuis le contrôleur de fédération"
     },
     "self": {
       "configure": "Configurer la sauvegarde de cet hôte"

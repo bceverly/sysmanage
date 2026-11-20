@@ -350,6 +350,39 @@ def record_vulnerability_rollup_snapshot(
 
 # A site names at most this many hosts needing attention.
 MAX_BACKUP_ATTENTION_HOSTS = 10
+# ... and reports at most this many of its backup targets (27.3).
+MAX_BACKUP_TARGETS = 20
+
+
+def _text_or_none(value: Any, limit: int = 255) -> Optional[str]:
+    return str(value)[:limit] if value not in (None, "") else None
+
+
+def _backup_targets(value: Any) -> Optional[List[Dict[str, Any]]]:
+    """A site's targets as reported: names, use and health only.  None from
+    a site too old to report them."""
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        raise ValueError("targets must be a list")
+    found = []
+    for entry in value[:MAX_BACKUP_TARGETS]:
+        if not isinstance(entry, dict):
+            continue
+        used = entry.get("used_percent")
+        found.append(
+            {
+                "name": _text_or_none(entry.get("name")),
+                "location": _text_or_none(entry.get("location")),
+                "is_default": bool(entry.get("is_default")),
+                "hosts": max(0, int(entry.get("hosts") or 0)),
+                "problem": bool(entry.get("problem")),
+                "used_percent": (
+                    float(used) if isinstance(used, (int, float)) else None
+                ),
+            }
+        )
+    return found
 
 
 def _when(value: Any) -> Optional[datetime]:
@@ -408,6 +441,7 @@ def record_backup_rollup_snapshot(
         ),
         attention_hosts_json=_json_or_none(attention),
         readiness_counts_json=_json_or_none(_int_map(body.get("readiness_counts"))),
+        targets_json=_json_or_none(_backup_targets(body.get("targets"))),
         **counts,
     )
     session.add(row)
@@ -443,6 +477,8 @@ def backup_rollup_dict(row: Optional[FederationBackupRollup]) -> Optional[Dict]:
         "attention_hosts": _loads(row.attention_hosts_json) or [],
         # None: the site has no restore readiness (no Enterprise engine).
         "readiness_counts": _loads(row.readiness_counts_json),
+        # None: the site is too old to report its targets (27.3).
+        "targets": _loads(row.targets_json),
         "snapshot_at": row.snapshot_at.isoformat() if row.snapshot_at else None,
     }
 

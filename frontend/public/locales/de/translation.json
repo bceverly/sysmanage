@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "Verifizierung deaktiviert: {{n}}",
       "backupVerifying": "Wird gerade verifiziert: {{n}}",
       "backupRpoMissed": "Wiederherstellungspunkt verpasst: {{n}}",
-      "backupUnproven": "Unbewiesen: {{n}}"
+      "backupUnproven": "Unbewiesen: {{n}}",
+      "backupTargetDefault": "Standard",
+      "backupTargetHosts": "Anzahl Hosts: {{n}}",
+      "backupTargetProblem": "Erfordert Aufmerksamkeit",
+      "backupTargetUsed": "{{percent}}% voll",
+      "backupTargets": "Backup-Ziele am Standort"
     },
     "empty": "Noch keine Standorte angemeldet. Melden Sie einen untergeordneten SysManage-Server an, um loszulegen.",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "Tag",
       "tag": "Hosts mit dem Tag",
       "title": "Richtlinien nach Tag",
-      "verifyDays": "Vollständige Leseprüfung alle (Tage, 0 = aus)"
+      "verifyDays": "Vollständige Leseprüfung alle (Tage, 0 = aus)",
+      "fromController": "Aus dem Federation-Controller"
     },
     "self": {
       "configure": "Eigensicherung konfigurieren"
@@ -6098,7 +6104,7 @@
       "default": "Standard für neue Hosts",
       "defaultError": "Das Standardziel konnte nicht geändert werden.",
       "followDefault": "Der Standard ({{name}})",
-      "hostCount": "Hosts: {{n}}",
+      "hostCount": "Anzahl Hosts: {{n}}",
       "makeDefault": "Als Standard festlegen",
       "picker": "Backup-Ziel",
       "pickerHelp": "Wo dieses Backup gespeichert wird.",

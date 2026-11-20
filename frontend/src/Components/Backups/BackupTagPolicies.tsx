@@ -148,6 +148,10 @@ const BackupTagPolicies: React.FC<{
                                         <Chip size="small" sx={{ ml: 1 }}
                                             label={t('backups.tagPolicies.paused', 'Paused')} />
                                     )}
+                                    {row.managed_by === 'federation' && (
+                                        <Chip size="small" variant="outlined" sx={{ ml: 1 }}
+                                            label={t('backups.tagPolicies.fromController', 'From the federation controller')} />
+                                    )}
                                 </TableCell>
                                 <TableCell>{row.tag_name ?? '-'}</TableCell>
                                 <TableCell>{row.priority}</TableCell>
@@ -156,7 +160,7 @@ const BackupTagPolicies: React.FC<{
                                         { applied: row.hosts_applied, tagged: row.hosts_tagged })}
                                 </TableCell>
                                 <TableCell align="right">
-                                    {canManage && (
+                                    {canManage && row.managed_by !== 'federation' && (
                                         <>
                                             <Tooltip title={t('backups.tagPolicies.edit', 'Change')}>
                                                 <IconButton size="small" aria-label={t('backups.tagPolicies.edit', 'Change')}

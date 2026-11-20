@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:17-0800\n"
+"POT-Creation-Date: 2026-11-20 09:21-0800\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -2218,11 +2218,11 @@ msgstr "SAMLResponse 또는 RelayState가 누락되었습니다."
 msgid "Invalid or expired SAML RelayState."
 msgstr "유효하지 않거나 만료된 SAML RelayState."
 
-#: backend/api/backups_escrow.py:61
+#: backend/api/backups_escrow.py:60
 msgid "Break-glass escrow needs the Professional+ backup engine"
 msgstr "비상용 키 보관에는 Professional+ 백업 엔진이 필요합니다"
 
-#: backend/api/backups_escrow.py:66
+#: backend/api/backups_escrow.py:65
 msgid "No backup target is set up yet"
 msgstr "아직 백업 대상이 설정되지 않았습니다"
 
@@ -3156,32 +3156,36 @@ msgstr "태그별 백업 정책에는 Professional+ 백업 엔진이 필요합�
 msgid "Tag policy not found"
 msgstr "태그 정책을 찾을 수 없습니다"
 
-#: backend/api/backups_tag_policies.py:99 backend/api/backups_retention.py:67
+#: backend/api/backups_tag_policies.py:100
+msgid "The federation controller manages this tag policy; change it there"
+msgstr "연방 컨트롤러가 이 태그 정책을 관리합니다; 그곳에서 변경하세요"
+
+#: backend/api/backups_tag_policies.py:111 backend/api/backups_retention.py:67
 #: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s은(는) 0부터 %(max)d까지의 정수여야 합니다"
 
-#: backend/api/backups_tag_policies.py:212 backend/api/backups_equip.py:160
+#: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
 #: backend/services/backup_targets.py:121
 msgid "Set up the backup target first"
 msgstr "먼저 백업 대상을 설정하세요"
 
-#: backend/api/backups_tag_policies.py:216
-#: backend/api/backups_tag_policies.py:251
+#: backend/api/backups_tag_policies.py:230
+#: backend/api/backups_tag_policies.py:265
 msgid "A tag policy has that name"
 msgstr "같은 이름의 태그 정책이 이미 있습니다"
 
-#: backend/api/backups_tag_policies.py:302
+#: backend/api/backups_tag_policies.py:316
 msgid "This host has no backup policy"
 msgstr "이 호스트에는 백업 정책이 없습니다"
 
-#: backend/api/backups_tag_policies.py:303
+#: backend/api/backups_tag_policies.py:317
 msgid "This host already follows its tag policy"
 msgstr "이 호스트는 이미 태그 정책을 따르고 있습니다"
 
-#: backend/api/backups_tag_policies.py:305
+#: backend/api/backups_tag_policies.py:319
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr "이 호스트에 적용되는 태그 정책이 없어 전환할 대상이 없습니다"
 

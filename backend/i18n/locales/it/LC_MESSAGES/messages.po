@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:17-0800\n"
+"POT-Creation-Date: 2026-11-20 09:21-0800\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -2330,13 +2330,13 @@ msgstr "Mancante SAMLResponse o RelayState."
 msgid "Invalid or expired SAML RelayState."
 msgstr "SAML RelayState non valido o scaduto."
 
-#: backend/api/backups_escrow.py:61
+#: backend/api/backups_escrow.py:60
 msgid "Break-glass escrow needs the Professional+ backup engine"
 msgstr ""
 "Il deposito delle chiavi di emergenza richiede il motore di backup "
 "Professional+"
 
-#: backend/api/backups_escrow.py:66
+#: backend/api/backups_escrow.py:65
 msgid "No backup target is set up yet"
 msgstr "Non è ancora configurata una destinazione di backup"
 
@@ -3311,32 +3311,37 @@ msgstr ""
 msgid "Tag policy not found"
 msgstr "Criterio per tag non trovato"
 
-#: backend/api/backups_tag_policies.py:99 backend/api/backups_retention.py:67
+#: backend/api/backups_tag_policies.py:100
+msgid "The federation controller manages this tag policy; change it there"
+msgstr ""
+"Il controller di federazione gestisce questa politica di tag; modificala lì"
+
+#: backend/api/backups_tag_policies.py:111 backend/api/backups_retention.py:67
 #: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s deve essere un numero intero da 0 a %(max)d"
 
-#: backend/api/backups_tag_policies.py:212 backend/api/backups_equip.py:160
+#: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
 #: backend/services/backup_targets.py:121
 msgid "Set up the backup target first"
 msgstr "Configura prima la destinazione di backup"
 
-#: backend/api/backups_tag_policies.py:216
-#: backend/api/backups_tag_policies.py:251
+#: backend/api/backups_tag_policies.py:230
+#: backend/api/backups_tag_policies.py:265
 msgid "A tag policy has that name"
 msgstr "Esiste già un criterio per tag con questo nome"
 
-#: backend/api/backups_tag_policies.py:302
+#: backend/api/backups_tag_policies.py:316
 msgid "This host has no backup policy"
 msgstr "Questo host non ha un criterio di backup"
 
-#: backend/api/backups_tag_policies.py:303
+#: backend/api/backups_tag_policies.py:317
 msgid "This host already follows its tag policy"
 msgstr "Questo host segue già il suo criterio per tag"
 
-#: backend/api/backups_tag_policies.py:305
+#: backend/api/backups_tag_policies.py:319
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr ""
 "Nessun criterio per tag si applica a questo host; non c'è nulla a cui "

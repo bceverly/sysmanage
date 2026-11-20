@@ -393,6 +393,9 @@ class FederationBackupRollup(Base):
     # JSON {ready, unproven, rpo_breached, never_backed_up} -- restore
     # readiness (27.1), from sites with the Enterprise backup_ops_engine.
     readiness_counts_json = Column(Text, nullable=True)
+    # JSON [{name, location, is_default, hosts, problem, used_percent}] --
+    # the site's backup targets (27.3), never their paths or storage hosts.
+    targets_json = Column(Text, nullable=True)
 
     __table_args__ = (
         Index(

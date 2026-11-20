@@ -3477,7 +3477,12 @@
       "backupVerifyOff": "検証オフ: {{n}}",
       "backupVerifying": "現在検証中: {{n}}",
       "backupRpoMissed": "復旧ポイントが見つかりませんでした: {{n}}",
-      "backupUnproven": "未検証: {{n}}"
+      "backupUnproven": "未検証: {{n}}",
+      "backupTargetDefault": "デフォルト",
+      "backupTargetHosts": "ホスト: {{n}}",
+      "backupTargetProblem": "注意が必要",
+      "backupTargetUsed": "{{percent}}% 使用中",
+      "backupTargets": "サイトのバックアップ先"
     },
     "empty": "連携サイトはありません。サブオーディナートSysManageサーバーを最初に登録してください。",
     "enroll": {
@@ -5917,7 +5922,8 @@
       "tagColumn": "タグ",
       "tag": "タグを持つホスト",
       "title": "タグ別ポリシー",
-      "verifyDays": "全読み取りチェックの間隔（日、0 = オフ）"
+      "verifyDays": "全読み取りチェックの間隔（日、0 = オフ）",
+      "fromController": "フェデレーションコントローラーから"
     },
     "self": {
       "configure": "自身のバックアップを設定"
