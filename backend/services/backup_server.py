@@ -209,7 +209,7 @@ def encryption(db: Session) -> Dict[str, Any]:
     Pro+ with the escrow key it uses, and whether the policy uses it yet."""
     if backup_escrow.backup_engine() is None:
         return {"available": False}
-    target = jobs.the_target(db)
+    target = backup_escrow.escrow_target(db)
     policy = marked(db)
     escrow = getattr(target, "escrow_fingerprint", None) if target else None
     return {

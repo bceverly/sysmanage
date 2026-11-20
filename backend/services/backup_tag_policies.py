@@ -220,7 +220,40 @@ def _new_policy(db, host, target, actor) -> models.BackupPolicy:
     return policy
 
 
-def _apply_one(db, host, tag_policy, target, actor, outcome: Outcome) -> None:
+def tag_target(db: Session, tag_policy, default):
+    """Where ``tag_policy`` sends its hosts: its own target (27.3) while the
+    Enterprise engine is loaded and the target exists, else ``default``."""
+    # pylint: disable-next=import-outside-toplevel
+    from backend.services import backup_targets  # noqa: PLC0415
+
+    if not tag_policy.target_id or backup_targets.engine() is None:
+        return default
+    found = db.get(models.BackupTarget, tag_policy.target_id)
+    return found if found is not None else default
+
+
+def _follow_target(db: Session, policy, target) -> bool:
+    """Move a tag-given policy to its tag policy's target while it has no
+    backups yet; one with history stays where it is (moving it with its
+    history copied first is 27.3 step 4).  True when it moved."""
+    if policy.id is None or policy.target_id == target.id:
+        return False
+    has_history = (
+        db.query(models.BackupSnapshot.id)
+        .filter(
+            models.BackupSnapshot.policy_id == policy.id,
+            models.BackupSnapshot.gone_at.is_(None),
+        )
+        .first()
+        is not None
+    )
+    if has_history:
+        return False
+    policy.target_id = target.id
+    return True
+
+
+def _apply_one(db, host, tag_policy, default, actor, outcome: Outcome) -> None:
     policy = (
         db.query(models.BackupPolicy)
         .filter(models.BackupPolicy.host_id == host.id)
@@ -235,9 +268,12 @@ def _apply_one(db, host, tag_policy, target, actor, outcome: Outcome) -> None:
                 {"host_id": str(host.id), "fqdn": host.fqdn, "reason": reason}
             )
             return
+    target = tag_target(db, tag_policy, default)
+    if policy is None:
         policy = _new_policy(db, host, target, actor)
     moved = str(policy.tag_policy_id or "") != str(tag_policy.id)
     changed = apply_settings(policy, settings_of(tag_policy))
+    changed = _follow_target(db, policy, target) or changed
     if not (moved or changed):
         outcome.unchanged += 1
         return
@@ -297,7 +333,7 @@ def resolve(db: Session, actor: Any = None) -> Outcome:
     """Bring every tag-covered host's policy to its winning tag policy, and
     drop the tag-given policies no tag policy covers any more."""
     outcome = Outcome()
-    target = jobs.the_target(db)
+    target = jobs.default_target(db)
     if target is None or not engine_loaded():
         return outcome
     winners = covering(db)

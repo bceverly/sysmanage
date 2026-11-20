@@ -5677,7 +5677,9 @@
       "cacheBudgetHelp": "O restate mantém um cache de gravação não criptografado em cada host de um repositório criptografado; um host acima deste valor é sinalizado.",
       "changeTransport": "Alterar como os hosts chegam ao armazenamento",
       "changeBandwidth": "Alterar os limites de largura de banda",
-      "details": "Detalhes"
+      "details": "Detalhes",
+      "location": "Localização (opcional)",
+      "locationHelp": "Onde está: um site, sala ou edifício."
     },
     "title": "Backups",
     "warning": {
@@ -6090,6 +6092,18 @@
       "released": "Liberado por {{who}} {{when}}",
       "snapshot": "Snapshot",
       "title": "Colocar um bloqueio legal em um snapshot de {{host}}"
+    },
+    "targets": {
+      "add": "Adicionar outro destino",
+      "default": "Padrão para novos hosts",
+      "defaultError": "Não foi possível alterar o destino padrão.",
+      "followDefault": "O padrão ({{name}})",
+      "hostCount": "Hosts: {{n}}",
+      "makeDefault": "Definir como padrão",
+      "picker": "Destino de backup",
+      "pickerHelp": "Onde este backup é armazenado.",
+      "pickerUnlicensed": "Escolher outro destino requer a licença Enterprise; um host mantém o destino que possui.",
+      "tagHelp": "Onde seus hosts fazem backup. Um host que já tem backups permanece em seu destino."
     }
   },
   "cloudBackup": {

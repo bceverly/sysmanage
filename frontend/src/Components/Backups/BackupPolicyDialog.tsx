@@ -8,6 +8,7 @@
 // or leave out (one restate pattern per line; leave-outs win).
 
 import React, { useEffect, useState } from 'react';
+import TargetPicker from './TargetPicker';
 import {
     Alert,
     Autocomplete,
@@ -115,9 +116,12 @@ const BackupPolicyDialog: React.FC<{
     const [keep, setKeep] = useState('');
     const [skip, setSkip] = useState('');
     const [error, setError] = useState<string | null>(null);
+    // Its target (27.3): the one it has, else the default ('').
+    const [target, setTarget] = useState('');
 
     useEffect(() => {
         if (open) {
+            setTarget(policy?.target_id ?? '');
             const input = initial();
             setForm(input);
             setHooks(input.quiesce_with);
@@ -139,6 +143,7 @@ const BackupPolicyDialog: React.FC<{
         try {
             await savePolicy(hostId, {
                 ...form,
+                target_id: target || null,
                 quiesce_with,
                 keep_paths: lines(keep),
                 skip_paths: lines(skip),
@@ -164,6 +169,7 @@ const BackupPolicyDialog: React.FC<{
                     {error && <Alert severity="error">{error}</Alert>}
                     <TagPolicyNote source={source} />
                     <OwnPolicyNote source={source} />
+                    <TargetPicker value={target} onChange={setTarget} current={policy?.target_id} />
                     <FormControlLabel
                         control={<Switch checked={form.enabled} onChange={e => set({ enabled: e.target.checked })} />}
                         label={t('backups.policy.enabled', 'Back up this host on a schedule')}

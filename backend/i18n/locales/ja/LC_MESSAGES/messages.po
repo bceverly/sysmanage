@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 16:48-0800\n"
+"POT-Creation-Date: 2026-11-20 08:17-0800\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -124,7 +124,7 @@ msgstr "選択したアカウントにアクセス権限がありません"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:157
+#: backend/api/posture.py:375 backend/api/backups.py:134
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
@@ -240,8 +240,8 @@ msgstr "ホストIDの形式が無効です"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:169
-#: backend/api/backups.py:172 backend/api/auto_updates.py:238
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:146
+#: backend/api/backups.py:149 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
@@ -327,16 +327,16 @@ msgstr "このサーバーでは利用できません"
 msgid "Cloud backup account not found"
 msgstr "クラウドバックアップのアカウントが見つかりません"
 
-#: backend/api/cloud_backup.py:136 backend/api/backups.py:193
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:170
 #, python-format
 msgid "%s is out of range"
 msgstr "%s が範囲外です"
 
-#: backend/api/cloud_backup.py:141 backend/api/backups.py:261
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:174
 msgid "Interval (hours)"
 msgstr "間隔（時間）"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:262
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:175
 msgid "Window start hour"
 msgstr "時間帯の開始時刻"
 
@@ -410,6 +410,93 @@ msgstr "UUID形式が無効: %s"
 #, python-format
 msgid "Role with ID %s does not exist"
 msgstr "役割ID %s は存在しません"
+
+#: backend/api/backups_targets.py:77
+msgid "Host mount point"
+msgstr "ホストのマウントポイント"
+
+#: backend/api/backups_targets.py:78 backend/api/backups_targets.py:123
+msgid "Storage path"
+msgstr "ストレージパス"
+
+#: backend/api/backups_targets.py:79
+msgid "Concurrent backups"
+msgstr "同時バックアップ数"
+
+#: backend/api/backups_targets.py:80
+msgid "Days to keep sealed snapshots"
+msgstr "封印したスナップショットの保持日数"
+
+#: backend/api/backups_targets.py:81
+msgid "Write cache budget"
+msgstr "書き込みキャッシュの上限"
+
+#: backend/api/backups_targets.py:82
+msgid "Storage space warning"
+msgstr "ストレージ容量の警告"
+
+#: backend/api/backups_targets.py:83
+msgid "Storage space critical"
+msgstr "ストレージ容量が重大"
+
+#: backend/api/backups_targets.py:87
+msgid "The storage space warning must be below the critical level"
+msgstr "ストレージ容量の警告は重大レベルより低くする必要があります"
+
+#: backend/api/backups_targets.py:89
+msgid "The backup service account is not a valid account name"
+msgstr "バックアップ用サービスアカウントが有効なアカウント名ではありません"
+
+#: backend/api/backups_targets.py:91
+msgid "Unknown seal mode"
+msgstr "不明な封印モードです"
+
+#: backend/api/backups_targets.py:93
+msgid "A ZFS snapshot seal needs the dataset name"
+msgstr "ZFS スナップショットによる封印にはデータセット名が必要です"
+
+#: backend/api/backups_targets.py:95
+msgid "The ZFS dataset name is not valid"
+msgstr "ZFS データセット名が無効です"
+
+#: backend/api/backups_targets.py:102
+msgid "A storage host needs the storage path"
+msgstr "ストレージホストにはストレージパスが必要です"
+
+#: backend/api/backups_targets.py:119
+msgid "A btrfs snapshot seal needs the snapshot directory"
+msgstr "btrfs スナップショットによる封印にはスナップショットディレクトリが必要です"
+
+#: backend/api/backups_targets.py:121
+msgid "A btrfs snapshot seal needs the storage path"
+msgstr "btrfs スナップショットによる封印にはストレージパスが必要です"
+
+#: backend/api/backups_targets.py:124
+msgid "Snapshot directory"
+msgstr "スナップショットディレクトリ"
+
+#: backend/api/backups_targets.py:129
+#, python-format
+msgid ""
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
+" trailing '/')"
+msgstr "%s は単純な絶対パスである必要があります (英字、数字、'_'、'.'、'-'、'/' のみ。末尾に '/' は不可)"
+
+#: backend/api/backups_targets.py:137
+msgid "The snapshot directory must be outside the storage path"
+msgstr "スナップショットディレクトリはストレージパスの外にある必要があります"
+
+#: backend/api/backups_targets.py:251
+msgid "Remove the hosts' backup policies before the target"
+msgstr "バックアップ先より先に、各ホストのバックアップポリシーを削除してください"
+
+#: backend/api/backups_targets.py:256
+msgid "A tag policy sends its hosts to this target; change it first"
+msgstr "タグポリシーがそのホストをこのターゲットに送っています。先にそのポリシーを変更してください"
+
+#: backend/api/backups_targets.py:261
+msgid "Make another target the default before deleting this one"
+msgstr "このターゲットを削除する前に、別のターゲットをデフォルトにしてください"
 
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
@@ -1478,8 +1565,8 @@ msgstr "プロセスの終了を要求しました。リストはまもなく更
 msgid "Invalid tag_id: %s"
 msgstr "無効な tag_id: %s"
 
-#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:70
-#: backend/api/backups_tag_policies.py:74 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:74
+#: backend/api/backups_tag_policies.py:78 backend/api/error_constants.py:136
 msgid "Tag not found"
 msgstr "タグが見つかりません"
 
@@ -2639,12 +2726,6 @@ msgstr "NVD API キーをクリアしました"
 msgid "Failed to clear NVD API key"
 msgstr "NVD API キーをクリアできませんでした"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:189
-#: backend/api/backups_equip.py:160 backend/api/backups.py:582
-#: backend/services/cloud_backup_jobs.py:128
-msgid "Set up the backup target first"
-msgstr "先にバックアップ先を設定してください"
-
 #: backend/api/firewall_status.py:157
 #, python-format
 msgid "Failed to retrieve firewall status: %s"
@@ -3075,34 +3156,40 @@ msgstr "差分を取るための以前の公開バージョンが存在しませ
 msgid "No published version %s"
 msgstr "公開バージョン %s が存在しません"
 
-#: backend/api/backups_tag_policies.py:55
+#: backend/api/backups_tag_policies.py:59
 msgid "Backup policies by tag need the Professional+ backup engine"
 msgstr "タグ別のバックアップポリシーには Professional+ のバックアップエンジンが必要です"
 
-#: backend/api/backups_tag_policies.py:79
+#: backend/api/backups_tag_policies.py:83
 msgid "Tag policy not found"
 msgstr "タグポリシーが見つかりません"
 
-#: backend/api/backups_tag_policies.py:95 backend/api/backups_retention.py:67
+#: backend/api/backups_tag_policies.py:99 backend/api/backups_retention.py:67
 #: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s は 0 から %(max)d までの整数にしてください"
 
-#: backend/api/backups_tag_policies.py:193
-#: backend/api/backups_tag_policies.py:227
+#: backend/api/backups_tag_policies.py:212 backend/api/backups_equip.py:160
+#: backend/services/cloud_backup_jobs.py:128
+#: backend/services/backup_targets.py:121
+msgid "Set up the backup target first"
+msgstr "先にバックアップ先を設定してください"
+
+#: backend/api/backups_tag_policies.py:216
+#: backend/api/backups_tag_policies.py:251
 msgid "A tag policy has that name"
 msgstr "その名前のタグポリシーはすでにあります"
 
-#: backend/api/backups_tag_policies.py:277
+#: backend/api/backups_tag_policies.py:302
 msgid "This host has no backup policy"
 msgstr "このホストにはバックアップポリシーがありません"
 
-#: backend/api/backups_tag_policies.py:278
+#: backend/api/backups_tag_policies.py:303
 msgid "This host already follows its tag policy"
 msgstr "このホストはすでにタグポリシーに従っています"
 
-#: backend/api/backups_tag_policies.py:280
+#: backend/api/backups_tag_policies.py:305
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr "このホストに適用されるタグポリシーがないため、切り替え先がありません"
 
@@ -3239,31 +3326,31 @@ msgstr "このOSに対してデフォルトのアンチウイルス設定が見�
 msgid "Failed to delete antivirus default: %s"
 msgstr "デフォルトアンチウイルス設定を削除できませんでした: %s"
 
-#: backend/api/backups_transport.py:46
+#: backend/api/backups_transport.py:47
 msgid "Unknown transport"
 msgstr "不明な接続方法です"
 
-#: backend/api/backups_transport.py:48
+#: backend/api/backups_transport.py:49
 msgid "The proxy address is not a host name or IP address"
 msgstr "プロキシのアドレスがホスト名でも IP アドレスでもありません"
 
-#: backend/api/backups_transport.py:51
+#: backend/api/backups_transport.py:52
 msgid "The proxy port must be between 1 and 65535"
 msgstr "プロキシのポートは 1 から 65535 の範囲で指定してください"
 
-#: backend/api/backups_transport.py:54
+#: backend/api/backups_transport.py:55
 msgid "The pinned key must be a SHA-256 in hex (64 characters)"
 msgstr "ピン留めする鍵は 16 進数の SHA-256 (64 文字) で指定してください"
 
-#: backend/api/backups_transport.py:57
+#: backend/api/backups_transport.py:58
 msgid "The proxy's CA must be a PEM certificate"
 msgstr "プロキシの CA は PEM 形式の証明書で指定してください"
 
-#: backend/api/backups_transport.py:120
+#: backend/api/backups_transport.py:121
 msgid "Give at most 25 bandwidth rules"
 msgstr "帯域幅のルールは 25 個までにしてください"
 
-#: backend/api/backups_transport.py:123
+#: backend/api/backups_transport.py:124
 msgid ""
 "A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours"
 " and a rate (08-18 2MiB/s)"
@@ -3271,23 +3358,23 @@ msgstr ""
 "帯域幅のルールは速度 (512KiB/s、2MiB/s、1GiB/s、または unlimited)、または時間帯と速度 (08-18 2MiB/s) "
 "です"
 
-#: backend/api/backups_transport.py:127
+#: backend/api/backups_transport.py:128
 msgid "A bandwidth rate must be at least 64KiB/s"
 msgstr "帯域幅の速度は 64KiB/s 以上にしてください"
 
-#: backend/api/backups_transport.py:130
+#: backend/api/backups_transport.py:131
 msgid "Give one rate for every other hour, not two"
 msgstr "その他の時間の速度は 1 つだけ指定してください"
 
-#: backend/api/backups_transport.py:133
+#: backend/api/backups_transport.py:134
 msgid "Bandwidth hours run from 00 to 24, from one hour to another"
 msgstr "帯域幅の時間は 00 から 24 までで、開始と終了は別の時刻にしてください"
 
-#: backend/api/backups_transport.py:135
+#: backend/api/backups_transport.py:136
 msgid "An hour is in two bandwidth rules"
 msgstr "同じ時間が 2 つの帯域幅ルールに含まれています"
 
-#: backend/api/backups_transport.py:163
+#: backend/api/backups_transport.py:164
 msgid "Bandwidth limits by the hour need the Professional+ backup engine"
 msgstr "時間帯別の帯域幅制限には Professional+ のバックアップエンジンが必要です"
 
@@ -3590,7 +3677,7 @@ msgstr "復元には、エンタープライズ バックアップ操作エン�
 msgid "This host has no backup policy yet"
 msgstr "このホストにはまだバックアップポリシーが設定されていません。"
 
-#: backend/api/backups_breakglass.py:75
+#: backend/api/backups_breakglass.py:77
 msgid "Paste the OpenPGP public key to seal the export to"
 msgstr "エクスポートの封印に使う OpenPGP 公開鍵を貼り付けてください"
 
@@ -4253,183 +4340,96 @@ msgstr "KVMネットワークはLinuxホストでのみ利用可能です"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "KVMネットワーク一覧がリクエストされました。まもなく結果が表示されます。"
 
-#: backend/api/backups.py:188
+#: backend/api/backups.py:165
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s は '..' を含まない絶対パスである必要があります"
 
-#: backend/api/backups.py:197
-msgid "Host mount point"
-msgstr "ホストのマウントポイント"
-
-#: backend/api/backups.py:198 backend/api/backups.py:243
-msgid "Storage path"
-msgstr "ストレージパス"
-
-#: backend/api/backups.py:199
-msgid "Concurrent backups"
-msgstr "同時バックアップ数"
-
-#: backend/api/backups.py:200
-msgid "Days to keep sealed snapshots"
-msgstr "封印したスナップショットの保持日数"
-
-#: backend/api/backups.py:201
-msgid "Write cache budget"
-msgstr "書き込みキャッシュの上限"
-
-#: backend/api/backups.py:202
-msgid "Storage space warning"
-msgstr "ストレージ容量の警告"
-
-#: backend/api/backups.py:203
-msgid "Storage space critical"
-msgstr "ストレージ容量が重大"
-
-#: backend/api/backups.py:207
-msgid "The storage space warning must be below the critical level"
-msgstr "ストレージ容量の警告は重大レベルより低くする必要があります"
-
-#: backend/api/backups.py:209
-msgid "The backup service account is not a valid account name"
-msgstr "バックアップ用サービスアカウントが有効なアカウント名ではありません"
-
-#: backend/api/backups.py:211
-msgid "Unknown seal mode"
-msgstr "不明な封印モードです"
-
-#: backend/api/backups.py:213
-msgid "A ZFS snapshot seal needs the dataset name"
-msgstr "ZFS スナップショットによる封印にはデータセット名が必要です"
-
-#: backend/api/backups.py:215
-msgid "The ZFS dataset name is not valid"
-msgstr "ZFS データセット名が無効です"
-
-#: backend/api/backups.py:222
-msgid "A storage host needs the storage path"
-msgstr "ストレージホストにはストレージパスが必要です"
-
-#: backend/api/backups.py:239
-msgid "A btrfs snapshot seal needs the snapshot directory"
-msgstr "btrfs スナップショットによる封印にはスナップショットディレクトリが必要です"
-
-#: backend/api/backups.py:241
-msgid "A btrfs snapshot seal needs the storage path"
-msgstr "btrfs スナップショットによる封印にはストレージパスが必要です"
-
-#: backend/api/backups.py:244
-msgid "Snapshot directory"
-msgstr "スナップショットディレクトリ"
-
-#: backend/api/backups.py:249
-#, python-format
-msgid ""
-"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
-" trailing '/')"
-msgstr "%s は単純な絶対パスである必要があります (英字、数字、'_'、'.'、'-'、'/' のみ。末尾に '/' は不可)"
-
-#: backend/api/backups.py:257
-msgid "The snapshot directory must be outside the storage path"
-msgstr "スナップショットディレクトリはストレージパスの外にある必要があります"
-
-#: backend/api/backups.py:263
+#: backend/api/backups.py:176
 msgid "Snapshots to keep"
 msgstr "保持するスナップショット数"
 
-#: backend/api/backups.py:264
+#: backend/api/backups.py:177
 msgid "Check interval (days)"
 msgstr "チェック間隔（日）"
 
-#: backend/api/backups.py:268
+#: backend/api/backups.py:181
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "一時停止フックは小文字の短い名前で最大 10 個までです"
 
-#: backend/api/backups.py:281
+#: backend/api/backups.py:194
 msgid "At most 50 path rules can be set"
 msgstr "パスルールは最大で50個まで設定できます"
 
-#: backend/api/backups.py:292
+#: backend/api/backups.py:205
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 msgstr "各パスルールは先頭や末尾のスペースがない512文字以内の一行です。また、先頭に#を含んではいけません"
 
-#: backend/api/backups.py:300 backend/api/backups_drift.py:103
+#: backend/api/backups.py:213 backend/api/backups_drift.py:103
 #: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "スナップショット名が無効です"
 
-#: backend/api/backups.py:302
+#: backend/api/backups.py:215
 msgid "At most 50 paths can be restored at once"
 msgstr "一度に復元できるパスは最大 50 個です"
 
-#: backend/api/backups.py:305
+#: backend/api/backups.py:218
 msgid "A restore path is empty or too long"
 msgstr "復元パスが空か、長すぎます"
 
-#: backend/api/backups.py:307
+#: backend/api/backups.py:220
 msgid "A restore path must not contain '..'"
 msgstr "復元パスに '..' を含めることはできません"
 
-#: backend/api/backups.py:313
+#: backend/api/backups.py:226
 msgid "A restore path must be absolute, such as /home/alice/notes.txt"
 msgstr "復元するパスは /home/alice/notes.txt のような絶対パスである必要があります"
 
-#: backend/api/backups.py:327
+#: backend/api/backups.py:240
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr "元に戻すパスを指定してください。ホスト全体を元の場所に復元することはできません"
 
-#: backend/api/backups.py:333
+#: backend/api/backups.py:246
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr "元の場所に復元する各パスは、/etc/nginx のように具体的である必要があります"
 
-#: backend/api/backups.py:338
+#: backend/api/backups.py:251
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "これらのパスにあるホストのファイルが置き換えられることを確認してください"
 
-#: backend/api/backups.py:358 backend/api/backups.py:361
-msgid "Backup target not found"
-msgstr "バックアップ先が見つかりません"
-
-#: backend/api/backups.py:417
-msgid "This edition supports one backup target; edit the existing one"
-msgstr "このエディションではバックアップ先は1つだけです。既存のものを編集してください"
-
-#: backend/api/backups.py:494
-msgid "Remove the hosts' backup policies before the target"
-msgstr "バックアップ先より先に、各ホストのバックアップポリシーを削除してください"
-
-#: backend/api/backups.py:632
+#: backend/api/backups.py:415
 msgid "No backup policy"
 msgstr "バックアップポリシーがありません"
 
-#: backend/api/backups.py:656
+#: backend/api/backups.py:439
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "このホストはまだバックアップを実行できません（%s）"
 
-#: backend/api/backups.py:662
+#: backend/api/backups.py:445
 msgid "This host's backup is not configured yet"
 msgstr "このホストのバックアップはまだ設定されていません"
 
-#: backend/api/backups.py:679
+#: backend/api/backups.py:462
 msgid "The backup storage host is not ready"
 msgstr "バックアップのストレージホストの準備ができていません"
 
-#: backend/api/backups.py:694
+#: backend/api/backups.py:477
 msgid "Unknown backup action"
 msgstr "不明なバックアップ操作です"
 
-#: backend/api/backups.py:707
+#: backend/api/backups.py:490
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "暗号化されたリポジトリはストレージホストで再パックできません"
 
-#: backend/api/backups.py:711
+#: backend/api/backups.py:494
 msgid "That backup job is already queued or running"
 msgstr "そのバックアップジョブはすでにキューにあるか実行中です"
 
-#: backend/api/backups.py:807
+#: backend/api/backups.py:590
 msgid ""
 "This backup is encrypted to your break-glass escrow key, which SysManage "
 "never holds. Restore it by hand with restate and that key, as the server "
@@ -4438,16 +4438,16 @@ msgstr ""
 "このバックアップは緊急用エスクローキーで暗号化されており、SysManage はそのキーを保持しません。サーバー復旧手順書のとおり、restate "
 "とそのキーを使って手動で復元してください。"
 
-#: backend/api/backups.py:826 backend/api/backups_drift.py:114
+#: backend/api/backups.py:609 backend/api/backups_drift.py:114
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "このホストの restate ではまだこの操作ができません。restate を更新してください"
 
-#: backend/api/backups.py:838
+#: backend/api/backups.py:621
 msgid "This snapshot's repository is no longer kept"
 msgstr "このスナップショットのリポジトリはもう保持されていません"
 
-#: backend/api/backups.py:923 backend/api/backups.py:926
+#: backend/api/backups.py:704 backend/api/backups.py:707
 msgid "Backup run not found"
 msgstr "バックアップジョブが見つかりません"
 
@@ -6258,6 +6258,36 @@ msgstr "2 ファクタ認証コードは 6 桁です"
 msgid "The backup target has no storage host to run on"
 msgstr "バックアップ先に実行先のストレージホストがありません"
 
+#: backend/services/backup_targets.py:33
+msgid "Another backup target has that name"
+msgstr "別のバックアップターゲットがすでにその名前を使用しています"
+
+#: backend/services/backup_targets.py:37
+msgid ""
+"Another backup target already uses that storage path on that storage host, "
+"or one inside it or around it"
+msgstr "別のバックアップターゲットが、そのストレージホスト上のそのストレージパス、またはその内側か上位のパスをすでに使用しています"
+
+#: backend/services/backup_targets.py:43
+msgid "Another backup target already uses that host mount point"
+msgstr "別のバックアップターゲットが、ホスト上のそのマウントポイントをすでに使用しています"
+
+#: backend/services/backup_targets.py:62
+msgid ""
+"More than one backup target needs the Enterprise backup operations engine"
+msgstr "複数のバックアップターゲットを使うには、Enterprise のバックアップ運用エンジンが必要です"
+
+#: backend/services/backup_targets.py:99
+#: backend/services/backup_targets.py:103
+msgid "Backup target not found"
+msgstr "バックアップ先が見つかりません"
+
+#: backend/services/backup_targets.py:149
+msgid ""
+"This host already has backups on its target; it cannot move to another "
+"target yet"
+msgstr "このホストには現在のターゲットにすでにバックアップがあるため、まだ別のターゲットに移動できません"
+
 #: backend/services/backup_key_release.py:90
 #: backend/services/backup_key_release.py:159
 msgid "No such backup run for this host"
@@ -6300,61 +6330,61 @@ msgid ""
 "Neither host has a file watch list assigned, so there is nothing to compare."
 msgstr "ホストにファイル監視リストが割り当てられていないため、比較するものが何もありません。"
 
-#: backend/services/backup_breakglass.py:178
+#: backend/services/backup_breakglass.py:181
 #, python-format
 msgid "gpg failed: %s"
 msgstr "gpgエラー: %s"
 
-#: backend/services/backup_breakglass.py:196
+#: backend/services/backup_breakglass.py:199
 msgid "gpg is not installed on the SysManage server; install GnuPG"
 msgstr "SysManageサーバーにgpgがインストールされていません。GnuPGをインストールしてください"
 
-#: backend/services/backup_breakglass.py:206
-#: backend/services/backup_breakglass.py:229
+#: backend/services/backup_breakglass.py:209
+#: backend/services/backup_breakglass.py:232
 msgid "gpg could not read that public key"
 msgstr "gpgはその公開鍵を読み取ることができませんでした"
 
-#: backend/services/backup_breakglass.py:214
-#: backend/services/backup_breakglass.py:221
+#: backend/services/backup_breakglass.py:217
+#: backend/services/backup_breakglass.py:224
 msgid "Paste one armored OpenPGP public key"
 msgstr "ASCII アーマー形式の OpenPGP 公開鍵を 1 つ貼り付けてください"
 
-#: backend/services/backup_breakglass.py:218
-#: backend/services/backup_escrow.py:214
+#: backend/services/backup_breakglass.py:221
+#: backend/services/backup_escrow.py:229
 msgid "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
 msgstr "これは秘密鍵です。公開鍵を貼り付けてください (gpg --armor --export)"
 
-#: backend/services/backup_breakglass.py:238
+#: backend/services/backup_breakglass.py:241
 msgid "Paste exactly one public key, not several"
 msgstr "正確に1つの公開鍵を貼り付けてください、複数の鍵は貼らないでください"
 
-#: backend/services/backup_breakglass.py:241
+#: backend/services/backup_breakglass.py:244
 msgid "That key is expired, revoked or not valid"
 msgstr "そのキーは期限切れ、取り消し、または無効です"
 
-#: backend/services/backup_breakglass.py:244
+#: backend/services/backup_breakglass.py:247
 msgid "That key cannot encrypt (it has no usable encryption key)"
 msgstr "そのキーは暗号化できません（有効な暗号化キーがありません）"
 
-#: backend/services/backup_breakglass.py:261
+#: backend/services/backup_breakglass.py:264
 #, python-format
 msgid "Say why the keys are exported, in %(min)d to %(max)d characters"
 msgstr "%(min)dから%(max)d文字でキーエクスポートの理由を説明してください"
 
-#: backend/services/backup_breakglass.py:323
+#: backend/services/backup_breakglass.py:326
 #, python-format
 msgid "OpenBAO does not hold every backup key of %s; nothing was exported"
 msgstr "OpenBAOは、%sのすべてのバックアップキーを保持していません。何もエクスポートされていません"
 
-#: backend/services/backup_breakglass.py:428
+#: backend/services/backup_breakglass.py:457
 msgid "gpg did not seal the key export"
 msgstr "gpg が鍵のエクスポートを封印しませんでした"
 
-#: backend/services/backup_breakglass.py:439
+#: backend/services/backup_breakglass.py:468
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "選択されたホストのうち、暗号化バックアップはありません"
 
-#: backend/services/backup_reach.py:147
+#: backend/services/backup_reach.py:148
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6364,7 +6394,7 @@ msgstr ""
 "このホストはバックアップストレージの restate-proxy（%(address)s、ポート %(port)s）に到達できません: "
 "%(error)s。バックアップには、そこへのネットワーク経路と、このホストが信頼する証明書が必要です。"
 
-#: backend/services/backup_reach.py:157
+#: backend/services/backup_reach.py:158
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6376,7 +6406,7 @@ msgstr ""
 "として見えるため、マウントが拒否されます。ホストを NAT の内側に置くのではなく、ストレージホストのネットワーク "
 "(仮想マシンの場合はブリッジネットワーク) に接続してください。"
 
-#: backend/services/backup_reach.py:167
+#: backend/services/backup_reach.py:168
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "
@@ -6385,11 +6415,11 @@ msgstr ""
 "このホストはバックアップストレージ (%(storage)s、%(address)s、NFS ポート %(port)s) "
 "に到達できません。バックアップにはそこへのネットワーク経路が必要です。"
 
-#: backend/services/backup_escrow.py:283
+#: backend/services/backup_escrow.py:298
 msgid "Backup keys rotated: make a new break-glass export"
 msgstr "バックアップ鍵をローテーションしました: 緊急用の鍵を新たにエクスポートしてください"
 
-#: backend/services/backup_escrow.py:285
+#: backend/services/backup_escrow.py:300
 #, python-format
 msgid ""
 "SysManage rotated %(count)d backup encryption key(s) on schedule. A break-glass export made before this rotation does not hold the new keys, and backups taken from now on need them.\n"
@@ -6606,6 +6636,9 @@ msgstr "NetBSD の pkgsrc パッケージの脆弱性 (pkg_admin audit が読む
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS バージョン別の macOS の脆弱性 (NVD の影響を受けるバージョンのデータより)"
+
+#~ msgid "This edition supports one backup target; edit the existing one"
+#~ msgstr "このエディションではバックアップ先は1つだけです。既存のものを編集してください"
 
 #, python-format
 #~ msgid ""

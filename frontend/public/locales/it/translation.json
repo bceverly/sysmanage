@@ -5677,7 +5677,9 @@
       "cacheBudgetHelp": "restate mantiene una cache di scrittura non cifrata su ogni host di un repository cifrato; un host che supera questo valore viene segnalato.",
       "changeTransport": "Modifica come gli host raggiungono l'archiviazione",
       "changeBandwidth": "Modifica i limiti di larghezza di banda",
-      "details": "Dettagli"
+      "details": "Dettagli",
+      "location": "Posizione (facoltativa)",
+      "locationHelp": "Dove si trova: un sito, una stanza o un edificio."
     },
     "title": "Backup",
     "warning": {
@@ -6090,6 +6092,18 @@
       "released": "Rilasciata da {{who}} {{when}}",
       "snapshot": "Snapshot",
       "title": "Poni una trattenuta legale su uno snapshot di {{host}}"
+    },
+    "targets": {
+      "add": "Aggiungi un altro target",
+      "default": "Predefinito per nuovi host",
+      "defaultError": "Non è stato possibile modificare il target predefinito.",
+      "followDefault": "Il predefinito ({{name}})",
+      "hostCount": "Host: {{n}}",
+      "makeDefault": "Imposta come predefinito",
+      "picker": "Target di backup",
+      "pickerHelp": "Dove questo backup è memorizzato.",
+      "pickerUnlicensed": "La scelta di un altro target richiede la licenza Enterprise; un host mantiene il target che ha.",
+      "tagHelp": "Dove i suoi host eseguono il backup. Un host che ha già backup rimane sul suo target."
     }
   },
   "cloudBackup": {

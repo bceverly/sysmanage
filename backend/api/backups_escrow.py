@@ -29,7 +29,6 @@ from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_escrow as escrow
 from backend.services import backup_server
-from backend.services import backup_jobs as jobs
 from backend.services.audit_service import EntityType
 
 router = APIRouter(dependencies=[Depends(JWTBearer())])
@@ -61,7 +60,7 @@ def save_escrow_key(
                 _("Break-glass escrow needs the Professional+ backup engine"),
             ),
         )
-    target = jobs.the_target(db)
+    target = escrow.escrow_target(db)
     if target is None:
         raise HTTPException(status_code=404, detail=_("No backup target is set up yet"))
     try:

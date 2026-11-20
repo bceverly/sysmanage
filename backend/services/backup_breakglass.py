@@ -81,7 +81,10 @@ keys/<host>/    one file per key: an armored OpenPGP secret key
 keys/signing.pub.asc
                 when snapshot signing is on: the PUBLIC key the storage
                 host signs each snapshot with, for restate --trusted-key
-                (no secret; manifest.json names it under "signing")
+                (no secret; manifest.json names it under "signing").  With
+                several backup targets, each target's storage host has its
+                own: a host's entry in manifest.json names its file
+                ("signing_file"), and that is the one to give --trusted-key
 
 A host's snapshots may need ANY of its keys -- a backup taken after a key
 rotation still reuses data written before it -- so always give restate
@@ -330,30 +333,39 @@ def _held_keys(db, policy, host, vault, keys):
     return held
 
 
+def _policy_target(db, policy, fallback):
+    """The target ``policy``'s repository is on (27.3: one of several)."""
+    found = db.get(models.BackupTarget, policy.target_id) if policy.target_id else None
+    return found if found is not None else fallback
+
+
 def gather_export(db, pairs, target, vault=None, keys=None):
     """The manifest entries and secret keys for ``pairs`` of (host, policy):
     every key each policy holds and has not retired, newest first, read from
     OpenBAO.  Raises BreakGlassError if OpenBAO lacks one -- an export with a
-    key missing would be found out only when it is needed."""
+    key missing would be found out only when it is needed.  Each entry names
+    its own target's storage path and signer (``target`` when a policy's is
+    not found)."""
     if vault is None:
         from backend.services.vault_service import (  # pylint: disable=import-outside-toplevel
             VaultService,
         )
 
         vault = VaultService()
-    storage = (
-        (getattr(target, "storage_path", None) or "").rstrip("/") if target else ""
-    )
     entries = []
     for host, policy in pairs:
+        own = _policy_target(db, policy, target)
+        storage = (getattr(own, "storage_path", None) or "").rstrip("/")
         repository = policy.repository_dir
         entries.append({
             "host": host.fqdn, "host_id": str(host.id), "policy_id": str(policy.id),
+            "target": getattr(own, "name", None),
             "repository": repository,
             "previous_repository": policy.previous_repository_dir,
             "storage_repository": f"{storage}/{repository}"
             if storage and repository else None,
             "keys": _held_keys(db, policy, host, vault, keys),
+            "signer": signer_of(own),
         })  # fmt: skip
     return entries
 
@@ -371,12 +383,28 @@ def signer_of(target):
     return {"fingerprint": getattr(target, "sign_fingerprint", None), "public": public}
 
 
+def _signing_files(entries, signer):
+    """``{fingerprint: (file, signer)}``: ``signer`` (the default target's)
+    as keys/signing.pub.asc, and each other target's signer the entries name
+    as keys/signing-<fingerprint>.pub.asc (27.3)."""
+    files = {}
+    for found in [signer] + [e.get("signer") for e in entries]:
+        if not found or found.get("fingerprint") in files:
+            continue
+        name = (SIGNING_FILE if not files
+                else f"keys/signing-{_safe_name(found.get('fingerprint'))}.pub.asc")  # fmt: skip
+        files[found.get("fingerprint")] = (name, found)
+    return files
+
+
 def build_bundle(entries, made, who, reason, recipient, signer=None):
     """The plain tar archive: README.txt, manifest.json (no secrets), one
     armored secret key per file under keys/<host>/, and, with snapshot
-    signing on, the signer's PUBLIC key as keys/signing.pub.asc."""
+    signing on, the signer's PUBLIC key as keys/signing.pub.asc -- one file
+    per signer with several targets, each host naming its own."""
     manifest = {"made": made, "made_by": who, "reason": reason, "sealed_to": recipient,
                 "hosts": []}  # fmt: skip
+    signers = _signing_files(entries, signer)
     files = []
     for entry in entries:
         folder = _safe_name(entry["host"])
@@ -387,15 +415,16 @@ def build_bundle(entries, made, who, reason, recipient, signer=None):
             listed.append(
                 {k: v for k, v in key.items() if k != "secret"} | {"file": name}
             )
-        manifest["hosts"].append({k: v for k, v in entry.items() if k != "keys"}
-                                 | {"keys": listed})  # fmt: skip
+        own = entry.get("signer") or signer
+        shown = {k: v for k, v in entry.items() if k not in ("keys", "signer")}
+        if own and own.get("fingerprint") in signers:
+            shown["signing_file"] = signers[own.get("fingerprint")][0]
+        manifest["hosts"].append(shown | {"keys": listed})
     manifest["signing"] = None
-    if signer:
-        files.append((SIGNING_FILE, signer["public"].encode("utf-8")))
-        manifest["signing"] = {
-            "fingerprint": signer.get("fingerprint"),
-            "file": SIGNING_FILE,
-        }
+    for fingerprint, (name, found) in signers.items():
+        files.append((name, found["public"].encode("utf-8")))
+        if manifest["signing"] is None:
+            manifest["signing"] = {"fingerprint": fingerprint, "file": name}
     readme = _README.format(made=made, who=who, reason=reason, recipient=recipient)
     files[:0] = [("README.txt", readme.encode("utf-8")),
                  ("manifest.json", json.dumps(manifest, indent=2).encode("utf-8"))]  # fmt: skip
@@ -456,6 +485,6 @@ def break_glass_export(  # pylint: disable=too-many-arguments,too-many-positiona
         "hosts": [entry["host"] for entry in entries],
         "keys": sum(len(entry["keys"]) for entry in entries),
         "reason": text,
-        "signing": bool(signer),
+        "signing": bool(signer) or any(e.get("signer") for e in entries),
     }
     return name, sealed, summary

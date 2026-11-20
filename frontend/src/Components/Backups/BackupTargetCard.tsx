@@ -17,6 +17,7 @@ import {
     Button,
     Card,
     CardContent,
+    Chip,
     Dialog,
     DialogActions,
     DialogContent,
@@ -34,7 +35,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import AsyncButton from '../AsyncButton';
-import { saveTarget } from '../../Services/backups';
+import { saveTarget, setDefaultTarget } from '../../Services/backups';
 import type { BackupHost, BackupTarget, TargetInput } from '../../Services/backups';
 import { apiDetail, reasonLabel } from './backupLabels';
 import BackupStorageStatus from './BackupStorageStatus';
@@ -62,6 +63,7 @@ const writeOpen = (open: boolean): void => {
 
 const EMPTY: TargetInput = {
     name: '',
+    location: null,
     host_mount_point: '/mnt/backups',
     storage_host_id: null,
     storage_path: '/srv/backups/restate',
@@ -80,6 +82,7 @@ const toInput = (target: BackupTarget | null): TargetInput =>
     target
         ? {
               name: target.name,
+              location: target.location ?? null,
               host_mount_point: target.host_mount_point,
               storage_host_id: target.storage_host_id,
               storage_path: target.storage_path,
@@ -142,6 +145,9 @@ export const TargetDialog: React.FC<{
                     {error && <Alert severity="error">{error}</Alert>}
                     <TextField label={t('backups.target.name', 'Name')} value={form.name}
                         onChange={e => set({ name: e.target.value })} required />
+                    <TextField label={t('backups.target.location', 'Location (optional)')}
+                        value={form.location ?? ''} onChange={e => set({ location: e.target.value || null })}
+                        helperText={t('backups.target.locationHelp', 'Where it is: a site, room or building.')} />
                     <TextField label={t('backups.target.hostMountPoint', 'Mount point on each host')}
                         value={form.host_mount_point} onChange={e => set({ host_mount_point: e.target.value })}
                         helperText={t('backups.target.hostMountPointHelp',
@@ -242,8 +248,23 @@ const BackupTargetCard: React.FC<{
     versions: string[];
     canManage: boolean;
     onChanged: () => void;
-}> = ({ target, hosts, versions, canManage, onChanged }) => {
+    /** There is more than one target (27.3): name the default. */
+    several?: boolean;
+    /** The Enterprise engine is licensed: another target may become the default. */
+    canMakeDefault?: boolean;
+}> = ({ target, hosts, versions, canManage, onChanged, several = false, canMakeDefault = false }) => {
     const { t } = useTranslation();
+    const [defaultError, setDefaultError] = useState<string | null>(null);
+    const makeDefault = async () => {
+        if (!target) return;
+        setDefaultError(null);
+        try {
+            await setDefaultTarget(target.id);
+            onChanged();
+        } catch (err) {
+            setDefaultError(apiDetail(err, t('backups.targets.defaultError', 'The default target could not be changed.')));
+        }
+    };
     const [open, setOpen] = useState(false);
     const [transportOpen, setTransportOpen] = useState(false);
     const [bandwidthOpen, setBandwidthOpen] = useState(false);
@@ -261,6 +282,18 @@ const BackupTargetCard: React.FC<{
                         <Typography variant="h6" noWrap>
                             {target ? target.name : t('backups.target.none', 'No backup target yet')}
                         </Typography>
+                        {target?.location && (
+                            <Typography variant="body2" color="text.secondary" noWrap>{target.location}</Typography>
+                        )}
+                        {several && target?.is_default && (
+                            <Chip size="small" color="primary" variant="outlined"
+                                label={t('backups.targets.default', 'Default for new hosts')} />
+                        )}
+                        {several && target && (
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                                {t('backups.targets.hostCount', 'Hosts: {{n}}', { n: target.hosts ?? 0 })}
+                            </Typography>
+                        )}
                     </Stack>
                     {canManage && (
                         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="flex-end">
@@ -274,12 +307,18 @@ const BackupTargetCard: React.FC<{
                                     {t('backups.target.changeBandwidth', 'Change bandwidth limits')}
                                 </Button>
                             )}
+                            {several && target && !target.is_default && canMakeDefault && (
+                                <Button variant="outlined" size="small" onClick={makeDefault}>
+                                    {t('backups.targets.makeDefault', 'Make default')}
+                                </Button>
+                            )}
                             <Button variant="outlined" size="small" onClick={() => setOpen(true)}>
                                 {target ? t('backups.target.edit', 'Edit target') : t('backups.target.add', 'Set up target')}
                             </Button>
                         </Stack>
                     )}
                 </Stack>
+                {defaultError && <Alert severity="error" sx={{ mb: 1 }}>{defaultError}</Alert>}
                 {!target && (
                     <Typography variant="body2" color="text.secondary">
                         {t('backups.target.intro',
@@ -301,12 +340,12 @@ const BackupTargetCard: React.FC<{
                             onChange={(_e, expanded) => { setDetailsOpen(expanded); writeOpen(expanded); }}
                             sx={{ mt: 1, bgcolor: 'transparent', '&::before': { display: 'none' } }}>
                             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0, minHeight: 0 }}
-                                aria-controls="backup-target-details" id="backup-target-details-header">
+                                aria-controls={`backup-target-details-${target.id}`} id={`backup-target-details-header-${target.id}`}>
                                 <Typography variant="body2" color="text.secondary">
                                     {t('backups.target.details', 'Details')}
                                 </Typography>
                             </AccordionSummary>
-                            <AccordionDetails sx={{ px: 0, pt: 0 }} id="backup-target-details">
+                            <AccordionDetails sx={{ px: 0, pt: 0 }} id={`backup-target-details-${target.id}`}>
                                 <Typography variant="body2">
                                     {t('backups.target.mountedAt', 'Hosts mount it at')}: <code>{target.host_mount_point}</code>
                                 </Typography>

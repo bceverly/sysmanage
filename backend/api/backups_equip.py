@@ -156,7 +156,7 @@ def backup_reach_check(
                 "This host's agent cannot check that yet; upgrade the agent first"
             ),
         )
-    if reach.storage_address(db) is None:
+    if reach.storage_address(db, host) is None:
         raise HTTPException(status_code=409, detail=_("Set up the backup target first"))
     # None for the storage host itself: it holds the backups, never mounts them.
     command_id = reach.start(db, host, force=True)

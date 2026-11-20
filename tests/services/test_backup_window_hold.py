@@ -149,7 +149,7 @@ def test_the_tick_hands_only_encrypted_policies_to_the_engine(session, monkeypat
     s = _setup(session)
     engine = _Engine()
     monkeypatch.setattr(tick, "_encryption_engine", lambda: engine)
-    target = jobs.the_target(session)
+    target = jobs.default_target(session)
     assert tick.rotate_keys(session, target, NOW) == 0  # nothing encrypted
     assert engine.calls == []
     s.policy.encrypt_public_key = "-----BEGIN PGP PUBLIC KEY BLOCK-----\nk\n"
@@ -162,7 +162,7 @@ def test_no_engine_no_rotation_and_an_engine_failure_never_stops_the_tick(
 ):
     s = _setup(session)
     s.policy.encrypt_public_key = "-----BEGIN PGP PUBLIC KEY BLOCK-----\nk\n"
-    target = jobs.the_target(session)
+    target = jobs.default_target(session)
     monkeypatch.setattr(tick, "_encryption_engine", lambda: None)
     assert tick.rotate_keys(session, target, NOW) == 0
     monkeypatch.setattr(tick, "_encryption_engine", lambda: _Engine(fail=True))

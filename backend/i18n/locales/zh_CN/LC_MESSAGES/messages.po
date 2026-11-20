@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 16:48-0800\n"
+"POT-Creation-Date: 2026-11-20 08:17-0800\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -121,7 +121,7 @@ msgstr "您没有访问所选账户的权限。"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:157
+#: backend/api/posture.py:375 backend/api/backups.py:134
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
@@ -237,8 +237,8 @@ msgstr "无效的主机ID格式"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:169
-#: backend/api/backups.py:172 backend/api/auto_updates.py:238
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:146
+#: backend/api/backups.py:149 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
@@ -324,16 +324,16 @@ msgstr "此服务器上不可用"
 msgid "Cloud backup account not found"
 msgstr "未找到云备份账户"
 
-#: backend/api/cloud_backup.py:136 backend/api/backups.py:193
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:170
 #, python-format
 msgid "%s is out of range"
 msgstr "%s 超出允许范围"
 
-#: backend/api/cloud_backup.py:141 backend/api/backups.py:261
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:174
 msgid "Interval (hours)"
 msgstr "间隔（小时）"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:262
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:175
 msgid "Window start hour"
 msgstr "时间窗口开始小时"
 
@@ -407,6 +407,93 @@ msgstr "UUID 格式无效: %s"
 #, python-format
 msgid "Role with ID %s does not exist"
 msgstr "ID为%s的角色不存在"
+
+#: backend/api/backups_targets.py:77
+msgid "Host mount point"
+msgstr "主机挂载点"
+
+#: backend/api/backups_targets.py:78 backend/api/backups_targets.py:123
+msgid "Storage path"
+msgstr "存储路径"
+
+#: backend/api/backups_targets.py:79
+msgid "Concurrent backups"
+msgstr "同时进行的备份数"
+
+#: backend/api/backups_targets.py:80
+msgid "Days to keep sealed snapshots"
+msgstr "封存快照保留天数"
+
+#: backend/api/backups_targets.py:81
+msgid "Write cache budget"
+msgstr "写入缓存预算"
+
+#: backend/api/backups_targets.py:82
+msgid "Storage space warning"
+msgstr "存储空间警告"
+
+#: backend/api/backups_targets.py:83
+msgid "Storage space critical"
+msgstr "存储空间严重"
+
+#: backend/api/backups_targets.py:87
+msgid "The storage space warning must be below the critical level"
+msgstr "存储空间警告必须低于严重级别"
+
+#: backend/api/backups_targets.py:89
+msgid "The backup service account is not a valid account name"
+msgstr "备份服务账户不是有效的账户名"
+
+#: backend/api/backups_targets.py:91
+msgid "Unknown seal mode"
+msgstr "未知的封存模式"
+
+#: backend/api/backups_targets.py:93
+msgid "A ZFS snapshot seal needs the dataset name"
+msgstr "使用 ZFS 快照封存需要数据集名称"
+
+#: backend/api/backups_targets.py:95
+msgid "The ZFS dataset name is not valid"
+msgstr "ZFS 数据集名称无效"
+
+#: backend/api/backups_targets.py:102
+msgid "A storage host needs the storage path"
+msgstr "存储主机需要存储路径"
+
+#: backend/api/backups_targets.py:119
+msgid "A btrfs snapshot seal needs the snapshot directory"
+msgstr "btrfs 快照封存需要快照目录"
+
+#: backend/api/backups_targets.py:121
+msgid "A btrfs snapshot seal needs the storage path"
+msgstr "btrfs 快照封存需要存储路径"
+
+#: backend/api/backups_targets.py:124
+msgid "Snapshot directory"
+msgstr "快照目录"
+
+#: backend/api/backups_targets.py:129
+#, python-format
+msgid ""
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
+" trailing '/')"
+msgstr "%s 必须是简单的绝对路径（仅限字母、数字、'_'、'.'、'-' 和 '/'；末尾不能有 '/'）"
+
+#: backend/api/backups_targets.py:137
+msgid "The snapshot directory must be outside the storage path"
+msgstr "快照目录必须位于存储路径之外"
+
+#: backend/api/backups_targets.py:251
+msgid "Remove the hosts' backup policies before the target"
+msgstr "请先删除各主机的备份策略，再删除目标"
+
+#: backend/api/backups_targets.py:256
+msgid "A tag policy sends its hosts to this target; change it first"
+msgstr "有标签策略将其主机发送到此目标；请先修改该策略"
+
+#: backend/api/backups_targets.py:261
+msgid "Make another target the default before deleting this one"
+msgstr "删除此目标之前，请先将另一个目标设为默认"
 
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
@@ -1469,8 +1556,8 @@ msgstr "已请求终止进程。列表将很快更新。"
 msgid "Invalid tag_id: %s"
 msgstr "无效的 tag_id: %s"
 
-#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:70
-#: backend/api/backups_tag_policies.py:74 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:74
+#: backend/api/backups_tag_policies.py:78 backend/api/error_constants.py:136
 msgid "Tag not found"
 msgstr "未找到标签"
 
@@ -2602,12 +2689,6 @@ msgstr "NVD API 密钥已成功清除"
 msgid "Failed to clear NVD API key"
 msgstr "清除 NVD API 密钥失败"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:189
-#: backend/api/backups_equip.py:160 backend/api/backups.py:582
-#: backend/services/cloud_backup_jobs.py:128
-msgid "Set up the backup target first"
-msgstr "请先设置备份目标"
-
 #: backend/api/firewall_status.py:157
 #, python-format
 msgid "Failed to retrieve firewall status: %s"
@@ -3034,34 +3115,40 @@ msgstr "没有更早的已发布版本可以进行比较"
 msgid "No published version %s"
 msgstr "未发布版本 %s"
 
-#: backend/api/backups_tag_policies.py:55
+#: backend/api/backups_tag_policies.py:59
 msgid "Backup policies by tag need the Professional+ backup engine"
 msgstr "按标签的备份策略需要 Professional+ 备份引擎"
 
-#: backend/api/backups_tag_policies.py:79
+#: backend/api/backups_tag_policies.py:83
 msgid "Tag policy not found"
 msgstr "未找到标签策略"
 
-#: backend/api/backups_tag_policies.py:95 backend/api/backups_retention.py:67
+#: backend/api/backups_tag_policies.py:99 backend/api/backups_retention.py:67
 #: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s 必须是 0 到 %(max)d 之间的整数"
 
-#: backend/api/backups_tag_policies.py:193
-#: backend/api/backups_tag_policies.py:227
+#: backend/api/backups_tag_policies.py:212 backend/api/backups_equip.py:160
+#: backend/services/cloud_backup_jobs.py:128
+#: backend/services/backup_targets.py:121
+msgid "Set up the backup target first"
+msgstr "请先设置备份目标"
+
+#: backend/api/backups_tag_policies.py:216
+#: backend/api/backups_tag_policies.py:251
 msgid "A tag policy has that name"
 msgstr "已有同名的标签策略"
 
-#: backend/api/backups_tag_policies.py:277
+#: backend/api/backups_tag_policies.py:302
 msgid "This host has no backup policy"
 msgstr "此主机没有备份策略"
 
-#: backend/api/backups_tag_policies.py:278
+#: backend/api/backups_tag_policies.py:303
 msgid "This host already follows its tag policy"
 msgstr "此主机已在使用其标签策略"
 
-#: backend/api/backups_tag_policies.py:280
+#: backend/api/backups_tag_policies.py:305
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr "没有适用于此主机的标签策略；没有可切换的对象"
 
@@ -3195,53 +3282,53 @@ msgstr "为当前操作系统未找到防病毒默认设置"
 msgid "Failed to delete antivirus default: %s"
 msgstr "删除反病毒默认设置失败：%s"
 
-#: backend/api/backups_transport.py:46
+#: backend/api/backups_transport.py:47
 msgid "Unknown transport"
 msgstr "未知的传输方式"
 
-#: backend/api/backups_transport.py:48
+#: backend/api/backups_transport.py:49
 msgid "The proxy address is not a host name or IP address"
 msgstr "网络代理地址不是主机名或 IP 地址"
 
-#: backend/api/backups_transport.py:51
+#: backend/api/backups_transport.py:52
 msgid "The proxy port must be between 1 and 65535"
 msgstr "网络代理端口必须介于 1 到 65535 之间"
 
-#: backend/api/backups_transport.py:54
+#: backend/api/backups_transport.py:55
 msgid "The pinned key must be a SHA-256 in hex (64 characters)"
 msgstr "固定的密钥必须是十六进制的 SHA-256（64 个字符）"
 
-#: backend/api/backups_transport.py:57
+#: backend/api/backups_transport.py:58
 msgid "The proxy's CA must be a PEM certificate"
 msgstr "网络代理的 CA 必须是 PEM 证书"
 
-#: backend/api/backups_transport.py:120
+#: backend/api/backups_transport.py:121
 msgid "Give at most 25 bandwidth rules"
 msgstr "最多指定 25 条带宽规则"
 
-#: backend/api/backups_transport.py:123
+#: backend/api/backups_transport.py:124
 msgid ""
 "A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours"
 " and a rate (08-18 2MiB/s)"
 msgstr "带宽规则是一个速率（512KiB/s、2MiB/s、1GiB/s 或 unlimited），或者时段加速率（08-18 2MiB/s）"
 
-#: backend/api/backups_transport.py:127
+#: backend/api/backups_transport.py:128
 msgid "A bandwidth rate must be at least 64KiB/s"
 msgstr "带宽速率至少为 64KiB/s"
 
-#: backend/api/backups_transport.py:130
+#: backend/api/backups_transport.py:131
 msgid "Give one rate for every other hour, not two"
 msgstr "其他所有时间只能指定一个速率，不能两个"
 
-#: backend/api/backups_transport.py:133
+#: backend/api/backups_transport.py:134
 msgid "Bandwidth hours run from 00 to 24, from one hour to another"
 msgstr "带宽时段从 00 到 24，起止须为不同的整点"
 
-#: backend/api/backups_transport.py:135
+#: backend/api/backups_transport.py:136
 msgid "An hour is in two bandwidth rules"
 msgstr "同一小时出现在两条带宽规则中"
 
-#: backend/api/backups_transport.py:163
+#: backend/api/backups_transport.py:164
 msgid "Bandwidth limits by the hour need the Professional+ backup engine"
 msgstr "按时段的带宽限制需要 Professional+ 备份引擎"
 
@@ -3540,7 +3627,7 @@ msgstr "恢复可用性需要企业备份操作引擎"
 msgid "This host has no backup policy yet"
 msgstr "这个主机还没有备份策略"
 
-#: backend/api/backups_breakglass.py:75
+#: backend/api/backups_breakglass.py:77
 msgid "Paste the OpenPGP public key to seal the export to"
 msgstr "请粘贴用于封存导出的 OpenPGP 公钥"
 
@@ -4199,199 +4286,112 @@ msgstr "KVM 网络仅在 Linux 主机上可用"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "已请求 KVM 网络列表。结果将很快显示。"
 
-#: backend/api/backups.py:188
+#: backend/api/backups.py:165
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s 必须是不含 '..' 的绝对路径"
 
-#: backend/api/backups.py:197
-msgid "Host mount point"
-msgstr "主机挂载点"
-
-#: backend/api/backups.py:198 backend/api/backups.py:243
-msgid "Storage path"
-msgstr "存储路径"
-
-#: backend/api/backups.py:199
-msgid "Concurrent backups"
-msgstr "同时进行的备份数"
-
-#: backend/api/backups.py:200
-msgid "Days to keep sealed snapshots"
-msgstr "封存快照保留天数"
-
-#: backend/api/backups.py:201
-msgid "Write cache budget"
-msgstr "写入缓存预算"
-
-#: backend/api/backups.py:202
-msgid "Storage space warning"
-msgstr "存储空间警告"
-
-#: backend/api/backups.py:203
-msgid "Storage space critical"
-msgstr "存储空间严重"
-
-#: backend/api/backups.py:207
-msgid "The storage space warning must be below the critical level"
-msgstr "存储空间警告必须低于严重级别"
-
-#: backend/api/backups.py:209
-msgid "The backup service account is not a valid account name"
-msgstr "备份服务账户不是有效的账户名"
-
-#: backend/api/backups.py:211
-msgid "Unknown seal mode"
-msgstr "未知的封存模式"
-
-#: backend/api/backups.py:213
-msgid "A ZFS snapshot seal needs the dataset name"
-msgstr "使用 ZFS 快照封存需要数据集名称"
-
-#: backend/api/backups.py:215
-msgid "The ZFS dataset name is not valid"
-msgstr "ZFS 数据集名称无效"
-
-#: backend/api/backups.py:222
-msgid "A storage host needs the storage path"
-msgstr "存储主机需要存储路径"
-
-#: backend/api/backups.py:239
-msgid "A btrfs snapshot seal needs the snapshot directory"
-msgstr "btrfs 快照封存需要快照目录"
-
-#: backend/api/backups.py:241
-msgid "A btrfs snapshot seal needs the storage path"
-msgstr "btrfs 快照封存需要存储路径"
-
-#: backend/api/backups.py:244
-msgid "Snapshot directory"
-msgstr "快照目录"
-
-#: backend/api/backups.py:249
-#, python-format
-msgid ""
-"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
-" trailing '/')"
-msgstr "%s 必须是简单的绝对路径（仅限字母、数字、'_'、'.'、'-' 和 '/'；末尾不能有 '/'）"
-
-#: backend/api/backups.py:257
-msgid "The snapshot directory must be outside the storage path"
-msgstr "快照目录必须位于存储路径之外"
-
-#: backend/api/backups.py:263
+#: backend/api/backups.py:176
 msgid "Snapshots to keep"
 msgstr "保留的快照数"
 
-#: backend/api/backups.py:264
+#: backend/api/backups.py:177
 msgid "Check interval (days)"
 msgstr "检查间隔（天）"
 
-#: backend/api/backups.py:268
+#: backend/api/backups.py:181
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "暂停钩子最多 10 个，且须为简短的小写名称"
 
-#: backend/api/backups.py:281
+#: backend/api/backups.py:194
 msgid "At most 50 path rules can be set"
 msgstr "最多可以设置50条路径规则"
 
-#: backend/api/backups.py:292
+#: backend/api/backups.py:205
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 msgstr "每条路径规则是一行，长度不超过512个字符，不允许有前导或尾随空格或以#开头"
 
-#: backend/api/backups.py:300 backend/api/backups_drift.py:103
+#: backend/api/backups.py:213 backend/api/backups_drift.py:103
 #: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "快照名称无效"
 
-#: backend/api/backups.py:302
+#: backend/api/backups.py:215
 msgid "At most 50 paths can be restored at once"
 msgstr "一次最多只能恢复 50 个路径"
 
-#: backend/api/backups.py:305
+#: backend/api/backups.py:218
 msgid "A restore path is empty or too long"
 msgstr "某个恢复路径为空或过长"
 
-#: backend/api/backups.py:307
+#: backend/api/backups.py:220
 msgid "A restore path must not contain '..'"
 msgstr "恢复路径不得包含 '..'"
 
-#: backend/api/backups.py:313
+#: backend/api/backups.py:226
 msgid "A restore path must be absolute, such as /home/alice/notes.txt"
 msgstr "恢复路径必须是绝对路径，例如 /home/alice/notes.txt"
 
-#: backend/api/backups.py:327
+#: backend/api/backups.py:240
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr "请指定要放回的路径；不能将整个主机恢复到原位置"
 
-#: backend/api/backups.py:333
+#: backend/api/backups.py:246
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr "每个恢复到原位置的路径都必须是具体路径，例如 /etc/nginx"
 
-#: backend/api/backups.py:338
+#: backend/api/backups.py:251
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "请确认主机上这些路径中的文件将被替换"
 
-#: backend/api/backups.py:358 backend/api/backups.py:361
-msgid "Backup target not found"
-msgstr "未找到备份目标"
-
-#: backend/api/backups.py:417
-msgid "This edition supports one backup target; edit the existing one"
-msgstr "此版本仅支持一个备份目标；请编辑现有目标"
-
-#: backend/api/backups.py:494
-msgid "Remove the hosts' backup policies before the target"
-msgstr "请先删除各主机的备份策略，再删除目标"
-
-#: backend/api/backups.py:632
+#: backend/api/backups.py:415
 msgid "No backup policy"
 msgstr "没有备份策略"
 
-#: backend/api/backups.py:656
+#: backend/api/backups.py:439
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "此主机暂时无法运行备份（%s）"
 
-#: backend/api/backups.py:662
+#: backend/api/backups.py:445
 msgid "This host's backup is not configured yet"
 msgstr "此主机的备份尚未配置"
 
-#: backend/api/backups.py:679
+#: backend/api/backups.py:462
 msgid "The backup storage host is not ready"
 msgstr "备份存储主机尚未就绪"
 
-#: backend/api/backups.py:694
+#: backend/api/backups.py:477
 msgid "Unknown backup action"
 msgstr "未知的备份操作"
 
-#: backend/api/backups.py:707
+#: backend/api/backups.py:490
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "加密的存储库无法在存储主机上重新打包"
 
-#: backend/api/backups.py:711
+#: backend/api/backups.py:494
 msgid "That backup job is already queued or running"
 msgstr "该备份作业已在排队或正在运行"
 
-#: backend/api/backups.py:807
+#: backend/api/backups.py:590
 msgid ""
 "This backup is encrypted to your break-glass escrow key, which SysManage "
 "never holds. Restore it by hand with restate and that key, as the server "
 "recovery runbook describes."
 msgstr "此备份使用您的应急托管密钥加密，SysManage 从不持有该密钥。请按服务器恢复手册所述，使用 restate 和该密钥手动恢复。"
 
-#: backend/api/backups.py:826 backend/api/backups_drift.py:114
+#: backend/api/backups.py:609 backend/api/backups_drift.py:114
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "此主机的 restate 尚不支持此操作；请升级 restate"
 
-#: backend/api/backups.py:838
+#: backend/api/backups.py:621
 msgid "This snapshot's repository is no longer kept"
 msgstr "此快照所在的存储库已不再保留"
 
-#: backend/api/backups.py:923 backend/api/backups.py:926
+#: backend/api/backups.py:704 backend/api/backups.py:707
 msgid "Backup run not found"
 msgstr "未找到备份作业"
 
@@ -6176,6 +6176,36 @@ msgstr "双重认证代码为六位数字"
 msgid "The backup target has no storage host to run on"
 msgstr "备份目标没有可运行的存储主机"
 
+#: backend/services/backup_targets.py:33
+msgid "Another backup target has that name"
+msgstr "另一个备份目标已使用该名称"
+
+#: backend/services/backup_targets.py:37
+msgid ""
+"Another backup target already uses that storage path on that storage host, "
+"or one inside it or around it"
+msgstr "另一个备份目标已在该存储主机上使用该存储路径，或其内部或上层的路径"
+
+#: backend/services/backup_targets.py:43
+msgid "Another backup target already uses that host mount point"
+msgstr "另一个备份目标已使用主机上的该挂载点"
+
+#: backend/services/backup_targets.py:62
+msgid ""
+"More than one backup target needs the Enterprise backup operations engine"
+msgstr "使用多个备份目标需要企业版备份运维引擎"
+
+#: backend/services/backup_targets.py:99
+#: backend/services/backup_targets.py:103
+msgid "Backup target not found"
+msgstr "未找到备份目标"
+
+#: backend/services/backup_targets.py:149
+msgid ""
+"This host already has backups on its target; it cannot move to another "
+"target yet"
+msgstr "该主机在其目标上已有备份；暂时无法迁移到其他目标"
+
 #: backend/services/backup_key_release.py:90
 #: backend/services/backup_key_release.py:159
 msgid "No such backup run for this host"
@@ -6218,61 +6248,61 @@ msgid ""
 "Neither host has a file watch list assigned, so there is nothing to compare."
 msgstr "没有主机分配文件监控列表，因此没有可比较的内容。"
 
-#: backend/services/backup_breakglass.py:178
+#: backend/services/backup_breakglass.py:181
 #, python-format
 msgid "gpg failed: %s"
 msgstr "gpg 失败：%s"
 
-#: backend/services/backup_breakglass.py:196
+#: backend/services/backup_breakglass.py:199
 msgid "gpg is not installed on the SysManage server; install GnuPG"
 msgstr "SysManage 服务器上未安装 gpg；请安装 GnuPG"
 
-#: backend/services/backup_breakglass.py:206
-#: backend/services/backup_breakglass.py:229
+#: backend/services/backup_breakglass.py:209
+#: backend/services/backup_breakglass.py:232
 msgid "gpg could not read that public key"
 msgstr "gpg 无法读取该公钥"
 
-#: backend/services/backup_breakglass.py:214
-#: backend/services/backup_breakglass.py:221
+#: backend/services/backup_breakglass.py:217
+#: backend/services/backup_breakglass.py:224
 msgid "Paste one armored OpenPGP public key"
 msgstr "请粘贴一个 ASCII armor 格式的 OpenPGP 公钥"
 
-#: backend/services/backup_breakglass.py:218
-#: backend/services/backup_escrow.py:214
+#: backend/services/backup_breakglass.py:221
+#: backend/services/backup_escrow.py:229
 msgid "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
 msgstr "这是私钥；请粘贴公钥（gpg --armor --export）"
 
-#: backend/services/backup_breakglass.py:238
+#: backend/services/backup_breakglass.py:241
 msgid "Paste exactly one public key, not several"
 msgstr "请粘贴一个公钥，不是一堆公钥"
 
-#: backend/services/backup_breakglass.py:241
+#: backend/services/backup_breakglass.py:244
 msgid "That key is expired, revoked or not valid"
 msgstr "该密钥已过期、被撤销或无效"
 
-#: backend/services/backup_breakglass.py:244
+#: backend/services/backup_breakglass.py:247
 msgid "That key cannot encrypt (it has no usable encryption key)"
 msgstr "该密钥无法加密（它没有可用的加密密钥）"
 
-#: backend/services/backup_breakglass.py:261
+#: backend/services/backup_breakglass.py:264
 #, python-format
 msgid "Say why the keys are exported, in %(min)d to %(max)d characters"
 msgstr "请用 %(min)d 到 %(max)d 个字符说明为什么要导出密钥"
 
-#: backend/services/backup_breakglass.py:323
+#: backend/services/backup_breakglass.py:326
 #, python-format
 msgid "OpenBAO does not hold every backup key of %s; nothing was exported"
 msgstr "OpenBAO不持有每一次备份的密钥 %s；没有内容被导出"
 
-#: backend/services/backup_breakglass.py:428
+#: backend/services/backup_breakglass.py:457
 msgid "gpg did not seal the key export"
 msgstr "gpg 未能封存密钥导出"
 
-#: backend/services/backup_breakglass.py:439
+#: backend/services/backup_breakglass.py:468
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "没有选择的主机有加密备份"
 
-#: backend/services/backup_reach.py:147
+#: backend/services/backup_reach.py:148
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6282,7 +6312,7 @@ msgstr ""
 "此主机无法连接备份存储的 restate-proxy（%(address)s，端口 "
 "%(port)s）：%(error)s。备份需要一条通往它的网络路径，以及此主机信任的证书。"
 
-#: backend/services/backup_reach.py:157
+#: backend/services/backup_reach.py:158
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6293,18 +6323,18 @@ msgstr ""
 "此主机位于 NAT 之后：备份存储（%(storage)s）将其视为 %(seen)s，而不是 "
 "%(address)s，因此拒绝挂载。请将主机接入存储主机所在的网络（虚拟机使用桥接网络），而不要放在其 NAT 之后。"
 
-#: backend/services/backup_reach.py:167
+#: backend/services/backup_reach.py:168
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "
 "port %(port)s). Backups need a network path to it."
 msgstr "此主机无法访问备份存储（%(storage)s、%(address)s、NFS 端口 %(port)s）。备份需要一条通往它的网络路径。"
 
-#: backend/services/backup_escrow.py:283
+#: backend/services/backup_escrow.py:298
 msgid "Backup keys rotated: make a new break-glass export"
 msgstr "备份密钥已轮换：请重新进行应急密钥导出"
 
-#: backend/services/backup_escrow.py:285
+#: backend/services/backup_escrow.py:300
 #, python-format
 msgid ""
 "SysManage rotated %(count)d backup encryption key(s) on schedule. A break-glass export made before this rotation does not hold the new keys, and backups taken from now on need them.\n"
@@ -6516,6 +6546,9 @@ msgstr "NetBSD pkgsrc 软件包漏洞（pkg_admin audit 读取的数据）"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "按操作系统版本列出的 macOS 漏洞（来自 NVD 的受影响版本数据）"
+
+#~ msgid "This edition supports one backup target; edit the existing one"
+#~ msgstr "此版本仅支持一个备份目标；请编辑现有目标"
 
 #, python-format
 #~ msgid ""

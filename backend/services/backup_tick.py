@@ -383,9 +383,11 @@ def start_requested(db: Session, actor: str = jobs.SYSTEM_ACTOR) -> int:
     capture calls this again, and so does every tick.  A request a host can
     no longer run is dropped, loudly."""
     db.flush()
-    target = jobs.the_target(db)
-    if target is None:
-        return 0
+    return sum(_start_requested_on(db, target, actor) for target in jobs.targets(db))
+
+
+def _start_requested_on(db: Session, target, actor: str) -> int:
+    """start_requested for one target: each has its own concurrency."""
     free = max(1, target.max_concurrent or 1) - running_captures(db, target.id)
     started = 0
     for policy in _requested(db, target):
@@ -414,14 +416,12 @@ def configure_now(db: Session) -> None:
     target or policy takes effect while the operator is watching.  Queues
     configuration only -- never a capture."""
     db.flush()
-    target = jobs.the_target(db)
-    if target is None:
-        return
-    storage_ready = _eligible(jobs.storage_host(db, target))
-    for policy in _target_policies(db, target):
-        host = _policy_host(db, policy)
-        if _eligible(host):
-            _configure(db, policy, target, host, storage_ready)
+    for target in jobs.targets(db):
+        storage_ready = _eligible(jobs.storage_host(db, target))
+        for policy in _target_policies(db, target):
+            host = _policy_host(db, policy)
+            if _eligible(host):
+                _configure(db, policy, target, host, storage_ready)
 
 
 def reconcile(db: Session, now: Optional[datetime] = None) -> int:
@@ -439,19 +439,30 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
     if removed:
         logger.info("Backup job history: removed %d runs older than %d days",
                     removed, jobs.RUN_RETENTION_DAYS)  # fmt: skip
-    target = jobs.the_target(db)
-    if target is None:
+    default = jobs.default_target(db)
+    if default is None:
         return 0
     # Tag policies first (Pro+ 24.6): a host tagged since the last pass gets
     # its policy, and its job files, on this same pass.
     tag_policies.resolve(db)
-    # Then keys, so a rotated key's job files go out on this same pass.
+    queued = start_requested(db)  # asked for first, then the schedule
+    for target in jobs.targets(db):  # several are Enterprise (27.3)
+        queued += _reconcile_target(db, target, now)
+    # iCloud Photos to local (24.12), on the default target's storage host:
+    # never raises.
+    queued += cloud_tick.reconcile(db, default, now)
+    return queued + reach_checks(db, now)
+
+
+def _reconcile_target(db: Session, target, now: datetime) -> int:
+    """One target's share of a pass: its keys, grants and policies."""
+    # Keys first, so a rotated key's job files go out on this same pass.
     rotate_keys(db, target, now)
     # restate-proxy (25.5): a host joined, left or was deleted -- re-send the
     # storage host's grants on this same pass.
     backup_proxy.sync_clients(db, target)
     storage_ready = _eligible(jobs.storage_host(db, target))
-    queued = start_requested(db)  # asked for first, then the schedule
+    queued = 0
     for policy in _target_policies(db, target):
         host = _policy_host(db, policy)
         if not _eligible(host):
@@ -463,9 +474,7 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
         if storage_ready and _storage_upkeep(db, policy, target, now):
             queued += 1
         queued += int(verify.maybe_verify(db, policy, host, now))
-    # iCloud Photos to local (24.12), on the storage host: never raises.
-    queued += cloud_tick.reconcile(db, target, now)
-    return queued + reach_checks(db, now)
+    return queued
 
 
 def reach_checks(db: Session, now: datetime) -> int:

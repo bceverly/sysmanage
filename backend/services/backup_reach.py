@@ -68,12 +68,13 @@ RECHECK_AFTER = timedelta(days=1)
 ANSWER_WITHIN = timedelta(minutes=10)
 
 
-def storage_address(db: Session) -> Optional[Dict[str, Any]]:
-    """``{"address", "port", "host_id", "fqdn", "proxy"}`` of what hosts must
-    reach: the storage host as they mount from it (its IPv4, port 2049,
-    backup_jobs.nfs_source), or the target's restate-proxy (``proxy``: what
-    the agent's TLS check needs).  None when there is no storage host."""
-    target = jobs.the_target(db)
+def storage_address(db: Session, host: models.Host) -> Optional[Dict[str, Any]]:
+    """``{"address", "port", "host_id", "fqdn", "proxy"}`` of what ``host``
+    must reach: the storage host of ITS target (27.3: each host has one) as
+    it mounts from it (its IPv4, port 2049, backup_jobs.nfs_source), or the
+    target's restate-proxy (``proxy``: what the agent's TLS check needs).
+    None when there is no storage host."""
+    target = jobs.host_target(db, host)
     storage = jobs.storage_host(db, target)
     if storage is None:
         return None
@@ -109,7 +110,7 @@ def can_check(host: models.Host) -> bool:
 
 def state(db: Session, host: models.Host) -> Optional[Dict[str, Any]]:
     """The last answer for the current storage address, or None (unknown)."""
-    storage = storage_address(db)
+    storage = storage_address(db, host)
     row = _row(db, host.id)
     if storage is None or row is None or not _same(row, storage):
         return None
@@ -176,7 +177,7 @@ def message(db: Session, host: models.Host) -> str:
 def due(db: Session, host: models.Host, now=None) -> bool:
     """A check is wanted: none for the current address, the last one is a
     day old, or one asked for went unanswered."""
-    storage = storage_address(db)
+    storage = storage_address(db, host)
     if storage is None or str(storage["host_id"]) == str(host.id):
         return False  # the storage host does not mount its own storage
     now = now or jobs.now()
@@ -195,7 +196,7 @@ def start(db: Session, host: models.Host, force: bool = False) -> Optional[str]:
     from backend.services.config_mgmt_dispatch import queue_command  # noqa: PLC0415
     from backend.websocket.messages import CommandType  # noqa: PLC0415
 
-    storage = storage_address(db)
+    storage = storage_address(db, host)
     if storage is None or not can_check(host) or not (force or due(db, host)):
         return None
     if str(storage["host_id"]) == str(host.id):
@@ -324,7 +325,8 @@ def _ask_storage_for_peers(db: Session, row: models.BackupReach) -> None:
     from backend.services.config_mgmt_dispatch import queue_command  # noqa: PLC0415
     from backend.websocket.messages import CommandType  # noqa: PLC0415
 
-    storage = storage_address(db)
+    host = _storage_host(db, row.host_id)
+    storage = storage_address(db, host) if host is not None else None
     if storage is None or storage["address"] != row.address:
         return
     if not _storage_lists_peers(db, storage["host_id"]):
@@ -360,7 +362,8 @@ def record_peers(db: Session, storage_id: Any, message_data: Dict[str, Any]) -> 
         if command_id
         else None
     )
-    storage = storage_address(db)
+    asker = _storage_host(db, row.host_id) if row is not None else None
+    storage = storage_address(db, asker) if asker is not None else None
     if row is None or storage is None or str(storage["host_id"]) != str(storage_id):
         logger.warning(
             "list_nfs_peers result from host %s for unknown command %s ignored",

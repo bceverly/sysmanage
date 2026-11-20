@@ -144,6 +144,12 @@ export interface BackupTarget {
   proxy_bandwidth?: ProxyBandwidth;
   id: string;
   name: string;
+  /** Where it is: a site, room or building (several targets, Enterprise). */
+  location?: string | null;
+  /** New host policies go to the default target unless they name another. */
+  is_default?: boolean;
+  /** How many host policies back up to it. */
+  hosts?: number;
   host_mount_point: string;
   storage_host_id: string | null;
   storage_hostname: string | null;
@@ -176,6 +182,7 @@ export interface BackupTarget {
 
 export interface TargetInput {
   name: string;
+  location?: string | null;
   host_mount_point: string;
   storage_host_id: string | null;
   storage_path: string | null;
@@ -207,6 +214,8 @@ export interface NetworkMounts {
 export interface BackupPolicy {
   id: string;
   host_id: string;
+  /** The target its repository is on. */
+  target_id?: string;
   /** The SysManage server's own backup (25.9). */
   server_preset?: boolean;
   enabled: boolean;
@@ -270,7 +279,11 @@ export type PolicyInput = Pick<
   | "quiesce_with"
   | "keep_paths"
   | "skip_paths"
->;
+> & {
+  /** Its target (Enterprise for any but the default); omitted keeps the one
+   *  it has, or gives a new policy the default. */
+  target_id?: string | null;
+};
 
 export interface BackupProgress {
   phase?: string | null;
@@ -426,7 +439,10 @@ export interface FirstFit {
 }
 
 export interface BackupOverview {
+  /** The default target (null before one is set up). */
   target: BackupTarget | null;
+  /** Every target, the default first (several are Enterprise). */
+  targets?: BackupTarget[];
   hosts: BackupHost[];
   counts: Partial<Record<BackupStatus, number>>;
   restate_versions: string[];
@@ -544,6 +560,23 @@ export const saveTarget = async (
     ? (await axiosInstance.put<BackupTarget>(`${base}/backups/targets/${id}`, input)).data
     : (await axiosInstance.post<BackupTarget>(`${base}/backups/targets`, input)).data;
 
+/** Every target in a line, the default first: for pickers. */
+export interface TargetBrief {
+  id: string;
+  name: string;
+  location: string | null;
+  is_default: boolean;
+  hosts: number;
+  tag_policies: number;
+}
+
+export const listTargets = async (): Promise<TargetBrief[]> =>
+  (await axiosInstance.get<TargetBrief[]>(`${base}/backups/targets`)).data;
+
+/** Where new host policies go (Enterprise while there are several). */
+export const setDefaultTarget = async (id: string): Promise<BackupTarget> =>
+  (await axiosInstance.put<BackupTarget>(`${base}/backups/targets/${id}/default`)).data;
+
 /** Switch how hosts reach the storage; every host's jobs are re-sent. */
 export const setTransport = async (
   targetId: string,
@@ -621,8 +654,8 @@ export interface BulkSetupResult {
 }
 
 /** Give each picked equipped host without a policy the default policy. */
-export const bulkSetupBackups = async (hostIds: string[]): Promise<BulkSetupResult> =>
-  (await axiosInstance.post<BulkSetupResult>(`${base}/backups/setup`, { host_ids: hostIds })).data;
+export const bulkSetupBackups = async (hostIds: string[], targetId?: string | null): Promise<BulkSetupResult> =>
+  (await axiosInstance.post<BulkSetupResult>(`${base}/backups/setup`, { host_ids: hostIds, target_id: targetId ?? null })).data;
 
 /** Ask the host's agent whether it can run restate now ("Check again"). */
 /** Check again whether the host can reach the backup storage. */

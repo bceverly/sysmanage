@@ -32,7 +32,6 @@ from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_escrow
-from backend.services import backup_jobs as jobs
 from backend.services import backup_server
 from backend.services import backup_views as views
 from backend.services.audit_service import EntityType
@@ -70,7 +69,7 @@ def put_server_policy(
     host = _host_or_404(db, body.host_id)
     body.quiesce = True  # the databases are always paused (and enforced)
     engine = backup_escrow.backup_engine()
-    target = jobs.the_target(db)
+    target = backup_escrow.escrow_target(db)
     if engine is not None and target is not None and not target.escrow_fingerprint:
         # Pro+: never an unencrypted server backup, and never one keyed from
         # the OpenBAO it holds a copy of.

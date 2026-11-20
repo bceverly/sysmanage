@@ -32,12 +32,12 @@ from backend.api.backups import (
     _require,
 )
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
-from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_jobs as jobs
 from backend.services import backup_reach as reach
+from backend.services import backup_targets as targets
 from backend.services import backup_tick
 from backend.services.audit_service import EntityType
 
@@ -56,6 +56,8 @@ COMMUNITY_KEEP_LAST = 30
 
 class BulkSetupBody(BaseModel):
     host_ids: List[str] = Field(min_length=1, max_length=500)
+    # Their target (27.3, Enterprise for any but the default); None = default.
+    target_id: Optional[str] = None
 
 
 def default_body(storage_abilities: Optional[List[str]] = None) -> PolicyBody:
@@ -89,9 +91,7 @@ def bulk_backup_setup(
     """Give each picked host that can run backups, and has no policy, the
     default policy; the rest come back with why."""
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
-    target = jobs.the_target(db)
-    if target is None:
-        raise HTTPException(status_code=409, detail=_("Set up the backup target first"))
+    target = targets.chosen(db, body.target_id)
     defaults = default_body(jobs.target_storage_abilities(db, target.id))
     gfs = retention.gfs_values(defaults)
     created, skipped = 0, []
@@ -125,7 +125,7 @@ def bulk_backup_setup(
             host.id,
             host.fqdn,
             "Backup policy set (bulk setup with the defaults)",
-            defaults.model_dump(),
+            defaults.model_dump() | {"target": target.name},
         )
     if created:
         backup_tick.configure_now(db)

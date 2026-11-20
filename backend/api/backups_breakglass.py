@@ -32,7 +32,7 @@ from backend.security.roles import SecurityRoles
 from backend.services import backup_breakglass as breakglass
 from backend.services import backup_jobs as jobs
 from backend.services.audit_service import EntityType
-from backend.services.backup_escrow import BREAK_GLASS_AUDIT
+from backend.services.backup_escrow import BREAK_GLASS_AUDIT, escrow_target
 
 router = APIRouter(dependencies=[Depends(JWTBearer())])
 
@@ -50,7 +50,7 @@ class BreakGlassBody(BaseModel):
 
 @router.get("/backups/break-glass")
 def break_glass_info(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
-    target = jobs.the_target(db)
+    target = escrow_target(db)
     pairs = breakglass.encrypted_pairs(db)
     return {
         "available": bool(pairs),
@@ -67,8 +67,10 @@ def break_glass_export(
 ) -> Response:
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
     _require(current_user, SecurityRoles.RESTORE_FILES)
-    target = jobs.the_target(db)
-    recipient = body.recipient_key or getattr(target, "escrow_public_key", None)
+    target = jobs.default_target(db)  # each host's own target is in the export
+    recipient = body.recipient_key or getattr(
+        escrow_target(db), "escrow_public_key", None
+    )
     if not recipient:
         raise HTTPException(
             status_code=422,

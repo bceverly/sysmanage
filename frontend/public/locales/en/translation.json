@@ -5677,7 +5677,9 @@
       "cacheBudgetHelp": "restate keeps an unencrypted write cache on each host of an encrypted repository; a host over this is flagged.",
       "changeTransport": "Change how hosts reach storage",
       "changeBandwidth": "Change bandwidth limits",
-      "details": "Details"
+      "details": "Details",
+      "location": "Location (optional)",
+      "locationHelp": "Where it is: a site, room or building."
     },
     "title": "Backups",
     "warning": {
@@ -6090,6 +6092,18 @@
       "released": "Released by {{who}} {{when}}",
       "snapshot": "Snapshot",
       "title": "Place a legal hold on a snapshot of {{host}}"
+    },
+    "targets": {
+      "add": "Add another target",
+      "default": "Default for new hosts",
+      "defaultError": "The default target could not be changed.",
+      "followDefault": "The default ({{name}})",
+      "hostCount": "Hosts: {{n}}",
+      "makeDefault": "Make default",
+      "picker": "Backup target",
+      "pickerHelp": "Where this backup is stored.",
+      "pickerUnlicensed": "Choosing another target needs the Enterprise license; a host keeps the target it has.",
+      "tagHelp": "Where its hosts back up. A host that already has backups stays on its target."
     }
   },
   "cloudBackup": {

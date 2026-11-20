@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 16:48-0800\n"
+"POT-Creation-Date: 2026-11-20 08:17-0800\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -125,7 +125,7 @@ msgstr "선택한 계정에 액세스 권한이 없습니다."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:157
+#: backend/api/posture.py:375 backend/api/backups.py:134
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
@@ -241,8 +241,8 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:169
-#: backend/api/backups.py:172 backend/api/auto_updates.py:238
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:146
+#: backend/api/backups.py:149 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
@@ -328,16 +328,16 @@ msgstr "이 서버에서는 사용할 수 없습니다"
 msgid "Cloud backup account not found"
 msgstr "클라우드 백업 계정을 찾을 수 없습니다"
 
-#: backend/api/cloud_backup.py:136 backend/api/backups.py:193
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:170
 #, python-format
 msgid "%s is out of range"
 msgstr "%s이(가) 허용 범위를 벗어났습니다"
 
-#: backend/api/cloud_backup.py:141 backend/api/backups.py:261
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:174
 msgid "Interval (hours)"
 msgstr "간격 (시간)"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:262
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:175
 msgid "Window start hour"
 msgstr "시간대 시작 시각"
 
@@ -411,6 +411,93 @@ msgstr "잘못된 UUID 형식: %s"
 #, python-format
 msgid "Role with ID %s does not exist"
 msgstr "ID %s의 역할이 존재하지 않습니다"
+
+#: backend/api/backups_targets.py:77
+msgid "Host mount point"
+msgstr "호스트 마운트 지점"
+
+#: backend/api/backups_targets.py:78 backend/api/backups_targets.py:123
+msgid "Storage path"
+msgstr "스토리지 경로"
+
+#: backend/api/backups_targets.py:79
+msgid "Concurrent backups"
+msgstr "동시 백업 수"
+
+#: backend/api/backups_targets.py:80
+msgid "Days to keep sealed snapshots"
+msgstr "봉인된 스냅샷 보관 일수"
+
+#: backend/api/backups_targets.py:81
+msgid "Write cache budget"
+msgstr "쓰기 캐시 한도"
+
+#: backend/api/backups_targets.py:82
+msgid "Storage space warning"
+msgstr "스토리지 공간 경고"
+
+#: backend/api/backups_targets.py:83
+msgid "Storage space critical"
+msgstr "스토리지 공간 심각"
+
+#: backend/api/backups_targets.py:87
+msgid "The storage space warning must be below the critical level"
+msgstr "스토리지 공간 경고는 심각 수준보다 낮아야 합니다"
+
+#: backend/api/backups_targets.py:89
+msgid "The backup service account is not a valid account name"
+msgstr "백업 서비스 계정이 유효한 계정 이름이 아닙니다"
+
+#: backend/api/backups_targets.py:91
+msgid "Unknown seal mode"
+msgstr "알 수 없는 봉인 모드입니다"
+
+#: backend/api/backups_targets.py:93
+msgid "A ZFS snapshot seal needs the dataset name"
+msgstr "ZFS 스냅샷 봉인에는 데이터 세트 이름이 필요합니다"
+
+#: backend/api/backups_targets.py:95
+msgid "The ZFS dataset name is not valid"
+msgstr "ZFS 데이터 세트 이름이 올바르지 않습니다"
+
+#: backend/api/backups_targets.py:102
+msgid "A storage host needs the storage path"
+msgstr "스토리지 호스트에는 스토리지 경로가 필요합니다"
+
+#: backend/api/backups_targets.py:119
+msgid "A btrfs snapshot seal needs the snapshot directory"
+msgstr "btrfs 스냅샷 봉인에는 스냅샷 디렉터리가 필요합니다"
+
+#: backend/api/backups_targets.py:121
+msgid "A btrfs snapshot seal needs the storage path"
+msgstr "btrfs 스냅샷 봉인에는 스토리지 경로가 필요합니다"
+
+#: backend/api/backups_targets.py:124
+msgid "Snapshot directory"
+msgstr "스냅샷 디렉터리"
+
+#: backend/api/backups_targets.py:129
+#, python-format
+msgid ""
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
+" trailing '/')"
+msgstr "%s은(는) 단순한 절대 경로여야 합니다(문자, 숫자, '_', '.', '-', '/'만 사용, 끝에 '/' 없음)"
+
+#: backend/api/backups_targets.py:137
+msgid "The snapshot directory must be outside the storage path"
+msgstr "스냅샷 디렉터리는 스토리지 경로 바깥에 있어야 합니다"
+
+#: backend/api/backups_targets.py:251
+msgid "Remove the hosts' backup policies before the target"
+msgstr "대상을 삭제하기 전에 호스트의 백업 정책을 제거하세요"
+
+#: backend/api/backups_targets.py:256
+msgid "A tag policy sends its hosts to this target; change it first"
+msgstr "태그 정책이 해당 호스트를 이 대상으로 보내고 있습니다. 먼저 그 정책을 변경하세요"
+
+#: backend/api/backups_targets.py:261
+msgid "Make another target the default before deleting this one"
+msgstr "이 대상을 삭제하기 전에 다른 대상을 기본값으로 지정하세요"
 
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
@@ -1477,8 +1564,8 @@ msgstr "프로세스 종료를 요청했습니다. 목록이 곧 업데이트됩
 msgid "Invalid tag_id: %s"
 msgstr "잘못된 tag_id: %s"
 
-#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:70
-#: backend/api/backups_tag_policies.py:74 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:74
+#: backend/api/backups_tag_policies.py:78 backend/api/error_constants.py:136
 msgid "Tag not found"
 msgstr "태그를 찾을 수 없습니다"
 
@@ -2632,12 +2719,6 @@ msgstr "NVD API 키가 성공적으로 초기화되었습니다"
 msgid "Failed to clear NVD API key"
 msgstr "NVD API 키 지우기 실패"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:189
-#: backend/api/backups_equip.py:160 backend/api/backups.py:582
-#: backend/services/cloud_backup_jobs.py:128
-msgid "Set up the backup target first"
-msgstr "먼저 백업 대상을 설정하세요"
-
 #: backend/api/firewall_status.py:157
 #, python-format
 msgid "Failed to retrieve firewall status: %s"
@@ -3067,34 +3148,40 @@ msgstr "비교할 이전에 공개된 버전이 없습니다"
 msgid "No published version %s"
 msgstr "공개된 버전 %s이 없습니다"
 
-#: backend/api/backups_tag_policies.py:55
+#: backend/api/backups_tag_policies.py:59
 msgid "Backup policies by tag need the Professional+ backup engine"
 msgstr "태그별 백업 정책에는 Professional+ 백업 엔진이 필요합니다"
 
-#: backend/api/backups_tag_policies.py:79
+#: backend/api/backups_tag_policies.py:83
 msgid "Tag policy not found"
 msgstr "태그 정책을 찾을 수 없습니다"
 
-#: backend/api/backups_tag_policies.py:95 backend/api/backups_retention.py:67
+#: backend/api/backups_tag_policies.py:99 backend/api/backups_retention.py:67
 #: backend/api/backups_retention.py:103
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s은(는) 0부터 %(max)d까지의 정수여야 합니다"
 
-#: backend/api/backups_tag_policies.py:193
-#: backend/api/backups_tag_policies.py:227
+#: backend/api/backups_tag_policies.py:212 backend/api/backups_equip.py:160
+#: backend/services/cloud_backup_jobs.py:128
+#: backend/services/backup_targets.py:121
+msgid "Set up the backup target first"
+msgstr "먼저 백업 대상을 설정하세요"
+
+#: backend/api/backups_tag_policies.py:216
+#: backend/api/backups_tag_policies.py:251
 msgid "A tag policy has that name"
 msgstr "같은 이름의 태그 정책이 이미 있습니다"
 
-#: backend/api/backups_tag_policies.py:277
+#: backend/api/backups_tag_policies.py:302
 msgid "This host has no backup policy"
 msgstr "이 호스트에는 백업 정책이 없습니다"
 
-#: backend/api/backups_tag_policies.py:278
+#: backend/api/backups_tag_policies.py:303
 msgid "This host already follows its tag policy"
 msgstr "이 호스트는 이미 태그 정책을 따르고 있습니다"
 
-#: backend/api/backups_tag_policies.py:280
+#: backend/api/backups_tag_policies.py:305
 msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr "이 호스트에 적용되는 태그 정책이 없어 전환할 대상이 없습니다"
 
@@ -3232,31 +3319,31 @@ msgstr "이 운영 체제에 대한 기본_ANTIVIRUS_설정을 찾을 수 없습
 msgid "Failed to delete antivirus default: %s"
 msgstr "디폴트 악성코드 제거 프로그램 삭제 실패: %s"
 
-#: backend/api/backups_transport.py:46
+#: backend/api/backups_transport.py:47
 msgid "Unknown transport"
 msgstr "알 수 없는 전송 방식"
 
-#: backend/api/backups_transport.py:48
+#: backend/api/backups_transport.py:49
 msgid "The proxy address is not a host name or IP address"
 msgstr "프록시 주소가 호스트 이름 또는 IP 주소가 아닙니다"
 
-#: backend/api/backups_transport.py:51
+#: backend/api/backups_transport.py:52
 msgid "The proxy port must be between 1 and 65535"
 msgstr "프록시 포트는 1에서 65535 사이여야 합니다"
 
-#: backend/api/backups_transport.py:54
+#: backend/api/backups_transport.py:55
 msgid "The pinned key must be a SHA-256 in hex (64 characters)"
 msgstr "고정된 키는 16진수 SHA-256(64자)이어야 합니다"
 
-#: backend/api/backups_transport.py:57
+#: backend/api/backups_transport.py:58
 msgid "The proxy's CA must be a PEM certificate"
 msgstr "프록시의 CA는 PEM 인증서여야 합니다"
 
-#: backend/api/backups_transport.py:120
+#: backend/api/backups_transport.py:121
 msgid "Give at most 25 bandwidth rules"
 msgstr "대역폭 규칙은 최대 25개까지 지정하십시오"
 
-#: backend/api/backups_transport.py:123
+#: backend/api/backups_transport.py:124
 msgid ""
 "A bandwidth rule is a rate (512KiB/s, 2MiB/s, 1GiB/s or unlimited), or hours"
 " and a rate (08-18 2MiB/s)"
@@ -3264,23 +3351,23 @@ msgstr ""
 "대역폭 규칙은 속도(512KiB/s, 2MiB/s, 1GiB/s 또는 unlimited)이거나 시간대와 속도(08-18 "
 "2MiB/s)입니다"
 
-#: backend/api/backups_transport.py:127
+#: backend/api/backups_transport.py:128
 msgid "A bandwidth rate must be at least 64KiB/s"
 msgstr "대역폭 속도는 최소 64KiB/s여야 합니다"
 
-#: backend/api/backups_transport.py:130
+#: backend/api/backups_transport.py:131
 msgid "Give one rate for every other hour, not two"
 msgstr "그 밖의 모든 시간에 대한 속도는 하나만 지정하십시오"
 
-#: backend/api/backups_transport.py:133
+#: backend/api/backups_transport.py:134
 msgid "Bandwidth hours run from 00 to 24, from one hour to another"
 msgstr "대역폭 시간은 00부터 24까지이며 시작과 끝은 서로 다른 시각이어야 합니다"
 
-#: backend/api/backups_transport.py:135
+#: backend/api/backups_transport.py:136
 msgid "An hour is in two bandwidth rules"
 msgstr "한 시간이 두 대역폭 규칙에 들어 있습니다"
 
-#: backend/api/backups_transport.py:163
+#: backend/api/backups_transport.py:164
 msgid "Bandwidth limits by the hour need the Professional+ backup engine"
 msgstr "시간대별 대역폭 제한에는 Professional+ 백업 엔진이 필요합니다"
 
@@ -3583,7 +3670,7 @@ msgstr "복원 준비에는 엔터프라이즈 백업 운영 엔진이 필요합
 msgid "This host has no backup policy yet"
 msgstr "이 호스트는 아직 백업 정책이 설정되지 않았습니다."
 
-#: backend/api/backups_breakglass.py:75
+#: backend/api/backups_breakglass.py:77
 msgid "Paste the OpenPGP public key to seal the export to"
 msgstr "내보내기를 봉인할 OpenPGP 공개 키를 붙여넣으십시오"
 
@@ -4247,183 +4334,96 @@ msgstr "KVM 네트워크는 Linux 호스트에서만 사용할 수 있습니다"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "KVM 네트워크 목록이 요청되었습니다. 결과가 곧 표시됩니다."
 
-#: backend/api/backups.py:188
+#: backend/api/backups.py:165
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s은(는) '..'이 없는 절대 경로여야 합니다"
 
-#: backend/api/backups.py:197
-msgid "Host mount point"
-msgstr "호스트 마운트 지점"
-
-#: backend/api/backups.py:198 backend/api/backups.py:243
-msgid "Storage path"
-msgstr "스토리지 경로"
-
-#: backend/api/backups.py:199
-msgid "Concurrent backups"
-msgstr "동시 백업 수"
-
-#: backend/api/backups.py:200
-msgid "Days to keep sealed snapshots"
-msgstr "봉인된 스냅샷 보관 일수"
-
-#: backend/api/backups.py:201
-msgid "Write cache budget"
-msgstr "쓰기 캐시 한도"
-
-#: backend/api/backups.py:202
-msgid "Storage space warning"
-msgstr "스토리지 공간 경고"
-
-#: backend/api/backups.py:203
-msgid "Storage space critical"
-msgstr "스토리지 공간 심각"
-
-#: backend/api/backups.py:207
-msgid "The storage space warning must be below the critical level"
-msgstr "스토리지 공간 경고는 심각 수준보다 낮아야 합니다"
-
-#: backend/api/backups.py:209
-msgid "The backup service account is not a valid account name"
-msgstr "백업 서비스 계정이 유효한 계정 이름이 아닙니다"
-
-#: backend/api/backups.py:211
-msgid "Unknown seal mode"
-msgstr "알 수 없는 봉인 모드입니다"
-
-#: backend/api/backups.py:213
-msgid "A ZFS snapshot seal needs the dataset name"
-msgstr "ZFS 스냅샷 봉인에는 데이터 세트 이름이 필요합니다"
-
-#: backend/api/backups.py:215
-msgid "The ZFS dataset name is not valid"
-msgstr "ZFS 데이터 세트 이름이 올바르지 않습니다"
-
-#: backend/api/backups.py:222
-msgid "A storage host needs the storage path"
-msgstr "스토리지 호스트에는 스토리지 경로가 필요합니다"
-
-#: backend/api/backups.py:239
-msgid "A btrfs snapshot seal needs the snapshot directory"
-msgstr "btrfs 스냅샷 봉인에는 스냅샷 디렉터리가 필요합니다"
-
-#: backend/api/backups.py:241
-msgid "A btrfs snapshot seal needs the storage path"
-msgstr "btrfs 스냅샷 봉인에는 스토리지 경로가 필요합니다"
-
-#: backend/api/backups.py:244
-msgid "Snapshot directory"
-msgstr "스냅샷 디렉터리"
-
-#: backend/api/backups.py:249
-#, python-format
-msgid ""
-"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
-" trailing '/')"
-msgstr "%s은(는) 단순한 절대 경로여야 합니다(문자, 숫자, '_', '.', '-', '/'만 사용, 끝에 '/' 없음)"
-
-#: backend/api/backups.py:257
-msgid "The snapshot directory must be outside the storage path"
-msgstr "스냅샷 디렉터리는 스토리지 경로 바깥에 있어야 합니다"
-
-#: backend/api/backups.py:263
+#: backend/api/backups.py:176
 msgid "Snapshots to keep"
 msgstr "보존할 스냅샷 수"
 
-#: backend/api/backups.py:264
+#: backend/api/backups.py:177
 msgid "Check interval (days)"
 msgstr "검사 간격 (일)"
 
-#: backend/api/backups.py:268
+#: backend/api/backups.py:181
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "일시 중지 후크는 소문자로 된 짧은 이름 최대 10개여야 합니다"
 
-#: backend/api/backups.py:281
+#: backend/api/backups.py:194
 msgid "At most 50 path rules can be set"
 msgstr "경로 규칙은 최대 50개까지 설정할 수 있습니다"
 
-#: backend/api/backups.py:292
+#: backend/api/backups.py:205
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 msgstr "각 경로 규칙은 앞뒤 공백이나 #으로 시작하지 않는 512자 이내의 한 줄입니다"
 
-#: backend/api/backups.py:300 backend/api/backups_drift.py:103
+#: backend/api/backups.py:213 backend/api/backups_drift.py:103
 #: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "스냅샷 이름이 올바르지 않습니다"
 
-#: backend/api/backups.py:302
+#: backend/api/backups.py:215
 msgid "At most 50 paths can be restored at once"
 msgstr "한 번에 최대 50개 경로만 복원할 수 있습니다"
 
-#: backend/api/backups.py:305
+#: backend/api/backups.py:218
 msgid "A restore path is empty or too long"
 msgstr "복원 경로가 비어 있거나 너무 깁니다"
 
-#: backend/api/backups.py:307
+#: backend/api/backups.py:220
 msgid "A restore path must not contain '..'"
 msgstr "복원 경로에 '..'을 포함할 수 없습니다"
 
-#: backend/api/backups.py:313
+#: backend/api/backups.py:226
 msgid "A restore path must be absolute, such as /home/alice/notes.txt"
 msgstr "복원 경로는 /home/alice/notes.txt처럼 절대 경로여야 합니다"
 
-#: backend/api/backups.py:327
+#: backend/api/backups.py:240
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr "되돌릴 경로를 지정하세요. 호스트 전체는 원래 위치로 복원되지 않습니다"
 
-#: backend/api/backups.py:333
+#: backend/api/backups.py:246
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr "원래 위치로 복원하는 각 경로는 /etc/nginx처럼 구체적이어야 합니다"
 
-#: backend/api/backups.py:338
+#: backend/api/backups.py:251
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "이 경로에 있는 호스트의 파일이 대체된다는 것을 확인하세요"
 
-#: backend/api/backups.py:358 backend/api/backups.py:361
-msgid "Backup target not found"
-msgstr "백업 대상을 찾을 수 없습니다"
-
-#: backend/api/backups.py:417
-msgid "This edition supports one backup target; edit the existing one"
-msgstr "이 에디션은 백업 대상을 하나만 지원합니다. 기존 대상을 편집하세요"
-
-#: backend/api/backups.py:494
-msgid "Remove the hosts' backup policies before the target"
-msgstr "대상을 삭제하기 전에 호스트의 백업 정책을 제거하세요"
-
-#: backend/api/backups.py:632
+#: backend/api/backups.py:415
 msgid "No backup policy"
 msgstr "백업 정책이 없습니다"
 
-#: backend/api/backups.py:656
+#: backend/api/backups.py:439
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "이 호스트는 아직 백업을 실행할 수 없습니다 (%s)"
 
-#: backend/api/backups.py:662
+#: backend/api/backups.py:445
 msgid "This host's backup is not configured yet"
 msgstr "이 호스트의 백업이 아직 구성되지 않았습니다"
 
-#: backend/api/backups.py:679
+#: backend/api/backups.py:462
 msgid "The backup storage host is not ready"
 msgstr "백업 스토리지 호스트가 준비되지 않았습니다"
 
-#: backend/api/backups.py:694
+#: backend/api/backups.py:477
 msgid "Unknown backup action"
 msgstr "알 수 없는 백업 작업입니다"
 
-#: backend/api/backups.py:707
+#: backend/api/backups.py:490
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "암호화된 저장소는 스토리지 호스트에서 다시 압축할 수 없습니다"
 
-#: backend/api/backups.py:711
+#: backend/api/backups.py:494
 msgid "That backup job is already queued or running"
 msgstr "해당 백업 작업이 이미 대기 중이거나 실행 중입니다"
 
-#: backend/api/backups.py:807
+#: backend/api/backups.py:590
 msgid ""
 "This backup is encrypted to your break-glass escrow key, which SysManage "
 "never holds. Restore it by hand with restate and that key, as the server "
@@ -4432,16 +4432,16 @@ msgstr ""
 "이 백업은 SysManage가 보관하지 않는 비상용 에스크로 키로 암호화되어 있습니다. 서버 복구 런북에 설명된 대로 restate와 그"
 " 키를 사용해 직접 복원하세요."
 
-#: backend/api/backups.py:826 backend/api/backups_drift.py:114
+#: backend/api/backups.py:609 backend/api/backups_drift.py:114
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "이 호스트의 restate는 아직 이 작업을 할 수 없습니다. restate를 업그레이드하세요"
 
-#: backend/api/backups.py:838
+#: backend/api/backups.py:621
 msgid "This snapshot's repository is no longer kept"
 msgstr "이 스냅샷의 저장소는 더 이상 보관되지 않습니다"
 
-#: backend/api/backups.py:923 backend/api/backups.py:926
+#: backend/api/backups.py:704 backend/api/backups.py:707
 msgid "Backup run not found"
 msgstr "백업 작업을 찾을 수 없습니다"
 
@@ -6239,6 +6239,36 @@ msgstr "이중 인증 코드는 6자리입니다"
 msgid "The backup target has no storage host to run on"
 msgstr "백업 대상에 실행할 스토리지 호스트가 없습니다"
 
+#: backend/services/backup_targets.py:33
+msgid "Another backup target has that name"
+msgstr "다른 백업 대상이 이미 그 이름을 사용하고 있습니다"
+
+#: backend/services/backup_targets.py:37
+msgid ""
+"Another backup target already uses that storage path on that storage host, "
+"or one inside it or around it"
+msgstr "다른 백업 대상이 이미 해당 스토리지 호스트에서 그 스토리지 경로, 또는 그 안이나 상위의 경로를 사용하고 있습니다"
+
+#: backend/services/backup_targets.py:43
+msgid "Another backup target already uses that host mount point"
+msgstr "다른 백업 대상이 이미 호스트의 그 마운트 지점을 사용하고 있습니다"
+
+#: backend/services/backup_targets.py:62
+msgid ""
+"More than one backup target needs the Enterprise backup operations engine"
+msgstr "백업 대상을 둘 이상 사용하려면 엔터프라이즈 백업 운영 엔진이 필요합니다"
+
+#: backend/services/backup_targets.py:99
+#: backend/services/backup_targets.py:103
+msgid "Backup target not found"
+msgstr "백업 대상을 찾을 수 없습니다"
+
+#: backend/services/backup_targets.py:149
+msgid ""
+"This host already has backups on its target; it cannot move to another "
+"target yet"
+msgstr "이 호스트는 현재 대상에 이미 백업이 있어 아직 다른 대상으로 옮길 수 없습니다"
+
 #: backend/services/backup_key_release.py:90
 #: backend/services/backup_key_release.py:159
 msgid "No such backup run for this host"
@@ -6281,61 +6311,61 @@ msgid ""
 "Neither host has a file watch list assigned, so there is nothing to compare."
 msgstr "호스트 중 하나에도 파일 감시 목록이 할당되지 않았으므로 비교할 항목이 없습니다."
 
-#: backend/services/backup_breakglass.py:178
+#: backend/services/backup_breakglass.py:181
 #, python-format
 msgid "gpg failed: %s"
 msgstr "gpg 오류: %s"
 
-#: backend/services/backup_breakglass.py:196
+#: backend/services/backup_breakglass.py:199
 msgid "gpg is not installed on the SysManage server; install GnuPG"
 msgstr "SysManage 서버에 gpg가 설치되어 있지 않습니다. GnuPG를 설치하십시오"
 
-#: backend/services/backup_breakglass.py:206
-#: backend/services/backup_breakglass.py:229
+#: backend/services/backup_breakglass.py:209
+#: backend/services/backup_breakglass.py:232
 msgid "gpg could not read that public key"
 msgstr "gpg는 그 공개 키를 읽을 수 없습니다."
 
-#: backend/services/backup_breakglass.py:214
-#: backend/services/backup_breakglass.py:221
+#: backend/services/backup_breakglass.py:217
+#: backend/services/backup_breakglass.py:224
 msgid "Paste one armored OpenPGP public key"
 msgstr "ASCII armor 형식의 OpenPGP 공개 키를 하나 붙여넣으십시오"
 
-#: backend/services/backup_breakglass.py:218
-#: backend/services/backup_escrow.py:214
+#: backend/services/backup_breakglass.py:221
+#: backend/services/backup_escrow.py:229
 msgid "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
 msgstr "이것은 비밀 키입니다. 공개 키를 붙여 넣으세요 (gpg --armor --export)"
 
-#: backend/services/backup_breakglass.py:238
+#: backend/services/backup_breakglass.py:241
 msgid "Paste exactly one public key, not several"
 msgstr "정확히 한 개의 공개 키를 붙여넣으십시오, 여러 개가 아닌."
 
-#: backend/services/backup_breakglass.py:241
+#: backend/services/backup_breakglass.py:244
 msgid "That key is expired, revoked or not valid"
 msgstr "그 키는 만료되었거나 취소되었거나 유효하지 않습니다."
 
-#: backend/services/backup_breakglass.py:244
+#: backend/services/backup_breakglass.py:247
 msgid "That key cannot encrypt (it has no usable encryption key)"
 msgstr "그 키는 암호화할 수 없습니다. (사용 가능한 암호화 키가 없습니다.)"
 
-#: backend/services/backup_breakglass.py:261
+#: backend/services/backup_breakglass.py:264
 #, python-format
 msgid "Say why the keys are exported, in %(min)d to %(max)d characters"
 msgstr "키를 내보내는 이유를 %(min)d~%(max)d자로 입력하십시오"
 
-#: backend/services/backup_breakglass.py:323
+#: backend/services/backup_breakglass.py:326
 #, python-format
 msgid "OpenBAO does not hold every backup key of %s; nothing was exported"
 msgstr "OpenBAO는 %s의 모든 백업 키를 저장하지 않습니다. 아무것도 내보내지지 않았습니다."
 
-#: backend/services/backup_breakglass.py:428
+#: backend/services/backup_breakglass.py:457
 msgid "gpg did not seal the key export"
 msgstr "gpg는 키 내보내기를 봉인하지 못했습니다."
 
-#: backend/services/backup_breakglass.py:439
+#: backend/services/backup_breakglass.py:468
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "선택된 호스트 중 하나도 암호화된 백업을 가지고 있지 않습니다."
 
-#: backend/services/backup_reach.py:147
+#: backend/services/backup_reach.py:148
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6345,7 +6375,7 @@ msgstr ""
 "이 호스트는 백업 스토리지의 restate-proxy(%(address)s, 포트 %(port)s)에 연결할 수 없습니다: "
 "%(error)s. 백업에는 그곳까지의 네트워크 경로와 이 호스트가 신뢰하는 인증서가 필요합니다."
 
-#: backend/services/backup_reach.py:157
+#: backend/services/backup_reach.py:158
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6357,7 +6387,7 @@ msgstr ""
 "%(seen)s(으)로 보이므로 마운트를 거부합니다. 호스트를 NAT 뒤에 두지 말고 스토리지 호스트의 네트워크(가상 머신의 경우 브리지"
 " 네트워크)에 연결하세요."
 
-#: backend/services/backup_reach.py:167
+#: backend/services/backup_reach.py:168
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "
@@ -6366,11 +6396,11 @@ msgstr ""
 "이 호스트는 백업 스토리지(%(storage)s, %(address)s, NFS 포트 %(port)s)에 연결할 수 없습니다. 백업하려면"
 " 그곳까지의 네트워크 경로가 필요합니다."
 
-#: backend/services/backup_escrow.py:283
+#: backend/services/backup_escrow.py:298
 msgid "Backup keys rotated: make a new break-glass export"
 msgstr "백업 키를 순환했습니다: 비상용 키를 새로 내보내세요"
 
-#: backend/services/backup_escrow.py:285
+#: backend/services/backup_escrow.py:300
 #, python-format
 msgid ""
 "SysManage rotated %(count)d backup encryption key(s) on schedule. A break-glass export made before this rotation does not hold the new keys, and backups taken from now on need them.\n"
@@ -6586,6 +6616,9 @@ msgstr "NetBSD pkgsrc 패키지 취약점(pkg_admin audit가 읽는 데이터)"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS 버전별 macOS 취약점(NVD의 영향받는 버전 데이터 기준)"
+
+#~ msgid "This edition supports one backup target; edit the existing one"
+#~ msgstr "이 에디션은 백업 대상을 하나만 지원합니다. 기존 대상을 편집하세요"
 
 #, python-format
 #~ msgid ""

@@ -5677,7 +5677,9 @@
       "cacheBudgetHelp": "restate hält auf jedem Host eines verschlüsselten Repositorys einen unverschlüsselten Schreibcache; ein Host darüber wird markiert.",
       "changeTransport": "Ändern, wie Hosts den Speicher erreichen",
       "changeBandwidth": "Bandbreitenlimits ändern",
-      "details": "Details"
+      "details": "Details",
+      "location": "Standort (optional)",
+      "locationHelp": "Wo es ist: eine Site, ein Raum oder ein Gebäude."
     },
     "title": "Sicherungen",
     "warning": {
@@ -6090,6 +6092,18 @@
       "released": "Von {{who}} {{when}} freigegeben",
       "snapshot": "Snapshot",
       "title": "Setze eine rechtliche Sperre auf ein Snapshot von {{host}}"
+    },
+    "targets": {
+      "add": "Ein weiteres Ziel hinzufügen",
+      "default": "Standard für neue Hosts",
+      "defaultError": "Das Standardziel konnte nicht geändert werden.",
+      "followDefault": "Der Standard ({{name}})",
+      "hostCount": "Hosts: {{n}}",
+      "makeDefault": "Als Standard festlegen",
+      "picker": "Backup-Ziel",
+      "pickerHelp": "Wo dieses Backup gespeichert wird.",
+      "pickerUnlicensed": "Für ein anderes Ziel ist die Enterprise-Lizenz nötig; ein Host behält sein bisheriges Ziel.",
+      "tagHelp": "Wo seine Hosts Backups speichern. Ein Host, der bereits Backups hat, bleibt bei seinem Ziel."
     }
   },
   "cloudBackup": {

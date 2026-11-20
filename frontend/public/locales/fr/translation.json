@@ -5677,7 +5677,9 @@
       "cacheBudgetHelp": "restate conserve un cache d'écriture non chiffré sur chaque hôte d'un dépôt chiffré ; un hôte qui dépasse cette valeur est signalé.",
       "changeTransport": "Modifier la façon dont les hôtes atteignent le stockage",
       "changeBandwidth": "Modifier les limites de bande passante",
-      "details": "Détails"
+      "details": "Détails",
+      "location": "Emplacement (facultatif)",
+      "locationHelp": "Où elle est : un site, une salle ou un bâtiment."
     },
     "title": "Sauvegardes",
     "warning": {
@@ -6090,6 +6092,18 @@
       "released": "Libérée par {{who}} {{when}}",
       "snapshot": "Instantané",
       "title": "Placer une conservation légale sur un instantané de {{host}}"
+    },
+    "targets": {
+      "add": "Ajouter une autre cible",
+      "default": "Par défaut pour les nouveaux hôtes",
+      "defaultError": "La cible par défaut n'a pas pu être modifiée.",
+      "followDefault": "Celle par défaut ({{name}})",
+      "hostCount": "Hôtes : {{n}}",
+      "makeDefault": "Définir comme par défaut",
+      "picker": "Cible de sauvegarde",
+      "pickerHelp": "Où cette sauvegarde est stockée.",
+      "pickerUnlicensed": "Le choix d'une autre cible nécessite la licence Entreprise ; un hôte conserve la cible qu'il a.",
+      "tagHelp": "Où ses hôtes effectuent des sauvegardes. Un hôte qui a déjà des sauvegardes reste sur sa cible."
     }
   },
   "cloudBackup": {

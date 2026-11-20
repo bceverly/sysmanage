@@ -8,6 +8,7 @@
 // always beats a tag policy.
 
 import React, { useEffect, useState } from 'react';
+import TargetPicker from './TargetPicker';
 import {
     Alert,
     Autocomplete,
@@ -53,6 +54,8 @@ const TagPolicyDialog: React.FC<{
     const [keep, setKeep] = useState('');
     const [skip, setSkip] = useState('');
     const [error, setError] = useState<string | null>(null);
+    // Its hosts' target (27.3): '' follows whichever target is the default.
+    const [target, setTarget] = useState('');
 
     useEffect(() => {
         if (!open) return;
@@ -62,6 +65,7 @@ const TagPolicyDialog: React.FC<{
             setTagId(existing.tag_id);
             setPriority(existing.priority);
             setEnabled(existing.enabled);
+            setTarget(existing.target_id ?? '');
             setSettings({ ...DEFAULTS, ...existing.settings });
             setKeep((existing.settings.keep_paths ?? []).join('\n'));
             setSkip((existing.settings.skip_paths ?? []).join('\n'));
@@ -70,6 +74,7 @@ const TagPolicyDialog: React.FC<{
             setTagId(tags[0]?.id ?? '');
             setPriority(100);
             setEnabled(true);
+            setTarget('');
             setSettings({ ...DEFAULTS, ...GFS_DEFAULTS, window_start_hour: 5 });
             setKeep('');
             setSkip('');
@@ -87,6 +92,7 @@ const TagPolicyDialog: React.FC<{
             priority,
             enabled,
             settings: { ...settings, keep_paths: lines(keep), skip_paths: lines(skip) },
+            target_id: target || null,
         };
         try {
             const result = existing
@@ -125,6 +131,8 @@ const TagPolicyDialog: React.FC<{
                         control={<Switch checked={enabled} onChange={e => setEnabled(e.target.checked)} />}
                         label={t('backups.tagPolicies.enabled', 'Apply this tag policy')}
                     />
+                    <TargetPicker value={target} onChange={setTarget} current={existing?.target_id} followDefault
+                        helper={t('backups.targets.tagHelp', 'Where its hosts back up. A host that already has backups stays on its target.')} />
                     <Typography variant="subtitle2">{t('backups.tagPolicies.settings', 'Settings for every tagged host')}</Typography>
                     <FormControlLabel
                         control={<Switch checked={settings.enabled} onChange={e => set({ enabled: e.target.checked })} />}

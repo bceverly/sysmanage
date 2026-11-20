@@ -55,10 +55,15 @@ export const canEquip = (row: BackupHost): boolean =>
 /** A host the bulk "Set up backups" can take: equipped, with no policy. */
 export const canSetUp = (row: BackupHost): boolean => row.equipped && !row.policy && !unreachable(row);
 
-/** The target's storage host, with no backup policy of its own: it holds the
- *  backups, so it is not offered host actions. */
-export const isStorageHost = (row: BackupHost, storageHostId: string | null | undefined): boolean =>
-    !!storageHostId && row.host_id === storageHostId && !row.policy;
+type StorageHostIds = string | string[] | null | undefined;
+
+/** A target's storage host (any of them, with several targets), with no
+ *  backup policy of its own: it holds the backups, so it is not offered
+ *  host actions. */
+export const isStorageHost = (row: BackupHost, storageHostId: StorageHostIds): boolean => {
+    const ids = Array.isArray(storageHostId) ? storageHostId : storageHostId ? [storageHostId] : [];
+    return ids.includes(row.host_id) && !row.policy;
+};
 
 /** A host the bulk bar can act on at all. */
 const canPick = (row: BackupHost): boolean => canBackUp(row) || canEquip(row) || canSetUp(row);
@@ -88,7 +93,7 @@ export const pickBlocked = (t: TFunction, row: BackupHost): string | null => {
     return null;
 };
 
-export const sortHosts = (rows: BackupHost[], storageHostId?: string | null): BackupHost[] =>
+export const sortHosts = (rows: BackupHost[], storageHostId?: StorageHostIds): BackupHost[] =>
     [...rows].sort((a, b) =>
         Number(isStorageHost(a, storageHostId)) - Number(isStorageHost(b, storageHostId))
         || rank(a) - rank(b) || a.fqdn.localeCompare(b.fqdn));
@@ -134,7 +139,7 @@ const HostCell: React.FC<{ row: BackupHost }> = ({ row }) => {
 const BackupHostsTable: React.FC<{
     rows: BackupHost[];
     hasTarget: boolean;
-    storageHostId?: string | null;
+    storageHostId?: StorageHostIds;
     canManage: boolean;
     canRestore: boolean;
     onChanged: () => void;

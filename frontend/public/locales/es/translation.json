@@ -5677,7 +5677,9 @@
       "cacheBudgetHelp": "restate mantiene una caché de escritura sin cifrar en cada host de un repositorio cifrado; se marca el host que supere este valor.",
       "changeTransport": "Cambiar cómo llegan los hosts al almacenamiento",
       "changeBandwidth": "Cambiar los límites de ancho de banda",
-      "details": "Detalles"
+      "details": "Detalles",
+      "location": "Ubicación (opcional)",
+      "locationHelp": "Dónde está: un sitio, una sala o un edificio."
     },
     "title": "Copias de seguridad",
     "warning": {
@@ -6090,6 +6092,18 @@
       "released": "Liberada por {{who}} {{when}}",
       "snapshot": "Instantánea",
       "title": "Colocar una retención legal en una instantánea de {{host}}"
+    },
+    "targets": {
+      "add": "Agregar otro destino",
+      "default": "Predeterminado para hosts nuevos",
+      "defaultError": "No se pudo cambiar el destino predeterminado.",
+      "followDefault": "El predeterminado ({{name}})",
+      "hostCount": "Hosts: {{n}}",
+      "makeDefault": "Hacer predeterminado",
+      "picker": "Destino de respaldo",
+      "pickerHelp": "Dónde se almacena esta copia de seguridad.",
+      "pickerUnlicensed": "Elegir otro destino requiere la licencia Enterprise; un host conserva el destino que tiene.",
+      "tagHelp": "Dónde hacen copia de seguridad sus hosts. Un host que ya tiene copias de seguridad permanece en su destino."
     }
   },
   "cloudBackup": {

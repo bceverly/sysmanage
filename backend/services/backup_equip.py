@@ -113,13 +113,12 @@ def state(db: Session, host_id: Any, now=None) -> Optional[Dict[str, Any]]:
 
 
 def _serves_proxy(db: Session, host: models.Host) -> bool:
-    """This host is the storage host of a target on restate-proxy (25.5)."""
+    """This host is the storage host of a target on restate-proxy (25.5) --
+    any of them, with several targets (27.3)."""
     # pylint: disable=import-outside-toplevel
     from backend.services import backup_proxy  # noqa: PLC0415
 
-    target = jobs.the_target(db)
-    storage = target is not None and str(target.storage_host_id) == str(host.id)
-    return storage and backup_proxy.uses_proxy(target)
+    return any(backup_proxy.uses_proxy(t) for t in jobs.stored_on(db, host))
 
 
 def parameters(db: Session, host: models.Host) -> Dict[str, Any]:

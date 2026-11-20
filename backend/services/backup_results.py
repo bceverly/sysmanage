@@ -120,7 +120,7 @@ def _storage_filesystem(db: Session, run: models.BackupRun, reply: Any) -> None:
     """A storage host's configure reply says which filesystem it is on."""
     if _parameters(run).get("role") not in ("storage", jobs.SELF_ROLE):
         return
-    target = jobs.the_target(db)
+    target = jobs.target_of(db, _policy(db, run))
     if target is not None and str(target.storage_host_id) == str(run.host_id):
         storage_status.record_storage_fs(target, reply)
 

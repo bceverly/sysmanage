@@ -106,11 +106,26 @@ def host_state(db: Session, host, policy) -> Optional[str]:
     return "ok" if since is None or exported > since else "failing"
 
 
+def escrow_target(db: Session):
+    """The target that holds the operator's escrow key: the one key for the
+    whole installation, whichever target it was saved on, else the default
+    (27.3: several targets share it)."""
+    for target in jobs.targets(db):
+        if target.escrow_fingerprint:
+            return target
+    return jobs.default_target(db)
+
+
+def _newest_signing_at(db: Session) -> Optional[datetime]:
+    found = [_naive(t.signing_enabled_at) for t in jobs.targets(db)]
+    found = [when for when in found if when is not None]
+    return max(found) if found else None
+
+
 def signing_newer_than(db: Session, exported: Optional[datetime]) -> bool:
-    """Snapshot signing was turned on after ``exported`` (or there is no
-    export): the export lacks the signer's public key."""
-    target = jobs.the_target(db)
-    signing_at = _naive(getattr(target, "signing_enabled_at", None))
+    """Snapshot signing was turned on, on any target, after ``exported`` (or
+    there is no export): the export lacks that signer's public key."""
+    signing_at = _newest_signing_at(db)
     return signing_at is not None and (exported is None or exported < signing_at)
 
 
@@ -161,8 +176,8 @@ def _escrow_key_dict(target) -> Optional[Dict[str, Any]]:
 def status(db: Session) -> Dict[str, Any]:
     """The fleet's escrow status.  ``applies`` is False in Community, or with
     nothing encrypted and signing off -- then nothing needs escrow."""
-    target = jobs.the_target(db)
-    signing_at = _naive(getattr(target, "signing_enabled_at", None))
+    target = escrow_target(db)
+    signing_at = _newest_signing_at(db)
     rows = [
         (policy, host)
         for policy, host in (

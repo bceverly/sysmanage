@@ -20,6 +20,8 @@ export interface TagPolicy {
   priority: number;
   enabled: boolean;
   settings: PolicyInput;
+  /** The target its hosts back up to; null = whichever is the default. */
+  target_id?: string | null;
   /** Hosts carrying the tag, and hosts whose policy comes from this one. */
   hosts_tagged: number;
   hosts_applied: number;
@@ -34,6 +36,7 @@ export interface TagPolicyInput {
   priority: number;
   enabled: boolean;
   settings: PolicyInput;
+  target_id?: string | null;
 }
 
 export interface TagPolicyOutcome {

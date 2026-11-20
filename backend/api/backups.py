@@ -35,7 +35,6 @@ Every change is audited.
 """
 
 import json
-import posixpath
 import re
 import uuid
 from typing import Any, Dict, List, Optional
@@ -57,7 +56,7 @@ from backend.services import backup_four_eyes as four_eyes
 from backend.services import backup_jobs as jobs
 from backend.services import backup_package_restore as package_restore
 from backend.services import backup_reach as reach
-from backend.services import backup_storage_status as storage_fs
+from backend.services import backup_targets as targets
 from backend.services import backup_tick
 from backend.services import backup_views as views
 from backend.services.audit_service import ActionType, AuditService, EntityType
@@ -66,11 +65,6 @@ router = APIRouter(dependencies=[Depends(JWTBearer())])
 
 _HOOK_NAME = re.compile(r"^[a-z0-9_-]{1,32}$")
 _SNAPSHOT_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:+-]{0,254}$")
-_DATASET = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,254}$")
-# What the agent accepts for a btrfs seal path (it checks again).
-_SEAL_PATH = re.compile(r"^/[A-Za-z0-9_./-]*$")
-# A POSIX account name, as the storage host's agent accepts it.
-_ACCOUNT_NAME = re.compile(r"^[a-z_][a-z0-9_-]{0,31}$")
 _RUNNABLE = {
     "capture": "host",
     "estimate": "host",
@@ -79,26 +73,6 @@ _RUNNABLE = {
     "repack": "storage",
     "prepare": "storage",
 }
-
-
-class TargetBody(BaseModel):
-    name: str = Field(min_length=1, max_length=255)
-    host_mount_point: str = Field(min_length=1, max_length=1024)
-    storage_host_id: Optional[str] = None
-    storage_path: Optional[str] = Field(default=None, max_length=1024)
-    max_concurrent: int = 2
-    seal_mode: str = "none"
-    zfs_dataset: Optional[str] = Field(default=None, max_length=255)
-    btrfs_snapshot_dir: Optional[str] = Field(default=None, max_length=1024)
-    # The storage host's backup account every host's export maps to.
-    service_account: Optional[str] = Field(default=None, max_length=32)
-    # Days the storage host keeps its seals; None = the default (14).
-    seal_keep_days: Optional[int] = None
-    # GB of restate write cache per host before it is flagged; None = 20.
-    cache_budget_gb: Optional[int] = None
-    # Percent used at which the target warns, and warns critically.
-    space_low_percent: Optional[int] = None
-    space_critical_percent: Optional[int] = None
 
 
 class PolicyBody(BaseModel):
@@ -119,6 +93,9 @@ class PolicyBody(BaseModel):
     quiesce_with: List[str] = Field(default_factory=list)
     keep_paths: List[str] = Field(default_factory=list)
     skip_paths: List[str] = Field(default_factory=list)
+    # Its target (27.3, Enterprise for any but the default); None keeps the
+    # one it has, or gives a new policy the default.
+    target_id: Optional[str] = None
 
 
 class RunBody(BaseModel):
@@ -191,70 +168,6 @@ def _absolute_path(value: Optional[str], label: str) -> None:
 def _in_range(value: Optional[int], low: int, high: int, label: str) -> None:
     if value is not None and not low <= value <= high:
         raise _bad(_("%s is out of range") % label + f" ({low}-{high})")
-
-
-def _validate_target(db: Session, body: TargetBody) -> Optional[uuid.UUID]:
-    _absolute_path(body.host_mount_point, _("Host mount point"))
-    _absolute_path(body.storage_path, _("Storage path"))
-    _in_range(body.max_concurrent, 1, 50, _("Concurrent backups"))
-    _in_range(body.seal_keep_days, 1, 3650, _("Days to keep sealed snapshots"))
-    _in_range(body.cache_budget_gb, 1, 10000, _("Write cache budget"))
-    _in_range(body.space_low_percent, 50, 99, _("Storage space warning"))
-    _in_range(body.space_critical_percent, 51, 100, _("Storage space critical"))
-    low = body.space_low_percent or 85
-    critical = body.space_critical_percent or 95
-    if low >= critical:
-        raise _bad(_("The storage space warning must be below the critical level"))
-    if body.service_account and not _ACCOUNT_NAME.match(body.service_account):
-        raise _bad(_("The backup service account is not a valid account name"))
-    if body.seal_mode not in jobs.SEAL_MODES:
-        raise _bad(_("Unknown seal mode"))
-    if body.seal_mode == "zfs_snapshot" and not body.zfs_dataset:
-        raise _bad(_("A ZFS snapshot seal needs the dataset name"))
-    if body.zfs_dataset and not _DATASET.match(body.zfs_dataset):
-        raise _bad(_("The ZFS dataset name is not valid"))
-    if body.seal_mode == "btrfs_snapshot":
-        _validate_btrfs(body)
-    if not body.storage_host_id:
-        return None
-    storage = _host_or_404(db, body.storage_host_id)
-    if not body.storage_path:
-        raise _bad(_("A storage host needs the storage path"))
-    return storage.id
-
-
-def _seal_path_ok(value: str) -> bool:
-    return (
-        bool(_SEAL_PATH.match(value))
-        and value != "/"
-        and posixpath.normpath(value) == value
-        and not any(part.startswith("-") for part in value.split("/"))
-    )
-
-
-def _validate_btrfs(body: TargetBody) -> None:
-    """The subvolume is the storage path; snapshots go outside it."""
-    snapshot_dir = body.btrfs_snapshot_dir
-    if not snapshot_dir:
-        raise _bad(_("A btrfs snapshot seal needs the snapshot directory"))
-    if not body.storage_path:
-        raise _bad(_("A btrfs snapshot seal needs the storage path"))
-    for value, label in (
-        (body.storage_path, _("Storage path")),
-        (snapshot_dir, _("Snapshot directory")),
-    ):
-        if not _seal_path_ok(value):
-            raise _bad(
-                _(
-                    "%s must be a plain absolute path (letters, digits, "
-                    "'_', '.', '-' and '/'; no trailing '/')"
-                )
-                % label
-            )
-    if snapshot_dir == body.storage_path or snapshot_dir.startswith(
-        body.storage_path + "/"
-    ):
-        raise _bad(_("The snapshot directory must be outside the storage path"))
 
 
 def _validate_policy(body: PolicyBody) -> None:
@@ -354,31 +267,6 @@ def _audit(db, current_user, entity_type, entity_id, name, description, details)
     )
 
 
-def _target_or_404(db: Session, target_id: str) -> models.BackupTarget:
-    key = _uuid_or_404(target_id, _("Backup target not found"))
-    target = db.query(models.BackupTarget).filter(models.BackupTarget.id == key).first()
-    if target is None:
-        raise HTTPException(status_code=404, detail=_("Backup target not found"))
-    return target
-
-
-def _apply_target(target: models.BackupTarget, body: TargetBody, storage_id) -> None:
-    target.name = body.name.strip()
-    target.host_mount_point = body.host_mount_point
-    target.storage_host_id = storage_id
-    target.storage_path = body.storage_path
-    target.max_concurrent = body.max_concurrent
-    target.seal_mode = body.seal_mode
-    target.zfs_dataset = body.zfs_dataset or None
-    target.btrfs_snapshot_dir = body.btrfs_snapshot_dir or None
-    target.service_account = body.service_account or None
-    target.seal_keep_days = body.seal_keep_days
-    target.cache_budget_gb = body.cache_budget_gb
-    target.space_low_percent = body.space_low_percent
-    target.space_critical_percent = body.space_critical_percent
-    target.updated_at = jobs.now()
-
-
 # --- overview -------------------------------------------------------------
 
 
@@ -399,112 +287,6 @@ def backups_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
         "escrow_stale": backup_escrow.status(db)["stale"],  # Pro+ break-glass
         "server_unprotected": bool(data["server"]["warn"]),  # 25.9
     }
-
-
-# --- targets --------------------------------------------------------------
-
-
-@router.post("/backups/targets")
-def create_target(
-    body: TargetBody,
-    db: Session = Depends(get_tenant_db),
-    current_user=Depends(require_authenticated_user),
-) -> Dict[str, Any]:
-    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
-    if jobs.the_target(db) is not None:
-        raise HTTPException(
-            status_code=409,
-            detail=_("This edition supports one backup target; edit the existing one"),
-        )
-    storage_id = _validate_target(db, body)
-    target = models.BackupTarget(created_at=jobs.now(), created_by=current_user.userid)
-    _apply_target(target, body, storage_id)
-    db.add(target)
-    db.flush()
-    _audit(
-        db,
-        current_user,
-        EntityType.SETTING,
-        target.id,
-        target.name,
-        "Backup target created",
-        body.model_dump(),
-    )
-    backup_tick.configure_now(db)  # take effect now, not on the next tick
-    db.commit()
-    return views.target_dict(target, db)
-
-
-@router.put("/backups/targets/{target_id}")
-def update_target(
-    target_id: str,
-    body: TargetBody,
-    db: Session = Depends(get_tenant_db),
-    current_user=Depends(require_authenticated_user),
-) -> Dict[str, Any]:
-    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
-    target = _target_or_404(db, target_id)
-    storage_id = _validate_target(db, body)
-    moved = (str(target.storage_host_id or ""), target.storage_path) != (
-        str(storage_id or ""),
-        body.storage_path,
-    )
-    _apply_target(target, body, storage_id)
-    if moved:  # the filesystem report was about the old place
-        storage_fs.forget_storage_fs(target)
-    # Every host's job files name the mount point; the storage side's, the
-    # path and seal.  Re-send both.
-    for policy in (
-        db.query(models.BackupPolicy)
-        .filter(models.BackupPolicy.target_id == target.id)
-        .all()
-    ):
-        policy.config_version += 1
-        policy.updated_at = jobs.now()
-    _audit(
-        db,
-        current_user,
-        EntityType.SETTING,
-        target.id,
-        target.name,
-        "Backup target changed",
-        body.model_dump(),
-    )
-    backup_tick.configure_now(db)  # take effect now, not on the next tick
-    db.commit()
-    return views.target_dict(target, db)
-
-
-@router.delete("/backups/targets/{target_id}")
-def delete_target(
-    target_id: str,
-    db: Session = Depends(get_tenant_db),
-    current_user=Depends(require_authenticated_user),
-) -> Dict[str, Any]:
-    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
-    target = _target_or_404(db, target_id)
-    in_use = (
-        db.query(models.BackupPolicy)
-        .filter(models.BackupPolicy.target_id == target.id)
-        .count()
-    )
-    if in_use:
-        raise HTTPException(
-            status_code=409,
-            detail=_("Remove the hosts' backup policies before the target"),
-        )
-    _audit(
-        db,
-        current_user,
-        EntityType.SETTING,
-        target.id,
-        target.name,
-        "Backup target deleted",
-        {},
-    )
-    db.delete(target)
-    db.commit()
-    return {"deleted": True}
 
 
 # --- per host -------------------------------------------------------------
@@ -531,7 +313,7 @@ def _snapshots(db: Session, host: models.Host, include_gone: bool = False):
 def host_backup(host_id: str, db: Session = Depends(get_tenant_db)):
     host = _host_or_404(db, host_id)
     view = views.host_status(db, host)
-    target = jobs.the_target(db)
+    target = jobs.host_target(db, host)  # its own, or where it would go
     view["target"] = views.target_dict(target, db) if target else None
     return view
 
@@ -577,11 +359,11 @@ def save_policy(db, current_user, host, body: PolicyBody, mark=None) -> Dict[str
     """Create or change ``host``'s policy; ``mark(policy)`` runs before the
     configure job goes out (the server's own policy, 25.9)."""
     _validate_policy(body)
-    target = jobs.the_target(db)
-    if target is None:
-        raise HTTPException(status_code=409, detail=_("Set up the backup target first"))
-    reach.refuse_if_blocked(db, host)
     policy = _policy_of(db, host)
+    # Its target: the one named, else the one it has, else the default (27.3).
+    target = targets.chosen(db, body.target_id, jobs.target_of(db, policy))
+    targets.refuse_move_with_history(db, policy, target)
+    reach.refuse_if_blocked(db, host)
     gfs = retention.check_gfs_change(  # 402 to change without Pro+
         policy, body, jobs.target_storage_abilities(db, target.id)
     )
@@ -598,6 +380,7 @@ def save_policy(db, current_user, host, body: PolicyBody, mark=None) -> Dict[str
         db.add(policy)
     else:
         policy.config_version += 1
+        policy.target_id = target.id
     _apply_policy(policy, body)
     retention.apply_gfs(policy, gfs)
     policy.tag_policy_id = None  # Configure makes it this host's own (24.6)
@@ -610,7 +393,7 @@ def save_policy(db, current_user, host, body: PolicyBody, mark=None) -> Dict[str
         host.id,
         host.fqdn,
         "Backup policy set",
-        body.model_dump(),
+        body.model_dump() | {"target": target.name},
     )
     backup_tick.configure_now(db)  # take effect now, not on the next tick
     reach.start(db, host)  # when due
@@ -667,7 +450,7 @@ def _ready_policy(
 def _run_host(db: Session, policy, host: models.Host, action: str):
     if _RUNNABLE[action] == "host":
         return host.id
-    target = jobs.the_target(db)
+    target = jobs.target_of(db, policy)
     storage = jobs.storage_host(db, target)
     if (
         storage is None
@@ -910,9 +693,7 @@ def clear_runs(
         )
         .update({models.BackupRun.dismissed_at: now}, synchronize_session=False)
     )
-    target = jobs.the_target(db)
-    _audit(db, current_user, EntityType.SETTING,
-           target.id if target else None, target.name if target else "backups",
+    _audit(db, current_user, EntityType.SETTING, None, "backups",
            "Backup job list cleared", {"runs": cleared})  # fmt: skip
     db.commit()
     return {"cleared": cleared}

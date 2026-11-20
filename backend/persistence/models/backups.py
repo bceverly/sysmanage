@@ -56,6 +56,12 @@ class BackupTarget(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False)
+    # The target a new host policy uses unless it names another (q102, 27.3:
+    # several targets are Enterprise).  NULL counts as False; with none
+    # marked, the oldest target is the default.
+    is_default = Column(Boolean, nullable=True)
+    # Where the target is -- a site, room or building -- for the operator.
+    location = Column(String(255), nullable=True)
     host_mount_point = Column(String(1024), nullable=False)
     # Soft reference (no FK): a NAS host can be removed and re-registered
     # without taking the target's history with it.
@@ -251,6 +257,9 @@ class BackupTagPolicy(Base):
     enabled = Column(Boolean, nullable=False, default=True)
     # JSON: the per-host policy fields (backups.PolicyBody).
     settings = Column(Text, nullable=False)
+    # The target its hosts back up to (q102, Enterprise); NULL = the default.
+    # Soft reference: a target a tag policy names cannot be deleted.
+    target_id = Column(GUID(), nullable=True)
     created_at = Column(DateTime, nullable=False)
     created_by = Column(String(255), nullable=True)
     updated_at = Column(DateTime, nullable=False)

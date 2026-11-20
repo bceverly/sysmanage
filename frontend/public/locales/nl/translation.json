@@ -5677,7 +5677,9 @@
       "cacheBudgetHelp": "restate houdt op elke host van een versleutelde repository een onversleutelde schrijfcache bij; een host die dit overschrijdt, wordt gemarkeerd.",
       "changeTransport": "Wijzigen hoe hosts de opslag bereiken",
       "changeBandwidth": "Bandbreedtelimieten wijzigen",
-      "details": "Details"
+      "details": "Details",
+      "location": "Locatie (optioneel)",
+      "locationHelp": "Waar het zich bevindt: een site, kamer of gebouw."
     },
     "title": "Back-ups",
     "warning": {
@@ -6090,6 +6092,18 @@
       "released": "Door {{who}} {{when}} vrijgegeven",
       "snapshot": "Snapshot",
       "title": "Plaats een juridische vasthouding op een snapshot van {{host}}"
+    },
+    "targets": {
+      "add": "Een ander doel toevoegen",
+      "default": "Standaard voor nieuwe hosts",
+      "defaultError": "Het standaarddoel kon niet worden gewijzigd.",
+      "followDefault": "De standaard ({{name}})",
+      "hostCount": "Hosts: {{n}}",
+      "makeDefault": "Als standaard instellen",
+      "picker": "Backup-doel",
+      "pickerHelp": "Waar deze back-up wordt opgeslagen.",
+      "pickerUnlicensed": "Het kiezen van een ander doel vereist een Enterprise-licentie; een host behoudt het doel dat het heeft.",
+      "tagHelp": "Waar de hosts ervan een back-up maken. Een host die al back-ups heeft, blijft op zijn doel."
     }
   },
   "cloudBackup": {

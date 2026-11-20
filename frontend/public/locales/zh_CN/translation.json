@@ -5677,7 +5677,9 @@
       "cacheBudgetHelp": "restate 会在加密仓库的每台主机上保留未加密的写入缓存；超过此值的主机将被标记。",
       "changeTransport": "更改主机访问存储的方式",
       "changeBandwidth": "更改带宽限制",
-      "details": "详细信息"
+      "details": "详细信息",
+      "location": "位置（可选）",
+      "locationHelp": "它在哪里：一个站点、房间或建筑。"
     },
     "title": "备份",
     "warning": {
@@ -6090,6 +6092,18 @@
       "released": "由 {{who}} {{when}} 发布",
       "snapshot": "快照",
       "title": "在{{host}}的快照上放置法律保留"
+    },
+    "targets": {
+      "add": "添加另一个目标",
+      "default": "新主机的默认值",
+      "defaultError": "未能更改默认目标。",
+      "followDefault": "默认 ({{name}})",
+      "hostCount": "主机: {{n}}",
+      "makeDefault": "设置为默认",
+      "picker": "备份目标",
+      "pickerHelp": "这个备份存储在哪里。",
+      "pickerUnlicensed": "选择另一个目标需要企业许可证；主机会保留它当前的目标。",
+      "tagHelp": "它的主机备份在哪里。已经有备份的主机会保持其当前目标。"
     }
   },
   "cloudBackup": {

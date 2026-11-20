@@ -17,6 +17,7 @@ import pytest
 from fastapi import HTTPException
 
 from backend.api import backups as api
+from backend.api import backups_targets as targets_api
 from backend.persistence import models
 from backend.security.roles import SecurityRoles
 from backend.services import backup_jobs as jobs
@@ -52,7 +53,9 @@ def sent():
 
 
 def _target_body(**extra):
-    return api.TargetBody(name="nas", host_mount_point="/mnt/backups", **extra)
+    return targets_api.TargetBody(
+        **{"name": "nas", "host_mount_point": "/mnt/backups", **extra}
+    )
 
 
 async def _status(call):
@@ -69,15 +72,24 @@ async def _status(call):
 @pytest.mark.asyncio
 async def test_targets_need_the_role_and_community_has_one(session):
     assert (
-        await _status(lambda: api.create_target(_target_body(), session, NOBODY)) == 403
+        await _status(
+            lambda: targets_api.create_target(_target_body(), session, NOBODY)
+        )
+        == 403
     )
-    made = api.create_target(_target_body(), session, MANAGER)
+    made = targets_api.create_target(_target_body(), session, MANAGER)
     assert made["warnings"] == ["no_storage_host", "not_sealed"]
     assert made["problem"] is True
+    # A second target is Enterprise (27.3): 402 without the engine.
     assert (
-        await _status(lambda: api.create_target(_target_body(), session, MANAGER))
-        == 409
+        await _status(
+            lambda: targets_api.create_target(
+                _target_body(name="second"), session, MANAGER
+            )
+        )
+        == 402
     )
+    assert made["is_default"] is True
     audit = session.query(models.AuditLog).all()
     assert any("Backup target created" in a.description for a in audit)
 
@@ -109,7 +121,7 @@ def _bad_btrfs_bodies(nas_id):
 @pytest.mark.asyncio
 async def test_a_btrfs_target_is_accepted_and_sends_its_seal(session):
     nas = _host(session, fqdn="nas.lab")
-    made = api.create_target(_btrfs(str(nas.id)), session, MANAGER)
+    made = targets_api.create_target(_btrfs(str(nas.id)), session, MANAGER)
     assert made["seal_mode"] == "btrfs_snapshot"
     assert made["btrfs_snapshot_dir"] == "/srv/backups/.snapshots"
     target = session.query(models.BackupTarget).one()
@@ -140,10 +152,10 @@ async def test_moving_the_storage_path_forgets_the_filesystem(session):
     same = _target_body(
         storage_host_id=str(s.nas.id), storage_path="/srv/backups/restate"
     )
-    api.update_target(str(s.target.id), same, session, MANAGER)
+    targets_api.update_target(str(s.target.id), same, session, MANAGER)
     assert s.target.storage_fs_type == "ext4"
     moved = _target_body(storage_host_id=str(s.nas.id), storage_path="/srv/new")
-    api.update_target(str(s.target.id), moved, session, MANAGER)
+    targets_api.update_target(str(s.target.id), moved, session, MANAGER)
     assert s.target.storage_fs_type is None and s.target.storage_fs_checked_at is None
 
 
@@ -151,16 +163,19 @@ async def test_moving_the_storage_path_forgets_the_filesystem(session):
 async def test_target_validation(session):
     nas = _host(session, fqdn="nas.lab")
     for body in (
-        api.TargetBody(name="n", host_mount_point="relative"),
-        api.TargetBody(name="n", host_mount_point="/mnt/../etc"),
+        targets_api.TargetBody(name="n", host_mount_point="relative"),
+        targets_api.TargetBody(name="n", host_mount_point="/mnt/../etc"),
         _target_body(seal_mode="btrfs"),
         _target_body(seal_mode="zfs_snapshot"),
         _target_body(max_concurrent=0),
         _target_body(storage_host_id=str(nas.id)),  # no storage path
         *_bad_btrfs_bodies(str(nas.id)),
     ):
-        assert await _status(lambda: api.create_target(body, session, MANAGER)) == 422
-    sealed = api.create_target(
+        assert (
+            await _status(lambda: targets_api.create_target(body, session, MANAGER))
+            == 422
+        )
+    sealed = targets_api.create_target(
         _target_body(
             storage_host_id=str(nas.id), storage_path="/srv/b",
             seal_mode="zfs_snapshot", zfs_dataset="tank/b",
@@ -175,10 +190,12 @@ async def test_target_validation(session):
 async def test_changing_the_target_resends_every_hosts_job_files(session):
     s = _setup(session)
     body = _target_body(storage_host_id=str(s.nas.id), storage_path="/srv/new")
-    api.update_target(str(s.target.id), body, session, MANAGER)
+    targets_api.update_target(str(s.target.id), body, session, MANAGER)
     assert s.policy.config_version == 2
     assert (
-        await _status(lambda: api.delete_target(str(s.target.id), session, MANAGER))
+        await _status(
+            lambda: targets_api.delete_target(str(s.target.id), session, MANAGER)
+        )
         == 409
     )
 
@@ -191,7 +208,7 @@ async def test_a_policy_needs_a_target_and_bumps_its_version(session):
         await _status(lambda: api.put_policy(str(host.id), body, session, MANAGER))
         == 409
     )
-    api.create_target(_target_body(), session, MANAGER)
+    targets_api.create_target(_target_body(), session, MANAGER)
     made = api.put_policy(str(host.id), body, session, MANAGER)
     assert (made["config_version"], made["configured"]) == (1, False)
     again = api.put_policy(str(host.id), body, session, MANAGER)
@@ -662,13 +679,15 @@ async def test_repack_now_goes_to_the_storage_host(session, sent):
 
 @pytest.mark.asyncio
 async def test_the_service_account_is_validated_and_kept(session):
-    good = api.create_target(_target_body(service_account="backup_1"), session, MANAGER)
+    good = targets_api.create_target(
+        _target_body(service_account="backup_1"), session, MANAGER
+    )
     assert good["service_account"] == "backup_1"
     with pytest.raises(ValueError):  # too long: refused by the request model
         _target_body(service_account="a" * 40)
     for bad in ("Root!", "-mapall", "9lives"):
         assert await _status(lambda:
-            api.update_target(good["id"], _target_body(service_account=bad), session, MANAGER)
+            targets_api.update_target(good["id"], _target_body(service_account=bad), session, MANAGER)
         ) == 422  # fmt: skip
 
 
@@ -691,24 +710,24 @@ async def test_prepare_storage_goes_to_the_storage_host(session, sent):
 
 @pytest.mark.asyncio
 async def test_seal_keep_days_is_validated_and_kept(session):
-    good = api.create_target(_target_body(seal_keep_days=30), session, MANAGER)
+    good = targets_api.create_target(_target_body(seal_keep_days=30), session, MANAGER)
     assert good["seal_keep_days"] == 30
     for bad in (0, 3651):
         assert await _status(lambda:
-            api.update_target(good["id"], _target_body(seal_keep_days=bad), session, MANAGER)
+            targets_api.update_target(good["id"], _target_body(seal_keep_days=bad), session, MANAGER)
         ) == 422  # fmt: skip
-    cleared = api.update_target(good["id"], _target_body(), session, MANAGER)
+    cleared = targets_api.update_target(good["id"], _target_body(), session, MANAGER)
     assert cleared["seal_keep_days"] == 14  # the default
 
 
 @pytest.mark.asyncio
 async def test_space_thresholds_are_validated_and_kept(session):
-    made = api.create_target(
+    made = targets_api.create_target(
         _target_body(space_low_percent=80, space_critical_percent=90), session, MANAGER
     )
     assert (made["space_low_percent"], made["space_critical_percent"]) == (80, 90)
     for low, critical in ((95, 90), (40, 90), (80, 101)):
-        assert await _status(lambda: api.update_target(
+        assert await _status(lambda: targets_api.update_target(
             made["id"], _target_body(space_low_percent=low, space_critical_percent=critical),
             session, MANAGER,
         )) in (400, 422)  # fmt: skip

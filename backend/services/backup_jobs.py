@@ -236,7 +236,7 @@ def equipped(host: Optional[models.Host]) -> Tuple[bool, Optional[str]]:
 
 def _target_on_proxy(host: models.Host) -> bool:
     db = object_session(host)
-    return db is not None and proxy.uses_proxy(the_target(db))
+    return db is not None and proxy.uses_proxy(host_target(db, host))
 
 
 def _json_strings(text: Optional[str]) -> List[str]:
@@ -864,11 +864,40 @@ def prune_run_history(db: Session, now) -> int:
     return removed
 
 
-def the_target(db: Session) -> Optional[models.BackupTarget]:
-    """Community has one target."""
-    return (
-        db.query(models.BackupTarget).order_by(models.BackupTarget.created_at).first()
+def targets(db: Session) -> List[models.BackupTarget]:
+    """Every target, the default first (27.3: several are Enterprise)."""
+    found = db.query(models.BackupTarget).order_by(models.BackupTarget.created_at).all()
+    return sorted(found, key=lambda t: not t.is_default)
+
+
+def default_target(db: Session) -> Optional[models.BackupTarget]:
+    """Where a new host policy goes unless it names another target: the one
+    marked default, else the oldest.  Community has only this one."""
+    found = targets(db)
+    return found[0] if found else None
+
+
+def target_of(db: Session, policy) -> Optional[models.BackupTarget]:
+    """The target ``policy``'s repository is on."""
+    if policy is None or policy.target_id is None:
+        return None
+    return db.get(models.BackupTarget, policy.target_id)
+
+
+def host_target(db: Session, host) -> Optional[models.BackupTarget]:
+    """The target ``host`` backs up to: its policy's, else where a policy
+    made now would go (the default)."""
+    policy = (
+        db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.host_id == host.id)
+        .first()
     )
+    return target_of(db, policy) if policy is not None else default_target(db)
+
+
+def stored_on(db: Session, host) -> List[models.BackupTarget]:
+    """The targets whose storage host ``host`` is."""
+    return [t for t in targets(db) if str(t.storage_host_id) == str(host.id)]
 
 
 def storage_host(db: Session, target: models.BackupTarget) -> Optional[models.Host]:

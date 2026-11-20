@@ -5677,7 +5677,9 @@
       "cacheBudgetHelp": "restate는 암호화된 리포지토리의 각 호스트에 암호화되지 않은 쓰기 캐시를 유지합니다. 이 값을 넘는 호스트는 표시됩니다.",
       "changeTransport": "호스트가 스토리지에 연결하는 방식 변경",
       "changeBandwidth": "대역폭 제한 변경",
-      "details": "세부 정보"
+      "details": "세부 정보",
+      "location": "위치 (선택 사항)",
+      "locationHelp": "그 위치: 사이트, 방 또는 건물."
     },
     "title": "백업",
     "warning": {
@@ -6090,6 +6092,18 @@
       "released": "{{who}} {{when}}에 의해 해제되었습니다.",
       "snapshot": "스냅샷",
       "title": "{{host}}의 스냅샷에 법적 보유를 걸어두세요."
+    },
+    "targets": {
+      "add": "다른 대상 추가",
+      "default": "새 호스트의 기본값",
+      "defaultError": "기본 대상을 변경하지 못했습니다.",
+      "followDefault": "기본값 ({{name}})",
+      "hostCount": "호스트: {{n}}",
+      "makeDefault": "기본으로 설정",
+      "picker": "백업 대상",
+      "pickerHelp": "이 백업이 저장되는 곳.",
+      "pickerUnlicensed": "다른 대상을 선택하려면 엔터프라이즈 라이선스가 필요합니다; 호스트는 현재 설정된 대상을 유지합니다.",
+      "tagHelp": "그 호스트의 백업 위치. 이미 백업이 설정된 호스트는 현재 대상을 유지합니다."
     }
   },
   "cloudBackup": {

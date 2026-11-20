@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { BACKUP_STATUS_ORDER, getBackupOverview } from '../Services/backups';
 import type { BackupOverview, BackupStatus } from '../Services/backups';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
-import BackupTargetCard from '../Components/Backups/BackupTargetCard';
+import BackupTargets, { storageHostIds } from '../Components/Backups/BackupTargets';
 import BackupHostsTable from '../Components/Backups/BackupHostsTable';
 import BackupClearJobs from '../Components/Backups/BackupClearJobs';
 import BackupRunsList from '../Components/Backups/BackupRunsList';
@@ -81,8 +81,7 @@ const Backups: React.FC = () => {
             <BackupServerCard server={data.server} hosts={data.hosts} canManage={canManage} onChanged={changed} />
             <BackupEscrowBanner refreshKey={refreshKey} />
             {canManage && <BackupKeyExportCard refreshKey={refreshKey} />}
-            <BackupTargetCard target={data.target} hosts={data.hosts} versions={data.restate_versions}
-                canManage={canManage} onChanged={changed} />
+            <BackupTargets data={data} canManage={canManage} onChanged={changed} />
             <BackupReadinessCard canManage={canManage} refreshKey={refreshKey} />
             <BackupApprovalsCard canManage={canManage} canRestore={canRestore} onChanged={changed} />
             <BackupLegalHoldsCard canManage={canManage} refreshKey={refreshKey} />
@@ -103,7 +102,7 @@ const Backups: React.FC = () => {
                     <Alert severity="info">{t('backups.empty', 'There are no approved hosts yet.')}</Alert>
                 ) : (
                     <BackupHostsTable rows={shown ? data.hosts.filter(h => h.status === shown) : data.hosts} hasTarget={data.target !== null}
-                        storageHostId={data.target?.storage_host_id} canManage={canManage}
+                        storageHostId={storageHostIds(data)} canManage={canManage}
                         canRestore={canRestore} onChanged={changed} onError={setMessage} onNotice={setNotice} />
                 )}
             </Paper>

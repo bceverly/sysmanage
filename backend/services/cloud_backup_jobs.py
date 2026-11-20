@@ -123,7 +123,7 @@ def airgapped() -> bool:
 def target_and_storage(db: Session):
     """``(target, storage host)``; refused when there is no target or no
     storage host to run on."""
-    target = jobs.the_target(db)
+    target = jobs.default_target(db)
     if target is None:
         raise CloudBackupRefused(409, _("Set up the backup target first"))
     host = jobs.storage_host(db, target)

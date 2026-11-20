@@ -29,6 +29,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_jobs as jobs
+from backend.services import backup_targets as targets
 from backend.services import backup_tag_policies as tag_policies
 from backend.services import backup_tick
 from backend.services.audit_service import ActionType, AuditService, EntityType
@@ -44,6 +45,9 @@ class TagPolicyBody(BaseModel):
     priority: int = 100
     enabled: bool = True
     settings: PolicyBody = Field(default_factory=PolicyBody)
+    # The target its hosts back up to (27.3, Enterprise for any but the
+    # default); None = whichever target is the default.
+    target_id: Optional[str] = None
 
 
 def _engine_or_402() -> None:
@@ -97,11 +101,29 @@ def _checked_settings(db: Session, body: TagPolicyBody) -> Dict[str, Any]:
         )
     _validate_policy(body.settings)
     values = retention.gfs_values(body.settings)
-    target = jobs.the_target(db)
+    target = (
+        targets.target_or_404(db, body.target_id)
+        if body.target_id
+        else jobs.default_target(db)
+    )
     abilities = jobs.target_storage_abilities(db, target.id) if target else None
     retention.check_yearly(None, values, abilities)
     retention.check_verify_change(None, body.settings)
-    return body.settings.model_dump()
+    # The target is the tag policy's own column, not a host setting.
+    return body.settings.model_dump(exclude={"target_id"})
+
+
+def _target_id(db: Session, body: TagPolicyBody, current=None):
+    """The target to store: None (the default), or the one named -- which
+    needs the Enterprise engine unless it is the default or unchanged."""
+    if not body.target_id:
+        return None
+    target = targets.target_or_404(db, body.target_id)
+    default = jobs.default_target(db)
+    unchanged = current is not None and str(current) == str(target.id)
+    if not unchanged and (default is None or target.id != default.id):
+        targets.engine_or_402()
+    return target.id
 
 
 def _host_count(db: Session, row: models.BackupTagPolicy) -> int:
@@ -126,6 +148,7 @@ def _dict(db: Session, row: models.BackupTagPolicy) -> Dict[str, Any]:
         "priority": row.priority,
         "enabled": bool(row.enabled),
         "settings": tag_policies.settings_of(row),
+        "target_id": str(row.target_id) if row.target_id else None,
         "hosts_tagged": _host_count(db, row),
         "hosts_applied": _applied_count(db, row),
         "created_at": row.created_at.isoformat() if row.created_at else None,
@@ -185,7 +208,7 @@ def create_tag_policy(
 ) -> Dict[str, Any]:
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
     _engine_or_402()
-    if jobs.the_target(db) is None:
+    if jobs.default_target(db) is None:
         raise HTTPException(status_code=409, detail=_("Set up the backup target first"))
     tag = _tag_or_422(db, body.tag_id)
     name = body.name.strip()
@@ -198,6 +221,7 @@ def create_tag_policy(
         priority=body.priority,
         enabled=body.enabled,
         settings=json.dumps(settings),
+        target_id=_target_id(db, body),
         created_at=jobs.now(),
         created_by=current_user.userid,
         updated_at=jobs.now(),
@@ -233,6 +257,7 @@ def update_tag_policy(
         body.enabled,
     )
     row.settings = json.dumps(settings)
+    row.target_id = _target_id(db, body, row.target_id)
     row.updated_at = jobs.now()
     _audit(db, current_user, row, "Backup tag policy changed",
            {"tag": tag.name, "priority": row.priority, "settings": settings})  # fmt: skip

@@ -62,6 +62,16 @@ COMMUNITY_LICENSED_FLAG = {
     ),
 }
 
+# Backup routes whose gate depends on what is already there: the walk's
+# sample data has a target, so adding one is a SECOND target, which is
+# Enterprise (27.3); the first is Community (tests/test_backups_targets.py
+# proves both answers).
+DEPENDS_ON_STATE = {
+    ("POST", "/api/v1/backups/targets"): (
+        "the first target is Community; another is Enterprise (27.3)"
+    ),
+}
+
 # The backup routes that need the Professional+ backup engine.  Every OTHER
 # route whose path names a backup is Community and must never answer 402:
 # backing up, restoring, browsing, the break-glass export, the server's own
@@ -271,6 +281,8 @@ def test_community_backups_are_untouched_and_pro_plus_backups_refuse(edition):
         if "/federation/" in path:
             continue
         status = response.status_code
+        if (method, path) in DEPENDS_ON_STATE:
+            continue
         if (method, path) in PRO_PLUS_BACKUP:
             if status != 402:
                 failures.append(f"Pro+ {method} {path} -> {status}, want 402")

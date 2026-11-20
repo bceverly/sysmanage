@@ -26,7 +26,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from backend.api.backups import _audit, _require, _target_or_404
+from backend.api.backups import _audit, _require
+from backend.api.backups_targets import _target_or_404
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.licensing.migration_compat import missing_engine_detail

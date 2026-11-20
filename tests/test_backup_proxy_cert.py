@@ -88,7 +88,7 @@ def test_once_issued_it_is_sent_and_hosts_trust_the_sysmanage_ca(session, sent):
     ca = certificate_manager.get_ca_certificate().decode()
     host = jobs.host_configuration(s.policy, s.target, s.host)["target"]["proxy"]
     assert host["ca"] == ca
-    assert reach.storage_address(session)["proxy"]["ca"] == ca
+    assert reach.storage_address(session, s.host)["proxy"]["ca"] == ca
     assert proxy.target_view(s.target)["certificate"]["current"] is True
 
 

@@ -5677,7 +5677,9 @@
       "cacheBudgetHelp": "restate 會在加密儲存庫的每台主機上保留未加密的寫入快取；超過此值的主機將被標記。",
       "changeTransport": "變更主機存取儲存的方式",
       "changeBandwidth": "變更頻寬限制",
-      "details": "詳細資料"
+      "details": "詳細資料",
+      "location": "位置（可選）",
+      "locationHelp": "位置：站點、房間或建築物。"
     },
     "title": "備份",
     "warning": {
@@ -6090,6 +6092,18 @@
       "released": "由 {{who}} {{when}} 釋放",
       "snapshot": "快照",
       "title": "在 {{host}} 的快照上放置法律鎖定"
+    },
+    "targets": {
+      "add": "新增另一個目標",
+      "default": "新主機的預設值",
+      "defaultError": "未能變更預設目標。",
+      "followDefault": "預設 ({{name}})",
+      "hostCount": "主機: {{n}}",
+      "makeDefault": "設定為預設",
+      "picker": "備份目標",
+      "pickerHelp": "此備份的儲存位置。",
+      "pickerUnlicensed": "選擇另一個目標需要企業版授權；主機會保留其現有目標。",
+      "tagHelp": "其主機備份的位置。已備份的主機會保留其目標。"
     }
   },
   "cloudBackup": {

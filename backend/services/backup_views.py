@@ -83,6 +83,12 @@ def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
     return {
         "id": str(target.id),
         "name": target.name,
+        # 27.3: where it is, whether new hosts go to it, and how many use it.
+        "location": target.location,
+        "is_default": bool(target.is_default),
+        "hosts": db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.target_id == target.id)
+        .count(),
         "host_mount_point": target.host_mount_point,
         "storage_host_id": (
             str(target.storage_host_id) if target.storage_host_id else None
@@ -363,7 +369,7 @@ def _policy_status(
         )
         .count()
     )
-    entry["first_fit"] = first_fit.fit(db, policy, jobs.the_target(db))
+    entry["first_fit"] = first_fit.fit(db, policy, jobs.target_of(db, policy))
     entry["verification"] = backup_verify.state(db, policy, now)
     # A capture a closed maintenance window holds is waiting, not backing up
     # (14.2): it is sent when the window opens.
@@ -395,7 +401,7 @@ def _capturing_status(db: Session, policy, last_capture, now, held: bool) -> str
 
 
 def overview(db: Session) -> Dict[str, Any]:
-    target = jobs.the_target(db)
+    every = jobs.targets(db)  # the default first (27.3)
     hosts = (
         db.query(models.Host)
         .filter(models.Host.approval_status == "approved")
@@ -421,8 +427,11 @@ def overview(db: Session) -> Dict[str, Any]:
             if version
         }
     )
+    shown = [dict(target_dict(t, db), is_default=i == 0) for i, t in enumerate(every)]
     return {
-        "target": target_dict(target, db) if target else None,
+        # The default target, as before several (27.3), and every target.
+        "target": shown[0] if shown else None,
+        "targets": shown,
         "hosts": rows,
         "counts": counts,
         "restate_versions": versions,
@@ -438,10 +447,14 @@ ATTENTION_STATUSES = ("overdue", "incomplete", "failed")
 
 
 def target_problem(data: Dict[str, Any]) -> bool:
-    """The target's storage side is broken: no storage host, stale seal /
+    """A target's storage side is broken: no storage host, stale seal /
     prune / check, a failed drive or critically full storage."""
-    target = data["target"]
-    return bool(target and target["problem"])
+    return any(t["problem"] for t in data.get("targets") or [])
+
+
+def target_problems(data: Dict[str, Any]) -> int:
+    """How many targets have a broken storage side: each counts once."""
+    return sum(1 for t in data.get("targets") or [] if t["problem"])
 
 
 def attention_count(data: Dict[str, Any]) -> int:
@@ -456,7 +469,7 @@ def attention_count(data: Dict[str, Any]) -> int:
         and row.get("first_fit")
         and not row["first_fit"]["fits"]
     )
-    return hosts + held + int(target_problem(data)) + int(server_unprotected(data))
+    return hosts + held + target_problems(data) + int(server_unprotected(data))
 
 
 def server_unprotected(data: Dict[str, Any]) -> bool:

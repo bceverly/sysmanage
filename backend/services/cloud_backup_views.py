@@ -172,7 +172,7 @@ def accounts(db: Session, target_id) -> List[models.CloudBackupAccount]:
 def overview(db: Session) -> Dict[str, Any]:
     if cloud.airgapped():
         return {"available": False, "reason": "airgapped"}
-    target = jobs.the_target(db)
+    target = jobs.default_target(db)
     if target is None:
         return {"available": True, "target": None, "accounts": []}
     host = jobs.storage_host(db, target)
@@ -214,7 +214,7 @@ def summary(db: Session) -> Dict[str, Any]:
     }
     if cloud.airgapped():
         return empty
-    target = jobs.the_target(db)
+    target = jobs.default_target(db)
     if target is None:
         return empty
     counts = dict(empty, enabled=cloud.enabled(db, target.id))
