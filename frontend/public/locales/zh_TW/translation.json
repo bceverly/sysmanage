@@ -6130,6 +6130,17 @@
       "settingUp": "正在設定中",
       "stop": "無（停止複製；副本保持原地）",
       "title": "{{name}} 的異地副本"
+    },
+    "move": {
+      "cancel": "取消移動",
+      "cancelError": "未能取消移動。",
+      "checking": "遷移到 {{target}}：檢查副本",
+      "copyError": "上一次複製未完成：{{error}}",
+      "copying": "遷移到 {{target}}：已複製 {{copied}}/{{total}} 個快照",
+      "failed": "遷移至 {{target}} 已停止：{{error}}。此主機仍會備份至 {{from}}。",
+      "kept": "從 {{from}} 移動；其舊的存儲庫在那裡被保留至 {{date}}。",
+      "keptForGood": "從 {{from}} 移動；其舊的存儲庫在那裡被保留。",
+      "note": "這個主機的備份會先複製到新的目標。它會持續備份到目前的目標，直到複製完成並確認後，才切換。舊的存儲庫至少會保留 14 天。"
     }
   },
   "cloudBackup": {

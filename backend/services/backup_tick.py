@@ -45,6 +45,7 @@ from backend.services import backup_escrow
 from backend.services import backup_jobs as jobs
 from backend.services import backup_proxy
 from backend.services import backup_reach as reach
+from backend.services import backup_moves
 from backend.services import backup_replicas
 from backend.services import backup_tag_policies as tag_policies
 from backend.services import backup_verify as verify
@@ -455,6 +456,7 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
     queued += cloud_tick.reconcile(db, default, now)
     # Off-site copies (27.3): job files, and copies that stalled.
     backup_replicas.tick(db, now)
+    backup_moves.tick(db, now)  # moves with their backups: check, switch
     return queued + reach_checks(db, now)
 
 

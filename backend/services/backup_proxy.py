@@ -392,6 +392,12 @@ def sync_clients(db: Session, target: models.BackupTarget) -> bool:
         .all()
     ):
         replica.config_version += 1
+    for move in (
+        db.query(models.BackupMove)
+        .filter(models.BackupMove.target_id == target.id)
+        .all()
+    ):
+        move.config_version += 1  # a host moving in (backup_moves)
     return True
 
 

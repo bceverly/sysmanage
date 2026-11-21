@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 15:44-0800\n"
+"POT-Creation-Date: 2026-11-20 18:40-0800\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -130,7 +130,7 @@ msgstr "У вас нет доступа к выбранной учетной з�
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:137
+#: backend/api/posture.py:375 backend/api/backups.py:138
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
@@ -246,8 +246,8 @@ msgstr "Неверный формат идентификатора узла"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:149
-#: backend/api/backups.py:152 backend/api/auto_updates.py:238
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
+#: backend/api/backups.py:153 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
@@ -337,16 +337,16 @@ msgstr "Недоступно на этом сервере"
 msgid "Cloud backup account not found"
 msgstr "Учетная запись облачного резервного копирования не найдена"
 
-#: backend/api/cloud_backup.py:136 backend/api/backups.py:173
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:174
 #, python-format
 msgid "%s is out of range"
 msgstr "%s вне допустимого диапазона"
 
-#: backend/api/cloud_backup.py:141 backend/api/backups.py:177
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:178
 msgid "Interval (hours)"
 msgstr "Интервал (часов)"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:178
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:179
 msgid "Window start hour"
 msgstr "Час начала окна"
 
@@ -422,74 +422,74 @@ msgstr "Неправильный формат UUID: %s"
 msgid "Role with ID %s does not exist"
 msgstr "Роль с ID %s не существует"
 
-#: backend/api/backups_targets.py:77
+#: backend/api/backups_targets.py:80
 msgid "Host mount point"
 msgstr "Точка монтирования на хосте"
 
-#: backend/api/backups_targets.py:78 backend/api/backups_targets.py:123
+#: backend/api/backups_targets.py:81 backend/api/backups_targets.py:126
 msgid "Storage path"
 msgstr "Путь хранения"
 
-#: backend/api/backups_targets.py:79
+#: backend/api/backups_targets.py:82
 msgid "Concurrent backups"
 msgstr "Одновременные резервные копии"
 
-#: backend/api/backups_targets.py:80
+#: backend/api/backups_targets.py:83
 msgid "Days to keep sealed snapshots"
 msgstr "Дней хранения запечатанных снимков"
 
-#: backend/api/backups_targets.py:81
+#: backend/api/backups_targets.py:84
 msgid "Write cache budget"
 msgstr "Лимит кеша записи"
 
-#: backend/api/backups_targets.py:82
+#: backend/api/backups_targets.py:85
 msgid "Storage space warning"
 msgstr "Предупреждение о месте в хранилище"
 
-#: backend/api/backups_targets.py:83
+#: backend/api/backups_targets.py:86
 msgid "Storage space critical"
 msgstr "Критическое заполнение хранилища"
 
-#: backend/api/backups_targets.py:87
+#: backend/api/backups_targets.py:90
 msgid "The storage space warning must be below the critical level"
 msgstr ""
 "Порог предупреждения о месте в хранилище должен быть ниже критического"
 
-#: backend/api/backups_targets.py:89
+#: backend/api/backups_targets.py:92
 msgid "The backup service account is not a valid account name"
 msgstr ""
 "Служебная учетная запись резервного копирования не является допустимым "
 "именем учетной записи"
 
-#: backend/api/backups_targets.py:91
+#: backend/api/backups_targets.py:94
 msgid "Unknown seal mode"
 msgstr "Неизвестный режим запечатывания"
 
-#: backend/api/backups_targets.py:93
+#: backend/api/backups_targets.py:96
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "Для запечатывания снимком ZFS нужно имя набора данных"
 
-#: backend/api/backups_targets.py:95
+#: backend/api/backups_targets.py:98
 msgid "The ZFS dataset name is not valid"
 msgstr "Недопустимое имя набора данных ZFS"
 
-#: backend/api/backups_targets.py:102
+#: backend/api/backups_targets.py:105
 msgid "A storage host needs the storage path"
 msgstr "Для хоста хранения нужен путь хранения"
 
-#: backend/api/backups_targets.py:119
+#: backend/api/backups_targets.py:122
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr "Для запечатывания снимком btrfs нужен каталог снимков"
 
-#: backend/api/backups_targets.py:121
+#: backend/api/backups_targets.py:124
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "Для запечатывания снимком btrfs нужен путь хранения"
 
-#: backend/api/backups_targets.py:124
+#: backend/api/backups_targets.py:127
 msgid "Snapshot directory"
 msgstr "Каталог снимков"
 
-#: backend/api/backups_targets.py:129
+#: backend/api/backups_targets.py:132
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
@@ -498,32 +498,36 @@ msgstr ""
 "%s должен быть простым абсолютным путем (буквы, цифры, '_', '.', '-' и '/'; "
 "без '/' в конце)"
 
-#: backend/api/backups_targets.py:137
+#: backend/api/backups_targets.py:140
 msgid "The snapshot directory must be outside the storage path"
 msgstr "Каталог снимков должен находиться вне пути хранения"
 
-#: backend/api/backups_targets.py:251
+#: backend/api/backups_targets.py:254
 msgid "Remove the hosts' backup policies before the target"
 msgstr "Сначала удалите политики резервного копирования хостов, затем цель"
 
-#: backend/api/backups_targets.py:256
+#: backend/api/backups_targets.py:259
 msgid "A tag policy sends its hosts to this target; change it first"
 msgstr ""
 "Политика тегов направляет свои хосты на эту целевую точку; сначала измените "
 "политику"
 
-#: backend/api/backups_targets.py:261
+#: backend/api/backups_targets.py:264
 msgid "Make another target the default before deleting this one"
 msgstr ""
 "Прежде чем удалить эту целевую точку, назначьте целевой точкой по умолчанию "
 "другую"
 
-#: backend/api/backups_targets.py:267
+#: backend/api/backups_targets.py:270
 msgid ""
 "Another target copies off-site to this one; stop its off-site copy first"
 msgstr ""
 "В эту целевую точку копирует другая целевая точка; сначала остановите её "
 "копирование на другую площадку"
+
+#: backend/api/backups_targets.py:366
+msgid "This move is no longer under way"
+msgstr "Это перемещение больше не в процессе"
 
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
@@ -4563,28 +4567,28 @@ msgid "KVM network list requested. Results will be returned shortly."
 msgstr ""
 "Запрошен список сетей KVM. Результаты будут отображены в ближайшее время."
 
-#: backend/api/backups.py:168
+#: backend/api/backups.py:169
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s должен быть абсолютным путем без '..'"
 
-#: backend/api/backups.py:179
+#: backend/api/backups.py:180
 msgid "Snapshots to keep"
 msgstr "Сколько снимков хранить"
 
-#: backend/api/backups.py:180
+#: backend/api/backups.py:181
 msgid "Check interval (days)"
 msgstr "Интервал проверки (дней)"
 
-#: backend/api/backups.py:184
+#: backend/api/backups.py:185
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "Хуки приостановки: не более 10 коротких имен в нижнем регистре"
 
-#: backend/api/backups.py:197
+#: backend/api/backups.py:198
 msgid "At most 50 path rules can be set"
 msgstr "Не более 50 правил для путей можно задать"
 
-#: backend/api/backups.py:208
+#: backend/api/backups.py:209
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
@@ -4592,74 +4596,74 @@ msgstr ""
 "Каждое правило пути состоит из одной строки не более 512 символов без "
 "начальных или конечных пробелов или начального символа #"
 
-#: backend/api/backups.py:216 backend/api/backups_drift.py:103
+#: backend/api/backups.py:217 backend/api/backups_drift.py:103
 #: backend/api/backups_browse.py:96
 msgid "The snapshot name is not valid"
 msgstr "Недопустимое имя снимка"
 
-#: backend/api/backups.py:218
+#: backend/api/backups.py:219
 msgid "At most 50 paths can be restored at once"
 msgstr "За один раз можно восстановить не более 50 путей"
 
-#: backend/api/backups.py:221
+#: backend/api/backups.py:222
 msgid "A restore path is empty or too long"
 msgstr "Путь восстановления пуст или слишком длинный"
 
-#: backend/api/backups.py:223
+#: backend/api/backups.py:224
 msgid "A restore path must not contain '..'"
 msgstr "Путь восстановления не должен содержать '..'"
 
-#: backend/api/backups.py:229
+#: backend/api/backups.py:230
 msgid "A restore path must be absolute, such as /home/alice/notes.txt"
 msgstr ""
 "Путь восстановления должен быть абсолютным, например /home/alice/notes.txt"
 
-#: backend/api/backups.py:243
+#: backend/api/backups.py:244
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr ""
 "Укажите пути для возврата на место; хост целиком на место не "
 "восстанавливается"
 
-#: backend/api/backups.py:249
+#: backend/api/backups.py:250
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr ""
 "Каждый путь, восстанавливаемый на место, должен быть конкретным, например "
 "/etc/nginx"
 
-#: backend/api/backups.py:254
+#: backend/api/backups.py:255
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "Подтвердите, что файлы хоста по этим путям будут заменены"
 
-#: backend/api/backups.py:418
+#: backend/api/backups.py:422
 msgid "No backup policy"
 msgstr "Нет политики резервного копирования"
 
-#: backend/api/backups.py:442
+#: backend/api/backups.py:446
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Этот хост пока не может выполнять резервное копирование (%s)"
 
-#: backend/api/backups.py:448
+#: backend/api/backups.py:452
 msgid "This host's backup is not configured yet"
 msgstr "Резервное копирование этого хоста еще не настроено"
 
-#: backend/api/backups.py:465
+#: backend/api/backups.py:469
 msgid "The backup storage host is not ready"
 msgstr "Хост хранения резервных копий не готов"
 
-#: backend/api/backups.py:480
+#: backend/api/backups.py:484
 msgid "Unknown backup action"
 msgstr "Неизвестное действие резервного копирования"
 
-#: backend/api/backups.py:493
+#: backend/api/backups.py:497
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "Зашифрованный репозиторий нельзя переупаковать на хосте хранения"
 
-#: backend/api/backups.py:497
+#: backend/api/backups.py:501
 msgid "That backup job is already queued or running"
 msgstr "Это задание резервного копирования уже в очереди или выполняется"
 
-#: backend/api/backups.py:595
+#: backend/api/backups.py:599
 msgid ""
 "This backup is encrypted to your break-glass escrow key, which SysManage "
 "never holds. Restore it by hand with restate and that key, as the server "
@@ -4669,16 +4673,16 @@ msgstr ""
 "который SysManage никогда не хранит. Восстановите ее вручную с помощью "
 "restate и этого ключа, как описано в руководстве по восстановлению сервера."
 
-#: backend/api/backups.py:614 backend/api/backups_drift.py:114
+#: backend/api/backups.py:618 backend/api/backups_drift.py:114
 #: backend/api/backups_browse.py:66
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "restate на этом хосте пока не умеет этого; обновите restate"
 
-#: backend/api/backups.py:626
+#: backend/api/backups.py:630
 msgid "This snapshot's repository is no longer kept"
 msgstr "Репозиторий этого снимка больше не хранится"
 
-#: backend/api/backups.py:709 backend/api/backups.py:712
+#: backend/api/backups.py:713 backend/api/backups.py:716
 msgid "Backup run not found"
 msgstr "Задание резервного копирования не найдено"
 
@@ -6623,14 +6627,6 @@ msgstr ""
 msgid "Backup target not found"
 msgstr "Цель резервного копирования не найдена"
 
-#: backend/services/backup_targets.py:212
-msgid ""
-"This host already has backups on its target; it cannot move to another "
-"target yet"
-msgstr ""
-"У этого хоста уже есть резервные копии на его целевой точке; пока его нельзя"
-" перенести на другую"
-
 #: backend/services/backup_key_release.py:90
 #: backend/services/backup_key_release.py:159
 msgid "No such backup run for this host"
@@ -6799,6 +6795,47 @@ msgstr "Хост-ссылка не найдена"
 msgid "Target host not found"
 msgstr "Целевой хост не найден"
 
+#: backend/services/backup_moves.py:62
+msgid ""
+"A host with backups can move only to a target reached through restate-proxy"
+msgstr ""
+"Хост с резервными копиями может перемещаться только к цели, доступной через "
+"restate-proxy"
+
+#: backend/services/backup_moves.py:65
+msgid "This host's storage host cannot copy backups yet; upgrade its agent"
+msgstr ""
+"Хост хранения этого хоста пока не может копировать резервные копии; обновите"
+" его агента"
+
+#: backend/services/backup_moves.py:68
+msgid ""
+"This host still has backups from before its repository was encrypted; it can"
+" move once they have been pruned"
+msgstr ""
+"У этого хоста все еще есть резервные копии, сделанные до шифрования его "
+"репозитория; он сможет переместиться после того, как они будут очищены"
+
+#: backend/services/backup_moves.py:72
+msgid ""
+"That target holds this host's off-site copy; stop copying to it, or choose "
+"another target"
+msgstr ""
+"Эта цель содержит копию этого хоста на другой площадке; остановите "
+"копирование в нее или выберите другую цель"
+
+#: backend/services/backup_moves.py:75
+msgid "This host is already moving to another target"
+msgstr "Этот хост уже перемещается к другой цели"
+
+#: backend/services/backup_moves.py:76
+msgid "That target has no storage host yet"
+msgstr "У этой цели еще нет хоста хранения"
+
+#: backend/services/backup_moves.py:440
+msgid "Move not found"
+msgstr "Перемещение не найдено"
+
 #: backend/services/network_sweep.py:65
 msgid "That is not a valid network"
 msgstr "Это недопустимая сеть"
@@ -6912,11 +6949,11 @@ msgstr "Недействительный ответ от vault"
 msgid "Invalid secret format"
 msgstr "Неверный формат секрета"
 
-#: backend/services/backup_replicas.py:696
+#: backend/services/backup_replicas.py:767
 msgid "This host has no off-site copy"
 msgstr "У этого хоста нет копии на другой площадке"
 
-#: backend/services/backup_replicas.py:698
+#: backend/services/backup_replicas.py:769
 msgid ""
 "The off-site copy cannot be read yet: its storage host has not been told "
 "this host's read token"
@@ -6924,11 +6961,11 @@ msgstr ""
 "Копию на другой площадке пока нельзя прочитать: её хосту хранения ещё не "
 "сообщили токен чтения этого хоста"
 
-#: backend/services/backup_replicas.py:701
+#: backend/services/backup_replicas.py:772
 msgid "That snapshot is not in the off-site copy"
 msgstr "Этого снимка нет в копии на другой площадке"
 
-#: backend/services/backup_replicas.py:703
+#: backend/services/backup_replicas.py:774
 msgid "This host's agent cannot read its off-site copy yet; upgrade the agent"
 msgstr ""
 "Агент этого хоста пока не может читать свою копию на другой площадке; "
@@ -7024,6 +7061,13 @@ msgstr "Уязвимости пакетов pkgsrc в NetBSD (то, что чи�
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "Уязвимости macOS по версиям ОС на основе данных NVD о затронутых версиях"
+
+#~ msgid ""
+#~ "This host already has backups on its target; it cannot move to another "
+#~ "target yet"
+#~ msgstr ""
+#~ "У этого хоста уже есть резервные копии на его целевой точке; пока его нельзя"
+#~ " перенести на другую"
 
 #~ msgid "This edition supports one backup target; edit the existing one"
 #~ msgstr ""

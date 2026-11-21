@@ -6130,6 +6130,17 @@
       "settingUp": "en cours de configuration",
       "stop": "Aucune (arrêter la copie ; les copies restent où elles sont)",
       "title": "Copie hors site de {{name}}"
+    },
+    "move": {
+      "cancel": "Annuler le déplacement",
+      "cancelError": "L'annulation du déplacement a échoué.",
+      "checking": "Déplacement vers {{target}} : vérification de la copie",
+      "copyError": "La dernière copie ne s'est pas terminée : {{error}}",
+      "copying": "Déplacement vers {{target}} : {{copied}} instantanés sur {{total}} copiés",
+      "failed": "Le déplacement vers {{target}} s'est arrêté : {{error}}. Cet hôte effectue toujours des sauvegardes vers {{from}}.",
+      "kept": "Déplacé de {{from}} ; son ancien dépôt là-bas est conservé jusqu'à {{date}}.",
+      "keptForGood": "Déplacé de {{from}} ; son ancien dépôt là-bas est conservé.",
+      "note": "Les sauvegardes de cet hôte sont d'abord copiées vers la nouvelle cible. Il continue à effectuer des sauvegardes vers sa cible actuelle jusqu'à ce que la copie ait été vérifiée, puis bascule. Son ancien dépôt est conservé pendant au moins 14 jours."
     }
   },
   "cloudBackup": {

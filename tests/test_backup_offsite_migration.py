@@ -2,8 +2,9 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""q105offsite: a target's off-site copy and ``backup_replica`` -- added
-idempotently, removed by the downgrade (SQLite)."""
+"""q105offsite, q106offsiteread and q107move: off-site copies, their read
+tokens and moves with backups -- added idempotently, removed by the
+downgrade (SQLite)."""
 
 import os
 import sqlite3
@@ -55,5 +56,23 @@ def test_the_hosts_read_token_columns_come_and_go():
         _alembic(["upgrade", "head"], db_path)  # a rerun changes nothing
         _alembic(["downgrade", "q105offsite"], db_path)
         assert "read_token_sha256" not in _columns(db_path, "backup_replica")
+    finally:
+        os.unlink(db_path)
+
+
+def test_the_move_table_comes_and_goes():
+    fd, db_path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    try:
+        _alembic(["upgrade", "head"], db_path)
+        assert {"status", "from_target_id", "keep_until", "verified_at"} <= set(
+            _columns(db_path, "backup_move")
+        )
+        _alembic(["stamp", "q106offsiteread"], db_path)
+        _alembic(["upgrade", "head"], db_path)  # a rerun changes nothing
+        _alembic(["downgrade", "q106offsiteread"], db_path)
+        assert "backup_move" not in _tables(db_path)
+        _alembic(["upgrade", "head"], db_path)
+        assert "backup_move" in _tables(db_path)
     finally:
         os.unlink(db_path)

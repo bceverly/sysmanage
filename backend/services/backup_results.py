@@ -35,6 +35,7 @@ from backend.services import backup_host_reply as host_reply
 from backend.services import backup_jobs as jobs
 from backend.services import backup_network_mounts as network_mounts
 from backend.services import backup_proxy
+from backend.services import backup_moves
 from backend.services import backup_proxy_cert
 from backend.services import backup_replicas
 from backend.services import backup_signing
@@ -886,7 +887,8 @@ def record_result(
         return run
     result = _store_outcome(run, payload)
     if backup_replicas.is_replica_run(run):
-        backup_replicas.after(db, run, result)  # an off-site copy's, not the policy's
+        if backup_moves.after(db, run, result):  # a copy's or a move's
+            backup_tick.configure_now(db)  # a move switched: tell everyone now
         return run
     policy = _policy(db, run)
     if "storage_audit" in payload and str(run.host_id) != str(
@@ -936,12 +938,8 @@ def record_storage_audit(db: Session, host_id: Any, payload: Dict[str, Any]) -> 
         if policy is not None
         else None
     )
-    if (
-        policy is None
-        and policy_id
-        and backup_replicas.is_offsite_audit(db, policy_id, host_id)
-    ):
-        return True  # an off-site copy's: the copy's own runs carry what matters
+    if policy_id and backup_moves.is_quiet_audit(db, policy_id, host_id):
+        return True  # a copy's, or a moved host's old storage: nothing to keep
     is_storage = target is not None and str(target.storage_host_id) == str(host_id)
     is_host = policy is not None and str(policy.host_id) == str(host_id)
     version = payload.get("restate_version")

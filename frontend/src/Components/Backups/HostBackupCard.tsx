@@ -42,6 +42,7 @@ import StorageReachNote from './StorageReachNote';
 import { VerificationLine } from './VerificationStatus';
 import { LegalHoldButton } from './BackupLegalHolds';
 import { HostOffsite } from './BackupOffsite';
+import { HostMove } from './BackupMove';
 
 // restate's plaintext write cache on this host (encrypted repositories only;
 // restate 2.1.0.4 reports its size with each capture), against the target's
@@ -165,6 +166,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                         </Typography>
                         <VerificationLine verification={data.verification} />
                         <HostOffsite offsite={data.offsite} />
+                        <HostMove move={data.move} canManage={canManage} onChanged={() => void load()} />
                         <WriteCache run={data.last_good_capture} budgetGb={data.target?.cache_budget_gb ?? 20} />
                         <FirstFitNote fit={data.first_fit} />
                     </>
@@ -213,7 +215,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                 </Stack>
                 {editing && !data.server_host && (
                     <BackupPolicyDialog open hostId={hostId} fqdn={data.fqdn} policy={data.policy}
-                        source={data.policy_source}
+                        source={data.policy_source} hasBackups={data.snapshot_count > 0}
                         onClose={() => setEditing(false)} onSaved={() => void load()} />
                 )}
                 {editing && data.server_host && (

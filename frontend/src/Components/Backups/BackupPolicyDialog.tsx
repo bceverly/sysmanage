@@ -101,9 +101,11 @@ const BackupPolicyDialog: React.FC<{
     policy: BackupPolicy | null;
     /** Where its settings come from (24.6); a tag policy gets a note. */
     source?: PolicySource | null;
+    /** It has snapshots: choosing another target moves them first (27.3). */
+    hasBackups?: boolean;
     onClose: () => void;
     onSaved: () => void;
-}> = ({ open, hostId, fqdn, policy, source, onClose, onSaved }) => {
+}> = ({ open, hostId, fqdn, policy, source, hasBackups, onClose, onSaved }) => {
     const { t, i18n } = useTranslation();
     const gfsLicensed = useModuleLicensed('backup_engine');
     const initial = (): PolicyInput =>
@@ -170,6 +172,11 @@ const BackupPolicyDialog: React.FC<{
                     <TagPolicyNote source={source} />
                     <OwnPolicyNote source={source} />
                     <TargetPicker value={target} onChange={setTarget} current={policy?.target_id} />
+                    {hasBackups && policy && target && target !== policy.target_id && (
+                        <Alert severity="info" data-testid="backup-move-note">
+                            {t('backups.move.note', 'This host\'s backups are copied to the new target first. It keeps backing up to its current target until the copy has been checked, then switches. Its old repository is kept for at least 14 days.')}
+                        </Alert>
+                    )}
                     <FormControlLabel
                         control={<Switch checked={form.enabled} onChange={e => set({ enabled: e.target.checked })} />}
                         label={t('backups.policy.enabled', 'Back up this host on a schedule')}

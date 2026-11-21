@@ -6,7 +6,9 @@
 
 ``GET /backups/targets`` -- every target in a line, the default first.
 ``POST /backups/targets``, ``PUT``/``DELETE /backups/targets/{id}`` and
-``PUT /backups/targets/{id}/default``.  Manage Backups.  The first target is
+``PUT /backups/targets/{id}/default``, and ``POST
+/backups/moves/{id}/cancel`` (a host moving to another target with its
+backups, 27.3: stopping a move is never licensed).  Manage Backups.  The first target is
 the default; a second needs the Enterprise ``backup_ops_engine`` (402
 without it), and so does choosing another default while there are several.
 A target in use by a host or tag policy, or the default while others
@@ -36,6 +38,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_jobs as jobs
+from backend.services import backup_moves as moves
 from backend.services import backup_storage_status as storage_fs
 from backend.services import backup_targets as targets
 from backend.services import backup_tick
@@ -346,3 +349,34 @@ def set_replica_target(
     backup_tick.configure_now(db)
     db.commit()
     return views.target_dict(target, db)
+
+
+@router.post("/backups/moves/{move_id}/cancel")
+def cancel_move(
+    move_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Stop a host's move to another target before it switches: the host
+    stays on its target, backing up as before.  Any edition."""
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    row = moves.move_or_404(db, move_id)
+    if row.status not in moves.replicas.MOVING:
+        raise HTTPException(
+            status_code=409, detail=_("This move is no longer under way")
+        )
+    policy = db.get(models.BackupPolicy, row.policy_id)
+    host = db.get(models.Host, policy.host_id) if policy else None
+    moves.cancel(db, row)
+    _audit(
+        db,
+        current_user,
+        EntityType.HOST,
+        host.id if host else None,
+        host.fqdn if host else None,
+        "Backup move canceled",
+        {"move_id": str(row.id)},
+    )
+    backup_tick.configure_now(db)
+    db.commit()
+    return {"canceled": True}

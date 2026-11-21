@@ -565,3 +565,55 @@ class BackupReplica(Base):
     abilities = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)
+
+
+class BackupMove(Base):
+    """A host moving to another target with its backups (27.3, q107): copy,
+    then switch.  Its repository is copied into the new target the way an
+    off-site copy is -- the source storage host copies each snapshot in
+    through the new target's restate-proxy with a token of its own, and the
+    new storage host keeps the copy under this row's id, in the directory the
+    host's own repository will have there -- then checked, and only then does
+    the policy name the new target.  The old repository is kept as it is
+    until ``keep_until`` (NULL: for good)."""
+
+    __tablename__ = "backup_move"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    policy_id = Column(
+        GUID(), ForeignKey(_POLICY_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
+    # The target it moves to (named as an off-site copy's holder is).
+    target_id = Column(
+        GUID(),
+        ForeignKey("backup_target.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    from_target_id = Column(
+        GUID(), ForeignKey("backup_target.id", ondelete="SET NULL"), nullable=True
+    )
+    repo_dir = Column(String(255), nullable=False)
+    # copying -> verifying -> switched; or failed, canceled.
+    status = Column(String(16), nullable=False)
+    error = Column(String(1000), nullable=True)
+    config_version = Column(Integer, nullable=False, default=1)
+    acked_version = Column(Integer, nullable=True)
+    prepared_at = Column(DateTime, nullable=True)
+    token_sha256 = Column(String(64), nullable=True)
+    token_sha256_old = Column(String(64), nullable=True)
+    # What the new storage host's du last listed (JSON names); ``pruned`` is
+    # always empty (nothing is pruned there before the switch).
+    snapshots = Column(Text, nullable=True)
+    pruned = Column(Text, nullable=True)
+    repository_bytes = Column(BigInteger, nullable=True)
+    last_copy_at = Column(DateTime, nullable=True)
+    last_copy_status = Column(String(32), nullable=True)
+    last_copy_error = Column(String(1000), nullable=True)
+    abilities = Column(Text, nullable=True)
+    verified_at = Column(DateTime, nullable=True)
+    switched_at = Column(DateTime, nullable=True)
+    keep_until = Column(DateTime, nullable=True)
+    created_by = Column(String(255), nullable=True)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)

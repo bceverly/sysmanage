@@ -217,7 +217,9 @@ async def test_after_a_lapse_a_host_keeps_its_target_and_cannot_move(
 
 
 @pytest.mark.asyncio
-async def test_a_host_moves_only_before_it_has_backups(session, sent, ops_engine):
+async def test_a_host_with_backups_moves_only_to_a_proxy_target(
+    session, sent, ops_engine
+):
     s = _setup(session)
     second, _nas = _second(session)
     api.save_policy(session, MANAGER, s.host, _policy_body(target_id=str(second.id)))

@@ -6130,6 +6130,17 @@
       "settingUp": "wird eingerichtet",
       "stop": "Keine (Kopieren beenden; die Kopien bleiben, wo sie sind)",
       "title": "Offsite-Kopie von {{name}}"
+    },
+    "move": {
+      "cancel": "Verschiebung abbrechen",
+      "cancelError": "Die Verschiebung konnte nicht storniert werden.",
+      "checking": "Verschiebung nach {{target}}: Kopie wird überprüft",
+      "copyError": "Die letzte Kopie wurde nicht abgeschlossen: {{error}}",
+      "copying": "Verschiebung nach {{target}}: {{copied}} von {{total}} Snapshots kopiert",
+      "failed": "Die Verschiebung nach {{target}} wurde abgebrochen: {{error}}. Dieser Host sichert weiterhin auf {{from}}.",
+      "kept": "Verschoben von {{from}}; sein altes Repository dort wird bis {{date}} aufbewahrt.",
+      "keptForGood": "Verschoben von {{from}}; sein altes Repository dort wird aufbewahrt.",
+      "note": "Die Sicherungen dieses Hosts werden zuerst auf das neue Ziel kopiert. Er sichert weiterhin auf sein aktuelles Ziel, bis die Kopie überprüft wurde, und wechselt dann. Sein altes Repository wird mindestens 14 Tage lang aufbewahrt."
     }
   },
   "cloudBackup": {

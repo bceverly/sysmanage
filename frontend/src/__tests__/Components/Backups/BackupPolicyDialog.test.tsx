@@ -19,10 +19,15 @@ vi.mock("../../../hooks/useModuleLicensed", () => ({
 }));
 vi.mock("../../../Services/backups", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../../Services/backups")>();
-  return { ...actual, savePolicy: vi.fn() };
+  return {
+    ...actual,
+    savePolicy: vi.fn(),
+    // Never settles (as the real call did here): no picker, no late update.
+    listTargets: vi.fn(() => new Promise(() => undefined)),
+  };
 });
 
-import { savePolicy } from "../../../Services/backups";
+import { listTargets, savePolicy } from "../../../Services/backups";
 import type { BackupPolicy } from "../../../Services/backups";
 import BackupPolicyDialog from "../../../Components/Backups/BackupPolicyDialog";
 
@@ -128,5 +133,32 @@ describe("BackupPolicyDialog start hour", () => {
   test("says nothing about local time without a start hour", () => {
     open(policy({ window_start_hour: null }));
     expect(screen.queryByText(/In your time zone/)).not.toBeInTheDocument();
+  });
+});
+
+describe("BackupPolicyDialog moving a host with backups", () => {
+  beforeEach(() => {
+    licensed.value = true;
+    vi.mocked(listTargets).mockResolvedValue([
+      { id: "a", name: "NAS", location: null, is_default: true, hosts: 1, tag_policies: 0 },
+      { id: "b", name: "Offsite", location: null, is_default: false, hosts: 0, tag_policies: 0 },
+    ]);
+  });
+
+  test("choosing another target says its backups are copied first", async () => {
+    render(<BackupPolicyDialog open hostId="h1" fqdn="t14" hasBackups
+      policy={policy({ target_id: "a" } as Partial<BackupPolicy>)} onClose={vi.fn()} onSaved={vi.fn()} />);
+    fireEvent.mouseDown(await screen.findByRole("combobox", { name: "Backup target" }));
+    fireEvent.click(await screen.findByText("Offsite"));
+    expect(await screen.findByTestId("backup-move-note")).toHaveTextContent(
+      "copied to the new target first");
+  });
+
+  test("a host without backups just moves, with no note", async () => {
+    render(<BackupPolicyDialog open hostId="h1" fqdn="t14" hasBackups={false}
+      policy={policy({ target_id: "a" } as Partial<BackupPolicy>)} onClose={vi.fn()} onSaved={vi.fn()} />);
+    fireEvent.mouseDown(await screen.findByRole("combobox", { name: "Backup target" }));
+    fireEvent.click(await screen.findByText("Offsite"));
+    expect(screen.queryByTestId("backup-move-note")).toBeNull();
   });
 });

@@ -32,6 +32,7 @@ from backend.services import backup_tag_policies
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_forecast
 from backend.services import backup_jobs as jobs
+from backend.services import backup_moves
 from backend.services import backup_package_restore as package_restore
 from backend.services import backup_proxy
 from backend.services import backup_replicas
@@ -369,6 +370,8 @@ def host_status(
     _policy_status(db, entry, policy, ready, now)
     # Off-site copies (27.3): where, how far behind, how big.
     entry["offsite"] = backup_replicas.view(db, policy, now)
+    # Moving to another target with its backups (27.3).
+    entry["move"] = backup_moves.view(db, policy, now)
     return entry
 
 

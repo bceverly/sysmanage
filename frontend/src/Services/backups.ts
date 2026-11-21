@@ -364,10 +364,29 @@ export interface OffsiteCopy {
   last_copy_error: string | null;
 }
 
+/** A host moving to another target with its backups (27.3): copy, check,
+ *  then switch; or, after the switch, how long the old repository is kept. */
+export interface BackupMove {
+  id: string;
+  status: 'copying' | 'verifying' | 'switched' | 'failed';
+  target: string | null;
+  from_target: string | null;
+  /** The host's snapshots, and how many are still to copy. */
+  total: number;
+  behind: number;
+  bytes: number | null;
+  error: string | null;
+  switched_at: string | null;
+  /** The old repository is kept until then; null: kept for good. */
+  keep_until: string | null;
+}
+
 export interface BackupHost {
   host_id: string;
   /** Off-site copies of its repository (27.3). */
   offsite?: OffsiteCopy[];
+  /** Its move to another target, with its backups (27.3). */
+  move?: BackupMove | null;
   fqdn: string;
   platform: string | null;
   platform_release: string | null;
@@ -610,6 +629,11 @@ export const setDefaultTarget = async (id: string): Promise<BackupTarget> =>
 
 /** Copy every repository on a target off-site to another target, or stop
  *  (null).  Enterprise; stopping leaves the copies where they are. */
+/** Stop a host's move to another target before it switches (any edition). */
+export const cancelMove = async (id: string): Promise<void> => {
+  await axiosInstance.post(`${base}/backups/moves/${id}/cancel`);
+};
+
 export const setReplicaTarget = async (
   id: string,
   replicaTargetId: string | null,

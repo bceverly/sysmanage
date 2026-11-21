@@ -104,6 +104,32 @@ def rows(db: Session, policy: models.BackupPolicy) -> List[models.BackupReplica]
     )
 
 
+# A move with its backups (backup_moves) copies the way an off-site copy
+# does, while it is copying or being checked.
+MOVING = ("copying", "verifying")
+
+
+def is_move(row: Any) -> bool:
+    return isinstance(row, models.BackupMove)
+
+
+def moving(db: Session, policy: models.BackupPolicy) -> List[models.BackupMove]:
+    return (
+        db.query(models.BackupMove)
+        .filter(
+            models.BackupMove.policy_id == policy.id,
+            models.BackupMove.status.in_(MOVING),
+        )
+        .all()
+    )
+
+
+def copy_rows(db: Session, policy: models.BackupPolicy) -> List[Any]:
+    """Every repository the policy's storage host copies into: its off-site
+    copies and the target it is moving to."""
+    return [*rows(db, policy), *moving(db, policy)]
+
+
 def ensure(
     db: Session,
     policy: models.BackupPolicy,
@@ -144,10 +170,21 @@ def target_clients(db: Session, target: models.BackupTarget) -> List[str]:
         .filter(models.BackupReplica.target_id == target.id)
         .all()
     )
+    moves = (
+        db.query(models.BackupMove.id)
+        .filter(
+            models.BackupMove.target_id == target.id,
+            models.BackupMove.status.in_(MOVING),
+        )
+        .all()
+    )
     return sorted(
-        prefix + str(row_id)
-        for (row_id,) in found
-        for prefix in (CLIENT_PREFIX, READ_PREFIX)
+        [
+            prefix + str(row_id)
+            for (row_id,) in found
+            for prefix in (CLIENT_PREFIX, READ_PREFIX)
+        ]
+        + [CLIENT_PREFIX + str(row_id) for (row_id,) in moves]
     )
 
 
@@ -161,7 +198,7 @@ def source_block(db: Session, policy: models.BackupPolicy) -> Dict[str, Any]:
     if ABILITY not in jobs.storage_abilities(policy):
         return {}
     out = []
-    for row in rows(db, policy):
+    for row in copy_rows(db, policy):
         holder = db.get(models.BackupTarget, row.target_id)
         if not proxy.uses_proxy(holder):
             continue
@@ -230,7 +267,7 @@ def store_tokens(
     if policy is None or not isinstance(tokens, dict):
         return False
     changed = False
-    for row in rows(db, policy):
+    for row in copy_rows(db, policy):
         digest = tokens.get(str(row.id))
         if not proxy.is_sha256(digest) or digest == row.token_sha256:
             continue
@@ -263,21 +300,27 @@ def configuration(
     arrives through the proxy encrypted or not, as it was made."""
     source = jobs.storage_host(db, db.get(models.BackupTarget, policy.target_id))
     keep = jobs.prune_keep(policy)
-    work: Dict[str, Any] = {
-        "seal": jobs.seal_job(holder),
-        "check": {"read_all": False},
-        "du": {},
-        "protect": {},
-    }
-    if _holds_ok(row, keep):
-        work["prune"] = keep
+    work: Dict[str, Any] = {"check": {"read_all": False}, "du": {}, "protect": {}}
+    if not is_move(row):
+        # A move's copy is the host's own repository-to-be: nothing is pruned
+        # or sealed there until the switch, when its own jobs take over.
+        work["seal"] = jobs.seal_job(holder)
+        if _holds_ok(row, keep):
+            work["prune"] = keep
     hashes = [h for h in (row.token_sha256, row.token_sha256_old) if h]
     grants = []
     if hashes:
         grants.append(
             {"client": client(row), "token_sha256": hashes, "operations": ["append"]}
         )
-    readers = [h for h in (row.read_token_sha256, row.read_token_sha256_old) if h]
+    readers = [
+        h
+        for h in (
+            getattr(row, "read_token_sha256", None),
+            getattr(row, "read_token_sha256_old", None),
+        )
+        if h
+    ]
     if readers:
         # The backed-up host restores from its own copy: read, never more.
         grants.append(
@@ -433,10 +476,12 @@ def advance(db: Session, row: models.BackupReplica, copied: bool = False) -> Non
     this round copied something -- the off-site chain."""
     if not ready(row) or _busy(db, row):
         return
+    if is_move(row) and row.status != MOVING[0]:
+        return
     todo = needed(db, row)
     if todo:
         queue_copy(db, row, todo[0])
-    elif copied:
+    elif copied and not is_move(row):  # a move is checked next (backup_moves)
         queue_offsite(db, row, _CHAIN[0])
 
 
@@ -454,17 +499,27 @@ def _row(db: Session, run: models.BackupRun) -> Optional[models.BackupReplica]:
     replica_id = params.get("replica_id") if isinstance(params, dict) else None
     if not replica_id:
         return None
+    key = jobs.as_uuid(replica_id)
     return (
-        db.query(models.BackupReplica)
-        .filter(models.BackupReplica.id == jobs.as_uuid(replica_id))
-        .first()
+        db.query(models.BackupReplica).filter(models.BackupReplica.id == key).first()
+        or db.query(models.BackupMove).filter(models.BackupMove.id == key).first()
     )
+
+
+def row_of(db: Session, run: models.BackupRun) -> Any:
+    """The off-site copy or the move a copying run is for, or None."""
+    return _row(db, run)
+
+
+def names(text: Optional[str]) -> List[str]:
+    return _names(text)
 
 
 def is_offsite_audit(db: Session, replica_id: Any, host_id: Any) -> bool:
     """A storage audit the off-site storage host sent for a copy it keeps
     (it audits every repository it stores, under the id it was given)."""
-    row = db.get(models.BackupReplica, replica_id)
+    key = jobs.as_uuid(replica_id)
+    row = db.get(models.BackupReplica, key) or db.get(models.BackupMove, key)
     holder = db.get(models.BackupTarget, row.target_id) if row else None
     return holder is not None and str(holder.storage_host_id) == str(host_id)
 
@@ -495,7 +550,8 @@ def configured(db: Session, run: models.BackupRun, reply: Any) -> None:
         row.config_version += 1
     if row.acked_version >= row.config_version:
         row.token_sha256_old = None  # the grant holds the new ones now
-        row.read_token_sha256_old = None
+        if not is_move(row):
+            row.read_token_sha256_old = None
     if not row.prepared_at:
         queue_offsite(db, row, "prepare")
     row.updated_at = jobs.now()
@@ -525,20 +581,26 @@ def refused(db: Session, run: models.BackupRun, code: str) -> None:
                    run.action, getattr(row, "id", None), run.host_id, code)  # fmt: skip
 
 
-def _after_copy(db: Session, row, run, result) -> None:
+def record_copy(row: Any, run: models.BackupRun, result: Dict[str, Any]) -> bool:
+    """Note one copy run's end on its row; True when it copied."""
     row.last_copy_at = jobs.now()
     row.last_copy_status = run.status
     row.last_copy_error = (run.message or None) if run.status != "ok" else None
     if run.status != "ok":
-        logger.error("Off-site copy of %s for copy %s ended %s: %s",
+        logger.error("Copy of %s into %s ended %s: %s",
                      _record(run).get("snapshot"), row.id, run.status,
                      run.message)  # fmt: skip
-        return
+        return False
     copy = result.get("copy") if isinstance(result.get("copy"), dict) else {}
     name = copy.get("snapshot") or _record(run).get("snapshot")
     if isinstance(name, str):
         row.snapshots = json.dumps(sorted(set(_names(row.snapshots)) | {name}))
-    advance(db, row, copied=True)
+    return True
+
+
+def _after_copy(db: Session, row, run, result) -> None:
+    if record_copy(row, run, result):
+        advance(db, row, copied=True)
 
 
 def _record(run: models.BackupRun) -> Dict[str, Any]:
@@ -558,6 +620,11 @@ def _after_prune(_db: Session, row, run, result) -> None:
         row.snapshots = json.dumps(sorted(set(_names(row.snapshots)) - set(dropped)))
     if run.status == "ok":
         queue_offsite(_db, row, "du")
+
+
+def record_du(row: Any, run: models.BackupRun, result: Dict[str, Any]) -> None:
+    """What a du of the copy listed: its snapshots and size."""
+    _after_du(None, row, run, result)
 
 
 def _after_du(_db: Session, row, run, result) -> None:
@@ -636,10 +703,17 @@ def after(db: Session, run: models.BackupRun, result: Dict[str, Any]) -> None:
 # --- the scheduler ------------------------------------------------------
 
 
+def _every_copy(db: Session) -> List[Any]:
+    return [
+        *db.query(models.BackupReplica).all(),
+        *db.query(models.BackupMove).filter(models.BackupMove.status.in_(MOVING)),
+    ]
+
+
 def configure_pending(db: Session) -> None:
-    """Send each copy's changed job files to its off-site storage host --
-    once its grant can name the source's token."""
-    for row in db.query(models.BackupReplica).all():
+    """Send each copy's changed job files to its storage host -- once its
+    grant can name the source's token."""
+    for row in _every_copy(db):
         if row.token_sha256 and (row.acked_version or 0) < row.config_version:
             queue_configure(db, row)
 
@@ -648,7 +722,7 @@ def tick(db: Session, now: datetime) -> None:
     """Send changed off-site job files, and start a copy that has stalled
     (a failure, or a copy set up since the last nightly chain)."""
     configure_pending(db)
-    for row in db.query(models.BackupReplica).all():
+    for row in _every_copy(db):
         last = row.last_copy_at
         if last is None or (now - last).total_seconds() >= RETRY_HOURS * 3600:
             advance(db, row)

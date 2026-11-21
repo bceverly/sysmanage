@@ -54,6 +54,7 @@ from backend.services import backup_server
 from backend.api import backups_restore_flow as restore_flow
 from backend.services import backup_four_eyes as four_eyes
 from backend.services import backup_jobs as jobs
+from backend.services import backup_moves as moves
 from backend.services import backup_package_restore as package_restore
 from backend.services import backup_reach as reach
 from backend.services import backup_targets as targets
@@ -365,7 +366,9 @@ def save_policy(db, current_user, host, body: PolicyBody, mark=None) -> Dict[str
     policy = _policy_of(db, host)
     # Its target: the one named, else the one it has, else the default (27.3).
     target = targets.chosen(db, body.target_id, jobs.target_of(db, policy))
-    targets.refuse_move_with_history(db, policy, target)
+    # A host with backups elsewhere moves by copy, then switch: its policy
+    # stays on its target until the copy is checked (27.3).
+    move = moves.plan(db, policy, host, target, current_user.userid)
     reach.refuse_if_blocked(db, host)
     gfs = retention.check_gfs_change(  # 402 to change without Pro+
         policy, body, jobs.target_storage_abilities(db, target.id)
@@ -383,7 +386,8 @@ def save_policy(db, current_user, host, body: PolicyBody, mark=None) -> Dict[str
         db.add(policy)
     else:
         policy.config_version += 1
-        policy.target_id = target.id
+        if move is None:
+            policy.target_id = target.id
     _apply_policy(policy, body)
     retention.apply_gfs(policy, gfs)
     policy.tag_policy_id = None  # Configure makes it this host's own (24.6)
@@ -396,7 +400,7 @@ def save_policy(db, current_user, host, body: PolicyBody, mark=None) -> Dict[str
         host.id,
         host.fqdn,
         "Backup policy set",
-        body.model_dump() | {"target": target.name},
+        body.model_dump() | {"target": target.name, "moving": move is not None},
     )
     backup_tick.configure_now(db)  # take effect now, not on the next tick
     reach.start(db, host)  # when due

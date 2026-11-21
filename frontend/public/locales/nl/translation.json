@@ -6130,6 +6130,17 @@
       "settingUp": "wordt ingesteld",
       "stop": "Geen (stop met kopiëren; de kopieën blijven waar ze zijn)",
       "title": "Off-site kopie van {{name}}"
+    },
+    "move": {
+      "cancel": "Annuleer verplaatsing",
+      "cancelError": "De verplaatsing kon niet worden geannuleerd.",
+      "checking": "Verplaatsing naar {{target}}: kopie wordt gecontroleerd",
+      "copyError": "De laatste kopie is niet voltooid: {{error}}",
+      "copying": "Verplaatsing naar {{target}}: snapshots gekopieerd {{copied}} van {{total}}",
+      "failed": "De verplaatsing naar {{target}} is gestopt: {{error}}. Deze host maakt nog steeds back-ups naar {{from}}.",
+      "kept": "Verplaatst van {{from}}; zijn oude repository daar wordt bewaard tot {{date}}.",
+      "keptForGood": "Verplaatst van {{from}}; zijn oude repository daar blijft behouden.",
+      "note": "De back-ups van deze host worden eerst gekopieerd naar het nieuwe doel. Het blijft back-ups maken naar zijn huidige doel totdat de kopie is gecontroleerd, waarna het overschakelt. Zijn oude repository wordt bewaard voor minimaal 14 dagen."
     }
   },
   "cloudBackup": {

@@ -191,30 +191,6 @@ def chosen(
     return target
 
 
-def refuse_move_with_history(db: Session, policy, target) -> None:
-    """A host with backups stays on its target for now: moving it copies its
-    repository to the new target first, then switches (27.3 step 4)."""
-    if policy is None or policy.target_id == target.id:
-        return
-    has_history = (
-        db.query(models.BackupSnapshot.id)
-        .filter(
-            models.BackupSnapshot.policy_id == policy.id,
-            models.BackupSnapshot.gone_at.is_(None),
-        )
-        .first()
-        is not None
-    )
-    if has_history:
-        raise HTTPException(
-            status_code=409,
-            detail=_(
-                "This host already has backups on its target; it cannot move "
-                "to another target yet"
-            ),
-        )
-
-
 def in_use(db: Session, target) -> Dict[str, int]:
     """How many host policies and tag policies name ``target``."""
     return {

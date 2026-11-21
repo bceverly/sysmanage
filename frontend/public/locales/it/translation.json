@@ -6130,6 +6130,17 @@
       "settingUp": "in fase di configurazione",
       "stop": "Nessuna (interrompi la copia; le copie restano dove sono)",
       "title": "Copia fuori sede di {{name}}"
+    },
+    "move": {
+      "cancel": "Annulla spostamento",
+      "cancelError": "Impossibile annullare lo spostamento.",
+      "checking": "Spostamento verso {{target}}: controllo della copia",
+      "copyError": "L'ultima copia non è stata completata: {{error}}",
+      "copying": "Spostamento verso {{target}}: snapshot copiati {{copied}} di {{total}}",
+      "failed": "Il trasferimento verso {{target}} si è interrotto: {{error}}. Questo host effettua ancora backup a {{from}}.",
+      "kept": "Spostato da {{from}}; il suo vecchio repository lì è conservato fino a {{date}}.",
+      "keptForGood": "Spostato da {{from}}; il suo vecchio repository lì è conservato.",
+      "note": "I backup di questo host vengono copiati al nuovo target in primo luogo. Continuerà a effettuare backup al suo target attuale fino a quando la copia non sarà stata controllata, dopodiché passerà ad un altro. Il suo vecchio repository è conservato per almeno 14 giorni."
     }
   },
   "cloudBackup": {

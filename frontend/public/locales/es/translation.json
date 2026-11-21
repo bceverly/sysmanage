@@ -6130,6 +6130,17 @@
       "settingUp": "en proceso de configuración",
       "stop": "Ninguna (dejar de copiar; las copias se quedan donde están)",
       "title": "Copia fuera del sitio de {{name}}"
+    },
+    "move": {
+      "cancel": "Cancelar movimiento",
+      "cancelError": "No se pudo cancelar el movimiento.",
+      "checking": "Movimiento a {{target}}: comprobando la copia",
+      "copyError": "La última copia no terminó: {{error}}",
+      "copying": "Movimiento a {{target}}: {{copied}} de {{total}} instantáneas copiadas",
+      "failed": "El movimiento a {{target}} se detuvo: {{error}}. Este host aún realiza copias de seguridad a {{from}}.",
+      "kept": "Movido desde {{from}}; su antiguo repositorio allí se mantiene hasta {{date}}.",
+      "keptForGood": "Movido desde {{from}}; su antiguo repositorio allí se mantiene.",
+      "note": "Las copias de seguridad de este host se copian primero al nuevo destino. Sigue realizando copias de seguridad en su destino actual hasta que se haya comprobado la copia y luego cambia. Su antiguo repositorio se mantiene durante al menos 14 días."
     }
   },
   "cloudBackup": {

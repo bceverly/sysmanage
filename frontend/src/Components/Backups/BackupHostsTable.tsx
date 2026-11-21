@@ -243,7 +243,7 @@ const BackupHostsTable: React.FC<{
             </Table>
             {editing && !editing.server_host && (
                 <BackupPolicyDialog open hostId={editing.host_id} fqdn={editing.fqdn} policy={editing.policy}
-                    onClose={() => setEditing(null)} onSaved={onChanged} />
+                    hasBackups={editing.snapshot_count > 0} onClose={() => setEditing(null)} onSaved={onChanged} />
             )}
             {editing?.server_host && (
                 // The server's own host has the server's policy only (25.9).

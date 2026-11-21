@@ -6130,6 +6130,17 @@
       "settingUp": "正在设置中",
       "stop": "无（停止复制；副本保持在当前位置）",
       "title": "{{name}} 的异地副本"
+    },
+    "move": {
+      "cancel": "取消移动",
+      "cancelError": "未能取消移动。",
+      "checking": "迁移到 {{target}}：检查复制内容",
+      "copyError": "上一次复制没有完成：{{error}}",
+      "copying": "移动到 {{target}}：已复制 {{copied}}/{{total}} 个快照",
+      "failed": "移动到 {{target}} 停止了: {{error}}。此主机仍向 {{from}} 备份。",
+      "kept": "从 {{from}} 移动；它的旧仓库在那里被保留直到 {{date}}。",
+      "keptForGood": "从 {{from}} 移动；它的旧仓库在那里被保留。",
+      "note": "此主机的备份会先复制到新目标。在副本检查通过之前，它会继续备份到当前目标，然后再切换。其旧存储库至少保留 14 天。"
     }
   },
   "cloudBackup": {

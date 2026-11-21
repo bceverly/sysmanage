@@ -6130,6 +6130,17 @@
       "settingUp": "being set up",
       "stop": "None (stop copying; the copies stay where they are)",
       "title": "Off-site copy of {{name}}"
+    },
+    "move": {
+      "cancel": "Cancel move",
+      "cancelError": "The move could not be canceled.",
+      "checking": "Moving to {{target}}: checking the copy",
+      "copyError": "The last copy did not finish: {{error}}",
+      "copying": "Moving to {{target}}: snapshots copied {{copied}} of {{total}}",
+      "failed": "The move to {{target}} stopped: {{error}}. This host still backs up to {{from}}.",
+      "kept": "Moved from {{from}}; its old repository there is kept until {{date}}.",
+      "keptForGood": "Moved from {{from}}; its old repository there is kept.",
+      "note": "This host's backups are copied to the new target first. It keeps backing up to its current target until the copy has been checked, then switches. Its old repository is kept for at least 14 days."
     }
   },
   "cloudBackup": {

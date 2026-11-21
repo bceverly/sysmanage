@@ -6130,6 +6130,17 @@
       "settingUp": "sendo configurada",
       "stop": "Nenhuma (parar de copiar; as cópias permanecem onde estão)",
       "title": "Cópia off-site de {{name}}"
+    },
+    "move": {
+      "cancel": "Cancelar movimento",
+      "cancelError": "O cancelamento do movimento não foi possível.",
+      "checking": "Movendo para {{target}}: verificando a cópia",
+      "copyError": "A última cópia não foi concluída: {{error}}",
+      "copying": "Movendo para {{target}}: snapshots copiados {{copied}} de {{total}}",
+      "failed": "O movimento para {{target}} parou: {{error}}. Este host ainda faz backup para {{from}}.",
+      "kept": "Movido de {{from}}; seu antigo repositório lá é mantido até {{date}}.",
+      "keptForGood": "Movido de {{from}}; seu antigo repositório lá é mantido.",
+      "note": "Os backups deste host são copiados primeiro para o novo destino. Ele continua fazendo backup para o destino atual até que a cópia seja verificada e depois muda. Seu antigo repositório é mantido por pelo menos 14 dias."
     }
   },
   "cloudBackup": {
