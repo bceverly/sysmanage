@@ -44,13 +44,20 @@ _ABILITIES = (
     "hook_option",
     proxy.REMOTE_ABILITY,
     proxy.REMOTE_CAPTURE,
+    # Restores and browses its off-site copy through that target's proxy
+    # (27.3); the server then sends ``offsite`` in the host's configure.
+    "offsite_read",
 )
 
 
 def store_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
-    """Browse / what changed / write cache: what the host's restate offers."""
+    """Browse / what changed / write cache: what the host's restate offers.
+    An agent that newly reads off-site copies gets their addresses next."""
     if policy is not None and isinstance(found, list):
+        could = "offsite_read" in jobs.abilities(policy)
         policy.host_abilities = json.dumps(sorted(set(found) & set(_ABILITIES)))
+        if "offsite_read" in jobs.abilities(policy) and not could:
+            policy.config_version += 1
 
 
 def _proxy_abilities(policy: models.BackupPolicy) -> tuple:
@@ -73,6 +80,11 @@ def store(
     store_abilities(policy, reply.get("abilities"))
     network_mounts.store_configured(policy, reply.get("network_mounts"))
     tokens_changed = proxy.store_tokens(policy, reply)
+    # pylint: disable-next=import-outside-toplevel
+    from backend.services import backup_replicas  # noqa: PLC0415
+
+    if backup_replicas.store_read_tokens(db, policy, reply):
+        backup_tick.configure_now(db)  # the off-site grant takes the token
     if policy is None:
         return
     if (

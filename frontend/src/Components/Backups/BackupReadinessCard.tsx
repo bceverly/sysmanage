@@ -107,7 +107,7 @@ function RpoDialog({ row, onClose, onSaved }: Readonly<{
           {t('backups.readiness.rpoHelp', 'The oldest its last good backup may be before it counts as missed. Leave it at the default, twice the backup interval, unless this host needs a tighter one.')}
         </Typography>
         <TextField type="number" label={t('backups.readiness.rpoHours', 'Hours')} value={value}
-          onChange={(e) => setValue(e.target.value)} error={!valid} inputProps={{ min: 1 }} />
+          onChange={(e) => setValue(e.target.value)} error={!valid} slotProps={{ htmlInput: { min: 1 } }} />
         {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
       </DialogContent>
       <DialogActions>

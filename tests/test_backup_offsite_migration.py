@@ -41,3 +41,19 @@ def test_the_off_site_column_and_table_come_and_go():
         assert "backup_replica" in _tables(db_path)
     finally:
         os.unlink(db_path)
+
+
+def test_the_hosts_read_token_columns_come_and_go():
+    fd, db_path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    try:
+        _alembic(["upgrade", "head"], db_path)
+        assert {"read_token_sha256", "read_token_sha256_old"} <= set(
+            _columns(db_path, "backup_replica")
+        )
+        _alembic(["stamp", "q105offsite"], db_path)
+        _alembic(["upgrade", "head"], db_path)  # a rerun changes nothing
+        _alembic(["downgrade", "q105offsite"], db_path)
+        assert "read_token_sha256" not in _columns(db_path, "backup_replica")
+    finally:
+        os.unlink(db_path)

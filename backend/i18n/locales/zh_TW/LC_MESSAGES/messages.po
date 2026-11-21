@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 14:42-0800\n"
+"POT-Creation-Date: 2026-11-20 15:44-0800\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -121,7 +121,7 @@ msgstr "您沒有權限訪問所選的帳戶"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:134
+#: backend/api/posture.py:375 backend/api/backups.py:137
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
@@ -237,8 +237,8 @@ msgstr "主機ID格式無效"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:146
-#: backend/api/backups.py:149 backend/api/auto_updates.py:238
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:149
+#: backend/api/backups.py:152 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
@@ -324,16 +324,16 @@ msgstr "此伺服器上無法使用"
 msgid "Cloud backup account not found"
 msgstr "找不到雲端備份帳號"
 
-#: backend/api/cloud_backup.py:136 backend/api/backups.py:170
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:173
 #, python-format
 msgid "%s is out of range"
 msgstr "%s 超出允許範圍"
 
-#: backend/api/cloud_backup.py:141 backend/api/backups.py:174
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:177
 msgid "Interval (hours)"
 msgstr "間隔（小時）"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:175
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:178
 msgid "Window start hour"
 msgstr "時間窗開始小時"
 
@@ -1419,12 +1419,12 @@ msgstr "主機名稱格式無效"
 msgid "Hostname change requested"
 msgstr "請求主機名變更"
 
-#: backend/api/backups_restore_flow.py:51 backend/api/backups_legal_hold.py:50
-#: backend/api/backups_legal_hold.py:135 backend/api/backups_browse.py:78
+#: backend/api/backups_restore_flow.py:52 backend/api/backups_legal_hold.py:50
+#: backend/api/backups_legal_hold.py:135 backend/api/backups_browse.py:81
 msgid "Snapshot not found"
 msgstr "找不到快照"
 
-#: backend/api/backups_restore_flow.py:58
+#: backend/api/backups_restore_flow.py:60
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "此快照未簽署；請確認以仍然還原它"
 
@@ -3141,7 +3141,7 @@ msgstr "%(field)s 必須是 0 到 %(max)d 之間的整數"
 
 #: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
-#: backend/services/backup_targets.py:182
+#: backend/services/backup_targets.py:184
 msgid "Set up the backup target first"
 msgstr "請先設定備份目標"
 
@@ -4296,112 +4296,112 @@ msgstr "KVM 網路僅在 Linux 主機上可用"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "已請求 KVM 網路清單。結果將很快顯示。"
 
-#: backend/api/backups.py:165
+#: backend/api/backups.py:168
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s 必須是不含 '..' 的絕對路徑"
 
-#: backend/api/backups.py:176
+#: backend/api/backups.py:179
 msgid "Snapshots to keep"
 msgstr "保留的快照數"
 
-#: backend/api/backups.py:177
+#: backend/api/backups.py:180
 msgid "Check interval (days)"
 msgstr "檢查間隔（天）"
 
-#: backend/api/backups.py:181
+#: backend/api/backups.py:184
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "暫停掛鉤最多 10 個，且須為簡短的小寫名稱"
 
-#: backend/api/backups.py:194
+#: backend/api/backups.py:197
 msgid "At most 50 path rules can be set"
 msgstr "最多可以設定 50 個路徑規則"
 
-#: backend/api/backups.py:205
+#: backend/api/backups.py:208
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 msgstr "每個路徑規則是一行，長度最多為 512 字元，且不能有開頭或結尾的空白字元或開頭的 #"
 
-#: backend/api/backups.py:213 backend/api/backups_drift.py:103
-#: backend/api/backups_browse.py:93
+#: backend/api/backups.py:216 backend/api/backups_drift.py:103
+#: backend/api/backups_browse.py:96
 msgid "The snapshot name is not valid"
 msgstr "快照名稱無效"
 
-#: backend/api/backups.py:215
+#: backend/api/backups.py:218
 msgid "At most 50 paths can be restored at once"
 msgstr "一次最多只能還原 50 個路徑"
 
-#: backend/api/backups.py:218
+#: backend/api/backups.py:221
 msgid "A restore path is empty or too long"
 msgstr "某個還原路徑為空或過長"
 
-#: backend/api/backups.py:220
+#: backend/api/backups.py:223
 msgid "A restore path must not contain '..'"
 msgstr "還原路徑不得包含 '..'"
 
-#: backend/api/backups.py:226
+#: backend/api/backups.py:229
 msgid "A restore path must be absolute, such as /home/alice/notes.txt"
 msgstr "還原路徑必須是絕對路徑，例如 /home/alice/notes.txt"
 
-#: backend/api/backups.py:240
+#: backend/api/backups.py:243
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr "請指定要放回的路徑；無法將整台主機還原到原位置"
 
-#: backend/api/backups.py:246
+#: backend/api/backups.py:249
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr "每個還原到原位置的路徑都必須是具體路徑，例如 /etc/nginx"
 
-#: backend/api/backups.py:251
+#: backend/api/backups.py:254
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "請確認主機上這些路徑中的檔案將被取代"
 
-#: backend/api/backups.py:415
+#: backend/api/backups.py:418
 msgid "No backup policy"
 msgstr "沒有備份原則"
 
-#: backend/api/backups.py:439
+#: backend/api/backups.py:442
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "此主機暫時無法執行備份（%s）"
 
-#: backend/api/backups.py:445
+#: backend/api/backups.py:448
 msgid "This host's backup is not configured yet"
 msgstr "此主機的備份尚未設定"
 
-#: backend/api/backups.py:462
+#: backend/api/backups.py:465
 msgid "The backup storage host is not ready"
 msgstr "備份儲存主機尚未就緒"
 
-#: backend/api/backups.py:477
+#: backend/api/backups.py:480
 msgid "Unknown backup action"
 msgstr "未知的備份操作"
 
-#: backend/api/backups.py:490
+#: backend/api/backups.py:493
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "加密的存放庫無法在儲存主機上重新打包"
 
-#: backend/api/backups.py:494
+#: backend/api/backups.py:497
 msgid "That backup job is already queued or running"
 msgstr "該備份工作已在佇列中或正在執行"
 
-#: backend/api/backups.py:590
+#: backend/api/backups.py:595
 msgid ""
 "This backup is encrypted to your break-glass escrow key, which SysManage "
 "never holds. Restore it by hand with restate and that key, as the server "
 "recovery runbook describes."
 msgstr "此備份使用您的緊急託管金鑰加密，SysManage 從不持有該金鑰。請依伺服器復原手冊所述，使用 restate 和該金鑰手動還原。"
 
-#: backend/api/backups.py:609 backend/api/backups_drift.py:114
-#: backend/api/backups_browse.py:63
+#: backend/api/backups.py:614 backend/api/backups_drift.py:114
+#: backend/api/backups_browse.py:66
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "此主機的 restate 尚不支援此操作；請升級 restate"
 
-#: backend/api/backups.py:621
+#: backend/api/backups.py:626
 msgid "This snapshot's repository is no longer kept"
 msgstr "此快照所在的存放庫已不再保留"
 
-#: backend/api/backups.py:704 backend/api/backups.py:707
+#: backend/api/backups.py:709 backend/api/backups.py:712
 msgid "Backup run not found"
 msgstr "找不到備份工作"
 
@@ -4931,7 +4931,7 @@ msgstr "權限 denied: {} 角色所需"
 msgid "The drift timeline needs the Professional+ backup engine"
 msgstr "漂移時間軸需要 Professional+ 備份引擎"
 
-#: backend/api/backups_drift.py:83 backend/api/backups_browse.py:95
+#: backend/api/backups_drift.py:83 backend/api/backups_browse.py:98
 msgid "The path must be absolute"
 msgstr "路徑必須是絕對路徑"
 
@@ -5644,11 +5644,11 @@ msgstr ""
 msgid "Machine link decided for host %s"
 msgstr "主機連結已決定為 %s"
 
-#: backend/api/backups_browse.py:129
+#: backend/api/backups_browse.py:140
 msgid "What changed compares with the current repository only"
 msgstr "變更內容僅與目前的存放庫進行比較"
 
-#: backend/api/backups_browse.py:135
+#: backend/api/backups_browse.py:146
 msgid "A check of what changed is already running"
 msgstr "變更檢查已在執行"
 
@@ -6229,12 +6229,12 @@ msgstr "該目標已經直接或透過其他目標複製到此目標"
 msgid "Off-site copies need a newer backup operations engine"
 msgstr "異地副本需要更新的備份作業引擎"
 
-#: backend/services/backup_targets.py:160
-#: backend/services/backup_targets.py:164
+#: backend/services/backup_targets.py:162
+#: backend/services/backup_targets.py:166
 msgid "Backup target not found"
 msgstr "找不到備份目標"
 
-#: backend/services/backup_targets.py:210
+#: backend/services/backup_targets.py:212
 msgid ""
 "This host already has backups on its target; it cannot move to another "
 "target yet"
@@ -6502,6 +6502,24 @@ msgstr "從 vault 收到的回應無效"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "密鑰格式無效"
+
+#: backend/services/backup_replicas.py:696
+msgid "This host has no off-site copy"
+msgstr "此主機沒有異地副本"
+
+#: backend/services/backup_replicas.py:698
+msgid ""
+"The off-site copy cannot be read yet: its storage host has not been told "
+"this host's read token"
+msgstr "異地副本暫時無法讀取：其儲存主機尚未獲知此主機的讀取令牌"
+
+#: backend/services/backup_replicas.py:701
+msgid "That snapshot is not in the off-site copy"
+msgstr "該快照不在異地副本中"
+
+#: backend/services/backup_replicas.py:703
+msgid "This host's agent cannot read its off-site copy yet; upgrade the agent"
+msgstr "此主機的代理程式尚無法讀取其異地副本；請升級代理程式"
 
 #: backend/services/auto_update_rollout.py:149
 #, python-format

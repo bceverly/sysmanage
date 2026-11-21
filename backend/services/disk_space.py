@@ -97,7 +97,7 @@ def fullest(devices: Iterable[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     return best
 
 
-def record_from_storage(session: Session, host: Any, devices: List[Any]) -> bool:
+def record_from_storage(host: Any, devices: List[Any]) -> bool:
     """The disk list arrived: keep its fullest filesystem.  False when no
     device carries its free space (an older Linux agent) -- the host
     metrics then speak for it."""

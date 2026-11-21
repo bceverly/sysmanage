@@ -5600,7 +5600,11 @@
       "unsigned": "nicht signiert",
       "packages": "Zuerst die Pakete des Snapshots in ihren Versionen zurücklegen",
       "packagesAck": "Pakete auf {{host}} installieren und die Pakete, die der Snapshot nicht hatte, entfernen, damit er ihm entspricht.",
-      "awaitingApproval": "Angefordert. Eine Wiederherstellung über die eigenen Dateien des Hosts muss von einer zweiten Person mit der Wiederherstellungsrolle genehmigt werden; sie wird gesendet, sobald diese zustimmt (Seite „Sicherungen“, „Wiederherstellungen, die auf Genehmigung warten“)."
+      "awaitingApproval": "Angefordert. Eine Wiederherstellung über die eigenen Dateien des Hosts muss von einer zweiten Person mit der Wiederherstellungsrolle genehmigt werden; sie wird gesendet, sobald diese zustimmt (Seite „Sicherungen“, „Wiederherstellungen, die auf Genehmigung warten“).",
+      "offsiteNote": "Aus der Offsite-Kopie auf {{target}} über deren Proxy lesen: Der Backup-Speicher dieses Standorts wird nicht verwendet, daher funktioniert dies auch, wenn er ausgefallen ist.",
+      "source": "Wiederherstellen von",
+      "sourceHere": "Backup-Speicher dieses Standorts",
+      "sourceOffsite": "Offsite-Kopie auf {{target}}"
     },
     "run": {
       "busy": "Belegt, wird wiederholt",

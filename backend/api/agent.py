@@ -915,7 +915,7 @@ def handle_installation_completion(
                 # There is no WebSocket here: this HTTP route answers the
                 # refusal itself (403 below).  Without this an unknown host
                 # token raised AttributeError and the agent got a 500.
-                return None
+                await asyncio.sleep(0)
 
         # Validate host authentication (a coroutine: run on a loop of its own,
         # since this plain handler is in FastAPI's thread pool)

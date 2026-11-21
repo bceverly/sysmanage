@@ -564,7 +564,7 @@ async def handle_hardware_update(  # NOSONAR
                 db.add(storage_device)
             # Its fullest filesystem, for the nearly-full warning (2026-11-20).
             disk_space.record_from_storage(
-                db, db.get(Host, connection.host_id), storage_devices
+                db.get(Host, connection.host_id), storage_devices
             )
 
         db.commit()

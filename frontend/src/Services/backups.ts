@@ -355,6 +355,10 @@ export interface OffsiteCopy {
   bytes: number | null;
   /** Its grant names the source's token and its repository is made. */
   ready: boolean;
+  /** A restore can come from it: the host's own read token is granted. */
+  readable?: boolean;
+  /** The snapshots the copy holds, oldest first. */
+  snapshots?: string[];
   last_copy_at: string | null;
   last_copy_status: string | null;
   last_copy_error: string | null;
@@ -567,6 +571,8 @@ export interface RestoreInput {
   /** The snapshot's packages put back first (Pro+ 24.6; in place only). */
   packages?: boolean;
   acknowledge_packages?: boolean;
+  /** From the host's off-site copy, through that target's proxy (27.3). */
+  offsite?: boolean;
 }
 
 const base = "/api/v1";
@@ -717,8 +723,14 @@ export const getSnapshots = async (hostId: string): Promise<BackupSnapshot[]> =>
   (await axiosInstance.get<BackupSnapshot[]>(`${base}/host/${hostId}/backup-snapshots`)).data;
 
 /** List one folder of a snapshot (restate 2.1.0.4 ``list``); poll the run. */
-export const browseSnapshot = async (hostId: string, snapshot: string, path: string): Promise<BackupRun> =>
-  (await axiosInstance.post<BackupRun>(`${base}/host/${hostId}/backup-browse`, { snapshot, path })).data;
+export const browseSnapshot = async (
+  hostId: string,
+  snapshot: string,
+  path: string,
+  offsite = false,
+): Promise<BackupRun> =>
+  (await axiosInstance.post<BackupRun>(`${base}/host/${hostId}/backup-browse`,
+    offsite ? { snapshot, path, offsite } : { snapshot, path })).data;
 
 /** What changed on the host since its newest snapshot (restate ``status``). */
 export const backupChanges = async (hostId: string): Promise<BackupRun> =>

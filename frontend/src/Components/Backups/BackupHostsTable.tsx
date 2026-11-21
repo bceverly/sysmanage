@@ -55,13 +55,15 @@ export const canEquip = (row: BackupHost): boolean =>
 /** A host the bulk "Set up backups" can take: equipped, with no policy. */
 export const canSetUp = (row: BackupHost): boolean => row.equipped && !row.policy && !unreachable(row);
 
-type StorageHostIds = string | string[] | null | undefined;
+type StorageHostIds = string | string[] | null;
 
 /** A target's storage host (any of them, with several targets), with no
  *  backup policy of its own: it holds the backups, so it is not offered
  *  host actions. */
-export const isStorageHost = (row: BackupHost, storageHostId: StorageHostIds): boolean => {
-    const ids = Array.isArray(storageHostId) ? storageHostId : storageHostId ? [storageHostId] : [];
+export const isStorageHost = (row: BackupHost, storageHostId?: StorageHostIds): boolean => {
+    let ids: string[] = [];
+    if (Array.isArray(storageHostId)) ids = storageHostId;
+    else if (storageHostId) ids = [storageHostId];
     return ids.includes(row.host_id) && !row.policy;
 };
 
@@ -252,6 +254,7 @@ const BackupHostsTable: React.FC<{
             {restoring && (
                 <RestoreFilesDialog open hostId={restoring.host_id} fqdn={restoring.fqdn}
                     canBrowse={!!restoring.policy?.abilities?.includes('list')}
+                    offsite={restoring.offsite}
                     onClose={() => setRestoring(null)} />
             )}
         </>

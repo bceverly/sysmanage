@@ -545,6 +545,10 @@ class BackupReplica(Base):
     # before it while a configure carrying the new one is on its way.
     token_sha256 = Column(String(64), nullable=True)
     token_sha256_old = Column(String(64), nullable=True)
+    # The backed-up host's own read token for the copy (q106): a restore
+    # reads it through the proxy while the host's own site is down.
+    read_token_sha256 = Column(String(64), nullable=True)
+    read_token_sha256_old = Column(String(64), nullable=True)
     # What the off-site du last listed (JSON names), and what the off-site
     # prune dropped (JSON names, the latest few hundred) -- never copied
     # again, or the two prunes would fight.

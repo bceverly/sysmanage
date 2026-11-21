@@ -145,4 +145,34 @@ describe("RestoreFilesDialog", () => {
     await waitFor(() => expect(restoreFiles).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(button("Restore to staging")).toBeEnabled());
   });
+
+  test("a restore can come from the off-site copy, its own snapshots listed", async () => {
+    const copy = {
+      id: "r1", target_id: "b", target: "Offsite", newest_snapshot: "20261120T010000Z",
+      lag_hours: 1, behind: 0, bytes: 1, ready: true, readable: true,
+      snapshots: ["20261025T103120Z", "20261120T010000Z"],
+      last_copy_at: null, last_copy_status: "ok", last_copy_error: null,
+    };
+    render(<RestoreFilesDialog open hostId="h1" fqdn="t14" offsite={[copy]} onClose={vi.fn()} />);
+    await waitFor(() => expect(getSnapshots).toHaveBeenCalled());
+    fireEvent.change(screen.getByTestId("restore-source"), { target: { value: "r1" } });
+    expect(await screen.findByText(/this site's backup storage is not used/)).toBeInTheDocument();
+    vi.mocked(restoreFiles).mockResolvedValue(done("p9"));
+    fireEvent.click(button("Preview"));
+    await waitFor(() => expect(restoreFiles).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(restoreFiles).mock.calls[0][1]).toMatchObject({
+      offsite: true, snapshot: "20261120T010000Z", dry_run: true,
+    });
+  });
+
+  test("a copy the host cannot read yet is not offered", async () => {
+    const copy = {
+      id: "r1", target_id: "b", target: "Offsite", newest_snapshot: null, lag_hours: null,
+      behind: 0, bytes: null, ready: true, readable: false, snapshots: [],
+      last_copy_at: null, last_copy_status: null, last_copy_error: null,
+    };
+    render(<RestoreFilesDialog open hostId="h1" fqdn="t14" offsite={[copy]} onClose={vi.fn()} />);
+    await waitFor(() => expect(getSnapshots).toHaveBeenCalled());
+    expect(screen.queryByTestId("restore-source")).toBeNull();
+  });
 });

@@ -84,9 +84,9 @@ export const LegalHoldButton: React.FC<{ hostId: string; fqdn: string; onPlaced?
                 ))}
               </TextField>
               <TextField label={t('backups.hold.owner', 'Whose hold (a case, a matter, a person)')} value={owner}
-                onChange={(e) => setOwner(e.target.value)} inputProps={{ maxLength: 255 }} />
+                onChange={(e) => setOwner(e.target.value)} slotProps={{ htmlInput: { maxLength: 255 } }} />
               <TextField label={t('backups.hold.reason', 'Why it is held')} value={reason} multiline minRows={2}
-                onChange={(e) => setReason(e.target.value)} inputProps={{ maxLength: 1000 }} />
+                onChange={(e) => setReason(e.target.value)} slotProps={{ htmlInput: { maxLength: 1000 } }} />
             </Stack>
             {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
           </DialogContent>

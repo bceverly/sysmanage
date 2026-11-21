@@ -5600,7 +5600,11 @@
       "unsigned": "niet ondertekend",
       "packages": "Eerst de pakketten van de snapshot terugzetten, in hun versies",
       "packagesAck": "Pakketten installeren op {{host}} en de pakketten die de snapshot niet had verwijderen, zodat hij ermee overeenkomt.",
-      "awaitingApproval": "Verzocht. Een herstel over de eigen bestanden van de host vereist een tweede persoon met de herstelrol om het goed te keuren; het wordt verzonden wanneer ze dat doen (Backups pagina, \"Herstel in afwachting van goedkeuring\")."
+      "awaitingApproval": "Verzocht. Een herstel over de eigen bestanden van de host vereist een tweede persoon met de herstelrol om het goed te keuren; het wordt verzonden wanneer ze dat doen (Backups pagina, \"Herstel in afwachting van goedkeuring\").",
+      "offsiteNote": "Lezen vanaf de off-site kopie op {{target}} via de proxy daarvan: de back-upopslag van deze site wordt niet gebruikt, dus dit werkt ook als die niet beschikbaar is.",
+      "source": "Herstel vanuit",
+      "sourceHere": "De back-upopslag van deze site",
+      "sourceOffsite": "Off-site kopie op {{target}}"
     },
     "run": {
       "busy": "Bezet, wordt opnieuw geprobeerd",

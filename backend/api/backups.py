@@ -121,6 +121,9 @@ class RestoreBody(BaseModel):
     # The snapshot's packages put back first (Pro+ 24.6; in place only).
     packages: bool = False
     acknowledge_packages: bool = False
+    # From the host's off-site copy (27.3): through that target's proxy, so
+    # it works while this site's storage is down.  In every edition.
+    offsite: bool = False
 
 
 def _bad(message: str) -> HTTPException:
@@ -576,8 +579,10 @@ def backup_restore(
     _validate_restore(body)
     policy = _ready_policy(db, host)
     package_restore.check(body, policy)
-    # A restore (and its preview) mounts the repository on the host.
-    reach.refuse_if_blocked(db, host)
+    # A restore (and its preview) mounts the repository on the host -- not
+    # one from the off-site copy, which is read through its proxy instead.
+    if not body.offsite:
+        reach.refuse_if_blocked(db, host)
     # Four-eyes approval (27.2, Enterprise): held for a second person.
     held = four_eyes.hold(db, current_user, host, body)
     if held is not None:

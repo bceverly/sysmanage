@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from backend.i18n import _
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
+from backend.services import backup_replicas as replicas
 from backend.services import backup_views as views
 from backend.services.audit_service import EntityType
 
@@ -38,21 +39,22 @@ def perform(  # pylint: disable=too-many-arguments
         key_needed,
     )
 
-    snapshot = (
-        db.query(models.BackupSnapshot)
-        .filter(
-            models.BackupSnapshot.policy_id == policy.id,
-            models.BackupSnapshot.name == body.snapshot,
-            models.BackupSnapshot.gone_at.is_(None),
-        )
-        .first()
-    )
-    if snapshot is None:
-        raise HTTPException(status_code=404, detail=_("Snapshot not found"))
-    where = _readable_repository(snapshot, policy, host)
+    offsite = None
+    if getattr(body, "offsite", False):
+        # The copy is asked, not this site's catalog: the snapshot may be
+        # one this site's storage no longer has (a site loss).
+        offsite = replicas.readable(db, policy, body.snapshot)
+        snapshot = _catalog(db, policy, body.snapshot, live=False)
+        where = replicas.repository_of(offsite, policy, host)
+    else:
+        snapshot = _catalog(db, policy, body.snapshot, live=True)
+        if snapshot is None:
+            raise HTTPException(status_code=404, detail=_("Snapshot not found"))
+        where = _readable_repository(snapshot, policy, host)
+    signed = bool(snapshot and snapshot.signed)
     # Only a real restore needs the operator to accept an unsigned snapshot: a
     # preview (dry run) writes nothing on the host (Bryan, 2026-10-30).
-    if not snapshot.signed and not body.dry_run and not body.acknowledge_unsigned:
+    if not signed and not body.dry_run and not body.acknowledge_unsigned:
         raise HTTPException(
             status_code=409,
             detail=_("This snapshot is not signed; confirm to restore it anyway"),
@@ -61,26 +63,28 @@ def perform(  # pylint: disable=too-many-arguments
         db,
         policy,
         host,
-        snapshot.name,
+        body.snapshot,
         body.include,
         body.dry_run,
-        allow_unverified=not snapshot.signed,
+        allow_unverified=not signed,
         actor=current_user.userid,
         exclude=body.exclude,
         in_place=body.in_place,
         previous=where == jobs.PREVIOUS,
         needs_key=key_needed(where, policy),
         packages=body.packages,
+        offsite=str(offsite.id) if offsite else None,
     )
     details = {
         "run_id": str(run.id),
-        "snapshot": snapshot.name,
+        "snapshot": body.snapshot,
+        **({"offsite_target_id": str(offsite.target_id)} if offsite else {}),
         "include": body.include,
         "exclude": body.exclude,
         "dry_run": body.dry_run,
         "in_place": body.in_place,
         "packages": body.packages,
-        "unsigned_acknowledged": not snapshot.signed and body.acknowledge_unsigned,
+        "unsigned_acknowledged": not signed and body.acknowledge_unsigned,
     }
     if approved_by:
         details["approved_by"] = approved_by
@@ -98,3 +102,14 @@ def perform(  # pylint: disable=too-many-arguments
     out["in_place"] = body.in_place
     out["staging_path"] = None if body.in_place else jobs.staging_dir(run.id)
     return out
+
+
+def _catalog(db: Session, policy, name: str, live: bool):
+    """The snapshot's catalog row (``live``: not yet pruned), or None."""
+    query = db.query(models.BackupSnapshot).filter(
+        models.BackupSnapshot.policy_id == policy.id,
+        models.BackupSnapshot.name == name,
+    )
+    if live:
+        query = query.filter(models.BackupSnapshot.gone_at.is_(None))
+    return query.order_by(models.BackupSnapshot.seen_at.desc()).first()

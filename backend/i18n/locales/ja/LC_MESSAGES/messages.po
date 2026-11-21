@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 14:42-0800\n"
+"POT-Creation-Date: 2026-11-20 15:44-0800\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -124,7 +124,7 @@ msgstr "選択したアカウントにアクセス権限がありません"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:134
+#: backend/api/posture.py:375 backend/api/backups.py:137
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
@@ -240,8 +240,8 @@ msgstr "ホストIDの形式が無効です"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:146
-#: backend/api/backups.py:149 backend/api/auto_updates.py:238
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:149
+#: backend/api/backups.py:152 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
@@ -327,16 +327,16 @@ msgstr "このサーバーでは利用できません"
 msgid "Cloud backup account not found"
 msgstr "クラウドバックアップのアカウントが見つかりません"
 
-#: backend/api/cloud_backup.py:136 backend/api/backups.py:170
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:173
 #, python-format
 msgid "%s is out of range"
 msgstr "%s が範囲外です"
 
-#: backend/api/cloud_backup.py:141 backend/api/backups.py:174
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:177
 msgid "Interval (hours)"
 msgstr "間隔（時間）"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:175
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:178
 msgid "Window start hour"
 msgstr "時間帯の開始時刻"
 
@@ -1428,12 +1428,12 @@ msgstr "ホスト名の形式が無効です"
 msgid "Hostname change requested"
 msgstr "ホスト名変更を要求しています"
 
-#: backend/api/backups_restore_flow.py:51 backend/api/backups_legal_hold.py:50
-#: backend/api/backups_legal_hold.py:135 backend/api/backups_browse.py:78
+#: backend/api/backups_restore_flow.py:52 backend/api/backups_legal_hold.py:50
+#: backend/api/backups_legal_hold.py:135 backend/api/backups_browse.py:81
 msgid "Snapshot not found"
 msgstr "スナップショットが見つかりません"
 
-#: backend/api/backups_restore_flow.py:58
+#: backend/api/backups_restore_flow.py:60
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "このスナップショットは署名されていません。それでも復元するには確認してください"
 
@@ -3181,7 +3181,7 @@ msgstr "%(field)s は 0 から %(max)d までの整数にしてください"
 
 #: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
-#: backend/services/backup_targets.py:182
+#: backend/services/backup_targets.py:184
 msgid "Set up the backup target first"
 msgstr "先にバックアップ先を設定してください"
 
@@ -4349,96 +4349,96 @@ msgstr "KVMネットワークはLinuxホストでのみ利用可能です"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "KVMネットワーク一覧がリクエストされました。まもなく結果が表示されます。"
 
-#: backend/api/backups.py:165
+#: backend/api/backups.py:168
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s は '..' を含まない絶対パスである必要があります"
 
-#: backend/api/backups.py:176
+#: backend/api/backups.py:179
 msgid "Snapshots to keep"
 msgstr "保持するスナップショット数"
 
-#: backend/api/backups.py:177
+#: backend/api/backups.py:180
 msgid "Check interval (days)"
 msgstr "チェック間隔（日）"
 
-#: backend/api/backups.py:181
+#: backend/api/backups.py:184
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "一時停止フックは小文字の短い名前で最大 10 個までです"
 
-#: backend/api/backups.py:194
+#: backend/api/backups.py:197
 msgid "At most 50 path rules can be set"
 msgstr "パスルールは最大で50個まで設定できます"
 
-#: backend/api/backups.py:205
+#: backend/api/backups.py:208
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 msgstr "各パスルールは先頭や末尾のスペースがない512文字以内の一行です。また、先頭に#を含んではいけません"
 
-#: backend/api/backups.py:213 backend/api/backups_drift.py:103
-#: backend/api/backups_browse.py:93
+#: backend/api/backups.py:216 backend/api/backups_drift.py:103
+#: backend/api/backups_browse.py:96
 msgid "The snapshot name is not valid"
 msgstr "スナップショット名が無効です"
 
-#: backend/api/backups.py:215
+#: backend/api/backups.py:218
 msgid "At most 50 paths can be restored at once"
 msgstr "一度に復元できるパスは最大 50 個です"
 
-#: backend/api/backups.py:218
+#: backend/api/backups.py:221
 msgid "A restore path is empty or too long"
 msgstr "復元パスが空か、長すぎます"
 
-#: backend/api/backups.py:220
+#: backend/api/backups.py:223
 msgid "A restore path must not contain '..'"
 msgstr "復元パスに '..' を含めることはできません"
 
-#: backend/api/backups.py:226
+#: backend/api/backups.py:229
 msgid "A restore path must be absolute, such as /home/alice/notes.txt"
 msgstr "復元するパスは /home/alice/notes.txt のような絶対パスである必要があります"
 
-#: backend/api/backups.py:240
+#: backend/api/backups.py:243
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr "元に戻すパスを指定してください。ホスト全体を元の場所に復元することはできません"
 
-#: backend/api/backups.py:246
+#: backend/api/backups.py:249
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr "元の場所に復元する各パスは、/etc/nginx のように具体的である必要があります"
 
-#: backend/api/backups.py:251
+#: backend/api/backups.py:254
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "これらのパスにあるホストのファイルが置き換えられることを確認してください"
 
-#: backend/api/backups.py:415
+#: backend/api/backups.py:418
 msgid "No backup policy"
 msgstr "バックアップポリシーがありません"
 
-#: backend/api/backups.py:439
+#: backend/api/backups.py:442
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "このホストはまだバックアップを実行できません（%s）"
 
-#: backend/api/backups.py:445
+#: backend/api/backups.py:448
 msgid "This host's backup is not configured yet"
 msgstr "このホストのバックアップはまだ設定されていません"
 
-#: backend/api/backups.py:462
+#: backend/api/backups.py:465
 msgid "The backup storage host is not ready"
 msgstr "バックアップのストレージホストの準備ができていません"
 
-#: backend/api/backups.py:477
+#: backend/api/backups.py:480
 msgid "Unknown backup action"
 msgstr "不明なバックアップ操作です"
 
-#: backend/api/backups.py:490
+#: backend/api/backups.py:493
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "暗号化されたリポジトリはストレージホストで再パックできません"
 
-#: backend/api/backups.py:494
+#: backend/api/backups.py:497
 msgid "That backup job is already queued or running"
 msgstr "そのバックアップジョブはすでにキューにあるか実行中です"
 
-#: backend/api/backups.py:590
+#: backend/api/backups.py:595
 msgid ""
 "This backup is encrypted to your break-glass escrow key, which SysManage "
 "never holds. Restore it by hand with restate and that key, as the server "
@@ -4447,16 +4447,16 @@ msgstr ""
 "このバックアップは緊急用エスクローキーで暗号化されており、SysManage はそのキーを保持しません。サーバー復旧手順書のとおり、restate "
 "とそのキーを使って手動で復元してください。"
 
-#: backend/api/backups.py:609 backend/api/backups_drift.py:114
-#: backend/api/backups_browse.py:63
+#: backend/api/backups.py:614 backend/api/backups_drift.py:114
+#: backend/api/backups_browse.py:66
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "このホストの restate ではまだこの操作ができません。restate を更新してください"
 
-#: backend/api/backups.py:621
+#: backend/api/backups.py:626
 msgid "This snapshot's repository is no longer kept"
 msgstr "このスナップショットのリポジトリはもう保持されていません"
 
-#: backend/api/backups.py:704 backend/api/backups.py:707
+#: backend/api/backups.py:709 backend/api/backups.py:712
 msgid "Backup run not found"
 msgstr "バックアップジョブが見つかりません"
 
@@ -4994,7 +4994,7 @@ msgstr "アクセスが拒否されました: {} ロールが必要です"
 msgid "The drift timeline needs the Professional+ backup engine"
 msgstr "ドリフトのタイムラインには Professional+ のバックアップエンジンが必要です"
 
-#: backend/api/backups_drift.py:83 backend/api/backups_browse.py:95
+#: backend/api/backups_drift.py:83 backend/api/backups_browse.py:98
 msgid "The path must be absolute"
 msgstr "パスは絶対パスである必要があります"
 
@@ -5715,11 +5715,11 @@ msgstr ""
 msgid "Machine link decided for host %s"
 msgstr "ホスト %s へのマシンリンクが決定しました"
 
-#: backend/api/backups_browse.py:129
+#: backend/api/backups_browse.py:140
 msgid "What changed compares with the current repository only"
 msgstr "変更内容は現在のリポジトリとのみ比較されます"
 
-#: backend/api/backups_browse.py:135
+#: backend/api/backups_browse.py:146
 msgid "A check of what changed is already running"
 msgstr "変更内容の確認はすでに実行中です"
 
@@ -6312,12 +6312,12 @@ msgstr "そのターゲットは、直接または他のターゲットを経由
 msgid "Off-site copies need a newer backup operations engine"
 msgstr "オフサイトコピーには、より新しいバックアップオペレーションエンジンが必要です。"
 
-#: backend/services/backup_targets.py:160
-#: backend/services/backup_targets.py:164
+#: backend/services/backup_targets.py:162
+#: backend/services/backup_targets.py:166
 msgid "Backup target not found"
 msgstr "バックアップ先が見つかりません"
 
-#: backend/services/backup_targets.py:210
+#: backend/services/backup_targets.py:212
 msgid ""
 "This host already has backups on its target; it cannot move to another "
 "target yet"
@@ -6588,6 +6588,24 @@ msgstr "vaultからの応答が無効です"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "シークレットフォーマットが無効です"
+
+#: backend/services/backup_replicas.py:696
+msgid "This host has no off-site copy"
+msgstr "このホストにはオフサイトコピーがありません"
+
+#: backend/services/backup_replicas.py:698
+msgid ""
+"The off-site copy cannot be read yet: its storage host has not been told "
+"this host's read token"
+msgstr "オフサイトコピーはまだ読み取れません：ストレージホストがこのホストの読み取りトークンを知らされていないためです"
+
+#: backend/services/backup_replicas.py:701
+msgid "That snapshot is not in the off-site copy"
+msgstr "そのスナップショットはオフサイトコピーに含まれていません"
+
+#: backend/services/backup_replicas.py:703
+msgid "This host's agent cannot read its off-site copy yet; upgrade the agent"
+msgstr "このホストのエージェントはまだオフサイトコピーを読み取れません；エージェントをアップグレードしてください"
 
 #: backend/services/auto_update_rollout.py:149
 #, python-format

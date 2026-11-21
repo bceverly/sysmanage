@@ -22,7 +22,10 @@ from typing import Any, Dict, Optional
 
 # lsblk's human sizes are binary (K = 1024).
 _UNITS = {"B": 1, "K": 1024, "M": 1024**2, "G": 1024**3, "T": 1024**4, "P": 1024**5}
-_HUMAN = re.compile(r"^\s*(\d+(?:[.,]\d+)?)\s*([BKMGTP])?(?:i?B)?\s*$", re.IGNORECASE)
+# Matched against a stripped, length-capped string with at most one space,
+# so nothing in it can backtrack (CodeQL py/polynomial-redos).
+_HUMAN = re.compile(r"(\d{1,20}(?:[.,]\d{1,20})?) ?([BKMGTP])?(?:i?B)?", re.IGNORECASE)
+_HUMAN_MAX = 32
 
 
 def _bytes(value: Any) -> Optional[int]:
@@ -35,7 +38,10 @@ def _bytes(value: Any) -> Optional[int]:
         return int(value) if value >= 0 else None
     if not isinstance(value, str):
         return None
-    match = _HUMAN.match(value)
+    value = value.strip()
+    if len(value) > _HUMAN_MAX:
+        return None
+    match = _HUMAN.fullmatch(value)
     if not match:
         return None
     number = float(match.group(1).replace(",", "."))

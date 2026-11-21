@@ -5600,7 +5600,11 @@
       "unsigned": "non firmato",
       "packages": "Rimetti prima i pacchetti dello snapshot, nelle loro versioni",
       "packagesAck": "Installa pacchetti su {{host}} e rimuovi i pacchetti che lo snapshot non aveva, perché corrisponda.",
-      "awaitingApproval": "Richiesto. Un ripristino sopra i file dell'host richiede l'approvazione di una seconda persona con il ruolo di ripristino; viene inviato quando lo fanno (Pagina Backup, \"Ripristini in attesa di approvazione\")."
+      "awaitingApproval": "Richiesto. Un ripristino sopra i file dell'host richiede l'approvazione di una seconda persona con il ruolo di ripristino; viene inviato quando lo fanno (Pagina Backup, \"Ripristini in attesa di approvazione\").",
+      "offsiteNote": "Leggi dalla copia fuori sede su {{target}} tramite il suo proxy: lo spazio di archiviazione di backup di questo sito non viene utilizzato, quindi funziona anche quando non è disponibile.",
+      "source": "Ripristina da",
+      "sourceHere": "Spazio di archiviazione di backup di questo sito",
+      "sourceOffsite": "Copia fuori sede su {{target}}"
     },
     "run": {
       "busy": "Occupato, verrà ritentato",

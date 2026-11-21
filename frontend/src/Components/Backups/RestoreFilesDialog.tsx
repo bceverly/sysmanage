@@ -37,7 +37,7 @@ import { getRun, getSnapshots, restoreFiles } from '../../Services/backups';
 import SnapshotBrowser from './SnapshotBrowser';
 import RestoreNotes from './RestoreNotes';
 import PackageRestoreSummary from './PackageRestoreSummary';
-import type { BackupRun, BackupSnapshot } from '../../Services/backups';
+import type { BackupRun, BackupSnapshot, OffsiteCopy } from '../../Services/backups';
 import { apiDetail, formatBytes, formatTime, runStatusLabel } from './backupLabels';
 import { FINISHED } from './pollRun';
 
@@ -127,10 +127,16 @@ const RestoreFilesDialog: React.FC<{
     canBrowse?: boolean;
     /** Packages can be put back first (Pro+ 24.6: the engine and the ability). */
     canPackages?: boolean;
+    /** The host's off-site copies (27.3): a restore may come from one. */
+    offsite?: OffsiteCopy[];
     onClose: () => void;
-}> = ({ open, hostId, fqdn, canBrowse = false, canPackages = false, onClose }) => {
+}> = ({ open, hostId, fqdn, canBrowse = false, canPackages = false, offsite = [], onClose }) => {
     const { t } = useTranslation();
-    const [snapshots, setSnapshots] = useState<BackupSnapshot[]>([]);
+    const [catalog, setCatalog] = useState<BackupSnapshot[]>([]);
+    // '' = this site's storage; else the off-site copy's id.
+    const [source, setSource] = useState('');
+    const copies = offsite.filter(copy => copy.readable);
+    const copy = copies.find(c => c.id === source);
     const [snapshot, setSnapshot] = useState('');
     const [paths, setPaths] = useState('');
     const [excluded, setExcluded] = useState('');
@@ -156,9 +162,10 @@ const RestoreFilesDialog: React.FC<{
         setPlaceAck(false);
         setPackages(false);
         setPackagesAck(false);
+        setSource('');
         getSnapshots(hostId)
             .then(rows => {
-                setSnapshots(rows);
+                setCatalog(rows);
                 setSnapshot(rows[0]?.name ?? '');
             })
             .catch(() => setError(t('backups.restore.loadError', 'Could not load the snapshots.')));
@@ -178,6 +185,21 @@ const RestoreFilesDialog: React.FC<{
         return () => clearInterval(timer);
     }, [active, refresh]);
 
+    // From the off-site copy: the snapshots it holds, newest first, with
+    // what this site's catalog still knows of each (signed, size).
+    const snapshots: BackupSnapshot[] = copy
+        ? [...(copy.snapshots ?? [])].reverse().map(name =>
+            catalog.find(s => s.name === name)
+            ?? ({ id: name, name, signed: false, created_at: null, bytes: null } as unknown as BackupSnapshot))
+        : catalog;
+    const chooseSource = (value: string) => {
+        setSource(value);
+        const chosen = copies.find(c => c.id === value);
+        const names = chosen ? [...(chosen.snapshots ?? [])].reverse() : catalog.map(s => s.name);
+        setSnapshot(names[0] ?? '');
+        setPreview(null);
+        setBrowsing(false);
+    };
     const selected = snapshots.find(s => s.name === snapshot);
     const needsAck = selected ? !selected.signed : true;
     const lines = (text: string) => text.split('\n').map(p => p.trim()).filter(Boolean);
@@ -197,6 +219,7 @@ const RestoreFilesDialog: React.FC<{
                 acknowledge_in_place: inPlace && placeAck,
                 packages,
                 acknowledge_packages: packages && packagesAck,
+                ...(copy ? { offsite: true } : {}),
             });
             if (dryRun) {
                 setPreview(run);
@@ -252,6 +275,28 @@ const RestoreFilesDialog: React.FC<{
                         </Alert>
                     )}
                     {error && <Alert severity="error">{error}</Alert>}
+                    {copies.length > 0 && (
+                        <FormControl fullWidth>
+                            <InputLabel id="restore-source">{t('backups.restore.source', 'Restore from')}</InputLabel>
+                            <Select labelId="restore-source" label={t('backups.restore.source', 'Restore from')}
+                                value={source} onChange={e => chooseSource(e.target.value)}
+                                inputProps={{ 'data-testid': 'restore-source' }}>
+                                <MenuItem value="">{t('backups.restore.sourceHere', 'This site\'s backup storage')}</MenuItem>
+                                {copies.map(c => (
+                                    <MenuItem key={c.id} value={c.id}>
+                                        {t('backups.restore.sourceOffsite', 'Off-site copy at {{target}}', { target: c.target ?? '?' })}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    )}
+                    {copy && (
+                        <Alert severity="info">
+                            {t('backups.restore.offsiteNote',
+                                'Read from the off-site copy at {{target}} through its proxy: this site\'s backup storage is not used, so this works while it is down.',
+                                { target: copy.target ?? '?' })}
+                        </Alert>
+                    )}
                     {snapshots.length === 0 && !error ? (
                         <Typography variant="body2">{t('backups.restore.noSnapshots', 'This host has no snapshots yet.')}</Typography>
                     ) : (
@@ -261,7 +306,7 @@ const RestoreFilesDialog: React.FC<{
                                 value={snapshot} onChange={e => { setSnapshot(e.target.value); setPreview(null); }}>
                                 {snapshots.map(s => (
                                     <MenuItem key={s.id} value={s.name}>
-                                        {s.name} ({formatTime(s.created_at)}, {formatBytes(s.bytes)})
+                                        {s.name}{s.created_at ? ` (${formatTime(s.created_at)}, ${formatBytes(s.bytes)})` : ''}
                                         {s.signed ? ` - ${t('backups.restore.signed', 'signed')}` : ` - ${t('backups.restore.unsigned', 'not signed')}`}
                                     </MenuItem>
                                 ))}
@@ -275,7 +320,7 @@ const RestoreFilesDialog: React.FC<{
                                     : t('backups.browse.show', 'Browse the snapshot\'s folders')}
                             </Button>
                             {browsing && (
-                                <SnapshotBrowser hostId={hostId} snapshot={snapshot} picked={include}
+                                <SnapshotBrowser hostId={hostId} snapshot={snapshot} picked={include} offsite={!!copy}
                                     onPick={path => { setPaths(text => (text.trim() ? `${text.trim()}\n${path}` : path)); setPreview(null); }} />
                             )}
                         </Box>

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 14:42-0800\n"
+"POT-Creation-Date: 2026-11-20 15:44-0800\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -129,7 +129,7 @@ msgstr "Non hai accesso all'account selezionato."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:134
+#: backend/api/posture.py:375 backend/api/backups.py:137
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
@@ -245,8 +245,8 @@ msgstr "Formato di ID host non valido"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:146
-#: backend/api/backups.py:149 backend/api/auto_updates.py:238
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:149
+#: backend/api/backups.py:152 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
@@ -334,16 +334,16 @@ msgstr "Non disponibile su questo server"
 msgid "Cloud backup account not found"
 msgstr "Account di backup cloud non trovato"
 
-#: backend/api/cloud_backup.py:136 backend/api/backups.py:170
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:173
 #, python-format
 msgid "%s is out of range"
 msgstr "%s è fuori dall'intervallo consentito"
 
-#: backend/api/cloud_backup.py:141 backend/api/backups.py:174
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:177
 msgid "Interval (hours)"
 msgstr "Intervallo (ore)"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:175
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:178
 msgid "Window start hour"
 msgstr "Ora di inizio della finestra"
 
@@ -1489,12 +1489,12 @@ msgstr "Formato di nome host non valido"
 msgid "Hostname change requested"
 msgstr "Richiesta di modifica del nome host"
 
-#: backend/api/backups_restore_flow.py:51 backend/api/backups_legal_hold.py:50
-#: backend/api/backups_legal_hold.py:135 backend/api/backups_browse.py:78
+#: backend/api/backups_restore_flow.py:52 backend/api/backups_legal_hold.py:50
+#: backend/api/backups_legal_hold.py:135 backend/api/backups_browse.py:81
 msgid "Snapshot not found"
 msgstr "Snapshot non trovato"
 
-#: backend/api/backups_restore_flow.py:58
+#: backend/api/backups_restore_flow.py:60
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "Questo snapshot non è firmato; conferma per ripristinarlo comunque"
 
@@ -3331,7 +3331,7 @@ msgstr "%(field)s deve essere un numero intero da 0 a %(max)d"
 
 #: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
-#: backend/services/backup_targets.py:182
+#: backend/services/backup_targets.py:184
 msgid "Set up the backup target first"
 msgstr "Configura prima la destinazione di backup"
 
@@ -4607,29 +4607,29 @@ msgstr "Le reti KVM sono disponibili solo su host Linux"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "Elenco reti KVM richiesto. I risultati verranno visualizzati a breve."
 
-#: backend/api/backups.py:165
+#: backend/api/backups.py:168
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s deve essere un percorso assoluto senza '..'"
 
-#: backend/api/backups.py:176
+#: backend/api/backups.py:179
 msgid "Snapshots to keep"
 msgstr "Snapshot da conservare"
 
-#: backend/api/backups.py:177
+#: backend/api/backups.py:180
 msgid "Check interval (days)"
 msgstr "Intervallo di verifica (giorni)"
 
-#: backend/api/backups.py:181
+#: backend/api/backups.py:184
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr ""
 "Gli hook di sospensione devono essere al massimo 10 nomi brevi in minuscolo"
 
-#: backend/api/backups.py:194
+#: backend/api/backups.py:197
 msgid "At most 50 path rules can be set"
 msgstr "Si possono impostare al massimo 50 regole di percorso"
 
-#: backend/api/backups.py:205
+#: backend/api/backups.py:208
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
@@ -4637,74 +4637,74 @@ msgstr ""
 "Ogni regola di percorso è una riga di al massimo 512 caratteri, senza spazi "
 "iniziali o finali e senza # iniziale"
 
-#: backend/api/backups.py:213 backend/api/backups_drift.py:103
-#: backend/api/backups_browse.py:93
+#: backend/api/backups.py:216 backend/api/backups_drift.py:103
+#: backend/api/backups_browse.py:96
 msgid "The snapshot name is not valid"
 msgstr "Il nome dello snapshot non è valido"
 
-#: backend/api/backups.py:215
+#: backend/api/backups.py:218
 msgid "At most 50 paths can be restored at once"
 msgstr "Si possono ripristinare al massimo 50 percorsi alla volta"
 
-#: backend/api/backups.py:218
+#: backend/api/backups.py:221
 msgid "A restore path is empty or too long"
 msgstr "Un percorso di ripristino è vuoto o troppo lungo"
 
-#: backend/api/backups.py:220
+#: backend/api/backups.py:223
 msgid "A restore path must not contain '..'"
 msgstr "Un percorso di ripristino non deve contenere '..'"
 
-#: backend/api/backups.py:226
+#: backend/api/backups.py:229
 msgid "A restore path must be absolute, such as /home/alice/notes.txt"
 msgstr ""
 "Un percorso di ripristino deve essere assoluto, come /home/alice/notes.txt"
 
-#: backend/api/backups.py:240
+#: backend/api/backups.py:243
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr ""
 "Indica i percorsi da rimettere al loro posto; un intero host non viene "
 "ripristinato sul posto"
 
-#: backend/api/backups.py:246
+#: backend/api/backups.py:249
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr ""
 "Ogni percorso ripristinato sul posto deve essere specifico, come /etc/nginx"
 
-#: backend/api/backups.py:251
+#: backend/api/backups.py:254
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "Conferma che i file dell'host in questi percorsi verranno sostituiti"
 
-#: backend/api/backups.py:415
+#: backend/api/backups.py:418
 msgid "No backup policy"
 msgstr "Nessun criterio di backup"
 
-#: backend/api/backups.py:439
+#: backend/api/backups.py:442
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Questo host non può ancora eseguire backup (%s)"
 
-#: backend/api/backups.py:445
+#: backend/api/backups.py:448
 msgid "This host's backup is not configured yet"
 msgstr "Il backup di questo host non è ancora configurato"
 
-#: backend/api/backups.py:462
+#: backend/api/backups.py:465
 msgid "The backup storage host is not ready"
 msgstr "L'host di archiviazione dei backup non è pronto"
 
-#: backend/api/backups.py:477
+#: backend/api/backups.py:480
 msgid "Unknown backup action"
 msgstr "Azione di backup sconosciuta"
 
-#: backend/api/backups.py:490
+#: backend/api/backups.py:493
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr ""
 "Un repository cifrato non può essere ricompattato sull'host di archiviazione"
 
-#: backend/api/backups.py:494
+#: backend/api/backups.py:497
 msgid "That backup job is already queued or running"
 msgstr "Questa attività di backup è già in coda o in esecuzione"
 
-#: backend/api/backups.py:590
+#: backend/api/backups.py:595
 msgid ""
 "This backup is encrypted to your break-glass escrow key, which SysManage "
 "never holds. Restore it by hand with restate and that key, as the server "
@@ -4714,16 +4714,16 @@ msgstr ""
 "SysManage non possiede mai. Ripristinalo a mano con restate e quella chiave,"
 " come descrive la procedura di ripristino del server."
 
-#: backend/api/backups.py:609 backend/api/backups_drift.py:114
-#: backend/api/backups_browse.py:63
+#: backend/api/backups.py:614 backend/api/backups_drift.py:114
+#: backend/api/backups_browse.py:66
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "Il restate di questo host non può ancora farlo; aggiorna restate"
 
-#: backend/api/backups.py:621
+#: backend/api/backups.py:626
 msgid "This snapshot's repository is no longer kept"
 msgstr "Il repository di questo snapshot non viene più conservato"
 
-#: backend/api/backups.py:704 backend/api/backups.py:707
+#: backend/api/backups.py:709 backend/api/backups.py:712
 msgid "Backup run not found"
 msgstr "Attività di backup non trovata"
 
@@ -5281,7 +5281,7 @@ msgstr "Autorizzazione negata: ruolo {} richiesto"
 msgid "The drift timeline needs the Professional+ backup engine"
 msgstr "La cronologia del drift richiede il motore di backup di Professional+"
 
-#: backend/api/backups_drift.py:83 backend/api/backups_browse.py:95
+#: backend/api/backups_drift.py:83 backend/api/backups_browse.py:98
 msgid "The path must be absolute"
 msgstr "Il percorso deve essere assoluto"
 
@@ -6036,11 +6036,11 @@ msgstr ""
 msgid "Machine link decided for host %s"
 msgstr "Link della macchina deciso per l'host %s"
 
-#: backend/api/backups_browse.py:129
+#: backend/api/backups_browse.py:140
 msgid "What changed compares with the current repository only"
 msgstr "Cosa è cambiato confronta solo con il repository attuale"
 
-#: backend/api/backups_browse.py:135
+#: backend/api/backups_browse.py:146
 msgid "A check of what changed is already running"
 msgstr "È già in corso una verifica delle modifiche"
 
@@ -6685,12 +6685,12 @@ msgid "Off-site copies need a newer backup operations engine"
 msgstr ""
 "Le copie fuori sede richiedono un motore di operazioni di backup più recente"
 
-#: backend/services/backup_targets.py:160
-#: backend/services/backup_targets.py:164
+#: backend/services/backup_targets.py:162
+#: backend/services/backup_targets.py:166
 msgid "Backup target not found"
 msgstr "Destinazione di backup non trovata"
 
-#: backend/services/backup_targets.py:210
+#: backend/services/backup_targets.py:212
 msgid ""
 "This host already has backups on its target; it cannot move to another "
 "target yet"
@@ -6984,6 +6984,29 @@ msgstr "Risposta vault non valida"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "Formato segreto non valido"
+
+#: backend/services/backup_replicas.py:696
+msgid "This host has no off-site copy"
+msgstr "Questo host non ha una copia fuori sede"
+
+#: backend/services/backup_replicas.py:698
+msgid ""
+"The off-site copy cannot be read yet: its storage host has not been told "
+"this host's read token"
+msgstr ""
+"La copia fuori sede non può ancora essere letta: al suo host di "
+"archiviazione non è stato ancora comunicato il token di lettura di questo "
+"host"
+
+#: backend/services/backup_replicas.py:701
+msgid "That snapshot is not in the off-site copy"
+msgstr "Quello snapshot non è presente nella copia fuori sede"
+
+#: backend/services/backup_replicas.py:703
+msgid "This host's agent cannot read its off-site copy yet; upgrade the agent"
+msgstr ""
+"L'agente di questo host non può ancora leggere la sua copia fuori sede; "
+"aggiorna l'agente"
 
 #: backend/services/auto_update_rollout.py:149
 #, python-format

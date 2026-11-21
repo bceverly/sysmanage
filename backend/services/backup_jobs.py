@@ -594,6 +594,8 @@ def queue_configure(
     else:
         payload = host_configuration(policy, target, host, storage_host(db, target))
         run_host = host.id
+        # Off-site copies (27.3): where the host can restore from them.
+        payload.update(backup_replicas.host_block(db, policy))
     return _queue(
         db,
         policy,
@@ -659,6 +661,7 @@ def queue_restore(  # pylint: disable=too-many-arguments,too-many-positional-arg
     previous: bool = False,
     needs_key: bool = False,
     packages: bool = False,
+    offsite: Optional[str] = None,
 ) -> models.BackupRun:
     """Restore into the agent's staging directory, or (``in_place``) over the
     host's own files; the agent chooses the root either way.  ``packages``
@@ -679,6 +682,8 @@ def queue_restore(  # pylint: disable=too-many-arguments,too-many-positional-arg
             "in_place": bool(in_place),
             **({"packages": True} if packages else {}),
             **({"previous": True} if previous else {}),
+            # From the off-site copy (27.3): through its target's proxy.
+            **({"offsite": offsite} if offsite else {}),
             # Never the key itself (this goes through the queue and the run
             # row): the agent fetches it for this run (backup_key_release).
             **({"needs_key": True} if needs_key else {}),
@@ -697,9 +702,11 @@ def queue_browse(  # pylint: disable=too-many-arguments,too-many-positional-argu
     actor: str,
     previous: bool = False,
     needs_key: bool = False,
+    offsite: Optional[str] = None,
 ) -> models.BackupRun:
     """A snapshot listing or a what-changed check on the host itself
-    (``previous``: in the repository before an encrypted one)."""
+    (``previous``: in the repository before an encrypted one; ``offsite``:
+    in that off-site copy, 27.3)."""
     if action not in BROWSE_ACTIONS:
         raise ValueError(f"unknown browse action {action!r}")
     params: Dict[str, Any] = {"policy_id": str(policy.id), "action": action}
@@ -707,6 +714,8 @@ def queue_browse(  # pylint: disable=too-many-arguments,too-many-positional-argu
         params["previous"] = True
     if needs_key:
         params["needs_key"] = True  # fetched by the agent, never sent here
+    if offsite:
+        params["offsite"] = offsite
     if snapshot:
         params["snapshot"] = snapshot
     if action == LIST:

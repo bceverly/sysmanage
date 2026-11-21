@@ -5600,7 +5600,11 @@
       "unsigned": "non signé",
       "packages": "Remettre d'abord les paquets de l'instantané, dans leurs versions",
       "packagesAck": "Installer des paquets sur {{host}} et supprimer les paquets que l'instantané n'avait pas, pour qu'il lui corresponde.",
-      "awaitingApproval": "Demandée. Une restauration sur les fichiers de l'hôte nécessite une deuxième personne avec le rôle de restauration pour l'approuver ; elle est envoyée lorsque cela est fait (Page des sauvegardes, « Restaurations en attente d'approbation »)."
+      "awaitingApproval": "Demandée. Une restauration sur les fichiers de l'hôte nécessite une deuxième personne avec le rôle de restauration pour l'approuver ; elle est envoyée lorsque cela est fait (Page des sauvegardes, « Restaurations en attente d'approbation »).",
+      "offsiteNote": "Lecture depuis la copie hors site sur {{target}} via son proxy : le stockage de sauvegarde de ce site n'est pas utilisé, cela fonctionne donc même lorsqu'il est en panne.",
+      "source": "Restaurer à partir de",
+      "sourceHere": "Stockage de sauvegarde de ce site",
+      "sourceOffsite": "Copie hors site sur {{target}}"
     },
     "run": {
       "busy": "Occupé, nouvelle tentative prévue",

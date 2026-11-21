@@ -5600,7 +5600,11 @@
       "unsigned": "sin firmar",
       "packages": "Volver a poner primero los paquetes de la instantánea, en sus versiones",
       "packagesAck": "Instalar paquetes en {{host}} y eliminar los paquetes que la instantánea no tenía, para que coincida con ella.",
-      "awaitingApproval": "Solicitada. Una restauración sobre los propios archivos del host necesita que la apruebe una segunda persona con el rol de restauración; se envía cuando lo hace (página Copias de seguridad, «Restauraciones pendientes de aprobación»)."
+      "awaitingApproval": "Solicitada. Una restauración sobre los propios archivos del host necesita que la apruebe una segunda persona con el rol de restauración; se envía cuando lo hace (página Copias de seguridad, «Restauraciones pendientes de aprobación»).",
+      "offsiteNote": "Leer desde la copia fuera del sitio en {{target}} a través de su proxy: no se utiliza el almacenamiento de copias de seguridad de este sitio, por lo que esto funciona aunque esté caído.",
+      "source": "Restaurar desde",
+      "sourceHere": "Almacenamiento de copias de seguridad de este sitio",
+      "sourceOffsite": "Copia fuera del sitio en {{target}}"
     },
     "run": {
       "busy": "Ocupado, se reintentará",

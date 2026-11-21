@@ -8,6 +8,8 @@ of its own and an append-only grant; the off-site storage host prepares,
 protects, prunes (the source's retention and holds) and sizes the copy."""
 
 import json
+
+import pytest
 import uuid
 from datetime import datetime
 
@@ -265,7 +267,10 @@ def test_the_offsite_target_keeps_copy_grants_among_its_clients(
     jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
     session.commit()
     row = replicas.rows(session, s.policy)[0]
-    assert proxy.target_clients(session, s.holder) == [f"replica-{row.id}"]
+    assert proxy.target_clients(session, s.holder) == [
+        f"offsite-{row.id}",
+        f"replica-{row.id}",
+    ]
 
 
 def test_stopping_the_copy_drops_its_row(session, sent):  # noqa: F811
@@ -326,3 +331,118 @@ def test_the_storage_hosts_own_backup_is_copied_off_site_too(
     _ack(session, _runs(session, jobs.CONFIGURE)[-1],
          {"copy_tokens": {str(row.id): TOKEN}, "storage_abilities": ["replica_copy"]})  # fmt: skip
     assert row.token_sha256 == TOKEN
+
+
+# --- restoring from the copy (the site-loss drill) -------------------------
+
+READ = "d" * 64
+
+
+def _readable_row(session, s, sent):  # noqa: F811
+    """A copy the host may read: its agent reads off-site copies, its read
+    token is in the off-site grant, and the copy holds one snapshot."""
+    row = _ready_row(session, s, sent)
+    s.policy.host_abilities = json.dumps(["list", "offsite_read"])
+    row.snapshots = json.dumps(["20261119T010000Z"])
+    session.commit()
+    assert replicas.store_read_tokens(
+        session, s.policy, {"offsite_tokens": {str(row.id): READ}}
+    )
+    replicas.configure_pending(session)
+    session.commit()
+    _ack(session, _runs(session, "off_configure")[-1])
+    return row
+
+
+def test_the_host_is_told_where_its_copies_are_and_reads_with_its_own_token(
+    session, sent  # noqa: F811
+):
+    s = _offsite(session, _setup(session))
+    row = _ready_row(session, s, sent)
+    assert replicas.host_block(session, s.policy) == {}  # an older agent
+    s.policy.host_abilities = json.dumps(["offsite_read"])
+    assert replicas.host_block(session, s.policy) == {"offsite": [{
+        "id": str(row.id),
+        "url": f"https://backup.dc2.lab:8443/v1/offsite-{row.id}",
+        "pin_sha256": "c" * 64,
+    }]}  # fmt: skip
+    replicas.store_read_tokens(
+        session, s.policy, {"offsite_tokens": {str(row.id): READ}}
+    )
+    grants = replicas.configuration(session, row, s.policy, s.holder)["target"][
+        "proxy"
+    ]["grants"]
+    assert {"client": f"offsite-{row.id}", "token_sha256": [READ],
+            "operations": ["read"]} in grants  # fmt: skip
+    assert f"offsite-{row.id}" in proxy.target_clients(session, s.holder)
+
+
+def test_a_restore_from_the_copy_never_asks_this_sites_storage(
+    session, sent, monkeypatch
+):  # noqa: F811
+    from backend.api import backups as api  # pylint: disable=import-outside-toplevel
+    from backend.services import (
+        backup_reach as reach,
+    )  # pylint: disable=import-outside-toplevel
+    from tests.test_backups_api import (
+        RESTORER,
+    )  # pylint: disable=import-outside-toplevel
+
+    s = _offsite(session, _setup(session))
+    _readable_row(session, s, sent)
+    monkeypatch.setattr(reach, "blocked", lambda _db, _host: True)  # the site is down
+    body = api.RestoreBody(snapshot="20261119T010000Z", offsite=True, dry_run=True)
+    data = api.backup_restore(str(s.host.id), body, session, RESTORER)
+    params = sent[-1][2]
+    row = replicas.rows(session, s.policy)[0]
+    assert params["offsite"] == str(row.id) and params["snapshot"] == "20261119T010000Z"
+    assert data["action"] == "restore"
+
+
+@pytest.mark.asyncio
+async def test_an_offsite_restore_is_refused_with_its_reason(
+    session, sent
+):  # noqa: F811
+    from backend.api import backups as api  # pylint: disable=import-outside-toplevel
+    from tests.test_backups_api import (
+        RESTORER,
+        _status,
+    )  # pylint: disable=import-outside-toplevel
+
+    s = _offsite(session, _setup(session))
+    row = _ready_row(session, s, sent)
+
+    def ask(name="20261119T010000Z"):
+        body = api.RestoreBody(snapshot=name, offsite=True, dry_run=True)
+        return _status(
+            lambda: api.backup_restore(str(s.host.id), body, session, RESTORER)
+        )
+
+    assert await ask() == 409  # the agent cannot read copies yet
+    s.policy.host_abilities = json.dumps(["offsite_read"])
+    session.commit()
+    assert await ask() == 409  # no read token in the grant yet
+    _readable_row(session, s, sent)
+    assert await ask("20261101T010000Z") == 409  # not in the copy
+    assert row.read_token_sha256 == READ
+
+
+def test_browsing_the_copy_goes_through_its_proxy(
+    session, sent, monkeypatch
+):  # noqa: F811
+    from backend.api import (
+        backups_browse as browse,
+    )  # pylint: disable=import-outside-toplevel
+    from backend.services import (
+        backup_reach as reach,
+    )  # pylint: disable=import-outside-toplevel
+    from tests.test_backups_api import (
+        RESTORER,
+    )  # pylint: disable=import-outside-toplevel
+
+    s = _offsite(session, _setup(session))
+    row = _readable_row(session, s, sent)
+    monkeypatch.setattr(reach, "blocked", lambda _db, _host: True)
+    body = browse.BrowseBody(snapshot="20261119T010000Z", path="/etc", offsite=True)
+    browse.browse_snapshot(str(s.host.id), body, session, RESTORER)
+    assert sent[-1][2]["offsite"] == str(row.id) and sent[-1][2]["path"] == "/etc"

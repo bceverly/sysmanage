@@ -51,7 +51,7 @@ describe("SnapshotBrowser", () => {
     expect(badRow.querySelector("button")).toBeDisabled(); // "bad" is not valid text
     fireEvent.click(screen.getByText("etc/"));
     expect(await screen.findByText("hosts")).toBeInTheDocument();
-    expect(browseSnapshot).toHaveBeenLastCalledWith("h1", "s1", "/etc");
+    expect(browseSnapshot).toHaveBeenLastCalledWith("h1", "s1", "/etc", false);
     fireEvent.click(screen.getByText("Add"));
     expect(onPick).toHaveBeenCalledWith("/etc/hosts");
   });

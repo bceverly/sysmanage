@@ -5600,7 +5600,11 @@
       "unsigned": "not signed",
       "packages": "Put the snapshot's packages back first, at their versions",
       "packagesAck": "Install packages on {{host}}, and remove the packages the snapshot did not have, to match it.",
-      "awaitingApproval": "Requested. A restore over the host's own files needs a second person with the restore role to approve it; it is sent when they do (Backups page, \"Restores awaiting approval\")."
+      "awaitingApproval": "Requested. A restore over the host's own files needs a second person with the restore role to approve it; it is sent when they do (Backups page, \"Restores awaiting approval\").",
+      "offsiteNote": "Read from the off-site copy at {{target}} through its proxy: this site's backup storage is not used, so this works while it is down.",
+      "source": "Restore from",
+      "sourceHere": "This site's backup storage",
+      "sourceOffsite": "Off-site copy at {{target}}"
     },
     "run": {
       "busy": "Busy, will retry",

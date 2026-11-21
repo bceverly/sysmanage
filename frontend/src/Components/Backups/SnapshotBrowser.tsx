@@ -63,7 +63,9 @@ const SnapshotBrowser: React.FC<{
     snapshot: string;
     picked: string[];
     onPick: (path: string) => void;
-}> = ({ hostId, snapshot, picked, onPick }) => {
+    /** In the host's off-site copy (27.3). */
+    offsite?: boolean;
+}> = ({ hostId, snapshot, picked, onPick, offsite = false }) => {
     const { t } = useTranslation();
     const [path, setPath] = useState('/');
     const [run, setRun] = useState<BackupRun | null>(null);
@@ -76,11 +78,11 @@ const SnapshotBrowser: React.FC<{
         let stop: (() => void) | undefined;
         setRun(null);
         setError(null);
-        browseSnapshot(hostId, snapshot, path)
+        browseSnapshot(hostId, snapshot, path, offsite)
             .then(started => { if (alive) { setRun(started); stop = pollRun(started.id, setRun, POLL_MS); } })
             .catch(err => { if (alive) setError(apiDetail(err, t('backups.browse.error', 'This folder could not be listed.'))); });
         return () => { alive = false; stop?.(); };
-    }, [hostId, snapshot, path, t]);
+    }, [hostId, snapshot, path, offsite, t]);
 
     const parts = path.split('/').filter(Boolean);
     const listing = run && FINISHED.has(run.status) ? listingOf(run) : null;

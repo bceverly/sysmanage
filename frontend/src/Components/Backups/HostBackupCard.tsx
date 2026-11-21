@@ -231,6 +231,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                     <RestoreFilesDialog open hostId={hostId} fqdn={data.fqdn}
                         canBrowse={!!data.policy?.abilities?.includes('list')}
                         canPackages={proLicensed && !!data.policy?.abilities?.includes('packages')}
+                        offsite={data.offsite}
                         onClose={() => setRestoring(false)} />
                 )}
             </CardContent>

@@ -38,6 +38,7 @@ from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_jobs as jobs
 from backend.services import backup_reach as reach
+from backend.services import backup_replicas as replicas
 from backend.services import backup_views as views
 from backend.services.audit_service import EntityType
 
@@ -50,6 +51,8 @@ _CONTROL = re.compile(r"[\x00-\x1f\x7f]")
 class BrowseBody(BaseModel):
     snapshot: str = Field(min_length=1, max_length=255)
     path: str = Field(default="/", max_length=4096)
+    # In the host's off-site copy (27.3): read through its target's proxy.
+    offsite: bool = False
 
 
 class ChangesBody(BaseModel):
@@ -95,13 +98,21 @@ def browse_snapshot(
         raise HTTPException(status_code=422, detail=_("The path must be absolute"))
     host = _host_or_404(db, host_id)
     policy = _ready_policy(db, host)
-    reach.refuse_if_blocked(db, host)  # both read the repository on the host
     _able(policy, "list")
-    snapshot = _snapshot_or_404(db, policy, body.snapshot)
-    where = _readable_repository(snapshot, policy, host)
+    offsite = None
+    if body.offsite:
+        # Never this site's storage: the copy, through its own proxy.
+        offsite = replicas.readable(db, policy, body.snapshot)
+        where = replicas.repository_of(offsite, policy, host)
+    else:
+        reach.refuse_if_blocked(db, host)  # read on the host, from its mount
+        where = _readable_repository(
+            _snapshot_or_404(db, policy, body.snapshot), policy, host
+        )
     run = jobs.queue_browse(
-        db, policy, host, jobs.LIST, snapshot.name, body.path, current_user.userid,
+        db, policy, host, jobs.LIST, body.snapshot, body.path, current_user.userid,
         previous=where == jobs.PREVIOUS, needs_key=key_needed(where, policy),
+        offsite=str(offsite.id) if offsite else None,
     )  # fmt: skip
     db.commit()
     return views.run_dict(run)

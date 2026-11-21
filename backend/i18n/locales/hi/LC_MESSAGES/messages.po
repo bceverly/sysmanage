@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 14:42-0800\n"
+"POT-Creation-Date: 2026-11-20 15:44-0800\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -130,7 +130,7 @@ msgstr "आपके पास चयनित खाते के लिए प
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:134
+#: backend/api/posture.py:375 backend/api/backups.py:137
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
@@ -246,8 +246,8 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:146
-#: backend/api/backups.py:149 backend/api/auto_updates.py:238
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:149
+#: backend/api/backups.py:152 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
@@ -335,16 +335,16 @@ msgstr "इस सर्वर पर उपलब्ध नहीं है"
 msgid "Cloud backup account not found"
 msgstr "क्लाउड बैकअप खाता नहीं मिला"
 
-#: backend/api/cloud_backup.py:136 backend/api/backups.py:170
+#: backend/api/cloud_backup.py:136 backend/api/backups.py:173
 #, python-format
 msgid "%s is out of range"
 msgstr "%s अनुमत सीमा से बाहर है"
 
-#: backend/api/cloud_backup.py:141 backend/api/backups.py:174
+#: backend/api/cloud_backup.py:141 backend/api/backups.py:177
 msgid "Interval (hours)"
 msgstr "अंतराल (घंटे)"
 
-#: backend/api/cloud_backup.py:142 backend/api/backups.py:175
+#: backend/api/cloud_backup.py:142 backend/api/backups.py:178
 msgid "Window start hour"
 msgstr "विंडो का प्रारंभ घंटा"
 
@@ -1464,12 +1464,12 @@ msgstr "अमान्य होस्टनेम फॉर्मेट"
 msgid "Hostname change requested"
 msgstr "होस्टनेम बदलने की सूचना"
 
-#: backend/api/backups_restore_flow.py:51 backend/api/backups_legal_hold.py:50
-#: backend/api/backups_legal_hold.py:135 backend/api/backups_browse.py:78
+#: backend/api/backups_restore_flow.py:52 backend/api/backups_legal_hold.py:50
+#: backend/api/backups_legal_hold.py:135 backend/api/backups_browse.py:81
 msgid "Snapshot not found"
 msgstr "स्नैपशॉट नहीं मिला"
 
-#: backend/api/backups_restore_flow.py:58
+#: backend/api/backups_restore_flow.py:60
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 "यह स्नैपशॉट हस्ताक्षरित नहीं है; फिर भी पुनर्स्थापित करने के लिए पुष्टि करें"
@@ -3288,7 +3288,7 @@ msgstr "%(field)s 0 से %(max)d तक की पूर्ण संख्य
 
 #: backend/api/backups_tag_policies.py:226 backend/api/backups_equip.py:160
 #: backend/services/cloud_backup_jobs.py:128
-#: backend/services/backup_targets.py:182
+#: backend/services/backup_targets.py:184
 msgid "Set up the backup target first"
 msgstr "पहले बैकअप लक्ष्य सेट करें"
 
@@ -4528,28 +4528,28 @@ msgstr "KVM नेटवर्क केवल Linux होस्ट पर उ�
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "KVM नेटवर्क सूची का अनुरोध किया गया। परिणाम शीघ्र ही प्रदर्शित होंगे।"
 
-#: backend/api/backups.py:165
+#: backend/api/backups.py:168
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s एक पूर्ण (absolute) पथ होना चाहिए, जिसमें '..' न हो"
 
-#: backend/api/backups.py:176
+#: backend/api/backups.py:179
 msgid "Snapshots to keep"
 msgstr "रखे जाने वाले स्नैपशॉट"
 
-#: backend/api/backups.py:177
+#: backend/api/backups.py:180
 msgid "Check interval (days)"
 msgstr "जाँच अंतराल (दिन)"
 
-#: backend/api/backups.py:181
+#: backend/api/backups.py:184
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "पॉज़ हुक अधिकतम 10 छोटे, लोअरकेस नाम होने चाहिए"
 
-#: backend/api/backups.py:194
+#: backend/api/backups.py:197
 msgid "At most 50 path rules can be set"
 msgstr "अधिकतम 50 पथ नियम सेट किए जा सकते हैं"
 
-#: backend/api/backups.py:205
+#: backend/api/backups.py:208
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
@@ -4557,73 +4557,73 @@ msgstr ""
 "हर पथ नियम अधिकतम 512 अक्षरों की एक पंक्ति है, जिसके आरंभ या अंत में स्पेस न"
 " हो और जो # से शुरू न हो"
 
-#: backend/api/backups.py:213 backend/api/backups_drift.py:103
-#: backend/api/backups_browse.py:93
+#: backend/api/backups.py:216 backend/api/backups_drift.py:103
+#: backend/api/backups_browse.py:96
 msgid "The snapshot name is not valid"
 msgstr "स्नैपशॉट का नाम मान्य नहीं है"
 
-#: backend/api/backups.py:215
+#: backend/api/backups.py:218
 msgid "At most 50 paths can be restored at once"
 msgstr "एक बार में अधिकतम 50 पथ पुनर्स्थापित किए जा सकते हैं"
 
-#: backend/api/backups.py:218
+#: backend/api/backups.py:221
 msgid "A restore path is empty or too long"
 msgstr "एक पुनर्स्थापना पथ खाली है या बहुत लंबा है"
 
-#: backend/api/backups.py:220
+#: backend/api/backups.py:223
 msgid "A restore path must not contain '..'"
 msgstr "पुनर्स्थापना पथ में '..' नहीं होना चाहिए"
 
-#: backend/api/backups.py:226
+#: backend/api/backups.py:229
 msgid "A restore path must be absolute, such as /home/alice/notes.txt"
 msgstr "पुनर्स्थापना पथ पूर्ण पथ होना चाहिए, जैसे /home/alice/notes.txt"
 
-#: backend/api/backups.py:240
+#: backend/api/backups.py:243
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr ""
 "वापस रखे जाने वाले पथ बताएँ; पूरे होस्ट को मूल स्थान पर पुनर्स्थापित नहीं "
 "किया जाता"
 
-#: backend/api/backups.py:246
+#: backend/api/backups.py:249
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr "मूल स्थान पर पुनर्स्थापित हर पथ विशिष्ट होना चाहिए, जैसे /etc/nginx"
 
-#: backend/api/backups.py:251
+#: backend/api/backups.py:254
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "पुष्टि करें कि इन पथों पर होस्ट की फ़ाइलें बदल दी जाएँगी"
 
-#: backend/api/backups.py:415
+#: backend/api/backups.py:418
 msgid "No backup policy"
 msgstr "कोई बैकअप नीति नहीं"
 
-#: backend/api/backups.py:439
+#: backend/api/backups.py:442
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "यह होस्ट अभी बैकअप नहीं चला सकता (%s)"
 
-#: backend/api/backups.py:445
+#: backend/api/backups.py:448
 msgid "This host's backup is not configured yet"
 msgstr "इस होस्ट का बैकअप अभी कॉन्फ़िगर नहीं हुआ है"
 
-#: backend/api/backups.py:462
+#: backend/api/backups.py:465
 msgid "The backup storage host is not ready"
 msgstr "बैकअप स्टोरेज होस्ट तैयार नहीं है"
 
-#: backend/api/backups.py:477
+#: backend/api/backups.py:480
 msgid "Unknown backup action"
 msgstr "अज्ञात बैकअप कार्रवाई"
 
-#: backend/api/backups.py:490
+#: backend/api/backups.py:493
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr ""
 "किसी एन्क्रिप्टेड रिपॉज़िटरी को स्टोरेज होस्ट पर दोबारा पैक नहीं किया जा "
 "सकता"
 
-#: backend/api/backups.py:494
+#: backend/api/backups.py:497
 msgid "That backup job is already queued or running"
 msgstr "वह बैकअप कार्य पहले से कतार में है या चल रहा है"
 
-#: backend/api/backups.py:590
+#: backend/api/backups.py:595
 msgid ""
 "This backup is encrypted to your break-glass escrow key, which SysManage "
 "never holds. Restore it by hand with restate and that key, as the server "
@@ -4633,16 +4633,16 @@ msgstr ""
 "नहीं रखता। इसे सर्वर रिकवरी रनबुक के अनुसार restate और उसी कुंजी से हाथ से "
 "पुनर्स्थापित करें।"
 
-#: backend/api/backups.py:609 backend/api/backups_drift.py:114
-#: backend/api/backups_browse.py:63
+#: backend/api/backups.py:614 backend/api/backups_drift.py:114
+#: backend/api/backups_browse.py:66
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "इस होस्ट का restate अभी यह नहीं कर सकता; restate अपग्रेड करें"
 
-#: backend/api/backups.py:621
+#: backend/api/backups.py:626
 msgid "This snapshot's repository is no longer kept"
 msgstr "इस स्नैपशॉट की रिपॉज़िटरी अब नहीं रखी जाती"
 
-#: backend/api/backups.py:704 backend/api/backups.py:707
+#: backend/api/backups.py:709 backend/api/backups.py:712
 msgid "Backup run not found"
 msgstr "बैकअप कार्य नहीं मिला"
 
@@ -5199,7 +5199,7 @@ msgstr "प्रवेश नहीं: {} भूमिका की आवश�
 msgid "The drift timeline needs the Professional+ backup engine"
 msgstr "ड्रिफ्ट टाइमलाइन के लिए Professional+ बैकअप इंजन चाहिए"
 
-#: backend/api/backups_drift.py:83 backend/api/backups_browse.py:95
+#: backend/api/backups_drift.py:83 backend/api/backups_browse.py:98
 msgid "The path must be absolute"
 msgstr "पथ निरपेक्ष होना चाहिए"
 
@@ -5937,11 +5937,11 @@ msgstr ""
 msgid "Machine link decided for host %s"
 msgstr "होस्ट के लिए मशीन लिंक निर्धारित किया गया %s"
 
-#: backend/api/backups_browse.py:129
+#: backend/api/backups_browse.py:140
 msgid "What changed compares with the current repository only"
 msgstr "क्या बदला केवल मौजूदा रिपॉज़िटरी से तुलना करता है"
 
-#: backend/api/backups_browse.py:135
+#: backend/api/backups_browse.py:146
 msgid "A check of what changed is already running"
 msgstr "क्या बदला, इसकी जाँच पहले से चल रही है"
 
@@ -6565,12 +6565,12 @@ msgstr ""
 msgid "Off-site copies need a newer backup operations engine"
 msgstr "ऑफ-साइट कॉपी के लिए नए बैकअप ऑपरेशन इंजन की आवश्यकता है"
 
-#: backend/services/backup_targets.py:160
-#: backend/services/backup_targets.py:164
+#: backend/services/backup_targets.py:162
+#: backend/services/backup_targets.py:166
 msgid "Backup target not found"
 msgstr "बैकअप लक्ष्य नहीं मिला"
 
-#: backend/services/backup_targets.py:210
+#: backend/services/backup_targets.py:212
 msgid ""
 "This host already has backups on its target; it cannot move to another "
 "target yet"
@@ -6854,6 +6854,27 @@ msgstr "वॉल्ट से अवैध प्रतिक्रिया"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "गुप्त प्रारूप गलत है"
+
+#: backend/services/backup_replicas.py:696
+msgid "This host has no off-site copy"
+msgstr "इस होस्ट की कोई ऑफ-साइट कॉपी नहीं है"
+
+#: backend/services/backup_replicas.py:698
+msgid ""
+"The off-site copy cannot be read yet: its storage host has not been told "
+"this host's read token"
+msgstr ""
+"ऑफ-साइट कॉपी अभी पढ़ी नहीं जा सकती: उसके स्टोरेज होस्ट को इस होस्ट के रीड "
+"टोकन के बारे में अभी तक बताया नहीं गया है"
+
+#: backend/services/backup_replicas.py:701
+msgid "That snapshot is not in the off-site copy"
+msgstr "वह स्नैपशॉट ऑफ-साइट कॉपी में नहीं है"
+
+#: backend/services/backup_replicas.py:703
+msgid "This host's agent cannot read its off-site copy yet; upgrade the agent"
+msgstr ""
+"इस होस्ट का एजेंट अभी अपनी ऑफ-साइट कॉपी नहीं पढ़ सकता; एजेंट को अपग्रेड करें"
 
 #: backend/services/auto_update_rollout.py:149
 #, python-format

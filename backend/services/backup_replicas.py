@@ -32,16 +32,23 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from backend.i18n import _
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
 from backend.services import backup_proxy as proxy
+from backend.services import backup_proxy_cert
 from backend.websocket.messages import CommandType
 
 logger = logging.getLogger(__name__)
 
 CLIENT_PREFIX = "replica-"
+# The backed-up host's own client on the copy's proxy: read only (27.3).
+READ_PREFIX = "offsite-"
+# What a backed-up host's agent reports once it reads its off-site copy.
+READ_ABILITY = "offsite_read"
 COPY = "copy"
 # What the source storage agent reports once it can copy into a repository
 # behind restate-proxy (and takes ``replicas`` in its configure).
@@ -61,6 +68,10 @@ RETRY_HOURS = 6
 
 def client(replica: models.BackupReplica) -> str:
     return CLIENT_PREFIX + str(replica.id)
+
+
+def read_client(replica: models.BackupReplica) -> str:
+    return READ_PREFIX + str(replica.id)
 
 
 def run_action(action: str) -> str:
@@ -133,7 +144,11 @@ def target_clients(db: Session, target: models.BackupTarget) -> List[str]:
         .filter(models.BackupReplica.target_id == target.id)
         .all()
     )
-    return sorted(CLIENT_PREFIX + str(row_id) for (row_id,) in found)
+    return sorted(
+        prefix + str(row_id)
+        for (row_id,) in found
+        for prefix in (CLIENT_PREFIX, READ_PREFIX)
+    )
 
 
 # --- the source storage host --------------------------------------------
@@ -158,6 +173,51 @@ def source_block(db: Session, policy: models.BackupPolicy) -> Dict[str, Any]:
             entry["pin_sha256"] = trust["pin_sha256"]
         out.append(entry)
     return {"replicas": out}
+
+
+def _entry(holder: models.BackupTarget, client_name: str) -> Dict[str, Any]:
+    entry = {"url": f"{proxy.base_url(holder)}/v1/{client_name}"}
+    trust = proxy.trust(holder)
+    for key in ("ca", "pin_sha256"):
+        if trust.get(key):
+            entry[key] = trust[key]
+    return entry
+
+
+def host_block(db: Session, policy: models.BackupPolicy) -> Dict[str, Any]:
+    """``{"offsite": [...]}`` for the backed-up host's configure: where its
+    off-site copies are, so it can restore from one while its own site's
+    storage is down.  Only to an agent that reads them (an older one takes
+    no such key)."""
+    if READ_ABILITY not in jobs.abilities(policy):
+        return {}
+    out = []
+    for row in rows(db, policy):
+        holder = db.get(models.BackupTarget, row.target_id)
+        if proxy.uses_proxy(holder):
+            out.append({"id": str(row.id), **_entry(holder, read_client(row))})
+    return {"offsite": out}
+
+
+def store_read_tokens(
+    db: Session, policy: Optional[models.BackupPolicy], reply: Any
+) -> bool:
+    """The backed-up host's read tokens (hashes) for its off-site copies;
+    True when an off-site storage host must be told."""
+    tokens = reply.get("offsite_tokens") if isinstance(reply, dict) else None
+    if policy is None or not isinstance(tokens, dict):
+        return False
+    changed = False
+    for row in rows(db, policy):
+        digest = tokens.get(str(row.id))
+        if not proxy.is_sha256(digest) or digest == row.read_token_sha256:
+            continue
+        row.read_token_sha256_old = row.read_token_sha256
+        row.read_token_sha256 = digest
+        row.config_version += 1
+        row.updated_at = jobs.now()
+        changed = True
+    return changed
 
 
 def store_tokens(
@@ -212,16 +272,28 @@ def configuration(
     if _holds_ok(row, keep):
         work["prune"] = keep
     hashes = [h for h in (row.token_sha256, row.token_sha256_old) if h]
-    grants = [{"client": client(row), "token_sha256": hashes, "operations": ["append"]}]
+    grants = []
+    if hashes:
+        grants.append(
+            {"client": client(row), "token_sha256": hashes, "operations": ["append"]}
+        )
+    readers = [h for h in (row.read_token_sha256, row.read_token_sha256_old) if h]
+    if readers:
+        # The backed-up host restores from its own copy: read, never more.
+        grants.append(
+            {
+                "client": read_client(row),
+                "token_sha256": readers,
+                "operations": ["read"],
+            }
+        )
     block: Dict[str, Any] = {
         "target_id": str(holder.id),
         "enabled": True,
-        "grants": grants if hashes else [],
+        "grants": grants,
         "clients": proxy.target_clients(db, holder),
         "export": False,
     }
-    # pylint: disable=import-outside-toplevel
-    from backend.services import backup_proxy_cert  # noqa: PLC0415
 
     cert = backup_proxy_cert.storage_block(holder)
     if cert is not None:
@@ -417,14 +489,13 @@ def configured(db: Session, run: models.BackupRun, reply: Any) -> None:
     if isinstance(reply, dict) and isinstance(reply.get("abilities"), list):
         row.abilities = json.dumps(sorted(a for a in reply["abilities"]
                                           if isinstance(a, str)))  # fmt: skip
-    # pylint: disable=import-outside-toplevel
-    from backend.services import backup_proxy_cert  # noqa: PLC0415
 
     holder = db.get(models.BackupTarget, row.target_id)
     if holder is not None and backup_proxy_cert.store_csr_for(db, holder, reply):
         row.config_version += 1
-    if row.token_sha256_old and row.acked_version >= row.config_version:
-        row.token_sha256_old = None  # the grant holds the new one now
+    if row.acked_version >= row.config_version:
+        row.token_sha256_old = None  # the grant holds the new ones now
+        row.read_token_sha256_old = None
     if not row.prepared_at:
         queue_offsite(db, row, "prepare")
     row.updated_at = jobs.now()
@@ -605,8 +676,71 @@ def view(
             "behind": len(needed(db, row)),
             "bytes": row.repository_bytes,
             "ready": ready(row),
+            # A restore can come from it: the host's read token is in its
+            # grant (27.3); and which snapshots it holds.
+            "readable": readable_now(row, policy),
+            "snapshots": _names(row.snapshots),
             "last_copy_at": row.last_copy_at.isoformat() if row.last_copy_at else None,
             "last_copy_status": row.last_copy_status,
             "last_copy_error": row.last_copy_error,
         })  # fmt: skip
     return out
+
+
+# --- restoring from the copy ---------------------------------------------
+
+_UNREADABLE = {
+    "no_copy": lambda: _("This host has no off-site copy"),
+    "not_ready": lambda: _(
+        "The off-site copy cannot be read yet: its storage host has not been "
+        "told this host's read token"
+    ),
+    "not_there": lambda: _("That snapshot is not in the off-site copy"),
+    "agent": lambda: _(
+        "This host's agent cannot read its off-site copy yet; upgrade the agent"
+    ),
+}
+
+
+def readable_now(row: models.BackupReplica, policy: models.BackupPolicy) -> bool:
+    return (
+        READ_ABILITY in jobs.abilities(policy)
+        and bool(row.read_token_sha256)
+        and bool(row.acked_version)
+        and row.acked_version >= row.config_version
+    )
+
+
+def readable(
+    db: Session, policy: models.BackupPolicy, snapshot: Optional[str] = None
+) -> models.BackupReplica:
+    """The off-site copy a restore or browse reads (HTTP 409 with the
+    reason when it cannot): one whose grant names the host's read token,
+    holding ``snapshot``.  Its own site's storage is not asked at all."""
+    found = [row for row in rows(db, policy) if row.acked_version]
+    if not found:
+        raise HTTPException(status_code=409, detail=_UNREADABLE["no_copy"]())
+    if READ_ABILITY not in jobs.abilities(policy):
+        raise HTTPException(status_code=409, detail=_UNREADABLE["agent"]())
+    granted = [
+        row
+        for row in found
+        if row.read_token_sha256 and row.acked_version >= row.config_version
+    ]
+    if not granted:
+        raise HTTPException(status_code=409, detail=_UNREADABLE["not_ready"]())
+    for row in granted:
+        if snapshot is None or snapshot in _names(row.snapshots):
+            return row
+    raise HTTPException(status_code=409, detail=_UNREADABLE["not_there"]())
+
+
+def repository_of(
+    row: models.BackupReplica, policy: models.BackupPolicy, host: models.Host
+) -> str:
+    """Which of the policy's repositories the copy is of: the current one
+    (encrypted when the policy is, so its key is fetched as for any
+    restore), else the one before it, which is plain."""
+    if row.repo_dir == jobs.policy_repo_dir(policy, host):
+        return jobs.CURRENT
+    return jobs.PREVIOUS
