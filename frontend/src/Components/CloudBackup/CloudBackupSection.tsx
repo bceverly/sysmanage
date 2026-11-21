@@ -47,7 +47,7 @@ const CloudBackupSection: React.FC<{ onError: (message: string) => void }> = ({ 
         void load();
         hasPermission(SecurityRoles.MANAGE_CLOUD_BACKUPS).then(setCanManage).catch(() => undefined);
     }, [load]);
-    const active = Boolean(data?.enable?.status === 'running' || data?.accounts.some(busyStatus));
+    const active = Boolean(data?.enable?.status === 'running' || data?.accounts?.some(busyStatus));
     useVisiblePolling(load, active ? 4000 : 20000, true);
 
     if (!data?.available) return null;  // an air-gapped server: no internet, no iCloud

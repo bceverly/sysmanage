@@ -135,7 +135,10 @@ describe("CloudBackupSection", () => {
   });
 
   test("renders nothing on an air-gapped server", async () => {
-    vi.mocked(getCloudOverview).mockResolvedValue({ available: false, reason: "airgapped", accounts: [] } as never);
+    // Exactly what the server sends (cloud_backup_views): no accounts list.
+    // The old mock added `accounts: []`, which hid a crash that blanked the
+    // whole Backups page on air-gapped servers (screenshots, 2026-11-21).
+    vi.mocked(getCloudOverview).mockResolvedValue({ available: false, reason: "airgapped" } as never);
     const { container } = render(<CloudBackupSection onError={vi.fn()} />);
     await waitFor(() => expect(getCloudOverview).toHaveBeenCalled());
     expect(container).toBeEmptyDOMElement();
