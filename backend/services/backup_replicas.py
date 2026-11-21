@@ -146,6 +146,8 @@ def ensure(
             found = row
         else:
             db.delete(row)
+            # The backed-up host lists its copies (host_block): tell it.
+            policy.config_version += 1
     if wanted is None or found is not None:
         return found
     stamp = jobs.now()
@@ -159,6 +161,10 @@ def ensure(
     )
     db.add(found)
     db.flush()
+    # The backed-up host must learn the new copy to make its read token for
+    # it; its configure may have been built before this row existed (lab,
+    # 2026-11-21: a copy that stayed unreadable).
+    policy.config_version += 1
     return found
 
 

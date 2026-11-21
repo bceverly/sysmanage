@@ -312,6 +312,14 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
         # Script execution capability should only be set through explicit admin configuration
         # or during initial host creation, not during agent reconnection/registration
 
+        # An upgraded agent's host, and the server's own host after a server
+        # start, are asked for their updates -- before the write below
+        # records the new version (agent_version_change).
+        agent_version_change.note_agent_version(
+            db, host, message_data.get("agent_version")
+        )
+        agent_version_change.note_server_host_connected(db, host)
+
         # Always update the database (last_access for all hosts, status only for approved)
         stmt = update(Host).where(Host.id == host.id).values(**update_values)
         db.execute(stmt)

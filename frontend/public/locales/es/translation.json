@@ -6129,7 +6129,10 @@
       "none": "Ninguna",
       "settingUp": "en proceso de configuración",
       "stop": "Ninguna (dejar de copiar; las copias se quedan donde están)",
-      "title": "Copia fuera del sitio de {{name}}"
+      "title": "Copia fuera del sitio de {{name}}",
+      "immutable": "Inmutable: solo de anexión para este sitio, y sellada allí durante {{days}} días.",
+      "immutableKept": "Inmutable: solo de anexión para este sitio, y sellada allí.",
+      "unsealed": "{{name}} no sella sus copias. Este sitio solo puede añadirles datos, pero si se dañan o se eliminan en ese host de almacenamiento, no se conserva ninguna versión anterior. Dele sellos de ZFS o btrfs para que la copia sea inmutable."
     },
     "move": {
       "cancel": "Cancelar movimiento",

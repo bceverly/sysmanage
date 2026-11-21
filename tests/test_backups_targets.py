@@ -424,8 +424,29 @@ def test_a_target_copies_off_site_to_a_proxy_target_on_another_host(
         MANAGER,
     )
     assert data["replica_target"] == "offsite"
-    assert s.policy.config_version == version + 1  # its storage host is told
+    # Its storage host is told, and then the backed-up host (its new copy).
+    assert s.policy.config_version == version + 2
     assert views.target_dict(second, session)["copies_from"] == ["nas"]
+
+
+def test_the_card_says_whether_the_off_site_copy_is_sealed(session, sent, ops_engine):
+    s = _setup(session)
+    second, _nas = _proxy_second(session)
+    assert views.target_dict(s.target, session)["offsite_seal"] is None
+    s.target.replica_target_id = second.id
+    second.seal_mode, second.seal_keep_days = "none", 30
+    session.commit()
+    seal = views.target_dict(s.target, session)["offsite_seal"]
+    assert seal == {
+        "append_only": True,
+        "sealed": False,
+        "mode": "none",
+        "keep_days": None,
+    }
+    second.seal_mode = "zfs_snapshot"
+    session.commit()
+    seal = views.target_dict(s.target, session)["offsite_seal"]
+    assert seal["sealed"] is True and seal["keep_days"] == 30
 
 
 @pytest.mark.asyncio

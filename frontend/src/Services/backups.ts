@@ -155,6 +155,8 @@ export interface BackupTarget {
   replica_target_id?: string | null;
   replica_target?: string | null;
   copies_from?: string[];
+  /** Whether the off-site copy is immutable: append-only, and sealed there. */
+  offsite_seal?: { append_only: boolean; sealed: boolean; mode: string; keep_days: number | null } | null;
   host_mount_point: string;
   storage_host_id: string | null;
   storage_hostname: string | null;

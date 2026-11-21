@@ -6129,7 +6129,10 @@
       "none": "Geen",
       "settingUp": "wordt ingesteld",
       "stop": "Geen (stop met kopiëren; de kopieën blijven waar ze zijn)",
-      "title": "Off-site kopie van {{name}}"
+      "title": "Off-site kopie van {{name}}",
+      "immutable": "Onveranderlijk: voor deze site alleen toevoegen, en daar {{days}} dagen verzegeld.",
+      "immutableKept": "Onveranderlijk: voor deze site alleen toevoegen, en daar verzegeld.",
+      "unsealed": "{{name}} verzegelt zijn kopieën niet. Deze site kan er alleen aan toevoegen, maar als ze op die opslaghost beschadigd raken of worden verwijderd, blijft er geen eerdere versie over. Geef het ZFS- of btrfs-verzegelingen om de kopie onveranderlijk te maken."
     },
     "move": {
       "cancel": "Annuleer verplaatsing",

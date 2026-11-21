@@ -94,3 +94,19 @@ test("a failed copy is a warning, and a new copy is being set up", () => {
   rerender(<HostOffsite offsite={[copy({ ready: false })]} />);
   expect(screen.getByTestId("host-offsite-r1").textContent).toContain("being set up");
 });
+
+test("the card says whether the off-site copy is immutable, and warns when it is not sealed", () => {
+  const sealed = { append_only: true, sealed: true, mode: "zfs_snapshot", keep_days: 30 };
+  const nas = target("a", "NAS", { replica_target: "Offsite", replica_target_id: "b", offsite_seal: sealed });
+  const off = target("b", "Offsite");
+  const { rerender } = render(
+    <TargetOffsite target={nas} targets={[nas, off]} canChange={false} onChanged={() => undefined} />,
+  );
+  expect(screen.getByTestId("offsite-sealed-a").textContent).toBe(
+    "Immutable: append-only for this site, and sealed there for 30 days.");
+  const open = { append_only: true, sealed: false, mode: "none", keep_days: null };
+  rerender(<TargetOffsite target={{ ...nas, offsite_seal: open }} targets={[nas, off]}
+    canChange={false} onChanged={() => undefined} />);
+  expect(screen.getByTestId("offsite-unsealed-a").textContent).toContain("Offsite does not seal its copies");
+  expect(screen.queryByTestId("offsite-sealed-a")).toBeNull();
+});

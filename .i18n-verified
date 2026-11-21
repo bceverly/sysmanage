@@ -1313,6 +1313,7 @@ ar	35aa9761f1e4538b	model
 ar	35bae1376ac465e4	model
 ar	35becd8222d77366	model
 ar	35d21029ade6d43f	model
+ar	35daa218b51eaac2	model
 ar	35dcf575a46393bc	model
 ar	35e411a839239a0e	model
 ar	35e932f1e3b1430a	model
@@ -4925,6 +4926,7 @@ ar	cd2cc8288e706c73	model
 ar	cd345f2f7f30191e	model
 ar	cd378dc23bfb84b0	model
 ar	cd37cd20b3bcbc9f	model
+ar	cd3e12ee26784dbb	model
 ar	cd42f68a941b81cb	model
 ar	cd48ec8889e1ae77	model
 ar	cd5e17464f1d7bdc	model
@@ -5784,6 +5786,7 @@ ar	f17cf7b8666edaea	model
 ar	f188961be6b68beb	model
 ar	f18ba925a539e054	model
 ar	f1916bf95c2eaa1d	model
+ar	f19ec17b9529e24e	model
 ar	f1a25160e9073995	model
 ar	f1ac02fc9200b430	model
 ar	f1afc4f0446f6dfa	model
@@ -6285,6 +6288,7 @@ de	059615c1867b8224	model
 de	059b16934c431e9f	model
 de	059df1d1b209505b	model
 de	059e3a34a60a856a	model
+de	05af4edb8d00181c	model
 de	05afd2cd94ee4174	model
 de	05aff0fa17ec90a0	model
 de	05b8e18f7948126b	model
@@ -8094,6 +8098,7 @@ de	54a99640174749e2	model
 de	54abffe641ce9b1a	model
 de	54b9da8db5ccfef5	model
 de	54d4b0352e6b50bd	model
+de	54dc4f90a6314580	model
 de	54dc8e7091a933c6	model
 de	54f0577778e7889f	model
 de	55006531f287cec6	model
@@ -8874,6 +8879,7 @@ de	76263793c9c6cfd7	model
 de	76292b9f00981cee	model
 de	76434c42f4e8025f	model
 de	764babc9e06d7efb	model
+de	765386cbef570d0d	model
 de	76616cfb55bf7887	model
 de	7666aee53ab73d26	model
 de	767224c731f4b513	model
@@ -13952,6 +13958,7 @@ es	4dab0866ac401b4b	model
 es	4db0a2940432ae10	model
 es	4db163375e11d7f0	model
 es	4dd36eb4c91e206a	model
+es	4ddb5b3f05b99c14	model
 es	4de903128db40c7f	model
 es	4df07855f46baa05	model
 es	4df287bfe6e6ae64	model
@@ -16923,6 +16930,7 @@ es	cb5abd2f5fb8098a	model
 es	cb7c4fad75bae6ab	human hand-translated by Claude, reviewed against the English (2026-11-13)
 es	cb834947dcbf7dcc	model
 es	cb84740ab7fb0a0f	model
+es	cb88c0edbc842f66	model
 es	cb8915837e63c2c9	model
 es	cb8bbbe0c4be7f5b	model
 es	cb9780c701c9a431	model
@@ -17520,6 +17528,7 @@ es	e42e83af81a97693	model
 es	e4329950657a842a	model
 es	e4489fe01fdcea4e	model
 es	e44dec0d02382d5c	model
+es	e450892153329877	model
 es	e457fade30490ee2	model
 es	e467dd413a46ebec	model
 es	e478b88a7528b2bd	model
@@ -18185,6 +18194,7 @@ fr	0030639127631753	model
 fr	00327b42a7fd0017	model
 fr	0054352192f73fce	model
 fr	00560fff56a806fa	model
+fr	00629c4549bfbf70	model
 fr	0064de52f2553d24	model
 fr	0067aa60a9de20dc	model
 fr	006c939071158f1a	model
@@ -21133,6 +21143,7 @@ fr	7abbe2c80e764ff4	model
 fr	7abd812c0727da16	model
 fr	7ac8eaf5065df9b6	model
 fr	7acb7bb1d0ea191a	model
+fr	7ad68df585a4bf81	model
 fr	7ada7477f4692a8b	model
 fr	7adf7e64af4117f5	model
 fr	7ae45b4314b2a425	model
@@ -21350,6 +21361,7 @@ fr	847ed7c11f2dad61	model
 fr	8480dfce710445a4	model
 fr	8493abeb105452f5	model
 fr	84a19489109543cc	model
+fr	84a3ec0b72bdbaf1	model
 fr	84b7dacdf02aa764	model
 fr	84ba007fd3dc1aec	model
 fr	84baf32c74af33ec	model
@@ -24221,6 +24233,7 @@ hi	008fd802874a8a02	model
 hi	00967ac231d115ba	model
 hi	009cc587d2a6c6da	model
 hi	009fd41f516ada57	model
+hi	00a4c1d8e89b2da6	model
 hi	00a90e8b31113f98	model
 hi	00b4a185c2e4082b	model
 hi	00b84b904c4164e5	model
@@ -24493,6 +24506,7 @@ hi	0a71af6142ea34ce	model
 hi	0a77a3d6559e010f	model
 hi	0a7f47c4d6411121	model
 hi	0a9eff1a2ee1092e	model
+hi	0a9fc734a4c6e57a	model
 hi	0ab2ba6b7478fae7	model
 hi	0abf05353332b043	model
 hi	0ac40f97b5d30e63	model
@@ -26207,6 +26221,7 @@ hi	54f39a38fb695875	model
 hi	55162daa503cd545	model
 hi	55172548202cea9e	model
 hi	5522bbb7e176c6b2	model
+hi	552a9bed0f60aec9	model
 hi	552b472d54b13039	model
 hi	552d66e09239ef39	model
 hi	553848a0111be5ae	model
@@ -32409,6 +32424,7 @@ it	564d69625af4ea45	model
 it	5665ed70c0f85b94	model
 it	56677d3dc78339c8	model
 it	5685628285b1eb5c	model
+it	568649204c5e1b46	model
 it	56a11f31da79ae24	model
 it	56a4329e6085f8e7	model
 it	56a9a0593b823fd7	model
@@ -32433,6 +32449,7 @@ it	576fb4f3eafe2d9f	model
 it	578da4fb1a888386	model
 it	578f579f16f4f9b0	model
 it	579036f18d495a80	model
+it	57917528417135e3	model
 it	5796be591ea229d0	model
 it	579a926f153591fe	model
 it	579b8c10e24a80da	model
@@ -34914,6 +34931,7 @@ it	c0814b8ec6d76f75	model
 it	c083a921fc24e936	model
 it	c08c5d40245303e7	model
 it	c0920bc39cae2ca2	model
+it	c09591522cab51c0	model
 it	c09758d25efa19e7	model
 it	c09796b4ebe74c98	model
 it	c0a24deea42b6d72	model
@@ -38076,6 +38094,7 @@ ja	48356f05e874311e	model
 ja	484215cd7b4d6cfb	model
 ja	4862a5cbc55f90d7	model
 ja	486a55ae11d8ab81	model
+ja	4870472d8368385a	model
 ja	488256ca391d432e	model
 ja	48899b43f0b17ff5	model
 ja	488a0c287d87f250	model
@@ -40050,6 +40069,7 @@ ja	9c728c9366249927	model
 ja	9c7cd515eadbc711	model
 ja	9c9564973e0883fc	model
 ja	9cb19b6b38fed011	model
+ja	9cba9e19e9e25239	model
 ja	9ccbab229cfe1044	model
 ja	9cd4ba7a47a33e3c	model
 ja	9cda1e8e5781fd09	model
@@ -42117,6 +42137,7 @@ ja	f18bb7c044eeeafb	model
 ja	f1b107f5973bf722	model
 ja	f1b41a678729b0d1	model
 ja	f1bb77de5268c681	model
+ja	f1bfa6d80d45a650	model
 ja	f1c0d070c1b129ba	model
 ja	f1c7e88f176507a9	model
 ja	f1d0082123640df1	model
@@ -42463,6 +42484,7 @@ ko	0112582971401867	model
 ko	0114acab92852fbf	model
 ko	011b952cf57304d3	model
 ko	011fbe82a02e1d50	model
+ko	0122a48466376aa0	model
 ko	013411f89c2fad4f	model
 ko	013aa4e958f5b683	model
 ko	016fa137e5a409d4	model
@@ -46575,6 +46597,7 @@ ko	afd5840f7515929b	model
 ko	afd70535cc1ea541	model
 ko	afe082e821404344	model
 ko	afe32fbb2f9be959	model
+ko	afec749a9f46d064	model
 ko	aff19fe7cf2a4c96	model
 ko	aff9d305f995c2a2	model
 ko	affdd006fface2a4	model
@@ -47205,6 +47228,7 @@ ko	c9d7920d8afa6b4a	model
 ko	c9df9bd060f7cbd3	model
 ko	c9efaed4e146fd58	model
 ko	ca1450c476d27c94	model
+ko	ca23a4cd7a28aec8	model
 ko	ca27f641e6547037	model
 ko	ca2ecb0cc0a81b9e	model
 ko	ca348a26535c8cac	model
@@ -50991,6 +51015,7 @@ nl	6d868265e28f4f9f	model
 nl	6d876c2c21259074	model
 nl	6d88cc851da56fca	model
 nl	6d94a0d967a88b0d	model
+nl	6d999457fa161029	model
 nl	6d9ccf19b4620c06	model
 nl	6da494089993aa22	model
 nl	6dabbe1119794fa2	model
@@ -52043,6 +52068,7 @@ nl	9983c639b01c315f	model
 nl	998b862a5afaf0b7	model
 nl	99a19bc406d2ffc3	model
 nl	99b120d68117a8ff	model
+nl	99c315ad894a5ce3	model
 nl	99c477f928b5d3ab	model
 nl	99c7903716bcca16	model
 nl	99cfb77e81067e7a	model
@@ -53082,6 +53108,7 @@ nl	c55c4071ac935cf5	model
 nl	c55df16d71afb4f5	model
 nl	c560990c04809f2f	model
 nl	c571732fb84d2787	model
+nl	c572472b110a4014	model
 nl	c58a063414af84a8	model
 nl	c592f09b5e583f97	model
 nl	c5944760887565ab	model
@@ -57260,6 +57287,7 @@ pt	77be7cd7c0cd3ede	model
 pt	77c8a3cb00183b48	model
 pt	77cb844dc501015a	model
 pt	77e4ffcc8283bd06	model
+pt	77e7b9cbb9c91fc6	model
 pt	77f78f57b47583ae	model
 pt	77f900786b85fd99	model
 pt	78026622d7255a75	model
@@ -57330,6 +57358,7 @@ pt	7aa94a6796e56557	model
 pt	7ab4e5c826fd8d24	model
 pt	7ac0d5a1fd18a5d0	model
 pt	7ac37549c1fcafec	model
+pt	7ac64a3ddb71452f	model
 pt	7acd5e4d8a58af65	model
 pt	7ad0fad673bf63ed	model
 pt	7ad30ee22e222fec	model
@@ -59650,6 +59679,7 @@ pt	ddb024eb0cce9cf2	model
 pt	ddb33b9ea1700c05	model
 pt	ddb97cc9574c9994	model
 pt	ddc469800b34e0d7	model
+pt	ddcaac15f6e486e5	model
 pt	ddd8d4aa9fc40e6e	model
 pt	dde1edc1545361f6	model
 pt	ddf891cbd8fb0f22	model
@@ -60870,6 +60900,7 @@ ru	0ee4c2c1a2ad1954	model
 ru	0eedaf984dbabb83	model
 ru	0efe809df204a748	model
 ru	0f050136ad49a646	model
+ru	0f0fc3a7177522a1	model
 ru	0f18bdded6f326f1	model
 ru	0f2cd4e1f870bbb1	model
 ru	0f327da7b015e550	model
@@ -64623,6 +64654,7 @@ ru	ac5821d336d91131	model
 ru	ac5bd3bfbcfe3e39	model
 ru	ac5ce461ae2d46fe	model
 ru	ac5ed013651208b8	model
+ru	ac65550f0f3acb11	model
 ru	ac67444e52135ded	model
 ru	ac8220e873637450	model
 ru	ac8a9b3d99896e72	model
@@ -65326,6 +65358,7 @@ ru	cb52c891a0086167	model
 ru	cb5e462b452a65c2	model
 ru	cb66320d677ae756	model
 ru	cb68fbc25c766b53	model
+ru	cb75c6292f497553	model
 ru	cb7e07f0606844d3	model
 ru	cb81293a8d6964f6	model
 ru	cb85e0aab0e9bf83	model
@@ -67339,6 +67372,7 @@ zh_CN	1e325944e1248222	model
 zh_CN	1e33081f2db3708e	model
 zh_CN	1e3a65d7b36738b5	model
 zh_CN	1e497666abb7edf6	model
+zh_CN	1e56af00ee1e13f1	model
 zh_CN	1e580ce1a7fe6371	model
 zh_CN	1e59fdc4ef1134af	model
 zh_CN	1e754242c1bd56f1	model
@@ -69458,6 +69492,7 @@ zh_CN	795a51659167fe7f	model
 zh_CN	795ac43acbcc4db3	model
 zh_CN	795cf23302e18eb3	model
 zh_CN	7966bf761be73007	model
+zh_CN	7969bbc1a2922852	model
 zh_CN	796b7e9c4daa0e8e	model
 zh_CN	796d436ca58bba5d	model
 zh_CN	79707494322f1426	model
@@ -69955,6 +69990,7 @@ zh_CN	8dfcf7f3e5ed8204	model
 zh_CN	8e011bf3a937e200	model
 zh_CN	8e050a0a8543f822	model
 zh_CN	8e1108d73b6bc814	model
+zh_CN	8e1b6caed8aa7257	model
 zh_CN	8e1cd4a17301d026	model
 zh_CN	8e1e664b50b39a92	model
 zh_CN	8e20fcd688d30367	model
@@ -73857,6 +73893,7 @@ zh_TW	3324421609bbe251	model
 zh_TW	333fba5f1ce65386	model
 zh_TW	335b15763253bb4a	model
 zh_TW	33656b6fa0dad37d	model
+zh_TW	337044c2c69406cc	model
 zh_TW	337b736ab9be92b0	model
 zh_TW	3399d584b940d1e9	model
 zh_TW	33a4f1021060476d	model
@@ -78396,6 +78433,7 @@ zh_TW	f29736e53e5b9bd0	model
 zh_TW	f2b1386ccd021688	model
 zh_TW	f2bc1eee08e3d093	model
 zh_TW	f2e19e8ca53d8649	model
+zh_TW	f2e8ffbdc232b6c3	model
 zh_TW	f2f0ba08b51dcdf4	model
 zh_TW	f2f46878db76012c	model
 zh_TW	f3036d2a144173f9	model
@@ -78644,6 +78682,7 @@ zh_TW	fbd26d5d38610493	model
 zh_TW	fbdfcde667011405	model
 zh_TW	fbf2aeb754ee76ad	model
 zh_TW	fbf2d42c6546d97d	model
+zh_TW	fbfeec86e9c70d58	model
 zh_TW	fc0d51bef4039448	model
 zh_TW	fc10a0337ec763fb	model
 zh_TW	fc13e40790df62a3	model

@@ -6129,7 +6129,10 @@
       "none": "Nessuna",
       "settingUp": "in fase di configurazione",
       "stop": "Nessuna (interrompi la copia; le copie restano dove sono)",
-      "title": "Copia fuori sede di {{name}}"
+      "title": "Copia fuori sede di {{name}}",
+      "immutable": "Immutabile: solo in aggiunta per questa sede, e sigillata lì per {{days}} giorni.",
+      "immutableKept": "Immutabile: solo in aggiunta per questa sede, e sigillata lì.",
+      "unsealed": "{{name}} non sigilla le sue copie. Questa sede può solo aggiungervi dati, ma se vengono danneggiate o eliminate su quell'host di archiviazione non resta alcuna versione precedente. Assegnagli sigilli ZFS o btrfs per rendere la copia immutabile."
     },
     "move": {
       "cancel": "Annulla spostamento",

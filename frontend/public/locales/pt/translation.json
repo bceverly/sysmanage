@@ -6129,7 +6129,10 @@
       "none": "Nenhuma",
       "settingUp": "sendo configurada",
       "stop": "Nenhuma (parar de copiar; as cópias permanecem onde estão)",
-      "title": "Cópia off-site de {{name}}"
+      "title": "Cópia off-site de {{name}}",
+      "immutable": "Imutável: somente acréscimo para este site, e selada lá por {{days}} dias.",
+      "immutableKept": "Imutável: somente acréscimo para este site, e selada lá.",
+      "unsealed": "{{name}} não sela suas cópias. Este site só pode adicionar a elas, mas se forem danificadas ou excluídas nesse host de armazenamento, nenhuma versão anterior é mantida. Dê a ele selos ZFS ou btrfs para tornar a cópia imutável."
     },
     "move": {
       "cancel": "Cancelar movimento",

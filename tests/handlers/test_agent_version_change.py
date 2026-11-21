@@ -90,3 +90,41 @@ async def test_the_heartbeat_after_an_upgrade_queues_one_check(
     session.expire_all()
     assert session.get(models.Host, host.id).agent_version == "3.13.0.21"
     assert len(_checks_queued(session, host)) == 1
+
+
+@pytest.mark.asyncio
+async def test_system_info_after_an_upgrade_queues_the_check(session, mock_connection):
+    """Production, 2026-11-21: the reconnecting agent's SYSTEM_INFO stored
+    the new version first, so the heartbeat never saw a change."""
+    from backend.api.message_handlers_core import (  # pylint: disable=import-outside-toplevel
+        handle_system_info,
+    )
+
+    host = _host(session)
+    mock_connection.send_message = AsyncMock()
+    mock_connection.client_cert_header = None  # no agent mTLS in this test
+    with patch.object(agent_version_change, "_server_host_id", return_value=None):
+        await handle_system_info(session, mock_connection, {
+            "hostname": host.fqdn, "ipv4": host.ipv4, "agent_version": "3.13.0.21",
+        })  # fmt: skip
+    session.expire_all()
+    assert session.get(models.Host, host.id).agent_version == "3.13.0.21"
+    assert len(_checks_queued(session, host)) == 1
+
+
+def test_the_servers_own_host_is_asked_once_per_server_start(session):
+    host = _host(session, "3.13.0.21")
+    agent_version_change._SERVER_HOST_ASKED.clear()
+    with patch.object(
+        agent_version_change, "_server_host_id", return_value=str(host.id)
+    ):
+        assert agent_version_change.note_server_host_connected(session, host)
+        assert not agent_version_change.note_server_host_connected(session, host)
+    session.commit()
+    assert len(_checks_queued(session, host)) == 1
+    other = _host(session, "3.13.0.21")
+    with patch.object(
+        agent_version_change, "_server_host_id", return_value=str(host.id)
+    ):
+        assert not agent_version_change.note_server_host_connected(session, other)
+    agent_version_change._SERVER_HOST_ASKED.clear()

@@ -377,6 +377,27 @@ def test_the_host_is_told_where_its_copies_are_and_reads_with_its_own_token(
     assert f"offsite-{row.id}" in proxy.target_clients(session, s.holder)
 
 
+def test_a_new_copy_retells_the_backed_up_host(session, sent):  # noqa: F811
+    """The host's configure may be built before the storage side's makes
+    the copy row; the host must still learn the copy, or it never makes a
+    read token for it (lab, 2026-11-21)."""
+    s = _offsite(session, _setup(session))
+    version = s.policy.config_version
+    jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+    session.commit()
+    assert len(replicas.rows(session, s.policy)) == 1
+    assert s.policy.config_version == version + 1  # the host is sent it again
+    jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+    session.commit()
+    assert s.policy.config_version == version + 1  # once
+    s.target.replica_target_id = None
+    session.commit()
+    jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+    session.commit()
+    assert replicas.rows(session, s.policy) == []
+    assert s.policy.config_version == version + 2  # and when it goes
+
+
 def test_a_restore_from_the_copy_never_asks_this_sites_storage(
     session, sent, monkeypatch
 ):  # noqa: F811

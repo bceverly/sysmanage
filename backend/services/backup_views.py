@@ -76,6 +76,27 @@ def _copies_from(db: Session, target: models.BackupTarget) -> List[str]:
     )
 
 
+def _offsite_seal(db: Session, target: models.BackupTarget) -> Optional[Dict[str, Any]]:
+    """Whether this target's off-site copy is immutable (27.3): the source
+    can only append to it (always: its token's grant is ``append``), and
+    whether the off-site target also seals it, for how long.  None without
+    an off-site copy."""
+    holder = (
+        db.get(models.BackupTarget, target.replica_target_id)
+        if target.replica_target_id
+        else None
+    )
+    if holder is None:
+        return None
+    mode = holder.seal_mode or "none"
+    return {
+        "append_only": True,
+        "sealed": mode != "none",
+        "mode": mode,
+        "keep_days": holder.seal_keep_days if mode != "none" else None,
+    }
+
+
 def coverage(host: models.Host) -> str:
     """``full`` (files plus the package baseline restate restores from),
     ``files_only``, or ``unsupported`` (restate has no driver there)."""
@@ -141,6 +162,8 @@ def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
         ),
         "replica_target": _name(db, target.replica_target_id),
         "copies_from": _copies_from(db, target),
+        # Is that copy immutable: append-only for this site, and sealed there?
+        "offsite_seal": _offsite_seal(db, target),
         # Bandwidth by the hour through the proxy (Pro+, 25.7).
         "proxy_bandwidth": backup_proxy_limits.view(
             target, jobs.target_storage_abilities(db, target.id)

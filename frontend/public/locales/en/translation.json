@@ -6129,7 +6129,10 @@
       "none": "None",
       "settingUp": "being set up",
       "stop": "None (stop copying; the copies stay where they are)",
-      "title": "Off-site copy of {{name}}"
+      "title": "Off-site copy of {{name}}",
+      "immutable": "Immutable: append-only for this site, and sealed there for {{days}} days.",
+      "immutableKept": "Immutable: append-only for this site, and sealed there.",
+      "unsealed": "{{name}} does not seal its copies. This site can only add to them, but if they are damaged or deleted on that storage host, no earlier version is kept. Give it ZFS or btrfs seals to make the copy immutable."
     },
     "move": {
       "cancel": "Cancel move",

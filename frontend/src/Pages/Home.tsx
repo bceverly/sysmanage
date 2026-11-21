@@ -95,6 +95,12 @@ function rolloutColor(r: { running: number; halted: number }): string {
 const BACKUP_COLORS = { error: COLOR_RED, warning: COLOR_YELLOW, ok: COLOR_GREEN } as const;
 const getBackupColor = (summary: BackupSummary): string => BACKUP_COLORS[backupSummaryLevel(summary)];
 
+// The card is 250 px tall inside its padding: a two-line title (about 52 px
+// with its margin) leaves room for a 170 px gauge, or 130 px beside a note of
+// up to two lines.
+const GAUGE_HEIGHT = 170;
+const GAUGE_HEIGHT_WITH_NOTE = 130;
+
 const DashboardCard: React.FC<DashboardCardProps> = ({
     title,
     value,
@@ -120,18 +126,35 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
             padding: 2
         }}
     >
-        <Typography align="center" variant="h5" sx={{ mb: 1 }}>
+        {/* A fixed two-line title area, so a long title (or a longer
+            translation) never pushes the gauge out of the card: past two
+            lines it ends in an ellipsis, with the whole title on hover. */}
+        <Typography
+            align="center"
+            variant="h6"
+            title={loading ? undefined : title}
+            sx={{
+                mb: 1,
+                lineHeight: 1.3,
+                height: `${2 * 1.3}em`,
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflowWrap: 'anywhere',
+            }}
+        >
             {loading ? <Skeleton width="80%" /> : title}
         </Typography>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1, md: 3 }} alignItems="center">
             {loading ? (
-                <Box display="flex" justifyContent="center" alignItems="center" width={200} height={180}>
+                <Box display="flex" justifyContent="center" alignItems="center" width={200} height={GAUGE_HEIGHT}>
                     <CircularProgress size={60} />
                 </Box>
             ) : (
                 <Gauge
                     width={200}
-                    height={180}
+                    height={note ? GAUGE_HEIGHT_WITH_NOTE : GAUGE_HEIGHT}
                     value={value}
                     valueMin={0}
                     valueMax={maxValue}
@@ -147,7 +170,10 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
             )}
         </Stack>
         {note && !loading && (
-            <Typography align="center" variant="caption" color="warning.main" component="div">
+            <Typography align="center" variant="caption" color="warning.main" component="div"
+                title={note}
+                sx={{ overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical', overflowWrap: 'anywhere' }}>
                 {note}
             </Typography>
         )}

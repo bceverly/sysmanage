@@ -6129,7 +6129,10 @@
       "none": "Aucune",
       "settingUp": "en cours de configuration",
       "stop": "Aucune (arrêter la copie ; les copies restent où elles sont)",
-      "title": "Copie hors site de {{name}}"
+      "title": "Copie hors site de {{name}}",
+      "immutable": "Immuable : en ajout seul pour ce site, et scellée là-bas pendant {{days}} jours.",
+      "immutableKept": "Immuable : en ajout seul pour ce site, et scellée là-bas.",
+      "unsealed": "{{name}} ne scelle pas ses copies. Ce site peut seulement y ajouter, mais si elles sont endommagées ou supprimées sur cet hôte de stockage, aucune version antérieure n'est conservée. Donnez-lui des scellés ZFS ou btrfs pour rendre la copie immuable."
     },
     "move": {
       "cancel": "Annuler le déplacement",

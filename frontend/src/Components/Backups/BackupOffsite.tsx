@@ -54,6 +54,7 @@ export const TargetOffsite: React.FC<{
                     </Button>
                 )}
             </Typography>
+            <OffsiteSeal target={target} />
             {from.length > 0 && (
                 <Typography variant="body2" color="text.secondary">
                     {t('backups.offsite.holds', 'Holds the off-site copies of: {{names}}',
@@ -65,6 +66,30 @@ export const TargetOffsite: React.FC<{
                     onClose={() => setOpen(false)} onSaved={onChanged} />
             )}
         </>
+    );
+};
+
+/** Is the off-site copy immutable: append-only for this site, and sealed there. */
+const OffsiteSeal: React.FC<{ target: BackupTarget }> = ({ target }) => {
+    const { t } = useTranslation();
+    const seal = target.offsite_seal;
+    if (!seal) return null;
+    if (!seal.sealed) {
+        return (
+            <Alert severity="warning" sx={{ my: 0.5 }} data-testid={`offsite-unsealed-${target.id}`}>
+                {t('backups.offsite.unsealed',
+                    '{{name}} does not seal its copies. This site can only add to them, but if they are damaged or deleted on that storage host, no earlier version is kept. Give it ZFS or btrfs seals to make the copy immutable.',
+                    { name: target.replica_target ?? '?' })}
+            </Alert>
+        );
+    }
+    return (
+        <Typography variant="body2" color="text.secondary" data-testid={`offsite-sealed-${target.id}`}>
+            {seal.keep_days
+                ? t('backups.offsite.immutable', 'Immutable: append-only for this site, and sealed there for {{days}} days.',
+                    { days: seal.keep_days })
+                : t('backups.offsite.immutableKept', 'Immutable: append-only for this site, and sealed there.')}
+        </Typography>
     );
 };
 

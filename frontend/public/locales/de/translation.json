@@ -6129,7 +6129,10 @@
       "none": "Keine",
       "settingUp": "wird eingerichtet",
       "stop": "Keine (Kopieren beenden; die Kopien bleiben, wo sie sind)",
-      "title": "Offsite-Kopie von {{name}}"
+      "title": "Offsite-Kopie von {{name}}",
+      "immutable": "Unveränderlich: für diesen Standort nur anfügbar und dort {{days}} Tage lang versiegelt.",
+      "immutableKept": "Unveränderlich: für diesen Standort nur anfügbar und dort versiegelt.",
+      "unsealed": "{{name}} versiegelt seine Kopien nicht. Dieser Standort kann nur etwas hinzufügen, aber wenn sie auf diesem Speicherhost beschädigt oder gelöscht werden, bleibt keine frühere Fassung erhalten. Geben Sie ihm ZFS- oder btrfs-Versiegelungen, um die Kopie unveränderlich zu machen."
     },
     "move": {
       "cancel": "Verschiebung abbrechen",
