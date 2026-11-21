@@ -304,7 +304,7 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
         return True  # backup_result got here first; it is the authority
     if not success:
         if backup_replicas.is_replica_run(run):
-            backup_replicas.refused(db, run, str(error or "agent_error"))
+            backup_moves.refused(db, run, str(error or "agent_error"))
         else:
             _refused(db, run, str(error or "agent_error"))
         return True

@@ -6140,7 +6140,14 @@
       "failed": "El movimiento a {{target}} se detuvo: {{error}}. Este host aún realiza copias de seguridad a {{from}}.",
       "kept": "Movido desde {{from}}; su antiguo repositorio allí se mantiene hasta {{date}}.",
       "keptForGood": "Movido desde {{from}}; su antiguo repositorio allí se mantiene.",
-      "note": "Las copias de seguridad de este host se copian primero al nuevo destino. Sigue realizando copias de seguridad en su destino actual hasta que se haya comprobado la copia y luego cambia. Su antiguo repositorio se mantiene durante al menos 14 días."
+      "note": "Las copias de seguridad de este host se copian primero al nuevo destino. Sigue realizando copias de seguridad en su destino actual hasta que se haya comprobado la copia y luego cambia. Su antiguo repositorio se mantiene durante al menos 14 días.",
+      "keep": "Mantener",
+      "keepError": "El antiguo repositorio no se pudo mantener.",
+      "removeError": "El antiguo repositorio no se pudo eliminar.",
+      "removeFailed": "El antiguo repositorio no se eliminó: {{error}}. Se intentará de nuevo más tarde.",
+      "removeNow": "Eliminar ahora",
+      "removing": "Movido desde {{from}}; se está eliminando su antiguo repositorio allí.",
+      "sealed": "El antiguo destino sella sus copias de seguridad, así que el antiguo repositorio puede eliminarse a partir del {{date}}."
     }
   },
   "cloudBackup": {

@@ -6140,7 +6140,14 @@
       "failed": "Die Verschiebung nach {{target}} wurde abgebrochen: {{error}}. Dieser Host sichert weiterhin auf {{from}}.",
       "kept": "Verschoben von {{from}}; sein altes Repository dort wird bis {{date}} aufbewahrt.",
       "keptForGood": "Verschoben von {{from}}; sein altes Repository dort wird aufbewahrt.",
-      "note": "Die Sicherungen dieses Hosts werden zuerst auf das neue Ziel kopiert. Er sichert weiterhin auf sein aktuelles Ziel, bis die Kopie überprüft wurde, und wechselt dann. Sein altes Repository wird mindestens 14 Tage lang aufbewahrt."
+      "note": "Die Sicherungen dieses Hosts werden zuerst auf das neue Ziel kopiert. Er sichert weiterhin auf sein aktuelles Ziel, bis die Kopie überprüft wurde, und wechselt dann. Sein altes Repository wird mindestens 14 Tage lang aufbewahrt.",
+      "keep": "Behalten",
+      "keepError": "Das alte Repository konnte nicht behalten werden.",
+      "removeError": "Das alte Repository konnte nicht entfernt werden.",
+      "removeFailed": "Das alte Repository wurde nicht entfernt: {{error}}. Es wird später erneut versucht.",
+      "removeNow": "Jetzt entfernen",
+      "removing": "Verschoben von {{from}}; sein altes Repository dort wird entfernt.",
+      "sealed": "Das alte Ziel versiegelt seine Backups, daher kann das alte Repository ab {{date}} entfernt werden."
     }
   },
   "cloudBackup": {

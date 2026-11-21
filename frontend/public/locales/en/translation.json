@@ -6140,7 +6140,14 @@
       "failed": "The move to {{target}} stopped: {{error}}. This host still backs up to {{from}}.",
       "kept": "Moved from {{from}}; its old repository there is kept until {{date}}.",
       "keptForGood": "Moved from {{from}}; its old repository there is kept.",
-      "note": "This host's backups are copied to the new target first. It keeps backing up to its current target until the copy has been checked, then switches. Its old repository is kept for at least 14 days."
+      "note": "This host's backups are copied to the new target first. It keeps backing up to its current target until the copy has been checked, then switches. Its old repository is kept for at least 14 days.",
+      "keep": "Keep",
+      "keepError": "The old repository could not be kept.",
+      "removeError": "The old repository could not be removed.",
+      "removeFailed": "The old repository was not removed: {{error}}. It is tried again later.",
+      "removeNow": "Remove now",
+      "removing": "Moved from {{from}}; removing its old repository there.",
+      "sealed": "The old target seals its backups, so the old repository can be removed from {{date}}."
     }
   },
   "cloudBackup": {

@@ -6140,7 +6140,14 @@
       "failed": "O movimento para {{target}} parou: {{error}}. Este host ainda faz backup para {{from}}.",
       "kept": "Movido de {{from}}; seu antigo repositório lá é mantido até {{date}}.",
       "keptForGood": "Movido de {{from}}; seu antigo repositório lá é mantido.",
-      "note": "Os backups deste host são copiados primeiro para o novo destino. Ele continua fazendo backup para o destino atual até que a cópia seja verificada e depois muda. Seu antigo repositório é mantido por pelo menos 14 dias."
+      "note": "Os backups deste host são copiados primeiro para o novo destino. Ele continua fazendo backup para o destino atual até que a cópia seja verificada e depois muda. Seu antigo repositório é mantido por pelo menos 14 dias.",
+      "keep": "Manter",
+      "keepError": "Não foi possível manter o antigo repositório.",
+      "removeError": "Não foi possível remover o antigo repositório.",
+      "removeFailed": "O antigo repositório não foi removido: {{error}}. Será tentado novamente mais tarde.",
+      "removeNow": "Remover agora",
+      "removing": "Movido de {{from}}; seu antigo repositório lá está sendo removido.",
+      "sealed": "O antigo destino sela seus backups, então o antigo repositório pode ser removido a partir de {{date}}."
     }
   },
   "cloudBackup": {

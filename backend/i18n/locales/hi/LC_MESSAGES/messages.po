@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 18:40-0800\n"
+"POT-Creation-Date: 2026-11-21 05:39-0800\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -6736,20 +6736,20 @@ msgstr "संदर्भ होस्ट नहीं मिला"
 msgid "Target host not found"
 msgstr "लक्ष्य होस्ट नहीं मिला"
 
-#: backend/services/backup_moves.py:62
+#: backend/services/backup_moves.py:74
 msgid ""
 "A host with backups can move only to a target reached through restate-proxy"
 msgstr ""
 "जिस होस्ट के बैकअप हैं, वह केवल ऐसे टारगेट पर स्थानांतरित हो सकता है जिस तक "
 "restate-proxy के माध्यम से पहुँचा जाता है"
 
-#: backend/services/backup_moves.py:65
+#: backend/services/backup_moves.py:77
 msgid "This host's storage host cannot copy backups yet; upgrade its agent"
 msgstr ""
 "इस होस्ट का स्टोरेज होस्ट अभी बैकअप कॉपी नहीं कर सकता; उसके एजेंट को अपग्रेड"
 " करें"
 
-#: backend/services/backup_moves.py:68
+#: backend/services/backup_moves.py:80
 msgid ""
 "This host still has backups from before its repository was encrypted; it can"
 " move once they have been pruned"
@@ -6757,7 +6757,7 @@ msgstr ""
 "इस होस्ट के बैकअप उसके रिपॉजिटरी के एन्क्रिप्शन से पहले थे; जब तक वे प्रून "
 "नहीं हो जाते, वह मूव नहीं कर सकता"
 
-#: backend/services/backup_moves.py:72
+#: backend/services/backup_moves.py:84
 msgid ""
 "That target holds this host's off-site copy; stop copying to it, or choose "
 "another target"
@@ -6765,18 +6765,38 @@ msgstr ""
 "उस टारगेट में इस होस्ट की ऑफ-साइट कॉपी है; उस पर कॉपी करना बंद करें, या "
 "दूसरा टारगेट चुनें"
 
-#: backend/services/backup_moves.py:75
+#: backend/services/backup_moves.py:87
 msgid "This host is already moving to another target"
 msgstr ""
 "इस होस्ट को किसी और टारगेट तक जाने की प्रक्रिया पहले से शुरू हो चुकी है"
 
-#: backend/services/backup_moves.py:76
+#: backend/services/backup_moves.py:89
+msgid ""
+"This host's old repository is still kept on that target; remove it there "
+"first"
+msgstr ""
+"इस होस्ट का पुराना रिपॉजिटरी अभी भी उस लक्ष्य पर रखा हुआ है; पहले उसे वहाँ "
+"से हटाएँ"
+
+#: backend/services/backup_moves.py:92
 msgid "That target has no storage host yet"
 msgstr "उस टारगेट के पास अभी भी स्टोरेज होस्ट नहीं है"
 
-#: backend/services/backup_moves.py:440
+#: backend/services/backup_moves.py:482
 msgid "Move not found"
 msgstr "मूव नहीं मिला"
+
+#: backend/services/backup_moves.py:589 backend/services/backup_moves.py:609
+msgid "This move's old repository is no longer kept"
+msgstr "इस स्थानांतरण का पुराना रिपॉजिटरी अब नहीं रखा गया है"
+
+#: backend/services/backup_moves.py:596
+#, python-format
+msgid ""
+"The old target seals its backups; this old repository can be removed from %s"
+msgstr ""
+"पुराना लक्ष्य अपने बैकअप सील करता है; यह पुराना रिपॉजिटरी %s से हटाया जा "
+"सकता है"
 
 #: backend/services/network_sweep.py:65
 msgid "That is not a valid network"

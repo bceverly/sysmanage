@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-20 18:40-0800\n"
+"POT-Creation-Date: 2026-11-21 05:39-0800\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -6629,17 +6629,17 @@ msgstr "Reference host not found"
 msgid "Target host not found"
 msgstr "Target host not found"
 
-#: backend/services/backup_moves.py:62
+#: backend/services/backup_moves.py:74
 msgid ""
 "A host with backups can move only to a target reached through restate-proxy"
 msgstr ""
 "A host with backups can move only to a target reached through restate-proxy"
 
-#: backend/services/backup_moves.py:65
+#: backend/services/backup_moves.py:77
 msgid "This host's storage host cannot copy backups yet; upgrade its agent"
 msgstr "This host's storage host cannot copy backups yet; upgrade its agent"
 
-#: backend/services/backup_moves.py:68
+#: backend/services/backup_moves.py:80
 msgid ""
 "This host still has backups from before its repository was encrypted; it can "
 "move once they have been pruned"
@@ -6647,7 +6647,7 @@ msgstr ""
 "This host still has backups from before its repository was encrypted; it can "
 "move once they have been pruned"
 
-#: backend/services/backup_moves.py:72
+#: backend/services/backup_moves.py:84
 msgid ""
 "That target holds this host's off-site copy; stop copying to it, or choose "
 "another target"
@@ -6655,17 +6655,36 @@ msgstr ""
 "That target holds this host's off-site copy; stop copying to it, or choose "
 "another target"
 
-#: backend/services/backup_moves.py:75
+#: backend/services/backup_moves.py:87
 msgid "This host is already moving to another target"
 msgstr "This host is already moving to another target"
 
-#: backend/services/backup_moves.py:76
+#: backend/services/backup_moves.py:89
+msgid ""
+"This host's old repository is still kept on that target; remove it there "
+"first"
+msgstr ""
+"This host's old repository is still kept on that target; remove it there "
+"first"
+
+#: backend/services/backup_moves.py:92
 msgid "That target has no storage host yet"
 msgstr "That target has no storage host yet"
 
-#: backend/services/backup_moves.py:440
+#: backend/services/backup_moves.py:482
 msgid "Move not found"
 msgstr "Move not found"
+
+#: backend/services/backup_moves.py:589 backend/services/backup_moves.py:609
+msgid "This move's old repository is no longer kept"
+msgstr "This move's old repository is no longer kept"
+
+#: backend/services/backup_moves.py:596
+#, python-format
+msgid ""
+"The old target seals its backups; this old repository can be removed from %s"
+msgstr ""
+"The old target seals its backups; this old repository can be removed from %s"
 
 #: backend/services/network_sweep.py:65
 msgid "That is not a valid network"

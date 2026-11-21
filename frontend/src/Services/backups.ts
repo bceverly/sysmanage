@@ -368,7 +368,7 @@ export interface OffsiteCopy {
  *  then switch; or, after the switch, how long the old repository is kept. */
 export interface BackupMove {
   id: string;
-  status: 'copying' | 'verifying' | 'switched' | 'failed';
+  status: 'copying' | 'verifying' | 'switched' | 'retiring' | 'failed';
   target: string | null;
   from_target: string | null;
   /** The host's snapshots, and how many are still to copy. */
@@ -379,6 +379,8 @@ export interface BackupMove {
   switched_at: string | null;
   /** The old repository is kept until then; null: kept for good. */
   keep_until: string | null;
+  /** A sealing old target: its old repository can be removed only from then. */
+  removable_from?: string | null;
 }
 
 export interface BackupHost {
@@ -632,6 +634,16 @@ export const setDefaultTarget = async (id: string): Promise<BackupTarget> =>
 /** Stop a host's move to another target before it switches (any edition). */
 export const cancelMove = async (id: string): Promise<void> => {
   await axiosInstance.post(`${base}/backups/moves/${id}/cancel`);
+};
+
+/** Remove a moved host's old repository now rather than at its keep date. */
+export const removeOldRepository = async (id: string): Promise<void> => {
+  await axiosInstance.post(`${base}/backups/moves/${id}/remove-old`);
+};
+
+/** Keep a moved host's old repository until someone removes it. */
+export const keepOldRepository = async (id: string): Promise<void> => {
+  await axiosInstance.post(`${base}/backups/moves/${id}/keep`);
 };
 
 export const setReplicaTarget = async (

@@ -380,3 +380,50 @@ def cancel_move(
     backup_tick.configure_now(db)
     db.commit()
     return {"canceled": True}
+
+
+def _move_host(db: Session, row: models.BackupMove) -> Optional[models.Host]:
+    policy = db.get(models.BackupPolicy, row.policy_id)
+    return db.get(models.Host, policy.host_id) if policy else None
+
+
+@router.post("/backups/moves/{move_id}/remove-old")
+def remove_old_repository(
+    move_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Remove a moved host's old repository now rather than at its keep
+    date (never while a seal of it still runs).  Any edition."""
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    row = moves.move_or_404(db, move_id)
+    moves.remove_now(db, row, jobs.now())
+    host = _move_host(db, row)
+    _audit(
+        db, current_user, EntityType.HOST, host.id if host else None,
+        host.fqdn if host else None, "Backup move: old repository removal requested",
+        {"move_id": str(row.id)},
+    )  # fmt: skip
+    db.commit()
+    return {"status": row.status}
+
+
+@router.post("/backups/moves/{move_id}/keep")
+def keep_old_repository(
+    move_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Keep a moved host's old repository until someone removes it.  Any
+    edition."""
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    row = moves.move_or_404(db, move_id)
+    moves.keep(row)
+    host = _move_host(db, row)
+    _audit(
+        db, current_user, EntityType.HOST, host.id if host else None,
+        host.fqdn if host else None, "Backup move: old repository kept",
+        {"move_id": str(row.id)},
+    )  # fmt: skip
+    db.commit()
+    return {"status": row.status}

@@ -19,9 +19,11 @@ vi.mock("react-i18next", () => {
   };
   return { useTranslation: () => value };
 });
-vi.mock("../../Services/backups", () => ({ cancelMove: vi.fn() }));
+vi.mock("../../Services/backups", () => ({
+  cancelMove: vi.fn(), keepOldRepository: vi.fn(), removeOldRepository: vi.fn(),
+}));
 
-import { cancelMove } from "../../Services/backups";
+import { cancelMove, keepOldRepository, removeOldRepository } from "../../Services/backups";
 import { HostMove } from "../../Components/Backups/BackupMove";
 import type { BackupMove } from "../../Services/backups";
 
@@ -69,5 +71,33 @@ test("after the switch it says how long the old repository is kept", () => {
   );
   expect(screen.getByTestId("host-move").textContent).toContain("Moved from NAS; its old repository there is kept until");
   rerender(<HostMove move={move({ status: "switched" })} canManage onChanged={() => undefined} />);
-  expect(screen.getByTestId("host-move").textContent).toBe("Moved from NAS; its old repository there is kept.");
+  expect(screen.getByTestId("host-move").textContent).toContain("Moved from NAS; its old repository there is kept.");
+  expect(screen.queryByText("Keep")).toBeNull(); // kept for good already
+});
+
+test("a manager can remove the old repository now or keep it", async () => {
+  const changed = vi.fn();
+  vi.mocked(removeOldRepository).mockResolvedValueOnce(undefined);
+  vi.mocked(keepOldRepository).mockResolvedValueOnce(undefined);
+  render(<HostMove move={move({ status: "switched", keep_until: "2026-12-04T03:00:00" })} canManage onChanged={changed} />);
+  fireEvent.click(screen.getByText("Remove now"));
+  await waitFor(() => expect(removeOldRepository).toHaveBeenCalledWith("m1"));
+  fireEvent.click(screen.getByText("Keep"));
+  await waitFor(() => expect(keepOldRepository).toHaveBeenCalledWith("m1"));
+  expect(changed).toHaveBeenCalledTimes(2);
+});
+
+test("a sealed old repository waits, and a failed removal is shown", () => {
+  render(<HostMove move={move({ status: "switched", keep_until: "2026-12-04T03:00:00",
+    removable_from: "2026-12-20T03:00:00", error: "Operation not permitted" })}
+    canManage onChanged={() => undefined} />);
+  expect(screen.queryByText("Remove now")).toBeNull();
+  expect(screen.getByText(/can be removed from/)).toBeTruthy();
+  expect(screen.getByText(/was not removed: Operation not permitted/)).toBeTruthy();
+});
+
+test("while it is removed the card says so, with no buttons", () => {
+  render(<HostMove move={move({ status: "retiring" })} canManage onChanged={() => undefined} />);
+  expect(screen.getByTestId("host-move").textContent).toBe("Moved from NAS; removing its old repository there.");
+  expect(screen.queryByRole("button")).toBeNull();
 });

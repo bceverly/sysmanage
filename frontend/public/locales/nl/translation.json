@@ -6140,7 +6140,14 @@
       "failed": "De verplaatsing naar {{target}} is gestopt: {{error}}. Deze host maakt nog steeds back-ups naar {{from}}.",
       "kept": "Verplaatst van {{from}}; zijn oude repository daar wordt bewaard tot {{date}}.",
       "keptForGood": "Verplaatst van {{from}}; zijn oude repository daar blijft behouden.",
-      "note": "De back-ups van deze host worden eerst gekopieerd naar het nieuwe doel. Het blijft back-ups maken naar zijn huidige doel totdat de kopie is gecontroleerd, waarna het overschakelt. Zijn oude repository wordt bewaard voor minimaal 14 dagen."
+      "note": "De back-ups van deze host worden eerst gekopieerd naar het nieuwe doel. Het blijft back-ups maken naar zijn huidige doel totdat de kopie is gecontroleerd, waarna het overschakelt. Zijn oude repository wordt bewaard voor minimaal 14 dagen.",
+      "keep": "Bewaren",
+      "keepError": "De oude repository kon niet worden bewaard.",
+      "removeError": "De oude repository kon niet worden verwijderd.",
+      "removeFailed": "De oude repository is niet verwijderd: {{error}}. Het wordt later opnieuw geprobeerd.",
+      "removeNow": "Nu verwijderen",
+      "removing": "Verplaatst van {{from}}; zijn oude repository daar wordt verwijderd.",
+      "sealed": "Het oude doel verzegelt zijn back-ups, dus de oude repository kan vanaf {{date}} worden verwijderd."
     }
   },
   "cloudBackup": {

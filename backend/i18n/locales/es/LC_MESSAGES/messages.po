@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 18:40-0800\n"
+"POT-Creation-Date: 2026-11-21 05:39-0800\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -6867,20 +6867,20 @@ msgstr "Host de referencia no encontrado"
 msgid "Target host not found"
 msgstr "Host objetivo no encontrado"
 
-#: backend/services/backup_moves.py:62
+#: backend/services/backup_moves.py:74
 msgid ""
 "A host with backups can move only to a target reached through restate-proxy"
 msgstr ""
 "Un host con copias de seguridad solo puede moverse a un destino accesible a "
 "través de restate-proxy"
 
-#: backend/services/backup_moves.py:65
+#: backend/services/backup_moves.py:77
 msgid "This host's storage host cannot copy backups yet; upgrade its agent"
 msgstr ""
 "El host de almacenamiento de este host aún no puede copiar copias de "
 "seguridad; actualice su agente"
 
-#: backend/services/backup_moves.py:68
+#: backend/services/backup_moves.py:80
 msgid ""
 "This host still has backups from before its repository was encrypted; it can"
 " move once they have been pruned"
@@ -6888,7 +6888,7 @@ msgstr ""
 "Este host todavía tiene copias de seguridad de antes de que se cifrara su "
 "repositorio; puede moverse una vez que se hayan depurado"
 
-#: backend/services/backup_moves.py:72
+#: backend/services/backup_moves.py:84
 msgid ""
 "That target holds this host's off-site copy; stop copying to it, or choose "
 "another target"
@@ -6896,17 +6896,37 @@ msgstr ""
 "Ese destino contiene la copia fuera del sitio de este host; detenga las "
 "copias a ese destino o elija otro destino"
 
-#: backend/services/backup_moves.py:75
+#: backend/services/backup_moves.py:87
 msgid "This host is already moving to another target"
 msgstr "Este host ya se está moviendo a otro destino"
 
-#: backend/services/backup_moves.py:76
+#: backend/services/backup_moves.py:89
+msgid ""
+"This host's old repository is still kept on that target; remove it there "
+"first"
+msgstr ""
+"El antiguo repositorio de este host todavía se conserva en ese destino; "
+"elimínelo allí primero"
+
+#: backend/services/backup_moves.py:92
 msgid "That target has no storage host yet"
 msgstr "Ese destino aún no tiene un host de almacenamiento"
 
-#: backend/services/backup_moves.py:440
+#: backend/services/backup_moves.py:482
 msgid "Move not found"
 msgstr "No se ha encontrado el movimiento"
+
+#: backend/services/backup_moves.py:589 backend/services/backup_moves.py:609
+msgid "This move's old repository is no longer kept"
+msgstr "El antiguo repositorio de este movimiento ya no se conserva"
+
+#: backend/services/backup_moves.py:596
+#, python-format
+msgid ""
+"The old target seals its backups; this old repository can be removed from %s"
+msgstr ""
+"El antiguo destino sella sus copias de seguridad; este antiguo repositorio "
+"puede eliminarse a partir del %s"
 
 #: backend/services/network_sweep.py:65
 msgid "That is not a valid network"

@@ -6140,7 +6140,14 @@
       "failed": "Il trasferimento verso {{target}} si è interrotto: {{error}}. Questo host effettua ancora backup a {{from}}.",
       "kept": "Spostato da {{from}}; il suo vecchio repository lì è conservato fino a {{date}}.",
       "keptForGood": "Spostato da {{from}}; il suo vecchio repository lì è conservato.",
-      "note": "I backup di questo host vengono copiati al nuovo target in primo luogo. Continuerà a effettuare backup al suo target attuale fino a quando la copia non sarà stata controllata, dopodiché passerà ad un altro. Il suo vecchio repository è conservato per almeno 14 giorni."
+      "note": "I backup di questo host vengono copiati al nuovo target in primo luogo. Continuerà a effettuare backup al suo target attuale fino a quando la copia non sarà stata controllata, dopodiché passerà ad un altro. Il suo vecchio repository è conservato per almeno 14 giorni.",
+      "keep": "Conserva",
+      "keepError": "Non è stato possibile conservare il vecchio repository.",
+      "removeError": "Non è stato possibile rimuovere il vecchio repository.",
+      "removeFailed": "Il vecchio repository non è stato rimosso: {{error}}. Verrà provato di nuovo in seguito.",
+      "removeNow": "Rimuovi ora",
+      "removing": "Spostato da {{from}}; il suo vecchio repository lì è in fase di rimozione.",
+      "sealed": "Il vecchio target sigilla i suoi backup, quindi il vecchio repository può essere rimosso dal {{date}}."
     }
   },
   "cloudBackup": {

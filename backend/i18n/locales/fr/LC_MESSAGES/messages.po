@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 18:40-0800\n"
+"POT-Creation-Date: 2026-11-21 05:39-0800\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -6902,20 +6902,20 @@ msgstr "Hôte de référence non trouvé"
 msgid "Target host not found"
 msgstr "Hôte cible non trouvé"
 
-#: backend/services/backup_moves.py:62
+#: backend/services/backup_moves.py:74
 msgid ""
 "A host with backups can move only to a target reached through restate-proxy"
 msgstr ""
 "Un hôte avec des sauvegardes ne peut se déplacer que vers une cible "
 "accessible via restate-proxy"
 
-#: backend/services/backup_moves.py:65
+#: backend/services/backup_moves.py:77
 msgid "This host's storage host cannot copy backups yet; upgrade its agent"
 msgstr ""
 "L'hôte de stockage de cet hôte ne peut pas encore copier les sauvegardes ; "
 "mettez à jour son agent"
 
-#: backend/services/backup_moves.py:68
+#: backend/services/backup_moves.py:80
 msgid ""
 "This host still has backups from before its repository was encrypted; it can"
 " move once they have been pruned"
@@ -6923,7 +6923,7 @@ msgstr ""
 "Cet hôte a toujours des sauvegardes effectuées avant que son dépôt n'ait été"
 " chiffré ; il peut se déplacer une fois qu'elles auront été effacées"
 
-#: backend/services/backup_moves.py:72
+#: backend/services/backup_moves.py:84
 msgid ""
 "That target holds this host's off-site copy; stop copying to it, or choose "
 "another target"
@@ -6931,17 +6931,37 @@ msgstr ""
 "Cette cible contient une copie hors site de cet hôte ; arrêtez les copies "
 "vers celle-ci, ou choisissez une autre cible"
 
-#: backend/services/backup_moves.py:75
+#: backend/services/backup_moves.py:87
 msgid "This host is already moving to another target"
 msgstr "Cet hôte est déjà en cours de déplacement vers une autre cible"
 
-#: backend/services/backup_moves.py:76
+#: backend/services/backup_moves.py:89
+msgid ""
+"This host's old repository is still kept on that target; remove it there "
+"first"
+msgstr ""
+"L'ancien dépôt de cet hôte est toujours conservé sur cette cible ; "
+"supprimez-le d'abord là-bas"
+
+#: backend/services/backup_moves.py:92
 msgid "That target has no storage host yet"
 msgstr "Cette cible n'a pas encore d'hôte de stockage"
 
-#: backend/services/backup_moves.py:440
+#: backend/services/backup_moves.py:482
 msgid "Move not found"
 msgstr "Déplacement non trouvé"
+
+#: backend/services/backup_moves.py:589 backend/services/backup_moves.py:609
+msgid "This move's old repository is no longer kept"
+msgstr "L'ancien dépôt de ce déplacement n'est plus conservé"
+
+#: backend/services/backup_moves.py:596
+#, python-format
+msgid ""
+"The old target seals its backups; this old repository can be removed from %s"
+msgstr ""
+"L'ancienne cible scelle ses sauvegardes ; cet ancien dépôt peut être "
+"supprimé à partir du %s"
 
 #: backend/services/network_sweep.py:65
 msgid "That is not a valid network"

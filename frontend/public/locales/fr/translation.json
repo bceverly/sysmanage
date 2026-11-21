@@ -6140,7 +6140,14 @@
       "failed": "Le déplacement vers {{target}} s'est arrêté : {{error}}. Cet hôte effectue toujours des sauvegardes vers {{from}}.",
       "kept": "Déplacé de {{from}} ; son ancien dépôt là-bas est conservé jusqu'à {{date}}.",
       "keptForGood": "Déplacé de {{from}} ; son ancien dépôt là-bas est conservé.",
-      "note": "Les sauvegardes de cet hôte sont d'abord copiées vers la nouvelle cible. Il continue à effectuer des sauvegardes vers sa cible actuelle jusqu'à ce que la copie ait été vérifiée, puis bascule. Son ancien dépôt est conservé pendant au moins 14 jours."
+      "note": "Les sauvegardes de cet hôte sont d'abord copiées vers la nouvelle cible. Il continue à effectuer des sauvegardes vers sa cible actuelle jusqu'à ce que la copie ait été vérifiée, puis bascule. Son ancien dépôt est conservé pendant au moins 14 jours.",
+      "keep": "Conserver",
+      "keepError": "L'ancien dépôt n'a pas pu être conservé.",
+      "removeError": "L'ancien dépôt n'a pas pu être supprimé.",
+      "removeFailed": "L'ancien dépôt n'a pas été supprimé : {{error}}. Une nouvelle tentative aura lieu plus tard.",
+      "removeNow": "Supprimer maintenant",
+      "removing": "Déplacé de {{from}} ; son ancien dépôt là-bas est en cours de suppression.",
+      "sealed": "L'ancienne cible scelle ses sauvegardes, donc l'ancien dépôt peut être supprimé à partir du {{date}}."
     }
   },
   "cloudBackup": {

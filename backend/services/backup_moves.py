@@ -25,6 +25,10 @@ has backups does not simply start writing elsewhere:
    all told.  The old repository is kept as it is -- nothing backs up to it
    or prunes it -- until ``keep_until``: 14 days, or the old target's seal
    retention if that is longer.
+4. **Retire.**  Then the old storage host removes it (``retire``; the
+   agent removes only a repository it served itself for that policy).  The
+   operator can remove it sooner (never before a seal of it would expire) or
+   keep it for good.
 
 Moving needs the new target to be reached through restate-proxy (a copy
 goes into a repository only through a proxy or on the same machine) and the
@@ -34,8 +38,9 @@ after a lapse, as off-site copying does.
 """
 
 import logging
+import posixpath
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -45,6 +50,7 @@ from backend.persistence import models
 from backend.services import backup_jobs as jobs
 from backend.services import backup_proxy as proxy
 from backend.services import backup_replicas as replicas
+from backend.websocket.messages import CommandType
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +58,12 @@ COPYING, VERIFYING = replicas.MOVING
 SWITCHED = "switched"
 FAILED = "failed"
 CANCELED = "canceled"
+# The old repository is being removed, then is gone.
+RETIRING = "retiring"
+RETIRED = "retired"
+# The old repository is still on the old target.
+KEPT = (SWITCHED, RETIRING)
+RETIRE = replicas.run_action("retire")
 # The old repository is kept this long after the switch (Bryan, 2026-11-20).
 GRACE_DAYS = 14
 # A check that has not moved for this long is started again by the tick.
@@ -73,6 +85,10 @@ _REFUSALS = {
         "choose another target"
     ),
     "busy": lambda: _("This host is already moving to another target"),
+    "kept": lambda: _(
+        "This host's old repository is still kept on that target; remove it "
+        "there first"
+    ),
     "no_storage": lambda: _("That target has no storage host yet"),
 }
 
@@ -123,6 +139,23 @@ def _previous_holds_snapshots(
     return False
 
 
+def _kept_on(
+    db: Session, policy: models.BackupPolicy, target: models.BackupTarget
+) -> bool:
+    """The host's old repository from an earlier move is still on ``target``
+    (moving back would copy into the very directory)."""
+    found = (
+        db.query(models.BackupMove.id)
+        .filter(
+            models.BackupMove.policy_id == policy.id,
+            models.BackupMove.from_target_id == target.id,
+            models.BackupMove.status.in_(KEPT),
+        )
+        .first()
+    )
+    return found is not None
+
+
 def _refusal(
     db: Session,
     policy: models.BackupPolicy,
@@ -134,6 +167,8 @@ def _refusal(
         return "no_storage"
     if not proxy.uses_proxy(target):
         return "needs_proxy"
+    if _kept_on(db, policy, target):
+        return "kept"
     if replicas.ABILITY not in jobs.storage_abilities(policy):
         return "agent"
     if current is not None and str(current.replica_target_id or "") == str(target.id):
@@ -331,6 +366,10 @@ def after(db: Session, run: models.BackupRun, result: Dict[str, Any]) -> bool:
     if not replicas.is_move(row):
         replicas.after(db, run, result)
         return False
+    if run.action == RETIRE:
+        if row.status == RETIRING:
+            _after_retire(row, run)
+        return False
     handler = _AFTER.get(run.action)
     if handler is None or row.status not in replicas.MOVING:
         return False
@@ -349,7 +388,7 @@ def is_quiet_audit(db: Session, policy_id: Any, host_id: Any) -> bool:
         db.query(models.BackupMove)
         .filter(
             models.BackupMove.policy_id == jobs.as_uuid(policy_id),
-            models.BackupMove.status == SWITCHED,
+            models.BackupMove.status.in_(KEPT),
         )
         .all()
     ):
@@ -387,6 +426,7 @@ def tick(db: Session, now: datetime) -> None:
     ):
         if row.prepared_at and _all_in(db, row):
             _check(db, row)
+    _retire_due(db, now)
 
 
 # --- what the Backups page shows -----------------------------------------
@@ -407,9 +447,7 @@ def view(
     """The host's move under way, or the last one while its old repository
     is still kept; None otherwise."""
     row = latest(db, policy)
-    if row is None or row.status == CANCELED:
-        return None
-    if row.status == SWITCHED and row.keep_until is not None and row.keep_until < now:
+    if row is None or row.status in (CANCELED, RETIRED):
         return None
     target = db.get(models.BackupTarget, row.target_id)
     source = _target(db, row.from_target_id)
@@ -433,6 +471,8 @@ def view(
         "error": row.error or (row.last_copy_error if moving else None),
         "switched_at": row.switched_at.isoformat() if row.switched_at else None,
         "keep_until": row.keep_until.isoformat() if row.keep_until else None,
+        # A sealed old repository is never removed before its seals expire.
+        "removable_from": _iso(earliest_removal(db, row, now)),
     }
 
 
@@ -441,3 +481,160 @@ def move_or_404(db: Session, move_id: Any) -> models.BackupMove:
     if row is None:
         raise HTTPException(status_code=404, detail=_("Move not found"))
     return row
+
+
+# --- retiring the old repository ------------------------------------------
+
+
+def _iso(value: Optional[datetime]) -> Optional[str]:
+    return value.isoformat() if value else None
+
+
+def old_repository(
+    db: Session, row: models.BackupMove
+) -> Optional[Tuple[models.BackupTarget, str]]:
+    """The old target and the old repository's path on its storage host."""
+    old = _target(db, row.from_target_id)
+    if old is None or not old.storage_host_id or not old.storage_path:
+        return None
+    return old, posixpath.join(posixpath.normpath(old.storage_path), row.repo_dir)
+
+
+def earliest_removal(
+    db: Session, row: models.BackupMove, now: datetime
+) -> Optional[datetime]:
+    """When the old repository may first be removed, if later than ``now``:
+    a sealing old target's seals of it run their course."""
+    old = _target(db, row.from_target_id)
+    if old is None or not row.switched_at or (old.seal_mode or "none") == "none":
+        return None
+    floor = row.switched_at + timedelta(days=old.seal_keep_days or 0)
+    return floor if floor > now else None
+
+
+def retire(db: Session, row: models.BackupMove) -> Optional[models.BackupRun]:
+    """Ask the old storage host to remove the old repository (forgetting
+    the policy there, unless the host moved within that storage host)."""
+    policy = db.get(models.BackupPolicy, row.policy_id)
+    found = old_repository(db, row)
+    if policy is None or found is None or row.status != SWITCHED:
+        return None
+    old, path = found
+    if str(policy.target_id) == str(old.id):
+        return None  # it is on that target again: the repository is its own
+    if jobs.pending(db, policy.id, RETIRE, old.storage_host_id):
+        return None
+    if _live_copy_on(db, policy, old):
+        return None  # the agent forgets every entry naming that directory
+    new = _target(db, policy.target_id)
+    same = new is not None and str(new.storage_host_id) == str(old.storage_host_id)
+    run = jobs.queue_command(
+        db, policy, old.storage_host_id, RETIRE, CommandType.BACKUP_RUN,
+        {"policy_id": str(policy.id), "action": "retire", "repository": path,
+         "forget": not same},
+        record={"replica_id": str(row.id)},
+    )  # fmt: skip
+    row.status, row.error, row.updated_at = RETIRING, None, jobs.now()
+    logger.info("Move %s: removing the old repository %s", row.id, path)
+    return run
+
+
+def _live_copy_on(
+    db: Session, policy: models.BackupPolicy, old: models.BackupTarget
+) -> bool:
+    """A copy of this host the old target still keeps under the same
+    directory: its off-site copy, or a move into it under way."""
+    replica = (
+        db.query(models.BackupReplica.id)
+        .filter(
+            models.BackupReplica.policy_id == policy.id,
+            models.BackupReplica.target_id == old.id,
+        )
+        .first()
+    )
+    moving = (
+        db.query(models.BackupMove.id)
+        .filter(
+            models.BackupMove.policy_id == policy.id,
+            models.BackupMove.target_id == old.id,
+            models.BackupMove.status.in_(replicas.MOVING),
+        )
+        .first()
+    )
+    return replica is not None or moving is not None
+
+
+def _after_retire(row: models.BackupMove, run: models.BackupRun) -> None:
+    row.updated_at = jobs.now()
+    if run.status == "ok":
+        row.status, row.error = RETIRED, None
+        logger.info("Move %s: the old repository is removed", row.id)
+        return
+    row.status = SWITCHED  # the tick tries again
+    row.error = (run.message or run.status or "")[:1000] or None
+    logger.error("Move %s: the old repository was not removed: %s", row.id, row.error)
+
+
+def refused(db: Session, run: models.BackupRun, message: str) -> None:
+    """A copying or retiring run the agent would not start."""
+    replicas.refused(db, run, message)
+    row = replicas.row_of(db, run)
+    if run.action == RETIRE and replicas.is_move(row) and row.status == RETIRING:
+        _after_retire(row, run)
+
+
+def _retire_due(db: Session, now: datetime) -> None:
+    """Remove each old repository whose keep date has passed (a failed
+    removal is tried again after RETRY_HOURS); free a removal whose run was
+    lost."""
+    retry = timedelta(hours=RETRY_HOURS)
+    for row in (
+        db.query(models.BackupMove)
+        .filter(
+            models.BackupMove.status.in_(KEPT),
+            models.BackupMove.keep_until.isnot(None),
+            models.BackupMove.keep_until <= now,
+        )
+        .all()
+    ):
+        if row.status == RETIRING:
+            policy_id = row.policy_id
+            if now - row.updated_at >= retry and not jobs.pending(
+                db, policy_id, RETIRE
+            ):
+                row.status = SWITCHED
+            continue
+        if row.error and now - row.updated_at < retry:
+            continue
+        if earliest_removal(db, row, now) is None:
+            retire(db, row)
+
+
+def remove_now(db: Session, row: models.BackupMove, now: datetime) -> None:
+    """The operator's "Remove now": 409 unless the move switched and no
+    seal of the old repository is still running its course."""
+    if row.status != SWITCHED:
+        raise HTTPException(
+            status_code=409, detail=_("This move's old repository is no longer kept")
+        )
+    floor = earliest_removal(db, row, now)
+    if floor is not None:
+        raise HTTPException(
+            status_code=409,
+            detail=_(
+                "The old target seals its backups; this old repository can be "
+                "removed from %s"
+            )
+            % floor.strftime("%Y-%m-%d"),
+        )
+    row.keep_until, row.error = now, None
+    retire(db, row)
+
+
+def keep(row: models.BackupMove) -> None:
+    """The operator's "Keep": the old repository stays until removed."""
+    if row.status != SWITCHED:
+        raise HTTPException(
+            status_code=409, detail=_("This move's old repository is no longer kept")
+        )
+    row.keep_until, row.error, row.updated_at = None, None, jobs.now()

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 18:40-0800\n"
+"POT-Creation-Date: 2026-11-21 05:39-0800\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -6390,38 +6390,54 @@ msgstr "參考主機未找到"
 msgid "Target host not found"
 msgstr "目標主機未找到"
 
-#: backend/services/backup_moves.py:62
+#: backend/services/backup_moves.py:74
 msgid ""
 "A host with backups can move only to a target reached through restate-proxy"
 msgstr "一個有備份的主機只能移動到透過 restate-proxy 到達的目標"
 
-#: backend/services/backup_moves.py:65
+#: backend/services/backup_moves.py:77
 msgid "This host's storage host cannot copy backups yet; upgrade its agent"
 msgstr "此主機的儲存主機尚未能夠複製備份；升級其代理程式"
 
-#: backend/services/backup_moves.py:68
+#: backend/services/backup_moves.py:80
 msgid ""
 "This host still has backups from before its repository was encrypted; it can"
 " move once they have been pruned"
 msgstr "此主機仍有其儲存庫加密之前的備份；修剪這些備份後即可移動"
 
-#: backend/services/backup_moves.py:72
+#: backend/services/backup_moves.py:84
 msgid ""
 "That target holds this host's off-site copy; stop copying to it, or choose "
 "another target"
 msgstr "該目標保存了此主機的異地副本；請停止向其複製，或選擇另一個目標"
 
-#: backend/services/backup_moves.py:75
+#: backend/services/backup_moves.py:87
 msgid "This host is already moving to another target"
 msgstr "此主機已開始移動至另一個目標"
 
-#: backend/services/backup_moves.py:76
+#: backend/services/backup_moves.py:89
+msgid ""
+"This host's old repository is still kept on that target; remove it there "
+"first"
+msgstr "此主機的舊存儲庫仍保留在該目標上；請先在那裡刪除它"
+
+#: backend/services/backup_moves.py:92
 msgid "That target has no storage host yet"
 msgstr "該目標尚未設定儲存主機"
 
-#: backend/services/backup_moves.py:440
+#: backend/services/backup_moves.py:482
 msgid "Move not found"
 msgstr "未找到移動"
+
+#: backend/services/backup_moves.py:589 backend/services/backup_moves.py:609
+msgid "This move's old repository is no longer kept"
+msgstr "此次移動的舊存儲庫已不再保留"
+
+#: backend/services/backup_moves.py:596
+#, python-format
+msgid ""
+"The old target seals its backups; this old repository can be removed from %s"
+msgstr "舊目標會封存其備份；此舊存儲庫自 %s 起才可刪除"
 
 #: backend/services/network_sweep.py:65
 msgid "That is not a valid network"

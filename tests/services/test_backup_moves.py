@@ -15,6 +15,7 @@ import uuid
 from datetime import datetime, timedelta
 
 import pytest
+from fastapi import HTTPException
 
 from backend.api import backups as api
 from backend.api import backups_targets as targets_api
@@ -242,7 +243,10 @@ async def test_a_move_is_canceled_only_on_purpose(session, sent, ops_engine):
     assert row.status == moves.CANCELED
     assert s.policy.target_id == s.target.id
     assert replicas.copy_rows(session, s.policy) == []
-    again = lambda: targets_api.cancel_move(str(row.id), session, MANAGER)  # noqa: E731
+
+    def again():
+        return targets_api.cancel_move(str(row.id), session, MANAGER)
+
     assert await _status(again) == 409
 
 
@@ -285,4 +289,134 @@ def test_the_host_card_shows_the_move(session, sent, ops_engine):
     row.status, row.switched_at = moves.SWITCHED, NOW
     row.keep_until = NOW + timedelta(days=14)
     assert moves.view(session, s.policy, NOW)["keep_until"].startswith("2026-12-04")
+    row.status = moves.RETIRED  # once removed, the card says no more
     assert moves.view(session, s.policy, NOW + timedelta(days=15)) is None
+
+
+# --- the old repository: kept, then removed ---------------------------------
+
+
+def _switched(session, s, days_ago=15):
+    row = _start(session, s)
+    stamp = jobs.now() - timedelta(days=days_ago)
+    row.status, row.switched_at = moves.SWITCHED, stamp
+    row.keep_until = stamp + timedelta(days=14)
+    s.policy.target_id = s.new.id
+    session.commit()
+    return row
+
+
+def test_the_old_repository_is_removed_when_its_keep_date_passes(
+    session, sent, ops_engine
+):
+    s = _setup_with_history(session)
+    row = _switched(session, s)
+    moves.tick(session, jobs.now())
+    run = _runs(session, moves.RETIRE)[-1]
+    assert str(run.host_id) == str(s.nas.id)  # the OLD storage host
+    params = sent[-1][2]
+    assert params["action"] == "retire" and params["forget"] is True
+    assert params["repository"] == f"{s.target.storage_path}/{row.repo_dir}"
+    assert row.status == moves.RETIRING
+    moves.tick(session, jobs.now())
+    assert len(_runs(session, moves.RETIRE)) == 1  # not asked twice
+    _finish(session, run)
+    assert row.status == moves.RETIRED
+    assert moves.view(session, s.policy, jobs.now()) is None
+
+
+def test_a_failed_removal_is_shown_and_tried_again_later(session, sent, ops_engine):
+    s = _setup_with_history(session)
+    row = _switched(session, s)
+    moves.tick(session, jobs.now())
+    _finish(session, _runs(session, moves.RETIRE)[-1], status="failed")
+    assert row.status == moves.SWITCHED and row.error
+    moves.tick(session, jobs.now())
+    assert len(_runs(session, moves.RETIRE)) == 1  # not at once
+    moves.tick(session, jobs.now() + timedelta(hours=moves.RETRY_HOURS + 1))
+    assert len(_runs(session, moves.RETIRE)) == 2
+
+
+def test_an_agent_that_cannot_remove_says_so(session, sent, ops_engine):
+    s = _setup_with_history(session)
+    row = _switched(session, s)
+    moves.tick(session, jobs.now())
+    run = _runs(session, moves.RETIRE)[-1]
+    results.record_command_result(session, {
+        "command_id": str(run.command_id), "success": False,
+        "error": "That backup action is not configured on this host."})  # fmt: skip
+    assert row.status == moves.SWITCHED
+    assert "not configured" in row.error
+
+
+def test_a_move_within_one_storage_host_keeps_the_policy_there(
+    session, sent, ops_engine
+):
+    s = _setup_with_history(session)
+    s.new.storage_host_id = s.nas.id
+    session.commit()
+    _switched(session, s)
+    moves.tick(session, jobs.now())
+    assert sent[-1][2]["forget"] is False
+
+
+def test_remove_now_and_keep(session, sent, ops_engine):
+    s = _setup_with_history(session)
+    row = _switched(session, s, days_ago=1)
+    moves.tick(session, jobs.now())
+    assert _runs(session, moves.RETIRE) == []  # still kept
+    targets_api.keep_old_repository(str(row.id), session, MANAGER)
+    assert row.keep_until is None
+    moves.tick(session, jobs.now() + timedelta(days=400))
+    assert _runs(session, moves.RETIRE) == []  # kept for good
+    targets_api.remove_old_repository(str(row.id), session, MANAGER)
+    assert row.status == moves.RETIRING and len(_runs(session, moves.RETIRE)) == 1
+
+
+@pytest.mark.asyncio
+async def test_a_sealed_old_repository_waits_for_its_seals(session, sent, ops_engine):
+    s = _setup_with_history(session)
+    s.target.seal_mode, s.target.seal_keep_days = "zfs", 30
+    session.commit()
+    row = _switched(session, s, days_ago=20)
+    row.keep_until = jobs.now() - timedelta(days=1)  # an older, shorter date
+    session.commit()
+    moves.tick(session, jobs.now())
+    assert _runs(session, moves.RETIRE) == []
+    shown = moves.view(session, s.policy, jobs.now())
+    assert shown["removable_from"] is not None
+
+    def now():
+        return targets_api.remove_old_repository(str(row.id), session, MANAGER)
+
+    assert await _status(now) == 409
+    moves.tick(session, jobs.now() + timedelta(days=11))
+    assert len(_runs(session, moves.RETIRE)) == 1
+
+
+def test_moving_back_waits_for_the_old_repository(session, sent, ops_engine):
+    s = _setup_with_history(session)
+    _switched(session, s, days_ago=1)
+    s.target.transport, s.target.proxy_host = "proxy", "backup.dc1.lab"
+    s.target.proxy_port, s.target.proxy_pin_sha256 = 8443, "d" * 64
+    session.commit()
+    body = api.PolicyBody(target_id=str(s.target.id))
+    with pytest.raises(HTTPException) as refused:
+        api.save_policy(session, MANAGER, s.host, body)
+    assert refused.value.status_code == 409
+    assert "still kept" in refused.value.detail
+
+
+def test_no_removal_while_a_live_copy_of_the_host_is_on_the_old_target(
+    session, sent, ops_engine
+):
+    s = _setup_with_history(session)
+    row = _switched(session, s)
+    stamp = jobs.now()
+    session.add(models.BackupReplica(
+        id=uuid.uuid4(), policy_id=s.policy.id, target_id=s.target.id,
+        repo_dir=row.repo_dir, created_at=stamp, updated_at=stamp,
+    ))  # fmt: skip
+    session.commit()
+    moves.tick(session, jobs.now())
+    assert _runs(session, moves.RETIRE) == [] and row.status == moves.SWITCHED
