@@ -158,7 +158,7 @@ if (Test-Path $osslStaticLib) {
 $venvScripts = Join-Path (Get-Location) ".venv\Scripts"
 if (Test-Path $venvScripts) {
     foreach ($d in @("libpq.dll", "libcrypto-3-arm64.dll", "libssl-3-arm64.dll",
-                     "z.dll", "lz4.dll", "legacy.dll")) {
+                     "z.dll", "libz.dll", "zlib1.dll", "zlib.dll", "lz4.dll", "legacy.dll")) {
         $src = Join-Path $vcpkgBin $d
         if (Test-Path $src) { Copy-Item $src $venvScripts -Force }
     }

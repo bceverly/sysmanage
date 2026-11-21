@@ -5,12 +5,12 @@
 # The ARM64 libpq runtime DLLs the MSIs bundle, in one place (dot-source it).
 #
 # zlib's DLL is named by the vcpkg zlib port that built libpq: z.dll from the
-# older port, zlib1.dll (or zlib.dll) from zlib 1.4 -- CI, 2026-11-20: "vcpkg
-# did not produce z.dll".  libpq.dll loads the name it was linked against, so
+# older port, libz.dll from the zlib 1.4 port (CI, 2026-11-21), zlib1.dll or
+# zlib.dll from other builds.  libpq.dll loads the name it was linked against, so
 # the DLL is staged under its own name (never renamed) and WiX is told which
 # (-d LIBPQ_ZLIB=...).
 
-$LibpqZlibNames = @('z.dll', 'zlib1.dll', 'zlib.dll')
+$LibpqZlibNames = @('z.dll', 'libz.dll', 'zlib1.dll', 'zlib.dll')
 $LibpqFixedDlls = @('libpq.dll', 'libcrypto-3-arm64.dll', 'libssl-3-arm64.dll', 'lz4.dll', 'legacy.dll')
 
 function Get-LibpqZlibName([string]$Dir) {
