@@ -385,9 +385,7 @@ class MirrorSettings(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
-    updated_by = Column(
-        GUID(), ForeignKey("user.id", ondelete=_FK_SET_NULL), nullable=True
-    )
+    updated_by = Column(GUID(), nullable=True)
 
     def to_dict(self) -> dict:
         return {

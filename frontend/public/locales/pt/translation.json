@@ -303,7 +303,17 @@
     "save": "Salvar",
     "saveSuccess": "Padrões de antivirus salvos com sucesso",
     "selectProgram": "Selecionar Programa Antivirus",
-    "title": "Antivírus"
+    "title": "Antivírus",
+    "swap": {
+      "help": "O ClamAV necessita de cerca de 3,5 GB de memória e swap combinados, e não é implantado em um host com menos. Com isso ativado, o SysManage adiciona primeiro um arquivo de swap a um host Linux ou BSD (em GB inteiros, no máximo 8 GB, nunca em ZFS ou btrfs, e apenas onde espaço suficiente em disco permanece livre), e depois implanta o ClamAV.",
+      "label": "Adicionar swap aos hosts com memória insuficiente para o ClamAV",
+      "saveError": "A configuração não pôde ser salva.",
+      "title": "Hosts com pouca memória",
+      "added": "O SysManage adicionou {{size}} GB de swap a este host para o ClamAV.",
+      "remove": "Remover o swap",
+      "removeError": "Não foi possível remover o arquivo de swap.",
+      "removing": "O arquivo de swap está sendo removido."
+    }
   },
   "apiKeys": {
     "active": "Ativo",
@@ -1822,7 +1832,9 @@
       "generic": "Faça login no host, reinstale o pacote do agente com o gerenciador de pacotes do host e, em seguida, inicie o serviço do agente.",
       "runCommands": "Faça login no host e execute esses comandos para finalizar a atualização e iniciar o agente:",
       "title": "Agente perdido durante sua própria atualização"
-    }
+    },
+    "noSwap": "Nenhum",
+    "swap": "Troca de Memória"
   },
   "hostGroup": {
     "add": "Adicionar",

@@ -26,7 +26,7 @@ from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
-from backend.services import av_auto_deploy, av_plan_builder
+from backend.services import av_auto_deploy, av_plan_builder, av_swap
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import CommandType, Message, MessageType
@@ -259,23 +259,26 @@ def deploy_antivirus(  # NOSONAR
                     host, antivirus_default.antivirus_package
                 )
                 if shortfall and not deploy_request.allow_low_memory:
-                    failed_hosts.append(
-                        {
-                            "host_id": host_id_str,
-                            "hostname": host.fqdn,
-                            "reason": _(
-                                "%(package)s needs at least %(needed)d MB of memory; "
-                                "this host has %(total)d MB"
-                            )
-                            % {
-                                "package": antivirus_default.antivirus_package,
-                                "needed": av_auto_deploy.MIN_MEMORY_MB[
-                                    antivirus_default.antivirus_package
-                                ],
-                                "total": host.memory_total_mb,
-                            },
-                        }
-                    )
+                    package = antivirus_default.antivirus_package
+                    swap = _swap_first(session, host, package)
+                    if swap is None:
+                        failed_hosts.append(
+                            {"host_id": host_id_str, "hostname": host.fqdn,
+                             "reason": _low_memory_reason(host, package)}
+                        )  # fmt: skip
+                        continue
+                    # Swap first; the deploy follows the moment it is made.
+                    AuditService.log(
+                        db=audit_session, user_id=current_user.id,
+                        username=current_user.userid, action_type=ActionType.EXECUTE,
+                        entity_type=EntityType.HOST, entity_id=str(host_id),
+                        entity_name=host.fqdn,
+                        description=f"Requested antivirus deployment for host {host.fqdn} "
+                        f"after adding {swap} MB of swap",
+                        result=Result.SUCCESS,
+                        details={"antivirus_package": package, "swap_mb": swap},
+                    )  # fmt: skip
+                    success_count += 1
                     continue
 
                 # Build a declarative deploy plan; agent runs it via
@@ -354,6 +357,41 @@ def deploy_antivirus(  # NOSONAR
     return AntivirusDeployResponse(
         success_count=success_count, failed_hosts=failed_hosts, message=message
     )
+
+
+def _swap_first(session, host, package) -> Optional[int]:
+    """With "Add swap to hosts with too little memory for ClamAV" on, ask the host for
+    the swap it lacks (av_swap): the MB asked for, or None when it cannot."""
+    if not av_swap.enabled():
+        return None
+    size = av_swap.swap_needed_mb(host, av_auto_deploy.MIN_MEMORY_MB.get(package))
+    if av_swap.cannot_add(host, size):
+        return None
+    av_swap.queue(
+        session, host, package, size, datetime.now(timezone.utc).replace(tzinfo=None)
+    )
+    return size
+
+
+def _low_memory_reason(host, package) -> str:
+    floor = av_auto_deploy.MIN_MEMORY_MB[package]
+    reason = _(
+        "%(package)s needs at least %(needed)d MB of memory and swap; this host "
+        "has %(total)d MB of memory and %(swap)d MB of swap"
+    ) % {"package": package, "needed": floor,
+         "total": getattr(host, "memory_total_mb", None) or 0,
+         "swap": getattr(host, "swap_total_mb", None) or 0}  # fmt: skip
+    if not av_swap.enabled():
+        return (
+            reason
+            + ". "
+            + _(
+                "Turn on Add swap to hosts with too little memory for ClamAV under "
+                "Settings, Antivirus, or add memory."
+            )
+        )
+    why = av_swap.cannot_add(host, av_swap.swap_needed_mb(host, floor))
+    return reason + (". " + _("Swap cannot be added: %s") % why if why else "")
 
 
 @router.post(
@@ -638,3 +676,62 @@ def get_antivirus_coverage(db: Session = Depends(get_tenant_db)):
             status_code=500,
             detail=_("Failed to retrieve antivirus coverage: %s") % str(e),
         ) from e
+
+
+def _swap_record(db: Session, host_id: str):
+    return (
+        db.query(models.AntivirusAutoDeploy)
+        .filter(models.AntivirusAutoDeploy.host_id == host_id)
+        .first()
+    )
+
+
+@router.get("/hosts/{host_id}/antivirus/swap", dependencies=[Depends(JWTBearer())])
+def antivirus_swap(
+    host_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+):
+    """The swap SysManage added so this host clears ClamAV's memory floor
+    (av_swap); the card offers to remove it once antivirus is gone."""
+    record = _swap_record(db, host_id)
+    return {"swap_added_mb": record.swap_added_mb if record else None}
+
+
+@router.post(
+    "/hosts/{host_id}/antivirus/remove-swap", dependencies=[Depends(JWTBearer())]
+)
+def remove_antivirus_swap(
+    host_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+):
+    """Remove the swap file SysManage added for ClamAV."""
+    if not current_user.has_role(SecurityRoles.REMOVE_ANTIVIRUS):
+        raise HTTPException(status_code=403, detail=error_permission_denied())
+    host = db.query(models.Host).filter(models.Host.id == host_id).first()
+    if not host:
+        raise HTTPException(status_code=404, detail=error_host_not_found())
+    record = _swap_record(db, host_id)
+    if record is None or not record.swap_added_mb:
+        raise HTTPException(
+            status_code=409, detail=_("SysManage has not added swap to this host")
+        )
+    av_swap.queue_removal(db, host)
+    size = record.swap_added_mb
+    record.swap_added_mb = None
+    db.commit()
+    audit = sessionmaker(
+        autocommit=False, autoflush=False, bind=persistence_db.get_engine()
+    )
+    with audit() as session:
+        AuditService.log(
+            db=session, user_id=current_user.id, username=current_user.userid,
+            action_type=ActionType.EXECUTE, entity_type=EntityType.HOST,
+            entity_id=str(host.id), entity_name=host.fqdn,
+            description=f"Requested removal of the {size} MB swap file SysManage "
+            f"added to {host.fqdn}",
+            result=Result.SUCCESS,
+        )  # fmt: skip
+        session.commit()
+    return {"message": _("Swap removal sent")}

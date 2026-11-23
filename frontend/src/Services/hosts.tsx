@@ -82,6 +82,8 @@ type SysManageHost = {
     cpu_threads?: number;
     cpu_frequency_mhz?: number;
     memory_total_mb?: number;
+    /** Swap, counted with memory against the antivirus memory floor. */
+    swap_total_mb?: number | null;
     storage_details?: string;
     network_details?: string;
     hardware_details?: string;

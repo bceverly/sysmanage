@@ -151,6 +151,7 @@ def _hardware_fields(host) -> dict:
         "cpu_threads": host.cpu_threads,
         "cpu_frequency_mhz": host.cpu_frequency_mhz,
         "memory_total_mb": host.memory_total_mb,
+        "swap_total_mb": getattr(host, "swap_total_mb", None),
         "reboot_required": host.reboot_required,
         "package_manager_needs_repair": bool(
             getattr(host, "package_manager_needs_repair", False)

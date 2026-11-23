@@ -18,6 +18,21 @@
   .nav__drawer {
     display: none; /* desktop uses the menubar, not the slide-in drawer */
   }
+  /* The menubar does not fit (useMenubarFits): it stays laid out, unseen,
+     so it can be measured again, and the compact button and drawer take
+     over -- the toolbar no longer lands on top of the last menu. */
+  .nav.nav--compact .nav__menubar {
+    visibility: hidden;
+    position: absolute;
+    pointer-events: none;
+  }
+  .nav.nav--compact .nav__drawer {
+    display: block;
+  }
+  .nav.nav--compact .nav__toggle,
+  .nav.nav--compact .nav__close {
+    display: inline-flex;
+  }
 }
 
 /* Top-level category triggers -- look like the old nav links (they just don't

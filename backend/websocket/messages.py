@@ -212,6 +212,9 @@ class CommandType(str, Enum):
     DEPLOY_FILES = "deploy_files"
     EXECUTE_COMMAND_SEQUENCE = "execute_command_sequence"
     APPLY_DEPLOYMENT_PLAN = "apply_deployment_plan"
+    # A swap file so ClamAV clears its memory floor (av_swap).
+    ENSURE_SWAP = "ensure_swap"
+    REMOVE_SWAP = "remove_swap"
 
     # Child Host / Virtualization Commands
     CHECK_VIRTUALIZATION_SUPPORT = "check_virtualization_support"

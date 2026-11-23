@@ -98,6 +98,9 @@ WINDOW_GATED_COMMANDS = frozenset(
         "update_child_agent",
         "deploy_files",
         "apply_deployment_plan",
+        # The swap file ClamAV's memory floor needs (av_swap), and its removal.
+        "ensure_swap",
+        "remove_swap",
         # check-mode runs are exempt -- see is_window_gated
         "apply_config_profile",
         "quarantine_file",

@@ -15,6 +15,8 @@ vi.mock("react-i18next", () => {
 
 vi.mock("../../Services/antivirusService", () => ({
   getAntivirusStatus: vi.fn(),
+  getAntivirusSwap: vi.fn().mockResolvedValue(null),
+  removeAntivirusSwap: vi.fn(),
 }));
 
 import { getAntivirusStatus } from "../../Services/antivirusService";

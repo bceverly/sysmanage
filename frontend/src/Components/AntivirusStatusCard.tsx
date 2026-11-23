@@ -21,6 +21,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { useTranslation } from 'react-i18next';
 import { AntivirusStatus, getAntivirusStatus } from '../Services/antivirusService';
 import AntivirusActionButtons, { AntivirusAction } from './AntivirusActionButtons';
+import AntivirusSwapOffer from './AntivirusSwapOffer';
 
 interface AntivirusStatusCardProps {
   hostId: string;
@@ -283,6 +284,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
             </Typography>
           </Box>
         )}
+        {!antivirusStatus && <AntivirusSwapOffer hostId={hostId} canRemove={canRemoveAntivirus} />}
 
         <AntivirusActionButtons
           status={antivirusStatus}

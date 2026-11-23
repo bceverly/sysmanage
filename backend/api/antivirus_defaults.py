@@ -21,6 +21,7 @@ from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
+from backend.services import av_swap
 from backend.services.audit_service import AuditService, EntityType
 from backend.utils.verbosity_logger import sanitize_log
 
@@ -105,6 +106,48 @@ def get_antivirus_defaults(
             status_code=500,
             detail=_("Failed to retrieve antivirus defaults: %s") % str(e),
         ) from e
+
+
+class SwapSetting(BaseModel):
+    """Add swap to hosts below the antivirus memory floor (av_swap)."""
+
+    enabled: bool
+
+
+@router.get("/swap", response_model=SwapSetting)
+def get_swap_setting(
+    dependencies=Depends(JWTBearer()),
+    current_user=Depends(require_authenticated_user),
+):
+    """Whether SysManage adds swap to hosts below the memory floor so they
+    can run ClamAV (off until turned on)."""
+    return SwapSetting(enabled=av_swap.enabled())
+
+
+@router.put("/swap", response_model=SwapSetting)
+def put_swap_setting(
+    body: SwapSetting,
+    dependencies=Depends(JWTBearer()),
+    current_user=Depends(require_authenticated_user),
+):
+    """Turn adding swap for the antivirus memory floor on or off."""
+    if not current_user.has_role(SecurityRoles.MANAGE_ANTIVIRUS_DEFAULTS):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"),
+        )
+    av_swap.set_enabled(body.enabled)
+    audit = sessionmaker(
+        autocommit=False, autoflush=False, bind=persistence_db.get_engine()
+    )
+    with audit() as session:
+        AuditService.log_update(
+            session, EntityType.SETTING, av_swap.SETTING,
+            user_id=current_user.id, username=current_user.userid,
+            entity_id=av_swap.SETTING, details={"enabled": body.enabled},
+        )  # fmt: skip
+        session.commit()
+    return SwapSetting(enabled=body.enabled)
 
 
 @router.get("/{os_name}", response_model=AntivirusDefaultResponse)

@@ -93,11 +93,6 @@ class AirgapCollectionRun(Base):
     )
     created_by = Column(
         GUID(),
-        ForeignKey(
-            "user.id",
-            name="fk_airgap_collection_run_created_by",
-            ondelete=_ON_DELETE_SET_NULL,
-        ),
         nullable=True,
     )
 
@@ -311,11 +306,6 @@ class AirgapIngestionRun(Base):
     )
     created_by = Column(
         GUID(),
-        ForeignKey(
-            "user.id",
-            name="fk_airgap_ingestion_run_created_by",
-            ondelete=_ON_DELETE_SET_NULL,
-        ),
         nullable=True,
     )
 

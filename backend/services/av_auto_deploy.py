@@ -35,7 +35,7 @@ from typing import Any, Dict, Optional
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
-from backend.services import av_plan_builder
+from backend.services import av_plan_builder, av_swap
 from backend.utils.host_spread import host_offset
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import CommandType, Message, MessageType
@@ -114,13 +114,18 @@ def os_name_for_defaults(host: Any) -> Optional[str]:
 
 def memory_shortfall(host: Any, package: str) -> Optional[str]:
     """Why ``host`` has too little memory for ``package``, or None if it
-    has enough (or the package has no floor).  Unknown memory is not a
-    shortfall here; callers decide what an unreported size means."""
+    has enough (or the package has no floor).  Swap counts toward the floor
+    (av_swap).  Unknown memory is not a shortfall here; callers decide what
+    an unreported size means."""
     floor = MIN_MEMORY_MB.get(package)
     total = getattr(host, "memory_total_mb", None)
-    if not floor or total is None or total >= floor:
+    if not floor or total is None:
         return None
-    return f"{package} needs at least {floor} MB of memory; host reports {total} MB"
+    swap = getattr(host, "swap_total_mb", None) or 0
+    if total + swap >= floor:
+        return None
+    return (f"{package} needs at least {floor} MB of memory and swap; host reports "
+            f"{total} MB of memory and {swap} MB of swap")  # fmt: skip
 
 
 def queue_deploy(session: Session, host: Any, package: str) -> str:
@@ -192,6 +197,11 @@ def _due(record, now: datetime) -> bool:
     """Whether a host needs a push now."""
     if record is not None and record.status == STATUS_OPTED_OUT:
         return False
+    if record is not None and record.status in (
+        av_swap.STATUS_ADDING,
+        av_swap.STATUS_FAILED,
+    ):
+        return True  # held for swap, and now clear of the floor
     if record is None or record.plan_version < av_plan_builder.PLAN_VERSION:
         return True
     if record.status == STATUS_SUCCEEDED:
@@ -350,7 +360,23 @@ def _summarize(label: str, summary: Dict[str, Any]) -> None:
 _LAST_SUMMARY: Dict[str, Dict[str, Any]] = {}
 
 
-def _classify(host, defaults, records, now):
+def _low_memory(host, package, record, now, add_swap):
+    """``(reason, package)`` for a host below the floor: held (with why), or
+    ``("add_swap", package)`` when SysManage should add its swap now."""
+    if not add_swap:
+        return "low_memory", None
+    held = av_swap.cannot_add(
+        host, av_swap.swap_needed_mb(host, MIN_MEMORY_MB.get(package))
+    )
+    if held:
+        return "low_memory", None
+    waits = av_swap.waiting(record, now)
+    if waits:
+        return waits, None
+    return "add_swap", package
+
+
+def _classify(host, defaults, records, now, add_swap=False):
     """``(reason, package)``: why ``host`` is skipped, or ``("due", pkg)``."""
     if host.approval_status != "approved":
         return "not_approved", None
@@ -369,7 +395,7 @@ def _classify(host, defaults, records, now):
         if getattr(host, "memory_total_mb", None) is None:
             return "memory_unknown", None
         if memory_shortfall(host, package):
-            return "low_memory", None
+            return _low_memory(host, package, record, now, add_swap)
     if _due(record, now):
         return "due", package
     if record.status == STATUS_SUCCEEDED:
@@ -379,10 +405,15 @@ def _classify(host, defaults, records, now):
     return "waiting_result", None
 
 
-def reconcile(session: Session, label: str = "") -> Dict[str, Any]:
-    """Queue deploy plans for this host database's hosts that need one.
-    The caller commits.  Returns (and logs, when it changes) a summary."""
+def reconcile(
+    session: Session, label: str = "", tenant_id: Optional[str] = None
+) -> Dict[str, Any]:
+    """Queue deploy plans for this host database's hosts that need one --
+    or, for a host below the memory floor with the swap setting on, the swap
+    file first (av_swap).  The caller commits.  Returns (and logs, when it
+    changes) a summary."""
     now = _utcnow()
+    add_swap = av_swap.enabled(tenant_id)
     defaults = {
         d.os_name: d.antivirus_package
         for d in session.query(models.AntivirusDefault).all()
@@ -396,7 +427,12 @@ def reconcile(session: Session, label: str = "") -> Dict[str, Any]:
     pushed = []
     for host in session.query(models.Host).all():
         summary["hosts"] += 1
-        reason, package = _classify(host, defaults, records, now)
+        reason, package = _classify(host, defaults, records, now, add_swap)
+        if reason == "add_swap" and len(pushed) < MAX_PUSHES_PER_PASS:
+            size = av_swap.swap_needed_mb(host, MIN_MEMORY_MB.get(package))
+            av_swap.queue(session, host, package, size, now)
+            summary["swap_asked"] = summary.get("swap_asked", 0) + 1
+            continue
         if reason == "due" and len(pushed) >= MAX_PUSHES_PER_PASS:
             reason = "next_wave"  # still due: a later pass takes it
         if reason != "due":
@@ -469,3 +505,23 @@ def _audit(session: Session, pushed) -> None:
             )
     except Exception:  # pylint: disable=broad-except
         logger.exception("Antivirus auto-deploy audit failed")
+
+
+def record_swap_result(session: Session, message_data: Dict[str, Any]) -> bool:
+    """An ``ensure_swap`` answer (av_swap): on success the deploy the host's
+    memory held back is queued at once -- no second request.  False when it
+    answers none of ours.  The caller commits."""
+    now = _utcnow()
+    record = av_swap.record_result(session, message_data, now)
+    if record is None:
+        return False
+    if record.status == av_swap.STATUS_FAILED:
+        return True
+    host = session.get(models.Host, record.host_id)
+    if host is None or not record.antivirus_package:
+        return True
+    command_id = queue_deploy(session, host, record.antivirus_package)
+    _record_push(session, record, host.id, record.antivirus_package, now, command_id)
+    logger.info("Antivirus: swap added on host %s; %s deploy queued",
+                host.id, record.antivirus_package)  # fmt: skip
+    return True

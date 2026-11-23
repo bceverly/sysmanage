@@ -75,7 +75,9 @@ class AccessGroup(Base):
         ForeignKey(_FK_ACCESS_GROUPS_ID, ondelete=_ON_DELETE_SET_NULL),
         nullable=True,
     )
-    created_by = Column(GUID(), ForeignKey(_FK_USER_ID, ondelete=_ON_DELETE_SET_NULL))
+    created_by = Column(
+        GUID(),
+    )
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
@@ -155,7 +157,9 @@ class RegistrationKey(Base):
     use_count = Column(Integer, nullable=False, default=0)
     # expires_at unset means the key never expires.
     expires_at = Column(DateTime, nullable=True)
-    created_by = Column(GUID(), ForeignKey(_FK_USER_ID, ondelete=_ON_DELETE_SET_NULL))
+    created_by = Column(
+        GUID(),
+    )
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     last_used_at = Column(DateTime, nullable=True)
 

@@ -24,7 +24,7 @@ does not constrain re-issuing.
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Column, DateTime, Integer, String, Text
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
@@ -71,7 +71,9 @@ class DynamicSecretLease(Base):
     # generated username.  NEVER stores the secret value itself.
     secret_metadata = Column(JSON, nullable=True)
     # Audit log: who asked + why (free-form note).
-    issued_by = Column(GUID(), ForeignKey("user.id", ondelete="SET NULL"))
+    issued_by = Column(
+        GUID(),
+    )
     note = Column(Text, nullable=True)
 
     def __repr__(self):

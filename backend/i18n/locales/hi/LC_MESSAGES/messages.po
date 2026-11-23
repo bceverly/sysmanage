@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 05:39-0800\n"
+"POT-Creation-Date: 2026-11-22 14:50-0800\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -564,7 +564,7 @@ msgstr "प्रक्रिया स्थिति अद्यतन सं
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:775 backend/api/update_handlers.py:40
+#: backend/api/message_handlers.py:792 backend/api/update_handlers.py:40
 #: backend/api/update_handlers.py:48 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "होस्ट पंजीकृत नहीं है"
@@ -648,11 +648,11 @@ msgstr "कोई OS जानकारी नहीं प्रदान क�
 msgid "Failed to update OS version"
 msgstr "OS भविष्यवाणी का अपडेट वापरे में विफल"
 
-#: backend/api/handlers/os_hardware_handlers.py:576
+#: backend/api/handlers/os_hardware_handlers.py:579
 msgid "hardware_updated"
 msgstr "हार्डवेयर अपडेट किया गया"
 
-#: backend/api/handlers/os_hardware_handlers.py:585
+#: backend/api/handlers/os_hardware_handlers.py:588
 msgid "Failed to update hardware information"
 msgstr "हार्डवेयर सूचना का अपडेट वापरे में विफल"
 
@@ -2851,7 +2851,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr "फाइरवॉल डिप्लोइंट कमेंड सफलतापूर्वक प्रसारित किया गया"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:66
+#: backend/api/antivirus_defaults.py:67
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "OS नाम आवश्यक है"
@@ -2998,21 +2998,21 @@ msgstr ""
 msgid "Agent session refused: client certificate %s"
 msgstr "एजेंट सत्र अस्वीकार किया गया: क्लाइंट प्रमाणपत्र %s"
 
-#: backend/api/message_handlers_core.py:338 backend/api/agent.py:830
+#: backend/api/message_handlers_core.py:346 backend/api/agent.py:830
 msgid "Host registration pending approval"
 msgstr "होस्ट रजिस्ट्रेशन प्रतीक्षा में है"
 
-#: backend/api/message_handlers_core.py:452
+#: backend/api/message_handlers_core.py:460
 msgid "Host auto-approved via child host creation"
 msgstr ""
 "HostException: बच्चा होस्ट निर्माण के माध्यम से होस्ट कॉर्ट अपवीक्षित किया "
 "गया"
 
-#: backend/api/message_handlers_core.py:576
+#: backend/api/message_handlers_core.py:584
 msgid "Agent registered and connected successfully"
 msgstr "एजेंट की पंजीकरण और संपर्क सफलतापूर्वक हुआ"
 
-#: backend/api/message_handlers_core.py:947
+#: backend/api/message_handlers_core.py:955
 msgid "Failed to process heartbeat"
 msgstr "हैर्टबीट प्रोसेस करने में विफल हुए"
 
@@ -3414,47 +3414,48 @@ msgid "This host's agent cannot check that yet; upgrade the agent first"
 msgstr ""
 "इस होस्ट का एजेंट अभी इसकी जाँच नहीं कर सकता; पहले एजेंट को अपग्रेड करें"
 
-#: backend/api/antivirus_defaults.py:68
+#: backend/api/antivirus_defaults.py:69
 msgid "OS name must be 100 characters or less"
 msgstr "OS नाम 100 अक्षरों की सीमा के भीतर होना चाहिए"
 
-#: backend/api/antivirus_defaults.py:81
+#: backend/api/antivirus_defaults.py:82
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "अंटीवायरस पैकेज नाम 255 अक्षर या उससे कम होना चाहिए"
 
-#: backend/api/antivirus_defaults.py:106
+#: backend/api/antivirus_defaults.py:107
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "एंटीवायरस डिफ़ॉल्ट प्राप्त करने में विफलता: %s"
 
-#: backend/api/antivirus_defaults.py:127
+#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
+#: backend/api/antivirus_defaults.py:302
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "प्रवेश नहीं: MANAGE_ANTIVIRUS_DEFAULTS भूमिका की आवश्यकता है"
+
+#: backend/api/antivirus_defaults.py:170
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr "OS: %s के लिए कोई antivirus मानक नहीं पाया गया"
 
-#: backend/api/antivirus_defaults.py:140
+#: backend/api/antivirus_defaults.py:183
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "वायरस रोकने की प्रतिबद्धता मूलभूत सेटिंग लाइब्रेरी खोजने में विफल: %s"
 
-#: backend/api/antivirus_defaults.py:159 backend/api/antivirus_defaults.py:259
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "प्रवेश नहीं: MANAGE_ANTIVIRUS_DEFAULTS भूमिका की आवश्यकता है"
-
-#: backend/api/antivirus_defaults.py:240
+#: backend/api/antivirus_defaults.py:283
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "एन्टीवायरस प्रतिस्थापन का अपडेट वापरे में विफल: %s"
 
-#: backend/api/antivirus_defaults.py:293
+#: backend/api/antivirus_defaults.py:336
 msgid "Antivirus default deleted successfully"
 msgstr "डिफ़ॉल्ट एन्टीवायरस हटा दिया गया सफलतापूर्वक"
 
-#: backend/api/antivirus_defaults.py:295
+#: backend/api/antivirus_defaults.py:338
 msgid "No antivirus default found for this OS"
 msgstr "इस OS के लिए कोई antivirus मानक नहीं पाया गया"
 
-#: backend/api/antivirus_defaults.py:303
+#: backend/api/antivirus_defaults.py:346
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "वायरस निषेधक प्रत्यक्षित मूल्य को हटाने में विफल: %s"
@@ -3843,23 +3844,23 @@ msgstr "पैकेज गिने फ़ालतू हुई: %s"
 msgid "Failed to search packages: %s"
 msgstr "पैकेज खोजने में विफल: %s"
 
-#: backend/api/host.py:235
+#: backend/api/host.py:236
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "प्रवेश नहीं: DELETE_HOST भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:299
+#: backend/api/host.py:300
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "प्रवेश नहीं: VIEW_HOST_DETAILS भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:688
+#: backend/api/host.py:689
 msgid "Host already exists"
 msgstr "होस्ट पहले से मौजूद है"
 
-#: backend/api/host.py:800
+#: backend/api/host.py:801
 msgid "Registration absorbed: host was recently deleted"
 msgstr "रजिस्ट्रेशन अवशोषित: होस्ट पहले से ही हटा दिया गया था"
 
-#: backend/api/host.py:880
+#: backend/api/host.py:881
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -3952,34 +3953,34 @@ msgstr "यह जॉब पहले ही पूरा हो चुका �
 msgid "Cancelled by an operator"
 msgstr "ऑपरेटर द्वारा रद्द किया गया"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:645
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "डायग्नोस्टिक रिजल्ट को प्रोसेस करने में असफल हुआ: %s"
 
-#: backend/api/message_handlers.py:662
+#: backend/api/message_handlers.py:679
 msgid "Missing message_id in command acknowledgment"
 msgstr "कमांड अद्यावरण के लिए message_id नहीं पाया गया या गलत है"
 
-#: backend/api/message_handlers.py:729
+#: backend/api/message_handlers.py:746
 msgid "This session cannot acknowledge another host's message"
 msgstr "यह सत्र किसी अन्य होस्ट के संदेश की पावती नहीं दे सकता"
 
-#: backend/api/message_handlers.py:799
+#: backend/api/message_handlers.py:816
 msgid "Missing installation_id in package installation status"
 msgstr "पैकेज इनस्टलेशन स्थिति में इनस्टॉलेशन ID नहीं पाया गया"
 
-#: backend/api/message_handlers.py:819
+#: backend/api/message_handlers.py:836
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "इनस्टॉलेशन लॉग एंट्री ID: %s के लिए नहीं मिला"
 
-#: backend/api/message_handlers.py:865
+#: backend/api/message_handlers.py:882
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "पैकेज इनस्टल करने की {status} एजेंट {hostname} पर"
 
-#: backend/api/message_handlers.py:894
+#: backend/api/message_handlers.py:911
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "पैकेज इनस्तॉलेशन संतुलन का अपडेट वापरे में विफल: %s"
@@ -4056,19 +4057,19 @@ msgstr "%d पैकेज्स को अनइंस्टल करने �
 msgid "Failed to queue package uninstallation: %s"
 msgstr "पैकेज अनइंस्टॉल करने की कोशिश विफल रही: %s"
 
-#: backend/api/host_data_updates.py:130
+#: backend/api/host_data_updates.py:132
 msgid "Hardware information updated successfully"
 msgstr "हार्डवेयर जानकारी सफलतापूर्वक अपडेट की गई"
 
-#: backend/api/host_data_updates.py:187
+#: backend/api/host_data_updates.py:189
 msgid "Hardware update requested"
 msgstr "हार्डवेयर अपडेट का अनुरोध किया गया"
 
-#: backend/api/host_data_updates.py:313
+#: backend/api/host_data_updates.py:315
 msgid "User access update requested"
 msgstr "उपयोगकर्ता एक्सेस अपडेट का अनुरोध किया गया"
 
-#: backend/api/host_data_updates.py:367
+#: backend/api/host_data_updates.py:369
 msgid "System info update requested"
 msgstr "सिस्टम इनफो अपडेट की गर्ड़ी"
 
@@ -5146,21 +5147,12 @@ msgstr "होस्ट ऑपरेटिंग सिस्टम की प�
 msgid "No antivirus default configured for OS: %s"
 msgstr "OS: %s के लिए कोई antivirus मानक नहीं जारी किया गया है"
 
-#: backend/api/antivirus_status.py:267
-#, python-format
-msgid ""
-"%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
-"MB"
-msgstr ""
-"%(package)s को कम से कम %(needed)d MB मेमोरी चाहिए; इस होस्ट में %(total)d "
-"MB है"
-
-#: backend/api/antivirus_status.py:343
+#: backend/api/antivirus_status.py:346
 #, python-format
 msgid "Antivirus deployment initiated for all %d hosts"
 msgstr "सभी %d होस्ट्स पर एन्टीवायरस इनस्तॉल करना सुरु किया गया"
 
-#: backend/api/antivirus_status.py:346
+#: backend/api/antivirus_status.py:349
 #, python-format
 msgid ""
 "Antivirus deployment initiated for %(success_count)d of %(total_count)d "
@@ -5170,26 +5162,56 @@ msgstr ""
 "\\u0906\\u092a\\u0928\\u0940 \\u0939\\u0948 "
 "\\u092c\\u0947\\u0938\\u094d\\u0924 \\u0915\\u094b %(total_count)d"
 
-#: backend/api/antivirus_status.py:352
+#: backend/api/antivirus_status.py:355
 msgid "Antivirus deployment failed for all hosts"
 msgstr "सभी होस्ट्स के लिए ऐन्टीवायरस डिप्लोइमेंट फ़ैल हो गई"
 
-#: backend/api/antivirus_status.py:424
+#: backend/api/antivirus_status.py:379
+#, python-format
+msgid ""
+"%(package)s needs at least %(needed)d MB of memory and swap; this host has "
+"%(total)d MB of memory and %(swap)d MB of swap"
+msgstr ""
+"%(package)s को कम से कम %(needed)d एमबी मेमोरी और स्वैप की आवश्यकता होती है;"
+" इस होस्ट पर %(total)d एमबी मेमोरी और %(swap)d एमबी स्वैप है"
+
+#: backend/api/antivirus_status.py:389
+msgid ""
+"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+"page, or add memory."
+msgstr ""
+"एंटीवायरस डिफ़ॉल्ट पेज पर नीचे दिखाए गए होस्टों से नीचे की ओर मेमोरी फ़्लोर "
+"तक स्वैप जोड़ें या मेमोरी जोड़ें"
+
+#: backend/api/antivirus_status.py:394
+#, python-format
+msgid "Swap cannot be added: %s"
+msgstr "स्वैप जोड़ा नहीं जा सकता: %s"
+
+#: backend/api/antivirus_status.py:462
 msgid "Antivirus enable command sent successfully"
 msgstr "अंटीवायरस एनेबल कमांड सफलतापूर्वक भेजा गया"
 
-#: backend/api/antivirus_status.py:492
+#: backend/api/antivirus_status.py:530
 msgid "Antivirus disable command sent successfully"
 msgstr "अंटीवायरस डिसेबल कमांड सफलतापूर्वक भेजा गया"
 
-#: backend/api/antivirus_status.py:570
+#: backend/api/antivirus_status.py:608
 msgid "Antivirus remove command sent successfully"
 msgstr "अंटीवायरस दूर करने का कमान सफलतापूर्वक भेजा गया"
 
-#: backend/api/antivirus_status.py:639
+#: backend/api/antivirus_status.py:677
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "वायरस रोकथाम कवरेज प्राप्त करने में विफल: %s"
+
+#: backend/api/antivirus_status.py:718
+msgid "SysManage has not added swap to this host"
+msgstr "SysManage ने इस होस्ट में स्वैप जोड़ा नहीं"
+
+#: backend/api/antivirus_status.py:737
+msgid "Swap removal sent"
+msgstr "स्वैप हटाने का संदेश भेजा गया"
 
 #: backend/api/child_host_utils.py:25
 msgid "Child host engine could not dispatch this request."
@@ -6786,11 +6808,11 @@ msgstr "उस टारगेट के पास अभी भी स्टो
 msgid "Move not found"
 msgstr "मूव नहीं मिला"
 
-#: backend/services/backup_moves.py:589 backend/services/backup_moves.py:609
+#: backend/services/backup_moves.py:618 backend/services/backup_moves.py:638
 msgid "This move's old repository is no longer kept"
 msgstr "इस स्थानांतरण का पुराना रिपॉजिटरी अब नहीं रखा गया है"
 
-#: backend/services/backup_moves.py:596
+#: backend/services/backup_moves.py:625
 #, python-format
 msgid ""
 "The old target seals its backups; this old repository can be removed from %s"
@@ -6913,11 +6935,11 @@ msgstr "वॉल्ट से अवैध प्रतिक्रिया"
 msgid "Invalid secret format"
 msgstr "गुप्त प्रारूप गलत है"
 
-#: backend/services/backup_replicas.py:767
+#: backend/services/backup_replicas.py:773
 msgid "This host has no off-site copy"
 msgstr "इस होस्ट की कोई ऑफ-साइट कॉपी नहीं है"
 
-#: backend/services/backup_replicas.py:769
+#: backend/services/backup_replicas.py:775
 msgid ""
 "The off-site copy cannot be read yet: its storage host has not been told "
 "this host's read token"
@@ -6925,11 +6947,11 @@ msgstr ""
 "ऑफ-साइट कॉपी अभी पढ़ी नहीं जा सकती: उसके स्टोरेज होस्ट को इस होस्ट के रीड "
 "टोकन के बारे में अभी तक बताया नहीं गया है"
 
-#: backend/services/backup_replicas.py:772
+#: backend/services/backup_replicas.py:778
 msgid "That snapshot is not in the off-site copy"
 msgstr "वह स्नैपशॉट ऑफ-साइट कॉपी में नहीं है"
 
-#: backend/services/backup_replicas.py:774
+#: backend/services/backup_replicas.py:780
 msgid "This host's agent cannot read its off-site copy yet; upgrade the agent"
 msgstr ""
 "इस होस्ट का एजेंट अभी अपनी ऑफ-साइट कॉपी नहीं पढ़ सकता; एजेंट को अपग्रेड करें"
@@ -7019,6 +7041,14 @@ msgstr "NetBSD pkgsrc पैकेज की भेद्यताएँ (जि
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "OS संस्करण के अनुसार macOS की भेद्यताएँ, NVD के प्रभावित-संस्करण डेटा से"
+
+#, python-format
+#~ msgid ""
+#~ "%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
+#~ "MB"
+#~ msgstr ""
+#~ "%(package)s को कम से कम %(needed)d MB मेमोरी चाहिए; इस होस्ट में %(total)d "
+#~ "MB है"
 
 #~ msgid ""
 #~ "This host already has backups on its target; it cannot move to another "

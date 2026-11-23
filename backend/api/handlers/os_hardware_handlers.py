@@ -434,6 +434,9 @@ async def handle_hardware_update(  # NOSONAR
         memory_total_mb = message_data.get("memory_total_mb")
         if memory_total_mb is not None:
             hardware_updates["memory_total_mb"] = memory_total_mb
+        swap_total_mb = message_data.get("swap_total_mb")
+        if swap_total_mb is not None:
+            hardware_updates["swap_total_mb"] = swap_total_mb
 
         # Map JSON detail fields
         hardware_details = message_data.get("hardware_details")

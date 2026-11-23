@@ -18,3 +18,14 @@ export const getAntivirusStatus = async (hostId: string): Promise<AntivirusStatu
   const response = await axiosInstance.get<AntivirusStatus | null>(`/api/v1/hosts/${hostId}/antivirus-status`);
   return response.data;
 };
+
+/** The swap SysManage added so the host clears ClamAV's memory floor. */
+export const getAntivirusSwap = async (hostId: string): Promise<number | null> => {
+  const response = await axiosInstance.get<{ swap_added_mb: number | null }>(`/api/v1/hosts/${hostId}/antivirus/swap`);
+  return response.data.swap_added_mb ?? null;
+};
+
+/** Remove the swap file SysManage added for ClamAV. */
+export const removeAntivirusSwap = async (hostId: string): Promise<void> => {
+  await axiosInstance.post(`/api/v1/hosts/${hostId}/antivirus/remove-swap`);
+};

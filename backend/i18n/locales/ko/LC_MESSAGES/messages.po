@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 05:39-0800\n"
+"POT-Creation-Date: 2026-11-22 14:50-0800\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -547,7 +547,7 @@ msgstr "프로세스 상태 업데이트 처리에 실패했습니다: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:775 backend/api/update_handlers.py:40
+#: backend/api/message_handlers.py:792 backend/api/update_handlers.py:40
 #: backend/api/update_handlers.py:48 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "호스트가 등록되지 않음"
@@ -631,11 +631,11 @@ msgstr "OS 정보가 제공되지 않았습니다"
 msgid "Failed to update OS version"
 msgstr "OS 버전을 업데이트할 수 없습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:576
+#: backend/api/handlers/os_hardware_handlers.py:579
 msgid "hardware_updated"
 msgstr "하드웨어가 업데이트되었습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:585
+#: backend/api/handlers/os_hardware_handlers.py:588
 msgid "Failed to update hardware information"
 msgstr "하드웨어 정보를 업데이트하는 데 실패했습니다"
 
@@ -2750,7 +2750,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr "방화벽 배포 명령을 성공적으로 전송했습니다"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:66
+#: backend/api/antivirus_defaults.py:67
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "OS 이름은 필수 항목입니다"
@@ -2893,19 +2893,19 @@ msgstr ""
 msgid "Agent session refused: client certificate %s"
 msgstr "에이전트 세션 거부됨: 클라이언트 인증서 %s"
 
-#: backend/api/message_handlers_core.py:338 backend/api/agent.py:830
+#: backend/api/message_handlers_core.py:346 backend/api/agent.py:830
 msgid "Host registration pending approval"
 msgstr "호스트 등록 승인 대기 중입니다."
 
-#: backend/api/message_handlers_core.py:452
+#: backend/api/message_handlers_core.py:460
 msgid "Host auto-approved via child host creation"
 msgstr "호스트 자동 승인됨(자식 호스트 생성 시)"
 
-#: backend/api/message_handlers_core.py:576
+#: backend/api/message_handlers_core.py:584
 msgid "Agent registered and connected successfully"
 msgstr "_AGENT이 성공적으로 등록되고 연결됨_"
 
-#: backend/api/message_handlers_core.py:947
+#: backend/api/message_handlers_core.py:955
 msgid "Failed to process heartbeat"
 msgstr "심장 박동 처리에 실패했습니다"
 
@@ -3287,47 +3287,48 @@ msgstr "이 호스트는 백업을 실행할 수 없습니다: %s"
 msgid "This host's agent cannot check that yet; upgrade the agent first"
 msgstr "이 호스트의 에이전트는 아직 이를 확인할 수 없습니다. 먼저 에이전트를 업그레이드하세요"
 
-#: backend/api/antivirus_defaults.py:68
+#: backend/api/antivirus_defaults.py:69
 msgid "OS name must be 100 characters or less"
 msgstr "OS 이름은 100자 이하여야 합니다"
 
-#: backend/api/antivirus_defaults.py:81
+#: backend/api/antivirus_defaults.py:82
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "_ANTIVIRUS 패키지 이름은 255자 이내이어야 합니다"
 
-#: backend/api/antivirus_defaults.py:106
+#: backend/api/antivirus_defaults.py:107
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "_ANTIVIRUS_DEFAULTS_ 가져오기에 실패했습니다: %s"
 
-#: backend/api/antivirus_defaults.py:127
+#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
+#: backend/api/antivirus_defaults.py:302
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "퍼미션 denied: MANAGE_ANTIVIRUS_DEFAULTS 역할 필요"
+
+#: backend/api/antivirus_defaults.py:170
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr "OS에 대한 기본_antivirus_설정이 없습니다: %s"
 
-#: backend/api/antivirus_defaults.py:140
+#: backend/api/antivirus_defaults.py:183
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "_ANTIVIRUS_DEFAULT_ 가져오기에 실패했습니다: %s"
 
-#: backend/api/antivirus_defaults.py:159 backend/api/antivirus_defaults.py:259
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "퍼미션 denied: MANAGE_ANTIVIRUS_DEFAULTS 역할 필요"
-
-#: backend/api/antivirus_defaults.py:240
+#: backend/api/antivirus_defaults.py:283
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "_ANTIVIRUS_DEFAULTS_UPDATE_FAILED_: %s"
 
-#: backend/api/antivirus_defaults.py:293
+#: backend/api/antivirus_defaults.py:336
 msgid "Antivirus default deleted successfully"
 msgstr "_ANTIVIRUS_DEFAULT_SUCCESSFULLY 삭제됨"
 
-#: backend/api/antivirus_defaults.py:295
+#: backend/api/antivirus_defaults.py:338
 msgid "No antivirus default found for this OS"
 msgstr "이 운영 체제에 대한 기본_ANTIVIRUS_설정을 찾을 수 없습니다"
 
-#: backend/api/antivirus_defaults.py:303
+#: backend/api/antivirus_defaults.py:346
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "디폴트 악성코드 제거 프로그램 삭제 실패: %s"
@@ -3702,23 +3703,23 @@ msgstr "패키지 개수 세는 데 실패했습니다: %s"
 msgid "Failed to search packages: %s"
 msgstr "패키지 검색 실패: %s"
 
-#: backend/api/host.py:235
+#: backend/api/host.py:236
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "퍼미션 denied: DELETE_HOST 역할 필요"
 
-#: backend/api/host.py:299
+#: backend/api/host.py:300
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "퍼미션 denied: VIEW_HOST_DETAILS 역할 필요"
 
-#: backend/api/host.py:688
+#: backend/api/host.py:689
 msgid "Host already exists"
 msgstr "호스트가 이미 존재합니다"
 
-#: backend/api/host.py:800
+#: backend/api/host.py:801
 msgid "Registration absorbed: host was recently deleted"
 msgstr "등록 흡수: 호스트가 최근에 삭제되었습니다"
 
-#: backend/api/host.py:880
+#: backend/api/host.py:881
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -3809,34 +3810,34 @@ msgstr "이 작업은 이미 완료되었습니다."
 msgid "Cancelled by an operator"
 msgstr "운영자에 의해 취소되었습니다."
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:645
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "진단 결과 처리에 실패했습니다: %s"
 
-#: backend/api/message_handlers.py:662
+#: backend/api/message_handlers.py:679
 msgid "Missing message_id in command acknowledgment"
 msgstr "message_id가 누락된 명령 확인 응답"
 
-#: backend/api/message_handlers.py:729
+#: backend/api/message_handlers.py:746
 msgid "This session cannot acknowledge another host's message"
 msgstr "이 세션은 다른 호스트의 메시지를 확인할 수 없습니다"
 
-#: backend/api/message_handlers.py:799
+#: backend/api/message_handlers.py:816
 msgid "Missing installation_id in package installation status"
 msgstr "installation_id가 누락된 패키지 설치 상태"
 
-#: backend/api/message_handlers.py:819
+#: backend/api/message_handlers.py:836
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "ID: %s에 대한 설치 로그 항목을 찾을 수 없습니다."
 
-#: backend/api/message_handlers.py:865
+#: backend/api/message_handlers.py:882
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Agent {hostname}의 패키지 설치 상태: {status}"
 
-#: backend/api/message_handlers.py:894
+#: backend/api/message_handlers.py:911
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "패키지 설치 상태를 업데이트하는 데 실패했습니다: %s"
@@ -3909,19 +3910,19 @@ msgstr "%d개 패키지를 제거 대기열에 추가했습니다"
 msgid "Failed to queue package uninstallation: %s"
 msgstr "_PACKAGE_UNINSTALLATION_ 명령을 대기열에 추가하는 데 실패했습니다: %s"
 
-#: backend/api/host_data_updates.py:130
+#: backend/api/host_data_updates.py:132
 msgid "Hardware information updated successfully"
 msgstr "하드웨어 정보가 성공적으로 업데이트되었습니다"
 
-#: backend/api/host_data_updates.py:187
+#: backend/api/host_data_updates.py:189
 msgid "Hardware update requested"
 msgstr "하드웨어 업데이트가 요청되었습니다"
 
-#: backend/api/host_data_updates.py:313
+#: backend/api/host_data_updates.py:315
 msgid "User access update requested"
 msgstr "사용자 액세스 업데이트가 요청되었습니다"
 
-#: backend/api/host_data_updates.py:367
+#: backend/api/host_data_updates.py:369
 msgid "System info update requested"
 msgstr "시스템 정보 업데이트 요청됨"
 
@@ -4936,46 +4937,66 @@ msgstr "호스트 운영 체제를 확인할 수 없습니다"
 msgid "No antivirus default configured for OS: %s"
 msgstr "OS용 기본_antivirus_설정이 없습니다: %s"
 
-#: backend/api/antivirus_status.py:267
-#, python-format
-msgid ""
-"%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
-"MB"
-msgstr ""
-"%(package)s에는 최소 %(needed)d MB의 메모리가 필요합니다. 이 호스트의 메모리는 %(total)d MB입니다"
-
-#: backend/api/antivirus_status.py:343
+#: backend/api/antivirus_status.py:346
 #, python-format
 msgid "Antivirus deployment initiated for all %d hosts"
 msgstr "전체 %d 호스트에 대한 안티바이러스 배포가 시작되었습니다"
 
-#: backend/api/antivirus_status.py:346
+#: backend/api/antivirus_status.py:349
 #, python-format
 msgid ""
 "Antivirus deployment initiated for %(success_count)d of %(total_count)d "
 "hosts"
 msgstr "%(success_count)d 개의 %(total_count)d 호스트에 대한 Antivirus 배포 시작됨"
 
-#: backend/api/antivirus_status.py:352
+#: backend/api/antivirus_status.py:355
 msgid "Antivirus deployment failed for all hosts"
 msgstr "_ANTIVIRUS 배포가 모든 호스트에서 실패했습니다"
 
-#: backend/api/antivirus_status.py:424
+#: backend/api/antivirus_status.py:379
+#, python-format
+msgid ""
+"%(package)s needs at least %(needed)d MB of memory and swap; this host has "
+"%(total)d MB of memory and %(swap)d MB of swap"
+msgstr ""
+"%(package)s에는 메모리와 스왑을 합쳐 최소 %(needed)d MB가 필요합니다. 이 호스트의 메모리는 %(total)d MB,"
+" 스왑은 %(swap)d MB입니다"
+
+#: backend/api/antivirus_status.py:389
+msgid ""
+"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+"page, or add memory."
+msgstr "안티바이러스 기본 설정 페이지에서 아래의 호스트 메모리 바닥선 이하로 스왑을 추가하거나 메모리를 추가하십시오."
+
+#: backend/api/antivirus_status.py:394
+#, python-format
+msgid "Swap cannot be added: %s"
+msgstr "스왑을 추가할 수 없습니다: %s"
+
+#: backend/api/antivirus_status.py:462
 msgid "Antivirus enable command sent successfully"
 msgstr "_ANTIVIRUS ENABLE 명령이 성공적으로 전송됨"
 
-#: backend/api/antivirus_status.py:492
+#: backend/api/antivirus_status.py:530
 msgid "Antivirus disable command sent successfully"
 msgstr "안티바이러스 비활성화 명령을 전송했습니다"
 
-#: backend/api/antivirus_status.py:570
+#: backend/api/antivirus_status.py:608
 msgid "Antivirus remove command sent successfully"
 msgstr "_ANTIVIRUS 삭제 명령이 성공적으로 전송되었습니다."
 
-#: backend/api/antivirus_status.py:639
+#: backend/api/antivirus_status.py:677
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "_ANTIVIRUS_ 커버리지 가져오기에 실패했습니다: %s"
+
+#: backend/api/antivirus_status.py:718
+msgid "SysManage has not added swap to this host"
+msgstr "SysManage는 이 호스트에 스왑을 추가하지 않았습니다"
+
+#: backend/api/antivirus_status.py:737
+msgid "Swap removal sent"
+msgstr "스왑 제거 요청됨"
 
 #: backend/api/child_host_utils.py:25
 msgid "Child host engine could not dispatch this request."
@@ -6496,11 +6517,11 @@ msgstr "그 대상은 아직 저장 호스트가 없습니다."
 msgid "Move not found"
 msgstr "이동을 찾을 수 없습니다."
 
-#: backend/services/backup_moves.py:589 backend/services/backup_moves.py:609
+#: backend/services/backup_moves.py:618 backend/services/backup_moves.py:638
 msgid "This move's old repository is no longer kept"
 msgstr "이 이동의 이전 저장소는 더 이상 보관되지 않습니다"
 
-#: backend/services/backup_moves.py:596
+#: backend/services/backup_moves.py:625
 #, python-format
 msgid ""
 "The old target seals its backups; this old repository can be removed from %s"
@@ -6617,21 +6638,21 @@ msgstr "vault에서 잘못된 응답"
 msgid "Invalid secret format"
 msgstr "비밀 형식이 잘못되었습니다"
 
-#: backend/services/backup_replicas.py:767
+#: backend/services/backup_replicas.py:773
 msgid "This host has no off-site copy"
 msgstr "이 호스트는 오프사이트 복사본이 없습니다."
 
-#: backend/services/backup_replicas.py:769
+#: backend/services/backup_replicas.py:775
 msgid ""
 "The off-site copy cannot be read yet: its storage host has not been told "
 "this host's read token"
 msgstr "오프사이트 복사본을 아직 읽을 수 없습니다: 해당 스토리지 호스트가 이 호스트의 읽기 토큰을 아직 전달받지 못했습니다"
 
-#: backend/services/backup_replicas.py:772
+#: backend/services/backup_replicas.py:778
 msgid "That snapshot is not in the off-site copy"
 msgstr "그 스냅샷은 오프사이트 복사본에 없습니다."
 
-#: backend/services/backup_replicas.py:774
+#: backend/services/backup_replicas.py:780
 msgid "This host's agent cannot read its off-site copy yet; upgrade the agent"
 msgstr "이 호스트의 에이전트는 아직 오프사이트 복사본을 읽을 수 없습니다; 에이전트를 업그레이드하십시오."
 
@@ -6716,6 +6737,13 @@ msgstr "NetBSD pkgsrc 패키지 취약점(pkg_admin audit가 읽는 데이터)"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS 버전별 macOS 취약점(NVD의 영향받는 버전 데이터 기준)"
+
+#, python-format
+#~ msgid ""
+#~ "%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
+#~ "MB"
+#~ msgstr ""
+#~ "%(package)s에는 최소 %(needed)d MB의 메모리가 필요합니다. 이 호스트의 메모리는 %(total)d MB입니다"
 
 #~ msgid ""
 #~ "This host already has backups on its target; it cannot move to another "

@@ -303,3 +303,9 @@ autoUpdates.fleet.hosts
 # Hand-reviewed.
 de,it,nl,pt: assetDiscovery.type.tablet
 nl: assetDiscovery.type.camera
+
+# "Swap" is the German and French term too (German Linux and Windows UIs
+# say "Swap" / "Swap-Speicher"; French Linux docs say "le swap", which reads
+# better than "Échange").  Scoped to de and fr.
+de: hostDetail.swap
+fr: hostDetail.swap

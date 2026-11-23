@@ -26,7 +26,7 @@ States:
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, String, Text
+from sqlalchemy import BigInteger, Column, DateTime, String, Text
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
@@ -103,6 +103,4 @@ class AirGapBundle(Base):
     # The user who triggered the build.  Nullable because the recovery
     # config-admin account has no DB row (and is allowed to trigger
     # bundles for bootstrap scenarios).
-    created_by_user_id = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    created_by_user_id = Column(GUID(), nullable=True)

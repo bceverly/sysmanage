@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 05:39-0800\n"
+"POT-Creation-Date: 2026-11-22 14:50-0800\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -542,7 +542,7 @@ msgstr "處理程序狀態更新失敗：%s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:775 backend/api/update_handlers.py:40
+#: backend/api/message_handlers.py:792 backend/api/update_handlers.py:40
 #: backend/api/update_handlers.py:48 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "主機未註冊"
@@ -626,11 +626,11 @@ msgstr "未提供操作系統信息"
 msgid "Failed to update OS version"
 msgstr "更新作業系統版本失敗"
 
-#: backend/api/handlers/os_hardware_handlers.py:576
+#: backend/api/handlers/os_hardware_handlers.py:579
 msgid "hardware_updated"
 msgstr "硬體已更新"
 
-#: backend/api/handlers/os_hardware_handlers.py:585
+#: backend/api/handlers/os_hardware_handlers.py:588
 msgid "Failed to update hardware information"
 msgstr "更新硬體資訊失敗"
 
@@ -2721,7 +2721,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr "防火牆部署命令已成功發送"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:66
+#: backend/api/antivirus_defaults.py:67
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "需要指定作業系統名稱"
@@ -2861,19 +2861,19 @@ msgstr "此代理程式未證明自己是此主機。如果主機已重新安裝
 msgid "Agent session refused: client certificate %s"
 msgstr "代理工作階段遭拒絕：用戶端憑證 %s"
 
-#: backend/api/message_handlers_core.py:338 backend/api/agent.py:830
+#: backend/api/message_handlers_core.py:346 backend/api/agent.py:830
 msgid "Host registration pending approval"
 msgstr "主機註冊待批准"
 
-#: backend/api/message_handlers_core.py:452
+#: backend/api/message_handlers_core.py:460
 msgid "Host auto-approved via child host creation"
 msgstr "主機自動批准通過子主機建立"
 
-#: backend/api/message_handlers_core.py:576
+#: backend/api/message_handlers_core.py:584
 msgid "Agent registered and connected successfully"
 msgstr "Agent 註冊並成功連接"
 
-#: backend/api/message_handlers_core.py:947
+#: backend/api/message_handlers_core.py:955
 msgid "Failed to process heartbeat"
 msgstr "無法處理心跳"
 
@@ -3251,47 +3251,48 @@ msgstr "此主機無法執行備份：%s"
 msgid "This host's agent cannot check that yet; upgrade the agent first"
 msgstr "此主機的代理程式尚無法檢查此項；請先升級代理程式"
 
-#: backend/api/antivirus_defaults.py:68
+#: backend/api/antivirus_defaults.py:69
 msgid "OS name must be 100 characters or less"
 msgstr "作業系統名稱必須少於100個字符"
 
-#: backend/api/antivirus_defaults.py:81
+#: backend/api/antivirus_defaults.py:82
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "防病毒包名稱必須少於或等於 255 個字符"
 
-#: backend/api/antivirus_defaults.py:106
+#: backend/api/antivirus_defaults.py:107
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "無法檢索防毒默認設置：%s"
 
-#: backend/api/antivirus_defaults.py:127
+#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
+#: backend/api/antivirus_defaults.py:302
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "權限 denied: MANAGE_ANTIVIRUS_DEFAULTS 角色所需"
+
+#: backend/api/antivirus_defaults.py:170
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr "找不到該操作系統的防病毒默認值：%s"
 
-#: backend/api/antivirus_defaults.py:140
+#: backend/api/antivirus_defaults.py:183
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "無法檢索防毒默認值：%s"
 
-#: backend/api/antivirus_defaults.py:159 backend/api/antivirus_defaults.py:259
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "權限 denied: MANAGE_ANTIVIRUS_DEFAULTS 角色所需"
-
-#: backend/api/antivirus_defaults.py:240
+#: backend/api/antivirus_defaults.py:283
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "更新防毒預設值失敗：%s"
 
-#: backend/api/antivirus_defaults.py:293
+#: backend/api/antivirus_defaults.py:336
 msgid "Antivirus default deleted successfully"
 msgstr "成功刪除預設防病毒程序"
 
-#: backend/api/antivirus_defaults.py:295
+#: backend/api/antivirus_defaults.py:338
 msgid "No antivirus default found for this OS"
 msgstr "找不到此操作系統的防病毒默認值"
 
-#: backend/api/antivirus_defaults.py:303
+#: backend/api/antivirus_defaults.py:346
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "刪除防毒預設值時失敗：%s"
@@ -3660,23 +3661,23 @@ msgstr "計算套件數量時失敗：%s"
 msgid "Failed to search packages: %s"
 msgstr "無法搜尋套件：%s"
 
-#: backend/api/host.py:235
+#: backend/api/host.py:236
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "權限被拒絕：需要 DELETE_HOST 角色"
 
-#: backend/api/host.py:299
+#: backend/api/host.py:300
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "權限 denied: VIEW_HOST_DETAILS 角色所需"
 
-#: backend/api/host.py:688
+#: backend/api/host.py:689
 msgid "Host already exists"
 msgstr "主機已存在"
 
-#: backend/api/host.py:800
+#: backend/api/host.py:801
 msgid "Registration absorbed: host was recently deleted"
 msgstr "註冊被吸收：主機最近已被刪除"
 
-#: backend/api/host.py:880
+#: backend/api/host.py:881
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -3767,34 +3768,34 @@ msgstr "此工作已經完成"
 msgid "Cancelled by an operator"
 msgstr "由操作員取消"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:645
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "無法處理診斷結果：%s"
 
-#: backend/api/message_handlers.py:662
+#: backend/api/message_handlers.py:679
 msgid "Missing message_id in command acknowledgment"
 msgstr "缺少消息ID在命令確認中"
 
-#: backend/api/message_handlers.py:729
+#: backend/api/message_handlers.py:746
 msgid "This session cannot acknowledge another host's message"
 msgstr "此工作階段無法確認其他主機的訊息"
 
-#: backend/api/message_handlers.py:799
+#: backend/api/message_handlers.py:816
 msgid "Missing installation_id in package installation status"
 msgstr "缺少安裝ID在包安裝狀態中"
 
-#: backend/api/message_handlers.py:819
+#: backend/api/message_handlers.py:836
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "未找到 ID 為 %s 的安裝日誌條目"
 
-#: backend/api/message_handlers.py:865
+#: backend/api/message_handlers.py:882
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "代理程式 {hostname} 上的包安裝 {status}"
 
-#: backend/api/message_handlers.py:894
+#: backend/api/message_handlers.py:911
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "更新套件安裝狀態失敗：%s"
@@ -3867,19 +3868,19 @@ msgstr "已成功排隊等待卸載 %d 個套件"
 msgid "Failed to queue package uninstallation: %s"
 msgstr "無法將套件卸載命令加入佇列：%s"
 
-#: backend/api/host_data_updates.py:130
+#: backend/api/host_data_updates.py:132
 msgid "Hardware information updated successfully"
 msgstr "硬體資訊更新成功"
 
-#: backend/api/host_data_updates.py:187
+#: backend/api/host_data_updates.py:189
 msgid "Hardware update requested"
 msgstr "已請求硬體更新"
 
-#: backend/api/host_data_updates.py:313
+#: backend/api/host_data_updates.py:315
 msgid "User access update requested"
 msgstr "已請求使用者存取更新"
 
-#: backend/api/host_data_updates.py:367
+#: backend/api/host_data_updates.py:369
 msgid "System info update requested"
 msgstr "系統信息更新請求"
 
@@ -4883,45 +4884,66 @@ msgstr "無法確定主機的操作系統"
 msgid "No antivirus default configured for OS: %s"
 msgstr "沒有為此操作系統配置防病毒默認值：%s"
 
-#: backend/api/antivirus_status.py:267
-#, python-format
-msgid ""
-"%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
-"MB"
-msgstr "%(package)s 至少需要 %(needed)d MB 記憶體；此主機只有 %(total)d MB"
-
-#: backend/api/antivirus_status.py:343
+#: backend/api/antivirus_status.py:346
 #, python-format
 msgid "Antivirus deployment initiated for all %d hosts"
 msgstr "已啟動對所有 %d 個主機的防病毒部署"
 
-#: backend/api/antivirus_status.py:346
+#: backend/api/antivirus_status.py:349
 #, python-format
 msgid ""
 "Antivirus deployment initiated for %(success_count)d of %(total_count)d "
 "hosts"
 msgstr "已為 %(success_count)d of %(total_count)d 主機部署防毒軟件"
 
-#: backend/api/antivirus_status.py:352
+#: backend/api/antivirus_status.py:355
 msgid "Antivirus deployment failed for all hosts"
 msgstr "所有主機上的防病毒部署失敗"
 
-#: backend/api/antivirus_status.py:424
+#: backend/api/antivirus_status.py:379
+#, python-format
+msgid ""
+"%(package)s needs at least %(needed)d MB of memory and swap; this host has "
+"%(total)d MB of memory and %(swap)d MB of swap"
+msgstr ""
+"這個 %(package)s 需要至少 %(needed)d MB 的記憶體和交換空間；此主機有 %(total)d MB 的記憶體和 %(swap)d"
+" MB 的交換空間"
+
+#: backend/api/antivirus_status.py:389
+msgid ""
+"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+"page, or add memory."
+msgstr "請在防病毒預設頁面啟用向下調整至記憶體地板的主機添加交換空間，或增加記憶體。"
+
+#: backend/api/antivirus_status.py:394
+#, python-format
+msgid "Swap cannot be added: %s"
+msgstr "無法新增交換空間：%s"
+
+#: backend/api/antivirus_status.py:462
 msgid "Antivirus enable command sent successfully"
 msgstr "成功發送啟用防病毒命令"
 
-#: backend/api/antivirus_status.py:492
+#: backend/api/antivirus_status.py:530
 msgid "Antivirus disable command sent successfully"
 msgstr "成功發送禁用防病毒命令"
 
-#: backend/api/antivirus_status.py:570
+#: backend/api/antivirus_status.py:608
 msgid "Antivirus remove command sent successfully"
 msgstr "成功發送刪除防病毒命令"
 
-#: backend/api/antivirus_status.py:639
+#: backend/api/antivirus_status.py:677
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "無法檢索防毒覆蓋範圍：%s"
+
+#: backend/api/antivirus_status.py:718
+msgid "SysManage has not added swap to this host"
+msgstr "SysManage 並未為此主機添加交換記憶體"
+
+#: backend/api/antivirus_status.py:737
+msgid "Swap removal sent"
+msgstr "已發送移除交換記憶體指令"
 
 #: backend/api/child_host_utils.py:25
 msgid "Child host engine could not dispatch this request."
@@ -6429,11 +6451,11 @@ msgstr "該目標尚未設定儲存主機"
 msgid "Move not found"
 msgstr "未找到移動"
 
-#: backend/services/backup_moves.py:589 backend/services/backup_moves.py:609
+#: backend/services/backup_moves.py:618 backend/services/backup_moves.py:638
 msgid "This move's old repository is no longer kept"
 msgstr "此次移動的舊存儲庫已不再保留"
 
-#: backend/services/backup_moves.py:596
+#: backend/services/backup_moves.py:625
 #, python-format
 msgid ""
 "The old target seals its backups; this old repository can be removed from %s"
@@ -6550,21 +6572,21 @@ msgstr "從 vault 收到的回應無效"
 msgid "Invalid secret format"
 msgstr "密鑰格式無效"
 
-#: backend/services/backup_replicas.py:767
+#: backend/services/backup_replicas.py:773
 msgid "This host has no off-site copy"
 msgstr "此主機沒有異地副本"
 
-#: backend/services/backup_replicas.py:769
+#: backend/services/backup_replicas.py:775
 msgid ""
 "The off-site copy cannot be read yet: its storage host has not been told "
 "this host's read token"
 msgstr "異地副本暫時無法讀取：其儲存主機尚未獲知此主機的讀取令牌"
 
-#: backend/services/backup_replicas.py:772
+#: backend/services/backup_replicas.py:778
 msgid "That snapshot is not in the off-site copy"
 msgstr "該快照不在異地副本中"
 
-#: backend/services/backup_replicas.py:774
+#: backend/services/backup_replicas.py:780
 msgid "This host's agent cannot read its off-site copy yet; upgrade the agent"
 msgstr "此主機的代理程式尚無法讀取其異地副本；請升級代理程式"
 
@@ -6644,6 +6666,12 @@ msgstr "NetBSD pkgsrc 套件弱點（pkg_admin audit 讀取的資料）"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "依作業系統版本列出的 macOS 弱點（來自 NVD 的受影響版本資料）"
+
+#, python-format
+#~ msgid ""
+#~ "%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
+#~ "MB"
+#~ msgstr "%(package)s 至少需要 %(needed)d MB 記憶體；此主機只有 %(total)d MB"
 
 #~ msgid ""
 #~ "This host already has backups on its target; it cannot move to another "

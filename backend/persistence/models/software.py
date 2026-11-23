@@ -550,12 +550,7 @@ class DefaultRepository(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
-    created_by = Column(
-        GUID(), ForeignKey(USER_ID_FK, ondelete=SET_NULL_ACTION), nullable=True
-    )
-
-    # Relationship to User
-    creator = relationship("User", foreign_keys=[created_by])
+    created_by = Column(GUID(), nullable=True)  # soft ref to user.id
 
     def __repr__(self):
         return (
@@ -582,12 +577,7 @@ class EnabledPackageManager(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
-    created_by = Column(
-        GUID(), ForeignKey(USER_ID_FK, ondelete=SET_NULL_ACTION), nullable=True
-    )
-
-    # Relationship to User
-    creator = relationship("User", foreign_keys=[created_by])
+    created_by = Column(GUID(), nullable=True)  # soft ref to user.id
 
     # Unique constraint on os_name + package_manager
     __table_args__ = (
@@ -618,17 +608,11 @@ class FirewallRole(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
-    created_by = Column(
-        GUID(), ForeignKey(USER_ID_FK, ondelete=SET_NULL_ACTION), nullable=True
-    )
+    created_by = Column(GUID(), nullable=True)
     updated_at = Column(DateTime, nullable=True)
-    updated_by = Column(
-        GUID(), ForeignKey(USER_ID_FK, ondelete=SET_NULL_ACTION), nullable=True
-    )
+    updated_by = Column(GUID(), nullable=True)
 
     # Relationships
-    creator = relationship("User", foreign_keys=[created_by])
-    updater = relationship("User", foreign_keys=[updated_by])
     open_ports = relationship(
         "FirewallRoleOpenPort",
         back_populates="firewall_role",
@@ -712,14 +696,11 @@ class HostFirewallRole(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
-    created_by = Column(
-        GUID(), ForeignKey(USER_ID_FK, ondelete=SET_NULL_ACTION), nullable=True
-    )
+    created_by = Column(GUID(), nullable=True)
 
     # Relationships
     host = relationship("Host", back_populates="firewall_roles")
     firewall_role = relationship("FirewallRole", back_populates="host_assignments")
-    creator = relationship("User", foreign_keys=[created_by])
 
     def __repr__(self):
         return (

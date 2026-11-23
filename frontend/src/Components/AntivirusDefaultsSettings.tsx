@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
+import AntivirusSwapSetting from './AntivirusSwapSetting';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
 interface AntivirusDefault {
@@ -330,6 +331,8 @@ const AntivirusDefaultsSettings: React.FC = () => {
           </Stack>
         </CardContent>
       </Card>
+
+      <AntivirusSwapSetting canManage={canManageAntivirusDefaults} />
 
       {/* Snackbar for notifications */}
       <Snackbar

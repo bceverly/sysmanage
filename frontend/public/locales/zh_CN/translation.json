@@ -303,7 +303,17 @@
     "save": "保存",
     "saveSuccess": "防病毒默认设置保存成功",
     "selectProgram": "选择防病毒程序",
-    "title": "防病毒"
+    "title": "防病毒",
+    "swap": {
+      "help": "ClamAV 需要内存与交换空间合计约 3.5 GB，不会部署到低于此值的主机上。开启此选项后，SysManage 会先为这样的 Linux 或 BSD 主机添加一个交换文件（以整 GB 计，最多 8 GB，绝不放在 ZFS 或 btrfs 上，并且只在磁盘仍留有足够空闲空间时添加），然后部署 ClamAV。",
+      "label": "为内存不足以运行 ClamAV 的主机添加交换空间",
+      "saveError": "设置无法保存",
+      "title": "内存量小的主机",
+      "added": "SysManage 为此主机添加了 {{size}} GB 的交换空间用于 ClamAV。",
+      "remove": "删除交换空间",
+      "removeError": "无法删除交换文件。",
+      "removing": "正在删除交换文件。"
+    }
   },
   "apiKeys": {
     "active": "活动",
@@ -1822,7 +1832,9 @@
       "generic": "请登录到主机，使用主机的包管理器重新安装代理包，然后启动代理服务。",
       "runCommands": "请登录到主机并运行以下命令以完成升级并启动代理：",
       "title": "代理在自身升级过程中丢失"
-    }
+    },
+    "noSwap": "无",
+    "swap": "交换空间"
   },
   "hostGroup": {
     "add": "添加",

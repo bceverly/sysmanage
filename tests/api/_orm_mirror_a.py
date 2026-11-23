@@ -109,6 +109,9 @@ class Host(TestBase):
     memory_total_mb = Column(
         Integer, nullable=True
     )  # Using Integer instead of BigInteger
+    swap_total_mb = Column(
+        Integer, nullable=True
+    )  # Integer like memory_total_mb (SQLite)
     storage_details = Column(
         String, nullable=True
     )  # Using String instead of Text for SQLite
@@ -708,9 +711,7 @@ class EnabledPackageManager(TestBase):
     created_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
-    created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    created_by = Column(GUID(), nullable=True)
 
 
 # Create test version of FirewallRole model for SQLite compatibility
@@ -723,13 +724,9 @@ class FirewallRole(TestBase):
         nullable=False,
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
-    created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    created_by = Column(GUID(), nullable=True)
     updated_at = Column(DateTime, nullable=True)
-    updated_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    updated_by = Column(GUID(), nullable=True)
     # Relationships
     open_ports = relationship(
         "FirewallRoleOpenPort",
@@ -782,9 +779,7 @@ class HostFirewallRole(TestBase):
         nullable=False,
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
-    created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    created_by = Column(GUID(), nullable=True)
     # Relationships
     host = relationship("Host", back_populates="firewall_roles")
     firewall_role = relationship("FirewallRole", back_populates="host_assignments")

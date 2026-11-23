@@ -349,6 +349,23 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
 
         return await handle_quarantine_result(db, connection, message_data)
 
+    # The antivirus memory floor: the swap SysManage asked for is made, so the
+    # deploy it held back goes out now (av_swap).
+    if (
+        command_type_of(message_data) == "ensure_swap"
+        or command_type_from_queue(db, message_data) == "ensure_swap"
+    ):
+        from backend.services import av_auto_deploy  # noqa: PLC0415
+
+        try:
+            if av_auto_deploy.record_swap_result(db, message_data):
+                db.commit()
+        except Exception:  # pylint: disable=broad-except
+            db.rollback()
+            logger.exception("Antivirus swap result could not be recorded for %s",
+                             getattr(connection, "hostname", "unknown"))  # fmt: skip
+        return None
+
     # Phase 21.3 antivirus auto-deploy: an automatic deploy is done only when
     # the agent says its plan succeeded.  Recorded, then normal handling
     # continues (a Deploy-button plan matches no record and is untouched).

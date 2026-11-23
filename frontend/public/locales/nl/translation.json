@@ -303,7 +303,17 @@
     "save": "Opslaan",
     "saveSuccess": "Antivirusstandaardinstellingen succesvol opgeslagen",
     "selectProgram": "Selecteer antivirusprogramma",
-    "title": "Anti-virus"
+    "title": "Anti-virus",
+    "swap": {
+      "help": "ClamAV heeft ongeveer 3,5 GB geheugen en swap nodig gecombineerd, en is niet geïmplementeerd op een host met minder. Met deze instelling voegt SysManage eerst een swap-bestand toe aan zo'n Linux of BSD-host (in hele GB's, maximaal 8 GB, nooit op ZFS of btrfs, en alleen waar voldoende schijfruimte vrij blijft), waarna ClamAV wordt geïmplementeerd.",
+      "label": "Voeg swap toe aan hosts met te weinig geheugen voor ClamAV",
+      "saveError": "De instelling kon niet worden opgeslagen.",
+      "title": "Hosts met weinig geheugen",
+      "added": "SysManage heeft {{size}} GB swap aan deze host toegevoegd voor ClamAV.",
+      "remove": "Verwijder de swap",
+      "removeError": "Het swap-bestand kon niet worden verwijderd.",
+      "removing": "Het swap-bestand wordt verwijderd."
+    }
   },
   "apiKeys": {
     "active": "Actief",
@@ -1822,7 +1832,9 @@
       "generic": "Meld je aan bij de host, installeer het agentpakket opnieuw met behulp van het pakketbeheersysteem van de host, en start vervolgens de agentservice.",
       "runCommands": "Meld je aan bij de host en voer deze opdrachten uit om de upgrade af te ronden en de agent te starten:",
       "title": "Agent verloren tijdens zijn eigen upgrade"
-    }
+    },
+    "noSwap": "Geen",
+    "swap": "Uitwisselingsruimte"
   },
   "hostGroup": {
     "add": "Toevoegen",

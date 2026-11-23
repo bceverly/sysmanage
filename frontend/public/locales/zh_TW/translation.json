@@ -303,7 +303,17 @@
     "save": "儲存",
     "saveSuccess": "防毒預設值已成功儲存",
     "selectProgram": "選擇防毒程式",
-    "title": "防毒軟體"
+    "title": "防毒軟體",
+    "swap": {
+      "help": "ClamAV 需要記憶體與交換空間合計約 3.5 GB，不會部署到低於此值的主機。開啟此選項後，SysManage 會先為這類 Linux 或 BSD 主機新增一個交換檔案（以整數 GB 計，最多 8 GB，絕不放在 ZFS 或 btrfs 上，且只在磁碟仍保有足夠可用空間時新增），然後部署 ClamAV。",
+      "label": "為記憶體不足以執行 ClamAV 的主機新增交換空間",
+      "saveError": "設定無法儲存。",
+      "title": "記憶體量較小的主機",
+      "added": "SysManage 已將 {{size}} GB 的交換空間添加到此主機用於 ClamAV。",
+      "remove": "移除交換記憶體",
+      "removeError": "無法移除交換檔案。",
+      "removing": "正在移除交換檔案。"
+    }
   },
   "apiKeys": {
     "active": "啟用",
@@ -1822,7 +1832,9 @@
       "generic": "請登入主機，使用主機的套件管理員重新安裝代理程式套件，然後啟動代理程式服務。",
       "runCommands": "請登入主機並執行以下命令，以完成升級並啟動代理程式：",
       "title": "代理程式在自身升級過程中遺失"
-    }
+    },
+    "noSwap": "無",
+    "swap": "交換記憶體"
   },
   "hostGroup": {
     "add": "新增",

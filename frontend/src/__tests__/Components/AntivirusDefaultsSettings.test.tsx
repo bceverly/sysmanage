@@ -32,6 +32,8 @@ vi.mock("../../Services/permissions", async (orig) => {
 
 import axiosInstance from "../../Services/api";
 import { hasPermission } from "../../Services/permissions";
+// The swap setting card has its own test (AntivirusSwapSetting.test.tsx).
+vi.mock("../../Components/AntivirusSwapSetting", () => ({ default: () => null }));
 import AntivirusDefaultsSettings from "../../Components/AntivirusDefaultsSettings";
 
 const m = (fn: unknown) => fn as ReturnType<typeof vi.fn>;

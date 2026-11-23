@@ -139,6 +139,18 @@ const HostHardwareTab: React.FC<HostHardwareTabProps> = ({
                                             </Typography>
                                             <Typography variant="body1">{formatMemorySize(t, host.memory_total_mb)}</Typography>
                                         </Grid>
+                                        {host.swap_total_mb !== undefined && host.swap_total_mb !== null && (
+                                            <Grid size={{ xs: 12 }}>
+                                                <Typography variant="body2" color="textSecondary">
+                                                    {t('hostDetail.swap', 'Swap')}
+                                                </Typography>
+                                                <Typography variant="body1">
+                                                    {host.swap_total_mb === 0
+                                                        ? t('hostDetail.noSwap', 'None')
+                                                        : formatMemorySize(t, host.swap_total_mb)}
+                                                </Typography>
+                                            </Grid>
+                                        )}
                                     </Grid>
                                 </Grid>
 

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 05:39-0800\n"
+"POT-Creation-Date: 2026-11-22 14:50-0800\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -545,7 +545,7 @@ msgstr "プロセス状態の更新の処理に失敗しました: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:775 backend/api/update_handlers.py:40
+#: backend/api/message_handlers.py:792 backend/api/update_handlers.py:40
 #: backend/api/update_handlers.py:48 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "ホストが登録されていません"
@@ -629,11 +629,11 @@ msgstr "OS情報が提供されていません"
 msgid "Failed to update OS version"
 msgstr "OSバージョンの更新に失敗しました"
 
-#: backend/api/handlers/os_hardware_handlers.py:576
+#: backend/api/handlers/os_hardware_handlers.py:579
 msgid "hardware_updated"
 msgstr "ハードウェアが更新されました"
 
-#: backend/api/handlers/os_hardware_handlers.py:585
+#: backend/api/handlers/os_hardware_handlers.py:588
 msgid "Failed to update hardware information"
 msgstr "ハードウェア情報の更新に失敗しました"
 
@@ -2757,7 +2757,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr "ファイアウォール展開コマンドが正常に送信されました"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:66
+#: backend/api/antivirus_defaults.py:67
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "OS名が必要です"
@@ -2901,19 +2901,19 @@ msgstr ""
 msgid "Agent session refused: client certificate %s"
 msgstr "エージェントセッションを拒否しました: クライアント証明書 %s"
 
-#: backend/api/message_handlers_core.py:338 backend/api/agent.py:830
+#: backend/api/message_handlers_core.py:346 backend/api/agent.py:830
 msgid "Host registration pending approval"
 msgstr "ホスト登録が承認待ちです"
 
-#: backend/api/message_handlers_core.py:452
+#: backend/api/message_handlers_core.py:460
 msgid "Host auto-approved via child host creation"
 msgstr "ホストは自動的に承認されました（子ホスト作成時）"
 
-#: backend/api/message_handlers_core.py:576
+#: backend/api/message_handlers_core.py:584
 msgid "Agent registered and connected successfully"
 msgstr "Agent の登録と接続に成功しました"
 
-#: backend/api/message_handlers_core.py:947
+#: backend/api/message_handlers_core.py:955
 msgid "Failed to process heartbeat"
 msgstr "ハートビートの処理に失敗しました"
 
@@ -3294,47 +3294,48 @@ msgstr "このホストではバックアップを実行できません: %s"
 msgid "This host's agent cannot check that yet; upgrade the agent first"
 msgstr "このホストのエージェントはまだそれを確認できません。先にエージェントをアップグレードしてください"
 
-#: backend/api/antivirus_defaults.py:68
+#: backend/api/antivirus_defaults.py:69
 msgid "OS name must be 100 characters or less"
 msgstr "OS名は100文字以内でなければなりません"
 
-#: backend/api/antivirus_defaults.py:81
+#: backend/api/antivirus_defaults.py:82
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "アンチウイルスパッケージ名は 255 文字以内でなければなりません"
 
-#: backend/api/antivirus_defaults.py:106
+#: backend/api/antivirus_defaults.py:107
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "アンチウイルスデフォルト設定を取得できませんでした: %s"
 
-#: backend/api/antivirus_defaults.py:127
+#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
+#: backend/api/antivirus_defaults.py:302
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "許可が拒否されました: MANAGE_ANTIVIRUS_DEFAULTS ロールが必要です"
+
+#: backend/api/antivirus_defaults.py:170
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr "このOSに対してデフォルトのアンチウイルス設定が見つかりません：%s"
 
-#: backend/api/antivirus_defaults.py:140
+#: backend/api/antivirus_defaults.py:183
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "デフォルトのアンチウイルス設定を取得できませんでした: %s"
 
-#: backend/api/antivirus_defaults.py:159 backend/api/antivirus_defaults.py:259
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "許可が拒否されました: MANAGE_ANTIVIRUS_DEFAULTS ロールが必要です"
-
-#: backend/api/antivirus_defaults.py:240
+#: backend/api/antivirus_defaults.py:283
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "アンチウイルスのデフォルトを更新できませんでした: %s"
 
-#: backend/api/antivirus_defaults.py:293
+#: backend/api/antivirus_defaults.py:336
 msgid "Antivirus default deleted successfully"
 msgstr "デフォルトのアンチウイルス設定を正常に削除しました"
 
-#: backend/api/antivirus_defaults.py:295
+#: backend/api/antivirus_defaults.py:338
 msgid "No antivirus default found for this OS"
 msgstr "このOSに対してデフォルトのアンチウイルス設定が見つかりません"
 
-#: backend/api/antivirus_defaults.py:303
+#: backend/api/antivirus_defaults.py:346
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "デフォルトアンチウイルス設定を削除できませんでした: %s"
@@ -3709,23 +3710,23 @@ msgstr "パッケージのカウントに失敗しました: %s"
 msgid "Failed to search packages: %s"
 msgstr "パッケージの検索に失敗しました: %s"
 
-#: backend/api/host.py:235
+#: backend/api/host.py:236
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "アクセス権限がありません: DELETE_HOST ロールが必要です"
 
-#: backend/api/host.py:299
+#: backend/api/host.py:300
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "許可が拒否されました: VIEW_HOST_DETAILS ロールが必要です"
 
-#: backend/api/host.py:688
+#: backend/api/host.py:689
 msgid "Host already exists"
 msgstr "ホストは既に存在しています"
 
-#: backend/api/host.py:800
+#: backend/api/host.py:801
 msgid "Registration absorbed: host was recently deleted"
 msgstr "登録が吸収されました: ホストは最近削除されました"
 
-#: backend/api/host.py:880
+#: backend/api/host.py:881
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -3816,34 +3817,34 @@ msgstr "このジョブは既に完了しています"
 msgid "Cancelled by an operator"
 msgstr "オペレーターによってキャンセルされました"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:645
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "診断結果の処理に失敗しました: %s"
 
-#: backend/api/message_handlers.py:662
+#: backend/api/message_handlers.py:679
 msgid "Missing message_id in command acknowledgment"
 msgstr "コマンド確認メッセージに message_id が含まれていません"
 
-#: backend/api/message_handlers.py:729
+#: backend/api/message_handlers.py:746
 msgid "This session cannot acknowledge another host's message"
 msgstr "このセッションは別のホストのメッセージを確認応答できません"
 
-#: backend/api/message_handlers.py:799
+#: backend/api/message_handlers.py:816
 msgid "Missing installation_id in package installation status"
 msgstr "パッケージインストール状態にインストールIDが含まれていません"
 
-#: backend/api/message_handlers.py:819
+#: backend/api/message_handlers.py:836
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "ID:%s のインストールログエントリが見つかりませんでした。"
 
-#: backend/api/message_handlers.py:865
+#: backend/api/message_handlers.py:882
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "エージェント {hostname} 上でのパッケージインストール {status}"
 
-#: backend/api/message_handlers.py:894
+#: backend/api/message_handlers.py:911
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "パッケージのインストール状態を更新できませんでした: %s"
@@ -3916,19 +3917,19 @@ msgstr "%d 個のパッケージのアンインストールがキューに追加
 msgid "Failed to queue package uninstallation: %s"
 msgstr "パッケージアンインストールをキューに追加できませんでした: %s"
 
-#: backend/api/host_data_updates.py:130
+#: backend/api/host_data_updates.py:132
 msgid "Hardware information updated successfully"
 msgstr "ハードウェア情報が正常に更新されました"
 
-#: backend/api/host_data_updates.py:187
+#: backend/api/host_data_updates.py:189
 msgid "Hardware update requested"
 msgstr "ハードウェア更新が要求されました"
 
-#: backend/api/host_data_updates.py:313
+#: backend/api/host_data_updates.py:315
 msgid "User access update requested"
 msgstr "ユーザーアクセス更新が要求されました"
 
-#: backend/api/host_data_updates.py:367
+#: backend/api/host_data_updates.py:369
 msgid "System info update requested"
 msgstr "システム情報更新要求"
 
@@ -4945,46 +4946,65 @@ msgstr "ホストOperating Systemを特定できません"
 msgid "No antivirus default configured for OS: %s"
 msgstr "このOSに対してデフォルトのアンチウイルス設定が構成されていません：%s"
 
-#: backend/api/antivirus_status.py:267
-#, python-format
-msgid ""
-"%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
-"MB"
-msgstr ""
-"%(package)s には少なくとも %(needed)d MB のメモリが必要です。このホストのメモリは %(total)d MB です"
-
-#: backend/api/antivirus_status.py:343
+#: backend/api/antivirus_status.py:346
 #, python-format
 msgid "Antivirus deployment initiated for all %d hosts"
 msgstr "すべての %d ホストに対してアンチウイルス展開が開始されました"
 
-#: backend/api/antivirus_status.py:346
+#: backend/api/antivirus_status.py:349
 #, python-format
 msgid ""
 "Antivirus deployment initiated for %(success_count)d of %(total_count)d "
 "hosts"
 msgstr "アンチウイルス展開を %(success_count)d つのホストのうち %(total_count)d つで開始しました"
 
-#: backend/api/antivirus_status.py:352
+#: backend/api/antivirus_status.py:355
 msgid "Antivirus deployment failed for all hosts"
 msgstr "すべてのホストでアンチウイルス展開に失敗しました"
 
-#: backend/api/antivirus_status.py:424
+#: backend/api/antivirus_status.py:379
+#, python-format
+msgid ""
+"%(package)s needs at least %(needed)d MB of memory and swap; this host has "
+"%(total)d MB of memory and %(swap)d MB of swap"
+msgstr ""
+"%(package)sには少なくとも%(needed)dMBのメモリとスワップが必要です。このホストは%(total)dMBのメモリと%(swap)dMBのスワップを持っています"
+
+#: backend/api/antivirus_status.py:389
+msgid ""
+"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+"page, or add memory."
+msgstr "ウイルス対策デフォルトページの「スワップに追加」をオンにして、またはメモリを追加してください。"
+
+#: backend/api/antivirus_status.py:394
+#, python-format
+msgid "Swap cannot be added: %s"
+msgstr "スワップを追加できません: %s"
+
+#: backend/api/antivirus_status.py:462
 msgid "Antivirus enable command sent successfully"
 msgstr "アンチウイルス有効コマンドを正常に送信しました"
 
-#: backend/api/antivirus_status.py:492
+#: backend/api/antivirus_status.py:530
 msgid "Antivirus disable command sent successfully"
 msgstr "アンチウイルス無効コマンドを正常に送信しました"
 
-#: backend/api/antivirus_status.py:570
+#: backend/api/antivirus_status.py:608
 msgid "Antivirus remove command sent successfully"
 msgstr "アンチウイルス削除コマンドを正常に送信しました"
 
-#: backend/api/antivirus_status.py:639
+#: backend/api/antivirus_status.py:677
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "アンチウイルス覆蓋範囲を取得できませんでした: %s"
+
+#: backend/api/antivirus_status.py:718
+msgid "SysManage has not added swap to this host"
+msgstr "SysManageはこのホストにスワップを追加していません"
+
+#: backend/api/antivirus_status.py:737
+msgid "Swap removal sent"
+msgstr "スワップの削除が送信されました"
 
 #: backend/api/child_host_utils.py:25
 msgid "Child host engine could not dispatch this request."
@@ -6515,11 +6535,11 @@ msgstr "そのターゲットにはまだストレージホストがありませ
 msgid "Move not found"
 msgstr "移動が見つかりません"
 
-#: backend/services/backup_moves.py:589 backend/services/backup_moves.py:609
+#: backend/services/backup_moves.py:618 backend/services/backup_moves.py:638
 msgid "This move's old repository is no longer kept"
 msgstr "この移動の古いリポジトリはもう保持されていません"
 
-#: backend/services/backup_moves.py:596
+#: backend/services/backup_moves.py:625
 #, python-format
 msgid ""
 "The old target seals its backups; this old repository can be removed from %s"
@@ -6636,21 +6656,21 @@ msgstr "vaultからの応答が無効です"
 msgid "Invalid secret format"
 msgstr "シークレットフォーマットが無効です"
 
-#: backend/services/backup_replicas.py:767
+#: backend/services/backup_replicas.py:773
 msgid "This host has no off-site copy"
 msgstr "このホストにはオフサイトコピーがありません"
 
-#: backend/services/backup_replicas.py:769
+#: backend/services/backup_replicas.py:775
 msgid ""
 "The off-site copy cannot be read yet: its storage host has not been told "
 "this host's read token"
 msgstr "オフサイトコピーはまだ読み取れません：ストレージホストがこのホストの読み取りトークンを知らされていないためです"
 
-#: backend/services/backup_replicas.py:772
+#: backend/services/backup_replicas.py:778
 msgid "That snapshot is not in the off-site copy"
 msgstr "そのスナップショットはオフサイトコピーに含まれていません"
 
-#: backend/services/backup_replicas.py:774
+#: backend/services/backup_replicas.py:780
 msgid "This host's agent cannot read its off-site copy yet; upgrade the agent"
 msgstr "このホストのエージェントはまだオフサイトコピーを読み取れません；エージェントをアップグレードしてください"
 
@@ -6736,6 +6756,13 @@ msgstr "NetBSD の pkgsrc パッケージの脆弱性 (pkg_admin audit が読む
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS バージョン別の macOS の脆弱性 (NVD の影響を受けるバージョンのデータより)"
+
+#, python-format
+#~ msgid ""
+#~ "%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
+#~ "MB"
+#~ msgstr ""
+#~ "%(package)s には少なくとも %(needed)d MB のメモリが必要です。このホストのメモリは %(total)d MB です"
 
 #~ msgid ""
 #~ "This host already has backups on its target; it cannot move to another "

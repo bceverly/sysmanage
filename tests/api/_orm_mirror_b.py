@@ -81,9 +81,7 @@ class AccessGroup(TestBase):
         ForeignKey("access_groups.id", ondelete="SET NULL"),
         nullable=True,
     )
-    created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    created_by = Column(GUID(), nullable=True)
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
 
@@ -109,9 +107,7 @@ class RegistrationKey(TestBase):
     max_uses = Column(Integer, nullable=True)
     use_count = Column(Integer, nullable=False, default=0)
     expires_at = Column(DateTime, nullable=True)
-    created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    created_by = Column(GUID(), nullable=True)
     created_at = Column(DateTime, nullable=True)
     last_used_at = Column(DateTime, nullable=True)
 
@@ -158,9 +154,7 @@ class UpgradeProfile(TestBase):
     package_managers = Column(Text, nullable=True)
     staggered_window_min = Column(Integer, nullable=False, default=0)
     tag_id = Column(GUID(), ForeignKey("tags.id", ondelete="SET NULL"), nullable=True)
-    created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    created_by = Column(GUID(), nullable=True)
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
     # 26.1 automatic updates (q94autoupdate)
@@ -211,9 +205,7 @@ class AirgapCollectionRun(TestBase):
         nullable=True,
     )
     created_at = Column(DateTime, nullable=True)
-    created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    created_by = Column(GUID(), nullable=True)
     # Phase 12 -- orchestrator + optical burn opt-in.  Mirror the real
     # schema or every ``SELECT * FROM airgap_collection_run`` blows
     # up on the test SQLite session with "no such column".
@@ -363,9 +355,7 @@ class ReportBranding(TestBase):
     logo_data = Column(LargeBinary, nullable=True)
     logo_mime_type = Column(String(80), nullable=True)
     updated_at = Column(DateTime, nullable=True)
-    updated_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    updated_by = Column(GUID(), nullable=True)
 
 
 class ReportTemplate(TestBase):
@@ -376,9 +366,7 @@ class ReportTemplate(TestBase):
     base_report_type = Column(String(50), nullable=False)
     selected_fields = Column(_JSON, nullable=False)
     enabled = Column(Boolean, nullable=False, default=True)
-    created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    created_by = Column(GUID(), nullable=True)
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
 
@@ -396,9 +384,7 @@ class AirGapBundle(TestBase):
     log_path = Column(Text, nullable=True)
     error_message = Column(Text, nullable=True)
     version = Column(String(64), nullable=True)
-    created_by_user_id = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    created_by_user_id = Column(GUID(), nullable=True)
 
 
 class DynamicSecretLease(TestBase):
@@ -414,9 +400,7 @@ class DynamicSecretLease(TestBase):
     revoked_at = Column(DateTime, nullable=True)
     status = Column(String(20), nullable=False, default="ACTIVE")
     secret_metadata = Column(_JSON, nullable=True)
-    issued_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    issued_by = Column(GUID(), nullable=True)
     note = Column(Text, nullable=True)
 
 
@@ -572,7 +556,6 @@ class MirrorSettings(TestBase):
     updated_at = Column(DateTime, nullable=True)
     updated_by = Column(
         GUID(),
-        ForeignKey("user.id", ondelete="SET NULL"),
         nullable=True,
     )
 

@@ -32,7 +32,6 @@ from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
-    ForeignKey,
     LargeBinary,
     String,
     Text,
@@ -67,7 +66,9 @@ class ReportBranding(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
-    updated_by = Column(GUID(), ForeignKey("user.id", ondelete="SET NULL"))
+    updated_by = Column(
+        GUID(),
+    )
 
     def __repr__(self):
         return f"<ReportBranding(company='{self.company_name}')>"
@@ -100,7 +101,9 @@ class ReportTemplate(Base):
     selected_fields = Column(JSON, nullable=False, default=list)
     enabled = Column(Boolean, nullable=False, default=True)
 
-    created_by = Column(GUID(), ForeignKey("user.id", ondelete="SET NULL"))
+    created_by = Column(
+        GUID(),
+    )
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,

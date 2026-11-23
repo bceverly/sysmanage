@@ -112,7 +112,7 @@ class UpgradeProfile(Base):
         Integer, nullable=False, default=0, server_default="0"
     )
 
-    created_by = Column(GUID(), ForeignKey("user.id", ondelete=SET_NULL))
+    created_by = Column(GUID())  # soft ref to user.id (users are server-global)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,

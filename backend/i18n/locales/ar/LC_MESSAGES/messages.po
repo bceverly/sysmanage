@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 05:39-0800\n"
+"POT-Creation-Date: 2026-11-22 14:50-0800\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -554,7 +554,7 @@ msgstr "فشل في معالجة تحديث حالة العملية: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:775 backend/api/update_handlers.py:40
+#: backend/api/message_handlers.py:792 backend/api/update_handlers.py:40
 #: backend/api/update_handlers.py:48 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "المضيف غير مسجل"
@@ -638,11 +638,11 @@ msgstr "لم يتم تقديم معلومات النظام الأساسي (OS)"
 msgid "Failed to update OS version"
 msgstr "فشل في تحديث إصدار نظام التشغيل"
 
-#: backend/api/handlers/os_hardware_handlers.py:576
+#: backend/api/handlers/os_hardware_handlers.py:579
 msgid "hardware_updated"
 msgstr "تم تحديث الأجهزة"
 
-#: backend/api/handlers/os_hardware_handlers.py:585
+#: backend/api/handlers/os_hardware_handlers.py:588
 msgid "Failed to update hardware information"
 msgstr "فشل في تحديث معلومات الأجهزة"
 
@@ -2805,7 +2805,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr " lệnh إرسال تثبيت جدار الحماية تم بنجاح"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:66
+#: backend/api/antivirus_defaults.py:67
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "اسم النظام التشغیعي مطلوب"
@@ -2950,19 +2950,19 @@ msgstr ""
 msgid "Agent session refused: client certificate %s"
 msgstr "تم رفض جلسة الوكيل: شهادة العميل %s"
 
-#: backend/api/message_handlers_core.py:338 backend/api/agent.py:830
+#: backend/api/message_handlers_core.py:346 backend/api/agent.py:830
 msgid "Host registration pending approval"
 msgstr "تمت الموافقة على تسجيل المضيف وانتظار التحقق منها"
 
-#: backend/api/message_handlers_core.py:452
+#: backend/api/message_handlers_core.py:460
 msgid "Host auto-approved via child host creation"
 msgstr "تم الموافقة تلقائيًا عند إنشاء مضيف فرعي"
 
-#: backend/api/message_handlers_core.py:576
+#: backend/api/message_handlers_core.py:584
 msgid "Agent registered and connected successfully"
 msgstr "تم تسجيل وكيل وإحالته بنجاح"
 
-#: backend/api/message_handlers_core.py:947
+#: backend/api/message_handlers_core.py:955
 msgid "Failed to process heartbeat"
 msgstr "فشل في معالجة النبضة القلبية"
 
@@ -3354,48 +3354,49 @@ msgstr "لا يمكن لهذا المضيف تشغيل النسخ الاحتيا
 msgid "This host's agent cannot check that yet; upgrade the agent first"
 msgstr "لا يستطيع وكيل هذا المضيف التحقق من ذلك بعد؛ قم بترقية الوكيل أولاً"
 
-#: backend/api/antivirus_defaults.py:68
+#: backend/api/antivirus_defaults.py:69
 msgid "OS name must be 100 characters or less"
 msgstr "يجب أن يكون اسم النظام التشغیعي 100 حرف أو أقل"
 
-#: backend/api/antivirus_defaults.py:81
+#: backend/api/antivirus_defaults.py:82
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "يجب أن يكون اسم حزمة برنامج مكافحة الفيروسات 255 حرفاً أو أقل"
 
-#: backend/api/antivirus_defaults.py:106
+#: backend/api/antivirus_defaults.py:107
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "فشل في استرداد الإعدادات الافتراضية لمضاد الفيروسات: %s"
 
-#: backend/api/antivirus_defaults.py:127
+#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
+#: backend/api/antivirus_defaults.py:302
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "تم رفض الإذن: يتطلب دور إدارة إعدادات مكافحة الفيروسات الافتراضية"
+
+#: backend/api/antivirus_defaults.py:170
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr "لم يتم العثور على قيمة افتراضية لمكافحة الفيروسات لنظام التشغيل: %s"
 
-#: backend/api/antivirus_defaults.py:140
+#: backend/api/antivirus_defaults.py:183
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "فشل في استرداد الإعداد الافتراضي لمضاد الفيروسات: %s"
 
-#: backend/api/antivirus_defaults.py:159 backend/api/antivirus_defaults.py:259
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "تم رفض الإذن: يتطلب دور إدارة إعدادات مكافحة الفيروسات الافتراضية"
-
-#: backend/api/antivirus_defaults.py:240
+#: backend/api/antivirus_defaults.py:283
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "فشل في تحديث القيم الافتراضية لبرامج مكافحة الفيروسات: %s"
 
-#: backend/api/antivirus_defaults.py:293
+#: backend/api/antivirus_defaults.py:336
 msgid "Antivirus default deleted successfully"
 msgstr "تم حذف الإفتراضي لبرنامج مكافحة الفيروسات بنجاح"
 
-#: backend/api/antivirus_defaults.py:295
+#: backend/api/antivirus_defaults.py:338
 msgid "No antivirus default found for this OS"
 msgstr ""
 "لم يتم العثور على قيمة افتراضية لمكافحة الفيروسات لهذا النظام الأساسي (OS)"
 
-#: backend/api/antivirus_defaults.py:303
+#: backend/api/antivirus_defaults.py:346
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "فشل في حذف الإعدادات الافتراضية لمكافحة الفيروسات: %s"
@@ -3781,23 +3782,23 @@ msgstr "فشل في إحصاء الحزم: %s"
 msgid "Failed to search packages: %s"
 msgstr "فشل في البحث عن الحزم: %s"
 
-#: backend/api/host.py:235
+#: backend/api/host.py:236
 msgid "Permission denied: DELETE_HOST role required"
 msgstr " رفض الوصول: يتطلب دور DELETE_HOST"
 
-#: backend/api/host.py:299
+#: backend/api/host.py:300
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "تم رفض الإذن: يتطلب دور `VIEW_HOST_DETAILS`"
 
-#: backend/api/host.py:688
+#: backend/api/host.py:689
 msgid "Host already exists"
 msgstr "المضيف موجود بالفعل"
 
-#: backend/api/host.py:800
+#: backend/api/host.py:801
 msgid "Registration absorbed: host was recently deleted"
 msgstr "التسجيل تم امتصاصه: كان المضيف قد حُذف مؤخرا"
 
-#: backend/api/host.py:880
+#: backend/api/host.py:881
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -3888,34 +3889,34 @@ msgstr "انتهت هذه الوظيفة بالفعل"
 msgid "Cancelled by an operator"
 msgstr "ألغاه مشغل"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:645
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "فشل في معالجة نتيجة التشخيص: %s"
 
-#: backend/api/message_handlers.py:662
+#: backend/api/message_handlers.py:679
 msgid "Missing message_id in command acknowledgment"
 msgstr "لم يتم تحديد معرف الرسالة في تأكيد الطلب"
 
-#: backend/api/message_handlers.py:729
+#: backend/api/message_handlers.py:746
 msgid "This session cannot acknowledge another host's message"
 msgstr "لا يمكن لهذه الجلسة الإقرار برسالة مضيف آخر"
 
-#: backend/api/message_handlers.py:799
+#: backend/api/message_handlers.py:816
 msgid "Missing installation_id in package installation status"
 msgstr "لم يتم تحديد معرف التثبيت في حالة التثبيت"
 
-#: backend/api/message_handlers.py:819
+#: backend/api/message_handlers.py:836
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "لم يتم العثور على سجل تثبيت للاستعلام: %s"
 
-#: backend/api/message_handlers.py:865
+#: backend/api/message_handlers.py:882
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr " حالة تثبيت الحزمة {status} على الوكيل {hostname}"
 
-#: backend/api/message_handlers.py:894
+#: backend/api/message_handlers.py:911
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "فشل في تحديث حالة تثبيت الحزم: %s"
@@ -3988,19 +3989,19 @@ msgstr "تم ترحيل حزمتين %d لإلغاء التنصيب بنجاح"
 msgid "Failed to queue package uninstallation: %s"
 msgstr "فشل في ترتيب حذف الحزمة من قائمة الانتظار: %s"
 
-#: backend/api/host_data_updates.py:130
+#: backend/api/host_data_updates.py:132
 msgid "Hardware information updated successfully"
 msgstr "تم تحديث معلومات الأجهزة بنجاح"
 
-#: backend/api/host_data_updates.py:187
+#: backend/api/host_data_updates.py:189
 msgid "Hardware update requested"
 msgstr "تم طلب تحديث الأجهزة"
 
-#: backend/api/host_data_updates.py:313
+#: backend/api/host_data_updates.py:315
 msgid "User access update requested"
 msgstr "تم طلب تحديث وصول المستخدم"
 
-#: backend/api/host_data_updates.py:367
+#: backend/api/host_data_updates.py:369
 msgid "System info update requested"
 msgstr "تم طلب تحديث معلومات النظام"
 
@@ -5044,21 +5045,12 @@ msgstr "لا يمكن تحديد نظام التشغيل للخادم"
 msgid "No antivirus default configured for OS: %s"
 msgstr "لم يتم تحديد قيمة افتراضية لمكافحة الفيروسات لنظام التشغيل: %s"
 
-#: backend/api/antivirus_status.py:267
-#, python-format
-msgid ""
-"%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
-"MB"
-msgstr ""
-"يحتاج %(package)s إلى %(needed)d ميغابايت من الذاكرة على الأقل؛ لدى هذا "
-"المضيف %(total)d ميغابايت"
-
-#: backend/api/antivirus_status.py:343
+#: backend/api/antivirus_status.py:346
 #, python-format
 msgid "Antivirus deployment initiated for all %d hosts"
 msgstr "تم بدء نشر برنامج مكافحة الفيروسات لجميع المضيفين %d"
 
-#: backend/api/antivirus_status.py:346
+#: backend/api/antivirus_status.py:349
 #, python-format
 msgid ""
 "Antivirus deployment initiated for %(success_count)d of %(total_count)d "
@@ -5067,26 +5059,56 @@ msgstr ""
 "تم بدء نشر برنامج مكافحة الفيروسات لـ %(success_count)d من %(total_count)d "
 "المستضياف"
 
-#: backend/api/antivirus_status.py:352
+#: backend/api/antivirus_status.py:355
 msgid "Antivirus deployment failed for all hosts"
 msgstr "فشل نشر برنامج مكافحة الفيروسات على جميع المضيفين"
 
-#: backend/api/antivirus_status.py:424
+#: backend/api/antivirus_status.py:379
+#, python-format
+msgid ""
+"%(package)s needs at least %(needed)d MB of memory and swap; this host has "
+"%(total)d MB of memory and %(swap)d MB of swap"
+msgstr ""
+"يحتاج %(package)s إلى ذاكرة وتبديل على الأقل %(needed)d ميجابايت؛ هذا المضيف"
+" لديه %(total)d ميجابايت من الذاكرة و%(swap)d ميجابايت من التبديل"
+
+#: backend/api/antivirus_status.py:389
+msgid ""
+"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+"page, or add memory."
+msgstr ""
+"قم بتشغيل إضافة التبديل إلى المضيفين أدناه أرضية الذاكرة على صفحة افتراضات "
+"برنامج الحماية من الفيروسات، أو أضف ذاكرة."
+
+#: backend/api/antivirus_status.py:394
+#, python-format
+msgid "Swap cannot be added: %s"
+msgstr "لا يمكن إضافة التبادل: %s"
+
+#: backend/api/antivirus_status.py:462
 msgid "Antivirus enable command sent successfully"
 msgstr " lệnh تم إرسالها بنجاح لتمكين مضاد الفيروسات"
 
-#: backend/api/antivirus_status.py:492
+#: backend/api/antivirus_status.py:530
 msgid "Antivirus disable command sent successfully"
 msgstr " lệnh تعطيل مضاد الفيروسات تم إرسالها بنجاح"
 
-#: backend/api/antivirus_status.py:570
+#: backend/api/antivirus_status.py:608
 msgid "Antivirus remove command sent successfully"
 msgstr " lệnh إزالة برنامج مكافحة الفيروسات تم إرسالها بنجاح"
 
-#: backend/api/antivirus_status.py:639
+#: backend/api/antivirus_status.py:677
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "فشل في استرداد نطاق مضاد الفيروسات: %s"
+
+#: backend/api/antivirus_status.py:718
+msgid "SysManage has not added swap to this host"
+msgstr "لم تضف SysManage تبادلًا لهذا المضيف"
+
+#: backend/api/antivirus_status.py:737
+msgid "Swap removal sent"
+msgstr "تم إرسال إزالة التبادل"
 
 #: backend/api/child_host_utils.py:25
 msgid "Child host engine could not dispatch this request."
@@ -6651,11 +6673,11 @@ msgstr "لذلك الهدف لا يوجد مضيف تخزين بعد"
 msgid "Move not found"
 msgstr "لم يتم العثور على الانتقال"
 
-#: backend/services/backup_moves.py:589 backend/services/backup_moves.py:609
+#: backend/services/backup_moves.py:618 backend/services/backup_moves.py:638
 msgid "This move's old repository is no longer kept"
 msgstr "لم يعد المستودع القديم لهذا النقل محفوظًا"
 
-#: backend/services/backup_moves.py:596
+#: backend/services/backup_moves.py:625
 #, python-format
 msgid ""
 "The old target seals its backups; this old repository can be removed from %s"
@@ -6774,11 +6796,11 @@ msgstr "استجابة vault غير صالحة"
 msgid "Invalid secret format"
 msgstr " định dạng bí mật không hợp lệ"
 
-#: backend/services/backup_replicas.py:767
+#: backend/services/backup_replicas.py:773
 msgid "This host has no off-site copy"
 msgstr "لا توجد لدى هذا المضيف نسخة خارج الموقع"
 
-#: backend/services/backup_replicas.py:769
+#: backend/services/backup_replicas.py:775
 msgid ""
 "The off-site copy cannot be read yet: its storage host has not been told "
 "this host's read token"
@@ -6786,11 +6808,11 @@ msgstr ""
 "لا يمكن قراءة النسخة خارج الموقع بعد: لم يتم إبلاغ مضيف التخزين الخاص بها "
 "برمز القراءة لهذا المضيف"
 
-#: backend/services/backup_replicas.py:772
+#: backend/services/backup_replicas.py:778
 msgid "That snapshot is not in the off-site copy"
 msgstr "تلك اللقطة ليست في النسخة خارج الموقع"
 
-#: backend/services/backup_replicas.py:774
+#: backend/services/backup_replicas.py:780
 msgid "This host's agent cannot read its off-site copy yet; upgrade the agent"
 msgstr ""
 "لا يستطيع وكيل هذا المضيف قراءة نسخته خارج الموقع بعد؛ قم بترقية الوكيل"
@@ -6878,6 +6900,14 @@ msgstr "ثغرات حزم pkgsrc في NetBSD (ما يقرؤه pkg_admin audit)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
+
+#, python-format
+#~ msgid ""
+#~ "%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
+#~ "MB"
+#~ msgstr ""
+#~ "يحتاج %(package)s إلى %(needed)d ميغابايت من الذاكرة على الأقل؛ لدى هذا "
+#~ "المضيف %(total)d ميغابايت"
 
 #~ msgid ""
 #~ "This host already has backups on its target; it cannot move to another "

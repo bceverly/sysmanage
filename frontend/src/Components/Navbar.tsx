@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect, useReducer, useRef } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router";
 import { IoClose, IoMenu, IoChevronDown, IoSearch } from "react-icons/io5";
 import * as Menubar from "@radix-ui/react-menubar";
@@ -18,6 +18,7 @@ import UserProfileDropdown from "./UserProfileDropdown";
 import type { AboutServerInfo } from "./AboutDialog";
 import { useFederationLicensed } from "../Services/federation";
 import NotificationBell from "./NotificationBell";
+import { useMenubarFits } from "./useMenubarFits";
 import {
   getCachedLicense,
   onLicenseChange,
@@ -272,7 +273,13 @@ export function buildNavCategories(
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // Measured: the menubar shows only while it fits beside the logo and the
+  // toolbar; otherwise the compact menu button and drawer take over.
+  const navRef = useRef<HTMLElement>(null);
+  const logoRef = useRef<HTMLAnchorElement>(null);
+  const menubarRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
   // Phase 12.3: hide the Sites link entirely when the federation
   // controller engine isn't loaded.  The Sites page itself remains
   // reachable by direct URL (where it shows the Enterprise upsell),
@@ -369,6 +376,10 @@ const Navbar = () => {
     federationLicensed,
     serverRole,
   });
+  const menubarFits = useMenubarFits(
+    { nav: navRef, logo: logoRef, menubar: menubarRef, toolbar: toolbarRef },
+    [i18n.language, categories.length, serverRole, federationRole],
+  );
 
   const isItemActive = (path: string) =>
     location.pathname === path || location.pathname.startsWith(path + '/');
@@ -422,8 +433,8 @@ const Navbar = () => {
 
   return (
     <header className="header">
-      <nav className="nav container">
-        <NavLink to="/" className="nav__logo" title={t('nav.dashboard', 'Dashboard')}>
+      <nav ref={navRef} className={`nav container${menubarFits ? '' : ' nav--compact'}`}>
+        <NavLink ref={logoRef} to="/" className="nav__logo" title={t('nav.dashboard', 'Dashboard')}>
           <img src={SysManageLogo} alt={t('nav.logoAlt', 'SysManage')} className="nav__logo-img" />
           {roleChip}
           {federationChip}
@@ -432,7 +443,7 @@ const Navbar = () => {
         {menuVisible === 'visible' && (
           <>
             {/* Desktop: grouped Radix menubar (categories don't navigate). */}
-            <Menubar.Root className="nav__menubar">
+            <Menubar.Root ref={menubarRef} className="nav__menubar">
               {categories.map(cat => (
                 <Menubar.Menu key={cat.id}>
                   <Menubar.Trigger
@@ -505,7 +516,7 @@ const Navbar = () => {
 
         {/* Utility toolbar -- language, connection, notifications, account. */}
         {menuVisible === "visible" && (
-          <div className="nav__language-toolbar">
+          <div ref={toolbarRef} className="nav__language-toolbar">
             {navbarWidgets
               .filter((w) => {
                 if (w.moduleRequired && !activeLicenseModules.includes(w.moduleRequired)) return false;

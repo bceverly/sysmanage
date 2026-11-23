@@ -62,6 +62,8 @@ def update_host_hardware(host_id: str, hardware_data: dict):  # NOSONAR
             host.cpu_frequency_mhz = hardware_data["cpu_frequency_mhz"]
         if "memory_total_mb" in hardware_data:
             host.memory_total_mb = hardware_data["memory_total_mb"]
+        if hardware_data.get("swap_total_mb") is not None:
+            host.swap_total_mb = hardware_data["swap_total_mb"]
         # Handle normalized storage devices
         if "storage_devices" in hardware_data:
             # Delete existing storage devices for this host

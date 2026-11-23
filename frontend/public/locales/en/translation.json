@@ -303,7 +303,17 @@
     "save": "Save",
     "saveSuccess": "Antivirus defaults saved successfully",
     "selectProgram": "Select Antivirus Program",
-    "title": "Antivirus"
+    "title": "Antivirus",
+    "swap": {
+      "help": "ClamAV needs about 3.5 GB of memory and swap combined, and is not deployed to a host with less. With this on, SysManage first adds a swap file to such a Linux or BSD host (whole GB, at most 8 GB, never on ZFS or btrfs, and only where enough disk space stays free), then deploys ClamAV.",
+      "label": "Add swap to hosts with too little memory for ClamAV",
+      "saveError": "The setting could not be saved.",
+      "title": "Hosts with little memory",
+      "added": "SysManage added {{size}} GB of swap to this host for ClamAV.",
+      "remove": "Remove the swap",
+      "removeError": "The swap file could not be removed.",
+      "removing": "The swap file is being removed."
+    }
   },
   "apiKeys": {
     "active": "Active",
@@ -1841,7 +1851,9 @@
       "generic": "Sign in to the host, reinstall the agent package with the host's package manager, and then start the agent service.",
       "runCommands": "Sign in to the host and run these commands to finish the upgrade and start the agent:",
       "title": "Agent lost during its own upgrade"
-    }
+    },
+    "noSwap": "None",
+    "swap": "Swap"
   },
   "hostGroup": {
     "add": "Add",

@@ -186,6 +186,8 @@ class Host(Base):
     cpu_threads = Column(Integer, nullable=True)
     cpu_frequency_mhz = Column(Integer, nullable=True)
     memory_total_mb = Column(BigInteger, nullable=True)
+    # Counted with memory against the antivirus memory floor (q108avswap).
+    swap_total_mb = Column(BigInteger, nullable=True)
     storage_details = Column(Text, nullable=True)
     network_details = Column(Text, nullable=True)
     hardware_details = Column(Text, nullable=True)

@@ -303,7 +303,17 @@
     "save": "Speichern",
     "saveSuccess": "Antivirus-Standardeinstellungen erfolgreich gespeichert",
     "selectProgram": "Antivirus-Programm auswählen",
-    "title": "Antiviren"
+    "title": "Antiviren",
+    "swap": {
+      "help": "ClamAV benötigt zusammen etwa 3,5 GB Arbeitsspeicher und Swap und wird auf einem Host mit weniger nicht bereitgestellt. Ist diese Option aktiviert, fügt SysManage einem solchen Linux- oder BSD-Host zuerst eine Swap-Datei hinzu (in ganzen GB, höchstens 8 GB, nie auf ZFS oder btrfs und nur, wenn genügend Speicherplatz frei bleibt) und stellt dann ClamAV bereit.",
+      "label": "Hosts mit zu wenig Arbeitsspeicher für ClamAV Swap hinzufügen",
+      "saveError": "Die Einstellung konnte nicht gespeichert werden.",
+      "title": "Hosts mit wenig Arbeitsspeicher",
+      "added": "SysManage hat diesem Host für ClamAV {{size}} GB Swap hinzugefügt.",
+      "remove": "Den Swap entfernen",
+      "removeError": "Die Swap-Datei konnte nicht entfernt werden.",
+      "removing": "Die Swap-Datei wird entfernt."
+    }
   },
   "apiKeys": {
     "active": "Aktiv",
@@ -1822,7 +1832,9 @@
       "generic": "Melden Sie sich beim Host an, installieren Sie das Agenten-Paket erneut mit dem Paketmanager des Hosts und starten Sie dann den Agenten-Dienst.",
       "runCommands": "Melden Sie sich beim Host an und führen Sie diese Befehle aus, um das Upgrade abzuschließen und den Agenten zu starten:",
       "title": "Der Agent wurde während seines eigenen Upgrades verloren"
-    }
+    },
+    "noSwap": "Keine",
+    "swap": "Swap"
   },
   "hostGroup": {
     "add": "Hinzufügen",

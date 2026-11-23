@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 05:39-0800\n"
+"POT-Creation-Date: 2026-11-22 14:50-0800\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -576,7 +576,7 @@ msgstr "Error al procesar la actualización del estado de procesos: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:775 backend/api/update_handlers.py:40
+#: backend/api/message_handlers.py:792 backend/api/update_handlers.py:40
 #: backend/api/update_handlers.py:48 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host no registrado"
@@ -661,11 +661,11 @@ msgstr "No se proporcionó información sobre el sistema operativo"
 msgid "Failed to update OS version"
 msgstr "Falló la actualización de la versión del SO"
 
-#: backend/api/handlers/os_hardware_handlers.py:576
+#: backend/api/handlers/os_hardware_handlers.py:579
 msgid "hardware_updated"
 msgstr "Hardware actualizado"
 
-#: backend/api/handlers/os_hardware_handlers.py:585
+#: backend/api/handlers/os_hardware_handlers.py:588
 msgid "Failed to update hardware information"
 msgstr "Falló la actualización de la información de hardware"
 
@@ -2890,7 +2890,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr "Comando de despliegue del firewall enviado con éxito"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:66
+#: backend/api/antivirus_defaults.py:67
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "Se requiere el nombre del sistema operativo"
@@ -3039,19 +3039,19 @@ msgstr ""
 msgid "Agent session refused: client certificate %s"
 msgstr "Sesión del agente rechazada: certificado de cliente %s"
 
-#: backend/api/message_handlers_core.py:338 backend/api/agent.py:830
+#: backend/api/message_handlers_core.py:346 backend/api/agent.py:830
 msgid "Host registration pending approval"
 msgstr "Registro del host pendiente de aprobación"
 
-#: backend/api/message_handlers_core.py:452
+#: backend/api/message_handlers_core.py:460
 msgid "Host auto-approved via child host creation"
 msgstr "El host se ha auto-aprobado mediante la creación de un hijo host"
 
-#: backend/api/message_handlers_core.py:576
+#: backend/api/message_handlers_core.py:584
 msgid "Agent registered and connected successfully"
 msgstr "Agente registrado y conectado exitosamente"
 
-#: backend/api/message_handlers_core.py:947
+#: backend/api/message_handlers_core.py:955
 msgid "Failed to process heartbeat"
 msgstr "No se pudo procesar el latido"
 
@@ -3463,50 +3463,51 @@ msgid "This host's agent cannot check that yet; upgrade the agent first"
 msgstr ""
 "El agente de este host aún no puede comprobarlo; actualice primero el agente"
 
-#: backend/api/antivirus_defaults.py:68
+#: backend/api/antivirus_defaults.py:69
 msgid "OS name must be 100 characters or less"
 msgstr "El nombre del sistema operativo debe tener 100 caracteres o menos"
 
-#: backend/api/antivirus_defaults.py:81
+#: backend/api/antivirus_defaults.py:82
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "El nombre del paquete de antivirus debe tener 255 caracteres o menos"
 
-#: backend/api/antivirus_defaults.py:106
+#: backend/api/antivirus_defaults.py:107
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "No se pudo recuperar los valores predeterminados del antivirus: %s"
 
-#: backend/api/antivirus_defaults.py:127
+#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
+#: backend/api/antivirus_defaults.py:302
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "Permiso denegado: se requiere el rol MANAGE_ANTIVIRUS_DEFAULTS"
+
+#: backend/api/antivirus_defaults.py:170
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr ""
 "No se encontró una configuración predeterminada de antivirus para OS: %s"
 
-#: backend/api/antivirus_defaults.py:140
+#: backend/api/antivirus_defaults.py:183
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "No se pudo recuperar el valor predeterminado del antivirus: %s"
 
-#: backend/api/antivirus_defaults.py:159 backend/api/antivirus_defaults.py:259
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "Permiso denegado: se requiere el rol MANAGE_ANTIVIRUS_DEFAULTS"
-
-#: backend/api/antivirus_defaults.py:240
+#: backend/api/antivirus_defaults.py:283
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr ""
 "Falló la actualización de los valores predeterminados del antivirus: %s"
 
-#: backend/api/antivirus_defaults.py:293
+#: backend/api/antivirus_defaults.py:336
 msgid "Antivirus default deleted successfully"
 msgstr "Eliminación exitosa del antivirus predeterminado"
 
-#: backend/api/antivirus_defaults.py:295
+#: backend/api/antivirus_defaults.py:338
 msgid "No antivirus default found for this OS"
 msgstr ""
 "No se encontró una configuración predeterminada de antivirus para este OS"
 
-#: backend/api/antivirus_defaults.py:303
+#: backend/api/antivirus_defaults.py:346
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "No se pudo borrar la configuración predeterminada de antivirus: %s"
@@ -3913,23 +3914,23 @@ msgstr "No se pudo contar paquetes: %s"
 msgid "Failed to search packages: %s"
 msgstr "Error al buscar paquetes: %s"
 
-#: backend/api/host.py:235
+#: backend/api/host.py:236
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Permiso denegado: se requiere el rol DELETE_HOST"
 
-#: backend/api/host.py:299
+#: backend/api/host.py:300
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Permiso denegado: se requiere el rol VIEW_HOST_DETAILS"
 
-#: backend/api/host.py:688
+#: backend/api/host.py:689
 msgid "Host already exists"
 msgstr "El host ya existe"
 
-#: backend/api/host.py:800
+#: backend/api/host.py:801
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registro absorbido: el host fue recientemente eliminado"
 
-#: backend/api/host.py:880
+#: backend/api/host.py:881
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -4022,34 +4023,34 @@ msgstr "Este trabajo ya ha finalizado"
 msgid "Cancelled by an operator"
 msgstr "Cancelado por un operador"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:645
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "No se pudo procesar el resultado diagnóstico: %s"
 
-#: backend/api/message_handlers.py:662
+#: backend/api/message_handlers.py:679
 msgid "Missing message_id in command acknowledgment"
 msgstr "Falta message_id en la confirmación de comando"
 
-#: backend/api/message_handlers.py:729
+#: backend/api/message_handlers.py:746
 msgid "This session cannot acknowledge another host's message"
 msgstr "Esta sesión no puede confirmar el mensaje de otro host"
 
-#: backend/api/message_handlers.py:799
+#: backend/api/message_handlers.py:816
 msgid "Missing installation_id in package installation status"
 msgstr "Falta installation_id en el estado de instalación del paquete"
 
-#: backend/api/message_handlers.py:819
+#: backend/api/message_handlers.py:836
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "No se encontró entrada de registro de instalación para ID: %s"
 
-#: backend/api/message_handlers.py:865
+#: backend/api/message_handlers.py:882
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Instalación del paquete {status} en el agente {hostname}"
 
-#: backend/api/message_handlers.py:894
+#: backend/api/message_handlers.py:911
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Falló la actualización del estado de instalación del paquete: %s"
@@ -4126,19 +4127,19 @@ msgstr "Colados exitosamente %d paquetes para desinstalación"
 msgid "Failed to queue package uninstallation: %s"
 msgstr "No se pudo colocar la desinstalación del paquete en cola: %s"
 
-#: backend/api/host_data_updates.py:130
+#: backend/api/host_data_updates.py:132
 msgid "Hardware information updated successfully"
 msgstr "Información de hardware actualizada correctamente"
 
-#: backend/api/host_data_updates.py:187
+#: backend/api/host_data_updates.py:189
 msgid "Hardware update requested"
 msgstr "Actualización de hardware solicitada"
 
-#: backend/api/host_data_updates.py:313
+#: backend/api/host_data_updates.py:315
 msgid "User access update requested"
 msgstr "Actualización de acceso de usuarios solicitada"
 
-#: backend/api/host_data_updates.py:367
+#: backend/api/host_data_updates.py:369
 msgid "System info update requested"
 msgstr "Se ha solicitado la actualización de la información del sistema"
 
@@ -5240,21 +5241,12 @@ msgstr "No se pudo determinar el sistema operativo del host"
 msgid "No antivirus default configured for OS: %s"
 msgstr "No hay configuración predeterminada de antivirus para OS: %s"
 
-#: backend/api/antivirus_status.py:267
-#, python-format
-msgid ""
-"%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
-"MB"
-msgstr ""
-"%(package)s necesita al menos %(needed)d MB de memoria; este host tiene "
-"%(total)d MB"
-
-#: backend/api/antivirus_status.py:343
+#: backend/api/antivirus_status.py:346
 #, python-format
 msgid "Antivirus deployment initiated for all %d hosts"
 msgstr "Iniciada la implementación del antivirus para todos los %d hosts"
 
-#: backend/api/antivirus_status.py:346
+#: backend/api/antivirus_status.py:349
 #, python-format
 msgid ""
 "Antivirus deployment initiated for %(success_count)d of %(total_count)d "
@@ -5263,26 +5255,57 @@ msgstr ""
 "Se inició la distribución del antivirus para %(success_count)d de "
 "%(total_count)d hosts"
 
-#: backend/api/antivirus_status.py:352
+#: backend/api/antivirus_status.py:355
 msgid "Antivirus deployment failed for all hosts"
 msgstr "Fallo en la implementación del antivirus para todos los hosts"
 
-#: backend/api/antivirus_status.py:424
+#: backend/api/antivirus_status.py:379
+#, python-format
+msgid ""
+"%(package)s needs at least %(needed)d MB of memory and swap; this host has "
+"%(total)d MB of memory and %(swap)d MB of swap"
+msgstr ""
+"%(package)s necesita al menos %(needed)d MB de memoria y swap; este host "
+"tiene %(total)d MB de memoria y %(swap)d MB de swap"
+
+#: backend/api/antivirus_status.py:389
+msgid ""
+"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+"page, or add memory."
+msgstr ""
+"Habilite Agregar intercambio a los hosts por debajo del piso de memoria en "
+"la página de configuraciones predeterminadas del antivirus, o agregue "
+"memoria."
+
+#: backend/api/antivirus_status.py:394
+#, python-format
+msgid "Swap cannot be added: %s"
+msgstr "No se puede agregar el intercambio: %s"
+
+#: backend/api/antivirus_status.py:462
 msgid "Antivirus enable command sent successfully"
 msgstr "Comando de habilitación del antivirus enviado exitosamente"
 
-#: backend/api/antivirus_status.py:492
+#: backend/api/antivirus_status.py:530
 msgid "Antivirus disable command sent successfully"
 msgstr "Comando de deshabilitación del antivirus enviado exitosamente"
 
-#: backend/api/antivirus_status.py:570
+#: backend/api/antivirus_status.py:608
 msgid "Antivirus remove command sent successfully"
 msgstr "Comando de eliminación del antivirus enviado exitosamente"
 
-#: backend/api/antivirus_status.py:639
+#: backend/api/antivirus_status.py:677
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "No se pudo recuperar la cobertura del antivirus: %s"
+
+#: backend/api/antivirus_status.py:718
+msgid "SysManage has not added swap to this host"
+msgstr "SysManage no ha agregado intercambio a este host"
+
+#: backend/api/antivirus_status.py:737
+msgid "Swap removal sent"
+msgstr "Se envió la eliminación de intercambio"
 
 #: backend/api/child_host_utils.py:25
 msgid "Child host engine could not dispatch this request."
@@ -6916,11 +6939,11 @@ msgstr "Ese destino aún no tiene un host de almacenamiento"
 msgid "Move not found"
 msgstr "No se ha encontrado el movimiento"
 
-#: backend/services/backup_moves.py:589 backend/services/backup_moves.py:609
+#: backend/services/backup_moves.py:618 backend/services/backup_moves.py:638
 msgid "This move's old repository is no longer kept"
 msgstr "El antiguo repositorio de este movimiento ya no se conserva"
 
-#: backend/services/backup_moves.py:596
+#: backend/services/backup_moves.py:625
 #, python-format
 msgid ""
 "The old target seals its backups; this old repository can be removed from %s"
@@ -7046,11 +7069,11 @@ msgstr "Respuesta del vault no válida"
 msgid "Invalid secret format"
 msgstr "Formato de secreto no válido"
 
-#: backend/services/backup_replicas.py:767
+#: backend/services/backup_replicas.py:773
 msgid "This host has no off-site copy"
 msgstr "Este host no tiene una copia fuera del sitio"
 
-#: backend/services/backup_replicas.py:769
+#: backend/services/backup_replicas.py:775
 msgid ""
 "The off-site copy cannot be read yet: its storage host has not been told "
 "this host's read token"
@@ -7058,11 +7081,11 @@ msgstr ""
 "La copia fuera del sitio aún no se puede leer: a su host de almacenamiento "
 "todavía no se le ha comunicado el token de lectura de este host"
 
-#: backend/services/backup_replicas.py:772
+#: backend/services/backup_replicas.py:778
 msgid "That snapshot is not in the off-site copy"
 msgstr "Esa instantánea no está en la copia fuera del sitio"
 
-#: backend/services/backup_replicas.py:774
+#: backend/services/backup_replicas.py:780
 msgid "This host's agent cannot read its off-site copy yet; upgrade the agent"
 msgstr ""
 "El agente de este host aún no puede leer su copia fuera del sitio; actualice"
@@ -7162,6 +7185,14 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "Vulnerabilidades de macOS por versión del sistema operativo, según los datos"
 " de versiones afectadas del NVD"
+
+#, python-format
+#~ msgid ""
+#~ "%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
+#~ "MB"
+#~ msgstr ""
+#~ "%(package)s necesita al menos %(needed)d MB de memoria; este host tiene "
+#~ "%(total)d MB"
 
 #~ msgid ""
 #~ "This host already has backups on its target; it cannot move to another "
