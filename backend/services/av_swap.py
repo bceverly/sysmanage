@@ -112,10 +112,11 @@ def waiting(record: Any, now: datetime) -> Optional[str]:
     """Why the host waits on a swap already asked for, or None."""
     if record is None:
         return None
-    if record.status == STATUS_ADDING:
-        if record.requested_at > now - timedelta(hours=SWAP_RETRY_HOURS):
-            return "adding_swap"
-        return None  # no answer in a day: ask again
+    # An add with no answer in a day falls through to None: ask again.
+    if record.status == STATUS_ADDING and record.requested_at > now - timedelta(
+        hours=SWAP_RETRY_HOURS
+    ):
+        return "adding_swap"
     if record.status == STATUS_FAILED and (
         record.finished_at or record.requested_at
     ) > now - timedelta(hours=SWAP_RETRY_HOURS):
