@@ -113,6 +113,9 @@ class SoftwarePackage(Base):
     # best-effort confinement. Nullable -- only populated for snap packages.
     channel = Column(String(100), nullable=True)
     revision = Column(String(255), nullable=True)  # snap revision or image digest
+    # The source package it was built from (Debian, RPM, Alpine): what those
+    # distributions' advisories name (q110srcpkg).
+    source_package = Column(String(255), nullable=True)
     confinement = Column(String(20), nullable=True)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)

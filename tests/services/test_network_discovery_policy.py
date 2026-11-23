@@ -197,7 +197,8 @@ class TestReconcile:
                 "deferred": 0,
             }
             # advisor (21.2), network discovery (21.6), malware (21.3),
-            # hardware (23.1), OS lifecycle (14.3), compliance scan (24.4):
+            # hardware (23.1), OS lifecycle (14.3), compliance scan (24.4),
+            # advisory refresh (2026-11-23):
             # none licensed.  Backups (24) are Community and always start --
             # stubbed here so no real task is created.
             with patch.object(
@@ -207,7 +208,7 @@ class TestReconcile:
             ), patch.object(
                 background_ticks.backup_tick, "start_if_licensed", return_value=None
             ):
-                assert background_ticks.start_licensed_ticks() == [None] * 7
+                assert background_ticks.start_licensed_ticks() == [None] * 8
 
 
 class TestRecorrelate:

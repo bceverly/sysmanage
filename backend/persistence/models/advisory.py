@@ -155,6 +155,9 @@ class SharedAdvisoryPackage(Base):
     # The fixed version differs per OS release, so keep the release alongside it.
     release = Column(String(100), nullable=True, index=True)  # e.g. "ubuntu:22.04"
     fixed_version = Column(String(100), nullable=True)
+    # The first version affected, where the feed gives one (FreeBSD's VuXML
+    # ranges): older versions are not affected (s20advfrom).
+    affected_from = Column(String(100), nullable=True)
     source = Column(String(100), nullable=True)
     created_at = Column(DateTime, nullable=False, default=_utcnow)
     updated_at = Column(DateTime, nullable=False, default=_utcnow, onupdate=_utcnow)
@@ -168,6 +171,7 @@ class SharedAdvisoryPackage(Base):
             "package_manager": self.package_manager,
             "release": self.release,
             "fixed_version": self.fixed_version,
+            "affected_from": self.affected_from,
         }
 
 

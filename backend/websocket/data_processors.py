@@ -127,6 +127,7 @@ def process_software_packages(db: Session, host_id: str, packages_data: list):
                 channel=package_data.get("channel"),
                 revision=package_data.get("revision"),
                 confinement=package_data.get("confinement"),
+                source_package=package_data.get("source_package"),
                 created_at=datetime.now(timezone.utc).replace(tzinfo=None),
                 updated_at=datetime.now(timezone.utc).replace(tzinfo=None),
             )

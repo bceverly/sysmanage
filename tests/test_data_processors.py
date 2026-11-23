@@ -353,6 +353,23 @@ class TestProcessSoftwarePackages:
         assert kwargs["confinement"] == "classic"
 
     @patch("backend.websocket.data_processors.SoftwarePackage")
+    def test_process_software_packages_keeps_the_source_package(self, mock_package):
+        """Debian, Fedora and Alpine advisories name the SOURCE package; the
+        agent reports what each binary was built from (2026-11-23)."""
+        from backend.websocket.data_processors import process_software_packages
+
+        packages_data = [
+            {"package_name": "libssl3", "version": "3.0.15-1~deb12u1",
+             "package_manager": "apt", "source_package": "openssl"},
+            {"package_name": "vim", "version": "9.1", "package_manager": "apt"},
+        ]  # fmt: skip
+
+        process_software_packages(MagicMock(), "test-host-id", packages_data)
+
+        sources = [c.kwargs["source_package"] for c in mock_package.call_args_list]
+        assert sources == ["openssl", None]
+
+    @patch("backend.websocket.data_processors.SoftwarePackage")
     def test_process_software_packages_non_snap_leaves_channel_none(self, mock_package):
         """A non-snap package leaves the snap-only columns NULL."""
         from backend.websocket.data_processors import process_software_packages

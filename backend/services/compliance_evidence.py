@@ -41,6 +41,14 @@ SECTION_TYPES = {
     "audit_rules": list,
     "umask": str,
     "fips_enabled": bool,
+    # Windows, macOS and the BSDs (2026-11-23): flat {setting: value} maps.
+    "win_security_policy": dict,
+    "win_audit_policy": dict,
+    "win_registry": dict,
+    "win_services": dict,
+    "macos_settings": dict,
+    "rc_conf": dict,
+    "bsd_settings": dict,
 }
 MAX_SECTIONS_BYTES = 512 * 1024
 _MAX_STATUS = 32

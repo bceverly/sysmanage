@@ -11,6 +11,7 @@ handling in a ``start_if_licensed()``; this only calls them in turn.
 
 from backend.services import (
     advisor_tick,
+    advisory_tick,
     backup_tick,
     compliance_scan_tick,
     hardware_tick,
@@ -28,6 +29,7 @@ def start_licensed_ticks():
         malware_tick.start_if_licensed(),  # 21.3 malware rule feed
         hardware_tick.start_if_licensed(),  # 23.1 smartmontools auto-install
         os_lifecycle_tick.start_if_licensed(),  # 14.3 EOL registry refresh
+        advisory_tick.start_if_licensed(),  # vendor advisories, every distribution
         compliance_scan_tick.start_if_licensed(),  # 24.4 scheduled compliance scan
         backup_tick.start_if_licensed(),  # 24 restate backups (Community)
     ]

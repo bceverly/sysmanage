@@ -38,7 +38,7 @@ debug_logger = logging.getLogger("debug_logger")
 
 SOFTWARE_COLUMNS = ("package_name", "package_version", "package_manager",
                     "package_description", "architecture", "install_path",
-                    "channel", "revision", "confinement")  # fmt: skip
+                    "channel", "revision", "confinement", "source_package")  # fmt: skip
 
 
 def _software_row(package: dict) -> dict:
@@ -52,6 +52,7 @@ def _software_row(package: dict) -> dict:
         "channel": package.get("channel"),
         "revision": package.get("revision"),
         "confinement": package.get("confinement"),
+        "source_package": package.get("source_package"),
     }
 
 
