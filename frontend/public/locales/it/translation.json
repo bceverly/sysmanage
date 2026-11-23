@@ -6228,7 +6228,8 @@
       "agentOutdated": "L'agente dell'host di archiviazione è troppo vecchio per il backup di iCloud. Aggiorna l'agente.",
       "prepareFailed": "Non è stato possibile preparare lo spazio per le foto nell'archivio.",
       "unknown": "Il processo non è terminato. I dettagli qui sotto spiegano perché.",
-      "appleBusy": "Apple ha continuato a rifiutare i download per questo account, quindi SysManage ha smesso di riprovare. Non si perde nulla: premi Esegui ora per continuare."
+      "appleBusy": "Apple ha continuato a rifiutare i download per questo account, quindi SysManage ha smesso di riprovare. Non si perde nulla: premi Esegui ora per continuare.",
+      "appleIndexing": "Apple stava ancora preparando questa libreria foto per il download a ogni tentativo, quindi SysManage ha smesso di riprovare. Va tutto bene: premi Esegui ora per riprovare."
     },
     "dashboard": {
       "needsSignIn": "Account iCloud che richiedono l'accesso: {{n}}",
@@ -6251,7 +6252,8 @@
       "expiring": "Scade presto: premi Connetti",
       "librariesFound": "Librerie trovate: {{names}}. Scegline una con Modifica.",
       "librariesOnlyPersonal": "È stata trovata solo la libreria personale: non c'è nessuna libreria condivisa da scegliere.",
-      "retryAt": "Apple sta limitando i download per questo account. Non si perde nulla: SysManage riproverà alle {{time}}."
+      "retryAt": "Apple sta limitando i download per questo account. Non si perde nulla: SysManage riproverà alle {{time}}.",
+      "indexingRetryAt": "Apple sta ancora preparando questa libreria foto per il download, cosa che fa la prima volta che una libreria viene raggiunta dall'esterno dei dispositivi Apple. Va tutto bene: SysManage riproverà alle {{time}}."
     },
     "code": {
       "failed": "Impossibile inviare il codice.",

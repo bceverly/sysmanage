@@ -6228,7 +6228,8 @@
       "agentOutdated": "Der Agent des Speicher-Hosts ist zu alt für die iCloud-Sicherung. Aktualisieren Sie den Agenten.",
       "prepareFailed": "Der Ablageort für die Fotos konnte im Speicher nicht vorbereitet werden.",
       "unknown": "Der Auftrag wurde nicht abgeschlossen. Die Details unten nennen den Grund.",
-      "appleBusy": "Apple hat Downloads für dieses Konto wiederholt abgelehnt, daher hat SysManage die Versuche eingestellt. Nichts geht verloren: Klicken Sie auf Jetzt ausführen, um fortzufahren."
+      "appleBusy": "Apple hat Downloads für dieses Konto wiederholt abgelehnt, daher hat SysManage die Versuche eingestellt. Nichts geht verloren: Klicken Sie auf Jetzt ausführen, um fortzufahren.",
+      "appleIndexing": "Apple hat diese Mediathek bei jedem Versuch noch für den Download vorbereitet, daher hat SysManage aufgehört, es zu versuchen. Es ist alles in Ordnung: Drücken Sie Jetzt ausführen, um es erneut zu versuchen."
     },
     "dashboard": {
       "needsSignIn": "iCloud-Konten, die eine Anmeldung benötigen: {{n}}",
@@ -6251,7 +6252,8 @@
       "expiring": "Endet bald: klicken Sie auf Verbinden",
       "librariesFound": "Gefundene Mediatheken: {{names}}. Wählen Sie eine mit Bearbeiten.",
       "librariesOnlyPersonal": "Nur die persönliche Mediathek wurde gefunden: Es gibt keine geteilte Mediathek zur Auswahl.",
-      "retryAt": "Apple begrenzt Downloads für dieses Konto. Nichts geht verloren: SysManage versucht es um {{time}} erneut."
+      "retryAt": "Apple begrenzt Downloads für dieses Konto. Nichts geht verloren: SysManage versucht es um {{time}} erneut.",
+      "indexingRetryAt": "Apple bereitet diese Mediathek noch für den Download vor; das geschieht, wenn eine Mediathek zum ersten Mal von außerhalb der Apple-Geräte abgerufen wird. Es ist alles in Ordnung: SysManage versucht es um {{time}} erneut."
     },
     "code": {
       "failed": "Der Code konnte nicht gesendet werden.",

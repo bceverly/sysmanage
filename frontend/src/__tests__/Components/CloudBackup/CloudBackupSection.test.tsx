@@ -119,6 +119,20 @@ describe("CloudBackupSection", () => {
     expect(screen.queryByText(/stopped trying/)).not.toBeInTheDocument();
   });
 
+  test("says Apple is still indexing a new library, not that it failed", async () => {
+    vi.mocked(getCloudOverview).mockResolvedValue({
+      ...OVERVIEW, enabled: true, accounts: [{
+        ...ACCOUNT, status: "cooling_down", session_created_at: "2026-11-23T13:49:28Z",
+        retry_at: "2026-11-23T14:53:48",
+        last_run: { ...RUN, action: "reconcile", status: "failed", reason: "apple_indexing", waiting_code: false },
+      }],
+    } as never);
+    render(<CloudBackupSection onError={vi.fn()} />);
+    expect(await screen.findByText("Waiting for Apple")).toBeInTheDocument();
+    expect(screen.getByText(/Apple is still preparing this library for download/)).toBeInTheDocument();
+    expect(screen.queryByText(/Apple is limiting downloads/)).not.toBeInTheDocument();
+  });
+
   test("sends the password once with a new account", async () => {
     vi.mocked(getCloudOverview).mockResolvedValue({ ...OVERVIEW, enabled: true } as never);
     vi.mocked(createCloudAccount).mockResolvedValue(ACCOUNT as never);

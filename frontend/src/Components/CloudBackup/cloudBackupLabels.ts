@@ -76,6 +76,9 @@ export const reasonText = (t: TFunction, reason: string | null, fallback: string
         case 'apple_busy':
             return t('cloudBackup.reason.appleBusy',
                 'Apple kept refusing downloads for this account, so SysManage stopped trying. Nothing is lost: press Run now to carry on.');
+        case 'apple_indexing':
+            return t('cloudBackup.reason.appleIndexing',
+                'Apple was still preparing this library for download every time SysManage tried, so it stopped trying. Nothing is wrong: press Run now to try again.');
         case 'listing_incomplete':
             return t('cloudBackup.reason.listingIncomplete',
                 'iCloud ended its list of photos early, so not every photo was seen. Nothing is lost: the rest is downloaded on the next run.');

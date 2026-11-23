@@ -172,9 +172,13 @@ const CloudAccountRow: React.FC<RowProps> = ({ account, canManage, onConnect, on
                 )}
                 {account.status === 'cooling_down' && (
                     <Typography variant="caption" color="warning.main" sx={{ display: 'block', maxWidth: 360 }}>
-                        {t('cloudBackup.table.retryAt',
-                            'Apple is limiting downloads for this account. Nothing is lost: SysManage tries again at {{time}}.',
-                            { time: formatTime(account.retry_at) })}
+                        {run?.reason === 'apple_indexing'
+                            ? t('cloudBackup.table.indexingRetryAt',
+                                "Apple is still preparing this library for download, which it does the first time a library is reached from outside Apple's own devices. Nothing is wrong: SysManage tries again at {{time}}.",
+                                { time: formatTime(account.retry_at) })
+                            : t('cloudBackup.table.retryAt',
+                                'Apple is limiting downloads for this account. Nothing is lost: SysManage tries again at {{time}}.',
+                                { time: formatTime(account.retry_at) })}
                     </Typography>
                 )}
                 {problem && (

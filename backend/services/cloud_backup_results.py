@@ -169,6 +169,8 @@ def _reason(payload: Dict[str, Any], detail: Optional[str]) -> Optional[str]:
     called it "tool_failed", so the cooldown retry (cloud_backup_tick) works
     with it too."""
     reason = _text(payload.get("reason"), 64)
+    if reason in (None, "tool_failed") and tick.apple_indexing(detail):
+        return tick.APPLE_INDEXING
     if reason in (None, "tool_failed") and tick.apple_stopped(detail):
         return tick.APPLE_BUSY
     return reason
@@ -178,6 +180,13 @@ def _reason(payload: Dict[str, Any], detail: Optional[str]) -> Optional[str]:
 APPLE_BUSY_MESSAGE = (
     "Apple is limiting downloads for this account. Nothing is lost: "
     "the download is tried again after a cooldown."
+)
+
+
+APPLE_INDEXING_MESSAGE = (
+    "Apple is still preparing this iCloud Photo Library for download, which "
+    "it does the first time a library is reached from outside Apple's own "
+    "devices. Nothing is wrong: the download is tried again after a cooldown."
 )
 
 
@@ -226,6 +235,8 @@ def record_result(db: Session, host_id: Any, payload: Dict[str, Any]):
             "reason": tick.APPLE_BUSY,
             "message": APPLE_BUSY_MESSAGE,
         }
+    if status == cloud.FAILED and _reason(payload, detail) == tick.APPLE_INDEXING:
+        payload = {**payload, "message": APPLE_INDEXING_MESSAGE}
     now = cloud.now()
     run.status = status
     run.finished_at = now

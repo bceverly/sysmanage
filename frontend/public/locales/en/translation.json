@@ -6228,7 +6228,8 @@
       "agentOutdated": "The storage host's agent is too old for iCloud backup. Update the agent.",
       "prepareFailed": "The place for the photos could not be prepared on the storage.",
       "unknown": "The job did not finish. The details below say why.",
-      "appleBusy": "Apple kept refusing downloads for this account, so SysManage stopped trying. Nothing is lost: press Run now to carry on."
+      "appleBusy": "Apple kept refusing downloads for this account, so SysManage stopped trying. Nothing is lost: press Run now to carry on.",
+      "appleIndexing": "Apple was still preparing this library for download every time SysManage tried, so it stopped trying. Nothing is wrong: press Run now to try again."
     },
     "dashboard": {
       "needsSignIn": "iCloud accounts that need sign-in: {{n}}",
@@ -6251,7 +6252,8 @@
       "expiring": "Ends soon: press Connect",
       "librariesFound": "Libraries found: {{names}}. Choose one with Edit.",
       "librariesOnlyPersonal": "Only the personal library was found: there is no shared library to choose.",
-      "retryAt": "Apple is limiting downloads for this account. Nothing is lost: SysManage tries again at {{time}}."
+      "retryAt": "Apple is limiting downloads for this account. Nothing is lost: SysManage tries again at {{time}}.",
+      "indexingRetryAt": "Apple is still preparing this library for download, which it does the first time a library is reached from outside Apple's own devices. Nothing is wrong: SysManage tries again at {{time}}."
     },
     "code": {
       "failed": "The code could not be sent.",

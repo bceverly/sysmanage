@@ -69,6 +69,23 @@ APPLE_BUSY_MARKERS = (
 _LOG_PREFIX = re.compile(r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(?:,\d+)? +[A-Z]+ +")
 
 
+# Apple builds a library's index the first time it is reached from outside
+# Apple's own devices, and until then icloudpd stops with this line and exit
+# 1 (2026-11-23: a second Apple ID added to production -- signed in fine, then
+# "failed: icloudpd exited with status 1" with the next try a day away).  It
+# is waited out like a refusal: the same cooldowns, its own words.
+APPLE_INDEXING = "apple_indexing"
+APPLE_INDEXING_MARKERS = ("Apple iCloud Photo Library has not finished indexing yet",)
+
+
+def apple_indexing(detail) -> bool:
+    """Whether icloudpd stopped because Apple is still indexing the library."""
+    for line in (detail or "").splitlines():
+        if _LOG_PREFIX.sub("", line.strip()).startswith(APPLE_INDEXING_MARKERS):
+            return True
+    return False
+
+
 def apple_stopped(detail) -> bool:
     """A line whose MESSAGE is one of the markers: the run was stopped.  A
     message that only contains one is about one file -- icloudpd 1.33.0 logs
@@ -151,7 +168,10 @@ def _last(db: Session, account_id, statuses) -> Optional[models.CloudBackupRun]:
 
 
 def _apple_busy(run: models.CloudBackupRun) -> bool:
-    return (cloud.parse_json(run.result) or {}).get("reason") == APPLE_BUSY
+    """A download Apple stopped -- refusing it, or still indexing the
+    library: either way it is tried again after a cooldown."""
+    reason = (cloud.parse_json(run.result) or {}).get("reason")
+    return reason in (APPLE_BUSY, APPLE_INDEXING)
 
 
 def apple_refusals(db: Session, account_id) -> List[models.CloudBackupRun]:

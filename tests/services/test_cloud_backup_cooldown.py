@@ -174,3 +174,32 @@ def test_a_jobs_icloudpd_version_is_kept(session, sent):
         "run_id": str(run.id), "status": "ok", "exit_code": 0, "tool_version": "1.33.0",
     })  # fmt: skip
     assert cloud.enable_row(session, run.target_id).tool_version == "1.33.0"
+
+
+# icloudpd's words for a library Apple has not indexed yet (production,
+# 2026-11-23: a second Apple ID signed in, then its first download stopped
+# after 66 s with this line and exit 1).
+INDEXING = (
+    "2026-11-23 13:52:41 INFO     Processing user: judy@example.com\n"
+    "2026-11-23 13:53:46 INFO     Apple iCloud Photo Library has not finished indexing yet"
+)
+
+
+def test_a_library_apple_is_still_indexing_waits_and_is_retried(session, sent):
+    s, account = _account(session, enabled=True)
+    ended = cloud.now() - timedelta(minutes=10)
+    run = _finish(session, s, account, ended, status="failed", exit_code=1,
+                  reason="tool_failed", detail=INDEXING,
+                  message="icloudpd exited with status 1")  # fmt: skip
+    assert cloud.parse_json(run.result)["reason"] == tick.APPLE_INDEXING
+    assert "still preparing this iCloud Photo Library" in run.message
+    shown = views.account_dict(session, account)
+    assert shown["status"] == tick.COOLING_DOWN  # waiting, not failed
+    assert shown["retry_at"] == (ended + timedelta(hours=1)).isoformat()
+    assert tick.due(session, account, ended + timedelta(hours=1))
+
+
+def test_indexing_is_recognized_only_as_icloudpds_own_line():
+    assert tick.apple_indexing(INDEXING)
+    assert not tick.apple_indexing("Downloaded has not finished indexing yet.HEIC")
+    assert not tick.apple_indexing(REFUSED)
