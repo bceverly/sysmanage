@@ -136,22 +136,19 @@ class HostRegistrationLegacy(BaseModel):
     os_info: Optional[Dict[str, Any]] = None
 
 
+# Copied as they are from the host row into every host view.
+_PLATFORM_FIELDS = (
+    "platform", "platform_release", "platform_version", "machine_architecture",
+    "processor", "cpu_vendor", "cpu_model", "cpu_cores", "cpu_threads",
+    "cpu_frequency_mhz", "memory_total_mb", "swap_total_mb",
+)  # fmt: skip
+
+
 def _hardware_fields(host) -> dict:
     """What every host view shows of its platform and hardware, and whether
     it needs a reboot or its package manager a repair (2026-11-13)."""
     return {
-        "platform": host.platform,
-        "platform_release": host.platform_release,
-        "platform_version": host.platform_version,
-        "machine_architecture": host.machine_architecture,
-        "processor": host.processor,
-        "cpu_vendor": host.cpu_vendor,
-        "cpu_model": host.cpu_model,
-        "cpu_cores": host.cpu_cores,
-        "cpu_threads": host.cpu_threads,
-        "cpu_frequency_mhz": host.cpu_frequency_mhz,
-        "memory_total_mb": host.memory_total_mb,
-        "swap_total_mb": getattr(host, "swap_total_mb", None),
+        **{name: getattr(host, name, None) for name in _PLATFORM_FIELDS},
         "reboot_required": host.reboot_required,
         "package_manager_needs_repair": bool(
             getattr(host, "package_manager_needs_repair", False)
