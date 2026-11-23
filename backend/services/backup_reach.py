@@ -64,6 +64,9 @@ HOLD_SECONDS = 60
 PORT = 2049
 UNREACHABLE = "storage_unreachable"
 RECHECK_AFTER = timedelta(days=1)
+# A failed check of a restate-proxy is asked again sooner: the proxy may just
+# have been set up (its first host's Prepare starts it).
+PROXY_RECHECK_FAILED = timedelta(minutes=15)
 # A check unanswered this long (agent away) may be asked again.
 ANSWER_WITHIN = timedelta(minutes=10)
 
@@ -116,6 +119,16 @@ def state(db: Session, host: models.Host) -> Optional[Dict[str, Any]]:
         return None
     if row.reachable is None:
         return None
+    if (
+        not row.reachable
+        and storage["proxy"] is not None
+        and not _proxy_set_up(db, host)
+    ):
+        # Its first host's Prepare is what starts a proxy: until the storage
+        # host has taken a configure for the target, failing to reach it says
+        # nothing -- and blocking on it kept the first policy from ever being
+        # saved (isolated-network lab, 2026-11-23).
+        return None
     return {
         "reachable": bool(row.reachable),
         "seen_as": row.seen_as,
@@ -127,6 +140,23 @@ def state(db: Session, host: models.Host) -> Optional[Dict[str, Any]]:
         "checked_at": row.checked_at.isoformat() if row.checked_at else None,
         "proxy": storage["proxy"] is not None,
     }
+
+
+def _proxy_set_up(db: Session, host: models.Host) -> bool:
+    """The storage host has taken a configure for the host's target (so its
+    restate-proxy runs)."""
+    target = jobs.host_target(db, host)
+    if target is None:
+        return False
+    return (
+        db.query(models.BackupPolicy.id)
+        .filter(
+            models.BackupPolicy.target_id == target.id,
+            models.BackupPolicy.storage_acked_version > 0,
+        )
+        .first()
+        is not None
+    )
 
 
 def _same(row: models.BackupReach, storage: Dict[str, Any]) -> bool:
@@ -186,6 +216,8 @@ def due(db: Session, host: models.Host, now=None) -> bool:
         return True
     if row.checked_at is None or row.requested_at > row.checked_at:
         return row.requested_at + ANSWER_WITHIN <= now
+    if not row.reachable and storage["proxy"] is not None:
+        return row.checked_at + PROXY_RECHECK_FAILED <= now
     return row.checked_at + RECHECK_AFTER <= now
 
 

@@ -116,11 +116,10 @@ def waiting(record: Any, now: datetime) -> Optional[str]:
         if record.requested_at > now - timedelta(hours=SWAP_RETRY_HOURS):
             return "adding_swap"
         return None  # no answer in a day: ask again
-    if record.status == STATUS_FAILED:
-        if (record.finished_at or record.requested_at) > now - timedelta(
-            hours=SWAP_RETRY_HOURS
-        ):
-            return "swap_failed"
+    if record.status == STATUS_FAILED and (
+        record.finished_at or record.requested_at
+    ) > now - timedelta(hours=SWAP_RETRY_HOURS):
+        return "swap_failed"
     return None
 
 

@@ -256,6 +256,13 @@ for (const tier of ['community', 'professional', 'enterprise'] as const) {
 }
 
 test.describe('license matrix -- nav items follow the license', () => {
+    // Wide enough for the full menubar.  Since 2026-11-22 the navbar measures
+    // whether its categories fit and, where they do not (Playwright's default
+    // 1280x720, with the Enterprise categories), collapses them into the
+    // drawer -- so there is no "Security" menuitem to click.  The compact
+    // layout has its own unit tests (useMenubarFits.test.ts).
+    test.use({ viewport: { width: 1920, height: 1080 } });
+
     test('community: /secrets and /reports nav links are hidden', async ({
         page,
     }) => {

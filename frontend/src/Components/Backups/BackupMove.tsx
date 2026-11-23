@@ -19,7 +19,7 @@ import { cancelMove, keepOldRepository, removeOldRepository } from '../../Servic
 import type { BackupMove } from '../../Services/backups';
 import { apiDetail, formatTime } from './backupLabels';
 
-const MOVING = ['copying', 'verifying'];
+const MOVING = new Set(['copying', 'verifying']);
 
 const OldRepository: React.FC<{
     move: BackupMove;
@@ -119,7 +119,7 @@ export const HostMove: React.FC<{
                     ? t('backups.move.checking', 'Moving to {{target}}: checking the copy', { target })
                     : t('backups.move.copying', 'Moving to {{target}}: snapshots copied {{copied}} of {{total}}',
                         { target, copied, total: move.total })}
-                {canManage && MOVING.includes(move.status) && (
+                {canManage && MOVING.has(move.status) && (
                     <Button size="small" sx={{ ml: 1 }} onClick={() => void cancel()}>
                         {t('backups.move.cancel', 'Cancel move')}
                     </Button>

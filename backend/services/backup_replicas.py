@@ -630,10 +630,6 @@ def _after_prune(_db: Session, row, run, result) -> None:
 
 def record_du(row: Any, run: models.BackupRun, result: Dict[str, Any]) -> None:
     """What a du of the copy listed: its snapshots and size."""
-    _after_du(None, row, run, result)
-
-
-def _after_du(_db: Session, row, run, result) -> None:
     if run.status != "ok":
         return
     usage = result.get("du") if isinstance(result.get("du"), dict) else {}
@@ -645,6 +641,10 @@ def _after_du(_db: Session, row, run, result) -> None:
         row.newest_at = _stamp(names[-1]) if names else None
     if isinstance(usage.get("bytes"), int):
         row.repository_bytes = usage["bytes"]
+
+
+def _after_du(_db: Session, row, run, result) -> None:
+    record_du(row, run, result)
 
 
 def _stamp(name: str) -> Optional[datetime]:

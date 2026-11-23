@@ -26,7 +26,10 @@ jobs:
   test-backend-postgres:
     name: Backend Tests (Linux + PostgreSQL)
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # 75, not 45 (2026-11-23): the suite outgrew 45 minutes on its slowest leg
+    # (Python 3.11 under coverage), and GitHub reports a job stopped at its
+    # timeout as "cancelled" -- which failed the release gate with no test failing.
+    timeout-minutes: 75
     permissions:
       contents: write
       pull-requests: write

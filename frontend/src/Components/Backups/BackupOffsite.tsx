@@ -23,6 +23,7 @@ import {
     Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
 import AsyncButton from '../AsyncButton';
 import { setReplicaTarget } from '../../Services/backups';
@@ -141,6 +142,14 @@ const OffsiteDialog: React.FC<{
     );
 };
 
+/** Where one off-site copy stands, in a few words. */
+const offsiteState = (t: TFunction, copy: OffsiteCopy): string => {
+    if (!copy.ready) return t('backups.offsite.settingUp', 'being set up');
+    if (!copy.newest_snapshot) return t('backups.offsite.empty', 'no snapshot copied yet');
+    return t('backups.offsite.newest', 'newest snapshot {{hours}} h old, {{size}}',
+        { hours: copy.lag_hours ?? '?', size: formatBytes(copy.bytes) });
+};
+
 /** A host's off-site copies on its Backup card. */
 export const HostOffsite: React.FC<{ offsite?: OffsiteCopy[] }> = ({ offsite }) => {
     const { t } = useTranslation();
@@ -151,12 +160,7 @@ export const HostOffsite: React.FC<{ offsite?: OffsiteCopy[] }> = ({ offsite }) 
                 <React.Fragment key={copy.id}>
                     <Typography variant="body2" data-testid={`host-offsite-${copy.id}`}>
                         {t('backups.offsite.hostLine', 'Off-site copy at {{target}}', { target: copy.target ?? '?' })}:{' '}
-                        {!copy.ready
-                            ? t('backups.offsite.settingUp', 'being set up')
-                            : copy.newest_snapshot
-                                ? t('backups.offsite.newest', 'newest snapshot {{hours}} h old, {{size}}',
-                                    { hours: copy.lag_hours ?? '?', size: formatBytes(copy.bytes) })
-                                : t('backups.offsite.empty', 'no snapshot copied yet')}
+                        {offsiteState(t, copy)}
                         {copy.ready && copy.behind > 0 && (
                             <>{' - '}{t('backups.offsite.behind', '{{n}} to copy', { n: copy.behind })}</>
                         )}

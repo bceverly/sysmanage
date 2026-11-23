@@ -30,6 +30,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def _permission_denied() -> str:
+    return _("Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required")
+
+
 class AntivirusDefaultResponse(BaseModel):
     """Response model for antivirus default."""
 
@@ -134,7 +138,7 @@ def put_swap_setting(
     if not current_user.has_role(SecurityRoles.MANAGE_ANTIVIRUS_DEFAULTS):
         raise HTTPException(
             status_code=403,
-            detail=_("Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"),
+            detail=_permission_denied(),
         )
     av_swap.set_enabled(body.enabled)
     audit = sessionmaker(
@@ -199,7 +203,7 @@ def update_antivirus_defaults(  # NOSONAR
     if not current_user.has_role(SecurityRoles.MANAGE_ANTIVIRUS_DEFAULTS):
         raise HTTPException(
             status_code=403,
-            detail=_("Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"),
+            detail=_permission_denied(),
         )
     audit_session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=persistence_db.get_engine()
@@ -299,7 +303,7 @@ def delete_antivirus_default(
     if not current_user.has_role(SecurityRoles.MANAGE_ANTIVIRUS_DEFAULTS):
         raise HTTPException(
             status_code=403,
-            detail=_("Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"),
+            detail=_permission_denied(),
         )
     audit_session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=persistence_db.get_engine()

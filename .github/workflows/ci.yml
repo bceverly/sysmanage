@@ -34,7 +34,10 @@ jobs:
   test-backend:
     name: Backend Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # 75, not 45 (2026-11-23): the suite outgrew 45 minutes on its slowest leg
+    # (Python 3.11 under coverage), and GitHub reports a job stopped at its
+    # timeout as "cancelled" -- which failed the release gate with no test failing.
+    timeout-minutes: 75
     permissions:
       contents: write  # Allow writing to update README badge
       pull-requests: write  # Allow creating pull requests

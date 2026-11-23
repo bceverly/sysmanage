@@ -14,6 +14,7 @@ certificate the host trusts, not NFS's port 2049, and NAT does not apply.
 # pylint: disable=redefined-outer-name
 
 import json
+from datetime import timedelta
 
 from backend.services import backup_jobs as jobs
 from backend.services import backup_proxy as proxy
@@ -199,3 +200,26 @@ def test_an_encrypted_proxy_host_s_storage_side_gets_its_public_key(session, sen
     session.commit()
     jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
     assert "encrypt_key" not in sent[-1][2]
+
+
+def test_a_new_proxy_target_does_not_block_its_first_host(session, sent):
+    """Isolated-network lab, 2026-11-23: a new proxy target's first host was
+    checked before any Prepare had started the proxy, failed, and that
+    failure refused its first policy -- the one whose Prepare would start
+    the proxy."""
+    s = _on_proxy(session)
+    s.policy.storage_acked_version = 0
+    session.commit()
+    assert _answer(session, s, sent, reachable=False, error="connection refused")
+    assert reach.state(session, s.host) is None and not reach.blocked(session, s.host)
+    s.policy.storage_acked_version = 1  # the storage host took its configure
+    session.commit()
+    assert reach.blocked(session, s.host)
+
+
+def test_a_failed_proxy_check_is_asked_again_after_a_quarter_hour(session, sent):
+    s = _on_proxy(session)
+    _answer(session, s, sent, reachable=False, error="connection refused")
+    row = session.query(reach.models.BackupReach).filter_by(host_id=s.host.id).one()
+    assert not reach.due(session, s.host, now=row.checked_at + timedelta(minutes=14))
+    assert reach.due(session, s.host, now=row.checked_at + reach.PROXY_RECHECK_FAILED)

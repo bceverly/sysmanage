@@ -912,6 +912,27 @@ def record_result(
     return run
 
 
+def _audit_policy(db: Session, raw_id: Any):
+    """``(policy id, policy, its target)`` an audit names; Nones for none."""
+    try:
+        policy_id = uuid.UUID(str(raw_id))
+    except (TypeError, ValueError):
+        return None, None, None
+    policy = (
+        db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.id == policy_id)
+        .first()
+    )
+    if policy is None:
+        return policy_id, None, None
+    target = (
+        db.query(models.BackupTarget)
+        .filter(models.BackupTarget.id == policy.target_id)
+        .first()
+    )
+    return policy_id, policy, target
+
+
 def record_storage_audit(db: Session, host_id: Any, payload: Dict[str, Any]) -> bool:
     """A storage host's audit sent outside any job -- at agent start, daily,
     and on Request Host Data -- so a check fixed since the last job (a new
@@ -920,24 +941,7 @@ def record_storage_audit(db: Session, host_id: Any, payload: Dict[str, Any]) -> 
     The same message carries the sender's restate version, from the storage
     host or (version only) the backed-up host; a changed one re-sends the
     job files.  False (logged) from any other host.  The caller commits."""
-    try:
-        policy_id = uuid.UUID(str(payload.get("policy_id")))
-    except (TypeError, ValueError):
-        policy_id = None
-    policy = (
-        db.query(models.BackupPolicy)
-        .filter(models.BackupPolicy.id == policy_id)
-        .first()
-        if policy_id
-        else None
-    )
-    target = (
-        db.query(models.BackupTarget)
-        .filter(models.BackupTarget.id == policy.target_id)
-        .first()
-        if policy is not None
-        else None
-    )
+    policy_id, policy, target = _audit_policy(db, payload.get("policy_id"))
     if policy_id and backup_moves.is_quiet_audit(db, policy_id, host_id):
         return True  # a copy's, or a moved host's old storage: nothing to keep
     is_storage = target is not None and str(target.storage_host_id) == str(host_id)

@@ -461,10 +461,11 @@ def store_storage_abilities(policy: Optional[models.BackupPolicy], found: Any) -
     could = storage_lists_signatures(policy)
     copied = "replica_copy" in storage_abilities(policy)
     policy.storage_abilities = json.dumps(sorted(set(found) & set(STORAGE_ABILITIES)))
-    if storage_lists_signatures(policy) and not could:
+    # A new ability the next configure uses: signatures, or off-site copies.
+    if (storage_lists_signatures(policy) and not could) or (
+        "replica_copy" in storage_abilities(policy) and not copied
+    ):
         policy.config_version += 1
-    elif "replica_copy" in storage_abilities(policy) and not copied:
-        policy.config_version += 1  # the next configure names its off-site copies
 
 
 def storage_lists_signatures(policy: models.BackupPolicy) -> bool:
@@ -647,7 +648,12 @@ def address_changed(policy: models.BackupPolicy, host: models.Host) -> bool:
     )
 
 
-def queue_restore(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+_RESTORE_OPTIONS = frozenset(
+    {"in_place", "previous", "needs_key", "packages", "offsite"}
+)
+
+
+def queue_restore(  # pylint: disable=too-many-positional-arguments
     db: Session,
     policy: models.BackupPolicy,
     host: models.Host,
@@ -657,15 +663,21 @@ def queue_restore(  # pylint: disable=too-many-arguments,too-many-positional-arg
     allow_unverified: bool,
     actor: str,
     exclude: Optional[List[str]] = None,
-    in_place: bool = False,
-    previous: bool = False,
-    needs_key: bool = False,
-    packages: bool = False,
-    offsite: Optional[str] = None,
+    **options: Any,
 ) -> models.BackupRun:
     """Restore into the agent's staging directory, or (``in_place``) over the
-    host's own files; the agent chooses the root either way.  ``packages``
-    (Pro+ 24.6) puts the snapshot's packages back first."""
+    host's own files; the agent chooses the root either way.  ``options``:
+    ``in_place``, ``previous`` (the previous repository), ``needs_key``,
+    ``packages`` (Pro+ 24.6: the snapshot's packages back first) and
+    ``offsite`` (an off-site copy's id) -- nothing else."""
+    unknown = set(options) - _RESTORE_OPTIONS
+    if unknown:
+        raise TypeError(f"queue_restore: unknown options {sorted(unknown)}")
+    in_place, previous = options.get("in_place", False), options.get("previous", False)
+    needs_key, packages = options.get("needs_key", False), options.get(
+        "packages", False
+    )
+    offsite = options.get("offsite")
     return _queue(
         db,
         policy,

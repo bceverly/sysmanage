@@ -49,6 +49,9 @@ _HOST_FK = "host.id"
 _POLICY_FK = "backup_policy.id"
 
 
+_FK_TARGET = "backup_target.id"
+
+
 class BackupTarget(Base):
     """Where a tenant's backup repositories live."""
 
@@ -143,7 +146,7 @@ class BackupPolicy(Base):
         index=True,
     )
     target_id = Column(
-        GUID(), ForeignKey("backup_target.id", ondelete="CASCADE"), nullable=False
+        GUID(), ForeignKey(_FK_TARGET, ondelete="CASCADE"), nullable=False
     )
     enabled = Column(Boolean, nullable=False, default=True)
     interval_hours = Column(Integer, nullable=False, default=24)
@@ -531,7 +534,7 @@ class BackupReplica(Base):
     )
     target_id = Column(
         GUID(),
-        ForeignKey("backup_target.id", ondelete="CASCADE"),
+        ForeignKey(_FK_TARGET, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -586,12 +589,12 @@ class BackupMove(Base):
     # The target it moves to (named as an off-site copy's holder is).
     target_id = Column(
         GUID(),
-        ForeignKey("backup_target.id", ondelete="CASCADE"),
+        ForeignKey(_FK_TARGET, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
     from_target_id = Column(
-        GUID(), ForeignKey("backup_target.id", ondelete="SET NULL"), nullable=True
+        GUID(), ForeignKey(_FK_TARGET, ondelete="SET NULL"), nullable=True
     )
     repo_dir = Column(String(255), nullable=False)
     # copying -> verifying -> switched; or failed, canceled.
