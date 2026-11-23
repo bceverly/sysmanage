@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 14:50-0800\n"
+"POT-Creation-Date: 2026-11-23 05:29-0800\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3782,23 +3782,23 @@ msgstr "فشل في إحصاء الحزم: %s"
 msgid "Failed to search packages: %s"
 msgstr "فشل في البحث عن الحزم: %s"
 
-#: backend/api/host.py:236
+#: backend/api/host.py:233
 msgid "Permission denied: DELETE_HOST role required"
 msgstr " رفض الوصول: يتطلب دور DELETE_HOST"
 
-#: backend/api/host.py:300
+#: backend/api/host.py:297
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "تم رفض الإذن: يتطلب دور `VIEW_HOST_DETAILS`"
 
-#: backend/api/host.py:689
+#: backend/api/host.py:686
 msgid "Host already exists"
 msgstr "المضيف موجود بالفعل"
 
-#: backend/api/host.py:801
+#: backend/api/host.py:798
 msgid "Registration absorbed: host was recently deleted"
 msgstr "التسجيل تم امتصاصه: كان المضيف قد حُذف مؤخرا"
 
-#: backend/api/host.py:881
+#: backend/api/host.py:878
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -5074,11 +5074,11 @@ msgstr ""
 
 #: backend/api/antivirus_status.py:389
 msgid ""
-"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
-"page, or add memory."
+"Turn on Add swap to hosts with too little memory for ClamAV under Settings, "
+"Antivirus, or add memory."
 msgstr ""
-"قم بتشغيل إضافة التبديل إلى المضيفين أدناه أرضية الذاكرة على صفحة افتراضات "
-"برنامج الحماية من الفيروسات، أو أضف ذاكرة."
+"تشغيل إضافة تخصيص الذاكرة المضيفة للآلات ذات الذاكرة المنخفضة لـ ClamAV تحت "
+"الإعدادات، أو مضادات الفيروسات، أو إضافة ذاكرة."
 
 #: backend/api/antivirus_status.py:394
 #, python-format
@@ -6900,6 +6900,13 @@ msgstr "ثغرات حزم pkgsrc في NetBSD (ما يقرؤه pkg_admin audit)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
+
+#~ msgid ""
+#~ "Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+#~ "page, or add memory."
+#~ msgstr ""
+#~ "قم بتشغيل إضافة التبديل إلى المضيفين أدناه أرضية الذاكرة على صفحة افتراضات "
+#~ "برنامج الحماية من الفيروسات، أو أضف ذاكرة."
 
 #, python-format
 #~ msgid ""

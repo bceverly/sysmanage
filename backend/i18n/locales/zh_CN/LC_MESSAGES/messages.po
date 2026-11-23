@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 14:50-0800\n"
+"POT-Creation-Date: 2026-11-23 05:29-0800\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3660,23 +3660,23 @@ msgstr "计算软件包数量失败：%s"
 msgid "Failed to search packages: %s"
 msgstr "无法搜索软件包：%s"
 
-#: backend/api/host.py:236
+#: backend/api/host.py:233
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "缺少 DELETE_HOST 角色，无法执行操作"
 
-#: backend/api/host.py:300
+#: backend/api/host.py:297
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "权限 denied: 需要 VIEW_HOST_DETAILS 角色"
 
-#: backend/api/host.py:689
+#: backend/api/host.py:686
 msgid "Host already exists"
 msgstr "主机已存在"
 
-#: backend/api/host.py:801
+#: backend/api/host.py:798
 msgid "Registration absorbed: host was recently deleted"
 msgstr "注册被吸收：主机最近已被删除"
 
-#: backend/api/host.py:881
+#: backend/api/host.py:878
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -4909,9 +4909,9 @@ msgstr ""
 
 #: backend/api/antivirus_status.py:389
 msgid ""
-"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
-"page, or add memory."
-msgstr "在防病毒默认页面上打开向下调整内存地板的添加交换空间选项，或添加内存。"
+"Turn on Add swap to hosts with too little memory for ClamAV under Settings, "
+"Antivirus, or add memory."
+msgstr "在“设置”>“防病毒”下，打开“添加交换空间”以解决ClamAV内存不足的问题，或增加内存。"
 
 #: backend/api/antivirus_status.py:394
 #, python-format
@@ -6665,6 +6665,11 @@ msgstr "NetBSD pkgsrc 软件包漏洞（pkg_admin audit 读取的数据）"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "按操作系统版本列出的 macOS 漏洞（来自 NVD 的受影响版本数据）"
+
+#~ msgid ""
+#~ "Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+#~ "page, or add memory."
+#~ msgstr "在防病毒默认页面上打开向下调整内存地板的添加交换空间选项，或添加内存。"
 
 #, python-format
 #~ msgid ""

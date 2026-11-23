@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 14:50-0800\n"
+"POT-Creation-Date: 2026-11-23 05:29-0800\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3844,23 +3844,23 @@ msgstr "पैकेज गिने फ़ालतू हुई: %s"
 msgid "Failed to search packages: %s"
 msgstr "पैकेज खोजने में विफल: %s"
 
-#: backend/api/host.py:236
+#: backend/api/host.py:233
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "प्रवेश नहीं: DELETE_HOST भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:300
+#: backend/api/host.py:297
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "प्रवेश नहीं: VIEW_HOST_DETAILS भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:689
+#: backend/api/host.py:686
 msgid "Host already exists"
 msgstr "होस्ट पहले से मौजूद है"
 
-#: backend/api/host.py:801
+#: backend/api/host.py:798
 msgid "Registration absorbed: host was recently deleted"
 msgstr "रजिस्ट्रेशन अवशोषित: होस्ट पहले से ही हटा दिया गया था"
 
-#: backend/api/host.py:881
+#: backend/api/host.py:878
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -5177,11 +5177,11 @@ msgstr ""
 
 #: backend/api/antivirus_status.py:389
 msgid ""
-"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
-"page, or add memory."
+"Turn on Add swap to hosts with too little memory for ClamAV under Settings, "
+"Antivirus, or add memory."
 msgstr ""
-"एंटीवायरस डिफ़ॉल्ट पेज पर नीचे दिखाए गए होस्टों से नीचे की ओर मेमोरी फ़्लोर "
-"तक स्वैप जोड़ें या मेमोरी जोड़ें"
+"सेटिंग्स, एंटीवायरस में 'ऐड स्वैप' ऑन करें, या अगर क्लैमएव के लिए मेमोरी "
+"बहुत कम है तो होस्ट्स में स्वैप जोड़ें।"
 
 #: backend/api/antivirus_status.py:394
 #, python-format
@@ -7041,6 +7041,13 @@ msgstr "NetBSD pkgsrc पैकेज की भेद्यताएँ (जि
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "OS संस्करण के अनुसार macOS की भेद्यताएँ, NVD के प्रभावित-संस्करण डेटा से"
+
+#~ msgid ""
+#~ "Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+#~ "page, or add memory."
+#~ msgstr ""
+#~ "एंटीवायरस डिफ़ॉल्ट पेज पर नीचे दिखाए गए होस्टों से नीचे की ओर मेमोरी फ़्लोर "
+#~ "तक स्वैप जोड़ें या मेमोरी जोड़ें"
 
 #, python-format
 #~ msgid ""

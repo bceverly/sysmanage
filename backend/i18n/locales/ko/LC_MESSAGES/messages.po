@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 14:50-0800\n"
+"POT-Creation-Date: 2026-11-23 05:29-0800\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3703,23 +3703,23 @@ msgstr "패키지 개수 세는 데 실패했습니다: %s"
 msgid "Failed to search packages: %s"
 msgstr "패키지 검색 실패: %s"
 
-#: backend/api/host.py:236
+#: backend/api/host.py:233
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "퍼미션 denied: DELETE_HOST 역할 필요"
 
-#: backend/api/host.py:300
+#: backend/api/host.py:297
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "퍼미션 denied: VIEW_HOST_DETAILS 역할 필요"
 
-#: backend/api/host.py:689
+#: backend/api/host.py:686
 msgid "Host already exists"
 msgstr "호스트가 이미 존재합니다"
 
-#: backend/api/host.py:801
+#: backend/api/host.py:798
 msgid "Registration absorbed: host was recently deleted"
 msgstr "등록 흡수: 호스트가 최근에 삭제되었습니다"
 
-#: backend/api/host.py:881
+#: backend/api/host.py:878
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -4964,9 +4964,9 @@ msgstr ""
 
 #: backend/api/antivirus_status.py:389
 msgid ""
-"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
-"page, or add memory."
-msgstr "안티바이러스 기본 설정 페이지에서 아래의 호스트 메모리 바닥선 이하로 스왑을 추가하거나 메모리를 추가하십시오."
+"Turn on Add swap to hosts with too little memory for ClamAV under Settings, "
+"Antivirus, or add memory."
+msgstr "설정, 안티바이러스에서 '스왑 추가'를 켜서 클램AV에 메모리 용량이 부족한 호스트에 스왑을 추가하거나 메모리를 추가하세요."
 
 #: backend/api/antivirus_status.py:394
 #, python-format
@@ -6737,6 +6737,11 @@ msgstr "NetBSD pkgsrc 패키지 취약점(pkg_admin audit가 읽는 데이터)"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS 버전별 macOS 취약점(NVD의 영향받는 버전 데이터 기준)"
+
+#~ msgid ""
+#~ "Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+#~ "page, or add memory."
+#~ msgstr "안티바이러스 기본 설정 페이지에서 아래의 호스트 메모리 바닥선 이하로 스왑을 추가하거나 메모리를 추가하십시오."
 
 #, python-format
 #~ msgid ""

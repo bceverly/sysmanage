@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 14:50-0800\n"
+"POT-Creation-Date: 2026-11-23 05:29-0800\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3904,23 +3904,23 @@ msgstr "Impossibile conteggiare i pacchetti: %s"
 msgid "Failed to search packages: %s"
 msgstr "Impossibile cercare i pacchetti: %s"
 
-#: backend/api/host.py:236
+#: backend/api/host.py:233
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Accesso negato: richiesta del ruolo DELETE_HOST"
 
-#: backend/api/host.py:300
+#: backend/api/host.py:297
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Permesso negato: richiesta del ruolo VIEW_HOST_DETAILS"
 
-#: backend/api/host.py:689
+#: backend/api/host.py:686
 msgid "Host already exists"
 msgstr "L'host esiste già"
 
-#: backend/api/host.py:801
+#: backend/api/host.py:798
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registrazione assorbita: l'host è stato recentemente eliminato"
 
-#: backend/api/host.py:881
+#: backend/api/host.py:878
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -5259,11 +5259,11 @@ msgstr ""
 
 #: backend/api/antivirus_status.py:389
 msgid ""
-"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
-"page, or add memory."
+"Turn on Add swap to hosts with too little memory for ClamAV under Settings, "
+"Antivirus, or add memory."
 msgstr ""
-"Abilita Aggiungi swap agli host al di sotto della soglia di memoria nella "
-"pagina delle impostazioni predefinite dell'antivirus, o aggiungi memoria."
+"Abilita l'aggiunta di swap agli host con memoria insufficiente per ClamAV "
+"nelle Impostazioni, Antivirus, o aggiungi memoria."
 
 #: backend/api/antivirus_status.py:394
 #, python-format
@@ -7181,6 +7181,13 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "Vulnerabilità di macOS per versione del sistema operativo, dai dati del NVD "
 "sulle versioni interessate"
+
+#~ msgid ""
+#~ "Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+#~ "page, or add memory."
+#~ msgstr ""
+#~ "Abilita Aggiungi swap agli host al di sotto della soglia di memoria nella "
+#~ "pagina delle impostazioni predefinite dell'antivirus, o aggiungi memoria."
 
 #, python-format
 #~ msgid ""

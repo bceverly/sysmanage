@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 14:50-0800\n"
+"POT-Creation-Date: 2026-11-23 05:29-0800\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3869,23 +3869,23 @@ msgstr "Falha ao contar pacotes: %s"
 msgid "Failed to search packages: %s"
 msgstr "Falha ao pesquisar pacotes: %s"
 
-#: backend/api/host.py:236
+#: backend/api/host.py:233
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Permissão negada: role DELETE_HOST requerida"
 
-#: backend/api/host.py:300
+#: backend/api/host.py:297
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Permissão negada: role VIEW_HOST_DETAILS requerida"
 
-#: backend/api/host.py:689
+#: backend/api/host.py:686
 msgid "Host already exists"
 msgstr "O host já existe"
 
-#: backend/api/host.py:801
+#: backend/api/host.py:798
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registro absorvido: o host foi recentemente excluído"
 
-#: backend/api/host.py:881
+#: backend/api/host.py:878
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -5211,11 +5211,11 @@ msgstr ""
 
 #: backend/api/antivirus_status.py:389
 msgid ""
-"Turn on Add swap to hosts below the memory floor on the antivirus defaults "
-"page, or add memory."
+"Turn on Add swap to hosts with too little memory for ClamAV under Settings, "
+"Antivirus, or add memory."
 msgstr ""
-"Ative Adicionar troca aos hosts abaixo do limite de memória na página de "
-"padrões do antivirus, ou adicione memória."
+"Ativar a adição de swap para hosts com memória insuficiente para o ClamAV "
+"nas Configurações, Antivírus, ou adicionar memória."
 
 #: backend/api/antivirus_status.py:394
 #, python-format
@@ -7101,6 +7101,13 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "Vulnerabilidades do macOS por versão do sistema operacional, a partir dos "
 "dados de versões afetadas do NVD"
+
+#~ msgid ""
+#~ "Turn on Add swap to hosts below the memory floor on the antivirus defaults "
+#~ "page, or add memory."
+#~ msgstr ""
+#~ "Ative Adicionar troca aos hosts abaixo do limite de memória na página de "
+#~ "padrões do antivirus, ou adicione memória."
 
 #, python-format
 #~ msgid ""
