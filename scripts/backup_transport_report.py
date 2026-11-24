@@ -123,8 +123,37 @@ def _sessions(url: Optional[str]):
         return
     from backend.persistence.partitions import iter_host_databases
 
+    _bridge_tenants()
     for _label, _tenant, db in iter_host_databases():
         yield db
+
+
+def _bridge_tenants() -> None:
+    """Reach every tenant's database, as the server does at startup: the
+    licensed multi-tenancy engine loaded (from the cached license and module,
+    no download or license update) and bridged into the data-plane resolver.
+    Without it a multi-tenant server's tenants are skipped and the report
+    reads nothing (2026-11-23).  Single-tenant or unlicensed: a no-op."""
+    # pylint: disable=import-outside-toplevel
+    import asyncio
+
+    from backend.licensing.license_service import license_service
+    from backend.licensing.module_loader import module_loader
+
+    async def load():
+        await license_service.initialize(update_now=False)
+        if not license_service.is_pro_plus_active:
+            return None
+        module_loader.initialize()
+        if not await module_loader.ensure_module_available("multitenancy_engine"):
+            return None
+        return module_loader.get_module("multitenancy_engine")
+
+    engine = asyncio.run(load())
+    if engine is not None:
+        from backend.multitenancy import bridge
+
+        bridge.bridge_loaded_engine(engine)
 
 
 def _captures(since: Optional[date], url: Optional[str] = None) -> List[Dict[str, Any]]:

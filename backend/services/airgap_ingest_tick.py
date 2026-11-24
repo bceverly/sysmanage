@@ -64,6 +64,7 @@ import os
 import posixpath
 import re
 import socket
+import threading
 from datetime import datetime, timezone
 
 from backend.config import config as config_module
@@ -554,6 +555,44 @@ def process_copy_result(session, run, outcome) -> None:
     run.error_message = None
     _register_local_repositories(session, run)
     _build_tools_repositories(run)
+    # A full catalog takes minutes to load (~650,000 rows): never in the
+    # agent-result handler that finishes the ingest.
+    threading.Thread(
+        target=_load_security_catalog,
+        args=(run.id, run.manifest_json),
+        name=f"airgap-catalog-{run.id}",
+        daemon=True,
+    ).start()
+
+
+def _load_security_catalog(run_id, manifest_json) -> None:
+    """The CVE and advisory catalog on the media, checked against the signed
+    manifest and loaded into the shared tables; then every host's
+    advisories recomputed (2026-11-23).  Never fails the ingest."""
+    # pylint: disable=import-outside-toplevel
+    from backend.persistence.partitions import shared_sessionmaker
+    from backend.services import advisory_tick, airgap_catalog
+
+    try:
+        manifest = json.loads(manifest_json or "{}")
+        path = airgap_catalog.find(REPO_ROOT, manifest)
+    except Exception:  # pylint: disable=broad-except
+        logger.exception("security catalog not checked for ingest %s", run_id)
+        return
+    if path is None:
+        return
+    db = shared_sessionmaker()()
+    try:
+        loaded = airgap_catalog.ingest(db, path)
+        db.commit()
+        logger.info("air-gap ingest %s loaded the security catalog: %s", run_id, loaded)
+    except Exception:  # pylint: disable=broad-except
+        db.rollback()
+        logger.exception("security catalog not loaded for ingest %s", run_id)
+        return
+    finally:
+        db.close()
+    advisory_tick.recompute_now()
 
 
 def _build_tools_repositories(run) -> None:

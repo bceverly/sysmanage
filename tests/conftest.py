@@ -882,3 +882,21 @@ def _no_ntp_queries(request, monkeypatch):
         monkeypatch.setattr(server_clock, "sntp_offset_ms", lambda _server: 0.0)
     yield
     server_clock._cache.clear()  # pylint: disable=protected-access
+
+
+@pytest.fixture(autouse=True)
+def _no_security_catalog_export(request, monkeypatch):
+    """A collection run carrying CVE data exports the server's whole CVE and
+    advisory catalog (services/airgap_catalog, 2026-11-23) through the shared
+    database -- which the run-tick tests do not have, so each one waited out
+    a connection timeout.  Stubbed except where a test asks for the real one
+    (``@pytest.mark.real_catalog_export``)."""
+    if request.node.get_closest_marker("real_catalog_export"):
+        return
+    from backend.services import airgap_run_tick  # noqa: PLC0415
+
+    monkeypatch.setattr(
+        airgap_run_tick,
+        "_resolve_catalog",
+        lambda run, staging: {"files": [], "commands": []},
+    )

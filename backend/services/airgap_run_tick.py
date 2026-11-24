@@ -191,13 +191,48 @@ def _resolve_tools(run, staging_dir: str) -> dict:
     return airgap_tools.fetch_plan(staging_dir, tools)
 
 
+def _resolve_catalog(run, staging_dir: str) -> dict:
+    """The security catalog (every CVE and vendor advisory this server
+    holds) exported beside the run and copied into ``staging_dir`` --
+    when the run carries CVE data.  Never fails the run (2026-11-23)."""
+    # pylint: disable-next=import-outside-toplevel
+    from backend.persistence.partitions import shared_sessionmaker
+    from backend.services import airgap_catalog  # noqa: PLC0415
+
+    # A boolean column: only a run that asked for CVE data (``is True`` also
+    # keeps a stand-in run object from exporting anything).
+    if getattr(run, "include_cve", False) is not True:
+        return {"files": [], "commands": []}
+    db = shared_sessionmaker()()
+    try:
+        entry = airgap_catalog.export(db, airgap_catalog.export_dir(run.id))
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.exception("security catalog not exported for run %s", run.id)
+        return {"files": [], "commands": []}
+    finally:
+        db.close()
+    logger.info("security catalog for run %s: %s", run.id, entry)
+    return airgap_catalog.stage_plan(run.id, staging_dir, entry)
+
+
+def _catalog_manifest(run):
+    # pylint: disable-next=import-outside-toplevel
+    from backend.services import airgap_catalog  # noqa: PLC0415
+
+    if getattr(run, "include_cve", False) is not True:
+        return None
+    return airgap_catalog.manifest_entry(run.id)
+
+
 def _add_tools(run, plan) -> None:
-    """The tools appended to a single-disc staging plan."""
+    """The tools (and the security catalog) appended to a single-disc
+    staging plan."""
     if not isinstance(plan, dict) or not isinstance(plan.get("commands"), list):
         return
-    extra = _resolve_tools(run, f"/var/lib/sysmanage/airgap-staging/{run.id}")
-    plan["commands"] = list(plan["commands"]) + extra["commands"]
-    plan["files"] = list(plan.get("files") or []) + extra["files"]
+    staging = f"/var/lib/sysmanage/airgap-staging/{run.id}"
+    for extra in (_resolve_tools(run, staging), _resolve_catalog(run, staging)):
+        plan["commands"] = list(plan["commands"]) + extra["commands"]
+        plan["files"] = list(plan.get("files") or []) + extra["files"]
 
 
 def _sign_manifest_or_raw(engine, manifest: dict) -> dict:
@@ -496,9 +531,13 @@ def _build_multidisc_plan(
     # bundle passes the repository's strict verify too.
     # The SysManage tools ride on disc 1 (25.9); every disc's signed
     # manifest lists them.
-    disc1_extra = _resolve_tools(
-        run, f"/var/lib/sysmanage/airgap-staging/{run.id}/disc-1"
-    )
+    disc1 = f"/var/lib/sysmanage/airgap-staging/{run.id}/disc-1"
+    disc1_extra = _resolve_tools(run, disc1)
+    catalog = _resolve_catalog(run, disc1)
+    disc1_extra = {
+        "files": disc1_extra["files"] + catalog["files"],
+        "commands": disc1_extra["commands"] + catalog["commands"],
+    }
     multidisc_manifest = {
         "format_version": 1,
         "iso_label": run.iso_label,
@@ -506,6 +545,7 @@ def _build_multidisc_plan(
         "include_compliance": run.include_compliance,
         "targets": _manifest_targets(run),
         "tools": _tools_manifest(run),
+        "security_catalog": _catalog_manifest(run),
     }
     signed_envelope = _sign_manifest_or_raw(engine, multidisc_manifest)
     try:
@@ -684,6 +724,8 @@ def _advance_staging_complete_to_building_iso(db, run, engine) -> None:
             # The SysManage tools on the media, each with its SHA-256 (25.9):
             # signed here, checked file by file on the repository side.
             "tools": _tools_manifest(run),
+            # Every CVE and vendor advisory, as one file (2026-11-23).
+            "security_catalog": _catalog_manifest(run),
         }
         # Sign the manifest before embedding it.  The repository side
         # verifies the ``/manifest.json`` that lives ON the disc (not

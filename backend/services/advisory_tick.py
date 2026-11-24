@@ -16,6 +16,8 @@ every host database.  A failed refresh is retried after the tick interval,
 not on every pass.
 
 Started from ``background_ticks`` only when ``advisory_engine`` is loaded.
+On an air-gapped repository server it never fetches: the catalog arrives on
+the media and ``recompute_now`` runs after each ingest.
 """
 
 import asyncio
@@ -23,6 +25,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+from backend.config import config as config_module
 from backend.licensing.features import ModuleCode
 from backend.licensing.license_service import license_service
 from backend.licensing.module_loader import module_loader
@@ -102,11 +105,28 @@ def _recompute_all(engine, shared) -> int:
     return done
 
 
-def run_one_tick() -> Optional[str]:
-    """Refresh the catalog if due, then recompute every host; the reason it
-    ran, or None.  Never raises."""
+def recompute_now() -> int:
+    """Recompute every approved host against the catalog as it is now (an
+    air-gap ingest just loaded it); how many hosts.  Never raises."""
     engine = _engine()
     if engine is None:
+        return 0
+    shared = shared_sessionmaker()()
+    try:
+        return _recompute_all(engine, shared)
+    except Exception:  # pylint: disable=broad-except
+        logger.exception("Advisories could not be recomputed")
+        return 0
+    finally:
+        shared.close()
+
+
+def run_one_tick() -> Optional[str]:
+    """Refresh the catalog if due, then recompute every host; the reason it
+    ran, or None.  Never raises.  An air-gapped repository server reaches no
+    feed: its catalog arrives on the media (``airgap_catalog``)."""
+    engine = _engine()
+    if engine is None or config_module.is_repository():
         return None
     shared = shared_sessionmaker()()
     try:
