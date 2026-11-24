@@ -295,6 +295,10 @@ class AirgapIngestionRun(Base):
     # per-distro ``AirgapLocalRepository`` rows from ``targets`` even
     # across a restart, and so the ingest is auditable after the fact.
     manifest_json = Column(Text, nullable=True)
+    # What the ingest found after it completed (2026-11-24): a JSON list of
+    # {code, params} -- tools repositories not built, the security catalog
+    # loaded / refused / failed.  Shown on the Import panel.
+    notices = Column(Text, nullable=True)
 
     # Which disc of a set this was (q91ingestdisc), from the manifest
     # envelope; a disc of a set of two or more is merged, not mirrored.

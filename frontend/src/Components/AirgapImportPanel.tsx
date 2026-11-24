@@ -53,6 +53,8 @@ interface IngestRun {
   id: string;
   status: string;
   error_message?: string | null;
+  // What the ingest found after it completed (2026-11-24).
+  notices?: { code: string; params?: Record<string, string | number | null> }[];
   file_count?: number | null;
   byte_count?: number | null;
   created_at?: string | null;
@@ -166,6 +168,43 @@ const AirgapImportPanel: React.FC<Props> = ({ onComplete }) => {
     return 'info';
   };
 
+  const noticeSeverity = (code: string): 'info' | 'warning' | 'error' => {
+    if (code === 'catalog_loaded') return 'info';
+    if (code === 'tools_not_built') return 'warning';
+    return 'error';
+  };
+
+  const noticeText = (notice: { code: string; params?: Record<string, string | number | null> }) => {
+    const p = notice.params || {};
+    switch (notice.code) {
+      case 'tools_not_built':
+        return t(
+          'airgapImport.notice.toolsNotBuilt',
+          'The SysManage tools repository for {{distro}} {{version}} was not built: {{error}}',
+          { distro: p.distro ?? '', version: p.version ?? '', error: p.error ?? '' },
+        );
+      case 'catalog_loaded':
+        return t(
+          'airgapImport.notice.catalogLoaded',
+          'Security catalog loaded: {{cves}} CVEs and {{advisories}} advisories, made by the collector at {{made}}.',
+          { cves: p.cves ?? 0, advisories: p.advisories ?? 0, made: p.generated_at ?? '' },
+        );
+      case 'catalog_refused':
+        return t(
+          'airgapImport.notice.catalogRefused',
+          'The security catalog on this media does not match its signed manifest, so it was not loaded.',
+        );
+      case 'catalog_failed':
+        return t(
+          'airgapImport.notice.catalogFailed',
+          'The security catalog could not be loaded: {{error}}',
+          { error: p.error ?? '' },
+        );
+      default:
+        return notice.code;
+    }
+  };
+
   const runLabel = (s: string): string => {
     const map: Record<string, string> = {
       QUEUED: t('airgapImport.run.queued', 'Queued'),
@@ -265,6 +304,16 @@ const AirgapImportPanel: React.FC<Props> = ({ onComplete }) => {
                 )}
               </Alert>
             )}
+            {run.status === 'COMPLETE' &&
+              (run.notices || []).map((notice, index) => (
+                <Alert
+                  key={`${notice.code}-${index}`}
+                  severity={noticeSeverity(notice.code)}
+                  sx={{ mt: 1 }}
+                >
+                  {noticeText(notice)}
+                </Alert>
+              ))}
           </Box>
         )}
       </CardContent>

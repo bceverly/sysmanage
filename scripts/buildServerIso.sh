@@ -141,9 +141,13 @@ mkdir -p "$APT_DEPS_DIR"
 log "Computing recursive apt dependency closure"
 # Pull direct deps from the .deb's control file (no PPA needed in apt
 # sources -- we already have the .deb itself).
+# Depends AND Recommends: a repository server builds its SysManage tools
+# repositories with apt-ftparchive (apt-utils) and createrepo_c, which the
+# package recommends; on an air-gapped site a recommended package left off
+# the media can never be fetched later (lab, 2026-11-23).
 DIRECT_DEPS="$(
-  dpkg-deb -f "$DEB_PATH" Depends \
-    | tr ',' '\n' \
+  { dpkg-deb -f "$DEB_PATH" Depends; echo ","; dpkg-deb -f "$DEB_PATH" Recommends; } \
+    | tr ',|' '\n\n' \
     | awk '{print $1}' \
     | grep -v '^\${' \
     | grep -vE '^$' \

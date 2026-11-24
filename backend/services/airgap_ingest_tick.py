@@ -565,6 +565,35 @@ def process_copy_result(session, run, outcome) -> None:
     ).start()
 
 
+def add_notice(run, code: str, params: dict) -> None:
+    """One more thing this ingest found, for the Import panel (2026-11-24)."""
+    try:
+        found = json.loads(run.notices or "[]")
+    except (TypeError, ValueError):
+        found = []
+    found.append({"code": code, "params": params})
+    run.notices = json.dumps(found[-20:])
+
+
+def _notice_later(run_id, code: str, params: dict) -> None:
+    """A notice from the catalog thread, in a session of its own."""
+    db = next(get_db())
+    try:
+        run = (
+            db.query(models.AirgapIngestionRun)
+            .filter(models.AirgapIngestionRun.id == run_id)
+            .first()
+        )
+        if run is not None:
+            add_notice(run, code, params)
+            db.commit()
+    except Exception:  # pylint: disable=broad-except
+        db.rollback()
+        logger.exception("could not record a notice on ingest %s", run_id)
+    finally:
+        db.close()
+
+
 def _load_security_catalog(run_id, manifest_json) -> None:
     """The CVE and advisory catalog on the media, checked against the signed
     manifest and loaded into the shared tables; then every host's
@@ -580,18 +609,27 @@ def _load_security_catalog(run_id, manifest_json) -> None:
         logger.exception("security catalog not checked for ingest %s", run_id)
         return
     if path is None:
+        named = isinstance(manifest, dict) and isinstance(
+            manifest.get("security_catalog"), dict
+        )
+        if named and os.path.exists(
+            os.path.join(REPO_ROOT, airgap_catalog.CATALOG_DIR)
+        ):
+            _notice_later(run_id, "catalog_refused", {})
         return
     db = shared_sessionmaker()()
     try:
         loaded = airgap_catalog.ingest(db, path)
         db.commit()
         logger.info("air-gap ingest %s loaded the security catalog: %s", run_id, loaded)
-    except Exception:  # pylint: disable=broad-except
+    except Exception as exc:  # pylint: disable=broad-except
         db.rollback()
         logger.exception("security catalog not loaded for ingest %s", run_id)
+        _notice_later(run_id, "catalog_failed", {"error": str(exc)[:300]})
         return
     finally:
         db.close()
+    _notice_later(run_id, "catalog_loaded", loaded)
     advisory_tick.recompute_now()
 
 
@@ -604,7 +642,14 @@ def _build_tools_repositories(run) -> None:
 
     try:
         manifest = json.loads(run.manifest_json or "{}")
-        airgap_tools.build(REPO_ROOT, manifest if isinstance(manifest, dict) else {})
+        built = airgap_tools.build(
+            REPO_ROOT, manifest if isinstance(manifest, dict) else {}
+        )
+        for result in built or []:
+            if result.get("error"):
+                add_notice(run, "tools_not_built", {
+                    "distro": result.get("distro"), "version": result.get("version"),
+                    "error": str(result.get("error"))[:300]})  # fmt: skip
     except Exception:  # pylint: disable=broad-exception-caught
         logger.exception(
             "SysManage tools repositories could not be built for ingest %s", run.id

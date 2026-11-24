@@ -21,6 +21,7 @@ is gated on the ``status`` ``ready`` flag; pressing it calls
 against the trusted keyring, and copies the payload in.
 """
 
+import json
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -148,6 +149,8 @@ class IngestRun(BaseModel):
     id: str
     status: str
     error_message: str | None = None
+    # What the ingest found after it completed: {code, params} (2026-11-24).
+    notices: list[dict] = []
     file_count: int | None = None
     byte_count: int | None = None
     iso_path: str | None = None
@@ -158,6 +161,14 @@ class IngestRun(BaseModel):
 
 class IngestRunList(BaseModel):
     runs: list[IngestRun]
+
+
+def _notices(run) -> list:
+    try:
+        found = json.loads(getattr(run, "notices", None) or "[]")
+    except (TypeError, ValueError):
+        return []
+    return [n for n in found if isinstance(n, dict) and isinstance(n.get("code"), str)]
 
 
 @router.get("/repository/ingest-runs", response_model=IngestRunList)
@@ -182,6 +193,7 @@ def list_ingest_runs(limit: int = 10, db: Session = Depends(get_db)):
                 id=str(r.id),
                 status=r.status,
                 error_message=r.error_message,
+                notices=_notices(r),
                 file_count=r.file_count,
                 byte_count=r.byte_count,
                 iso_path=r.iso_path,
