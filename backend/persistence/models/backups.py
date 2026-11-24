@@ -41,6 +41,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
+from sqlalchemy.orm import relationship
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
@@ -487,6 +488,63 @@ class BackupRestoreRequest(Base):
     decided_at = Column(DateTime, nullable=True)
     reason = Column(String(500), nullable=True)  # why rejected
     run_id = Column(GUID(), nullable=True)  # the restore, once approved
+
+
+class BackupFleetRestore(Base):
+    """One restore asked of many hosts, released in waves (27.2, Enterprise
+    ``backup_ops_engine``).  Each host restores its own newest snapshot, or
+    its newest taken before ``before_at``; ``include`` / ``exclude`` are JSON
+    lists of paths, as a single restore's."""
+
+    __tablename__ = "backup_fleet_restore"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False)
+    include = Column(Text, nullable=False)
+    exclude = Column(Text, nullable=True)
+    before_at = Column(DateTime, nullable=True)
+    in_place = Column(Boolean, nullable=False, default=False)
+    dry_run = Column(Boolean, nullable=False, default=False)
+    allow_unsigned = Column(Boolean, nullable=False, default=False)
+    concurrency = Column(Integer, nullable=False, default=5)
+    # awaiting_approval / running / completed / canceled / rejected
+    status = Column(String(24), nullable=False, index=True)
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    approved_by = Column(String(255), nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    targets = relationship(
+        "BackupFleetRestoreTarget",
+        back_populates="job",
+        cascade="all, delete-orphan",
+        order_by="BackupFleetRestoreTarget.id",
+    )
+
+
+class BackupFleetRestoreTarget(Base):
+    """One host of a fleet restore: waiting / running / ok / failed / skipped
+    / canceled, the snapshot it restores and the run that did it."""
+
+    __tablename__ = "backup_fleet_restore_target"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    job_id = Column(
+        GUID(),
+        ForeignKey("backup_fleet_restore.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    host_id = Column(
+        GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
+    status = Column(String(16), nullable=False, default="waiting", index=True)
+    snapshot = Column(String(255), nullable=True)
+    run_id = Column(GUID(), nullable=True)
+    message = Column(String(500), nullable=True)
+    started_at = Column(DateTime, nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    # Orders the inserts after the job's (a raw ForeignKey does not).
+    job = relationship("BackupFleetRestore", back_populates="targets")
 
 
 class BackupLegalHold(Base):

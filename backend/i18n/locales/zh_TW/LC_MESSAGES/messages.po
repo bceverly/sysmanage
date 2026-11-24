@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 12:33-0500\n"
+"POT-Creation-Date: 2026-11-24 15:40-0500\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -229,6 +229,8 @@ msgstr "主機ID格式無效"
 #: backend/api/package_compliance.py:442 backend/api/config_mgmt_drift.py:168
 #: backend/api/config_mgmt_drift.py:203 backend/api/advisor.py:255
 #: backend/api/grafana_integration.py:329
+#: backend/api/backups_fleet_restore.py:76
+#: backend/api/backups_fleet_restore.py:87
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
@@ -2335,6 +2337,31 @@ msgstr "連接失敗 - Grafana 伺服器可能已關閉或不可達"
 #: backend/api/grafana_integration.py:591
 msgid "Unexpected error checking Grafana health"
 msgstr "檢查 Grafana 健康狀態時發生意外錯誤"
+
+#: backend/api/backups_fleet_restore.py:58
+msgid "Fleet restores need the Enterprise backup operations engine"
+msgstr "主機群恢復需要企業備份操作引擎"
+
+#: backend/api/backups_fleet_restore.py:80
+#, python-format
+msgid "At most %d hosts can be restored in one job"
+msgstr "一次作業最多可以恢復 %d 個主機"
+
+#: backend/api/backups_fleet_restore.py:98
+msgid "Fleet restore not found"
+msgstr "未找到主機群恢復"
+
+#: backend/api/backups_fleet_restore.py:182
+msgid "This fleet restore is no longer waiting"
+msgstr "這個主機群恢復不再等待中"
+
+#: backend/api/backups_fleet_restore.py:195
+msgid "A fleet restore you asked for must be approved by someone else"
+msgstr "你請求的主機群恢復必須由其他人批准"
+
+#: backend/api/backups_fleet_restore.py:198
+msgid "This fleet restore request has expired; ask for it again"
+msgstr "這個主機群恢復請求已過期；請重新請求"
 
 #: backend/api/proplus_routes_stubs.py:69
 msgid ""
@@ -4587,38 +4614,38 @@ msgid ""
 " upgrade to access this feature."
 msgstr "排程升級設定檔需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
-#: backend/api/upgrade_profiles.py:258
+#: backend/api/upgrade_profiles.py:263
 msgid "Each fleet of a rollout needs its own tag"
 msgstr "部署中的每個主機群都需要各自的標籤"
 
-#: backend/api/upgrade_profiles.py:276
+#: backend/api/upgrade_profiles.py:281
 msgid "A rollout needs at least one fleet"
 msgstr "部署至少需要一個主機群"
 
-#: backend/api/upgrade_profiles.py:349
+#: backend/api/upgrade_profiles.py:354
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "已建立升級設定檔「%s」"
 
-#: backend/api/upgrade_profiles.py:418
+#: backend/api/upgrade_profiles.py:423
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "已更新升級設定檔「%s」"
 
-#: backend/api/upgrade_profiles.py:451
+#: backend/api/upgrade_profiles.py:456
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "已刪除升級設定檔「%s」"
 
-#: backend/api/upgrade_profiles.py:456
+#: backend/api/upgrade_profiles.py:461
 msgid "Upgrade profile deleted"
 msgstr "升級設定檔已刪除"
 
-#: backend/api/upgrade_profiles.py:483
+#: backend/api/upgrade_profiles.py:488
 msgid "A rollout of this policy is still running or halted"
 msgstr "此策略的部署仍在進行中或已停止"
 
-#: backend/api/upgrade_profiles.py:499
+#: backend/api/upgrade_profiles.py:504
 #, python-format
 msgid "Ran upgrade profile '%s' now"
 msgstr "已立即執行更新設定檔 '%s'"

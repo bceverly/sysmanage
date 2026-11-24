@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 12:33-0500\n"
+"POT-Creation-Date: 2026-11-24 15:40-0500\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -238,6 +238,8 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 #: backend/api/package_compliance.py:442 backend/api/config_mgmt_drift.py:168
 #: backend/api/config_mgmt_drift.py:203 backend/api/advisor.py:255
 #: backend/api/grafana_integration.py:329
+#: backend/api/backups_fleet_restore.py:76
+#: backend/api/backups_fleet_restore.py:87
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
@@ -2443,6 +2445,36 @@ msgstr "ग्राफना सर्वर अवश्यकता है �
 #: backend/api/grafana_integration.py:591
 msgid "Unexpected error checking Grafana health"
 msgstr "Grafana स्वास्थ्य जांच करने में अप्रत्याशित त्रुटि"
+
+#: backend/api/backups_fleet_restore.py:58
+msgid "Fleet restores need the Enterprise backup operations engine"
+msgstr ""
+"फ्लीट रिस्टोर के लिए एंटरप्राइज़ बैकअप ऑपरेशंस इंजन की आवश्यकता होती है"
+
+#: backend/api/backups_fleet_restore.py:80
+#, python-format
+msgid "At most %d hosts can be restored in one job"
+msgstr "एक जॉब में अधिकतम %d होस्ट रिस्टोर किए जा सकते हैं"
+
+#: backend/api/backups_fleet_restore.py:98
+msgid "Fleet restore not found"
+msgstr "फ्लीट रिस्टोर नहीं मिला"
+
+#: backend/api/backups_fleet_restore.py:182
+msgid "This fleet restore is no longer waiting"
+msgstr "यह फ्लीट रिस्टोर अब प्रतीक्षा में नहीं है"
+
+#: backend/api/backups_fleet_restore.py:195
+msgid "A fleet restore you asked for must be approved by someone else"
+msgstr ""
+"एक फ्लीट रिस्टोर जो आपने अनुरोध किया है, उसे किसी और द्वारा मंजूरी दी जानी "
+"चाहिए"
+
+#: backend/api/backups_fleet_restore.py:198
+msgid "This fleet restore request has expired; ask for it again"
+msgstr ""
+"इस फ्लीट रिस्टोर अनुरोध ने अपनी समय सीमा पूरी कर ली है; इसे फिर से अनुरोध "
+"करें"
 
 #: backend/api/proplus_routes_stubs.py:69
 msgid ""
@@ -4842,38 +4874,38 @@ msgstr ""
 "अनुसूचित अपग्रेड प्रोफ़ाइलों के लिए SysManage Professional+ लाइसेंस आवश्यक "
 "है। इस सुविधा तक पहुंचने के लिए कृपया अपग्रेड करें।"
 
-#: backend/api/upgrade_profiles.py:258
+#: backend/api/upgrade_profiles.py:263
 msgid "Each fleet of a rollout needs its own tag"
 msgstr "रोलआउट के हर फ्लीट का अपना टैग होना चाहिए"
 
-#: backend/api/upgrade_profiles.py:276
+#: backend/api/upgrade_profiles.py:281
 msgid "A rollout needs at least one fleet"
 msgstr "एक रोलआउट के लिए कम से कम एक फ्लीट की आवश्यकता होती है"
 
-#: backend/api/upgrade_profiles.py:349
+#: backend/api/upgrade_profiles.py:354
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "अपग्रेड प्रोफ़ाइल '%s' बनाई गई"
 
-#: backend/api/upgrade_profiles.py:418
+#: backend/api/upgrade_profiles.py:423
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "अपग्रेड प्रोफ़ाइल '%s' अपडेट"
 
-#: backend/api/upgrade_profiles.py:451
+#: backend/api/upgrade_profiles.py:456
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "अपग्रेड प्रोफ़ाइल '%s' हटाई गई"
 
-#: backend/api/upgrade_profiles.py:456
+#: backend/api/upgrade_profiles.py:461
 msgid "Upgrade profile deleted"
 msgstr "अपग्रेड प्रोफ़ाइल हटाई गई"
 
-#: backend/api/upgrade_profiles.py:483
+#: backend/api/upgrade_profiles.py:488
 msgid "A rollout of this policy is still running or halted"
 msgstr "इस नीति का एक रोलआउट अभी भी चल रहा है या रुका हुआ है"
 
-#: backend/api/upgrade_profiles.py:499
+#: backend/api/upgrade_profiles.py:504
 #, python-format
 msgid "Ran upgrade profile '%s' now"
 msgstr "अपडेट प्रोफ़ाइल '%s' अभी चलाई गई"

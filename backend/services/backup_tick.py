@@ -457,6 +457,10 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
     # Off-site copies (27.3): job files, and copies that stalled.
     backup_replicas.tick(db, now)
     backup_moves.tick(db, now)  # moves with their backups: check, switch
+    # Fleet restore jobs (27.2, Enterprise): finished hosts, the next wave.
+    from backend.services import backup_fleet_restore  # noqa: PLC0415
+
+    backup_fleet_restore.tick(db, now)
     return queued + reach_checks(db, now)
 
 

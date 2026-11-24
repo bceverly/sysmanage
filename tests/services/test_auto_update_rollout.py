@@ -315,3 +315,27 @@ def test_fleets_need_their_own_tags_and_a_rollout_needs_one(session):
     profiles_api._set_stages(session, profile, [stage])
     rows = auto_update_rollout.stage_rows(session, profile.id)
     assert [(r.name, r.soak_minutes) for r in rows] == [("A", 90)]
+
+
+def test_an_unfinished_fleet_is_dropped_when_the_rollout_is_off(session):
+    """Production, 2026-11-24: ticking "Roll out fleet by fleet" adds an empty
+    fleet; unticking it and saving sent that fleet's blank tag, a 400 "bad
+    uuid".  With the rollout off a tagless fleet is ignored; a finished one is
+    kept for when the rollout is turned back on."""
+    tag = _tag(session, "canary")
+    profile = models.UpgradeProfile(name="p", cron="0 3 * * *", rollout_enabled=False)
+    session.add(profile)
+    session.flush()
+    blank = profiles_api.RolloutStageRequest(
+        name="Canary fleet", tag_id="", soak_hours=24
+    )
+    done = profiles_api.RolloutStageRequest(name="A", tag_id=str(tag.id), soak_hours=1)
+    profiles_api._set_stages(session, profile, [blank])
+    assert auto_update_rollout.stage_rows(session, profile.id) == []
+    profiles_api._set_stages(session, profile, [done, blank])
+    assert [r.name for r in auto_update_rollout.stage_rows(session, profile.id)] == [
+        "A"
+    ]
+    profile.rollout_enabled = True  # on, a tagless fleet is still refused
+    with pytest.raises(HTTPException):
+        profiles_api._set_stages(session, profile, [done, blank])

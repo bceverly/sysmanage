@@ -24,6 +24,7 @@ import { statusColor, statusLabel } from '../Components/Backups/backupLabels';
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
 import BackupReadinessCard from '../Components/Backups/BackupReadinessCard';
 import BackupApprovalsCard from '../Components/Backups/BackupApprovalsCard';
+import BackupFleetRestoresCard from '../Components/Backups/BackupFleetRestores';
 import BackupLegalHoldsCard from '../Components/Backups/BackupLegalHolds';
 
 const Backups: React.FC = () => {
@@ -84,6 +85,7 @@ const Backups: React.FC = () => {
             <BackupTargets data={data} canManage={canManage} onChanged={changed} />
             <BackupReadinessCard canManage={canManage} refreshKey={refreshKey} />
             <BackupApprovalsCard canManage={canManage} canRestore={canRestore} onChanged={changed} />
+            <BackupFleetRestoresCard canRestore={canRestore} hosts={data.hosts} refreshKey={refreshKey} />
             <BackupLegalHoldsCard canManage={canManage} refreshKey={refreshKey} />
             <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', rowGap: 1 }}>
                 {BACKUP_STATUS_ORDER.filter(s => data.counts[s]).map(s => (

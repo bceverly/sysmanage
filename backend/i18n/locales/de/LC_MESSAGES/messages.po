@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 12:33-0500\n"
+"POT-Creation-Date: 2026-11-24 15:40-0500\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -239,6 +239,8 @@ msgstr "Ungültiges Host-ID-Format"
 #: backend/api/package_compliance.py:442 backend/api/config_mgmt_drift.py:168
 #: backend/api/config_mgmt_drift.py:203 backend/api/advisor.py:255
 #: backend/api/grafana_integration.py:329
+#: backend/api/backups_fleet_restore.py:76
+#: backend/api/backups_fleet_restore.py:87
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
@@ -2489,6 +2491,37 @@ msgstr ""
 #: backend/api/grafana_integration.py:591
 msgid "Unexpected error checking Grafana health"
 msgstr "Unerwarteter Fehler beim Äuffinden der Grafana-Gesundheit"
+
+#: backend/api/backups_fleet_restore.py:58
+msgid "Fleet restores need the Enterprise backup operations engine"
+msgstr ""
+"Flottenwiederherstellungen benötigen den Enterprise-Backup-"
+"Betriebskomponenten."
+
+#: backend/api/backups_fleet_restore.py:80
+#, python-format
+msgid "At most %d hosts can be restored in one job"
+msgstr ""
+"Im Rahmen eines Auftrags können höchstens %d Hosts wiederhergestellt werden."
+
+#: backend/api/backups_fleet_restore.py:98
+msgid "Fleet restore not found"
+msgstr "Eine Flottenwiederherstellung wurde nicht gefunden."
+
+#: backend/api/backups_fleet_restore.py:182
+msgid "This fleet restore is no longer waiting"
+msgstr "Diese Flottenwiederherstellung wartet nicht mehr."
+
+#: backend/api/backups_fleet_restore.py:195
+msgid "A fleet restore you asked for must be approved by someone else"
+msgstr ""
+"Ein von Ihnen angeforderter Flottenwiederherstellung muss von jemand anderem"
+" genehmigt werden."
+
+#: backend/api/backups_fleet_restore.py:198
+msgid "This fleet restore request has expired; ask for it again"
+msgstr ""
+"Diese Flottenwiederherstellungsanfrage ist abgelaufen; bitten Sie erneut an."
 
 #: backend/api/proplus_routes_stubs.py:69
 msgid ""
@@ -4956,38 +4989,38 @@ msgstr ""
 "Geplante Upgrade-Profile erfordern eine SysManage Professional+ Lizenz. "
 "Bitte führen Sie ein Upgrade durch, um auf diese Funktion zuzugreifen."
 
-#: backend/api/upgrade_profiles.py:258
+#: backend/api/upgrade_profiles.py:263
 msgid "Each fleet of a rollout needs its own tag"
 msgstr "Jede Flotte eines Rollouts benötigt ein eigenes Tag"
 
-#: backend/api/upgrade_profiles.py:276
+#: backend/api/upgrade_profiles.py:281
 msgid "A rollout needs at least one fleet"
 msgstr "Ein Rollout benötigt mindestens eine Flotte"
 
-#: backend/api/upgrade_profiles.py:349
+#: backend/api/upgrade_profiles.py:354
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "Aktualisierungsprofil '%s' erstellt"
 
-#: backend/api/upgrade_profiles.py:418
+#: backend/api/upgrade_profiles.py:423
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "Aktualisierungsprofil '%s' aktualisiert"
 
-#: backend/api/upgrade_profiles.py:451
+#: backend/api/upgrade_profiles.py:456
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "Aktualisierungsprofil '%s' gelöscht"
 
-#: backend/api/upgrade_profiles.py:456
+#: backend/api/upgrade_profiles.py:461
 msgid "Upgrade profile deleted"
 msgstr "Aktualisierungsprofil gelöscht"
 
-#: backend/api/upgrade_profiles.py:483
+#: backend/api/upgrade_profiles.py:488
 msgid "A rollout of this policy is still running or halted"
 msgstr "Ein Rollout dieser Richtlinie läuft noch oder ist angehalten"
 
-#: backend/api/upgrade_profiles.py:499
+#: backend/api/upgrade_profiles.py:504
 #, python-format
 msgid "Ran upgrade profile '%s' now"
 msgstr "Aktualisierungsprofil '%s' jetzt ausgeführt"

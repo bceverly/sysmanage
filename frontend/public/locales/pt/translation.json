@@ -6101,7 +6101,11 @@
       "what": "O que",
       "withdraw": "Retirar",
       "withdrawFailed": "A solicitação não poderia ser retirada.",
-      "withdrawn": "Retirado"
+      "withdrawn": "Retirado",
+      "fleet": "Restaurar frota",
+      "fleetWhat": "\"{{name}}\" sobre os arquivos de {{count}} hosts",
+      "fleetWhat_one": "\"{{name}}\" sobre os arquivos do {{count}} host",
+      "fleetWhat_other": "\"{{name}}\" sobre os arquivos de {{count}} hosts"
     },
     "hold": {
       "button": "Bloqueio legal",
@@ -6169,6 +6173,52 @@
       "removeNow": "Remover agora",
       "removing": "Movido de {{from}}; seu antigo repositório lá está sendo removido.",
       "sealed": "O antigo destino sela seus backups, então o antigo repositório pode ser removido a partir de {{date}}."
+    },
+    "fleet": {
+      "asked": "Solicitado",
+      "before": "A partir do snapshot mais recente antes de (opcional)",
+      "cancel": "Cancelar",
+      "cancelFailed": "A restauração da frota não poderia ser cancelada.",
+      "cardTitle": "Restauras de frota",
+      "concurrency": "Hosts por vez",
+      "confirmInPlace": "Eu entendo que os arquivos de cada host nestes caminhos serão substituídos",
+      "createFailed": "A restauração da frota não pôde ser iniciada.",
+      "details": "Hosts",
+      "exclude": "Caminhos a serem excluídos, um por linha (opcional)",
+      "help": "Cada host restaura de seu próprio instantâneo: o mais recente, ou o mais recente tomado antes do tempo que você especifica - o último bom antes de um incidente. Alguns hosts restauram ao mesmo tempo, então o host de armazenamento nunca é sobrecarregado.",
+      "host": {
+        "canceled": "Cancelado",
+        "failed": "Falhou",
+        "host": "Host",
+        "note": "Nota",
+        "ok": "Restaurado",
+        "running": "Restaurando",
+        "skipped": "Ignorado",
+        "snapshot": "Snapshot",
+        "state": "Estado",
+        "waiting": "Esperando"
+      },
+      "hosts": "Hosts",
+      "inPlace": "Sobre os próprios arquivos de cada host",
+      "include": "Caminhos para restaurar, um por linha",
+      "name": "Nome",
+      "new": "Nova restauração da frota",
+      "newTitle": "Restaurar os mesmos caminhos em muitos hosts",
+      "none": "Nenhuma restauração de frota ainda.",
+      "preview": "Pré-visualização apenas: lista o que seria restaurado, sem alterar nada",
+      "progress": "Hosts",
+      "staging": "Uma pasta de estágio em cada host",
+      "start": "Iniciar a restauração da frota",
+      "state": "Estado",
+      "status": {
+        "awaiting": "Em espera de aprovação",
+        "canceled": "Cancelado",
+        "completed": "Concluído",
+        "rejected": "Não aprovado",
+        "running": "Executando"
+      },
+      "unsigned": "Restaurar de instantâneos não assinados também",
+      "where": "Restaurar para"
     }
   },
   "cloudBackup": {

@@ -6101,7 +6101,11 @@
       "what": "What",
       "withdraw": "Withdraw",
       "withdrawFailed": "The request could not be withdrawn.",
-      "withdrawn": "Withdrawn"
+      "withdrawn": "Withdrawn",
+      "fleet": "Fleet restore",
+      "fleetWhat_one": "\"{{name}}\" over the files of {{count}} host",
+      "fleetWhat_other": "\"{{name}}\" over the files of {{count}} hosts",
+      "fleetWhat": "\"{{name}}\" over the files of {{count}} hosts"
     },
     "hold": {
       "button": "Legal hold",
@@ -6169,6 +6173,52 @@
       "removeNow": "Remove now",
       "removing": "Moved from {{from}}; removing its old repository there.",
       "sealed": "The old target seals its backups, so the old repository can be removed from {{date}}."
+    },
+    "fleet": {
+      "status": {
+        "awaiting": "Awaiting approval",
+        "running": "Running",
+        "completed": "Completed",
+        "canceled": "Canceled",
+        "rejected": "Not approved"
+      },
+      "host": {
+        "waiting": "Waiting",
+        "running": "Restoring",
+        "ok": "Restored",
+        "failed": "Failed",
+        "skipped": "Skipped",
+        "canceled": "Canceled",
+        "host": "Host",
+        "state": "State",
+        "snapshot": "Snapshot",
+        "note": "Note"
+      },
+      "createFailed": "The fleet restore could not be started.",
+      "newTitle": "Restore the same paths on many hosts",
+      "help": "Each host restores from its own snapshot: its newest, or its newest taken before the time you give -- the last good one before an incident. A few hosts restore at a time, so the storage host is never overwhelmed.",
+      "name": "Name",
+      "hosts": "Hosts",
+      "include": "Paths to restore, one per line",
+      "exclude": "Paths to leave out, one per line (optional)",
+      "before": "From the newest snapshot before (optional)",
+      "where": "Restore to",
+      "staging": "A staging folder on each host",
+      "inPlace": "Over each host's own files",
+      "confirmInPlace": "I understand each host's files at these paths will be replaced",
+      "preview": "Preview only: list what would be restored, change nothing",
+      "unsigned": "Restore from unsigned snapshots too",
+      "concurrency": "Hosts at a time",
+      "start": "Start the fleet restore",
+      "cancelFailed": "The fleet restore could not be canceled.",
+      "cardTitle": "Fleet restores",
+      "new": "New fleet restore",
+      "none": "No fleet restores yet.",
+      "state": "State",
+      "progress": "Hosts",
+      "asked": "Asked for",
+      "details": "Hosts",
+      "cancel": "Cancel"
     }
   },
   "cloudBackup": {

@@ -6101,7 +6101,11 @@
       "what": "Cosa",
       "withdraw": "Preleva",
       "withdrawFailed": "La richiesta non può essere ritirata.",
-      "withdrawn": "Ritirato"
+      "withdrawn": "Ritirato",
+      "fleet": "Ripristino della flotta",
+      "fleetWhat": "\"{{name}}\" sui file di {{count}} host",
+      "fleetWhat_one": "\"{{name}}\" sui file di {{count}} host",
+      "fleetWhat_other": "\"{{name}}\" sui file di {{count}} host"
     },
     "hold": {
       "button": "Blocco legale",
@@ -6169,6 +6173,52 @@
       "removeNow": "Rimuovi ora",
       "removing": "Spostato da {{from}}; il suo vecchio repository lì è in fase di rimozione.",
       "sealed": "Il vecchio target sigilla i suoi backup, quindi il vecchio repository può essere rimosso dal {{date}}."
+    },
+    "fleet": {
+      "asked": "Chieduto",
+      "before": "Dallo snapshot più recente precedente a (facoltativo)",
+      "cancel": "Annulla",
+      "cancelFailed": "Il ripristino della flotta non poteva essere annullato.",
+      "cardTitle": "Ripristini della flotta",
+      "concurrency": "Host contemporaneamente",
+      "confirmInPlace": "Capisco che i file di ogni host in questi percorsi saranno sostituiti",
+      "createFailed": "Il ripristino della flotta non è stato avviato.",
+      "details": "Hosts",
+      "exclude": "Percorsi da escludere, uno per riga (opzionale)",
+      "help": "Ogni host ripristina dalla propria istantanea: la più recente o quella più recente presa prima del momento specificato - l'ultima buona prima di un incidente. Pochi host ripristinano contemporaneamente, quindi il host di archiviazione non viene mai travolto.",
+      "host": {
+        "canceled": "Annullato",
+        "failed": "Fallito",
+        "host": "Host",
+        "note": "Nota",
+        "ok": "Ripristinato",
+        "running": "Ripristino",
+        "skipped": "Saltato",
+        "snapshot": "Snapshot",
+        "state": "Stato",
+        "waiting": "In attesa"
+      },
+      "hosts": "Hosts",
+      "inPlace": "Sopra i file di ciascun host",
+      "include": "Percorsi da ripristinare, uno per riga",
+      "name": "Nome",
+      "new": "Nuovo ripristino della flotta",
+      "newTitle": "Ripristinare gli stessi percorsi su molti host",
+      "none": "Nessun ripristino della flotta ancora.",
+      "preview": "Solo anteprima: elenca ciò che verrebbe ripristinato, senza modificare nulla",
+      "progress": "Hosts",
+      "staging": "Una cartella di staging su ogni host",
+      "start": "Avvia il ripristino della flotta",
+      "state": "Stato",
+      "status": {
+        "awaiting": "In attesa di approvazione",
+        "canceled": "Annullato",
+        "completed": "Completato",
+        "rejected": "Non approvato",
+        "running": "In esecuzione"
+      },
+      "unsigned": "Ripristina anche da snapshot non firmati",
+      "where": "Dove ripristinare"
     }
   },
   "cloudBackup": {

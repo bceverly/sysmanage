@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 12:33-0500\n"
+"POT-Creation-Date: 2026-11-24 15:40-0500\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -229,6 +229,8 @@ msgstr "无效的主机ID格式"
 #: backend/api/package_compliance.py:442 backend/api/config_mgmt_drift.py:168
 #: backend/api/config_mgmt_drift.py:203 backend/api/advisor.py:255
 #: backend/api/grafana_integration.py:329
+#: backend/api/backups_fleet_restore.py:76
+#: backend/api/backups_fleet_restore.py:87
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
@@ -2336,6 +2338,31 @@ msgstr "连接失败 - Grafana 服务器可能已关闭或不可达"
 #: backend/api/grafana_integration.py:591
 msgid "Unexpected error checking Grafana health"
 msgstr "检查 Grafana 健康状态时出现意外错误"
+
+#: backend/api/backups_fleet_restore.py:58
+msgid "Fleet restores need the Enterprise backup operations engine"
+msgstr "机群恢复需要企业备份操作引擎"
+
+#: backend/api/backups_fleet_restore.py:80
+#, python-format
+msgid "At most %d hosts can be restored in one job"
+msgstr "一次作业最多可以恢复 %d 个主机"
+
+#: backend/api/backups_fleet_restore.py:98
+msgid "Fleet restore not found"
+msgstr "未找到机群恢复"
+
+#: backend/api/backups_fleet_restore.py:182
+msgid "This fleet restore is no longer waiting"
+msgstr "这个机群恢复已经不再等待"
+
+#: backend/api/backups_fleet_restore.py:195
+msgid "A fleet restore you asked for must be approved by someone else"
+msgstr "你请求的机群恢复必须由其他人批准"
+
+#: backend/api/backups_fleet_restore.py:198
+msgid "This fleet restore request has expired; ask for it again"
+msgstr "这个机群恢复请求已过期；请重新请求"
 
 #: backend/api/proplus_routes_stubs.py:69
 msgid ""
@@ -4586,38 +4613,38 @@ msgid ""
 " upgrade to access this feature."
 msgstr "计划升级配置文件需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
-#: backend/api/upgrade_profiles.py:258
+#: backend/api/upgrade_profiles.py:263
 msgid "Each fleet of a rollout needs its own tag"
 msgstr "部署中的每个主机群都需要各自的标签"
 
-#: backend/api/upgrade_profiles.py:276
+#: backend/api/upgrade_profiles.py:281
 msgid "A rollout needs at least one fleet"
 msgstr "部署至少需要一个主机群"
 
-#: backend/api/upgrade_profiles.py:349
+#: backend/api/upgrade_profiles.py:354
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "已创建升级配置文件 '%s'"
 
-#: backend/api/upgrade_profiles.py:418
+#: backend/api/upgrade_profiles.py:423
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "已更新升级配置文件 '%s'"
 
-#: backend/api/upgrade_profiles.py:451
+#: backend/api/upgrade_profiles.py:456
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "已删除升级配置文件 '%s'"
 
-#: backend/api/upgrade_profiles.py:456
+#: backend/api/upgrade_profiles.py:461
 msgid "Upgrade profile deleted"
 msgstr "升级配置文件已删除"
 
-#: backend/api/upgrade_profiles.py:483
+#: backend/api/upgrade_profiles.py:488
 msgid "A rollout of this policy is still running or halted"
 msgstr "此策略的部署仍在进行中或已停止"
 
-#: backend/api/upgrade_profiles.py:499
+#: backend/api/upgrade_profiles.py:504
 #, python-format
 msgid "Ran upgrade profile '%s' now"
 msgstr "已立即运行更新配置文件 '%s'"

@@ -86,6 +86,11 @@ PRO_PLUS_BACKUP = {
     ("POST", "/api/v1/backups/restore-requests/{request_id}/approve"),
     ("POST", "/api/v1/backups/restore-requests/{request_id}/reject"),
     ("POST", "/api/v1/backups/restore-requests/{request_id}/withdraw"),
+    # ... and fleet restore jobs (27.2).
+    ("GET", "/api/v1/backups/fleet-restores"),
+    ("POST", "/api/v1/backups/fleet-restores"),
+    ("GET", "/api/v1/backups/fleet-restores/{job_id}"),
+    ("POST", "/api/v1/backups/fleet-restores/{job_id}/cancel"),
     # ... and legal hold (27.2): placing and releasing; honoring needs none.
     ("GET", "/api/v1/backups/legal-holds"),
     ("POST", "/api/v1/host/{host_id}/backup-snapshots/{snapshot}/hold"),

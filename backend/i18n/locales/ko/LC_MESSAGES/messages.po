@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 12:33-0500\n"
+"POT-Creation-Date: 2026-11-24 15:40-0500\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -233,6 +233,8 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 #: backend/api/package_compliance.py:442 backend/api/config_mgmt_drift.py:168
 #: backend/api/config_mgmt_drift.py:203 backend/api/advisor.py:255
 #: backend/api/grafana_integration.py:329
+#: backend/api/backups_fleet_restore.py:76
+#: backend/api/backups_fleet_restore.py:87
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
@@ -2357,6 +2359,31 @@ msgstr "연결 실패 - Grafana 서버가 다운되었거나 접근할 수 없�
 #: backend/api/grafana_integration.py:591
 msgid "Unexpected error checking Grafana health"
 msgstr "Grafana 상태 확인 중 예상치 못한 오류"
+
+#: backend/api/backups_fleet_restore.py:58
+msgid "Fleet restores need the Enterprise backup operations engine"
+msgstr "플릿 복원에는 엔터프라이즈 백업 운영 엔진이 필요합니다."
+
+#: backend/api/backups_fleet_restore.py:80
+#, python-format
+msgid "At most %d hosts can be restored in one job"
+msgstr "한 작업에서 최대 %d 호스트를 복원할 수 있습니다."
+
+#: backend/api/backups_fleet_restore.py:98
+msgid "Fleet restore not found"
+msgstr "플릿 복원이 발견되지 않았습니다."
+
+#: backend/api/backups_fleet_restore.py:182
+msgid "This fleet restore is no longer waiting"
+msgstr "이 플릿 복원은 더 이상 대기하지 않습니다."
+
+#: backend/api/backups_fleet_restore.py:195
+msgid "A fleet restore you asked for must be approved by someone else"
+msgstr "당신이 요청한 플릿 복원은 다른 사람에 의해 승인되어야 합니다."
+
+#: backend/api/backups_fleet_restore.py:198
+msgid "This fleet restore request has expired; ask for it again"
+msgstr "이 플릿 복원 요청은 만료되었습니다. 다시 요청하세요."
 
 #: backend/api/proplus_routes_stubs.py:69
 msgid ""
@@ -4639,38 +4666,38 @@ msgid ""
 msgstr ""
 "예약된 업그레이드 프로필에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
-#: backend/api/upgrade_profiles.py:258
+#: backend/api/upgrade_profiles.py:263
 msgid "Each fleet of a rollout needs its own tag"
 msgstr "롤아웃의 각 플릿에는 고유한 태그가 필요합니다"
 
-#: backend/api/upgrade_profiles.py:276
+#: backend/api/upgrade_profiles.py:281
 msgid "A rollout needs at least one fleet"
 msgstr "롤아웃에는 최소한 하나의 플릿이 필요합니다"
 
-#: backend/api/upgrade_profiles.py:349
+#: backend/api/upgrade_profiles.py:354
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "업그레이드 프로필 '%s' 가 생성되었습니다"
 
-#: backend/api/upgrade_profiles.py:418
+#: backend/api/upgrade_profiles.py:423
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "업그레이드 프로필 '%s' 가 업데이트되었습니다"
 
-#: backend/api/upgrade_profiles.py:451
+#: backend/api/upgrade_profiles.py:456
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "업그레이드 프로필 '%s' 가 삭제되었습니다"
 
-#: backend/api/upgrade_profiles.py:456
+#: backend/api/upgrade_profiles.py:461
 msgid "Upgrade profile deleted"
 msgstr "업그레이드 프로필이 삭제되었습니다"
 
-#: backend/api/upgrade_profiles.py:483
+#: backend/api/upgrade_profiles.py:488
 msgid "A rollout of this policy is still running or halted"
 msgstr "이 정책의 롤아웃이 아직 실행 중이거나 중지된 상태입니다"
 
-#: backend/api/upgrade_profiles.py:499
+#: backend/api/upgrade_profiles.py:504
 #, python-format
 msgid "Ran upgrade profile '%s' now"
 msgstr "업데이트 프로필 '%s'을(를) 지금 실행했습니다"

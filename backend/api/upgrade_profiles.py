@@ -251,6 +251,11 @@ def _apply_automatic_fields(db: Session, profile, request, user) -> None:
 def _set_stages(db: Session, profile, stages) -> None:
     """Replace the policy's fleets (26.4).  Each needs its own tag; a rollout
     needs at least one fleet."""
+    if stages is not None and not profile.rollout_enabled:
+        # A fleet row added by ticking "Roll out fleet by fleet" and left
+        # without a tag when it was unticked: nothing to keep, never a 400
+        # ("bad uuid" on saving a policy with the rollout off, 2026-11-24).
+        stages = [s for s in stages if (s.tag_id or "").strip()]
     if stages is not None:
         tags = [_parse_uuid_or_400(s.tag_id, "rollout_stages.tag_id") for s in stages]
         if len(set(tags)) != len(tags):

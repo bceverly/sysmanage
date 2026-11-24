@@ -118,6 +118,7 @@ from backend.api import (
     backups_browse,
     backups_drift,
     backups_escrow,
+    backups_fleet_restore,
     backups_transport,
     backups_tag_policies,
     backups_equip,
@@ -494,6 +495,7 @@ def register_routes(app: FastAPI):
     _include_versioned(app, backups_retention.router, tags=["backups"])
     _include_versioned(app, backups_readiness.router, tags=["backups"])  # 27.1
     _include_versioned(app, backups_four_eyes.router, tags=["backups"])  # 27.2
+    _include_versioned(app, backups_fleet_restore.router, tags=["backups"])  # 27.2
     _include_versioned(app, backups_legal_hold.router, tags=["backups"])  # 27.2
     _include_versioned(app, backups_targets.router, tags=["backups"])  # 27.3
     _include_versioned(app, backups_setup.router, tags=["backups"])

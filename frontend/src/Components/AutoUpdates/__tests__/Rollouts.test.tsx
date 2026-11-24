@@ -31,7 +31,7 @@ vi.mock('../../../Services/autoUpdates', () => ({
 }));
 
 import { autoUpdatesService } from '../../../Services/autoUpdates';
-import RolloutFields from '../RolloutFields';
+import RolloutFields, { stagesToSend } from '../RolloutFields';
 import RolloutsCard from '../RolloutsCard';
 
 const svc = autoUpdatesService as unknown as Record<string, ReturnType<typeof vi.fn>>;
@@ -149,5 +149,19 @@ describe('RolloutsCard', () => {
     const { container } = render(<RolloutsCard />);
     await waitFor(() => expect(svc.rollouts).toHaveBeenCalled());
     expect(container.textContent).toBe('');
+  });
+});
+
+describe('what a save sends (production, 2026-11-24)', () => {
+  test('rollout off: the untagged fleet the checkbox added is not sent', () => {
+    const canary = { uid: 'fleet-1', name: 'Canary fleet', tag_id: '', soak_hours: 24 };
+    const done = { uid: 'fleet-2', name: ' Desktops ', tag_id: 't1', soak_hours: 0 };
+    expect(stagesToSend(false, [canary, done])).toEqual([
+      { name: 'Desktops', tag_id: 't1', soak_hours: 0 },
+    ]);
+    // On, everything goes, so an unfinished fleet is caught and said.
+    expect(stagesToSend(true, [canary])).toEqual([
+      { name: 'Canary fleet', tag_id: '', soak_hours: 24 },
+    ]);
   });
 });

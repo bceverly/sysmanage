@@ -6101,7 +6101,11 @@
       "what": "Quoi",
       "withdraw": "Retirer",
       "withdrawFailed": "La demande ne pouvait pas être retirée.",
-      "withdrawn": "Retirée"
+      "withdrawn": "Retirée",
+      "fleet": "Restauration de la flotte",
+      "fleetWhat": "\"{{name}}\" sur les fichiers de {{count}} hôtes",
+      "fleetWhat_one": "\"{{name}}\" sur les fichiers de {{count}} hôte",
+      "fleetWhat_other": "\"{{name}}\" sur les fichiers de {{count}} hôtes"
     },
     "hold": {
       "button": "Conservation légale",
@@ -6169,6 +6173,52 @@
       "removeNow": "Supprimer maintenant",
       "removing": "Déplacé de {{from}} ; son ancien dépôt là-bas est en cours de suppression.",
       "sealed": "L'ancienne cible scelle ses sauvegardes, donc l'ancien dépôt peut être supprimé à partir du {{date}}."
+    },
+    "fleet": {
+      "asked": "Demande faite",
+      "before": "À partir de la dernière capture avant (facultatif)",
+      "cancel": "Annuler",
+      "cancelFailed": "La restauration de la flotte ne pouvait pas être annulée.",
+      "cardTitle": "Restaurations de flotte",
+      "concurrency": "Hôtes à la fois",
+      "confirmInPlace": "Je comprends que les fichiers de chaque hôte à ces chemins seront remplacés",
+      "createFailed": "La restauration de la flotte n'a pas pu être démarrée.",
+      "details": "Hôtes",
+      "exclude": "Chemins à exclure, un par ligne (facultatif)",
+      "help": "Chaque hôte restaure à partir de sa propre capture instantanée : la plus récente, ou la plus récente prise avant l'heure que vous spécifiez - la dernière bonne avant un incident. Quelques hôtes restaurent à la fois, donc le stockage hôte n'est jamais submergé.",
+      "host": {
+        "canceled": "Annulé",
+        "failed": "Échoué(e)",
+        "host": "hôte",
+        "note": "Remarque",
+        "ok": "Restauré",
+        "running": "Restaurer",
+        "skipped": "Omis",
+        "snapshot": "snapshot",
+        "state": "État",
+        "waiting": "En attente"
+      },
+      "hosts": "Hôtes",
+      "inPlace": "Sur chaque hôte, dans ses propres fichiers",
+      "include": "Chemins à restaurer, un par ligne",
+      "name": "Nom",
+      "new": "Nouvelle restauration de la flotte",
+      "newTitle": "Restaurer les mêmes chemins sur de nombreux hôtes",
+      "none": "Aucune restauration de flotte pour le moment.",
+      "preview": "Aperçu uniquement : listez ce qui serait restauré, ne modifiez rien",
+      "progress": "Hôtes",
+      "staging": "Un dossier intermédiaire sur chaque hôte",
+      "start": "Démarrer la restauration de la flotte",
+      "state": "État",
+      "status": {
+        "awaiting": "En attente d'approbation",
+        "canceled": "Annulé",
+        "completed": "Terminé",
+        "rejected": "Non approuvé",
+        "running": "En cours"
+      },
+      "unsigned": "Restaurer à partir de snapshots non signés aussi",
+      "where": "Restaurer à"
     }
   },
   "cloudBackup": {

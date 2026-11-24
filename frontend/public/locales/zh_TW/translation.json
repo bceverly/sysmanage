@@ -6101,7 +6101,11 @@
       "what": "什麼",
       "withdraw": "取款",
       "withdrawFailed": "請求無法撤回。",
-      "withdrawn": "撤回"
+      "withdrawn": "撤回",
+      "fleet": "主機群還原",
+      "fleetWhat": "\"{{name}}\" 上的 {{count}} 個主機檔案",
+      "fleetWhat_one": "\"{{name}}\" 涵蓋了 {{count}} 主機的檔案",
+      "fleetWhat_other": "\"{{name}}\" 上的 {{count}} 個主機檔案"
     },
     "hold": {
       "button": "法律保留",
@@ -6169,6 +6173,52 @@
       "removeNow": "現在刪除",
       "removing": "已從 {{from}} 移動；正在刪除其在那裡的舊存儲庫。",
       "sealed": "舊目標會封存其備份，因此舊存儲庫自 {{date}} 起才可刪除。"
+    },
+    "fleet": {
+      "asked": "要求的",
+      "before": "早於此時間的最新快照（選填）",
+      "cancel": "取消",
+      "cancelFailed": "無法取消主機群恢復操作。",
+      "cardTitle": "主機群還原",
+      "concurrency": "同時還原的主機數",
+      "confirmInPlace": "我明白每個主機的檔案會在這些路徑被替換",
+      "createFailed": "主機群恢復無法啟動。",
+      "details": "主機",
+      "exclude": "排除備份的路徑，每行一個（可選）",
+      "help": "每個主機從其自己的快照恢復：它是最新的，或者是在你指定的時間之前捕獲的最新一次（在事件發生前最後一個正常運行的快照）。一些主機一次恢復多個，因此不會讓儲存主機感到過載。",
+      "host": {
+        "canceled": "取消",
+        "failed": "失敗",
+        "host": "主機",
+        "note": "注意",
+        "ok": "恢復",
+        "running": "恢復",
+        "skipped": "跳過",
+        "snapshot": "快照",
+        "state": "狀態",
+        "waiting": "等待"
+      },
+      "hosts": "主機",
+      "inPlace": "覆寫每個主機自身的檔案",
+      "include": "恢復路徑，每行一個",
+      "name": "名稱",
+      "new": "新主機群還原",
+      "newTitle": "在多個主機上恢復相同的路徑",
+      "none": "尚未恢復任何主機群。",
+      "preview": "僅預覽：列出將要還原的內容，不做任何變更",
+      "progress": "主機",
+      "staging": "每個主機上的暫存資料夾",
+      "start": "啟動主機群還原",
+      "state": "狀態",
+      "status": {
+        "awaiting": "等待審核",
+        "canceled": "取消",
+        "completed": "完成",
+        "rejected": "未經批准",
+        "running": "運行中"
+      },
+      "unsigned": "也從未簽署的快照還原",
+      "where": "還原到"
     }
   },
   "cloudBackup": {

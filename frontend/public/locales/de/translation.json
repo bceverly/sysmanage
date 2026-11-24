@@ -6101,7 +6101,11 @@
       "what": "Was",
       "withdraw": "Zurückziehen",
       "withdrawFailed": "Der Antrag konnte nicht zurückgezogen werden.",
-      "withdrawn": "Rückgängig gemacht"
+      "withdrawn": "Rückgängig gemacht",
+      "fleet": "Flottenwiederherstellung",
+      "fleetWhat": "\"{{name}}\" über die Dateien von {{count}} Hosts",
+      "fleetWhat_one": "\"{{name}}\" über die Dateien von {{count}} Host",
+      "fleetWhat_other": "\"{{name}}\" über die Dateien von {{count}} Hosts"
     },
     "hold": {
       "button": "Rechtliche Sperre",
@@ -6169,6 +6173,52 @@
       "removeNow": "Jetzt entfernen",
       "removing": "Verschoben von {{from}}; sein altes Repository dort wird entfernt.",
       "sealed": "Das alte Ziel versiegelt seine Backups, daher kann das alte Repository ab {{date}} entfernt werden."
+    },
+    "fleet": {
+      "asked": "Gefragt nach",
+      "before": "Aus dem neuesten Snapshot vor (optional)",
+      "cancel": "Abbrechen",
+      "cancelFailed": "Die Rücksetzung der Flotte konnte nicht storniert werden.",
+      "cardTitle": "Flottenwiederherstellungen",
+      "concurrency": "Gleichzeitige Hosts",
+      "confirmInPlace": "Ich verstehe, dass die Dateien jedes Hosts an diesen Pfaden ersetzt werden",
+      "createFailed": "Die Wiederherstellung der Flotte konnte nicht gestartet werden.",
+      "details": "Hosts",
+      "exclude": "Auszuschließende Pfade, eine Zeile pro Pfad (optional)",
+      "help": "Jeder Host stellt aus seinem eigenen Snapshot wieder her: seinem neuesten oder seinem neuesten vor dem angegebenen Zeitpunkt -- dem letzten guten vor einem Vorfall. Es werden jeweils nur wenige Hosts gleichzeitig wiederhergestellt, damit der Speicher-Host nie überlastet wird.",
+      "host": {
+        "canceled": "Abgebrochen",
+        "failed": "Fehlgeschlagen",
+        "host": "Host",
+        "note": "Hinweis",
+        "ok": "Wiederhergestellt",
+        "running": "Wiederherstellung",
+        "skipped": "Ausgesprungen",
+        "snapshot": "Snapshot",
+        "state": "Zustand",
+        "waiting": "Warten"
+      },
+      "hosts": "Hosts",
+      "inPlace": "Über die eigenen Dateien jedes Hosts",
+      "include": "Wiederherstellungswege, einer pro Zeile",
+      "name": "Name",
+      "new": "Neue Flottenwiederherstellung",
+      "newTitle": "Die gleichen Pfade auf vielen Hosts wiederherstellen",
+      "none": "Bisher keine Flottenwiederherstellungen.",
+      "preview": "Nur Vorschau: auflisten, was wiederhergestellt würde, nichts ändern",
+      "progress": "Hosts",
+      "staging": "Ein Staging-Verzeichnis auf jedem Host",
+      "start": "Flottenwiederherstellung starten",
+      "state": "Zustand",
+      "status": {
+        "awaiting": "Warte auf Genehmigung",
+        "canceled": "Abgebrochen",
+        "completed": "Abgeschlossen",
+        "rejected": "Nicht genehmigt",
+        "running": "Läuft"
+      },
+      "unsigned": "Auch aus nicht signierten Snapshots wiederherstellen",
+      "where": "Wiederherstellen auf"
     }
   },
   "cloudBackup": {

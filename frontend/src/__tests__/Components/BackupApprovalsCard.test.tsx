@@ -78,3 +78,13 @@ test("the setting is switched by a backup manager", async () => {
   fireEvent.click(await screen.findByRole("switch"));
   await waitFor(() => expect(setFourEyes).toHaveBeenCalledWith(false));
 });
+
+test("a held fleet restore names its job and how many hosts (2026-11-24)", async () => {
+  vi.mocked(getFourEyes).mockResolvedValue({
+    enabled: true, ttl_hours: 24,
+    requests: [request({ kind: "fleet_restore", name: "after the incident", hosts: 7, snapshot: null, include: [] })],
+  });
+  render(<BackupApprovalsCard canManage canRestore />);
+  expect(await screen.findByText("Fleet restore")).toBeTruthy();
+  expect(screen.getByText(/"after the incident" over the files of 7 hosts/)).toBeTruthy();
+});

@@ -6101,7 +6101,11 @@
       "what": "什么",
       "withdraw": "取出",
       "withdrawFailed": "请求无法撤销。",
-      "withdrawn": "已撤销"
+      "withdrawn": "已撤销",
+      "fleet": "主机群恢复",
+      "fleetWhat": "\"{{name}}\" 覆盖的 {{count}} 主机文件",
+      "fleetWhat_one": "\"{{name}}\" 覆盖了 {{count}} 主机的文件",
+      "fleetWhat_other": "\"{{name}}\" 覆盖的 {{count}} 主机文件"
     },
     "hold": {
       "button": "法律保留",
@@ -6169,6 +6173,52 @@
       "removeNow": "现在删除",
       "removing": "已从 {{from}} 移动；正在删除它在那里的旧仓库。",
       "sealed": "旧目标会封存其备份，因此旧仓库自 {{date}} 起才可删除。"
+    },
+    "fleet": {
+      "asked": "请求的",
+      "before": "早于此时间的最新快照（可选）",
+      "cancel": "取消",
+      "cancelFailed": "无法取消主机群恢复操作。",
+      "cardTitle": "主机群恢复",
+      "concurrency": "同时恢复的主机数",
+      "confirmInPlace": "我理解每个主机的文件将在这些路径被替换",
+      "createFailed": "无法启动主机群恢复。",
+      "details": "主机",
+      "exclude": "可排除的路径，每行一个（可选）",
+      "help": "每个主机都从自己的快照恢复：最新的快照，或在您指定时间之前拍摄的最新快照 -- 即事件发生前最后一个正常的快照。每次只恢复少数几个主机，因此存储主机永远不会过载。",
+      "host": {
+        "canceled": "取消",
+        "failed": "失败",
+        "host": "主机",
+        "note": "注意",
+        "ok": "恢复完成",
+        "running": "恢复",
+        "skipped": "跳过",
+        "snapshot": "快照",
+        "state": "状态",
+        "waiting": "等待"
+      },
+      "hosts": "主机",
+      "inPlace": "覆盖每个主机自身的文件",
+      "include": "恢复路径，每行一个",
+      "name": "名称",
+      "new": "新主机群恢复",
+      "newTitle": "在多个主机上恢复相同的路径",
+      "none": "尚未恢复任何主机群。",
+      "preview": "仅预览：列出将要恢复的内容，不进行更改",
+      "progress": "主机",
+      "staging": "每个主机上的暂存文件夹",
+      "start": "启动主机群恢复",
+      "state": "状态",
+      "status": {
+        "awaiting": "等待审批",
+        "canceled": "取消",
+        "completed": "完成",
+        "rejected": "未批准",
+        "running": "运行"
+      },
+      "unsigned": "也从未签名的快照恢复",
+      "where": "恢复到"
     }
   },
   "cloudBackup": {

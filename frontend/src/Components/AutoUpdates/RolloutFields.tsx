@@ -48,6 +48,18 @@ function clamp(value: string, max: number, decimals = false): number {
 let nextUid = 0;
 /** A client-only identity for a fleet row: fleets move up and down, so the
  *  array index is not a stable React key. */
+/** The fleets a save sends.  With the rollout off an unfinished fleet is
+ *  left out: ticking "Roll out fleet by fleet" adds a "Canary fleet" with no
+ *  tag, and unticking then saving sent its blank tag, which the server
+ *  refused as a bad UUID (production, 2026-11-24). */
+export const stagesToSend = (
+  enabled: boolean,
+  stages: Array<{ uid?: string; name: string; tag_id: string; soak_hours: number }>,
+) =>
+  stages
+    .filter((s) => enabled || s.tag_id)
+    .map(({ uid: _uid, ...s }) => ({ ...s, name: s.name.trim() }));
+
 export const newStageUid = (): string => {
   nextUid += 1;
   return `fleet-${nextUid}`;

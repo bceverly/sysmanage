@@ -6101,7 +6101,11 @@
       "what": "Wat",
       "withdraw": "Intrekken",
       "withdrawFailed": "Het verzoek kon niet worden ingetrokken.",
-      "withdrawn": "Ingetrokken"
+      "withdrawn": "Ingetrokken",
+      "fleet": "Machinepark herstellen",
+      "fleetWhat": "\"{{name}}\" boven de bestanden van {{count}} hosts",
+      "fleetWhat_one": "\"{{name}}\" boven de bestanden van {{count}} host",
+      "fleetWhat_other": "\"{{name}}\" boven de bestanden van {{count}} hosts"
     },
     "hold": {
       "button": "Juridische vasthouding",
@@ -6169,6 +6173,52 @@
       "removeNow": "Nu verwijderen",
       "removing": "Verplaatst van {{from}}; zijn oude repository daar wordt verwijderd.",
       "sealed": "Het oude doel verzegelt zijn back-ups, dus de oude repository kan vanaf {{date}} worden verwijderd."
+    },
+    "fleet": {
+      "asked": "Vraag gesteld voor",
+      "before": "Van de nieuwste snapshot vóór (optioneel)",
+      "cancel": "Annuleren",
+      "cancelFailed": "De machineparkherstel kon niet worden geannuleerd.",
+      "cardTitle": "Machinepark herstel",
+      "concurrency": "Hosts tegelijk",
+      "confirmInPlace": "Ik begrijp dat de bestanden van elke host op deze paden zullen worden vervangen",
+      "createFailed": "De machineparkherstelactie kon niet worden gestart.",
+      "details": "Hosts",
+      "exclude": "Paden om uit te sluiten, één per regel (optioneel)",
+      "help": "Elke host herstelt vanuit zijn eigen snapshot: de nieuwste, of de nieuwste die vóór het tijdstip is genomen dat je opgeeft -- de laatste goede voor een incident. Een paar hosts herstellen tegelijkertijd, dus de opslaghost wordt nooit overweldigd.",
+      "host": {
+        "canceled": "Geannuleerd",
+        "failed": "Geslaagd niet",
+        "host": "Host",
+        "note": "Opmerking",
+        "ok": "Hersteld",
+        "running": "Herstellen",
+        "skipped": "Overgeslagen",
+        "snapshot": "Snapshot",
+        "state": "Status",
+        "waiting": "Wachtend"
+      },
+      "hosts": "Hosts",
+      "inPlace": "Over de eigen bestanden van elke host",
+      "include": "Paden om te herstellen, één per regel",
+      "name": "Naam",
+      "new": "Nieuw herstel van het machinepark",
+      "newTitle": "Herstel dezelfde paden op veel hosts",
+      "none": "Geen machinepark-herstelacties tot nu toe.",
+      "preview": "Alleen voorbeeld: toon wat hersteld zou worden, wijzig niets",
+      "progress": "Hosts",
+      "staging": "Een stagingmap op elke host",
+      "start": "Het herstel van het machinepark starten",
+      "state": "Status",
+      "status": {
+        "awaiting": "In afwachting van goedkeuring",
+        "canceled": "Geannuleerd",
+        "completed": "Voltooid",
+        "rejected": "Niet goedgekeurd",
+        "running": "Aan het draaien"
+      },
+      "unsigned": "Ook herstellen uit niet-ondertekende snapshots",
+      "where": "Herstellen naar"
     }
   },
   "cloudBackup": {

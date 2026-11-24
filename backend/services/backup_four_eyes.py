@@ -182,6 +182,9 @@ def _as_dict(eng, request, host, now) -> Dict[str, Any]:
         "snapshot": body.get("snapshot"),
         "include": body.get("include") or [],
         "packages": bool(body.get("packages")),
+        # A fleet restore's request names its job and how many hosts.
+        "name": body.get("name"),
+        "hosts": body.get("hosts"),
         "requested_by": request.requested_by,
         "requested_at": _iso(request.requested_at),
         "decided_by": request.decided_by,

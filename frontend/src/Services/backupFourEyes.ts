@@ -19,6 +19,9 @@ export interface RestoreRequest {
   target?: Record<string, unknown> | null;
   host_id: string;
   fqdn: string | null;
+  /** a fleet restore's request: its job's name and how many hosts */
+  name?: string | null;
+  hosts?: number | null;
   /** pending / approved / rejected / withdrawn / expired */
   status: string;
   snapshot: string;

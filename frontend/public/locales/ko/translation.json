@@ -6101,7 +6101,11 @@
       "what": "무엇",
       "withdraw": "철회",
       "withdrawFailed": "요청을 철회할 수 없습니다.",
-      "withdrawn": "철회됨"
+      "withdrawn": "철회됨",
+      "fleet": "플릿 복원",
+      "fleetWhat": "{{name}}이 {{count}}개의 호스트의 파일 위에 있습니다",
+      "fleetWhat_one": "{{name}}이 {{count}} 호스트의 파일 위에 있습니다",
+      "fleetWhat_other": "{{name}}이 {{count}}개의 호스트의 파일 위에 있습니다"
     },
     "hold": {
       "button": "법적 보유",
@@ -6169,6 +6173,52 @@
       "removeNow": "지금 제거",
       "removing": "{{from}}에서 이동됨; 그곳의 이전 저장소를 제거하는 중입니다.",
       "sealed": "이전 대상은 백업을 봉인하므로 이전 저장소는 {{date}}부터 제거할 수 있습니다."
+    },
+    "fleet": {
+      "asked": "요청됨",
+      "before": "이 시각 이전의 최신 스냅샷에서 (선택 사항)",
+      "cancel": "취소",
+      "cancelFailed": "플릿 복원 작업은 취소할 수 없습니다.",
+      "cardTitle": "플릿 복원",
+      "concurrency": "동시 호스트 수",
+      "confirmInPlace": "저는 각 호스트의 파일이 이 경로에서 대체될 것을 이해합니다",
+      "createFailed": "플릿 복원이 시작될 수 없었습니다.",
+      "details": "호스트들",
+      "exclude": "제외할 경로, 줄당 하나씩 (선택사항)",
+      "help": "각 호스트는 자신의 스냅샷에서 복원됩니다: 가장 최신 것 또는 당신이 지정한 시간 이전에 찍힌 가장 새로운 것 - 사건 발생 직전 마지막 좋은 상태의 것입니다. 몇 개의 호스트가 한 번에 복원되므로 스토리지 호스트는 결코 압도되지 않습니다.",
+      "host": {
+        "canceled": "취소됨",
+        "failed": "실패했습니다",
+        "host": "호스트",
+        "note": "참고",
+        "ok": "복원됨",
+        "running": "복원 중",
+        "skipped": "생략됨",
+        "snapshot": "스냅샷",
+        "state": "상태",
+        "waiting": "기다림 중"
+      },
+      "hosts": "호스트들",
+      "inPlace": "각 호스트의 자체 파일 위에",
+      "include": "복구할 경로, 한 줄당 하나",
+      "name": "이름",
+      "new": "새 플릿 복원",
+      "newTitle": "여러 호스트에서 동일한 경로를 복원합니다",
+      "none": "아직 플릿 복원 없음.",
+      "preview": "미리보기 전용: 복원될 항목 목록을 표시하지만 변경하지 않음",
+      "progress": "호스트들",
+      "staging": "각 호스트의 스테이징 폴더",
+      "start": "플릿 복원 시작",
+      "state": "상태",
+      "status": {
+        "awaiting": "승인 대기 중",
+        "canceled": "취소됨",
+        "completed": "완료",
+        "rejected": "승인되지 않음",
+        "running": "실행 중"
+      },
+      "unsigned": "서명되지 않은 스냅샷에서도 복원하기",
+      "where": "복원하기"
     }
   },
   "cloudBackup": {

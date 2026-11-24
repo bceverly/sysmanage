@@ -131,9 +131,11 @@ const BackupApprovalsCard: React.FC<{
           <TableBody>
             {shown.map((r) => (
               <TableRow key={r.id}>
-                <TableCell>{r.fqdn}</TableCell>
+                <TableCell>{r.kind === 'fleet_restore' ? t('backups.approvals.fleet', 'Fleet restore') : r.fqdn}</TableCell>
                 <TableCell>
-                  {t('backups.approvals.paths', '{{paths}} from {{snapshot}}', { paths: r.include.join(', '), snapshot: r.snapshot })}
+                  {r.kind === 'fleet_restore'
+                    ? t('backups.approvals.fleetWhat', '"{{name}}" over the files of {{count}} hosts', { name: r.name ?? '', count: r.hosts ?? 0 })
+                    : t('backups.approvals.paths', '{{paths}} from {{snapshot}}', { paths: r.include.join(', '), snapshot: r.snapshot })}
                   {r.packages && <Chip size="small" sx={{ ml: 1 }} label={t('backups.approvals.packages', 'with packages')} />}
                 </TableCell>
                 <TableCell>{r.requested_by} ({formatTime(r.requested_at)})</TableCell>

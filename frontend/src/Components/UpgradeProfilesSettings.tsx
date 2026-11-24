@@ -56,7 +56,7 @@ import { autoUpdatesService } from '../Services/autoUpdates';
 import AutoUpdatesPanel from './AutoUpdates/AutoUpdatesPanel';
 import AutomaticFields from './AutoUpdates/AutomaticFields';
 import RolloutsCard from './AutoUpdates/RolloutsCard';
-import { newStageUid } from './AutoUpdates/RolloutFields';
+import { newStageUid, stagesToSend } from './AutoUpdates/RolloutFields';
 
 interface TagOption {
   id: string;
@@ -257,7 +257,7 @@ const UpgradeProfilesSettings: React.FC = () => {
       critical_source: form.critical_source,
       rollout_enabled: form.rollout_enabled,
       rollout_max_failure_pct: form.rollout_max_failure_pct,
-      rollout_stages: form.rollout_stages.map(({ uid: _uid, ...s }) => ({ ...s, name: s.name.trim() })),
+      rollout_stages: stagesToSend(form.rollout_enabled, form.rollout_stages),
     };
     try {
       if (editing) {
