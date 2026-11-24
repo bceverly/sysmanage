@@ -230,20 +230,30 @@ chmod 755 /var/lib/sysmanage
 chmod 755 /var/log/sysmanage
 chmod 750 /etc/sysmanage
 
-# Fix virtualenv to work with system Python
-# Recreate the venv using the system's Python to fix all symlinks and paths
+# Build the environment BESIDE the current one and swap it in only when
+# complete (2026-11-24): deleting .venv first left no server at all when
+# pip could not reach PyPI (an air-gapped repository server).
 cd /opt/sysmanage
-rm -rf .venv
-%{python3_bin} -m venv .venv
-
-# Check if we have a vendor directory from the RPM (for COPR/OBS builds)
+rm -rf .venv.new
+%{python3_bin} -m venv .venv.new
+VENV_OK=1
 if [ -d vendor ]; then
-  .venv/bin/pip install --quiet --upgrade pip --no-index --find-links=vendor
-  .venv/bin/pip install --quiet -r requirements-prod.txt --no-index --find-links=vendor
+  .venv.new/bin/pip install --quiet --upgrade pip --no-index --find-links=vendor || true
+  .venv.new/bin/pip install --quiet -r requirements-prod.txt --no-index --find-links=vendor \
+    || .venv.new/bin/pip install --quiet -r requirements-prod.txt || VENV_OK=0
 else
-  # Fallback to network install (for direct RPM installs outside COPR/OBS)
-  .venv/bin/pip install --quiet --upgrade pip
-  .venv/bin/pip install --quiet -r requirements-prod.txt
+  # No vendor dir (a direct RPM install outside COPR / OBS): the network,
+  # or an operator's PIP_FIND_LINKS / PIP_NO_INDEX.
+  .venv.new/bin/pip install --quiet --upgrade pip || true
+  .venv.new/bin/pip install --quiet -r requirements-prod.txt || VENV_OK=0
+fi
+if [ "$VENV_OK" -eq 1 ]; then
+  rm -rf .venv
+  mv .venv.new .venv
+else
+  rm -rf .venv.new
+  echo "ERROR: the Python dependencies could not be installed; the previous environment" >&2
+  echo "  (if any) is kept.  Offline: PIP_NO_INDEX=1 PIP_FIND_LINKS=<wheels> and reinstall." >&2
 fi
 cd -
 

@@ -42,12 +42,18 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 		exit 1
 	fi
 	cd /opt/sysmanage
-	rm -rf .venv
+	# The new environment is built BESIDE the current one and swapped in only
+	# when complete (2026-11-24): deleting .venv first left an air-gapped
+	# repository server with no server at all when pip could not reach PyPI.
+	# Offline: run with PIP_NO_INDEX=1 PIP_FIND_LINKS=<the media's wheels/>.
+	rm -rf .venv.new
 	# The pinned Python records clang and llvm-ar as its tools; a requirement
 	# that has to be built from source must use the system gcc.
 	export CC="${CC:-gcc}" CXX="${CXX:-g++}" AR="${AR:-ar}"
-	"$SYSMANAGE_PYTHON" -m venv .venv
-	.venv/bin/pip install --quiet --upgrade pip
+	"$SYSMANAGE_PYTHON" -m venv .venv.new
+	VENV_OK=1
+	# A newer pip is welcome, never required (offline it is not there).
+	.venv.new/bin/pip install --quiet --upgrade pip || true
 	# Install runtime-only deps.  The full requirements.txt carries dev
 	# tooling (pylint/astroid/pytest/playwright) that the server does not
 	# need to run AND that the air-gap wheel set does not contain -- using
@@ -59,10 +65,21 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	if [ -d wheels ]; then
 		WHEELS="--prefer-binary --find-links=/opt/sysmanage/wheels"
 	fi
-	if [ -f requirements-prod.txt ]; then
-		.venv/bin/pip install --quiet $WHEELS -r requirements-prod.txt
+	REQS=requirements.txt
+	[ -f requirements-prod.txt ] && REQS=requirements-prod.txt
+	if [ "$VENV_OK" -eq 1 ] && .venv.new/bin/pip install --quiet $WHEELS -r "$REQS"; then
+		rm -rf .venv
+		mv .venv.new .venv
 	else
-		.venv/bin/pip install --quiet $WHEELS -r requirements.txt
+		rm -rf .venv.new
+		echo "ERROR: the Python dependencies could not be installed (no network?)." >&2
+		if [ -x .venv/bin/python ]; then
+			echo "  The previous environment is kept.  Offline, run again with" >&2
+		else
+			echo "  Offline, run again with" >&2
+		fi
+		echo "  sudo PIP_NO_INDEX=1 PIP_FIND_LINKS=<folder of wheels> dpkg --configure -a" >&2
+		exit 1
 	fi
 	cd -
 	echo "✓ Python dependencies installed"

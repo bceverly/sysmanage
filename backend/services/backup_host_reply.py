@@ -67,6 +67,39 @@ def _proxy_abilities(policy: models.BackupPolicy) -> tuple:
     return (proxy.REMOTE_ABILITY in found, proxy.REMOTE_CAPTURE in found)
 
 
+def store_refused(db: Session, run: models.BackupRun, message: Any) -> None:
+    """A REFUSED host configure's abilities (2026-11-24).  A restate-proxy
+    target's settings go to a host only once it is known to read through
+    the proxy, and that was learned only from an accepted configure -- so a
+    host whose first configure was NFS, on a site with no NFS (an air gap),
+    was refused forever.  Its agent now says what its restate can do even
+    when it refuses; a new proxy ability sends the job files again now."""
+    reply = message.get("result") if isinstance(message, dict) else None
+    if run.action != jobs.CONFIGURE or not isinstance(reply, dict):
+        return
+    try:
+        parameters = json.loads(run.parameters or "{}")
+    except ValueError:
+        return
+    if not isinstance(parameters, dict) or parameters.get("role") not in (
+        "host",
+        jobs.SELF_ROLE,
+    ):
+        return
+    policy = (
+        db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.id == run.policy_id)
+        .first()
+    )
+    if policy is None:
+        return
+    could = _proxy_abilities(policy)
+    store_abilities(policy, reply.get("abilities"))
+    if _proxy_abilities(policy) != could:
+        policy.config_version += 1
+        backup_tick.configure_now(db)
+
+
 def store(
     db: Session, policy: Optional[models.BackupPolicy], reply: Dict[str, Any]
 ) -> None:

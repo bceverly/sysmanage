@@ -16,10 +16,10 @@ echo "Python version: $(python3 --version)"
 
 cd /usr/local/lib/sysmanage
 
-if [ -d ".venv" ]; then
-	echo "Removing old virtual environment..."
-	rm -rf .venv
-fi
+# The new environment is built beside the current one (.venv.new) and
+# swapped in only when complete (2026-11-24): deleting .venv first left no
+# server at all when pip could not reach PyPI.
+rm -rf .venv.new
 
 echo "Creating virtual environment..."
 ACTUAL_ARCH=$(sysctl -n machdep.cpu.brand_string | grep -q "Apple" && echo "arm64" || uname -m)
@@ -29,15 +29,23 @@ if [ "$ACTUAL_ARCH" = "arm64" ]; then
 	echo "Apple Silicon detected - forcing ARM64 architecture"
 	export ARCHFLAGS="-arch arm64"
 	export _PYTHON_HOST_PLATFORM="macosx-11.0-arm64"
-	arch -arm64 python3 -m venv .venv
+	arch -arm64 python3 -m venv .venv.new
 	echo "Installing Python dependencies for ARM64..."
-	arch -arm64 ./.venv/bin/pip install --upgrade pip setuptools wheel
-	arch -arm64 ./.venv/bin/pip install -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
+	arch -arm64 ./.venv.new/bin/pip install --upgrade pip setuptools wheel
+	arch -arm64 ./.venv.new/bin/pip install -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
 else
 	echo "Intel architecture detected"
-	python3 -m venv .venv
-	./.venv/bin/pip install --upgrade pip setuptools wheel
-	./.venv/bin/pip install -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
+	python3 -m venv .venv.new
+	./.venv.new/bin/pip install --upgrade pip setuptools wheel
+	./.venv.new/bin/pip install -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
+fi
+
+if [ -x .venv.new/bin/python ] && ./.venv.new/bin/python -c "import fastapi, sqlalchemy" 2>/dev/null; then
+	rm -rf .venv
+	mv .venv.new .venv
+else
+	rm -rf .venv.new
+	echo "ERROR: the Python dependencies could not be installed; the previous environment (if any) is kept." >&2
 fi
 
 if [ ! -f "/etc/sysmanage.yaml" ]; then

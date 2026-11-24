@@ -307,6 +307,7 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
             backup_moves.refused(db, run, str(error or "agent_error"))
         else:
             _refused(db, run, str(error or "agent_error"))
+            host_reply.store_refused(db, run, message_data)
         return True
     if run.action == backup_replicas.run_action(jobs.CONFIGURE):
         backup_replicas.configured(db, run, message_data.get("result"))
@@ -965,6 +966,7 @@ def record_storage_audit(db: Session, host_id: Any, payload: Dict[str, Any]) -> 
         )
     if is_storage and "storage_audit" in payload:
         _store_audit(policy, payload.get("storage_audit"))
+        backup_proxy.resend_if_down(db, policy, payload.get("storage_audit"))
     return True
 
 

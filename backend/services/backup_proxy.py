@@ -498,3 +498,31 @@ def _certificate_view(target: models.BackupTarget) -> Optional[Dict[str, Any]]:
     from backend.services import backup_proxy_cert  # noqa: PLC0415
 
     return backup_proxy_cert.view(target)
+
+
+def resend_if_down(
+    db: Session, policy: Optional[models.BackupPolicy], audit: Any
+) -> bool:
+    """A storage host's audit (agent start, daily, Request Host Data) saying
+    its restate-proxy is not running re-sends its configure: the fix for a
+    broken proxy -- an account made, a key given back, a package repaired --
+    is installed by a configure, and nothing else sent one.  Saving the
+    policy is refused while hosts cannot reach the proxy (air-gap lab,
+    2026-11-24).  One configure per audit, never a loop: a configure's own
+    reply stores its audit without coming here."""
+    if policy is None or not isinstance(audit, list):
+        return False
+    down = any(
+        isinstance(f, dict)
+        and f.get("code") == "proxy_running"
+        and f.get("level") == "error"
+        for f in audit
+    )
+    if not down:
+        return False
+    # pylint: disable-next=import-outside-toplevel
+    from backend.services import backup_tick  # noqa: PLC0415
+
+    policy.config_version += 1
+    backup_tick.configure_now(db)
+    return True
