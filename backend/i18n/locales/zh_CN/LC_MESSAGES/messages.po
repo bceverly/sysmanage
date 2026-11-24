@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 05:29-0800\n"
+"POT-Creation-Date: 2026-11-24 12:33-0500\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -634,61 +634,61 @@ msgstr "硬件已更新"
 msgid "Failed to update hardware information"
 msgstr "更新硬件信息失败"
 
-#: backend/api/handlers/software_package_handlers.py:113
+#: backend/api/handlers/software_package_handlers.py:114
 msgid "software_inventory_updated"
 msgstr "软件清单已更新"
 
-#: backend/api/handlers/software_package_handlers.py:122
+#: backend/api/handlers/software_package_handlers.py:123
 msgid "Failed to update software inventory"
 msgstr "更新软件清单失败"
 
-#: backend/api/handlers/software_package_handlers.py:293
+#: backend/api/handlers/software_package_handlers.py:294
 #: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "存储更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:408
+#: backend/api/handlers/software_package_handlers.py:409
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "处理软件包收集结果失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:502
+#: backend/api/handlers/software_package_handlers.py:503
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "处理第三方仓库更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:585
+#: backend/api/handlers/software_package_handlers.py:586
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "处理反病毒状态更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:716
+#: backend/api/handlers/software_package_handlers.py:717
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "处理商业反病毒状态更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:818
+#: backend/api/handlers/software_package_handlers.py:819
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "处理防火墙状态更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:904
+#: backend/api/handlers/software_package_handlers.py:905
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "处理Graylog状态更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:936
+#: backend/api/handlers/software_package_handlers.py:937
 msgid "Missing request_id in installation_complete"
 msgstr "在安装完成请求中缺少 request_id"
 
-#: backend/api/handlers/software_package_handlers.py:953
+#: backend/api/handlers/software_package_handlers.py:954
 #: backend/api/agent.py:941 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "未找到安装请求: %s"
 
-#: backend/api/handlers/software_package_handlers.py:994
+#: backend/api/handlers/software_package_handlers.py:995
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -988,22 +988,29 @@ msgstr ""
 "automation_engine 未加载；next_run 时间戳未推进。在 Pro+ 许可证包含 automation_engine "
 "之前，计划仅在当前 tick 窗口中触发。"
 
-#: backend/api/host_registration.py:82
+#: backend/api/host_registration.py:73
+#, python-format
+msgid ""
+"Host '%(fqdn)s' re-enrolled with a one-time code; its old credential no "
+"longer works"
+msgstr "主机 '%(fqdn)s' 已使用一次性密码重新注册，其旧凭证不再有效"
+
+#: backend/api/host_registration.py:104
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 msgstr "主机 '%(fqdn)s' 通过注册密钥 '%(key_name)s' 加入（自动批准=%(auto_approve)s）"
 
-#: backend/api/host_registration.py:134
+#: backend/api/host_registration.py:156
 msgid "Invalid or expired registration key"
 msgstr "无效或缺失的注册密钥"
 
-#: backend/api/host_registration.py:173
+#: backend/api/host_registration.py:195
 msgid "Invalid or expired enrollment token"
 msgstr "无效或已过期的注册令牌"
 
-#: backend/api/host_registration.py:239
+#: backend/api/host_registration.py:261
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1033,9 +1040,13 @@ msgstr "你请求的恢复必须由其他人批准"
 msgid "Only the person who asked for this restore can withdraw it"
 msgstr "只有请求此恢复的人才能撤销它"
 
-#: backend/api/backups_four_eyes.py:83 backend/api/backups_four_eyes.py:86
+#: backend/api/backups_four_eyes.py:107 backend/api/backups_four_eyes.py:110
 msgid "Restore request not found"
 msgstr "未找到恢复请求"
+
+#: backend/api/backups_four_eyes.py:170
+msgid "This server cannot carry out this kind of request"
+msgstr "这个服务器无法处理这种请求"
 
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -2720,7 +2731,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr "防火墙部署命令发送成功"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:67
+#: backend/api/antivirus_defaults.py:71
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "操作系统名称是必需的"
@@ -3250,48 +3261,47 @@ msgstr "此主机无法运行备份：%s"
 msgid "This host's agent cannot check that yet; upgrade the agent first"
 msgstr "此主机的代理尚无法检查此项；请先升级代理"
 
-#: backend/api/antivirus_defaults.py:69
+#: backend/api/antivirus_defaults.py:34
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "权限 denied: 需要 MANAGE_ANTIVIRUS_DEFAULTS 角色"
+
+#: backend/api/antivirus_defaults.py:73
 msgid "OS name must be 100 characters or less"
 msgstr "操作系统名称必须少于100个字符"
 
-#: backend/api/antivirus_defaults.py:82
+#: backend/api/antivirus_defaults.py:86
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "防病毒包名称不得超过255个字符"
 
-#: backend/api/antivirus_defaults.py:107
+#: backend/api/antivirus_defaults.py:111
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "检索反病毒默认值失败：%s"
 
-#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
-#: backend/api/antivirus_defaults.py:302
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "权限 denied: 需要 MANAGE_ANTIVIRUS_DEFAULTS 角色"
-
-#: backend/api/antivirus_defaults.py:170
+#: backend/api/antivirus_defaults.py:174
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr "未在操作系统：%s 中找到默认的反病毒软件"
 
-#: backend/api/antivirus_defaults.py:183
+#: backend/api/antivirus_defaults.py:187
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "检索默认反病毒配置失败：%s"
 
-#: backend/api/antivirus_defaults.py:283
+#: backend/api/antivirus_defaults.py:287
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "更新反病毒默认设置失败：%s"
 
-#: backend/api/antivirus_defaults.py:336
+#: backend/api/antivirus_defaults.py:340
 msgid "Antivirus default deleted successfully"
 msgstr "默认的反病毒设置已成功删除"
 
-#: backend/api/antivirus_defaults.py:338
+#: backend/api/antivirus_defaults.py:342
 msgid "No antivirus default found for this OS"
 msgstr "为当前操作系统未找到防病毒默认设置"
 
-#: backend/api/antivirus_defaults.py:346
+#: backend/api/antivirus_defaults.py:350
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "删除反病毒默认设置失败：%s"
@@ -3660,23 +3670,23 @@ msgstr "计算软件包数量失败：%s"
 msgid "Failed to search packages: %s"
 msgstr "无法搜索软件包：%s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:234
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "缺少 DELETE_HOST 角色，无法执行操作"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:298
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "权限 denied: 需要 VIEW_HOST_DETAILS 角色"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:687
 msgid "Host already exists"
 msgstr "主机已存在"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "注册被吸收：主机最近已被删除"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -3887,20 +3897,20 @@ msgstr "系统信息更新请求"
 msgid "Environment subscriptions are managed on the federation coordinator"
 msgstr "环境订阅由联邦协调器管理"
 
-#: backend/api/airgap_devices.py:82
+#: backend/api/airgap_devices.py:83
 #, python-format
 msgid "Device %s is not an available import drive"
 msgstr "设备 %s 不是可用的导入驱动器"
 
-#: backend/api/airgap_devices.py:106
+#: backend/api/airgap_devices.py:107
 msgid "no import device selected"
 msgstr "未选择导入设备"
 
-#: backend/api/airgap_devices.py:132
+#: backend/api/airgap_devices.py:133
 msgid "No import device selected"
 msgstr "未选择导入设备"
 
-#: backend/api/airgap_devices.py:137
+#: backend/api/airgap_devices.py:138
 #, python-format
 msgid "Import device not ready: %s"
 msgstr "导入设备未准备好: %s"
@@ -6035,11 +6045,11 @@ msgid ""
 msgstr ""
 "请先保存应急托管密钥：SysManage 服务器自身的备份使用该密钥加密，因此恢复 OpenBAO 时绝不需要保存在 OpenBAO 中的密钥"
 
-#: backend/services/cloud_backup_tick.py:327
+#: backend/services/cloud_backup_tick.py:347
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "iCloud 登录即将过期：请重新登录"
 
-#: backend/services/cloud_backup_tick.py:329
+#: backend/services/cloud_backup_tick.py:349
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, SysManage cannot download its photos until someone signs in again.\n"
@@ -6354,7 +6364,7 @@ msgstr "gpg 未能封存密钥导出"
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "没有选择的主机有加密备份"
 
-#: backend/services/backup_reach.py:148
+#: backend/services/backup_reach.py:178
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6364,7 +6374,7 @@ msgstr ""
 "此主机无法连接备份存储的 restate-proxy（%(address)s，端口 "
 "%(port)s）：%(error)s。备份需要一条通往它的网络路径，以及此主机信任的证书。"
 
-#: backend/services/backup_reach.py:158
+#: backend/services/backup_reach.py:188
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6375,7 +6385,7 @@ msgstr ""
 "此主机位于 NAT 之后：备份存储（%(storage)s）将其视为 %(seen)s，而不是 "
 "%(address)s，因此拒绝挂载。请将主机接入存储主机所在的网络（虚拟机使用桥接网络），而不要放在其 NAT 之后。"
 
-#: backend/services/backup_reach.py:168
+#: backend/services/backup_reach.py:198
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

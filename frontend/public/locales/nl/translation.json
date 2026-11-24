@@ -261,7 +261,13 @@
     "runStats": "{{files}} bestanden · {{size}}",
     "runStatus": "Importstatus",
     "statusError": "Kon de importapparaat niet testen.",
-    "title": "Importeren vanaf media"
+    "title": "Importeren vanaf media",
+    "notice": {
+      "catalogFailed": "De beveiligingscatalogus kon niet worden geladen: {{error}}",
+      "catalogLoaded": "Beveiligingscatalogus geladen: {{cves}} CVEs en {{advisories}} adviezen, gemaakt door de verzamelaar op {{made}}.",
+      "catalogRefused": "De beveiligingscatalogus op dit medium komt niet overeen met zijn ondertekend manifest, dus werd het niet geladen.",
+      "toolsNotBuilt": "De SysManage-hulpprogramma's repository voor {{distro}} {{version}} is niet gebouwd: {{error}}"
+    }
   },
   "airgapKeys": {
     "collector": {

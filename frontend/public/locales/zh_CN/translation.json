@@ -261,7 +261,13 @@
     "runStats": "{{files}} 个文件 · {{size}}",
     "runStatus": "导入状态",
     "statusError": "无法探测导入设备。",
-    "title": "从介质导入"
+    "title": "从介质导入",
+    "notice": {
+      "catalogFailed": "无法加载安全目录：{{error}}",
+      "catalogLoaded": "安全目录加载：{{cves}}个CVE和{{advisories}}个安全建议，由收集器在{{made}}时创建。",
+      "catalogRefused": "此媒体的安全目录与其签名清单不匹配，因此未加载。",
+      "toolsNotBuilt": "SysManage 工具仓库对于 {{distro}} {{version}} 未构建: {{error}}"
+    }
   },
   "airgapKeys": {
     "collector": {

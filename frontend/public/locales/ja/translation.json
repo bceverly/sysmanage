@@ -261,7 +261,13 @@
     "runStats": "{{files}} 個のファイル · {{size}}",
     "runStatus": "インポート状態",
     "statusError": "インポートデバイスのプローブに失敗しました。",
-    "title": "メディアからインポート"
+    "title": "メディアからインポート",
+    "notice": {
+      "catalogFailed": "セキュリティカタログの読み込みに失敗しました: {{error}}",
+      "catalogLoaded": "セキュリティカタログが読み込まれました: {{cves}} 脆弱性 (CVE) と {{advisories}} アドバイリ、コレクターによって作成されました tại {{made}}。",
+      "catalogRefused": "このメディアのセキュリティカタログは署名されたマニフェストと一致しないため、読み込まれませんでした。",
+      "toolsNotBuilt": "SysManage ツール リポジトリの構築に失敗しました: {{distro}} {{version}} は {{error}} で構築されていません。"
+    }
   },
   "airgapKeys": {
     "collector": {

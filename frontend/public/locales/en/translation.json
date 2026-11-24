@@ -261,7 +261,13 @@
     "runStats": "{{files}} files · {{size}}",
     "runStatus": "Import status",
     "statusError": "Could not probe the import device.",
-    "title": "Import from Media"
+    "title": "Import from Media",
+    "notice": {
+      "toolsNotBuilt": "The SysManage tools repository for {{distro}} {{version}} was not built: {{error}}",
+      "catalogLoaded": "Security catalog loaded: {{cves}} CVEs and {{advisories}} advisories, made by the collector at {{made}}.",
+      "catalogRefused": "The security catalog on this media does not match its signed manifest, so it was not loaded.",
+      "catalogFailed": "The security catalog could not be loaded: {{error}}"
+    }
   },
   "airgapKeys": {
     "collector": {

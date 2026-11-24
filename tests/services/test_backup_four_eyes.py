@@ -212,3 +212,82 @@ def test_the_setting_is_off_until_turned_on(monkeypatch):
     assert four_eyes.enabled() is False
     four_eyes.set_enabled(True)
     assert four_eyes.enabled() is True and stored == {"backup_four_eyes": True}
+
+
+# --- any kind of request (2026-11-24) ---------------------------------------
+
+
+@pytest.fixture
+def clone_kind(monkeypatch):
+    """A stand-in for the rebuild / clone kinds still to come: approvable
+    only with Manage Backups, and recording what approving it ran."""
+    ran = []
+
+    def perform(db, user, request, host):
+        ran.append((user.userid, request.kind, str(host.id)))
+        return {"id": str(uuid.uuid4())}
+
+    kind = four_eyes.Kind(
+        role=SecurityRoles.MANAGE_BACKUPS,
+        perform=perform,
+        refusals={"no_role": lambda: "Permission denied: Manage Backups role required"},
+    )
+    monkeypatch.setitem(four_eyes.KINDS, "clone", kind)
+    return ran
+
+
+def _hold_clone(session, host):
+    return four_eyes.hold_request(
+        session, ALICE, host, kind="clone", payload={"snapshot": "s1"},
+        facts={}, audit_text="Clone requested", target={"hypervisor": "kvm01"},
+    )  # fmt: skip
+
+
+@pytest.mark.asyncio
+async def test_another_kind_is_held_and_approved_through_its_own_rules(
+    session, sent, ops_engine, setting, clone_kind
+):
+    s = _setup(session)
+    held = _hold_clone(session, s.host)
+    assert held["status"] == four_eyes.AWAITING and held["kind"] == "clone"
+    rid = held["request_id"]
+    # BOB can restore files but not manage backups: this kind's role decides.
+    assert await _status(lambda: eyes_api.approve_restore(rid, session, BOB)) == 403
+    assert clone_kind == []
+    carol = _person("carol@example.com", SecurityRoles.MANAGE_BACKUPS)
+    out = eyes_api.approve_restore(rid, session, carol)
+    assert clone_kind == [(carol.userid, "clone", str(s.host.id))]
+    request = session.get(models.BackupRestoreRequest, uuid.UUID(rid))
+    assert request.status == "approved" and str(request.run_id) == out["id"]
+    listed = four_eyes.recent(session, ops_engine, jobs.now())
+    assert listed[0]["kind"] == "clone" and listed[0]["target"] == {
+        "hypervisor": "kvm01"
+    }
+
+
+@pytest.mark.asyncio
+async def test_a_kind_this_server_cannot_perform_is_never_marked_approved(
+    session, sent, ops_engine, setting
+):
+    s = _setup(session)
+    request = models.BackupRestoreRequest(
+        host_id=s.host.id, kind="teleport", body="{}", status="pending",
+        requested_by=ALICE.userid, requested_at=jobs.now(),
+    )  # fmt: skip
+    session.add(request)
+    session.commit()
+    rid = str(request.id)
+    assert await _status(lambda: eyes_api.approve_restore(rid, session, BOB)) == 409
+    assert session.get(models.BackupRestoreRequest, request.id).status == "pending"
+
+
+def test_an_engine_from_before_kinds_still_decides(monkeypatch, setting):
+    old = SimpleNamespace(
+        restore_needs_approval=lambda on, in_place, dry: on and in_place and not dry
+    )
+    assert four_eyes.needs_approval(old, "restore", {"in_place": True}) is True
+    assert four_eyes.needs_approval(old, "restore", {"in_place": False}) is False
+    assert four_eyes.needs_approval(old, "clone", {}) is True
+    assert four_eyes.needs_approval(old, "clone", {"dry_run": True}) is False
+    setting["on"] = False
+    assert four_eyes.needs_approval(old, "clone", {}) is False

@@ -113,6 +113,7 @@ class HostRegistration(BaseModel):
     # so a retry whose first reply was lost gets its credential (see
     # backend/security/agent_identity.py, "idempotent registration").
     registration_nonce: Optional[str] = Field(default=None, max_length=256)
+    reenroll_code: Optional[str] = Field(default=None, max_length=256)  # rebuilt host
 
 
 class HostRegistrationLegacy(BaseModel):
@@ -766,8 +767,9 @@ def register_host(registration_data: HostRegistration):
         if existing_host:
             _refresh_existing_host(session, existing_host, registration_data)
             return existing_host_reply(
-                existing_host, registration_data.registration_nonce
-            )
+                existing_host, registration_data.registration_nonce,
+                registration_data.reenroll_code, session,
+            )  # fmt: skip
 
         # Phantom-duplicate loophole close: no token routed us to the no-tenant DB
         # and no server-scoped row exists for this fqdn -- but if it already lives

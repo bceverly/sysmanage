@@ -12,6 +12,11 @@ const base = '/api/v1';
 
 export interface RestoreRequest {
   id: string;
+  /** restore / rebuild / clone / wipe / migrate (2026-11-24); every request
+   *  so far is a restore.  The card labels the others when they land. */
+  kind?: string;
+  /** where a rebuild or clone goes; null for a restore */
+  target?: Record<string, unknown> | null;
   host_id: string;
   fqdn: string | null;
   /** pending / approved / rejected / withdrawn / expired */

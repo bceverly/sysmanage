@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 05:29-0800\n"
+"POT-Creation-Date: 2026-11-24 12:33-0500\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -656,61 +656,61 @@ msgstr "हार्डवेयर अपडेट किया गया"
 msgid "Failed to update hardware information"
 msgstr "हार्डवेयर सूचना का अपडेट वापरे में विफल"
 
-#: backend/api/handlers/software_package_handlers.py:113
+#: backend/api/handlers/software_package_handlers.py:114
 msgid "software_inventory_updated"
 msgstr "सॉफ़्टवेयर इन्वेंटरी अपडेट किया गया"
 
-#: backend/api/handlers/software_package_handlers.py:122
+#: backend/api/handlers/software_package_handlers.py:123
 msgid "Failed to update software inventory"
 msgstr "सॉफ्टवेयर संग्रहण का अपडेट वापरे में विफल"
 
-#: backend/api/handlers/software_package_handlers.py:293
+#: backend/api/handlers/software_package_handlers.py:294
 #: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "अपडेट संग्रहीत करने में असफल: %s"
 
-#: backend/api/handlers/software_package_handlers.py:408
+#: backend/api/handlers/software_package_handlers.py:409
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "पैकेज कलेक्शन रिझल्ट प्रोसेस करने में विफल हुए: %s"
 
-#: backend/api/handlers/software_package_handlers.py:502
+#: backend/api/handlers/software_package_handlers.py:503
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "तीसरी पक्ष के अनुभाग संशोधन प्रोसेसिंग में विफल हो गया: %s"
 
-#: backend/api/handlers/software_package_handlers.py:585
+#: backend/api/handlers/software_package_handlers.py:586
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "अंटीवायरस स्थिति अपडेट प्रोसेस करने में विफल: %s"
 
-#: backend/api/handlers/software_package_handlers.py:716
+#: backend/api/handlers/software_package_handlers.py:717
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "कॉमर्शियल एंटीवायरस स्थिति अपडेट प्रोसेस करने में विफल हुए: %s"
 
-#: backend/api/handlers/software_package_handlers.py:818
+#: backend/api/handlers/software_package_handlers.py:819
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "फायरवॉल स्टेटस अपडेट प्रोसेस करने में विफल हुए: %s"
 
-#: backend/api/handlers/software_package_handlers.py:904
+#: backend/api/handlers/software_package_handlers.py:905
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Graylog की स्थिति अपडेट प्रोसेस करने में विफल हुए: %s"
 
-#: backend/api/handlers/software_package_handlers.py:936
+#: backend/api/handlers/software_package_handlers.py:937
 msgid "Missing request_id in installation_complete"
 msgstr "installation_complete में request_id नहीं पाया गया"
 
-#: backend/api/handlers/software_package_handlers.py:953
+#: backend/api/handlers/software_package_handlers.py:954
 #: backend/api/agent.py:941 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "इनस्टॉलेशन अनुरोध %s के लिए मिल नहीं पाया"
 
-#: backend/api/handlers/software_package_handlers.py:994
+#: backend/api/handlers/software_package_handlers.py:995
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -1019,7 +1019,16 @@ msgstr ""
 "Pro+ लाइसेंस में automation_engine शामिल होने तक अनुसूचियाँ केवल वर्तमान टिक"
 " विंडो में सक्रिय होंगी।"
 
-#: backend/api/host_registration.py:82
+#: backend/api/host_registration.py:73
+#, python-format
+msgid ""
+"Host '%(fqdn)s' re-enrolled with a one-time code; its old credential no "
+"longer works"
+msgstr ""
+"होस्ट '%(fqdn)s' का पुनः पंजीकरण एक वन-टाइम कोड के साथ हुआ है; इसका पुराना "
+"क्रेडेंशियल अब काम नहीं करता"
+
+#: backend/api/host_registration.py:104
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -1028,15 +1037,15 @@ msgstr ""
 "होस्ट '%(fqdn)s' रजिस्ट्रेशन की कुंजी '%(key_name)s' "
 "(auto_approve=%(auto_approve)s) के माध्यम से एंटरल किया गया"
 
-#: backend/api/host_registration.py:134
+#: backend/api/host_registration.py:156
 msgid "Invalid or expired registration key"
 msgstr "अवैध या समाप्त रजिस्ट्रेशन की कुंजी"
 
-#: backend/api/host_registration.py:173
+#: backend/api/host_registration.py:195
 msgid "Invalid or expired enrollment token"
 msgstr "अवैध या समाप्त एनकॉलेंट टोकन"
 
-#: backend/api/host_registration.py:239
+#: backend/api/host_registration.py:261
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1073,9 +1082,13 @@ msgstr ""
 "केवल उस व्यक्ति द्वारा यह रिस्टोर वापस लिया जा सकता है जिसने इसका अनुरोध "
 "किया था"
 
-#: backend/api/backups_four_eyes.py:83 backend/api/backups_four_eyes.py:86
+#: backend/api/backups_four_eyes.py:107 backend/api/backups_four_eyes.py:110
 msgid "Restore request not found"
 msgstr "रिस्टोर रिक्वेस्ट नहीं मिली"
+
+#: backend/api/backups_four_eyes.py:170
+msgid "This server cannot carry out this kind of request"
+msgstr "इस सर्वर को इस तरह के अनुरोध को पूरा करने में असमर्थ है"
 
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -2851,7 +2864,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr "फाइरवॉल डिप्लोइंट कमेंड सफलतापूर्वक प्रसारित किया गया"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:67
+#: backend/api/antivirus_defaults.py:71
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "OS नाम आवश्यक है"
@@ -3414,48 +3427,47 @@ msgid "This host's agent cannot check that yet; upgrade the agent first"
 msgstr ""
 "इस होस्ट का एजेंट अभी इसकी जाँच नहीं कर सकता; पहले एजेंट को अपग्रेड करें"
 
-#: backend/api/antivirus_defaults.py:69
+#: backend/api/antivirus_defaults.py:34
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "प्रवेश नहीं: MANAGE_ANTIVIRUS_DEFAULTS भूमिका की आवश्यकता है"
+
+#: backend/api/antivirus_defaults.py:73
 msgid "OS name must be 100 characters or less"
 msgstr "OS नाम 100 अक्षरों की सीमा के भीतर होना चाहिए"
 
-#: backend/api/antivirus_defaults.py:82
+#: backend/api/antivirus_defaults.py:86
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "अंटीवायरस पैकेज नाम 255 अक्षर या उससे कम होना चाहिए"
 
-#: backend/api/antivirus_defaults.py:107
+#: backend/api/antivirus_defaults.py:111
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "एंटीवायरस डिफ़ॉल्ट प्राप्त करने में विफलता: %s"
 
-#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
-#: backend/api/antivirus_defaults.py:302
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "प्रवेश नहीं: MANAGE_ANTIVIRUS_DEFAULTS भूमिका की आवश्यकता है"
-
-#: backend/api/antivirus_defaults.py:170
+#: backend/api/antivirus_defaults.py:174
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr "OS: %s के लिए कोई antivirus मानक नहीं पाया गया"
 
-#: backend/api/antivirus_defaults.py:183
+#: backend/api/antivirus_defaults.py:187
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "वायरस रोकने की प्रतिबद्धता मूलभूत सेटिंग लाइब्रेरी खोजने में विफल: %s"
 
-#: backend/api/antivirus_defaults.py:283
+#: backend/api/antivirus_defaults.py:287
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "एन्टीवायरस प्रतिस्थापन का अपडेट वापरे में विफल: %s"
 
-#: backend/api/antivirus_defaults.py:336
+#: backend/api/antivirus_defaults.py:340
 msgid "Antivirus default deleted successfully"
 msgstr "डिफ़ॉल्ट एन्टीवायरस हटा दिया गया सफलतापूर्वक"
 
-#: backend/api/antivirus_defaults.py:338
+#: backend/api/antivirus_defaults.py:342
 msgid "No antivirus default found for this OS"
 msgstr "इस OS के लिए कोई antivirus मानक नहीं पाया गया"
 
-#: backend/api/antivirus_defaults.py:346
+#: backend/api/antivirus_defaults.py:350
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "वायरस निषेधक प्रत्यक्षित मूल्य को हटाने में विफल: %s"
@@ -3844,23 +3856,23 @@ msgstr "पैकेज गिने फ़ालतू हुई: %s"
 msgid "Failed to search packages: %s"
 msgstr "पैकेज खोजने में विफल: %s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:234
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "प्रवेश नहीं: DELETE_HOST भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:298
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "प्रवेश नहीं: VIEW_HOST_DETAILS भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:687
 msgid "Host already exists"
 msgstr "होस्ट पहले से मौजूद है"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "रजिस्ट्रेशन अवशोषित: होस्ट पहले से ही हटा दिया गया था"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -4077,20 +4089,20 @@ msgstr "सिस्टम इनफो अपडेट की गर्ड़�
 msgid "Environment subscriptions are managed on the federation coordinator"
 msgstr "संबंधित परिस्थिति सदस्यताएँ federation coordinator पर प्रबंधित हैं"
 
-#: backend/api/airgap_devices.py:82
+#: backend/api/airgap_devices.py:83
 #, python-format
 msgid "Device %s is not an available import drive"
 msgstr "डिवाइस %s एक उपलब्ध आयम ड्राइव नहीं है"
 
-#: backend/api/airgap_devices.py:106
+#: backend/api/airgap_devices.py:107
 msgid "no import device selected"
 msgstr "कोई आयपीडीएस डिवाइस नहीं चुना"
 
-#: backend/api/airgap_devices.py:132
+#: backend/api/airgap_devices.py:133
 msgid "No import device selected"
 msgstr "इम्पोर्ट डिवाइस नहीं चुना गया"
 
-#: backend/api/airgap_devices.py:137
+#: backend/api/airgap_devices.py:138
 #, python-format
 msgid "Import device not ready: %s"
 msgstr "इम्पोर्ट डिवाइस नहीं तैयार: %s"
@@ -6357,11 +6369,11 @@ msgstr ""
 "कुंजी से एन्क्रिप्ट होता है, इसलिए OpenBAO को पुनर्स्थापित करने के लिए कभी "
 "भी OpenBAO में रखी कुंजी की ज़रूरत नहीं पड़ती"
 
-#: backend/services/cloud_backup_tick.py:327
+#: backend/services/cloud_backup_tick.py:347
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "iCloud साइन-इन जल्द समाप्त होगा: फिर से साइन इन करें"
 
-#: backend/services/cloud_backup_tick.py:329
+#: backend/services/cloud_backup_tick.py:349
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, SysManage cannot download its photos until someone signs in again.\n"
@@ -6697,7 +6709,7 @@ msgstr "gpg ने कुंजी निर्यात को सील नह
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "चुने गए किसी भी होस्ट पर एन्क्रिप्टेड बैकअप नहीं हैं"
 
-#: backend/services/backup_reach.py:148
+#: backend/services/backup_reach.py:178
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6708,7 +6720,7 @@ msgstr ""
 "नहीं पहुँच सकता: %(error)s। बैकअप के लिए उस तक नेटवर्क पथ और ऐसा प्रमाणपत्र "
 "चाहिए जिस पर यह होस्ट भरोसा करता हो।"
 
-#: backend/services/backup_reach.py:158
+#: backend/services/backup_reach.py:188
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6721,7 +6733,7 @@ msgstr ""
 "उसके NAT के पीछे रखने के बजाय स्टोरेज होस्ट के नेटवर्क पर रखें (वर्चुअल मशीन"
 " के लिए ब्रिज्ड नेटवर्क)।"
 
-#: backend/services/backup_reach.py:168
+#: backend/services/backup_reach.py:198
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

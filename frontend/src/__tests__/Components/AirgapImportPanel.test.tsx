@@ -177,3 +177,30 @@ describe("existing runs", () => {
     expect(document.body.innerHTML).not.toBe("");
   });
 });
+
+describe("what an ingest found after it completed (2026-11-24)", () => {
+  test("a tools repository not built and the catalog's outcome are shown", async () => {
+    routeGets({ device: "/dev/sdb1", ready: true }, [
+      {
+        id: "r9",
+        status: "COMPLETE",
+        notices: [
+          { code: "tools_not_built", params: { distro: "ubuntu", version: "26.04", error: "apt-ftparchive is not installed (apt-utils)" } },
+          { code: "catalog_loaded", params: { cves: 151035, advisories: 47114, generated_at: "2026-11-23T22:53:59" } },
+          { code: "catalog_refused", params: {} },
+        ],
+      },
+    ]);
+    render(<AirgapImportPanel />);
+    expect(await screen.findByText(/tools repository .* was not built/i)).toBeTruthy();
+    expect(screen.getByText(/Security catalog loaded/i)).toBeTruthy();
+    expect(screen.getByText(/does not match its signed manifest/i)).toBeTruthy();
+  });
+
+  test("a run with no notices shows none", async () => {
+    routeGets({ device: "/dev/sdb1", ready: true }, [{ id: "r8", status: "COMPLETE" }]);
+    render(<AirgapImportPanel />);
+    await screen.findByText(/Import complete/i);
+    expect(screen.queryByText(/Security catalog/i)).toBeNull();
+  });
+});

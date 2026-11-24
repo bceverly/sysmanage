@@ -47,6 +47,9 @@ class Host(TestBase):
     )
     # Phase 22: SHA-256 of the registration nonce (idempotent registration).
     registration_nonce_hash = Column(String(64), nullable=True)
+    reenroll_code_hash = Column(String(64), nullable=True)
+    reenroll_code_expires_at = Column(DateTime, nullable=True)
+    reenroll_code_by = Column(String(255), nullable=True)
     last_access = Column(DateTime)
     status = Column(String(20), nullable=False, server_default="up")
     approval_status = Column(String(20), nullable=False, server_default="pending")

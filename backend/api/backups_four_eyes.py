@@ -73,10 +73,34 @@ _REFUSALS = {
 }
 
 
-def _refuse(code: Optional[str]) -> None:
+def _refuse(code: Optional[str], request=None) -> None:
+    """Raise the refusal ``code`` in the words of the request's own kind."""
     if code:
-        status, text = _REFUSALS[code]
+        status, _text = _REFUSALS[code]
+        kind = four_eyes.KINDS.get(four_eyes.kind_of(request)) if request else None
+        text = (kind.refusals if kind else {}).get(code, _text)
         raise HTTPException(status_code=status, detail=text())
+
+
+def _perform_restore(db: Session, current_user, request, host) -> Dict[str, Any]:
+    """Approving a held restore: exactly the restore asked for, after
+    checking the host can still take it (it may have changed since)."""
+    body = RestoreBody(**json.loads(request.body))
+    policy = _ready_policy(db, host)
+    reach.refuse_if_blocked(db, host)
+    return restore_flow.perform(
+        db, current_user, host, policy, body, approved_by=current_user.userid
+    )
+
+
+four_eyes.register(
+    four_eyes.RESTORE,
+    four_eyes.Kind(
+        role=SecurityRoles.RESTORE_FILES,
+        perform=_perform_restore,
+        refusals={code: text for code, (_status, text) in _REFUSALS.items()},
+    ),
+)
 
 
 def _request_or_404(db: Session, request_id: str) -> models.BackupRestoreRequest:
@@ -137,19 +161,20 @@ def approve_restore(
     eng = _engine_or_402()
     request = _request_or_404(db, request_id)
     now = jobs.now()
-    _refuse(four_eyes.approval_refusal(eng, request, current_user, now))
+    _refuse(four_eyes.approval_refusal(eng, request, current_user, now), request)
+    kind = four_eyes.KINDS.get(four_eyes.kind_of(request))
+    if kind is None:
+        # A kind this server cannot perform (a newer server asked for it).
+        raise HTTPException(
+            status_code=409,
+            detail=_("This server cannot carry out this kind of request"),
+        )
     host = _host_or_404(db, str(request.host_id))
-    body = RestoreBody(**json.loads(request.body))
-    # The host may have changed since it was asked for: check it again.
-    policy = _ready_policy(db, host)
-    reach.refuse_if_blocked(db, host)
+    out = kind.perform(db, current_user, request, host)
     request.status, request.decided_by, request.decided_at = (
         "approved",
         current_user.userid,
         now,
-    )
-    out = restore_flow.perform(
-        db, current_user, host, policy, body, approved_by=current_user.userid
     )
     request.run_id = uuid.UUID(out["id"])
     db.commit()
@@ -168,7 +193,7 @@ def reject_restore(
     now = jobs.now()
     code = four_eyes.approval_refusal(eng, request, current_user, now)
     # The requester withdraws instead; anyone else with the role may reject.
-    _refuse(code)
+    _refuse(code, request)
     request.status, request.decided_by, request.decided_at = (
         "rejected",
         current_user.userid,
@@ -198,7 +223,7 @@ def withdraw_restore(
     eng = _engine_or_402()
     request = _request_or_404(db, request_id)
     now = jobs.now()
-    _refuse(four_eyes.withdraw_refusal(eng, request, current_user, now))
+    _refuse(four_eyes.withdraw_refusal(eng, request, current_user, now), request)
     request.status, request.decided_by, request.decided_at = (
         "withdrawn",
         current_user.userid,

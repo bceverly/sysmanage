@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 05:29-0800\n"
+"POT-Creation-Date: 2026-11-24 12:33-0500\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -639,61 +639,61 @@ msgstr "하드웨어가 업데이트되었습니다"
 msgid "Failed to update hardware information"
 msgstr "하드웨어 정보를 업데이트하는 데 실패했습니다"
 
-#: backend/api/handlers/software_package_handlers.py:113
+#: backend/api/handlers/software_package_handlers.py:114
 msgid "software_inventory_updated"
 msgstr "소프트웨어 인벤토리가 업데이트되었습니다"
 
-#: backend/api/handlers/software_package_handlers.py:122
+#: backend/api/handlers/software_package_handlers.py:123
 msgid "Failed to update software inventory"
 msgstr "소프트웨어 인벤토리를 업데이트하는 데 실패했습니다"
 
-#: backend/api/handlers/software_package_handlers.py:293
+#: backend/api/handlers/software_package_handlers.py:294
 #: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "업데이트 저장 실패: %s"
 
-#: backend/api/handlers/software_package_handlers.py:408
+#: backend/api/handlers/software_package_handlers.py:409
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "_PACKAGE_COLLECTION_ 결과 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:502
+#: backend/api/handlers/software_package_handlers.py:503
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "제3자 저장소 업데이트 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:585
+#: backend/api/handlers/software_package_handlers.py:586
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "_ANTIVIRUS_ 상태 업데이트 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:716
+#: backend/api/handlers/software_package_handlers.py:717
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "_COMMERCIAL_ANTIVIRUS_ 상태 업데이트 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:818
+#: backend/api/handlers/software_package_handlers.py:819
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "방화벽 상태 업데이트 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:904
+#: backend/api/handlers/software_package_handlers.py:905
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Graylog 상태 업데이트 처리에 실패했습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:936
+#: backend/api/handlers/software_package_handlers.py:937
 msgid "Missing request_id in installation_complete"
 msgstr "installation_complete에서 request_id가 누락됨"
 
-#: backend/api/handlers/software_package_handlers.py:953
+#: backend/api/handlers/software_package_handlers.py:954
 #: backend/api/agent.py:941 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "설정 요청을 찾을 수 없습니다: %s"
 
-#: backend/api/handlers/software_package_handlers.py:994
+#: backend/api/handlers/software_package_handlers.py:995
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -995,22 +995,29 @@ msgstr ""
 "automation_engine이 로드되지 않았습니다; next_run 타임스탬프가 진행되지 않습니다. Pro+ 라이선스에 "
 "automation_engine이 포함될 때까지 스케줄은 현재 틱 창에서만 실행됩니다."
 
-#: backend/api/host_registration.py:82
+#: backend/api/host_registration.py:73
+#, python-format
+msgid ""
+"Host '%(fqdn)s' re-enrolled with a one-time code; its old credential no "
+"longer works"
+msgstr "호스트 '%(fqdn)s'는 일회용 코드로 재등록되었습니다. 이전 자격 증명은 더 이상 작동하지 않습니다."
+
+#: backend/api/host_registration.py:104
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 msgstr "'%(key_name)s' 등록 키를 통해 '%(fqdn)s' 호스트가 등록됨 (자동 승인=%(auto_approve)s)"
 
-#: backend/api/host_registration.py:134
+#: backend/api/host_registration.py:156
 msgid "Invalid or expired registration key"
 msgstr "잘못된 또는 없는 등록 키"
 
-#: backend/api/host_registration.py:173
+#: backend/api/host_registration.py:195
 msgid "Invalid or expired enrollment token"
 msgstr "잘못된 또는 만료된 등록 토큰"
 
-#: backend/api/host_registration.py:239
+#: backend/api/host_registration.py:261
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1040,9 +1047,13 @@ msgstr "당신이 요청한 복원은 다른 사람에 의해 승인되어야 �
 msgid "Only the person who asked for this restore can withdraw it"
 msgstr "이 복원 요청을 철회할 수 있는 사람은 오직 요청한 사람입니다."
 
-#: backend/api/backups_four_eyes.py:83 backend/api/backups_four_eyes.py:86
+#: backend/api/backups_four_eyes.py:107 backend/api/backups_four_eyes.py:110
 msgid "Restore request not found"
 msgstr "복원 요청이 찾을 수 없습니다."
+
+#: backend/api/backups_four_eyes.py:170
+msgid "This server cannot carry out this kind of request"
+msgstr "이 서버는 이 종류의 요청을 처리할 수 없습니다."
 
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -2750,7 +2761,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr "방화벽 배포 명령을 성공적으로 전송했습니다"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:67
+#: backend/api/antivirus_defaults.py:71
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "OS 이름은 필수 항목입니다"
@@ -3287,48 +3298,47 @@ msgstr "이 호스트는 백업을 실행할 수 없습니다: %s"
 msgid "This host's agent cannot check that yet; upgrade the agent first"
 msgstr "이 호스트의 에이전트는 아직 이를 확인할 수 없습니다. 먼저 에이전트를 업그레이드하세요"
 
-#: backend/api/antivirus_defaults.py:69
+#: backend/api/antivirus_defaults.py:34
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "퍼미션 denied: MANAGE_ANTIVIRUS_DEFAULTS 역할 필요"
+
+#: backend/api/antivirus_defaults.py:73
 msgid "OS name must be 100 characters or less"
 msgstr "OS 이름은 100자 이하여야 합니다"
 
-#: backend/api/antivirus_defaults.py:82
+#: backend/api/antivirus_defaults.py:86
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "_ANTIVIRUS 패키지 이름은 255자 이내이어야 합니다"
 
-#: backend/api/antivirus_defaults.py:107
+#: backend/api/antivirus_defaults.py:111
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "_ANTIVIRUS_DEFAULTS_ 가져오기에 실패했습니다: %s"
 
-#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
-#: backend/api/antivirus_defaults.py:302
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "퍼미션 denied: MANAGE_ANTIVIRUS_DEFAULTS 역할 필요"
-
-#: backend/api/antivirus_defaults.py:170
+#: backend/api/antivirus_defaults.py:174
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr "OS에 대한 기본_antivirus_설정이 없습니다: %s"
 
-#: backend/api/antivirus_defaults.py:183
+#: backend/api/antivirus_defaults.py:187
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "_ANTIVIRUS_DEFAULT_ 가져오기에 실패했습니다: %s"
 
-#: backend/api/antivirus_defaults.py:283
+#: backend/api/antivirus_defaults.py:287
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "_ANTIVIRUS_DEFAULTS_UPDATE_FAILED_: %s"
 
-#: backend/api/antivirus_defaults.py:336
+#: backend/api/antivirus_defaults.py:340
 msgid "Antivirus default deleted successfully"
 msgstr "_ANTIVIRUS_DEFAULT_SUCCESSFULLY 삭제됨"
 
-#: backend/api/antivirus_defaults.py:338
+#: backend/api/antivirus_defaults.py:342
 msgid "No antivirus default found for this OS"
 msgstr "이 운영 체제에 대한 기본_ANTIVIRUS_설정을 찾을 수 없습니다"
 
-#: backend/api/antivirus_defaults.py:346
+#: backend/api/antivirus_defaults.py:350
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "디폴트 악성코드 제거 프로그램 삭제 실패: %s"
@@ -3703,23 +3713,23 @@ msgstr "패키지 개수 세는 데 실패했습니다: %s"
 msgid "Failed to search packages: %s"
 msgstr "패키지 검색 실패: %s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:234
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "퍼미션 denied: DELETE_HOST 역할 필요"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:298
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "퍼미션 denied: VIEW_HOST_DETAILS 역할 필요"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:687
 msgid "Host already exists"
 msgstr "호스트가 이미 존재합니다"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "등록 흡수: 호스트가 최근에 삭제되었습니다"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -3930,20 +3940,20 @@ msgstr "시스템 정보 업데이트 요청됨"
 msgid "Environment subscriptions are managed on the federation coordinator"
 msgstr "환경 구독은 연방 조정기에서 관리됩니다"
 
-#: backend/api/airgap_devices.py:82
+#: backend/api/airgap_devices.py:83
 #, python-format
 msgid "Device %s is not an available import drive"
 msgstr "장치 %s 는 사용 가능한 임포트 드라이브가 아닙니다."
 
-#: backend/api/airgap_devices.py:106
+#: backend/api/airgap_devices.py:107
 msgid "no import device selected"
 msgstr "선택된 임포트 장치 없음"
 
-#: backend/api/airgap_devices.py:132
+#: backend/api/airgap_devices.py:133
 msgid "No import device selected"
 msgstr "입력 장치가 선택되지 않았습니다"
 
-#: backend/api/airgap_devices.py:137
+#: backend/api/airgap_devices.py:138
 #, python-format
 msgid "Import device not ready: %s"
 msgstr "Import 장치 준비 완료되지 않음: %s"
@@ -6098,11 +6108,11 @@ msgstr ""
 "먼저 비상용 에스크로 키를 저장하세요. SysManage 서버 자체의 백업은 이 키로 암호화되므로 OpenBAO를 복원할 때 "
 "OpenBAO 안에 보관된 키가 필요하지 않습니다"
 
-#: backend/services/cloud_backup_tick.py:327
+#: backend/services/cloud_backup_tick.py:347
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "iCloud 로그인이 곧 만료됩니다: 다시 로그인하세요"
 
-#: backend/services/cloud_backup_tick.py:329
+#: backend/services/cloud_backup_tick.py:349
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, SysManage cannot download its photos until someone signs in again.\n"
@@ -6419,7 +6429,7 @@ msgstr "gpg는 키 내보내기를 봉인하지 못했습니다."
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "선택된 호스트 중 하나도 암호화된 백업을 가지고 있지 않습니다."
 
-#: backend/services/backup_reach.py:148
+#: backend/services/backup_reach.py:178
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6429,7 +6439,7 @@ msgstr ""
 "이 호스트는 백업 스토리지의 restate-proxy(%(address)s, 포트 %(port)s)에 연결할 수 없습니다: "
 "%(error)s. 백업에는 그곳까지의 네트워크 경로와 이 호스트가 신뢰하는 인증서가 필요합니다."
 
-#: backend/services/backup_reach.py:158
+#: backend/services/backup_reach.py:188
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6441,7 +6451,7 @@ msgstr ""
 "%(seen)s(으)로 보이므로 마운트를 거부합니다. 호스트를 NAT 뒤에 두지 말고 스토리지 호스트의 네트워크(가상 머신의 경우 브리지"
 " 네트워크)에 연결하세요."
 
-#: backend/services/backup_reach.py:168
+#: backend/services/backup_reach.py:198
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

@@ -261,7 +261,13 @@
     "runStats": "{{files}} fichiers · {{size}}",
     "runStatus": "Statut d'importation",
     "statusError": "Impossible d'interroger l'appareil d'importation.",
-    "title": "Importer depuis le média"
+    "title": "Importer depuis le média",
+    "notice": {
+      "catalogFailed": "Le catalogue de sécurité n'a pas pu être chargé : {{error}}",
+      "catalogLoaded": "Le catalogue de sécurité a été chargé : {{cves}} CVEs et {{advisories}} avis, créé par le collecteur à {{made}}.",
+      "catalogRefused": "Le catalogue de sécurité sur ce support ne correspond pas à son manifeste signé, il n'a donc pas été chargé.",
+      "toolsNotBuilt": "Le dépôt d'outils SysManage pour {{distro}} {{version}} n'a pas été construit : {{error}}"
+    }
   },
   "airgapKeys": {
     "collector": {

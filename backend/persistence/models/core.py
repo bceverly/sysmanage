@@ -123,6 +123,11 @@ class Host(Base):
     # the same nonce gets the id and token again (its first reply may have
     # been lost); cleared once the agent proves its token.
     registration_nonce_hash = Column(String(64), nullable=True)
+    # "Allow re-enroll" (q113reenroll): SHA-256 of a one-time code that lets
+    # an agent with no credential (a rebuilt host) take over this record.
+    reenroll_code_hash = Column(String(64), nullable=True)
+    reenroll_code_expires_at = Column(DateTime, nullable=True)
+    reenroll_code_by = Column(String(255), nullable=True)
     last_access = Column(DateTime)
     status = Column(String(20), nullable=False, server_default="up")
     approval_status = Column(String(20), nullable=False, server_default="pending")

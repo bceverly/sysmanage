@@ -443,6 +443,57 @@ class TestHostRegister:
         retry = client.post("/api/host/register", json=registration_data).json()
         assert "id" not in retry and "host_token" not in retry
 
+    def test_a_rebuilt_host_takes_over_its_record_only_with_the_code(
+        self, client, session
+    ):
+        """2026-11-24 (27.2): a rebuilt host's agent has no credential and is
+        refused for good; an administrator's one-time code lets it take over
+        the existing record with a NEW token.  Naming the host, a wrong code,
+        a spent code or an expired one still get nothing."""
+        from backend.security import (  # pylint: disable=import-outside-toplevel
+            agent_reenroll,
+        )
+
+        reg = {"active": True, "fqdn": "rebuilt.example.com", "hostname": "rebuilt",
+               "ipv4": "192.168.1.170", "registration_nonce": "o" * 48}  # fmt: skip
+        first = client.post("/api/host/register", json=reg).json()
+        host = session.query(models.Host).filter(models.Host.id == first["id"]).first()
+        host.registration_nonce_hash = None  # the old agent proved its token
+        host.certificate_serial = "old-serial"
+        code, _expires = agent_reenroll.issue(host, "admin@example.com")
+        session.commit()
+
+        rebuilt = {k: v for k, v in reg.items() if k != "registration_nonce"}
+        wrong = client.post(
+            "/api/host/register", json={**rebuilt, "reenroll_code": "not-it"}
+        ).json()
+        assert "host_token" not in wrong
+
+        taken = client.post(
+            "/api/host/register", json={**rebuilt, "reenroll_code": code}
+        ).json()
+        assert taken["id"] == first["id"]
+        assert taken["host_token"] and taken["host_token"] != first["host_token"]
+        session.expire_all()
+        host = session.query(models.Host).filter(models.Host.id == first["id"]).first()
+        assert host.host_token == taken["host_token"]
+        assert host.reenroll_code_hash is None and host.certificate_serial is None
+
+        again = client.post(
+            "/api/host/register", json={**rebuilt, "reenroll_code": code}
+        ).json()
+        assert "host_token" not in again  # spent
+
+        late, _expires = agent_reenroll.issue(host, "admin@example.com")
+        host.reenroll_code_expires_at = (
+            agent_reenroll._now() - agent_reenroll.CODE_TTL
+        )  # pylint: disable=protected-access
+        session.commit()
+        expired = client.post(
+            "/api/host/register", json={**rebuilt, "reenroll_code": late}
+        ).json()
+        assert "host_token" not in expired
+
     def test_a_short_nonce_is_not_stored(self, client, session):
         client.post(
             "/api/host/register",

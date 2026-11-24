@@ -18,7 +18,7 @@ from fastapi import HTTPException
 
 from backend.i18n import _
 from backend.persistence import db, models
-from backend.security import agent_identity
+from backend.security import agent_identity, agent_reenroll
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 
@@ -54,10 +54,32 @@ def _refresh_existing_host(session, existing_host, registration_data) -> "models
         raise
 
 
-def existing_host_reply(existing_host, registration_nonce) -> dict:
+def existing_host_reply(
+    existing_host, registration_nonce, reenroll_code=None, session=None
+) -> dict:
     """The answer to a registration naming a host that already exists: no id
     or token (Phase 22.0) -- unless it is the registrant retrying with the
-    nonce it created the host with (Phase 22; agent_identity)."""
+    nonce it created the host with (Phase 22; agent_identity), or a machine
+    presenting the one-time code an administrator issued with "Allow
+    re-enroll" (a rebuilt host; agent_reenroll), which gets a NEW token."""
+    if session is not None and agent_reenroll.redeem(existing_host, reenroll_code):
+        AuditService.log(
+            db=session,
+            action_type=ActionType.UPDATE,
+            entity_type=EntityType.HOST,
+            entity_id=str(existing_host.id),
+            entity_name=existing_host.fqdn,
+            description=_(
+                "Host '%(fqdn)s' re-enrolled with a one-time code; its old "
+                "credential no longer works"
+            )
+            % {"fqdn": existing_host.fqdn},
+            result=Result.SUCCESS,
+            details={"reenrolled": True},
+        )
+        session.commit()
+        session.refresh(existing_host)
+        return registration_reply(existing_host, issue_credential=True)
     retry = agent_identity.registration_nonce_matches(existing_host, registration_nonce)
     if retry:
         logger.info(

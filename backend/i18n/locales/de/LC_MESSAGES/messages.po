@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 05:29-0800\n"
+"POT-Creation-Date: 2026-11-24 12:33-0500\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -660,62 +660,62 @@ msgstr "Hardware aktualisiert"
 msgid "Failed to update hardware information"
 msgstr "Hardwareinformation konnte nicht aktualisiert werden"
 
-#: backend/api/handlers/software_package_handlers.py:113
+#: backend/api/handlers/software_package_handlers.py:114
 msgid "software_inventory_updated"
 msgstr "Software-Inventar aktualisiert"
 
-#: backend/api/handlers/software_package_handlers.py:122
+#: backend/api/handlers/software_package_handlers.py:123
 msgid "Failed to update software inventory"
 msgstr "Fehler beim Aktualisieren der Software-Inventarliste"
 
-#: backend/api/handlers/software_package_handlers.py:293
+#: backend/api/handlers/software_package_handlers.py:294
 #: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Fehler beim Speichern der Updates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:408
+#: backend/api/handlers/software_package_handlers.py:409
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "Fehler beim Verarbeiten des Paket-Sammlergebnisses: %s"
 
-#: backend/api/handlers/software_package_handlers.py:502
+#: backend/api/handlers/software_package_handlers.py:503
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr ""
 "Fehler beim Verarbeiten der Drittanbieter-Repository-Aktualisierung: %s"
 
-#: backend/api/handlers/software_package_handlers.py:585
+#: backend/api/handlers/software_package_handlers.py:586
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "Fehler beim Verarbeiten des Antivirus-Statusupdates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:716
+#: backend/api/handlers/software_package_handlers.py:717
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "Fehler beim Verarbeiten des kommerziellen Antivirus-Statusupdates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:818
+#: backend/api/handlers/software_package_handlers.py:819
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "Fehler beim Verarbeiten des Firewall-Statusupdates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:904
+#: backend/api/handlers/software_package_handlers.py:905
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Fehler beim Verarbeiten des Graylog-Statusupdates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:936
+#: backend/api/handlers/software_package_handlers.py:937
 msgid "Missing request_id in installation_complete"
 msgstr "Fehlender request_id in installation_complete"
 
-#: backend/api/handlers/software_package_handlers.py:953
+#: backend/api/handlers/software_package_handlers.py:954
 #: backend/api/agent.py:941 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Installationsanfrage nicht gefunden: %s"
 
-#: backend/api/handlers/software_package_handlers.py:994
+#: backend/api/handlers/software_package_handlers.py:995
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -1034,7 +1034,16 @@ msgstr ""
 "aktualisiert. Pläne werden nur im aktuellen Tick-Fenster ausgeführt, bis die"
 " Pro+ Lizenz automation_engine enthält."
 
-#: backend/api/host_registration.py:82
+#: backend/api/host_registration.py:73
+#, python-format
+msgid ""
+"Host '%(fqdn)s' re-enrolled with a one-time code; its old credential no "
+"longer works"
+msgstr ""
+"Der Host %(fqdn)s wurde mit einem einmaligen Code neu registriert; seine "
+"alten Anmeldeinformationen funktionieren nicht mehr"
+
+#: backend/api/host_registration.py:104
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -1043,15 +1052,15 @@ msgstr ""
 "Host '%(fqdn)s' wurde über Registrierungsschlüssel '%(key_name)s' "
 "(auto_approve=%(auto_approve)s) angemeldet"
 
-#: backend/api/host_registration.py:134
+#: backend/api/host_registration.py:156
 msgid "Invalid or expired registration key"
 msgstr "Ungültiger oder abgelaufener Registrierungsschlüssel"
 
-#: backend/api/host_registration.py:173
+#: backend/api/host_registration.py:195
 msgid "Invalid or expired enrollment token"
 msgstr "Ungültiger oder abgelaufener Anmelde-Token"
 
-#: backend/api/host_registration.py:239
+#: backend/api/host_registration.py:261
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1090,9 +1099,13 @@ msgstr ""
 "Nur die Person, die diese Wiederherstellung angefordert hat, kann sie "
 "zurückziehen."
 
-#: backend/api/backups_four_eyes.py:83 backend/api/backups_four_eyes.py:86
+#: backend/api/backups_four_eyes.py:107 backend/api/backups_four_eyes.py:110
 msgid "Restore request not found"
 msgstr "Wiederherstellungsanfrage nicht gefunden"
+
+#: backend/api/backups_four_eyes.py:170
+msgid "This server cannot carry out this kind of request"
+msgstr "Dieser Server kann diese Art von Anfrage nicht ausführen"
 
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -2912,7 +2925,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr "Firewall-Deploy-Befehl erfolgreich gesendet"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:67
+#: backend/api/antivirus_defaults.py:71
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "Der Name des Betriebssystems ist erforderlich"
@@ -3490,49 +3503,48 @@ msgstr ""
 "Der Agent dieses Hosts kann das noch nicht prüfen; aktualisieren Sie zuerst "
 "den Agenten"
 
-#: backend/api/antivirus_defaults.py:69
+#: backend/api/antivirus_defaults.py:34
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "Berechtigung abgelehnt: MANAGE_ANTIVIRUS_DEFAULTS Rolle erforderlich"
+
+#: backend/api/antivirus_defaults.py:73
 msgid "OS name must be 100 characters or less"
 msgstr "Der Name des Betriebssystems muss 100 Zeichen oder weniger betragen"
 
-#: backend/api/antivirus_defaults.py:82
+#: backend/api/antivirus_defaults.py:86
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "Der Antivirus-Paketname muss 255 Zeichen oder weniger betragen"
 
-#: backend/api/antivirus_defaults.py:107
+#: backend/api/antivirus_defaults.py:111
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "Fehler beim Abrufen der Standard-Antivirus-Einstellungen: %s"
 
-#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
-#: backend/api/antivirus_defaults.py:302
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "Berechtigung abgelehnt: MANAGE_ANTIVIRUS_DEFAULTS Rolle erforderlich"
-
-#: backend/api/antivirus_defaults.py:170
+#: backend/api/antivirus_defaults.py:174
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr ""
 "Keine Standard-Anti-Virus-Software für das Betriebssystem gefunden: %s"
 
-#: backend/api/antivirus_defaults.py:183
+#: backend/api/antivirus_defaults.py:187
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "Fehler beim Abrufen des Standard-Antivirus-Status: %s"
 
-#: backend/api/antivirus_defaults.py:283
+#: backend/api/antivirus_defaults.py:287
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "Fehler beim Aktualisieren der Antivirus-Standardwerte: %s"
 
-#: backend/api/antivirus_defaults.py:336
+#: backend/api/antivirus_defaults.py:340
 msgid "Antivirus default deleted successfully"
 msgstr "Standard-Antivirus-Einstellung erfolgreich gelöschte"
 
-#: backend/api/antivirus_defaults.py:338
+#: backend/api/antivirus_defaults.py:342
 msgid "No antivirus default found for this OS"
 msgstr "Keine Standard-Anti-Virus-Software für dieses Betriebssystem gefunden"
 
-#: backend/api/antivirus_defaults.py:346
+#: backend/api/antivirus_defaults.py:350
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "Fehler beim Entfernen der Antivirus-Standardkonfiguration: %s"
@@ -3938,23 +3950,23 @@ msgstr "Fehler beim Zählen der Pakete: %s"
 msgid "Failed to search packages: %s"
 msgstr "Fehler beim Suchen von Paketen: %s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:234
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Zugriff verweigert: DELETE_HOST-Rolle erforderlich"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:298
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Berechtigung abgelehnt: VIEW_HOST_DETAILS Rolle erforderlich"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:687
 msgid "Host already exists"
 msgstr "Host existiert bereits"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registrierung absorbiert: Host wurde kürzlich gelöscht"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -4174,20 +4186,20 @@ msgstr "Aktualisierung von Systeminformationen angefordert"
 msgid "Environment subscriptions are managed on the federation coordinator"
 msgstr "Umgebungssubscriptionen werden vom Föderationskoordinator verwaltet"
 
-#: backend/api/airgap_devices.py:82
+#: backend/api/airgap_devices.py:83
 #, python-format
 msgid "Device %s is not an available import drive"
 msgstr "Gerät %s ist kein verfügbares Import-Drive"
 
-#: backend/api/airgap_devices.py:106
+#: backend/api/airgap_devices.py:107
 msgid "no import device selected"
 msgstr "Kein Import-Gerät ausgewählt"
 
-#: backend/api/airgap_devices.py:132
+#: backend/api/airgap_devices.py:133
 msgid "No import device selected"
 msgstr "Kein Importgerät ausgewählt"
 
-#: backend/api/airgap_devices.py:137
+#: backend/api/airgap_devices.py:138
 #, python-format
 msgid "Import device not ready: %s"
 msgstr "Import-Gerät ist noch nicht bereit: %s"
@@ -6513,11 +6525,11 @@ msgstr ""
 "des SysManage-Servers wird damit verschlüsselt, sodass die Wiederherstellung"
 " von OpenBAO nie einen in OpenBAO verwahrten Schlüssel braucht"
 
-#: backend/services/cloud_backup_tick.py:327
+#: backend/services/cloud_backup_tick.py:347
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "Die iCloud-Anmeldung läuft bald ab: melden Sie sich erneut an"
 
-#: backend/services/cloud_backup_tick.py:329
+#: backend/services/cloud_backup_tick.py:349
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, SysManage cannot download its photos until someone signs in again.\n"
@@ -6864,7 +6876,7 @@ msgstr "gpg hat den Schlüsselexport nicht versiegelt"
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "Keiner der ausgewählten Hosts verfügt über verschlüsselte Backups"
 
-#: backend/services/backup_reach.py:148
+#: backend/services/backup_reach.py:178
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6875,7 +6887,7 @@ msgstr ""
 "(%(address)s, Port %(port)s): %(error)s. Sicherungen brauchen einen "
 "Netzwerkweg dorthin und ein Zertifikat, dem dieser Host vertraut."
 
-#: backend/services/backup_reach.py:158
+#: backend/services/backup_reach.py:188
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6889,7 +6901,7 @@ msgstr ""
 " virtuellen Maschine ein Bridge-Netzwerk), statt ihn hinter dessen NAT zu "
 "betreiben."
 
-#: backend/services/backup_reach.py:168
+#: backend/services/backup_reach.py:198
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

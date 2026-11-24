@@ -261,7 +261,13 @@
     "runStats": "{{files}} 파일 · {{size}}",
     "runStatus": "가져오기 상태",
     "statusError": "임포트 장치를 탐색할 수 없습니다.",
-    "title": "미디어에서 가져오기"
+    "title": "미디어에서 가져오기",
+    "notice": {
+      "catalogFailed": "보안 카탈로그를 로드할 수 없었습니다: {{error}}",
+      "catalogLoaded": "보안 카탈로그가 로드되었습니다: {{cves}} CVEs와 {{advisories}} 경고, 수집기에 의해 생성되었습니다 {{made}}.",
+      "catalogRefused": "이 미디어에 있는 보안 카탈로그는 서명된 매니페스트와 일치하지 않으므로 로드되지 않았습니다.",
+      "toolsNotBuilt": "SysManage 도구 저장소인 {{distro}} {{version}}이 빌드되지 않았습니다: {{error}}"
+    }
   },
   "airgapKeys": {
     "collector": {

@@ -261,7 +261,13 @@
     "runStats": "{{files}} archivos · {{size}}",
     "runStatus": "Estado de importación",
     "statusError": "No se pudo probar el dispositivo de importación.",
-    "title": "Importar desde medios"
+    "title": "Importar desde medios",
+    "notice": {
+      "catalogFailed": "No se pudo cargar el catálogo de seguridad: {{error}}",
+      "catalogLoaded": "El catálogo de seguridad cargado: {{cves}} CVEs y {{advisories}} alertas, creado por el recolector en {{made}}.",
+      "catalogRefused": "El catálogo de seguridad en este medio no coincide con su manifiesto firmado, por lo que no se cargó.",
+      "toolsNotBuilt": "La herramienta de repositorio SysManage para {{distro}} {{version}} no se construyó: {{error}}"
+    }
   },
   "airgapKeys": {
     "collector": {

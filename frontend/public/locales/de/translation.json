@@ -261,7 +261,13 @@
     "runStats": "{{files}} Dateien · {{size}}",
     "runStatus": "Importstatus",
     "statusError": "Import-Gerät konnte nicht ermittelt werden.",
-    "title": "Von Medium importieren"
+    "title": "Von Medium importieren",
+    "notice": {
+      "catalogFailed": "Der Sicherheitskatalog konnte nicht geladen werden: {{error}}",
+      "catalogLoaded": "Sicherheitskatalog geladen: {{cves}} CVEs und {{advisories}} Sicherheitshinweise, erstellt vom Sammler am {{made}}.",
+      "catalogRefused": "Der Sicherheitskatalog auf diesem Medium stimmt nicht mit seinem signierten Manifest überein und wurde daher nicht geladen.",
+      "toolsNotBuilt": "Das SysManage-Tools-Repository für {{distro}} {{version}} wurde nicht erstellt: {{error}}"
+    }
   },
   "airgapKeys": {
     "collector": {

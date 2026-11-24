@@ -261,7 +261,13 @@
     "runStats": "{{files}} 個檔案 · {{size}}",
     "runStatus": "導入狀態",
     "statusError": "無法探測導入裝置。",
-    "title": "從媒體匯入"
+    "title": "從媒體匯入",
+    "notice": {
+      "catalogFailed": "無法載入安全目錄：{{error}}",
+      "catalogLoaded": "安全目錄已載入：{{cves}} 個 CVE 和 {{advisories}} 個警示，由收集器在 {{made}} 時創建。",
+      "catalogRefused": "此媒體的安全目錄與其簽名清單不符，因此未載入。",
+      "toolsNotBuilt": "SysManage 的工具庫存為 {{distro}} 和 {{version}} 沒有建立：{{error}}"
+    }
   },
   "airgapKeys": {
     "collector": {

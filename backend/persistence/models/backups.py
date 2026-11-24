@@ -475,7 +475,10 @@ class BackupRestoreRequest(Base):
     host_id = Column(
         GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), nullable=False, index=True
     )
+    # restore / rebuild / clone / wipe / migrate (q112requestkind)
+    kind = Column(String(16), nullable=False, default="restore")
     body = Column(Text, nullable=False)
+    target = Column(Text, nullable=True)  # JSON: where a rebuild or clone goes
     # pending / approved / rejected / withdrawn / expired
     status = Column(String(16), nullable=False, default="pending", index=True)
     requested_by = Column(String(255), nullable=False)

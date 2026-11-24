@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 05:29-0800\n"
+"POT-Creation-Date: 2026-11-24 12:33-0500\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -637,61 +637,61 @@ msgstr "ハードウェアが更新されました"
 msgid "Failed to update hardware information"
 msgstr "ハードウェア情報の更新に失敗しました"
 
-#: backend/api/handlers/software_package_handlers.py:113
+#: backend/api/handlers/software_package_handlers.py:114
 msgid "software_inventory_updated"
 msgstr "ソフトウェアインベントリが更新されました"
 
-#: backend/api/handlers/software_package_handlers.py:122
+#: backend/api/handlers/software_package_handlers.py:123
 msgid "Failed to update software inventory"
 msgstr "ソフトウェアインベントリの更新に失敗しました"
 
-#: backend/api/handlers/software_package_handlers.py:293
+#: backend/api/handlers/software_package_handlers.py:294
 #: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "更新の保存に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:408
+#: backend/api/handlers/software_package_handlers.py:409
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "パッケージ収集結果の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:502
+#: backend/api/handlers/software_package_handlers.py:503
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "サードパーティーリポジトリ更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:585
+#: backend/api/handlers/software_package_handlers.py:586
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "アンチウイルスステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:716
+#: backend/api/handlers/software_package_handlers.py:717
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "商用アンチウイルスステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:818
+#: backend/api/handlers/software_package_handlers.py:819
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "ファイアウォールステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:904
+#: backend/api/handlers/software_package_handlers.py:905
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Graylog ステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:936
+#: backend/api/handlers/software_package_handlers.py:937
 msgid "Missing request_id in installation_complete"
 msgstr "インストール完了リクエストに request_id が含まれていません"
 
-#: backend/api/handlers/software_package_handlers.py:953
+#: backend/api/handlers/software_package_handlers.py:954
 #: backend/api/agent.py:941 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "インストール要求が見つかりません: %s"
 
-#: backend/api/handlers/software_package_handlers.py:994
+#: backend/api/handlers/software_package_handlers.py:995
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -994,7 +994,14 @@ msgstr ""
 "automation_engine が読み込まれていないため、next_run タイムスタンプは進められません。Pro+ ライセンスに "
 "automation_engine が含まれるまで、スケジュールは現在のティックウィンドウでのみ実行されます。"
 
-#: backend/api/host_registration.py:82
+#: backend/api/host_registration.py:73
+#, python-format
+msgid ""
+"Host '%(fqdn)s' re-enrolled with a one-time code; its old credential no "
+"longer works"
+msgstr "ホスト「%(fqdn)s」は、1回限りのコードで再登録されました。古い資格情報はもはや機能しません"
+
+#: backend/api/host_registration.py:104
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -1003,15 +1010,15 @@ msgstr ""
 "'%(fqdn)s' のホストは、レジストレーションキー '%(key_name)s' "
 "を使用して登録されました（自動承認=%(auto_approve)s）"
 
-#: backend/api/host_registration.py:134
+#: backend/api/host_registration.py:156
 msgid "Invalid or expired registration key"
 msgstr "無効または期限切れの登録キー"
 
-#: backend/api/host_registration.py:173
+#: backend/api/host_registration.py:195
 msgid "Invalid or expired enrollment token"
 msgstr "無効または期限切れの登録トークン"
 
-#: backend/api/host_registration.py:239
+#: backend/api/host_registration.py:261
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1041,9 +1048,13 @@ msgstr "あなたが要求した復元は、他の誰かによって承認され
 msgid "Only the person who asked for this restore can withdraw it"
 msgstr "この復元を要求した人だけがそれを取り下げることができます。"
 
-#: backend/api/backups_four_eyes.py:83 backend/api/backups_four_eyes.py:86
+#: backend/api/backups_four_eyes.py:107 backend/api/backups_four_eyes.py:110
 msgid "Restore request not found"
 msgstr "復元リクエストが見つかりません。"
+
+#: backend/api/backups_four_eyes.py:170
+msgid "This server cannot carry out this kind of request"
+msgstr "このサーバーは、このようなリクエストを処理できません"
 
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -2757,7 +2768,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr "ファイアウォール展開コマンドが正常に送信されました"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:67
+#: backend/api/antivirus_defaults.py:71
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "OS名が必要です"
@@ -3294,48 +3305,47 @@ msgstr "このホストではバックアップを実行できません: %s"
 msgid "This host's agent cannot check that yet; upgrade the agent first"
 msgstr "このホストのエージェントはまだそれを確認できません。先にエージェントをアップグレードしてください"
 
-#: backend/api/antivirus_defaults.py:69
+#: backend/api/antivirus_defaults.py:34
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "許可が拒否されました: MANAGE_ANTIVIRUS_DEFAULTS ロールが必要です"
+
+#: backend/api/antivirus_defaults.py:73
 msgid "OS name must be 100 characters or less"
 msgstr "OS名は100文字以内でなければなりません"
 
-#: backend/api/antivirus_defaults.py:82
+#: backend/api/antivirus_defaults.py:86
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "アンチウイルスパッケージ名は 255 文字以内でなければなりません"
 
-#: backend/api/antivirus_defaults.py:107
+#: backend/api/antivirus_defaults.py:111
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "アンチウイルスデフォルト設定を取得できませんでした: %s"
 
-#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
-#: backend/api/antivirus_defaults.py:302
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "許可が拒否されました: MANAGE_ANTIVIRUS_DEFAULTS ロールが必要です"
-
-#: backend/api/antivirus_defaults.py:170
+#: backend/api/antivirus_defaults.py:174
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr "このOSに対してデフォルトのアンチウイルス設定が見つかりません：%s"
 
-#: backend/api/antivirus_defaults.py:183
+#: backend/api/antivirus_defaults.py:187
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "デフォルトのアンチウイルス設定を取得できませんでした: %s"
 
-#: backend/api/antivirus_defaults.py:283
+#: backend/api/antivirus_defaults.py:287
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "アンチウイルスのデフォルトを更新できませんでした: %s"
 
-#: backend/api/antivirus_defaults.py:336
+#: backend/api/antivirus_defaults.py:340
 msgid "Antivirus default deleted successfully"
 msgstr "デフォルトのアンチウイルス設定を正常に削除しました"
 
-#: backend/api/antivirus_defaults.py:338
+#: backend/api/antivirus_defaults.py:342
 msgid "No antivirus default found for this OS"
 msgstr "このOSに対してデフォルトのアンチウイルス設定が見つかりません"
 
-#: backend/api/antivirus_defaults.py:346
+#: backend/api/antivirus_defaults.py:350
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "デフォルトアンチウイルス設定を削除できませんでした: %s"
@@ -3710,23 +3720,23 @@ msgstr "パッケージのカウントに失敗しました: %s"
 msgid "Failed to search packages: %s"
 msgstr "パッケージの検索に失敗しました: %s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:234
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "アクセス権限がありません: DELETE_HOST ロールが必要です"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:298
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "許可が拒否されました: VIEW_HOST_DETAILS ロールが必要です"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:687
 msgid "Host already exists"
 msgstr "ホストは既に存在しています"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "登録が吸収されました: ホストは最近削除されました"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -3937,20 +3947,20 @@ msgstr "システム情報更新要求"
 msgid "Environment subscriptions are managed on the federation coordinator"
 msgstr "環境サブスクリプションは連合調整子で管理されます"
 
-#: backend/api/airgap_devices.py:82
+#: backend/api/airgap_devices.py:83
 #, python-format
 msgid "Device %s is not an available import drive"
 msgstr "デバイス %s は利用可能なインポートドライブではありません"
 
-#: backend/api/airgap_devices.py:106
+#: backend/api/airgap_devices.py:107
 msgid "no import device selected"
 msgstr "インポート用のデバイスが選択されていません"
 
-#: backend/api/airgap_devices.py:132
+#: backend/api/airgap_devices.py:133
 msgid "No import device selected"
 msgstr "インポートデバイスが選択されていません"
 
-#: backend/api/airgap_devices.py:137
+#: backend/api/airgap_devices.py:138
 #, python-format
 msgid "Import device not ready: %s"
 msgstr "インポートデバイスが準備ができていません: %s"
@@ -6116,11 +6126,11 @@ msgstr ""
 "まず緊急用エスクローキーを保存してください。SysManage サーバー自身のバックアップはこのキーで暗号化されるため、OpenBAO の復元に "
 "OpenBAO 内に保管されたキーが必要になることはありません"
 
-#: backend/services/cloud_backup_tick.py:327
+#: backend/services/cloud_backup_tick.py:347
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "iCloud のサインインがまもなく期限切れになります: もう一度サインインしてください"
 
-#: backend/services/cloud_backup_tick.py:329
+#: backend/services/cloud_backup_tick.py:349
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, SysManage cannot download its photos until someone signs in again.\n"
@@ -6437,7 +6447,7 @@ msgstr "gpg が鍵のエクスポートを封印しませんでした"
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "選択されたホストのうち、暗号化バックアップはありません"
 
-#: backend/services/backup_reach.py:148
+#: backend/services/backup_reach.py:178
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6447,7 +6457,7 @@ msgstr ""
 "このホストはバックアップストレージの restate-proxy（%(address)s、ポート %(port)s）に到達できません: "
 "%(error)s。バックアップには、そこへのネットワーク経路と、このホストが信頼する証明書が必要です。"
 
-#: backend/services/backup_reach.py:158
+#: backend/services/backup_reach.py:188
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6459,7 +6469,7 @@ msgstr ""
 "として見えるため、マウントが拒否されます。ホストを NAT の内側に置くのではなく、ストレージホストのネットワーク "
 "(仮想マシンの場合はブリッジネットワーク) に接続してください。"
 
-#: backend/services/backup_reach.py:168
+#: backend/services/backup_reach.py:198
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "

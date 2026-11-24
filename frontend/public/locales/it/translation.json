@@ -261,7 +261,13 @@
     "runStats": "{{files}} file · {{size}}",
     "runStatus": "Stato dell'importazione",
     "statusError": "Impossibile esplorare l'import device.",
-    "title": "Importa da supporto"
+    "title": "Importa da supporto",
+    "notice": {
+      "catalogFailed": "Impossibile caricare il catalogo di sicurezza: {{error}}",
+      "catalogLoaded": "Il catalogo di sicurezza è stato caricato: {{cves}} CVEs e {{advisories}} avvisi, creato dal raccoglitore in {{made}}.",
+      "catalogRefused": "Il catalogo di sicurezza su questo supporto non corrisponde al suo manifesto firmato, quindi non è stato caricato.",
+      "toolsNotBuilt": "Il repository degli strumenti SysManage per {{distro}} {{version}} non è stato costruito: {{error}}"
+    }
   },
   "airgapKeys": {
     "collector": {

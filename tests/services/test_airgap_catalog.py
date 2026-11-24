@@ -200,3 +200,41 @@ def test_an_advisory_without_a_severity_takes_its_worst_cves_and_links_them(
     assert repository.query(models.SharedAdvisory).one().severity == "HIGH"
     link = repository.query(models.SharedAdvisoryCve).one()
     assert link.vulnerability_id == repository.query(models.Vulnerability).one().id
+
+
+def test_an_ingests_notices_are_recorded_and_listed():
+    """Before 2026-11-24 a tools repository that could not be built, and the
+    catalog's outcome, were in the log only: the panel said "Complete"."""
+    from types import SimpleNamespace  # pylint: disable=import-outside-toplevel
+
+    from backend.api import airgap_devices  # pylint: disable=import-outside-toplevel
+    from backend.services import (
+        airgap_ingest_tick as tick,
+    )  # pylint: disable=import-outside-toplevel
+
+    run = SimpleNamespace(notices=None)
+    tick.add_notice(run, "tools_not_built", {"distro": "ubuntu", "version": "26.04",
+                                             "error": "apt-ftparchive is not installed"})  # fmt: skip
+    tick.add_notice(run, "catalog_loaded", {"cves": 3, "advisories": 1})
+    listed = airgap_devices._notices(run)  # pylint: disable=protected-access
+    assert [n["code"] for n in listed] == ["tools_not_built", "catalog_loaded"]
+    assert (
+        airgap_devices._notices(SimpleNamespace(notices="not json")) == []
+    )  # pylint: disable=protected-access
+
+
+def test_a_failed_tools_build_becomes_a_notice(tmp_path):
+    from types import SimpleNamespace  # pylint: disable=import-outside-toplevel
+
+    from backend.services import (
+        airgap_ingest_tick as tick,
+    )  # pylint: disable=import-outside-toplevel
+
+    run = SimpleNamespace(id="r1", notices=None, manifest_json='{"tools": []}')
+    failed = [{"distro": "ubuntu", "version": "26.04", "kept": [], "error": "apt-ftparchive is not installed (apt-utils)"},
+              {"distro": "alpine", "version": "3.22", "kept": ["x"], "error": None}]  # fmt: skip
+    with patch("backend.services.airgap_tools.build", return_value=failed):
+        tick._build_tools_repositories(run)  # pylint: disable=protected-access
+    notes = json.loads(run.notices)
+    assert len(notes) == 1 and notes[0]["code"] == "tools_not_built"
+    assert notes[0]["params"]["version"] == "26.04"

@@ -261,7 +261,13 @@
     "runStats": "{{files}} ملفات · {{size}}",
     "runStatus": "حالة الاستيراد",
     "statusError": "لم يتم اختبار جهاز الاستيراد.",
-    "title": "استيراد من الوسائط"
+    "title": "استيراد من الوسائط",
+    "notice": {
+      "catalogFailed": "تعذر تحميل فهرس الأمان: {{error}}",
+      "catalogLoaded": "تم تحميل فهرس الأمان: {{cves}} CVEs و {{advisories}} إشعارات، تم إنشاؤها من قبل المجمع في {{made}}.",
+      "catalogRefused": "فهرس الأمان في هذا الوسائط لا يتطابق مع بياناته المنشور، لذا لم يتم تحميله.",
+      "toolsNotBuilt": "لم يتم بناء مستودع أدوات SysManage لـ {{distro}} {{version}}: {{error}}"
+    }
   },
   "airgapKeys": {
     "collector": {

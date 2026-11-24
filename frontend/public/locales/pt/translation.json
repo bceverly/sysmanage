@@ -261,7 +261,13 @@
     "runStats": "{{files}} arquivos · {{size}}",
     "runStatus": "Status da importação",
     "statusError": "Não foi possível sondar o dispositivo de importação.",
-    "title": "Importar de mídia"
+    "title": "Importar de mídia",
+    "notice": {
+      "catalogFailed": "Não foi possível carregar o catálogo de segurança: {{error}}",
+      "catalogLoaded": "Catálogo de segurança carregado: {{cves}} CVEs e {{advisories}} avisos, criados pelo coletor em {{made}}.",
+      "catalogRefused": "O catálogo de segurança neste meio não corresponde ao seu manifesto assinado, então não foi carregado.",
+      "toolsNotBuilt": "O repositório de ferramentas do SysManage para {{distro}} {{version}} não foi construído: {{error}}"
+    }
   },
   "airgapKeys": {
     "collector": {

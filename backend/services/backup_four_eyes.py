@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Four-eyes restore approval (ROADMAP 27.2, Enterprise ``backup_ops_engine``).
+"""Four-eyes approval (ROADMAP 27.2, Enterprise ``backup_ops_engine``).
 
 With the tenant's setting on (off by default -- a one-admin site must never be
 locked out of its own restores), a restore over a host's own files is held as
@@ -12,10 +12,16 @@ approval sends exactly the restore that was asked for
 (``backups_restore_flow.perform``).  The engine decides who may do what and
 when a request has expired; without the engine nothing is held and nothing
 can be approved.
+
+Since 2026-11-24 a request has a ``kind``: ``restore`` is built in; a
+rebuild, a clone, a wipe or a migration registers its own (``register``)
+with the role that may approve it and what approving it does, and is held
+by the same table, rules and card.
 """
 
 import json
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -29,6 +35,30 @@ from backend.services.audit_service import EntityType
 ENGINE = "backup_ops_engine"
 SETTING = "backup_four_eyes"
 AWAITING = "awaiting_approval"
+RESTORE = "restore"
+
+
+@dataclass(frozen=True)
+class Kind:
+    """One kind of held request.  ``role``: the SecurityRoles value an
+    approver needs; ``perform(db, user, request, host)``: what approving it
+    does, returning the run it started (``{"id": ...}``); ``refusals``: the
+    API's messages by refusal code, for this kind."""
+
+    role: str
+    perform: Callable[..., Dict[str, Any]]
+    refusals: Dict[str, Callable[[], str]]
+
+
+KINDS: Dict[str, Kind] = {}
+
+
+def register(name: str, kind: Kind) -> None:
+    KINDS[name] = kind
+
+
+def kind_of(request) -> str:
+    return getattr(request, "kind", None) or RESTORE
 
 
 def _iso(when) -> Optional[str]:
@@ -40,6 +70,20 @@ def engine():
     (an older build), which then holds nothing."""
     eng = module_loader.get_module(ENGINE)
     return eng if hasattr(eng, "restore_needs_approval") else None
+
+
+def needs_approval(eng, kind: str, facts: Dict[str, Any]) -> bool:
+    """The engine's rule for ``kind``; an engine from before kinds
+    (``restore_needs_approval`` only) holds restores as it always did and
+    every other kind whenever the setting is on."""
+    on = enabled()
+    if hasattr(eng, "needs_approval"):
+        return bool(eng.needs_approval(kind, on, facts))
+    if kind == RESTORE:
+        return bool(
+            eng.restore_needs_approval(on, facts.get("in_place"), facts.get("dry_run"))
+        )
+    return on and not facts.get("dry_run")
 
 
 def _tenant() -> Optional[str]:
@@ -64,16 +108,27 @@ def set_enabled(value: bool) -> None:
         settings_service.set_setting(SETTING, bool(value))
 
 
-def hold(db: Session, current_user, host: models.Host, body) -> Optional[Dict]:
-    """Hold this restore for a second approver, or None to send it now."""
+def hold_request(  # pylint: disable=too-many-arguments
+    db: Session,
+    current_user,
+    host: models.Host,
+    *,
+    kind: str,
+    payload: Dict[str, Any],
+    facts: Dict[str, Any],
+    audit_text: str,
+    target: Optional[Dict[str, Any]] = None,
+) -> Optional[Dict]:
+    """Hold a request of ``kind`` for a second approver, or None to go
+    ahead now.  ``payload`` is what approving it will run, exactly."""
     eng = engine()
-    if eng is None or not eng.restore_needs_approval(
-        enabled(), body.in_place, body.dry_run
-    ):
+    if eng is None or not needs_approval(eng, kind, facts):
         return None
     request = models.BackupRestoreRequest(
         host_id=host.id,
-        body=json.dumps(body.model_dump()),
+        kind=kind,
+        body=json.dumps(payload),
+        target=json.dumps(target) if target is not None else None,
         status="pending",
         requested_by=current_user.userid,
         requested_at=jobs.now(),
@@ -89,22 +144,36 @@ def hold(db: Session, current_user, host: models.Host, body) -> Optional[Dict]:
         EntityType.HOST,
         host.id,
         host.fqdn,
-        "Restore over the host's files requested; waits for a second approver",
-        {"request_id": str(request.id), **body.model_dump()},
+        audit_text,
+        {"request_id": str(request.id), "kind": kind, **payload},
     )
     db.commit()
-    return {
-        "status": AWAITING,
-        "request_id": str(request.id),
-        "in_place": True,
-        "staging_path": None,
-    }
+    return {"status": AWAITING, "request_id": str(request.id), "kind": kind}
+
+
+def hold(db: Session, current_user, host: models.Host, body) -> Optional[Dict]:
+    """Hold this restore for a second approver, or None to send it now."""
+    held = hold_request(
+        db,
+        current_user,
+        host,
+        kind=RESTORE,
+        payload=body.model_dump(),
+        facts={"in_place": body.in_place, "dry_run": body.dry_run},
+        audit_text="Restore over the host's files requested; waits for a second approver",
+    )
+    if held is not None:
+        held.update({"in_place": True, "staging_path": None})
+    return held
 
 
 def _as_dict(eng, request, host, now) -> Dict[str, Any]:
     body = json.loads(request.body)
+    target = json.loads(request.target) if getattr(request, "target", None) else None
     return {
         "id": str(request.id),
+        "kind": kind_of(request),
+        "target": target,
         "host_id": str(request.host_id),
         "fqdn": host.fqdn if host is not None else None,
         "status": eng.request_state(
@@ -156,9 +225,9 @@ def approval_refusal(eng, request, user, now) -> Optional[str]:
         SecurityRoles,
     )
 
-    return eng.approval_refusal(
-        _facts(request), user.userid, user.has_role(SecurityRoles.RESTORE_FILES), now
-    )
+    kind = KINDS.get(kind_of(request))
+    role = kind.role if kind is not None else SecurityRoles.RESTORE_FILES
+    return eng.approval_refusal(_facts(request), user.userid, user.has_role(role), now)
 
 
 def withdraw_refusal(eng, request, user, now) -> Optional[str]:

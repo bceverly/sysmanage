@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 05:29-0800\n"
+"POT-Creation-Date: 2026-11-24 12:33-0500\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -646,61 +646,61 @@ msgstr "تم تحديث الأجهزة"
 msgid "Failed to update hardware information"
 msgstr "فشل في تحديث معلومات الأجهزة"
 
-#: backend/api/handlers/software_package_handlers.py:113
+#: backend/api/handlers/software_package_handlers.py:114
 msgid "software_inventory_updated"
 msgstr "تم تحديث مخزون البرمجيات"
 
-#: backend/api/handlers/software_package_handlers.py:122
+#: backend/api/handlers/software_package_handlers.py:123
 msgid "Failed to update software inventory"
 msgstr "فشل في تحديث سجل البرمجيات"
 
-#: backend/api/handlers/software_package_handlers.py:293
+#: backend/api/handlers/software_package_handlers.py:294
 #: backend/api/updates/report_routes.py:79
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "فشل في حفظ التحديثات: %s"
 
-#: backend/api/handlers/software_package_handlers.py:408
+#: backend/api/handlers/software_package_handlers.py:409
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "فشل في معالجة نتائج جمع الحزم: %s"
 
-#: backend/api/handlers/software_package_handlers.py:502
+#: backend/api/handlers/software_package_handlers.py:503
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "فشل في معالجة تحديث مستودع المستخدم الخارجي: %s"
 
-#: backend/api/handlers/software_package_handlers.py:585
+#: backend/api/handlers/software_package_handlers.py:586
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "فشل في معالجة تحديث حالة مضاد الفيروسات: %s"
 
-#: backend/api/handlers/software_package_handlers.py:716
+#: backend/api/handlers/software_package_handlers.py:717
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "فشل في معالجة تحديث حالة مضاد الفيروسات التجاري: %s"
 
-#: backend/api/handlers/software_package_handlers.py:818
+#: backend/api/handlers/software_package_handlers.py:819
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "فشل في معالجة تحديث حالة جدار الحماية: %s"
 
-#: backend/api/handlers/software_package_handlers.py:904
+#: backend/api/handlers/software_package_handlers.py:905
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "فشل في معالجة تحديث حالة Graylog: %s"
 
-#: backend/api/handlers/software_package_handlers.py:936
+#: backend/api/handlers/software_package_handlers.py:937
 msgid "Missing request_id in installation_complete"
 msgstr "لا يوجد معرف الطلب في استجابة الإكمال"
 
-#: backend/api/handlers/software_package_handlers.py:953
+#: backend/api/handlers/software_package_handlers.py:954
 #: backend/api/agent.py:941 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "لم يتم العثور على طلب التثبيت: %s"
 
-#: backend/api/handlers/software_package_handlers.py:994
+#: backend/api/handlers/software_package_handlers.py:995
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -1011,7 +1011,16 @@ msgstr ""
 "الجداول فقط في نافذة العلامة الحالية حتى يتضمن ترخيص Pro+ المحرك "
 "automation_engine."
 
-#: backend/api/host_registration.py:82
+#: backend/api/host_registration.py:73
+#, python-format
+msgid ""
+"Host '%(fqdn)s' re-enrolled with a one-time code; its old credential no "
+"longer works"
+msgstr ""
+"تم إعادة تسجيل المضيف '%(fqdn)s' باستخدام رمز مرة واحدة؛ لم تعد بيانات "
+"اعتماده القديمة صالحة"
+
+#: backend/api/host_registration.py:104
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -1020,15 +1029,15 @@ msgstr ""
 "تم تسجيل مستضياف '%(fqdn)s' عبر مفتاح التسجيل '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 
-#: backend/api/host_registration.py:134
+#: backend/api/host_registration.py:156
 msgid "Invalid or expired registration key"
 msgstr "مفتاح التسجيل غير صالح أو منتهٍ الصلاحية"
 
-#: backend/api/host_registration.py:173
+#: backend/api/host_registration.py:195
 msgid "Invalid or expired enrollment token"
 msgstr "رمز التسجيل غير صالح أو منتهٍ الصلاحية"
 
-#: backend/api/host_registration.py:239
+#: backend/api/host_registration.py:261
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1060,9 +1069,13 @@ msgstr "يجب الموافقة على عملية الاستعادة التي ط
 msgid "Only the person who asked for this restore can withdraw it"
 msgstr "يمكن سحب هذا الاستعادة فقط من قبل الشخص الذي طلبها"
 
-#: backend/api/backups_four_eyes.py:83 backend/api/backups_four_eyes.py:86
+#: backend/api/backups_four_eyes.py:107 backend/api/backups_four_eyes.py:110
 msgid "Restore request not found"
 msgstr "لم يتم العثور على طلب استعادة"
+
+#: backend/api/backups_four_eyes.py:170
+msgid "This server cannot carry out this kind of request"
+msgstr "لا يمكن لهذا الخادم تنفيذ هذا النوع من الطلبات"
 
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -2805,7 +2818,7 @@ msgid "Firewall deploy command sent successfully"
 msgstr " lệnh إرسال تثبيت جدار الحماية تم بنجاح"
 
 #: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:67
+#: backend/api/antivirus_defaults.py:71
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "اسم النظام التشغیعي مطلوب"
@@ -3354,49 +3367,48 @@ msgstr "لا يمكن لهذا المضيف تشغيل النسخ الاحتيا
 msgid "This host's agent cannot check that yet; upgrade the agent first"
 msgstr "لا يستطيع وكيل هذا المضيف التحقق من ذلك بعد؛ قم بترقية الوكيل أولاً"
 
-#: backend/api/antivirus_defaults.py:69
+#: backend/api/antivirus_defaults.py:34
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr "تم رفض الإذن: يتطلب دور إدارة إعدادات مكافحة الفيروسات الافتراضية"
+
+#: backend/api/antivirus_defaults.py:73
 msgid "OS name must be 100 characters or less"
 msgstr "يجب أن يكون اسم النظام التشغیعي 100 حرف أو أقل"
 
-#: backend/api/antivirus_defaults.py:82
+#: backend/api/antivirus_defaults.py:86
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "يجب أن يكون اسم حزمة برنامج مكافحة الفيروسات 255 حرفاً أو أقل"
 
-#: backend/api/antivirus_defaults.py:107
+#: backend/api/antivirus_defaults.py:111
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "فشل في استرداد الإعدادات الافتراضية لمضاد الفيروسات: %s"
 
-#: backend/api/antivirus_defaults.py:137 backend/api/antivirus_defaults.py:202
-#: backend/api/antivirus_defaults.py:302
-msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "تم رفض الإذن: يتطلب دور إدارة إعدادات مكافحة الفيروسات الافتراضية"
-
-#: backend/api/antivirus_defaults.py:170
+#: backend/api/antivirus_defaults.py:174
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr "لم يتم العثور على قيمة افتراضية لمكافحة الفيروسات لنظام التشغيل: %s"
 
-#: backend/api/antivirus_defaults.py:183
+#: backend/api/antivirus_defaults.py:187
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "فشل في استرداد الإعداد الافتراضي لمضاد الفيروسات: %s"
 
-#: backend/api/antivirus_defaults.py:283
+#: backend/api/antivirus_defaults.py:287
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "فشل في تحديث القيم الافتراضية لبرامج مكافحة الفيروسات: %s"
 
-#: backend/api/antivirus_defaults.py:336
+#: backend/api/antivirus_defaults.py:340
 msgid "Antivirus default deleted successfully"
 msgstr "تم حذف الإفتراضي لبرنامج مكافحة الفيروسات بنجاح"
 
-#: backend/api/antivirus_defaults.py:338
+#: backend/api/antivirus_defaults.py:342
 msgid "No antivirus default found for this OS"
 msgstr ""
 "لم يتم العثور على قيمة افتراضية لمكافحة الفيروسات لهذا النظام الأساسي (OS)"
 
-#: backend/api/antivirus_defaults.py:346
+#: backend/api/antivirus_defaults.py:350
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "فشل في حذف الإعدادات الافتراضية لمكافحة الفيروسات: %s"
@@ -3782,23 +3794,23 @@ msgstr "فشل في إحصاء الحزم: %s"
 msgid "Failed to search packages: %s"
 msgstr "فشل في البحث عن الحزم: %s"
 
-#: backend/api/host.py:233
+#: backend/api/host.py:234
 msgid "Permission denied: DELETE_HOST role required"
 msgstr " رفض الوصول: يتطلب دور DELETE_HOST"
 
-#: backend/api/host.py:297
+#: backend/api/host.py:298
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "تم رفض الإذن: يتطلب دور `VIEW_HOST_DETAILS`"
 
-#: backend/api/host.py:686
+#: backend/api/host.py:687
 msgid "Host already exists"
 msgstr "المضيف موجود بالفعل"
 
-#: backend/api/host.py:798
+#: backend/api/host.py:800
 msgid "Registration absorbed: host was recently deleted"
 msgstr "التسجيل تم امتصاصه: كان المضيف قد حُذف مؤخرا"
 
-#: backend/api/host.py:878
+#: backend/api/host.py:880
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -4009,20 +4021,20 @@ msgstr "تم طلب تحديث معلومات النظام"
 msgid "Environment subscriptions are managed on the federation coordinator"
 msgstr "يتم إدارة اشتراكات البيئة في المنسق الفيدرالي"
 
-#: backend/api/airgap_devices.py:82
+#: backend/api/airgap_devices.py:83
 #, python-format
 msgid "Device %s is not an available import drive"
 msgstr "الجهاز %s ليس محركًا متاحًا للاستيراد"
 
-#: backend/api/airgap_devices.py:106
+#: backend/api/airgap_devices.py:107
 msgid "no import device selected"
 msgstr "لم يتم تحديد جهاز استيراد"
 
-#: backend/api/airgap_devices.py:132
+#: backend/api/airgap_devices.py:133
 msgid "No import device selected"
 msgstr "لم يتم تحديد جهاز الاستيراد"
 
-#: backend/api/airgap_devices.py:137
+#: backend/api/airgap_devices.py:138
 #, python-format
 msgid "Import device not ready: %s"
 msgstr "جهاز الاستيراد غير جاهز: %s"
@@ -6235,11 +6247,11 @@ msgstr ""
 "نفسه بهذا المفتاح، فلا تحتاج استعادة OpenBAO أبدًا إلى مفتاح محفوظ داخل "
 "OpenBAO"
 
-#: backend/services/cloud_backup_tick.py:327
+#: backend/services/cloud_backup_tick.py:347
 msgid "iCloud sign-in ends soon: sign in again"
 msgstr "ينتهي تسجيل الدخول إلى iCloud قريبًا: سجّل الدخول مرة أخرى"
 
-#: backend/services/cloud_backup_tick.py:329
+#: backend/services/cloud_backup_tick.py:349
 #, python-format
 msgid ""
 "The iCloud sign-in for %(account)s ends around %(date)s. After that, SysManage cannot download its photos until someone signs in again.\n"
@@ -6565,7 +6577,7 @@ msgstr "لم يختم gpg تصدير المفاتيح"
 msgid "None of the chosen hosts has encrypted backups"
 msgstr "لا يوجد أي من المضيفين المختارين لديه نسخ احتياطية مشفرة"
 
-#: backend/services/backup_reach.py:148
+#: backend/services/backup_reach.py:178
 #, python-format
 msgid ""
 "This host cannot reach the backup storage's restate-proxy (%(address)s, port"
@@ -6576,7 +6588,7 @@ msgstr ""
 "(%(address)s، المنفذ %(port)s): %(error)s. تحتاج النسخ الاحتياطية إلى مسار "
 "شبكة إليه، وإلى شهادة يثق بها هذا المضيف."
 
-#: backend/services/backup_reach.py:158
+#: backend/services/backup_reach.py:188
 #, python-format
 msgid ""
 "This host is behind NAT: the backup storage (%(storage)s) sees it as "
@@ -6588,7 +6600,7 @@ msgstr ""
 "%(seen)s، وليس %(address)s، لذا يرفض التحميل. ضع المضيف على شبكة مضيف "
 "التخزين (شبكة مجسورة للجهاز الافتراضي) بدلًا من وضعه خلف NAT الخاص به."
 
-#: backend/services/backup_reach.py:168
+#: backend/services/backup_reach.py:198
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "
