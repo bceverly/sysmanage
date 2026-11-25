@@ -5,31 +5,31 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 10:44-0500\n"
+"POT-Creation-Date: 2026-11-25 14:00-0500\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: backend/security/communication_security.py:145
+#: backend/security/communication_security.py:147
 msgid "Invalid token signature"
 msgstr "잘못된 토큰 서명"
 
-#: backend/security/communication_security.py:154
+#: backend/security/communication_security.py:156
 msgid "Token expired"
 msgstr "토큰 만료"
 
-#: backend/security/communication_security.py:176
+#: backend/security/communication_security.py:178
 msgid "Malformed token"
 msgstr "형식이 잘못된 토큰"
 
-#: backend/security/communication_security.py:452
+#: backend/security/communication_security.py:454
 msgid "Encrypted data expired"
 msgstr "암호화된 데이터 만료"
 
-#: backend/security/communication_security.py:463
+#: backend/security/communication_security.py:465
 msgid "Invalid signature"
 msgstr "잘못된 서명"
 
-#: backend/security/communication_security.py:470
+#: backend/security/communication_security.py:472
 msgid "Decryption failed"
 msgstr "암호화 해제 실패"
 
@@ -3721,9 +3721,17 @@ msgstr "복원 준비에는 엔터프라이즈 백업 운영 엔진이 필요합
 msgid "This host has no backup policy yet"
 msgstr "이 호스트는 아직 백업 정책이 설정되지 않았습니다."
 
-#: backend/api/backups_breakglass.py:77
+#: backend/api/backups_breakglass.py:77 backend/api/backups_offsite.py:243
 msgid "Paste the OpenPGP public key to seal the export to"
 msgstr "내보내기를 봉인할 OpenPGP 공개 키를 붙여넣으십시오"
+
+#: backend/api/backups_offsite.py:188
+msgid "The setup guide needs Professional+"
+msgstr "설정 가이드는 Professional+가 필요합니다."
+
+#: backend/api/backups_offsite.py:221
+msgid "Name the new dataset to restore into"
+msgstr "새 데이터셋의 이름을 지정하여 복원하세요."
 
 #: backend/api/packages_helpers.py:103
 #, python-format
@@ -5775,12 +5783,12 @@ msgstr "변경 내용은 현재 저장소와만 비교됩니다"
 msgid "A check of what changed is already running"
 msgstr "변경 사항 확인이 이미 실행 중입니다"
 
-#: backend/websocket/message_router.py:295
+#: backend/websocket/message_router.py:305
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "큐에 알 수 없는 메시지 유형: %s"
 
-#: backend/websocket/message_router.py:300
+#: backend/websocket/message_router.py:310
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "메시지 유형 %(message_type)s 라우팅 중 오류 발생: %(error)s"
@@ -6084,7 +6092,7 @@ msgstr "알 수 없는 장치 상태: %s"
 
 #: backend/services/asset_discovery_review.py:344
 #: backend/services/malware_quarantine.py:139
-#: backend/services/malware_review.py:237
+#: backend/services/malware_review.py:239
 msgid "A reason of at least 3 characters is required"
 msgstr "3자 이상의 사유가 필요합니다"
 
@@ -6109,6 +6117,52 @@ msgstr "제외 항목을 찾을 수 없습니다"
 #: backend/services/asset_discovery_review.py:437
 msgid "This exclusion was already revoked"
 msgstr "이 제외는 이미 취소되었습니다"
+
+#: backend/services/backup_offsite_secrets.py:89
+msgid "OpenBAO did not say where it stored the secret"
+msgstr "OpenBAO는 비밀을 저장한 위치를 명시하지 않았습니다."
+
+#: backend/services/backup_offsite_secrets.py:95
+msgid "This off-site copy has no secret in OpenBAO"
+msgstr "이 오프사이트 복사본에는 OpenBAO에 비밀이 저장되어 있지 않습니다."
+
+#: backend/services/backup_offsite_secrets.py:99
+msgid "OpenBAO does not hold this off-site copy's secret"
+msgstr "OpenBAO는 이 오프사이트 복사본의 비밀을 가지고 있지 않습니다."
+
+#: backend/services/backup_offsite_secrets.py:128
+#: backend/services/backup_offsite_secrets.py:135
+msgid "The off-site credentials in OpenBAO are damaged"
+msgstr "오프사이트 자격증명이 손상되었습니다."
+
+#: backend/services/backup_offsite_secrets.py:157
+#: backend/services/backup_offsite_secrets.py:159
+msgid "The off-site key in OpenBAO is damaged"
+msgstr "오프사이트 키가 손상되었습니다."
+
+#: backend/services/backup_offsite_secrets.py:191
+msgid "No such off-site run for this host"
+msgstr "해당 호스트에 대한 오프사이트 실행이 없습니다."
+
+#: backend/services/backup_offsite_secrets.py:197
+msgid "This off-site run has already ended"
+msgstr "이 오프사이트 실행은 이미 종료되었습니다."
+
+#: backend/services/backup_offsite_secrets.py:199
+msgid "This off-site run's secrets were already released"
+msgstr "이 오프사이트 실행의 비밀은 이미 공개되었습니다."
+
+#: backend/services/backup_offsite_secrets.py:204
+msgid "This off-site run is too old"
+msgstr "이 오프사이트 실행은 너무 오래되었습니다."
+
+#: backend/services/backup_offsite_secrets.py:217
+msgid "This off-site copy was removed"
+msgstr "이 오프사이트 복사본은 삭제되었습니다."
+
+#: backend/services/backup_offsite_secrets.py:220
+msgid "The key this run needs is not held"
+msgstr "이 실행에 필요한 키가 저장되어 있지 않습니다."
 
 #: backend/services/malware_rulesets.py:169
 msgid "A rule set name may use only a-z, 0-9 and hyphens"
@@ -6211,6 +6265,38 @@ msgstr "호스트가 결과를 보고하지 않았습니다"
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "정책 '%(policy)s'에 따른 %(host)s 자동 재부팅"
 
+#: backend/services/backup_offsite_runs.py:74
+msgid "An off-site job for this copy is already queued or running"
+msgstr "이 오프사이트 작업은 이미 큐에 있거나 실행 중입니다."
+
+#: backend/services/backup_offsite_runs.py:100
+msgid "No such host"
+msgstr "해당 호스트가 없습니다."
+
+#: backend/services/backup_offsite_runs.py:167
+msgid "This off-site copy is turned off"
+msgstr "이 오프사이트 복사본은 비활성화되었습니다."
+
+#: backend/services/backup_offsite_runs.py:171
+msgid "This off-site copy has no key"
+msgstr "이 오프사이트 복사본에는 키가 없습니다."
+
+#: backend/services/backup_offsite_runs.py:207
+msgid "This restore point's chain is not complete in the bucket"
+msgstr "이 버킷의 체인이 완성되지 않았습니다."
+
+#: backend/services/backup_offsite_runs.py:211
+msgid "This chain spans two keys"
+msgstr "이 체인은 두 개의 키를 포함합니다."
+
+#: backend/services/backup_offsite_runs.py:253
+msgid "The thaw tier is Bulk or Standard"
+msgstr "해동 계층은 Bulk 또는 Standard입니다."
+
+#: backend/services/backup_offsite_runs.py:314
+msgid "The storage host has said nothing about this job for a day"
+msgstr "스토리지 호스트가 하루 동안 이 작업에 대해 아무것도 보고하지 않았습니다"
+
 #: backend/services/held_asset_tags.py:159
 #, python-format
 msgid "Held asset tag %s applied"
@@ -6293,6 +6379,10 @@ msgstr "이 클라우드 백업 실행은 코드를 받지 않습니다"
 msgid "No two-factor code was entered in time"
 msgstr "이중 인증 코드가 제시간에 입력되지 않았습니다"
 
+#: backend/services/backup_offsite_export.py:126
+msgid "This off-site copy has no key yet"
+msgstr "이 오프사이트 복사본에는 아직 키가 없습니다."
+
 #: backend/services/reboot_safety.py:54
 msgid ""
 "Not safe to reboot: the host may not boot. Repair the package manager first."
@@ -6311,6 +6401,7 @@ msgid "A two-factor code is six digits"
 msgstr "이중 인증 코드는 6자리입니다"
 
 #: backend/services/cloud_backup_jobs.py:132
+#: backend/services/backup_offsite.py:127
 msgid "The backup target has no storage host to run on"
 msgstr "백업 대상에 실행할 스토리지 호스트가 없습니다"
 
@@ -6695,10 +6786,57 @@ msgstr "{entity_type} '{entity_name}' 삭제됨"
 msgid "Unknown finding status: %s"
 msgstr "알 수 없는 발견 사항 상태: %s"
 
-#: backend/services/malware_review.py:234
+#: backend/services/malware_review.py:236
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "여기서는 해당 결정을 내릴 수 없습니다: %s"
+
+#: backend/services/backup_offsite.py:79
+msgid ""
+"Setting up and running the off-site cloud copy needs Professional+; "
+"restoring from it and exporting its keys do not"
+msgstr ""
+"오프사이트 클라우드 복사본 설정 및 실행에는 Professional+가 필요합니다. 복원 및 키 내보내는 작업은 필요하지 않습니다."
+
+#: backend/services/backup_offsite.py:108
+msgid "No such off-site copy"
+msgstr "해당 오프사이트 복사본이 없습니다."
+
+#: backend/services/backup_offsite.py:123
+msgid "No such backup target"
+msgstr "해당 백업 대상이 없습니다."
+
+#: backend/services/backup_offsite.py:142
+msgid "The endpoint must be a plain https:// address"
+msgstr "엔드포인트는 단순한 https:// 주소여야 합니다."
+
+#: backend/services/backup_offsite.py:157
+msgid "Enter the S3 bucket's name"
+msgstr "S3 버킷의 이름을 입력하세요."
+
+#: backend/services/backup_offsite.py:160
+msgid "Enter the bucket's AWS region"
+msgstr "버킷의 AWS 지역을 입력하세요."
+
+#: backend/services/backup_offsite.py:165
+msgid "The prefix may hold letters, digits and - _ . / only"
+msgstr "프린트에는 영문자, 숫자, - _ . /만 포함될 수 있습니다."
+
+#: backend/services/backup_offsite.py:170
+msgid "Choose a storage class"
+msgstr "저장 클래스를 선택하세요."
+
+#: backend/services/backup_offsite.py:184
+msgid "Enter the access key ID and secret access key"
+msgstr "접근 키 ID와 비밀 접근 키를 입력하세요."
+
+#: backend/services/backup_offsite.py:208
+msgid "An air-gapped site has no off-site cloud copy"
+msgstr "에어갭 사이트는 오프사이트 클라우드 복사본을 가지고 있지 않습니다."
+
+#: backend/services/backup_offsite.py:213
+msgid "This target already has an off-site copy"
+msgstr "이 대상에는 이미 오프사이트 복사본이 있습니다."
 
 #: backend/services/asset_tag_csv.py:372
 #, python-format

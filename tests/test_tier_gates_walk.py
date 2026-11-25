@@ -60,6 +60,10 @@ COMMUNITY_LICENSED_FLAG = {
         "Community host list; ``licensed`` says whether the automatic "
         "install (Enterprise) can be offered"
     ),
+    ("GET", "/api/v1/backups/offsite"): (
+        "the off-site cloud copy's record and restore are Community; "
+        "``licensed`` says whether setting it up can be offered (27.3)"
+    ),
 }
 
 # Backup routes whose gate depends on what is already there: the walk's
@@ -97,6 +101,11 @@ PRO_PLUS_BACKUP = {
     ("POST", "/api/v1/backups/legal-holds/{hold_id}/release"),
     # ... and off-site copies (27.3): setting or stopping one.
     ("PUT", "/api/v1/backups/targets/{target_id}/replica"),
+    # ... and the cloud copy (27.3, Pro+ backup_engine): setting one up and a
+    # new key.  Its other routes find no copy in the walk (404); turning it
+    # off, checking, restoring and the key export are Community.
+    ("POST", "/api/v1/backups/offsite"),
+    ("POST", "/api/v1/backups/offsite/{copy_id}/rotate-key"),
     ("GET", "/api/v1/host/{host_id}/backup-drift"),
     ("POST", "/api/v1/host/{host_id}/backup-drift/compute"),
     ("PUT", "/api/v1/host/{host_id}/backup-drift/ignore"),

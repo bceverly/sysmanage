@@ -71,6 +71,10 @@ class MessageType(str, Enum):
     # (from the backup target's storage host).
     CLOUD_BACKUP_RESULT = "cloud_backup_result"
     CLOUD_BACKUP_PROGRESS = "cloud_backup_progress"
+    # 27.3 the off-site cloud copy (S3 Glacier Deep Archive), from the
+    # storage host: a run's outcome and live progress.
+    OFFSITE_CLOUD_RESULT = "offsite_cloud_result"
+    OFFSITE_CLOUD_PROGRESS = "offsite_cloud_progress"
     NETWORK_DISCOVERY_REPORT = "network_discovery_report"
     HOSTNAME_CHANGED = "hostname_changed"
     # Agent reports completion of a server-initiated package install/uninstall.
@@ -181,6 +185,8 @@ class CommandType(str, Enum):
     CLOUD_BACKUP_ENABLE = "cloud_backup_enable"
     CLOUD_BACKUP_RUN = "cloud_backup_run"
     CLOUD_BACKUP_REMOVE = "cloud_backup_remove"
+    # 27.3 the off-site cloud copy on the storage host: check, upload, restore.
+    OFFSITE_CLOUD_RUN = "offsite_cloud_run"
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     # Ask the agent for a fresh capability report (Phase 24: after restate is

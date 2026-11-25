@@ -5,31 +5,31 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 10:44-0500\n"
+"POT-Creation-Date: 2026-11-25 14:00-0500\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: backend/security/communication_security.py:145
+#: backend/security/communication_security.py:147
 msgid "Invalid token signature"
 msgstr "अवैध टोकन हस्ताक्षर"
 
-#: backend/security/communication_security.py:154
+#: backend/security/communication_security.py:156
 msgid "Token expired"
 msgstr "टोकन का समय समाप्त"
 
-#: backend/security/communication_security.py:176
+#: backend/security/communication_security.py:178
 msgid "Malformed token"
 msgstr "अवैध टोकन"
 
-#: backend/security/communication_security.py:452
+#: backend/security/communication_security.py:454
 msgid "Encrypted data expired"
 msgstr "एन्क्रिप्टेड डेटा का समय समाप्त"
 
-#: backend/security/communication_security.py:463
+#: backend/security/communication_security.py:465
 msgid "Invalid signature"
 msgstr "अवैध हस्ताक्षर"
 
-#: backend/security/communication_security.py:470
+#: backend/security/communication_security.py:472
 msgid "Decryption failed"
 msgstr "डिक्रिप्शन असफल हो गई"
 
@@ -3869,9 +3869,17 @@ msgstr "पुनर्स्थापना के लिए तैयारी
 msgid "This host has no backup policy yet"
 msgstr "इस होस्ट पर अभी तक कोई बैकअप नीति नहीं है"
 
-#: backend/api/backups_breakglass.py:77
+#: backend/api/backups_breakglass.py:77 backend/api/backups_offsite.py:243
 msgid "Paste the OpenPGP public key to seal the export to"
 msgstr "वह OpenPGP सार्वजनिक कुंजी पेस्ट करें जिससे निर्यात को सील करना है"
+
+#: backend/api/backups_offsite.py:188
+msgid "The setup guide needs Professional+"
+msgstr "सेटअप गाइड को प्रोफेशनल+ की आवश्यकता है"
+
+#: backend/api/backups_offsite.py:221
+msgid "Name the new dataset to restore into"
+msgstr "नए डेटासेट का नाम जिसे रिस्टोर करना है"
 
 #: backend/api/packages_helpers.py:103
 #, python-format
@@ -6020,12 +6028,12 @@ msgstr "क्या बदला केवल मौजूदा रिपॉ�
 msgid "A check of what changed is already running"
 msgstr "क्या बदला, इसकी जाँच पहले से चल रही है"
 
-#: backend/websocket/message_router.py:295
+#: backend/websocket/message_router.py:305
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "कोई अज्ञात संदेश प्रकार है: %s"
 
-#: backend/websocket/message_router.py:300
+#: backend/websocket/message_router.py:310
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "%(message_type)s के संदेश प्रकार को लूटने में त्रुटि: %(error)s"
@@ -6349,7 +6357,7 @@ msgstr "अज्ञात डिवाइस स्थिति: %s"
 
 #: backend/services/asset_discovery_review.py:344
 #: backend/services/malware_quarantine.py:139
-#: backend/services/malware_review.py:237
+#: backend/services/malware_review.py:239
 msgid "A reason of at least 3 characters is required"
 msgstr "कम से कम 3 वर्णों का कारण आवश्यक है"
 
@@ -6374,6 +6382,52 @@ msgstr "अपवाद नहीं मिला"
 #: backend/services/asset_discovery_review.py:437
 msgid "This exclusion was already revoked"
 msgstr "यह अपवाद पहले ही रद्द किया जा चुका है"
+
+#: backend/services/backup_offsite_secrets.py:89
+msgid "OpenBAO did not say where it stored the secret"
+msgstr "OpenBAO ने यह नहीं बताया कि इसने सीक्रेट को कहाँ स्टोर किया"
+
+#: backend/services/backup_offsite_secrets.py:95
+msgid "This off-site copy has no secret in OpenBAO"
+msgstr "इस ऑफ़-साइट कॉपी में ओपनबाओ में कोई सीक्रेट नहीं है"
+
+#: backend/services/backup_offsite_secrets.py:99
+msgid "OpenBAO does not hold this off-site copy's secret"
+msgstr "OpenBAO इस ऑफ़-साइट कॉपी के सीक्रेट को नहीं रखता"
+
+#: backend/services/backup_offsite_secrets.py:128
+#: backend/services/backup_offsite_secrets.py:135
+msgid "The off-site credentials in OpenBAO are damaged"
+msgstr "ऑफ़साइट क्रेडेंशियल्स में OpenBAO में नुकसान हुआ है"
+
+#: backend/services/backup_offsite_secrets.py:157
+#: backend/services/backup_offsite_secrets.py:159
+msgid "The off-site key in OpenBAO is damaged"
+msgstr "ऑफ़साइट की कुंजी OpenBAO में क्षतिग्रस्त है"
+
+#: backend/services/backup_offsite_secrets.py:191
+msgid "No such off-site run for this host"
+msgstr "इस होस्ट के लिए कोई ऑफ़-साइट रन उपलब्ध नहीं है"
+
+#: backend/services/backup_offsite_secrets.py:197
+msgid "This off-site run has already ended"
+msgstr "यह ऑफ़-साइट रन पहले ही समाप्त हो चुका है"
+
+#: backend/services/backup_offsite_secrets.py:199
+msgid "This off-site run's secrets were already released"
+msgstr "इस ऑफ़-साइट रन के सीक्रेट पहले ही जारी कर दिए गए थे"
+
+#: backend/services/backup_offsite_secrets.py:204
+msgid "This off-site run is too old"
+msgstr "इस ऑफ़-साइट रन को बहुत समय हो गया"
+
+#: backend/services/backup_offsite_secrets.py:217
+msgid "This off-site copy was removed"
+msgstr "इस ऑफ़-साइट कॉपी को हटा दिया गया"
+
+#: backend/services/backup_offsite_secrets.py:220
+msgid "The key this run needs is not held"
+msgstr "इस रन के लिए ज़रूरी कुंजी उपलब्ध नहीं है"
 
 #: backend/services/malware_rulesets.py:169
 msgid "A rule set name may use only a-z, 0-9 and hyphens"
@@ -6482,6 +6536,38 @@ msgstr "होस्ट ने कभी परिणाम की सूचन�
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "नीति '%(policy)s' के बाद %(host)s का स्वचालित रीबूट"
 
+#: backend/services/backup_offsite_runs.py:74
+msgid "An off-site job for this copy is already queued or running"
+msgstr "इस कॉपी के लिए ऑफ़-साइट जॉब पहले से ही कतार में है या चल रहा है"
+
+#: backend/services/backup_offsite_runs.py:100
+msgid "No such host"
+msgstr "कोई ऐसा होस्ट नहीं मिला"
+
+#: backend/services/backup_offsite_runs.py:167
+msgid "This off-site copy is turned off"
+msgstr "इस ऑफ़-साइट कॉपी को निष्क्रिय कर दिया गया है"
+
+#: backend/services/backup_offsite_runs.py:171
+msgid "This off-site copy has no key"
+msgstr "इस ऑफ़-साइट कॉपी में कोई की नहीं है"
+
+#: backend/services/backup_offsite_runs.py:207
+msgid "This restore point's chain is not complete in the bucket"
+msgstr "इस रिस्टोर पॉइंट की चेन बकेट में पूरी नहीं है"
+
+#: backend/services/backup_offsite_runs.py:211
+msgid "This chain spans two keys"
+msgstr "यह श्रृंखला दो कुंजियों को कवर करती है"
+
+#: backend/services/backup_offsite_runs.py:253
+msgid "The thaw tier is Bulk or Standard"
+msgstr "ताप का स्तर Bulk या मानक है"
+
+#: backend/services/backup_offsite_runs.py:314
+msgid "The storage host has said nothing about this job for a day"
+msgstr "स्टोरेज होस्ट ने एक दिन से इस कार्य के बारे में कुछ नहीं बताया है"
+
 #: backend/services/held_asset_tags.py:159
 #, python-format
 msgid "Held asset tag %s applied"
@@ -6565,6 +6651,10 @@ msgstr "यह क्लाउड बैकअप रन कोड स्वी�
 msgid "No two-factor code was entered in time"
 msgstr "समय पर कोई टू-फ़ैक्टर कोड दर्ज नहीं किया गया"
 
+#: backend/services/backup_offsite_export.py:126
+msgid "This off-site copy has no key yet"
+msgstr "इस ऑफ़-साइट कॉपी के पास अभी तक कोई की नहीं है"
+
 #: backend/services/reboot_safety.py:54
 msgid ""
 "Not safe to reboot: the host may not boot. Repair the package manager first."
@@ -6585,6 +6675,7 @@ msgid "A two-factor code is six digits"
 msgstr "टू-फ़ैक्टर कोड छह अंकों का होता है"
 
 #: backend/services/cloud_backup_jobs.py:132
+#: backend/services/backup_offsite.py:127
 msgid "The backup target has no storage host to run on"
 msgstr "बैकअप लक्ष्य के पास चलाने के लिए कोई स्टोरेज होस्ट नहीं है"
 
@@ -7000,10 +7091,58 @@ msgstr "बनाया {entity_type} '{entity_name}' हटा दिया ग
 msgid "Unknown finding status: %s"
 msgstr "अज्ञात निष्कर्ष स्थिति: %s"
 
-#: backend/services/malware_review.py:234
+#: backend/services/malware_review.py:236
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "यह निर्णय यहाँ नहीं लिया जा सकता: %s"
+
+#: backend/services/backup_offsite.py:79
+msgid ""
+"Setting up and running the off-site cloud copy needs Professional+; "
+"restoring from it and exporting its keys do not"
+msgstr ""
+"ऑफ़साइट क्लाउड कॉपी सेटअप और चलाने के लिए प्रोफेशनल+ की आवश्यकता होती है; "
+"इससे रिकवर करना और इसके कीज़ निर्यात करना नहीं"
+
+#: backend/services/backup_offsite.py:108
+msgid "No such off-site copy"
+msgstr "कोई ऐसी ऑफ़-साइट कॉपी नहीं"
+
+#: backend/services/backup_offsite.py:123
+msgid "No such backup target"
+msgstr "कोई ऐसा बैकअप टारगेट नहीं मिला"
+
+#: backend/services/backup_offsite.py:142
+msgid "The endpoint must be a plain https:// address"
+msgstr "एंडपॉइंट एक साधारण https:// पते का होना चाहिए"
+
+#: backend/services/backup_offsite.py:157
+msgid "Enter the S3 bucket's name"
+msgstr "S3 बकेट का नाम दर्ज करें"
+
+#: backend/services/backup_offsite.py:160
+msgid "Enter the bucket's AWS region"
+msgstr "बकेट के AWS रीजन में प्रवेश करें"
+
+#: backend/services/backup_offsite.py:165
+msgid "The prefix may hold letters, digits and - _ . / only"
+msgstr "प्रीफिक्स अक्षरों, अंकों और - _ . / केवल रख सकता है"
+
+#: backend/services/backup_offsite.py:170
+msgid "Choose a storage class"
+msgstr "एक स्टोरेज क्लास चुनें"
+
+#: backend/services/backup_offsite.py:184
+msgid "Enter the access key ID and secret access key"
+msgstr "एक्सेस की कुंजी आईडी और सीक्रेट एक्सेस की कुंजी दर्ज करें"
+
+#: backend/services/backup_offsite.py:208
+msgid "An air-gapped site has no off-site cloud copy"
+msgstr "एक एयर-गैप्ड साइट में ऑफसाइट क्लाउड कॉपी नहीं है"
+
+#: backend/services/backup_offsite.py:213
+msgid "This target already has an off-site copy"
+msgstr "इस लक्ष्य के पास पहले से ही ऑफ़-साइट कॉपी है"
 
 #: backend/services/asset_tag_csv.py:372
 #, python-format

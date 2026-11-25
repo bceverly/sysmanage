@@ -5,31 +5,31 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 10:44-0500\n"
+"POT-Creation-Date: 2026-11-25 14:00-0500\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: backend/security/communication_security.py:145
+#: backend/security/communication_security.py:147
 msgid "Invalid token signature"
 msgstr "Ongeldige token-handtekening"
 
-#: backend/security/communication_security.py:154
+#: backend/security/communication_security.py:156
 msgid "Token expired"
 msgstr "Token verlopen"
 
-#: backend/security/communication_security.py:176
+#: backend/security/communication_security.py:178
 msgid "Malformed token"
 msgstr "Malfoorm token"
 
-#: backend/security/communication_security.py:452
+#: backend/security/communication_security.py:454
 msgid "Encrypted data expired"
 msgstr "Versleutelde gegevens verlopen"
 
-#: backend/security/communication_security.py:463
+#: backend/security/communication_security.py:465
 msgid "Invalid signature"
 msgstr "Ongeldige handtekening"
 
-#: backend/security/communication_security.py:470
+#: backend/security/communication_security.py:472
 msgid "Decryption failed"
 msgstr "Versleuteling mislukt"
 
@@ -3868,9 +3868,17 @@ msgstr ""
 msgid "This host has no backup policy yet"
 msgstr "Deze host heeft nog geen back-upbeleid"
 
-#: backend/api/backups_breakglass.py:77
+#: backend/api/backups_breakglass.py:77 backend/api/backups_offsite.py:243
 msgid "Paste the OpenPGP public key to seal the export to"
 msgstr "Plak de OpenPGP openbare sleutel om de export te verzegelen."
+
+#: backend/api/backups_offsite.py:188
+msgid "The setup guide needs Professional+"
+msgstr "De handleiding vereist Professional+"
+
+#: backend/api/backups_offsite.py:221
+msgid "Name the new dataset to restore into"
+msgstr "Geef de nieuwe datasetnaam op om te herstellen naar"
 
 #: backend/api/packages_helpers.py:103
 #, python-format
@@ -6012,12 +6020,12 @@ msgstr "Wat is veranderd vergelijkt alleen met de huidige repository"
 msgid "A check of what changed is already running"
 msgstr "Er loopt al een controle van wat er is gewijzigd"
 
-#: backend/websocket/message_router.py:295
+#: backend/websocket/message_router.py:305
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Onbekend berichttype in wachtrij: %s"
 
-#: backend/websocket/message_router.py:300
+#: backend/websocket/message_router.py:310
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Fout bij het routeren van berichttype %(message_type)s: %(error)s"
@@ -6340,7 +6348,7 @@ msgstr "Onbekende apparaatstatus: %s"
 
 #: backend/services/asset_discovery_review.py:344
 #: backend/services/malware_quarantine.py:139
-#: backend/services/malware_review.py:237
+#: backend/services/malware_review.py:239
 msgid "A reason of at least 3 characters is required"
 msgstr "Een reden van minstens 3 tekens is vereist"
 
@@ -6365,6 +6373,52 @@ msgstr "Uitsluiting niet gevonden"
 #: backend/services/asset_discovery_review.py:437
 msgid "This exclusion was already revoked"
 msgstr "Deze uitsluiting is al ingetrokken"
+
+#: backend/services/backup_offsite_secrets.py:89
+msgid "OpenBAO did not say where it stored the secret"
+msgstr "OpenBAO heeft niet vermeld waar het de geheime gegevens opslaat"
+
+#: backend/services/backup_offsite_secrets.py:95
+msgid "This off-site copy has no secret in OpenBAO"
+msgstr "Deze externe kopie heeft geen geheim in OpenBAO"
+
+#: backend/services/backup_offsite_secrets.py:99
+msgid "OpenBAO does not hold this off-site copy's secret"
+msgstr "OpenBAO bewaart het geheim van deze externe kopie niet"
+
+#: backend/services/backup_offsite_secrets.py:128
+#: backend/services/backup_offsite_secrets.py:135
+msgid "The off-site credentials in OpenBAO are damaged"
+msgstr "De inloggegevens van de externe kopie in OpenBAO zijn beschadigd"
+
+#: backend/services/backup_offsite_secrets.py:157
+#: backend/services/backup_offsite_secrets.py:159
+msgid "The off-site key in OpenBAO is damaged"
+msgstr "De sleutel van de externe kopie in OpenBAO is beschadigd"
+
+#: backend/services/backup_offsite_secrets.py:191
+msgid "No such off-site run for this host"
+msgstr "Er staat geen enkele taak op afstand voor deze host gepland"
+
+#: backend/services/backup_offsite_secrets.py:197
+msgid "This off-site run has already ended"
+msgstr "Deze taak op afstand is al afgelopen"
+
+#: backend/services/backup_offsite_secrets.py:199
+msgid "This off-site run's secrets were already released"
+msgstr "De geheimen van deze taak zijn al vrijgegeven"
+
+#: backend/services/backup_offsite_secrets.py:204
+msgid "This off-site run is too old"
+msgstr "Deze taak op afstand is te oud"
+
+#: backend/services/backup_offsite_secrets.py:217
+msgid "This off-site copy was removed"
+msgstr "Deze externe kopie is verwijderd"
+
+#: backend/services/backup_offsite_secrets.py:220
+msgid "The key this run needs is not held"
+msgstr "De sleutel die deze taak nodig heeft, is niet opgeslagen"
 
 #: backend/services/malware_rulesets.py:169
 msgid "A rule set name may use only a-z, 0-9 and hyphens"
@@ -6474,6 +6528,39 @@ msgstr "De host heeft het resultaat nooit gemeld"
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "Automatische herstart van %(host)s na beleid '%(policy)s'"
 
+#: backend/services/backup_offsite_runs.py:74
+msgid "An off-site job for this copy is already queued or running"
+msgstr ""
+"Er staat al een taak voor deze kopie op afstand gepland of wordt uitgevoerd"
+
+#: backend/services/backup_offsite_runs.py:100
+msgid "No such host"
+msgstr "Er bestaat geen dergelijke host"
+
+#: backend/services/backup_offsite_runs.py:167
+msgid "This off-site copy is turned off"
+msgstr "Deze externe kopie is uitgeschakeld"
+
+#: backend/services/backup_offsite_runs.py:171
+msgid "This off-site copy has no key"
+msgstr "Deze externe kopie heeft geen sleutel"
+
+#: backend/services/backup_offsite_runs.py:207
+msgid "This restore point's chain is not complete in the bucket"
+msgstr "Deze herstelpuntketen is niet compleet in de bucket"
+
+#: backend/services/backup_offsite_runs.py:211
+msgid "This chain spans two keys"
+msgstr "Deze keten omvat twee sleutels"
+
+#: backend/services/backup_offsite_runs.py:253
+msgid "The thaw tier is Bulk or Standard"
+msgstr "De ontdooiingstier is Bulk of Standard"
+
+#: backend/services/backup_offsite_runs.py:314
+msgid "The storage host has said nothing about this job for a day"
+msgstr "De opslaghost heeft al een dag niets over deze taak gemeld"
+
 #: backend/services/held_asset_tags.py:159
 #, python-format
 msgid "Held asset tag %s applied"
@@ -6558,6 +6645,10 @@ msgstr "Deze cloud-back-uprun accepteert geen code"
 msgid "No two-factor code was entered in time"
 msgstr "Er is niet op tijd een tweefactorcode ingevoerd"
 
+#: backend/services/backup_offsite_export.py:126
+msgid "This off-site copy has no key yet"
+msgstr "Deze externe kopie heeft nog geen sleutel"
+
 #: backend/services/reboot_safety.py:54
 msgid ""
 "Not safe to reboot: the host may not boot. Repair the package manager first."
@@ -6578,6 +6669,7 @@ msgid "A two-factor code is six digits"
 msgstr "Een tweefactorcode bestaat uit zes cijfers"
 
 #: backend/services/cloud_backup_jobs.py:132
+#: backend/services/backup_offsite.py:127
 msgid "The backup target has no storage host to run on"
 msgstr "Het back-updoel heeft geen opslaghost om dit op uit te voeren"
 
@@ -6997,10 +7089,58 @@ msgstr "Verwijderd {entity_type} '{entity_name}'"
 msgid "Unknown finding status: %s"
 msgstr "Onbekende status van bevinding: %s"
 
-#: backend/services/malware_review.py:234
+#: backend/services/malware_review.py:236
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "Die beslissing kan hier niet worden genomen: %s"
+
+#: backend/services/backup_offsite.py:79
+msgid ""
+"Setting up and running the off-site cloud copy needs Professional+; "
+"restoring from it and exporting its keys do not"
+msgstr ""
+"Het instellen en uitvoeren van de externe cloudkopie vereist Professional+; "
+"herstellen ervan en het exporteren van de sleutels niet"
+
+#: backend/services/backup_offsite.py:108
+msgid "No such off-site copy"
+msgstr "Een dergelijke externe kopie bestaat niet"
+
+#: backend/services/backup_offsite.py:123
+msgid "No such backup target"
+msgstr "Er bestaat geen dergelijke backupdoel"
+
+#: backend/services/backup_offsite.py:142
+msgid "The endpoint must be a plain https:// address"
+msgstr "Het eindpunt moet een eenvoudige https://-adres zijn"
+
+#: backend/services/backup_offsite.py:157
+msgid "Enter the S3 bucket's name"
+msgstr "Voer de naam van de S3-bucket in"
+
+#: backend/services/backup_offsite.py:160
+msgid "Enter the bucket's AWS region"
+msgstr "Voer de AWS-regio van de bucket in"
+
+#: backend/services/backup_offsite.py:165
+msgid "The prefix may hold letters, digits and - _ . / only"
+msgstr "De prefix mag letters, cijfers en - _ . / bevatten"
+
+#: backend/services/backup_offsite.py:170
+msgid "Choose a storage class"
+msgstr "Kies een opslagklasse"
+
+#: backend/services/backup_offsite.py:184
+msgid "Enter the access key ID and secret access key"
+msgstr "Voer de ID van de toegangssleutel en het geheime toegangswoord in"
+
+#: backend/services/backup_offsite.py:208
+msgid "An air-gapped site has no off-site cloud copy"
+msgstr "Een air-gapped site heeft geen externe cloudkopie"
+
+#: backend/services/backup_offsite.py:213
+msgid "This target already has an off-site copy"
+msgstr "Dit doel heeft al een externe kopie"
 
 #: backend/services/asset_tag_csv.py:372
 #, python-format

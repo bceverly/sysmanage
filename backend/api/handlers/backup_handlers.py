@@ -11,7 +11,9 @@ that follow a good capture); ``backup_progress`` -- the latest progress
 line of a run still going; ``backup_storage_audit`` -- a storage host's audit
 sent outside any job (agent start, daily, Request Host Data);
 ``cloud_backup_result`` / ``cloud_backup_progress`` -- iCloud Photos jobs on
-the storage host (24.12, ``services/cloud_backup_results.py``).  A message
+the storage host (24.12, ``services/cloud_backup_results.py``);
+``offsite_cloud_result`` / ``offsite_cloud_progress`` -- the off-site cloud
+copy (27.3, ``services/backup_offsite_runs.py``).  A message
 naming a run that belongs to another
 host is ignored and logged.
 """
@@ -21,7 +23,7 @@ from typing import Any, Dict
 
 from sqlalchemy.orm import Session
 
-from backend.services import backup_results, cloud_backup_results
+from backend.services import backup_offsite_runs, backup_results, cloud_backup_results
 
 logger = logging.getLogger(__name__)
 
@@ -134,3 +136,45 @@ async def handle_cloud_backup_progress(  # NOSONAR
             "data": {},
         }
     return {"message_type": "success", "data": {"stored": run is not None}}
+
+
+async def handle_offsite_cloud_result(  # NOSONAR
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Record one off-site cloud copy run's outcome (27.3).  Never raises."""
+    host_id = getattr(connection, "host_id", None)
+    if not host_id:
+        return _error()
+    try:
+        backup_offsite_runs.record_result(db, host_id, _payload(message_data))
+        db.commit()
+    except Exception:  # pylint: disable=broad-except
+        db.rollback()
+        logger.exception("offsite_cloud_result from host %s not recorded", host_id)
+        return {
+            "message_type": "error",
+            "error_type": "offsite_cloud_result",
+            "data": {},
+        }
+    return {"message_type": "success", "data": {}}
+
+
+async def handle_offsite_cloud_progress(  # NOSONAR
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Keep a running off-site run's latest progress (27.3).  Never raises."""
+    host_id = getattr(connection, "host_id", None)
+    if not host_id:
+        return _error()
+    try:
+        backup_offsite_runs.record_progress(db, host_id, _payload(message_data))
+        db.commit()
+    except Exception:  # pylint: disable=broad-except
+        db.rollback()
+        logger.exception("offsite_cloud_progress from host %s not recorded", host_id)
+        return {
+            "message_type": "error",
+            "error_type": "offsite_cloud_progress",
+            "data": {},
+        }
+    return {"message_type": "success", "data": {}}

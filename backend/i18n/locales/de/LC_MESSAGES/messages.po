@@ -5,31 +5,31 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 10:44-0500\n"
+"POT-Creation-Date: 2026-11-25 14:00-0500\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: backend/security/communication_security.py:145
+#: backend/security/communication_security.py:147
 msgid "Invalid token signature"
 msgstr "Ungültige Token-Signatur"
 
-#: backend/security/communication_security.py:154
+#: backend/security/communication_security.py:156
 msgid "Token expired"
 msgstr "Token abgelaufen"
 
-#: backend/security/communication_security.py:176
+#: backend/security/communication_security.py:178
 msgid "Malformed token"
 msgstr "Fehlerhafter Token"
 
-#: backend/security/communication_security.py:452
+#: backend/security/communication_security.py:454
 msgid "Encrypted data expired"
 msgstr "Verschlüsselte Daten abgelaufen"
 
-#: backend/security/communication_security.py:463
+#: backend/security/communication_security.py:465
 msgid "Invalid signature"
 msgstr "Ungültige Signatur"
 
-#: backend/security/communication_security.py:470
+#: backend/security/communication_security.py:472
 msgid "Decryption failed"
 msgstr "Entschlüsselung fehlgeschlagen"
 
@@ -3962,11 +3962,21 @@ msgstr ""
 msgid "This host has no backup policy yet"
 msgstr "Dieser Host hat noch keine Backup-Richtlinie"
 
-#: backend/api/backups_breakglass.py:77
+#: backend/api/backups_breakglass.py:77 backend/api/backups_offsite.py:243
 msgid "Paste the OpenPGP public key to seal the export to"
 msgstr ""
 "Fügen Sie den öffentlichen OpenPGP-Schlüssel ein, mit dem der Export "
 "versiegelt wird"
+
+#: backend/api/backups_offsite.py:188
+msgid "The setup guide needs Professional+"
+msgstr "Die Installationsanleitung erfordert Professional+"
+
+#: backend/api/backups_offsite.py:221
+msgid "Name the new dataset to restore into"
+msgstr ""
+"Nennen Sie die neue Datensatzerstellung, in die wiederhergestellt werden "
+"soll"
 
 #: backend/api/packages_helpers.py:103
 #, python-format
@@ -6164,12 +6174,12 @@ msgstr ""
 msgid "A check of what changed is already running"
 msgstr "Eine Prüfung der Änderungen läuft bereits"
 
-#: backend/websocket/message_router.py:295
+#: backend/websocket/message_router.py:305
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Unbekannter Nachrichtentyp in Warteschlange: %s"
 
-#: backend/websocket/message_router.py:300
+#: backend/websocket/message_router.py:310
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Fehler beim Routing der Nachrichtentyp %(message_type)s: %(error)s"
@@ -6505,7 +6515,7 @@ msgstr "Unbekannter Gerätestatus: %s"
 
 #: backend/services/asset_discovery_review.py:344
 #: backend/services/malware_quarantine.py:139
-#: backend/services/malware_review.py:237
+#: backend/services/malware_review.py:239
 msgid "A reason of at least 3 characters is required"
 msgstr "Eine Begründung mit mindestens 3 Zeichen ist erforderlich"
 
@@ -6530,6 +6540,53 @@ msgstr "Ausnahme nicht gefunden"
 #: backend/services/asset_discovery_review.py:437
 msgid "This exclusion was already revoked"
 msgstr "Diese Ausnahme wurde bereits widerrufen"
+
+#: backend/services/backup_offsite_secrets.py:89
+msgid "OpenBAO did not say where it stored the secret"
+msgstr "OpenBAO hat nicht angegeben, wo es das Geheimnis gespeichert hat"
+
+#: backend/services/backup_offsite_secrets.py:95
+msgid "This off-site copy has no secret in OpenBAO"
+msgstr "In OpenBAO gibt es für diese externe Kopie kein Geheimnis"
+
+#: backend/services/backup_offsite_secrets.py:99
+msgid "OpenBAO does not hold this off-site copy's secret"
+msgstr "OpenBAO enthält das Geheimnis dieser externen Kopie nicht"
+
+#: backend/services/backup_offsite_secrets.py:128
+#: backend/services/backup_offsite_secrets.py:135
+msgid "The off-site credentials in OpenBAO are damaged"
+msgstr "Die Zugangsdaten der externen Kopie in OpenBAO sind beschädigt"
+
+#: backend/services/backup_offsite_secrets.py:157
+#: backend/services/backup_offsite_secrets.py:159
+msgid "The off-site key in OpenBAO is damaged"
+msgstr "Der Schlüssel der externen Kopie in OpenBAO ist beschädigt"
+
+#: backend/services/backup_offsite_secrets.py:191
+msgid "No such off-site run for this host"
+msgstr "Für diesen Host gibt es keinen solchen Lauf der externen Kopie"
+
+#: backend/services/backup_offsite_secrets.py:197
+msgid "This off-site run has already ended"
+msgstr "Dieser Lauf der externen Kopie ist bereits beendet"
+
+#: backend/services/backup_offsite_secrets.py:199
+msgid "This off-site run's secrets were already released"
+msgstr ""
+"Die Geheimnisse dieses Laufs der externen Kopie wurden bereits freigegeben"
+
+#: backend/services/backup_offsite_secrets.py:204
+msgid "This off-site run is too old"
+msgstr "Dieser Lauf der externen Kopie ist zu alt"
+
+#: backend/services/backup_offsite_secrets.py:217
+msgid "This off-site copy was removed"
+msgstr "Diese externe Kopie wurde entfernt"
+
+#: backend/services/backup_offsite_secrets.py:220
+msgid "The key this run needs is not held"
+msgstr "Der Schlüssel, den diese Ausführung benötigt, ist nicht vorhanden"
 
 #: backend/services/malware_rulesets.py:169
 msgid "A rule set name may use only a-z, 0-9 and hyphens"
@@ -6643,6 +6700,41 @@ msgstr "Der Host hat das Ergebnis nie gemeldet"
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "Automatischer Neustart von %(host)s nach Richtlinie '%(policy)s'"
 
+#: backend/services/backup_offsite_runs.py:74
+msgid "An off-site job for this copy is already queued or running"
+msgstr ""
+"Für diese externe Kopie steht bereits ein Auftrag in der Warteschlange oder "
+"läuft"
+
+#: backend/services/backup_offsite_runs.py:100
+msgid "No such host"
+msgstr "Kein solcher Host gefunden"
+
+#: backend/services/backup_offsite_runs.py:167
+msgid "This off-site copy is turned off"
+msgstr "Diese externe Kopie ist ausgeschaltet"
+
+#: backend/services/backup_offsite_runs.py:171
+msgid "This off-site copy has no key"
+msgstr "Diese externe Kopie hat keinen Schlüssel"
+
+#: backend/services/backup_offsite_runs.py:207
+msgid "This restore point's chain is not complete in the bucket"
+msgstr "Diese Wiederherstellungspunktkette ist im Bucket nicht vollständig"
+
+#: backend/services/backup_offsite_runs.py:211
+msgid "This chain spans two keys"
+msgstr "Diese Kette umfasst zwei Schlüssel"
+
+#: backend/services/backup_offsite_runs.py:253
+msgid "The thaw tier is Bulk or Standard"
+msgstr "Die Entfrierstufe ist Bulk oder Standard"
+
+#: backend/services/backup_offsite_runs.py:314
+msgid "The storage host has said nothing about this job for a day"
+msgstr ""
+"Der Speicher-Host hat sich seit einem Tag nicht zu diesem Auftrag gemeldet"
+
 #: backend/services/held_asset_tags.py:159
 #, python-format
 msgid "Held asset tag %s applied"
@@ -6727,6 +6819,10 @@ msgstr "Dieser Lauf der Cloud-Sicherung nimmt keinen Code an"
 msgid "No two-factor code was entered in time"
 msgstr "Es wurde nicht rechtzeitig ein Zwei-Faktor-Code eingegeben"
 
+#: backend/services/backup_offsite_export.py:126
+msgid "This off-site copy has no key yet"
+msgstr "Diese externe Kopie hat noch keinen Schlüssel"
+
 #: backend/services/reboot_safety.py:54
 msgid ""
 "Not safe to reboot: the host may not boot. Repair the package manager first."
@@ -6747,6 +6843,7 @@ msgid "A two-factor code is six digits"
 msgstr "Ein Zwei-Faktor-Code hat sechs Ziffern"
 
 #: backend/services/cloud_backup_jobs.py:132
+#: backend/services/backup_offsite.py:127
 msgid "The backup target has no storage host to run on"
 msgstr "Das Sicherungsziel hat keinen Speicher-Host, auf dem dies laufen kann"
 
@@ -7174,10 +7271,60 @@ msgstr "Entfernt {entity_type} '{entity_name}'"
 msgid "Unknown finding status: %s"
 msgstr "Unbekannter Befundstatus: %s"
 
-#: backend/services/malware_review.py:234
+#: backend/services/malware_review.py:236
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "Diese Entscheidung kann hier nicht getroffen werden: %s"
+
+#: backend/services/backup_offsite.py:79
+msgid ""
+"Setting up and running the off-site cloud copy needs Professional+; "
+"restoring from it and exporting its keys do not"
+msgstr ""
+"Einrichtung und Betrieb der externen Cloud-Kopie erfordern Professional+; "
+"die Wiederherstellung daraus und der Export ihrer Schlüssel nicht"
+
+#: backend/services/backup_offsite.py:108
+msgid "No such off-site copy"
+msgstr "Keine solche externe Kopie"
+
+#: backend/services/backup_offsite.py:123
+msgid "No such backup target"
+msgstr "Kein solcher Backup-Ziel gefunden"
+
+#: backend/services/backup_offsite.py:142
+msgid "The endpoint must be a plain https:// address"
+msgstr "Das Endpunkt muss eine einfache https://-Adresse sein"
+
+#: backend/services/backup_offsite.py:157
+msgid "Enter the S3 bucket's name"
+msgstr "Geben Sie den Namen des S3-Buckets ein"
+
+#: backend/services/backup_offsite.py:160
+msgid "Enter the bucket's AWS region"
+msgstr "Geben Sie die AWS-Region des Buckets ein"
+
+#: backend/services/backup_offsite.py:165
+msgid "The prefix may hold letters, digits and - _ . / only"
+msgstr "Der Präfix darf Buchstaben, Ziffern und - _ . / enthalten"
+
+#: backend/services/backup_offsite.py:170
+msgid "Choose a storage class"
+msgstr "Wählen Sie eine Speicherklasse"
+
+#: backend/services/backup_offsite.py:184
+msgid "Enter the access key ID and secret access key"
+msgstr ""
+"Geben Sie die ID des Zugriffsschlüssels und das geheime Zugriffsschlüssel "
+"ein"
+
+#: backend/services/backup_offsite.py:208
+msgid "An air-gapped site has no off-site cloud copy"
+msgstr "Ein Air-Gap-Standort hat keine externe Cloud-Kopie"
+
+#: backend/services/backup_offsite.py:213
+msgid "This target already has an off-site copy"
+msgstr "Dieses Ziel hat bereits eine externe Kopie"
 
 #: backend/services/asset_tag_csv.py:372
 #, python-format

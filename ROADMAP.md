@@ -15056,6 +15056,48 @@ restore, decrypting with the key, and the break-glass export of that key --
 after a license lapse a customer still gets their data back from the cloud
 and can walk away cleanly ("never hold safety hostage").
 
+**BUILT 2026-11-25 (code, all four repos; not yet proven on a real storage
+host or against AWS -- the items below stay unticked until the Proof item
+runs).**  Agent `src/sysmanage_agent/offsite_cloud/`: `crypto` ("SMOC1": per
+object HKDF-SHA256 subkey from a random salt, AES-256-GCM chunks with STREAM
+nonces and the header as associated data, key id = HMAC label), `s3`
+(stdlib SigV4 client; matches AWS's published signature example; PUT with
+storage class, Content-MD5 + x-amz-checksum-sha256 and Object Lock
+COMPLIANCE retention; HEAD / GET / RestoreObject / ListObjectsV2 /
+GetObjectLockConfiguration), `bandwidth` (weekly local-time caps, token
+bucket), `datasets` (per-dataset `zfs send`, atomic `zfs snapshot` of all,
+own `@sysmanage-offsite-<UTC>` snapshots, keep new + base), `upload`
+(detached run; parts of 256 MiB spooled, encrypted, uploaded; manifest to S3
+Standard; `state.json` resume that re-reads and PROVES the skipped bytes),
+`restore` (thaw all parts, poll, download + SHA-256 + decrypt + `zfs receive
+-u` into a NEW dataset), `operations` (`offsite_cloud_run`: check / upload /
+restore; secrets fetched over HTTPS once and handed to the detached run on
+stdin only; watcher + start-up report).  Sudoers: `zfs send *`, `zfs destroy
+*`, `zfs receive -u *` on Linux (sudo-rs refuses a wildcard inside an
+argument: `*@sysmanage-offsite-*` made the whole file invalid, caught by
+`visudo -c` with sudo-rs before shipping), exact regular expressions on
+FreeBSD.  Proven against a local S3 emulator (moto): 3 Deep Archive parts
+with COMPLIANCE locks, a delete refused, manifest listed, check, restore
+byte-identical.  Server (OSS): q118offsite (`backup_offsite_copy` / `_key` /
+`_run` / `_stream`), `backup_offsite` (setup, settings, key rotation, view,
+overdue after 48 h), `backup_offsite_secrets` (credentials + keys in
+OpenBAO, released once per run within the hour; a restore gets its chain's
+own key), `backup_offsite_runs` (check / upload / restore, results become
+the record, restore points = full + incrementals under one key, thaw cost
+and time estimate, the leader's tick), `backup_offsite_export` (sealed
+export of every key + credentials + streams + README), routes
+`/api/v1/backups/offsite...` and `/api/agent/offsite-cloud-secret`; the
+Backups page's Cloud copy card.  Pro+ backup_engine `_backup_offsite.pxi`:
+defaults, settings, schedule, GFS classes (incremental max(class minimum,
+6 x 30) = 180, monthly full + full interval = 210, first full of a year
+7 x 365 + 30 = 2585), lifecycle rules per class in use, the no-delete IAM
+policy, cost.  Docs: the Professional+ backups page, "Cloud copy".  STILL
+OPEN: the Proof (a ZFS storage host and a real bucket -- needs Bryan's AWS
+account), the pool-dies runbook step and its drill, the other datasets'
+size and cost shown BEFORE they are added, alerts through the 24.6 alert
+channels (only the card's Overdue mark so far), and directories inside a
+dataset (a `zfs send` is all or nothing: exclusions are whole datasets).
+
 - [ ] **Straight from the storage host (design rule, Bryan 2026-10-27):** the
       storage host's own agent reads the repositories, encrypts and uploads
       them directly to AWS; no backup data passes through the SysManage

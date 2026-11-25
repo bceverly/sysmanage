@@ -5,31 +5,31 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 10:44-0500\n"
+"POT-Creation-Date: 2026-11-25 14:00-0500\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: backend/security/communication_security.py:145
+#: backend/security/communication_security.py:147
 msgid "Invalid token signature"
 msgstr "توقيع الرمز المميز غير صحيح"
 
-#: backend/security/communication_security.py:154
+#: backend/security/communication_security.py:156
 msgid "Token expired"
 msgstr "انتهت صلاحية الرمز المميز"
 
-#: backend/security/communication_security.py:176
+#: backend/security/communication_security.py:178
 msgid "Malformed token"
 msgstr "الرمز المميز مُشوَّه"
 
-#: backend/security/communication_security.py:452
+#: backend/security/communication_security.py:454
 msgid "Encrypted data expired"
 msgstr "انتهت صلاحية البيانات المشفرة"
 
-#: backend/security/communication_security.py:463
+#: backend/security/communication_security.py:465
 msgid "Invalid signature"
 msgstr "توقيع غير صحيح"
 
-#: backend/security/communication_security.py:470
+#: backend/security/communication_security.py:472
 msgid "Decryption failed"
 msgstr "فشل التشفير"
 
@@ -3802,9 +3802,17 @@ msgstr "استعادة الجاهزية تتطلب محرك عمليات الن�
 msgid "This host has no backup policy yet"
 msgstr "هذا المضيف ليس لديه سياسة نسخ احتياطي بعد"
 
-#: backend/api/backups_breakglass.py:77
+#: backend/api/backups_breakglass.py:77 backend/api/backups_offsite.py:243
 msgid "Paste the OpenPGP public key to seal the export to"
 msgstr "الصق مفتاح OpenPGP العام الذي يُختم به التصدير"
+
+#: backend/api/backups_offsite.py:188
+msgid "The setup guide needs Professional+"
+msgstr "دليل الإعداد يحتاج إلى مستوى محترف+"
+
+#: backend/api/backups_offsite.py:221
+msgid "Name the new dataset to restore into"
+msgstr "حدد اسم مجموعة البيانات الجديدة لاستعادتها إلى"
 
 #: backend/api/packages_helpers.py:103
 #, python-format
@@ -5902,12 +5910,12 @@ msgstr "لا يقارن ما الذي تغيّر إلا بالمستودع ال�
 msgid "A check of what changed is already running"
 msgstr "يجري بالفعل التحقق مما تغيّر"
 
-#: backend/websocket/message_router.py:295
+#: backend/websocket/message_router.py:305
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "نوع الرسالة غير المعروفة في الصف: %s"
 
-#: backend/websocket/message_router.py:300
+#: backend/websocket/message_router.py:310
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "خطأ في توجيه نوع الرسالة %(message_type)s: %(error)s"
@@ -6221,7 +6229,7 @@ msgstr "حالة جهاز غير معروفة: %s"
 
 #: backend/services/asset_discovery_review.py:344
 #: backend/services/malware_quarantine.py:139
-#: backend/services/malware_review.py:237
+#: backend/services/malware_review.py:239
 msgid "A reason of at least 3 characters is required"
 msgstr "يلزم سبب لا يقل عن 3 أحرف"
 
@@ -6246,6 +6254,52 @@ msgstr "لم يتم العثور على الاستثناء"
 #: backend/services/asset_discovery_review.py:437
 msgid "This exclusion was already revoked"
 msgstr "تم إلغاء هذا الاستثناء بالفعل"
+
+#: backend/services/backup_offsite_secrets.py:89
+msgid "OpenBAO did not say where it stored the secret"
+msgstr "لم يُحدد OpenBAO أين خزّن السر"
+
+#: backend/services/backup_offsite_secrets.py:95
+msgid "This off-site copy has no secret in OpenBAO"
+msgstr "هذه النسخة خارج الموقع لا تحتوي على أي أسرار في OpenBAO"
+
+#: backend/services/backup_offsite_secrets.py:99
+msgid "OpenBAO does not hold this off-site copy's secret"
+msgstr "لا يحتفظ OpenBAO بهذا النسخ الاحتياطي خارج الموقع السري"
+
+#: backend/services/backup_offsite_secrets.py:128
+#: backend/services/backup_offsite_secrets.py:135
+msgid "The off-site credentials in OpenBAO are damaged"
+msgstr "المؤهلات خارج الموقع في OpenBAO تضررت"
+
+#: backend/services/backup_offsite_secrets.py:157
+#: backend/services/backup_offsite_secrets.py:159
+msgid "The off-site key in OpenBAO is damaged"
+msgstr "المفتاح خارج الموقع في OpenBAO تالف"
+
+#: backend/services/backup_offsite_secrets.py:191
+msgid "No such off-site run for this host"
+msgstr "لا يوجد تشغيل خارجي لهذا المضيف"
+
+#: backend/services/backup_offsite_secrets.py:197
+msgid "This off-site run has already ended"
+msgstr "تم إنهاء هذا التشغيل خارج الموقع بالفعل"
+
+#: backend/services/backup_offsite_secrets.py:199
+msgid "This off-site run's secrets were already released"
+msgstr "تم بالفعل الكشف عن أسرار هذا التشغيل خارج الموقع"
+
+#: backend/services/backup_offsite_secrets.py:204
+msgid "This off-site run is too old"
+msgstr "هذه التشغيل خارج الموقع قديمة جداً"
+
+#: backend/services/backup_offsite_secrets.py:217
+msgid "This off-site copy was removed"
+msgstr "تم إزالة هذه النسخة الاحتياطية خارج الموقع"
+
+#: backend/services/backup_offsite_secrets.py:220
+msgid "The key this run needs is not held"
+msgstr "المفتاح الذي تحتاجه هذه العملية غير محفوظ"
 
 #: backend/services/malware_rulesets.py:169
 msgid "A rule set name may use only a-z, 0-9 and hyphens"
@@ -6352,6 +6406,38 @@ msgstr "لم يُبلغ المضيف عن النتيجة أبدًا"
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "إعادة تشغيل تلقائية لـ %(host)s بعد السياسة '%(policy)s'"
 
+#: backend/services/backup_offsite_runs.py:74
+msgid "An off-site job for this copy is already queued or running"
+msgstr "مهمة خارج الموقع لهذه النسخة معالجة بالفعل أو قيد التشغيل"
+
+#: backend/services/backup_offsite_runs.py:100
+msgid "No such host"
+msgstr "لا يوجد مضيف كهذا"
+
+#: backend/services/backup_offsite_runs.py:167
+msgid "This off-site copy is turned off"
+msgstr "هذه النسخة خارج الموقع معطلة"
+
+#: backend/services/backup_offsite_runs.py:171
+msgid "This off-site copy has no key"
+msgstr "هذه النسخة خارج الموقع لا تحتوي على مفتاح"
+
+#: backend/services/backup_offsite_runs.py:207
+msgid "This restore point's chain is not complete in the bucket"
+msgstr "هذه سلسلة نقطة الاستعادة ليست مكتملة في الدلو"
+
+#: backend/services/backup_offsite_runs.py:211
+msgid "This chain spans two keys"
+msgstr "هذه السلسلة تمتد على مفتاحين"
+
+#: backend/services/backup_offsite_runs.py:253
+msgid "The thaw tier is Bulk or Standard"
+msgstr "المستوى 'الذوبان' هو إما 'الجملة' أو 'المعياري'"
+
+#: backend/services/backup_offsite_runs.py:314
+msgid "The storage host has said nothing about this job for a day"
+msgstr "لم يُبلغ مضيف التخزين عن أي شيء بشأن هذه المهمة منذ يوم"
+
 #: backend/services/held_asset_tags.py:159
 #, python-format
 msgid "Held asset tag %s applied"
@@ -6434,6 +6520,10 @@ msgstr "تشغيل النسخ الاحتياطي السحابي هذا لا يق
 msgid "No two-factor code was entered in time"
 msgstr "لم يُدخل رمز المصادقة الثنائية في الوقت المحدد"
 
+#: backend/services/backup_offsite_export.py:126
+msgid "This off-site copy has no key yet"
+msgstr "هذه النسخة الاحتياطية خارج الموقع ليس لها مفتاح بعدًا"
+
 #: backend/services/reboot_safety.py:54
 msgid ""
 "Not safe to reboot: the host may not boot. Repair the package manager first."
@@ -6452,6 +6542,7 @@ msgid "A two-factor code is six digits"
 msgstr "يتكون رمز المصادقة الثنائية من ستة أرقام"
 
 #: backend/services/cloud_backup_jobs.py:132
+#: backend/services/backup_offsite.py:127
 msgid "The backup target has no storage host to run on"
 msgstr "لا تملك وجهة النسخ الاحتياطي مضيف تخزين للتشغيل عليه"
 
@@ -6855,10 +6946,58 @@ msgstr "حُذِفَت الكيان من نوع ‘{entity_type}’ باسم ‘
 msgid "Unknown finding status: %s"
 msgstr "حالة نتيجة غير معروفة: %s"
 
-#: backend/services/malware_review.py:234
+#: backend/services/malware_review.py:236
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "لا يمكن اتخاذ هذا القرار هنا: %s"
+
+#: backend/services/backup_offsite.py:79
+msgid ""
+"Setting up and running the off-site cloud copy needs Professional+; "
+"restoring from it and exporting its keys do not"
+msgstr ""
+"إعداد وتشغيل نسخة السحابة خارج الموقع يتطلب صلاحيات محترف+؛ استعادة البيانات"
+" منه وتصدير مفاتيحه لا"
+
+#: backend/services/backup_offsite.py:108
+msgid "No such off-site copy"
+msgstr "لا يوجد نسخة احتياطية خارج الموقع"
+
+#: backend/services/backup_offsite.py:123
+msgid "No such backup target"
+msgstr "لا يوجد هدف نسخ احتياطي كهذا"
+
+#: backend/services/backup_offsite.py:142
+msgid "The endpoint must be a plain https:// address"
+msgstr "يجب أن يكون عنوان النهاية عنوانًا بسيطًا من نوع https://"
+
+#: backend/services/backup_offsite.py:157
+msgid "Enter the S3 bucket's name"
+msgstr "أدخل اسم دلو S3"
+
+#: backend/services/backup_offsite.py:160
+msgid "Enter the bucket's AWS region"
+msgstr "أدخل منطقة AWS للبرميل"
+
+#: backend/services/backup_offsite.py:165
+msgid "The prefix may hold letters, digits and - _ . / only"
+msgstr "يمكن أن يحتوي البادئة على حروف وأرقام وشرطات ونقاط فقط"
+
+#: backend/services/backup_offsite.py:170
+msgid "Choose a storage class"
+msgstr "اختر فئة تخزين"
+
+#: backend/services/backup_offsite.py:184
+msgid "Enter the access key ID and secret access key"
+msgstr "أدخل معرف مفتاح الوصول وسريته"
+
+#: backend/services/backup_offsite.py:208
+msgid "An air-gapped site has no off-site cloud copy"
+msgstr "موقع منفصل عن الشبكة لا يحتوي على نسخة احتياطية سحابية خارج الموقع"
+
+#: backend/services/backup_offsite.py:213
+msgid "This target already has an off-site copy"
+msgstr "هذا الهدف لديه بالفعل نسخة خارج الموقع"
 
 #: backend/services/asset_tag_csv.py:372
 #, python-format

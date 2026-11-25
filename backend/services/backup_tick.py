@@ -22,7 +22,9 @@ approved, active host whose agent can run backups:
 4. with Pro+ backup_engine, rotate the encryption keys that are due;
 5. with Pro+ backup_engine, a full-read verification on the host every
    ``verify_interval_days`` (``backup_verify``);
-6. iCloud Photos to local on the storage host (``cloud_backup_tick``).
+6. iCloud Photos to local on the storage host (``cloud_backup_tick``);
+7. with Pro+ backup_engine, the off-site cloud copy's uploads
+   (``backup_offsite_runs``).
 
 Runs that got no result twelve hours after their command was sent are
 marked failed and logged; a run a maintenance window holds is waiting, not
@@ -457,6 +459,11 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
     # Off-site copies (27.3): job files, and copies that stalled.
     backup_replicas.tick(db, now)
     backup_moves.tick(db, now)  # moves with their backups: check, switch
+    # The off-site cloud copy (27.3, Pro+): each copy's upload at its hour.
+    # Without the engine nothing starts (the copy is frozen, never removed).
+    from backend.services import backup_offsite_runs  # noqa: PLC0415
+
+    backup_offsite_runs.tick(db, now)
     # Fleet restore jobs (27.2, Enterprise): finished hosts, the next wave.
     from backend.services import backup_fleet_restore  # noqa: PLC0415
 

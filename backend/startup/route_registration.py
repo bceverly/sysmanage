@@ -20,6 +20,7 @@ from backend.api import (
     agent_certificate,
     agent_mtls_settings,
     agent_cloud_backup,
+    agent_offsite,
     agent_poll,
     airgap_agent_mirrors,
     airgap_bundles,
@@ -116,6 +117,7 @@ from backend.api import (
     hardware_health,
     backups,
     backups_breakglass,
+    backups_offsite,
     backups_browse,
     backups_drift,
     backups_escrow,
@@ -386,6 +388,7 @@ def register_routes(app: FastAPI):
     # iCloud Photos (24.12): the storage host fetches a run's Apple ID
     # password and two-factor code here, never through the queue.
     app.include_router(agent_cloud_backup.router, prefix="/api", tags=["agent"])
+    app.include_router(agent_offsite.router, prefix="/api", tags=["agent"])  # 27.3
     # Agent mutual TLS (25.10): a host's certificate from its own request,
     # and the server's signed statement of the TLS keys it serves.
     app.include_router(
@@ -490,6 +493,7 @@ def register_routes(app: FastAPI):
     _include_versioned(app, backups_transport.router, tags=["backups"])
     # Every edition: a lapse never locks anyone out of their keys (2026-11-03).
     _include_versioned(app, backups_breakglass.router, tags=["backups"])
+    _include_versioned(app, backups_offsite.router, tags=["backups"])  # 27.3
     _include_versioned(app, backups_tag_policies.router, tags=["backups"])
     _include_versioned(app, backups_equip.router, tags=["backups"])
     _include_versioned(app, package_manager_repair.router, tags=["hosts"])

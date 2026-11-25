@@ -36,7 +36,8 @@ LOG_MSG_FROM_CONNECTION = "%s from connection %s"
 # update_apply_result closes only that host's pending logs and queued runs;
 # command_result closes the queued command it names; backup_result and
 # cloud_backup_result answer a pending run of that host by id and ignore a
-# finished one.
+# finished one; so does offsite_cloud_result (27.3: an upload can run for
+# days, and its result waits in the agent until the server is back).
 LATE_RESULT_TYPES = frozenset(
     {
         "script_execution_result",
@@ -44,6 +45,7 @@ LATE_RESULT_TYPES = frozenset(
         "command_result",
         "backup_result",
         "cloud_backup_result",
+        "offsite_cloud_result",
     }
 )
 

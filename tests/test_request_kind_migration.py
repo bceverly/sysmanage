@@ -181,3 +181,32 @@ def test_the_malware_scan_policies_come_and_go():
         assert "malware_scan_policy" in shape()[0]
     finally:
         os.unlink(db_path)
+
+
+def test_the_offsite_copy_tables_come_and_go():
+    fd, db_path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    offsite = {"backup_offsite_copy", "backup_offsite_key", "backup_offsite_run",
+               "backup_offsite_stream"}  # fmt: skip
+
+    def tables():
+        conn = sqlite3.connect(db_path)
+        try:
+            return {
+                r[0]
+                for r in conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                )
+            }
+        finally:
+            conn.close()
+
+    try:
+        _alembic(["upgrade", "head"], db_path)
+        assert offsite <= tables()
+        _alembic(["downgrade", "q117malwarepolicy"], db_path)
+        assert not offsite & tables() and "malware_scan_policy" in tables()
+        _alembic(["upgrade", "head"], db_path)
+        assert offsite <= tables()
+    finally:
+        os.unlink(db_path)

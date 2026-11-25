@@ -26,6 +26,7 @@ import BackupReadinessCard from '../Components/Backups/BackupReadinessCard';
 import BackupApprovalsCard from '../Components/Backups/BackupApprovalsCard';
 import BackupFleetRestoresCard from '../Components/Backups/BackupFleetRestores';
 import BackupLegalHoldsCard from '../Components/Backups/BackupLegalHolds';
+import BackupCloudCopy from '../Components/Backups/BackupCloudCopy';
 
 const Backups: React.FC = () => {
     const { t } = useTranslation();
@@ -87,6 +88,7 @@ const Backups: React.FC = () => {
             <BackupApprovalsCard canManage={canManage} canRestore={canRestore} onChanged={changed} />
             <BackupFleetRestoresCard canRestore={canRestore} hosts={data.hosts} refreshKey={refreshKey} />
             <BackupLegalHoldsCard canManage={canManage} refreshKey={refreshKey} />
+            <BackupCloudCopy canManage={canManage} canRestore={canRestore} refreshKey={refreshKey} />
             <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', rowGap: 1 }}>
                 {BACKUP_STATUS_ORDER.filter(s => data.counts[s]).map(s => (
                     <Chip key={s} variant={shown === s ? 'filled' : 'outlined'} color={statusColor(s)}

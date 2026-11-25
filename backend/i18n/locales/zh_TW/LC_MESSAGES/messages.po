@@ -5,31 +5,31 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 10:44-0500\n"
+"POT-Creation-Date: 2026-11-25 14:00-0500\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: backend/security/communication_security.py:145
+#: backend/security/communication_security.py:147
 msgid "Invalid token signature"
 msgstr "無效的權杖簽名"
 
-#: backend/security/communication_security.py:154
+#: backend/security/communication_security.py:156
 msgid "Token expired"
 msgstr "權杖過期"
 
-#: backend/security/communication_security.py:176
+#: backend/security/communication_security.py:178
 msgid "Malformed token"
 msgstr "令牌格式無效"
 
-#: backend/security/communication_security.py:452
+#: backend/security/communication_security.py:454
 msgid "Encrypted data expired"
 msgstr "加密資料過期"
 
-#: backend/security/communication_security.py:463
+#: backend/security/communication_security.py:465
 msgid "Invalid signature"
 msgstr "無效簽名"
 
-#: backend/security/communication_security.py:470
+#: backend/security/communication_security.py:472
 msgid "Decryption failed"
 msgstr "解密失敗"
 
@@ -3679,9 +3679,17 @@ msgstr "恢復狀態需要企業備份操作引擎"
 msgid "This host has no backup policy yet"
 msgstr "這個主機還沒有設定任何備份策略"
 
-#: backend/api/backups_breakglass.py:77
+#: backend/api/backups_breakglass.py:77 backend/api/backups_offsite.py:243
 msgid "Paste the OpenPGP public key to seal the export to"
 msgstr "請貼上用於封存匯出的 OpenPGP 公開金鑰"
+
+#: backend/api/backups_offsite.py:188
+msgid "The setup guide needs Professional+"
+msgstr "這個設置指南需要專業級"
+
+#: backend/api/backups_offsite.py:221
+msgid "Name the new dataset to restore into"
+msgstr "請為要還原的新資料集命名"
 
 #: backend/api/packages_helpers.py:103
 #, python-format
@@ -5719,12 +5727,12 @@ msgstr "變更內容僅與目前的存放庫進行比較"
 msgid "A check of what changed is already running"
 msgstr "變更檢查已在執行"
 
-#: backend/websocket/message_router.py:295
+#: backend/websocket/message_router.py:305
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "隊列中未知的消息類型: %s"
 
-#: backend/websocket/message_router.py:300
+#: backend/websocket/message_router.py:310
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "路由消息類型 %(message_type)s 時發生錯誤：%(error)s"
@@ -6024,7 +6032,7 @@ msgstr "未知的裝置狀態：%s"
 
 #: backend/services/asset_discovery_review.py:344
 #: backend/services/malware_quarantine.py:139
-#: backend/services/malware_review.py:237
+#: backend/services/malware_review.py:239
 msgid "A reason of at least 3 characters is required"
 msgstr "需要至少 3 個字元的原因"
 
@@ -6049,6 +6057,52 @@ msgstr "找不到排除項目"
 #: backend/services/asset_discovery_review.py:437
 msgid "This exclusion was already revoked"
 msgstr "此排除項目已被撤銷"
+
+#: backend/services/backup_offsite_secrets.py:89
+msgid "OpenBAO did not say where it stored the secret"
+msgstr "OpenBAO沒有說明它將密碼儲存在何處"
+
+#: backend/services/backup_offsite_secrets.py:95
+msgid "This off-site copy has no secret in OpenBAO"
+msgstr "此異地副本在 OpenBAO 中沒有機密"
+
+#: backend/services/backup_offsite_secrets.py:99
+msgid "OpenBAO does not hold this off-site copy's secret"
+msgstr "OpenBAO 中沒有此異地副本的機密"
+
+#: backend/services/backup_offsite_secrets.py:128
+#: backend/services/backup_offsite_secrets.py:135
+msgid "The off-site credentials in OpenBAO are damaged"
+msgstr "OpenBAO 中的異地副本憑證已損壞"
+
+#: backend/services/backup_offsite_secrets.py:157
+#: backend/services/backup_offsite_secrets.py:159
+msgid "The off-site key in OpenBAO is damaged"
+msgstr "OpenBAO 中的異地副本金鑰已損壞"
+
+#: backend/services/backup_offsite_secrets.py:191
+msgid "No such off-site run for this host"
+msgstr "此主機沒有這樣的異地副本執行"
+
+#: backend/services/backup_offsite_secrets.py:197
+msgid "This off-site run has already ended"
+msgstr "此異地副本執行已結束"
+
+#: backend/services/backup_offsite_secrets.py:199
+msgid "This off-site run's secrets were already released"
+msgstr "此異地副本執行的機密已經發放過"
+
+#: backend/services/backup_offsite_secrets.py:204
+msgid "This off-site run is too old"
+msgstr "此異地副本執行太舊"
+
+#: backend/services/backup_offsite_secrets.py:217
+msgid "This off-site copy was removed"
+msgstr "此異地副本已被移除"
+
+#: backend/services/backup_offsite_secrets.py:220
+msgid "The key this run needs is not held"
+msgstr "這個執行需要的密鑰未被持有"
 
 #: backend/services/malware_rulesets.py:169
 msgid "A rule set name may use only a-z, 0-9 and hyphens"
@@ -6150,6 +6204,38 @@ msgstr "主機從未回報結果"
 msgid "Automatic reboot of %(host)s after policy '%(policy)s'"
 msgstr "策略 '%(policy)s' 之後自動重新啟動 %(host)s"
 
+#: backend/services/backup_offsite_runs.py:74
+msgid "An off-site job for this copy is already queued or running"
+msgstr "此副本的異地作業已在排隊或正在執行"
+
+#: backend/services/backup_offsite_runs.py:100
+msgid "No such host"
+msgstr "沒有該主機"
+
+#: backend/services/backup_offsite_runs.py:167
+msgid "This off-site copy is turned off"
+msgstr "此異地副本已關閉"
+
+#: backend/services/backup_offsite_runs.py:171
+msgid "This off-site copy has no key"
+msgstr "此異地副本沒有金鑰"
+
+#: backend/services/backup_offsite_runs.py:207
+msgid "This restore point's chain is not complete in the bucket"
+msgstr "這個恢復點的鏈在桶中不完整"
+
+#: backend/services/backup_offsite_runs.py:211
+msgid "This chain spans two keys"
+msgstr "這個鏈跨越了兩個密鑰"
+
+#: backend/services/backup_offsite_runs.py:253
+msgid "The thaw tier is Bulk or Standard"
+msgstr "解凍層級是大量或標準"
+
+#: backend/services/backup_offsite_runs.py:314
+msgid "The storage host has said nothing about this job for a day"
+msgstr "儲存主機已有一天未回報此作業的任何狀況"
+
 #: backend/services/held_asset_tags.py:159
 #, python-format
 msgid "Held asset tag %s applied"
@@ -6232,6 +6318,10 @@ msgstr "此雲端備份執行不接受驗證碼"
 msgid "No two-factor code was entered in time"
 msgstr "未及時輸入雙重認證碼"
 
+#: backend/services/backup_offsite_export.py:126
+msgid "This off-site copy has no key yet"
+msgstr "此異地副本還沒有金鑰"
+
 #: backend/services/reboot_safety.py:54
 msgid ""
 "Not safe to reboot: the host may not boot. Repair the package manager first."
@@ -6250,6 +6340,7 @@ msgid "A two-factor code is six digits"
 msgstr "雙重認證碼為六位數字"
 
 #: backend/services/cloud_backup_jobs.py:132
+#: backend/services/backup_offsite.py:127
 msgid "The backup target has no storage host to run on"
 msgstr "備份目標沒有可執行的儲存主機"
 
@@ -6629,10 +6720,56 @@ msgstr "已刪除 {entity_type} '{entity_name}'"
 msgid "Unknown finding status: %s"
 msgstr "未知的偵測結果狀態: %s"
 
-#: backend/services/malware_review.py:234
+#: backend/services/malware_review.py:236
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "無法在此作出該處置: %s"
+
+#: backend/services/backup_offsite.py:79
+msgid ""
+"Setting up and running the off-site cloud copy needs Professional+; "
+"restoring from it and exporting its keys do not"
+msgstr "設定和執行異地雲端副本需要 Professional+；從中還原和匯出其金鑰則不需要"
+
+#: backend/services/backup_offsite.py:108
+msgid "No such off-site copy"
+msgstr "沒有這樣的異地副本"
+
+#: backend/services/backup_offsite.py:123
+msgid "No such backup target"
+msgstr "沒有此備份目標"
+
+#: backend/services/backup_offsite.py:142
+msgid "The endpoint must be a plain https:// address"
+msgstr "該端點必須是一個純粹的 https:// 地址"
+
+#: backend/services/backup_offsite.py:157
+msgid "Enter the S3 bucket's name"
+msgstr "輸入 S3 儲存桶的名稱"
+
+#: backend/services/backup_offsite.py:160
+msgid "Enter the bucket's AWS region"
+msgstr "輸入儲存桶的 AWS 區域"
+
+#: backend/services/backup_offsite.py:165
+msgid "The prefix may hold letters, digits and - _ . / only"
+msgstr "前綴可以包含字母、數字和 - _ . / 只有"
+
+#: backend/services/backup_offsite.py:170
+msgid "Choose a storage class"
+msgstr "選擇一個儲存類別"
+
+#: backend/services/backup_offsite.py:184
+msgid "Enter the access key ID and secret access key"
+msgstr "請輸入存取鍵 ID 和密鑰"
+
+#: backend/services/backup_offsite.py:208
+msgid "An air-gapped site has no off-site cloud copy"
+msgstr "隔離網路站點沒有異地雲端副本"
+
+#: backend/services/backup_offsite.py:213
+msgid "This target already has an off-site copy"
+msgstr "此目標已有異地副本"
 
 #: backend/services/asset_tag_csv.py:372
 #, python-format

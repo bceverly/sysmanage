@@ -82,6 +82,9 @@ PUBLIC_ROUTES = {
     # the asking storage host's own running job's password or two-factor code.
     ("POST", "/api/agent/cloud-backup-secret"): _AGENT,
     ("POST", "/api/agent/cloud-backup-code"): _AGENT,
+    # The off-site cloud copy (27.3): the same poll credentials; releases only
+    # the asking storage host's own pending run's credentials and key, once.
+    ("POST", "/api/agent/offsite-cloud-secret"): _AGENT,
     # Agent mutual TLS (25.10): the poll's credentials; signs a certificate
     # for the asking host only, from a request for a key the host made.
     ("POST", "/api/agent/certificate"): _AGENT,

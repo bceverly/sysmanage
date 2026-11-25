@@ -122,6 +122,10 @@ WINDOW_GATED_COMMANDS = frozenset(
         "cloud_backup_enable",
         "cloud_backup_run",
         "cloud_backup_remove",
+        # 27.3 the off-site cloud copy: an upload snapshots and destroys the
+        # copy's own snapshots; a restore makes a dataset.  A check (one small
+        # upload, nothing on the host) is exempt below.
+        "offsite_cloud_run",
         "attach_to_graylog",
         "fips_enable",
         "fips_disable",
@@ -197,4 +201,6 @@ def is_window_gated(message_type: str, message_data: Optional[str]) -> bool:
         _INTERACTIVE_CLOUD
     ):
         return False  # a sign-in someone is typing a code for right now
+    if command_type == "offsite_cloud_run" and params.get("action") == "check":
+        return False  # proves the credentials; changes nothing on the host
     return command_type not in WINDOW_EXEMPT_COMMANDS
