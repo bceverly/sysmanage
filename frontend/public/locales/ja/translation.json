@@ -4776,7 +4776,9 @@
     },
     "leg": {
       "feed": "ルールフィード",
-      "signatures": "ClamAV シグネチャ"
+      "signatures": "ClamAV シグネチャ",
+      "rootkit": "ルートキットチェック (chkrootkit, rkhunter)",
+      "vendor": "ホストのウイルス対策 (Microsoft Defender)"
     },
     "loadError": "マルウェアの検出事項を読み込めませんでした。",
     "reason": {
@@ -4786,14 +4788,17 @@
       "noDatabase": "ClamAV シグネチャデータベースがありません",
       "noRules": "利用可能なルールセットがありませんでした",
       "noScanner": "スキャナーがインストールされていません",
-      "timeout": "タイムアウトしました"
+      "timeout": "タイムアウトしました",
+      "notPrivileged": "チェックにはルート権限が必要で、エージェントはそれを実行できません（エージェントパッケージを更新してください）",
+      "notSupported": "エージェントは古いので実行できません"
     },
     "refusal": {
       "busy": "スキャンはすでに実行中です",
       "invalidPath": "有効な絶対パスではないパスがあります",
-      "notEquipped": "エージェントはスキャンできません (ClamAV なし)",
+      "notEquipped": "エージェントはスキャンできません（スキャナーがインストールされていません）",
       "notFound": "ホストが見つかりません",
-      "inactive": "ホストがアクティブではありません (または存在しません)"
+      "inactive": "ホストがアクティブではありません (または存在しません)",
+      "invalidExclude": "除外するパスは有効な絶対パスではありません"
     },
     "scan": {
       "completed": "完了",
@@ -4811,7 +4816,10 @@
       "concurrency": "同時にスキャンするホスト数",
       "jobStarted": "{{hosts}} 台のホスト: {{sent}} 台をスキャン中、{{waiting}} 台が順番待ち",
       "pathsUnix": "Linux、BSD、macOS のパス (1 行に 1 つ)",
-      "pathsWindows": "Windows のパス (1 行に 1 つ)"
+      "pathsWindows": "Windows のパス (1 行に 1 つ)",
+      "excludeHelp": "このスキャンからも除外されます。ホストの排他ポリシーで除外されるものに加えて",
+      "excludeUnix": "Linux、BSD、macOSのパスを除外する",
+      "excludeWindows": "除外するWindowsパス"
     },
     "scanHosts": "ホストをスキャン",
     "scans": {
@@ -4842,7 +4850,8 @@
       "decided": "判定済み",
       "open": "オープンな見つかった問題",
       "scans": "スキャン",
-      "rulesets": "ルールセット"
+      "rulesets": "ルールセット",
+      "policies": "スケジュールと排他"
     },
     "title": "マルウェア",
     "decideSelected_one": "選択した {{count}} 件を判定",
@@ -4855,7 +4864,8 @@
       "pathOccupied": "元のパスに別のものが存在します",
       "pending": "すでにエージェントの処理を待っている要求があります",
       "permission": "エージェントにはファイルを移動する権限がありません",
-      "wrongStatus": "この操作を許可する状態ではありません"
+      "wrongStatus": "この操作を許可する状態ではありません",
+      "rootkit": "ルートキットチェックは、見たものを名前で表すのではなく、移動するファイルではない"
     },
     "quarantine": {
       "confirm": "隔離",
@@ -4936,6 +4946,65 @@
       "hosts": "個別のホスト",
       "inventories": "インベントリ",
       "tags": "タグ"
+    },
+    "policies": {
+      "actionError": "それでうまくいきませんでした。",
+      "add": "追加",
+      "appliesTo": "適用先",
+      "cron": "cron {{cron}} (UTC)",
+      "cronLabel": "Cron (分 時 日 月 曜日、UTC)",
+      "custom": "Cron式",
+      "daily": "毎日",
+      "dayOfMonth": "月の日",
+      "deleted": "削除",
+      "editTitle": "ポリシーの変更",
+      "enabled": "オン",
+      "everyDay": "毎日、UTCの{{time}}",
+      "everyMonth": "毎月の日 {{day}} の {{time}} UTC",
+      "everyWeek": "毎日の{{day}}の{{time}} (UTC)",
+      "excludeHelp": "これらのホストのすべてのスキャン（手動またはスケジュールされたもの、どのスキャナーでも）は、これらのパスを除外します。",
+      "frequency": "頻度",
+      "friday": "金曜日",
+      "host": "ホスト",
+      "intro": "スケジュールは、各ホストのエージェントを通じてスキャンを開始します。除外は、カバーするホストの各スキャンからパスを除外します。それらはすべてホスト、タグ、または 1 つのホストに適用でき、ホストまたはタグに対して無効にすることができます。",
+      "kindExclusion": "スキャンからパスを除外する",
+      "kindSchedule": "スケジュールされたスキャン",
+      "lastNext": "最後の/次のスキャン",
+      "leavesOut": "除外: {{paths}}",
+      "loadError": "ポリシーが読み込まれることができませんでした。",
+      "monday": "月曜日",
+      "monthly": "毎月",
+      "name": "名前",
+      "newTitle": "新しいスキャンスケジュールまたは排他",
+      "noHosts": "スキャンするホストなし",
+      "none": "スケジュールや排他はまだありません。スキャンは誰かが開始するまで実行されません。",
+      "offFor": "オフで{{name}}",
+      "runNow": "今すぐ実行",
+      "saturday": "土曜日",
+      "saveError": "ポリシーが保存できませんでした。",
+      "scheduleExcludeHelp": "このスケジュールのスキャンからも除外されます。排他ポリシーに加えて",
+      "scopeHost": "1つのホスト",
+      "scopeTag": "タグ付きホスト",
+      "started": "スキャンが開始されています",
+      "sunday": "日曜日",
+      "switchOff": "オフにする",
+      "switchOffFor": "オフにします...",
+      "switchOffTitle": "{{name}}をオフにすると、...",
+      "switchedOff": "オフに切り替えられました。",
+      "switchedOn": "再起動しました。",
+      "tag": "タグ",
+      "thursday": "木曜日",
+      "timeUtc": "UTC時間",
+      "tuesday": "火曜日",
+      "turnedOff": "オフにしました。",
+      "turnedOn": "オンにしました。",
+      "usualPlaces": "通常の場所",
+      "wednesday": "水曜日",
+      "weekday": "日",
+      "weekly": "毎週",
+      "what": "内容",
+      "windowsNote": "スキャンは各ホストのメンテナンスウィンドウを待機し、他のコマンドと同じように動作します。",
+      "withTag": "タグ: {{name}}"
     }
   },
   "assetTags": {

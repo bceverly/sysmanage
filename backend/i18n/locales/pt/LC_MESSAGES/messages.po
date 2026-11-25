@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 15:40-0500\n"
+"POT-Creation-Date: 2026-11-25 10:44-0500\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -121,7 +121,7 @@ msgstr "Usuário não encontrado."
 msgid "You do not have access to the selected account."
 msgstr "Você não tem acesso à conta selecionada."
 
-#: backend/api/asset_tags.py:59 backend/api/malware.py:118
+#: backend/api/asset_tags.py:59 backend/api/malware.py:125
 #: backend/api/cloud_backup.py:92 backend/api/time_sync_policy.py:54
 #: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:55
 #: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:92
@@ -129,8 +129,8 @@ msgstr "Você não tem acesso à conta selecionada."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:138
-#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/malware_policies.py:67 backend/api/posture.py:375
+#: backend/api/backups.py:138 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
 #, python-format
@@ -244,7 +244,7 @@ msgstr "Formato de ID de host inválido"
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
-#: backend/api/updates/report_routes.py:34
+#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
@@ -296,12 +296,12 @@ msgstr "Somente uma implantação interrompida pode ser retomada"
 msgid "This rollout has already ended"
 msgstr "Esta implantação já terminou"
 
-#: backend/api/malware.py:134
+#: backend/api/malware.py:141
 msgid "Only an administrator can change the malware rule sets"
 msgstr ""
 "Somente um administrador pode alterar os conjuntos de regras de malware"
 
-#: backend/api/malware.py:140
+#: backend/api/malware.py:147
 msgid ""
 "Malware rule sets are shared by every tenant; change them from the server "
 "scope, not from inside a tenant"
@@ -309,11 +309,11 @@ msgstr ""
 "Os conjuntos de regras de malware são compartilhados por todos os "
 "locatários; altere-os no escopo do servidor, não de dentro de um locatário"
 
-#: backend/api/malware.py:150
+#: backend/api/malware.py:157
 msgid "Invalid id"
 msgstr "ID inválido"
 
-#: backend/api/malware.py:404
+#: backend/api/malware.py:413
 msgid "No imported rule set by that name"
 msgstr "Não há nenhum conjunto de regras importado com esse nome"
 
@@ -4051,6 +4051,10 @@ msgstr "Instalação de pacote {status} no agente {hostname}"
 msgid "Failed to update package installation status: %s"
 msgstr "Falha ao atualizar status de instalação de pacotes: %s"
 
+#: backend/api/malware_policies.py:177
+msgid "The policy covers no host that can be scanned now"
+msgstr "A política não abrange nenhum host que possa ser escaneado agora"
+
 #: backend/api/posture.py:93
 msgid "Only an administrator can change the threat model"
 msgstr "Somente um administrador pode alterar o modelo de ameaças"
@@ -6386,8 +6390,8 @@ msgid "Unknown device status: %s"
 msgstr "Status de dispositivo desconhecido: %s"
 
 #: backend/services/asset_discovery_review.py:344
-#: backend/services/malware_quarantine.py:136
-#: backend/services/malware_review.py:233
+#: backend/services/malware_quarantine.py:139
+#: backend/services/malware_review.py:237
 msgid "A reason of at least 3 characters is required"
 msgstr "É necessário um motivo com pelo menos 3 caracteres"
 
@@ -6469,17 +6473,17 @@ msgstr "Perfil '%s' não contém um JSON válido"
 msgid "Profile '%s' must contain a JSON array of DSC resources"
 msgstr "O perfil '%s' deve conter um array JSON de recursos DSC"
 
-#: backend/services/malware_scan_jobs.py:144
-#: backend/services/malware_scans.py:162
-#: backend/services/malware_quarantine.py:129
+#: backend/services/malware_scan_jobs.py:152
+#: backend/services/malware_scans.py:187
+#: backend/services/malware_quarantine.py:132
 msgid "Malware detection is not available"
 msgstr "A detecção de malware não está disponível"
 
-#: backend/services/malware_scan_jobs.py:149
+#: backend/services/malware_scan_jobs.py:157
 msgid "The targets do not name any active host"
 msgstr "Os alvos não indicam nenhum host ativo"
 
-#: backend/services/malware_scan_jobs.py:153
+#: backend/services/malware_scan_jobs.py:161
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "No máximo 10000 hosts podem ser verificados em um trabalho"
 
@@ -6540,11 +6544,11 @@ msgstr "Esta política não possui uma chave de backup no OpenBAO"
 msgid "OpenBAO does not hold this policy's backup key"
 msgstr "O OpenBAO não armazena a chave de backup desta política"
 
-#: backend/services/malware_scans.py:165
+#: backend/services/malware_scans.py:190
 msgid "Choose at least one host to scan"
 msgstr "Escolha pelo menos um host para verificar"
 
-#: backend/services/malware_scans.py:168
+#: backend/services/malware_scans.py:193
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "No máximo 500 hosts podem ser verificados em uma solicitação"
 
@@ -6717,7 +6721,7 @@ msgstr "A assinatura de snapshots não está ativada"
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "Backups assinados exigem o mecanismo de backup do Professional+"
 
-#: backend/services/malware_quarantine.py:132
+#: backend/services/malware_quarantine.py:135
 msgid "Unknown action"
 msgstr "Ação desconhecida"
 
@@ -6836,6 +6840,60 @@ msgstr ""
 "O SysManage rotacionou %(count)d chave(s) de criptografia de backup conforme o agendamento. Uma exportação de chaves de emergência feita antes desta rotação não contém as chaves novas, e os backups feitos daqui em diante precisam delas.\n"
 "\n"
 "Abra Backups, depois o painel \"Criptografia\" de um host, e use \"Exportação de chaves de emergência\" para fazer uma nova exportação. Guarde-a off-line e destrua a antiga."
+
+#: backend/services/malware_policies.py:190
+msgid "Too many paths"
+msgstr "Muito mais caminhos"
+
+#: backend/services/malware_policies.py:206
+#: backend/services/malware_policies.py:212
+#, python-format
+msgid "Each path must be absolute: %s"
+msgstr "Cada caminho deve ser absoluto: %s"
+
+#: backend/services/malware_policies.py:219
+msgid "Choose all hosts, a tag or a host"
+msgstr "Escolha todos os hosts, uma tag ou um host"
+
+#: backend/services/malware_policies.py:223
+msgid "Choose the tag or host"
+msgstr "Escolha a tag ou o host"
+
+#: backend/services/malware_policies.py:232
+msgid "The schedule is not valid"
+msgstr "O agendamento não é válido"
+
+#: backend/services/malware_policies.py:240
+msgid "Give the policy a name"
+msgstr "Dê um nome à política"
+
+#: backend/services/malware_policies.py:243
+msgid "A policy is a schedule or an exclusion"
+msgstr "Uma política é um agendamento ou uma exclusão"
+
+#: backend/services/malware_policies.py:245
+msgid "A policy's kind cannot be changed"
+msgstr "O tipo de política não pode ser alterado"
+
+#: backend/services/malware_policies.py:254
+msgid "Name at least one path to leave out"
+msgstr "Defina pelo menos um caminho para ser excluído"
+
+#: backend/services/malware_policies.py:294
+msgid "Policy not found"
+msgstr "Política não encontrada"
+
+#: backend/services/malware_policies.py:331
+msgid "Switch it off for a host or a tag"
+msgstr "Desligue-a para um host ou uma tag"
+
+#: backend/services/malware_policies.py:358
+msgid "Override not found"
+msgstr "Substitua não encontrado"
+
+#: backend/services/malware_policies.py:374
+msgid "Only a schedule starts scans"
+msgstr "Apenas um agendamento inicia escaneios"
 
 #: backend/services/config_mgmt_baseline.py:286
 #, python-format
@@ -6985,12 +7043,12 @@ msgstr "Atualizado {entity_type} '{entity_name}'"
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "Excluído {entity_type} '{entity_name}'"
 
-#: backend/services/malware_review.py:66
+#: backend/services/malware_review.py:68
 #, python-format
 msgid "Unknown finding status: %s"
 msgstr "Situação de constatação desconhecida: %s"
 
-#: backend/services/malware_review.py:230
+#: backend/services/malware_review.py:234
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "Essa decisão não pode ser tomada aqui: %s"

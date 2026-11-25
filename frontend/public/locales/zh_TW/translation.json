@@ -4776,7 +4776,9 @@
     },
     "leg": {
       "feed": "規則來源",
-      "signatures": "ClamAV 病毒碼"
+      "signatures": "ClamAV 病毒碼",
+      "rootkit": "根基檢查 (chkrootkit, rkhunter)",
+      "vendor": "主機防病毒 (Microsoft Defender)"
     },
     "loadError": "無法載入惡意軟體偵測結果。",
     "reason": {
@@ -4786,14 +4788,17 @@
       "noDatabase": "沒有 ClamAV 病毒碼資料庫",
       "noRules": "沒有可用的規則集",
       "noScanner": "未安裝掃描程式",
-      "timeout": "已逾時"
+      "timeout": "已逾時",
+      "notPrivileged": "檢查器需要根權限，但代理可能沒有（更新代理套件）",
+      "notSupported": "代理過舊無法執行此操作"
     },
     "refusal": {
       "busy": "已有掃描正在執行",
       "invalidPath": "有路徑不是有效的絕對路徑",
-      "notEquipped": "代理無法掃描（沒有 ClamAV）",
+      "notEquipped": "代理無法掃描（未安裝掃描器）",
       "notFound": "找不到主機",
-      "inactive": "主機未處於作用中狀態（或已不存在）"
+      "inactive": "主機未處於作用中狀態（或已不存在）",
+      "invalidExclude": "指定路徑並非絕對路徑"
     },
     "scan": {
       "completed": "已完成",
@@ -4811,7 +4816,10 @@
       "concurrency": "同時掃描的主機數",
       "jobStarted": "{{hosts}} 台主機：{{sent}} 台正在掃描，{{waiting}} 台等待輪到",
       "pathsUnix": "Linux、BSD 和 macOS 路徑（每行一個）",
-      "pathsWindows": "Windows 路徑（每行一個）"
+      "pathsWindows": "Windows 路徑（每行一個）",
+      "excludeHelp": "此掃描中被排除在外，除了主機的排除策略。",
+      "excludeUnix": "Linux、BSD 和 macOS 的路徑要排除",
+      "excludeWindows": "Windows 路徑以排除"
     },
     "scanHosts": "掃描主機",
     "scans": {
@@ -4842,7 +4850,8 @@
       "decided": "已處置",
       "open": "開放發現",
       "scans": "掃描",
-      "rulesets": "規則集"
+      "rulesets": "規則集",
+      "policies": "計劃和排除策略"
     },
     "title": "惡意軟體",
     "decideSelected_one": "處置選取的 {{count}} 筆",
@@ -4855,7 +4864,8 @@
       "pathOccupied": "原始路徑上現在有其他內容",
       "pending": "已有要求正在等待代理處理",
       "permission": "代理無權移動此檔案",
-      "wrongStatus": "目前狀態不允許此操作"
+      "wrongStatus": "目前狀態不允許此操作",
+      "rootkit": "根基檢查會記錄它看到的內容，而非要移動的檔案"
     },
     "quarantine": {
       "confirm": "隔離",
@@ -4936,6 +4946,65 @@
       "hosts": "個別主機",
       "inventories": "清單",
       "tags": "標籤"
+    },
+    "policies": {
+      "actionError": "操作未成功。",
+      "add": "添加",
+      "appliesTo": "適用於",
+      "cron": "cron ({{cron}} (UTC))",
+      "cronLabel": "Cron (分鐘 小時 日 月 星期，UTC)",
+      "custom": "Cron 表達式",
+      "daily": "每日",
+      "dayOfMonth": "月中的特定日期",
+      "deleted": "刪除。",
+      "editTitle": "更改策略",
+      "enabled": "於",
+      "everyDay": "每天的 {{time}} 點 (UTC) ",
+      "everyMonth": "每月第 {{day}} 天的 {{time}} 點 (UTC) ",
+      "everyWeek": "每 {{day}} 點 {{time}} 點 (UTC) ",
+      "excludeHelp": "每次掃描這些主機時，無論是手動還是預定，都排除這些路徑。",
+      "frequency": "頻率",
+      "friday": "週五",
+      "host": "主機",
+      "intro": "排程透過每個主機的代理開始掃描；排除會從主機掃描中排除指定路徑。每個排除項目都可以適用於所有主機、一個標籤或特定主機，並且可以關閉或開啟主機或標籤的掃描。",
+      "kindExclusion": "從掃描中排除路徑",
+      "kindSchedule": "根據計劃進行掃描",
+      "lastNext": "上一次/下一次掃描",
+      "leavesOut": "排除： {{paths}}",
+      "loadError": "無法載入策略。",
+      "monday": "週一",
+      "monthly": "每月",
+      "name": "名稱",
+      "newTitle": "新的掃描計劃或排除策略",
+      "noHosts": "沒有主機要掃描",
+      "none": "還沒有計劃或排除策略。只有在有人開始掃描時才會執行掃描。",
+      "offFor": "關閉 {{name}}",
+      "runNow": "立即運行",
+      "saturday": "週六",
+      "saveError": "無法儲存策略。",
+      "scheduleExcludeHelp": "也排除在這個掃描計劃之外，除了主機的排除策略。",
+      "scopeHost": "單個主機",
+      "scopeTag": "具有標籤的主機",
+      "started": "掃描已啟動。",
+      "sunday": "星期日",
+      "switchOff": "關閉開關",
+      "switchOffFor": "為...關閉開關",
+      "switchOffTitle": "關閉開關 {{name}} 以便...",
+      "switchedOff": "已關閉。",
+      "switchedOn": "重新開啟。",
+      "tag": "標籤",
+      "thursday": "星期四",
+      "timeUtc": "時間（UTC）",
+      "tuesday": "星期二",
+      "turnedOff": "已關閉。",
+      "turnedOn": "已開啟。",
+      "usualPlaces": "通常位置",
+      "wednesday": "星期三",
+      "weekday": "日",
+      "weekly": "每週",
+      "what": "什麼",
+      "windowsNote": "掃描等待每個主機的維護窗口，與其他命令一樣。",
+      "withTag": "標籤：{{name}}"
     }
   },
   "assetTags": {

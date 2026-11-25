@@ -4776,7 +4776,9 @@
     },
     "leg": {
       "feed": "Fuente de reglas",
-      "signatures": "Firmas de ClamAV"
+      "signatures": "Firmas de ClamAV",
+      "rootkit": "Comprobaciones de rootkit (chkrootkit, rkhunter)",
+      "vendor": "Antivirus del host (Microsoft Defender)"
     },
     "loadError": "No se pudieron cargar los hallazgos de software malicioso.",
     "reason": {
@@ -4786,14 +4788,17 @@
       "noDatabase": "no hay base de datos de firmas de ClamAV",
       "noRules": "no había ningún conjunto de reglas disponible",
       "noScanner": "no hay ningún escáner instalado",
-      "timeout": "se agotó el tiempo de espera"
+      "timeout": "se agotó el tiempo de espera",
+      "notPrivileged": "el verificador requiere permisos de superusuario y el agente no puede ejecutarlo (actualice el paquete del agente)",
+      "notSupported": "el agente es demasiado antiguo para ejecutarlo"
     },
     "refusal": {
       "busy": "ya hay un escaneo en curso",
       "invalidPath": "una ruta no es una ruta absoluta válida",
-      "notEquipped": "el agente no puede escanear (sin ClamAV)",
+      "notEquipped": "el agente no puede escanear (no está instalado ningún escáner)",
       "notFound": "host no encontrado",
-      "inactive": "el host no está activo (o ya no existe)"
+      "inactive": "el host no está activo (o ya no existe)",
+      "invalidExclude": "una ruta para excluir no es una ruta absoluta válida"
     },
     "scan": {
       "completed": "Completado",
@@ -4811,7 +4816,10 @@
       "concurrency": "Hosts escaneando a la vez",
       "jobStarted": "{{hosts}} hosts: {{sent}} escaneando ahora, {{waiting}} esperando su turno",
       "pathsUnix": "Rutas de Linux, BSD y macOS (una por línea)",
-      "pathsWindows": "Rutas de Windows (una por línea)"
+      "pathsWindows": "Rutas de Windows (una por línea)",
+      "excludeHelp": "Excluido de este escaneo, además de lo que las políticas de exclusión de los hosts dejan fuera.",
+      "excludeUnix": "Caminos Linux, BSD y macOS para excluir",
+      "excludeWindows": "rutas de Windows para excluir"
     },
     "scanHosts": "Escanear hosts",
     "scans": {
@@ -4842,7 +4850,8 @@
       "decided": "Decididos",
       "open": "Hallazgos abiertos",
       "scans": "Escaneos",
-      "rulesets": "Conjuntos de reglas"
+      "rulesets": "Conjuntos de reglas",
+      "policies": "Horarios y exclusiones"
     },
     "title": "Software malicioso",
     "decideSelected_one": "Decidir sobre {{count}} seleccionado",
@@ -4855,7 +4864,8 @@
       "pathOccupied": "ahora hay otro elemento en la ruta original",
       "pending": "ya hay una solicitud esperando al agente",
       "permission": "el agente no tiene permiso para moverlo",
-      "wrongStatus": "su estado actual no lo permite"
+      "wrongStatus": "su estado actual no lo permite",
+      "rootkit": "un chequeo de kit de raíz nombra lo que vio, no un archivo para mover"
     },
     "quarantine": {
       "confirm": "Poner en cuarentena",
@@ -4936,6 +4946,65 @@
       "hosts": "Hosts individuales",
       "inventories": "Inventarios de hosts",
       "tags": "Etiquetas"
+    },
+    "policies": {
+      "actionError": "Eso no funcionó.",
+      "add": "Agregar",
+      "appliesTo": "Se aplica a",
+      "cron": "Expresión cron {{cron}} (UTC)",
+      "cronLabel": "Cron (minuto hora día mes día de la semana, UTC)",
+      "custom": "Expresión Cron",
+      "daily": "Diario",
+      "dayOfMonth": "Día del mes",
+      "deleted": "Eliminado.",
+      "editTitle": "Cambiar política",
+      "enabled": "En",
+      "everyDay": "Cada día a las {{time}} UTC",
+      "everyMonth": "Día {{day}} de cada mes a las {{time}} UTC",
+      "everyWeek": "Cada {{day}} a las {{time}} UTC",
+      "excludeHelp": "Cada escaneo de estos hosts, manual o programado y por cada escáner, excluye estos caminos.",
+      "frequency": "¿Con qué frecuencia?",
+      "friday": "Viernes",
+      "host": "Host",
+      "intro": "Los horarios inician escaneos a través del agente de cada host; las exclusiones excluyen caminos de cada escaneo de los hosts que cubren. Cada uno puede ser para todos los hosts, una etiqueta o un host, y se puede desactivar para un host o una etiqueta.",
+      "kindExclusion": "Excluir caminos de los escaneos",
+      "kindSchedule": "Escanear según un horario",
+      "lastNext": "Último/próximo escaneo",
+      "leavesOut": "Excluye: {{paths}}",
+      "loadError": "Las políticas no pudieron cargarse.",
+      "monday": "Lunes",
+      "monthly": "Mensual",
+      "name": "Nombre",
+      "newTitle": "Nuevo horario de escaneo o exclusión",
+      "noHosts": "No hay host para escanear",
+      "none": "No hay horarios ni exclusiones aún. Los escaneos solo se ejecutan cuando alguien inicia uno.",
+      "offFor": "desactivado para {{name}}",
+      "runNow": "Ejecutar ahora",
+      "saturday": "Sábado",
+      "saveError": "La política no pudo ser guardada.",
+      "scheduleExcludeHelp": "También se excluyen de los escaneos de este horario, además de las políticas de exclusión.",
+      "scopeHost": "Un host",
+      "scopeTag": "Hosts con una etiqueta",
+      "started": "Los escaneos han comenzado.",
+      "sunday": "domingo",
+      "switchOff": "Apagar",
+      "switchOffFor": "Apagar para...",
+      "switchOffTitle": "Desactivar el interruptor '{{name}}' para...",
+      "switchedOff": "Desactivado.",
+      "switchedOn": "Reactivado.",
+      "tag": "Etiqueta",
+      "thursday": "jueves",
+      "timeUtc": "Hora (UTC)",
+      "tuesday": "martes",
+      "turnedOff": "Desactivado.",
+      "turnedOn": "Encendido.",
+      "usualPlaces": "los lugares habituales",
+      "wednesday": "miércoles",
+      "weekday": "Día",
+      "weekly": "Semanal",
+      "what": "¿Qué?",
+      "windowsNote": "Los escaneos esperan por el mantenimiento de cada host, al igual que cualquier otro comando.",
+      "withTag": "Etiqueta: {{name}}"
     }
   },
   "assetTags": {

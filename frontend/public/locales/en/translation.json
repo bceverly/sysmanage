@@ -4776,7 +4776,9 @@
     },
     "leg": {
       "feed": "Rule feed",
-      "signatures": "ClamAV signatures"
+      "signatures": "ClamAV signatures",
+      "rootkit": "Rootkit checks (chkrootkit, rkhunter)",
+      "vendor": "Host antivirus (Microsoft Defender)"
     },
     "loadError": "Malware findings could not be loaded.",
     "reason": {
@@ -4786,14 +4788,17 @@
       "noDatabase": "no ClamAV signature database",
       "noRules": "no rule set was available",
       "noScanner": "no scanner installed",
-      "timeout": "timed out"
+      "timeout": "timed out",
+      "notPrivileged": "the checker needs root and the agent may not run it (update the agent package)",
+      "notSupported": "the agent is too old to run it"
     },
     "refusal": {
       "busy": "a scan is already running",
       "invalidPath": "a path is not a valid absolute path",
-      "notEquipped": "the agent cannot scan (no ClamAV)",
+      "notEquipped": "the agent cannot scan (no scanner installed)",
       "notFound": "host not found",
-      "inactive": "the host is not active (or no longer exists)"
+      "inactive": "the host is not active (or no longer exists)",
+      "invalidExclude": "a path to leave out is not a valid absolute path"
     },
     "scan": {
       "completed": "Completed",
@@ -4811,7 +4816,10 @@
       "concurrency": "Hosts scanning at once",
       "jobStarted": "{{hosts}} hosts: {{sent}} scanning now, {{waiting}} waiting their turn",
       "pathsUnix": "Linux, BSD and macOS paths (one per line)",
-      "pathsWindows": "Windows paths (one per line)"
+      "pathsWindows": "Windows paths (one per line)",
+      "excludeHelp": "Left out of this scan, on top of what the hosts' exclusion policies leave out.",
+      "excludeUnix": "Linux, BSD and macOS paths to leave out",
+      "excludeWindows": "Windows paths to leave out"
     },
     "scanHosts": "Scan hosts",
     "scans": {
@@ -4842,7 +4850,8 @@
       "decided": "Decided",
       "open": "Open findings",
       "scans": "Scans",
-      "rulesets": "Rule sets"
+      "rulesets": "Rule sets",
+      "policies": "Schedules and exclusions"
     },
     "title": "Malware",
     "decideSelected_one": "Decide {{count}} selected",
@@ -4855,7 +4864,8 @@
       "pathOccupied": "something else is now at the original path",
       "pending": "a request is already waiting for the agent",
       "permission": "the agent is not allowed to move it",
-      "wrongStatus": "not in a state that allows this"
+      "wrongStatus": "not in a state that allows this",
+      "rootkit": "a rootkit check names what it saw, not a file to move"
     },
     "quarantine": {
       "confirm": "Quarantine",
@@ -4936,6 +4946,65 @@
       "hosts": "Individual hosts",
       "inventories": "Inventories",
       "tags": "Tags"
+    },
+    "policies": {
+      "actionError": "That did not work.",
+      "add": "Add",
+      "appliesTo": "Applies to",
+      "cron": "Cron {{cron}} (UTC)",
+      "cronLabel": "Cron (minute hour day month weekday, UTC)",
+      "custom": "Cron expression",
+      "daily": "Daily",
+      "dayOfMonth": "Day of month",
+      "deleted": "Deleted.",
+      "editTitle": "Change policy",
+      "enabled": "On",
+      "everyDay": "Every day at {{time}} UTC",
+      "everyMonth": "Day {{day}} of every month at {{time}} UTC",
+      "everyWeek": "Every {{day}} at {{time}} UTC",
+      "excludeHelp": "Every scan of these hosts, by hand or scheduled and by every scanner, leaves these paths out.",
+      "frequency": "How often",
+      "friday": "Friday",
+      "host": "Host",
+      "intro": "Schedules start scans through each host's agent; exclusions leave paths out of every scan of the hosts they cover. Each can be for all hosts, a tag or one host, and switched off for a host or tag.",
+      "kindExclusion": "Leave paths out of scans",
+      "kindSchedule": "Scan on a schedule",
+      "lastNext": "Last / next scan",
+      "leavesOut": "Leaves out: {{paths}}",
+      "loadError": "The policies could not be loaded.",
+      "monday": "Monday",
+      "monthly": "Monthly",
+      "name": "Name",
+      "newTitle": "New scan schedule or exclusion",
+      "noHosts": "No host to scan",
+      "none": "No schedules or exclusions yet. Scans run only when someone starts one.",
+      "offFor": "off for {{name}}",
+      "runNow": "Run now",
+      "saturday": "Saturday",
+      "saveError": "The policy could not be saved.",
+      "scheduleExcludeHelp": "Also left out of this schedule's scans, on top of the exclusion policies.",
+      "scopeHost": "One host",
+      "scopeTag": "Hosts with a tag",
+      "started": "Scans started.",
+      "sunday": "Sunday",
+      "switchOff": "Switch off",
+      "switchOffFor": "Switch off for...",
+      "switchOffTitle": "Switch \"{{name}}\" off for...",
+      "switchedOff": "Switched off.",
+      "switchedOn": "Switched back on.",
+      "tag": "Tag",
+      "thursday": "Thursday",
+      "timeUtc": "Time (UTC)",
+      "tuesday": "Tuesday",
+      "turnedOff": "Turned off.",
+      "turnedOn": "Turned on.",
+      "usualPlaces": "the usual places",
+      "wednesday": "Wednesday",
+      "weekday": "Day",
+      "weekly": "Weekly",
+      "what": "What",
+      "windowsNote": "Scans wait for each host's maintenance window, like any other command.",
+      "withTag": "Tag: {{name}}"
     }
   },
   "assetTags": {

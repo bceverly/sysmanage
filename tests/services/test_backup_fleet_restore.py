@@ -8,6 +8,7 @@ restore asked of many hosts, in waves, each host from its own snapshot."""
 # pylint: disable=redefined-outer-name,unused-argument,protected-access
 
 import importlib.util
+import json
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -157,6 +158,28 @@ def test_a_host_that_cannot_take_it_is_recorded_and_the_others_go_on(
     assert out["counts"] == {"running": 2, "skipped": 1}
 
 
+def test_a_host_refused_as_it_is_released_takes_no_slot(session, sent, eng):
+    # Lab, 2026-11-25: with concurrency 1 a refused host used the tick's one
+    # slot, so the next host waited a whole tick (three refusals, three ticks).
+    hosts = _fleet(session)
+    for host in hosts[:2]:
+        host.agent_capabilities = None  # not equipped: refused when released
+    session.commit()
+    out = api.create_fleet_restore(_body(hosts, concurrency=1), session, ALICE)
+    assert len(_restores(sent)) == 1  # the third host, in the same tick
+    assert out["counts"] == {"running": 1, "skipped": 2}
+
+
+def test_hosts_are_released_in_the_order_they_were_listed(session, sent, eng):
+    # Targets were ordered by their random ids (lab, 2026-11-25).
+    hosts = _fleet(session, n=5)
+    order = [hosts[i] for i in (3, 0, 4, 1, 2)]
+    out = api.create_fleet_restore(_body(order, concurrency=1), session, ALICE)
+    assert [t["host_id"] for t in out["targets"]] == [str(h.id) for h in order]
+    (first,) = _restores(sent)
+    assert first[0] == str(order[0].id)
+
+
 @pytest.mark.asyncio
 async def test_an_in_place_fleet_restore_waits_for_a_second_person(
     session, sent, eng, monkeypatch
@@ -171,12 +194,27 @@ async def test_an_in_place_fleet_restore_waits_for_a_second_person(
         session.query(models.BackupRestoreRequest).filter_by(kind="fleet_restore").one()
     )
     rid = str(request.id)
+    # The approver sees which files every host would have overwritten.
+    assert json.loads(request.body)["include"] == ["/etc/nginx"]
     assert await _status(lambda: eyes_api.approve_restore(rid, session, ALICE)) == 403
     eyes_api.approve_restore(rid, session, BOB)
     assert len(_restores(sent)) == 2
     assert all(c[2]["in_place"] for c in _restores(sent))
     job = api.get_fleet_restore(out["id"], session, ALICE)
     assert job["status"] == "running" and job["approved_by"] == BOB.userid
+
+
+def test_a_fleet_restore_into_staging_does_not_wait_for_a_second_person(
+    session, sent, eng, monkeypatch
+):
+    # Four-eyes holds a restore over existing files, not one into staging;
+    # the engine held every fleet restore while the setting was on (lab,
+    # 2026-11-25).
+    monkeypatch.setattr(four_eyes, "enabled", lambda: True)
+    hosts = _fleet(session)
+    out = api.create_fleet_restore(_body(hosts), session, ALICE)
+    assert out["status"] == "running" and len(_restores(sent)) == 2
+    assert session.query(models.BackupRestoreRequest).count() == 0
 
 
 def test_a_rejected_fleet_restore_never_runs(session, sent, eng, monkeypatch):
@@ -197,6 +235,28 @@ def test_a_rejected_fleet_restore_never_runs(session, sent, eng, monkeypatch):
     fleet.tick(session)
     job = api.get_fleet_restore(out["id"], session, ALICE)
     assert job["status"] == "rejected" and _restores(sent) == []
+
+
+def test_a_withdrawn_fleet_restore_is_canceled_not_rejected(
+    session, sent, eng, monkeypatch
+):
+    # The requester calling it off read "rejected" (lab, 2026-11-25).
+    monkeypatch.setattr(four_eyes, "enabled", lambda: True)
+    hosts = _fleet(session)
+    out = api.create_fleet_restore(
+        _body(hosts, in_place=True, acknowledge_in_place=True), session, ALICE
+    )
+    rid = str(
+        session.query(models.BackupRestoreRequest)
+        .filter_by(kind="fleet_restore")
+        .one()
+        .id
+    )
+    eyes_api.withdraw_restore(rid, session, ALICE)
+    fleet.tick(session)
+    job = api.get_fleet_restore(out["id"], session, ALICE)
+    assert job["status"] == "canceled" and _restores(sent) == []
+    assert {t["status"] for t in job["targets"]} == {"canceled"}
 
 
 def test_cancel_stops_the_waiting_hosts_and_lets_running_ones_finish(

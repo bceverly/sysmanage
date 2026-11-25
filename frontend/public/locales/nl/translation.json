@@ -4776,7 +4776,9 @@
     },
     "leg": {
       "feed": "Regelfeed",
-      "signatures": "ClamAV-signatures"
+      "signatures": "ClamAV-signatures",
+      "rootkit": "Rootkit-controles (chkrootkit, rkhunter)",
+      "vendor": "Antivirus voor de host (Microsoft Defender)"
     },
     "loadError": "Malwarebevindingen konden niet worden geladen.",
     "reason": {
@@ -4786,14 +4788,17 @@
       "noDatabase": "geen ClamAV-signaturedatabase",
       "noRules": "er was geen regelset beschikbaar",
       "noScanner": "geen scanner geïnstalleerd",
-      "timeout": "time-out"
+      "timeout": "time-out",
+      "notPrivileged": "de controleur heeft root-toegang nodig en de agent mag het niet uitvoeren (het agentpakket bijwerken)",
+      "notSupported": "de agent is te oud om het uit te voeren"
     },
     "refusal": {
       "busy": "er wordt al een scan uitgevoerd",
       "invalidPath": "een pad is geen geldig absoluut pad",
-      "notEquipped": "de agent kan niet scannen (geen ClamAV)",
+      "notEquipped": "de agent kan geen scan uitvoeren (geen scanner geïnstalleerd)",
       "notFound": "host niet gevonden",
-      "inactive": "de host is niet actief (of bestaat niet meer)"
+      "inactive": "de host is niet actief (of bestaat niet meer)",
+      "invalidExclude": "Een pad om uit te sluiten is geen geldig absoluut pad"
     },
     "scan": {
       "completed": "Voltooid",
@@ -4811,7 +4816,10 @@
       "concurrency": "Hosts die tegelijk scannen",
       "jobStarted": "{{hosts}} hosts: {{sent}} worden nu gescand, {{waiting}} wachten op hun beurt",
       "pathsUnix": "Paden voor Linux, BSD en macOS (één per regel)",
-      "pathsWindows": "Paden voor Windows (één per regel)"
+      "pathsWindows": "Paden voor Windows (één per regel)",
+      "excludeHelp": "Uitgesloten van deze scan, bovenop wat de hosts' uitsluitingsbeleidsregels laten buiten.",
+      "excludeUnix": "Linux, BSD en macOS paden om buiten te laten",
+      "excludeWindows": "Windows paden om uit te sluiten"
     },
     "scanHosts": "Hosts scannen",
     "scans": {
@@ -4842,7 +4850,8 @@
       "decided": "Beslist",
       "open": "Openstaande bevindingen",
       "scans": "Scans",
-      "rulesets": "Regelsets"
+      "rulesets": "Regelsets",
+      "policies": "Schema's en uitsluitingen"
     },
     "title": "Malware",
     "decideSelected_one": "Beslissen over {{count}} geselecteerde",
@@ -4855,7 +4864,8 @@
       "pathOccupied": "op het oorspronkelijke pad staat nu iets anders",
       "pending": "er wacht al een verzoek op de agent",
       "permission": "de agent mag het niet verplaatsen",
-      "wrongStatus": "de huidige status staat dit niet toe"
+      "wrongStatus": "de huidige status staat dit niet toe",
+      "rootkit": "een rootkit-controle noemt wat het zag, niet een bestand om te verplaatsen"
     },
     "quarantine": {
       "confirm": "In quarantaine plaatsen",
@@ -4936,6 +4946,65 @@
       "hosts": "Afzonderlijke hosts",
       "inventories": "Inventarissen",
       "tags": "Labels"
+    },
+    "policies": {
+      "actionError": "Dat heeft niet gewerkt.",
+      "add": "Toevoegen",
+      "appliesTo": "Van toepassing op",
+      "cron": "Cron-expressie {{cron}} (UTC)",
+      "cronLabel": "Cron (minuut uur dag maand weekdag, UTC)",
+      "custom": "Cron-uitdrukking",
+      "daily": "Dagelijks",
+      "dayOfMonth": "Dag van de maand",
+      "deleted": "Verwijderd.",
+      "editTitle": "Beleid wijzigen",
+      "enabled": "Op",
+      "everyDay": "Elke dag om {{time}} UTC",
+      "everyMonth": "Dag {{day}} van elke maand om {{time}} UTC",
+      "everyWeek": "Elk {{day}} om {{time}} UTC",
+      "excludeHelp": "Elke scan van deze hosts, handmatig of gepland en door elke scanner, laat deze paden buiten.",
+      "frequency": "Hoe vaak",
+      "friday": "Vrijdag",
+      "host": "Host",
+      "intro": "Schema's starten scans via de agent van elke host; uitsluitingen laten paden buiten elke scan van de hosts die ze dekken. Elk kan voor alle hosts, een tag of één host zijn, en uitgeschakeld worden voor een host of tag.",
+      "kindExclusion": "Paden buiten scans laten",
+      "kindSchedule": "Scan op schema",
+      "lastNext": "Laatste / volgende scan",
+      "leavesOut": "Laat buiten: {{paths}}",
+      "loadError": "De beleidsregels konden niet worden geladen.",
+      "monday": "Maandag",
+      "monthly": "Maandelijks",
+      "name": "Naam",
+      "newTitle": "Nieuwe scanschema of uitsluiting",
+      "noHosts": "Geen host om te scannen",
+      "none": "Geen schema's of uitsluitingen tot nu toe. Scans worden alleen uitgevoerd wanneer iemand er een start.",
+      "offFor": "uit voor {{name}}",
+      "runNow": "Nu uitvoeren",
+      "saturday": "Zaterdag",
+      "saveError": "Het beleid kon niet worden opgeslagen.",
+      "scheduleExcludeHelp": "Ook uitgesloten van deze scans, bovenop de uitsluitingsbeleidsregels.",
+      "scopeHost": "Eén host",
+      "scopeTag": "Hosts met een tag",
+      "started": "Scans zijn gestart.",
+      "sunday": "Zondag",
+      "switchOff": "Uitschakelen",
+      "switchOffFor": "Uitschakelen voor...",
+      "switchOffTitle": "Schakel '{{name}}' uit voor...",
+      "switchedOff": "Uitgeschakeld.",
+      "switchedOn": "Opnieuw ingeschakeld.",
+      "tag": "Label",
+      "thursday": "Donderdag",
+      "timeUtc": "Tijd (UTC)",
+      "tuesday": "Dinsdag",
+      "turnedOff": "Uitschakelen.",
+      "turnedOn": "Ingeschakeld.",
+      "usualPlaces": "de gebruikelijke plaatsen",
+      "wednesday": "Woensdag",
+      "weekday": "Dag",
+      "weekly": "Weekelijks",
+      "what": "Wat",
+      "windowsNote": "Scans wachten op het onderhoudsvenster van elke host, net als elk ander commando.",
+      "withTag": "Label: {{name}}"
     }
   },
   "assetTags": {

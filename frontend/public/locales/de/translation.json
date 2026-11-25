@@ -4776,7 +4776,9 @@
     },
     "leg": {
       "feed": "Regel-Feed",
-      "signatures": "ClamAV-Signaturen"
+      "signatures": "ClamAV-Signaturen",
+      "rootkit": "Wurzelkit-Überprüfungen (chkrootkit, rkhunter)",
+      "vendor": "Antiviren-Software des Hosts (Microsoft Defender)"
     },
     "loadError": "Schadsoftware-Befunde konnten nicht geladen werden.",
     "reason": {
@@ -4786,14 +4788,17 @@
       "noDatabase": "keine ClamAV-Signaturdatenbank",
       "noRules": "kein Regelsatz verfügbar",
       "noScanner": "kein Scanner installiert",
-      "timeout": "Zeitüberschreitung"
+      "timeout": "Zeitüberschreitung",
+      "notPrivileged": "Der Prüfer benötigt Root-Rechte und der Agent darf sie nicht verwenden (aktualisiere das Agenten-Paket)",
+      "notSupported": "Der Agent ist zu alt, um es auszuführen"
     },
     "refusal": {
       "busy": "ein Scan läuft bereits",
       "invalidPath": "ein Pfad ist kein gültiger absoluter Pfad",
-      "notEquipped": "der Agent kann nicht scannen (kein ClamAV)",
+      "notEquipped": "Der Agent kann nicht scannen (kein Scanner installiert)",
       "notFound": "Host nicht gefunden",
-      "inactive": "der Host ist nicht aktiv (oder existiert nicht mehr)"
+      "inactive": "der Host ist nicht aktiv (oder existiert nicht mehr)",
+      "invalidExclude": "Ein Pfad zum Ausschließen ist kein gültiger absoluter Pfad"
     },
     "scan": {
       "completed": "Abgeschlossen",
@@ -4811,7 +4816,10 @@
       "concurrency": "Gleichzeitig scannende Hosts",
       "jobStarted": "{{hosts}} Hosts: {{sent}} werden jetzt gescannt, {{waiting}} warten, bis sie an der Reihe sind",
       "pathsUnix": "Pfade für Linux, BSD und macOS (einer pro Zeile)",
-      "pathsWindows": "Pfade für Windows (einer pro Zeile)"
+      "pathsWindows": "Pfade für Windows (einer pro Zeile)",
+      "excludeHelp": "Aus dieser Überprüfung ausgeschlossen, zusätzlich zu dem, was die Ausschlussrichtlinien der Hosts auslassen.",
+      "excludeUnix": "Ausnahmepfade für Linux, BSD und macOS:",
+      "excludeWindows": "Windows-Pfade auszuschließen"
     },
     "scanHosts": "Hosts scannen",
     "scans": {
@@ -4842,7 +4850,8 @@
       "decided": "Entschieden",
       "open": "Offene Befunde",
       "scans": "Scanvorgänge",
-      "rulesets": "Regelsätze"
+      "rulesets": "Regelsätze",
+      "policies": "Planungen und Ausschlüsse"
     },
     "title": "Schadsoftware",
     "decideSelected_one": "Über {{count}} ausgewählten entscheiden",
@@ -4855,7 +4864,8 @@
       "pathOccupied": "am ursprünglichen Pfad befindet sich jetzt etwas anderes",
       "pending": "eine Anforderung wartet bereits auf den Agenten",
       "permission": "der Agent darf sie nicht verschieben",
-      "wrongStatus": "nicht in einem Zustand, der dies zulässt"
+      "wrongStatus": "nicht in einem Zustand, der dies zulässt",
+      "rootkit": "Ein Rootkit-Scan nennt, was er gesehen hat, nicht eine Datei zu verschieben"
     },
     "quarantine": {
       "confirm": "In Quarantäne verschieben",
@@ -4936,6 +4946,65 @@
       "hosts": "Einzelne Hosts",
       "inventories": "Inventare",
       "tags": "Tags"
+    },
+    "policies": {
+      "actionError": "Das hat nicht funktioniert.",
+      "add": "Hinzufügen",
+      "appliesTo": "Gilt für",
+      "cron": "Cron-Job {{cron}} (UTC)",
+      "cronLabel": "Cron (Minute Uhr Tag Monat Wochentag, UTC)",
+      "custom": "Cron-Ausdruck",
+      "daily": "Täglich",
+      "dayOfMonth": "Tag des Monats",
+      "deleted": "Gelöscht.",
+      "editTitle": "Richtlinie ändern",
+      "enabled": "Auf",
+      "everyDay": "Jeden Tag um {{time}} UTC",
+      "everyMonth": "Jeder Tag {{day}} des Monats um {{time}} UTC",
+      "everyWeek": "Jeder {{day}} bei {{time}} UTC",
+      "excludeHelp": "Jeder Scan dieser Hosts, manuell oder geplant und von jedem Scanner, lässt diese Pfade aus.",
+      "frequency": "Wie oft",
+      "friday": "Freitag",
+      "host": "Host",
+      "intro": "Planungen starten Scans über jeden Host’s Agent; Ausschlüsse lassen Pfade in jeder Scan-Durchführung der von ihnen abgedeckten Hosts aus. Jeder kann für alle Hosts, ein Tag oder einen Host gelten und für einen Host oder ein Tag deaktiviert werden.",
+      "kindExclusion": "Pfade aus Scans ausschließen",
+      "kindSchedule": "Planmäßige Überprüfung",
+      "lastNext": "Letzte/n nächste(n) Überprüfung(en)",
+      "leavesOut": "Lässt aus: {{paths}}",
+      "loadError": "Die Richtlinien konnten nicht geladen werden.",
+      "monday": "Montag",
+      "monthly": "monatlich",
+      "name": "Name",
+      "newTitle": "Neue Scanschedule oder Ausschluss",
+      "noHosts": "Kein Host zum Scannen",
+      "none": "Keine Zeitpläne oder Ausschlüsse vorhanden. Scans werden nur gestartet, wenn jemand einen startet.",
+      "offFor": "aus für {{name}}",
+      "runNow": "Jetzt ausführen",
+      "saturday": "Samstag",
+      "saveError": "Die Richtlinie konnte nicht gespeichert werden.",
+      "scheduleExcludeHelp": "Auch aus den Scans dieses Zeitplans ausgeschlossen, zusätzlich zu den Ausschlussrichtlinien.",
+      "scopeHost": "Ein Host",
+      "scopeTag": "Hosts mit einem Tag",
+      "started": "Scans begonnen.",
+      "sunday": "Sonntag",
+      "switchOff": "Aus schalten",
+      "switchOffFor": "Aus schalten für...",
+      "switchOffTitle": "Schalter \"{{name}}\" aus für...",
+      "switchedOff": "Ausgeschaltet.",
+      "switchedOn": "Zurückgeschaltet.",
+      "tag": "Tag",
+      "thursday": "Donnerstag",
+      "timeUtc": "Zeit (UTC)",
+      "tuesday": "Dienstag",
+      "turnedOff": "Ausgeschaltet.",
+      "turnedOn": "Eingeschaltet.",
+      "usualPlaces": "die üblichen Orte",
+      "wednesday": "Mittwoch",
+      "weekday": "Tag",
+      "weekly": "Wöchentlich",
+      "what": "Was",
+      "windowsNote": "Scans warten auf die Wartungsfenster jedes Hosts, genau wie jeder andere Befehl.",
+      "withTag": "Mit Tag: {{name}}"
     }
   },
   "assetTags": {

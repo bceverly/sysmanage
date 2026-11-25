@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 15:40-0500\n"
+"POT-Creation-Date: 2026-11-25 10:44-0500\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -117,7 +117,7 @@ msgstr "사용자를 찾을 수 없습니다."
 msgid "You do not have access to the selected account."
 msgstr "선택한 계정에 액세스 권한이 없습니다."
 
-#: backend/api/asset_tags.py:59 backend/api/malware.py:118
+#: backend/api/asset_tags.py:59 backend/api/malware.py:125
 #: backend/api/cloud_backup.py:92 backend/api/time_sync_policy.py:54
 #: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:55
 #: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:92
@@ -125,8 +125,8 @@ msgstr "선택한 계정에 액세스 권한이 없습니다."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:138
-#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/malware_policies.py:67 backend/api/posture.py:375
+#: backend/api/backups.py:138 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
 #, python-format
@@ -240,7 +240,7 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
-#: backend/api/updates/report_routes.py:34
+#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
@@ -292,21 +292,21 @@ msgstr "중지된 롤아웃만 재개할 수 있습니다"
 msgid "This rollout has already ended"
 msgstr "이 롤아웃은 이미 종료되었습니다"
 
-#: backend/api/malware.py:134
+#: backend/api/malware.py:141
 msgid "Only an administrator can change the malware rule sets"
 msgstr "관리자만 맬웨어 규칙 세트를 변경할 수 있습니다"
 
-#: backend/api/malware.py:140
+#: backend/api/malware.py:147
 msgid ""
 "Malware rule sets are shared by every tenant; change them from the server "
 "scope, not from inside a tenant"
 msgstr "맬웨어 규칙 세트는 모든 테넌트가 공유합니다. 테넌트 내부가 아니라 서버 범위에서 변경하십시오"
 
-#: backend/api/malware.py:150
+#: backend/api/malware.py:157
 msgid "Invalid id"
 msgstr "잘못된 ID"
 
-#: backend/api/malware.py:404
+#: backend/api/malware.py:413
 msgid "No imported rule set by that name"
 msgstr "해당 이름의 가져온 규칙 세트가 없습니다"
 
@@ -3879,6 +3879,10 @@ msgstr "Agent {hostname}의 패키지 설치 상태: {status}"
 msgid "Failed to update package installation status: %s"
 msgstr "패키지 설치 상태를 업데이트하는 데 실패했습니다: %s"
 
+#: backend/api/malware_policies.py:177
+msgid "The policy covers no host that can be scanned now"
+msgstr "현재 스캔 가능한 호스트는 정책으로 커버되지 않습니다."
+
 #: backend/api/posture.py:93
 msgid "Only an administrator can change the threat model"
 msgstr "관리자만 위협 모델을 변경할 수 있습니다"
@@ -6079,8 +6083,8 @@ msgid "Unknown device status: %s"
 msgstr "알 수 없는 장치 상태: %s"
 
 #: backend/services/asset_discovery_review.py:344
-#: backend/services/malware_quarantine.py:136
-#: backend/services/malware_review.py:233
+#: backend/services/malware_quarantine.py:139
+#: backend/services/malware_review.py:237
 msgid "A reason of at least 3 characters is required"
 msgstr "3자 이상의 사유가 필요합니다"
 
@@ -6160,17 +6164,17 @@ msgstr "%s 프로필은 유효한 JSON을 포함하지 않습니다."
 msgid "Profile '%s' must contain a JSON array of DSC resources"
 msgstr "%s 프로필은 DSC 리소스의 JSON 배열을 포함해야 합니다."
 
-#: backend/services/malware_scan_jobs.py:144
-#: backend/services/malware_scans.py:162
-#: backend/services/malware_quarantine.py:129
+#: backend/services/malware_scan_jobs.py:152
+#: backend/services/malware_scans.py:187
+#: backend/services/malware_quarantine.py:132
 msgid "Malware detection is not available"
 msgstr "맬웨어 탐지를 사용할 수 없습니다"
 
-#: backend/services/malware_scan_jobs.py:149
+#: backend/services/malware_scan_jobs.py:157
 msgid "The targets do not name any active host"
 msgstr "대상에 활성 호스트가 없습니다"
 
-#: backend/services/malware_scan_jobs.py:153
+#: backend/services/malware_scan_jobs.py:161
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "하나의 작업에서 최대 10000개 호스트를 검사할 수 있습니다"
 
@@ -6225,11 +6229,11 @@ msgstr "이 정책은 OpenBAO에 백업 키가 없습니다."
 msgid "OpenBAO does not hold this policy's backup key"
 msgstr "OpenBAO는 이 정책의 백업 키를 저장하지 않습니다."
 
-#: backend/services/malware_scans.py:165
+#: backend/services/malware_scans.py:190
 msgid "Choose at least one host to scan"
 msgstr "스캔할 호스트를 하나 이상 선택하세요"
 
-#: backend/services/malware_scans.py:168
+#: backend/services/malware_scans.py:193
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "한 번의 요청으로 최대 500개의 호스트를 스캔할 수 있습니다"
 
@@ -6393,7 +6397,7 @@ msgstr "스냅샷 서명이 켜져 있지 않습니다"
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "서명된 백업에는 Professional+ 백업 엔진이 필요합니다"
 
-#: backend/services/malware_quarantine.py:132
+#: backend/services/malware_quarantine.py:135
 msgid "Unknown action"
 msgstr "알 수 없는 작업"
 
@@ -6501,6 +6505,60 @@ msgstr ""
 "SysManage가 일정에 따라 백업 암호화 키 %(count)d개를 순환했습니다. 이번 순환 전에 만든 비상용 키 내보내기에는 새 키가 없으며, 지금부터 만드는 백업에는 그 키가 필요합니다.\n"
 "\n"
 "백업을(를) 열고 호스트의 \"암호화\" 패널에서 \"비상용 키 내보내기\"로 새로 내보내세요. 오프라인으로 보관하고 이전 것은 폐기하세요."
+
+#: backend/services/malware_policies.py:190
+msgid "Too many paths"
+msgstr "경로가 너무 많습니다."
+
+#: backend/services/malware_policies.py:206
+#: backend/services/malware_policies.py:212
+#, python-format
+msgid "Each path must be absolute: %s"
+msgstr "경로는 절대 경로여야 합니다: %s"
+
+#: backend/services/malware_policies.py:219
+msgid "Choose all hosts, a tag or a host"
+msgstr "모든 호스트, 태그 또는 호스트를 선택하세요."
+
+#: backend/services/malware_policies.py:223
+msgid "Choose the tag or host"
+msgstr "태그 또는 호스트를 선택하세요."
+
+#: backend/services/malware_policies.py:232
+msgid "The schedule is not valid"
+msgstr "스케줄이 유효하지 않습니다."
+
+#: backend/services/malware_policies.py:240
+msgid "Give the policy a name"
+msgstr "정책에 이름을 지정하세요."
+
+#: backend/services/malware_policies.py:243
+msgid "A policy is a schedule or an exclusion"
+msgstr "정책은 스케줄 또는 배제입니다."
+
+#: backend/services/malware_policies.py:245
+msgid "A policy's kind cannot be changed"
+msgstr "정책의 종류는 변경할 수 없습니다."
+
+#: backend/services/malware_policies.py:254
+msgid "Name at least one path to leave out"
+msgstr "제외할 경로 중 하나 이상을 지정하세요."
+
+#: backend/services/malware_policies.py:294
+msgid "Policy not found"
+msgstr "정책이 발견되지 않았습니다."
+
+#: backend/services/malware_policies.py:331
+msgid "Switch it off for a host or a tag"
+msgstr "호스트 또는 태그에 대해 비활성화하세요."
+
+#: backend/services/malware_policies.py:358
+msgid "Override not found"
+msgstr "찾지 못함이 무시되었습니다."
+
+#: backend/services/malware_policies.py:374
+msgid "Only a schedule starts scans"
+msgstr "스케줄만 스캔을 시작합니다."
 
 #: backend/services/config_mgmt_baseline.py:286
 #, python-format
@@ -6632,12 +6690,12 @@ msgstr "{entity_type} '{entity_name}' 업데이트 완료"
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' 삭제됨"
 
-#: backend/services/malware_review.py:66
+#: backend/services/malware_review.py:68
 #, python-format
 msgid "Unknown finding status: %s"
 msgstr "알 수 없는 발견 사항 상태: %s"
 
-#: backend/services/malware_review.py:230
+#: backend/services/malware_review.py:234
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "여기서는 해당 결정을 내릴 수 없습니다: %s"

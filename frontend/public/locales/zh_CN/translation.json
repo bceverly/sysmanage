@@ -4776,7 +4776,9 @@
     },
     "leg": {
       "feed": "规则源",
-      "signatures": "ClamAV 特征码"
+      "signatures": "ClamAV 特征码",
+      "rootkit": "根克检查 (chkrootkit, rkhunter)",
+      "vendor": "主机防病毒 (Microsoft Defender)"
     },
     "loadError": "无法加载恶意软件检测结果。",
     "reason": {
@@ -4786,14 +4788,17 @@
       "noDatabase": "没有 ClamAV 特征库",
       "noRules": "没有可用的规则集",
       "noScanner": "未安装扫描程序",
-      "timeout": "已超时"
+      "timeout": "已超时",
+      "notPrivileged": "检查器需要根权限，代理可能无法运行它（更新代理包）",
+      "notSupported": "该代理太过陈旧，无法运行它"
     },
     "refusal": {
       "busy": "已有扫描正在运行",
       "invalidPath": "某个路径不是有效的绝对路径",
-      "notEquipped": "代理无法扫描（没有 ClamAV）",
+      "notEquipped": "代理无法扫描（未安装扫描器）",
       "notFound": "未找到主机",
-      "inactive": "主机未处于活动状态（或已不存在）"
+      "inactive": "主机未处于活动状态（或已不存在）",
+      "invalidExclude": "一个要排除的路径不是有效的绝对路径"
     },
     "scan": {
       "completed": "已完成",
@@ -4811,7 +4816,10 @@
       "concurrency": "同时扫描的主机数",
       "jobStarted": "{{hosts}} 台主机：{{sent}} 台正在扫描，{{waiting}} 台等待轮到",
       "pathsUnix": "Linux、BSD 和 macOS 路径（每行一个）",
-      "pathsWindows": "Windows 路径（每行一个）"
+      "pathsWindows": "Windows 路径（每行一个）",
+      "excludeHelp": "本扫描中被排除，除了主机排斥策略所排除的内容。",
+      "excludeUnix": "Linux、BSD 和 macOS 路径以排除",
+      "excludeWindows": "排除的 Windows 路径"
     },
     "scanHosts": "扫描主机",
     "scans": {
@@ -4842,7 +4850,8 @@
       "decided": "已处置",
       "open": "打开检测结果",
       "scans": "扫描",
-      "rulesets": "规则集"
+      "rulesets": "规则集",
+      "policies": "计划和排斥"
     },
     "title": "恶意软件",
     "decideSelected_one": "处置所选的 {{count}} 条",
@@ -4855,7 +4864,8 @@
       "pathOccupied": "原始路径上现在存在其他内容",
       "pending": "已有请求正在等待代理处理",
       "permission": "代理无权移动该文件",
-      "wrongStatus": "当前状态不允许此操作"
+      "wrongStatus": "当前状态不允许此操作",
+      "rootkit": "一个根基检查应该描述它所看到的内容，而不是要移动的文件"
     },
     "quarantine": {
       "confirm": "隔离",
@@ -4936,6 +4946,65 @@
       "hosts": "单个主机",
       "inventories": "清单",
       "tags": "标签"
+    },
+    "policies": {
+      "actionError": "那没有起作用。",
+      "add": "添加",
+      "appliesTo": "适用于",
+      "cron": "计划任务 {{cron}}（UTC）",
+      "cronLabel": "Cron (分钟 小时 日 月 星期几，UTC)",
+      "custom": "Cron 表达式",
+      "daily": "每日",
+      "dayOfMonth": "月份中的特定日期",
+      "deleted": "已删除。",
+      "editTitle": "更改策略",
+      "enabled": "在",
+      "everyDay": "每天在 {{time}} UTC",
+      "everyMonth": "每个月的{{day}}日 {{time}} UTC",
+      "everyWeek": "每{{day}}在{{time}} UTC",
+      "excludeHelp": "对这些主机的每次手动或计划扫描和每个扫描器都排除这些路径。",
+      "frequency": "频率",
+      "friday": "周五",
+      "host": "主机",
+      "intro": "计划通过每个主机的代理开始扫描；排除会从受其覆盖的主机的所有扫描中排除路径。它们可以针对所有主机、一个标签或一个主机，并且可以为主机或标签禁用。",
+      "kindExclusion": "从扫描中排除路径",
+      "kindSchedule": "按计划扫描",
+      "lastNext": "上一次/下一次扫描",
+      "leavesOut": "忽略：{{paths}}",
+      "loadError": "策略无法加载。",
+      "monday": "周一",
+      "monthly": "每月",
+      "name": "名称",
+      "newTitle": "新扫描计划或排斥",
+      "noHosts": "无主机进行扫描",
+      "none": "尚未创建计划或排斥。只有在有人启动扫描时才会执行扫描。",
+      "offFor": "关闭 {{name}}",
+      "runNow": "立即运行",
+      "saturday": "周六",
+      "saveError": "策略无法保存。",
+      "scheduleExcludeHelp": "也排除在当前计划扫描之外，除了主机排斥策略。",
+      "scopeHost": "单个主机",
+      "scopeTag": "带有标签的主机",
+      "started": "扫描已开始。",
+      "sunday": "星期日",
+      "switchOff": "关闭",
+      "switchOffFor": "关闭...",
+      "switchOffTitle": "关闭标记 {{name}} 以...",
+      "switchedOff": "关闭了。",
+      "switchedOn": "重新开启了。",
+      "tag": "标签",
+      "thursday": "星期四",
+      "timeUtc": "时间（UTC）",
+      "tuesday": "星期二",
+      "turnedOff": "关闭了。",
+      "turnedOn": "开启了。",
+      "usualPlaces": "通常的位置",
+      "wednesday": "星期三",
+      "weekday": "日期",
+      "weekly": "每周",
+      "what": "什么",
+      "windowsNote": "扫描等待每个主机的维护窗口，与任何其他命令一样。",
+      "withTag": "标签: {{name}}"
     }
   },
   "assetTags": {

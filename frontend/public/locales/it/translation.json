@@ -4776,7 +4776,9 @@
     },
     "leg": {
       "feed": "Feed di regole",
-      "signatures": "Firme ClamAV"
+      "signatures": "Firme ClamAV",
+      "rootkit": "Controllo rootkit (chkrootkit, rkhunter)",
+      "vendor": "Antivirus dell'host (Microsoft Defender)"
     },
     "loadError": "Impossibile caricare i rilevamenti di malware.",
     "reason": {
@@ -4786,14 +4788,17 @@
       "noDatabase": "nessun database di firme ClamAV",
       "noRules": "nessun set di regole disponibile",
       "noScanner": "nessuno scanner installato",
-      "timeout": "tempo scaduto"
+      "timeout": "tempo scaduto",
+      "notPrivileged": "il verificatore richiede privilegi di root e l'agente potrebbe non eseguirlo (aggiorna il pacchetto dell'agente)",
+      "notSupported": "l'agente è troppo vecchio per eseguirlo"
     },
     "refusal": {
       "busy": "una scansione è già in corso",
       "invalidPath": "un percorso non è un percorso assoluto valido",
-      "notEquipped": "l'agente non può eseguire scansioni (ClamAV assente)",
+      "notEquipped": "l'agente non può eseguire la scansione (nessun scanner installato)",
       "notFound": "host non trovato",
-      "inactive": "l'host non è attivo (o non esiste più)"
+      "inactive": "l'host non è attivo (o non esiste più)",
+      "invalidExclude": "un percorso da escludere non è un percorso assoluto valido"
     },
     "scan": {
       "completed": "Completata",
@@ -4811,7 +4816,10 @@
       "concurrency": "Host in scansione contemporaneamente",
       "jobStarted": "{{hosts}} host: {{sent}} in scansione ora, {{waiting}} in attesa del proprio turno",
       "pathsUnix": "Percorsi Linux, BSD e macOS (uno per riga)",
-      "pathsWindows": "Percorsi Windows (uno per riga)"
+      "pathsWindows": "Percorsi Windows (uno per riga)",
+      "excludeHelp": "Escluso da questa scansione, oltre a ciò che le politiche di esclusione degli host lasciano fuori.",
+      "excludeUnix": "Percorsi Linux, BSD e macOS da escludere",
+      "excludeWindows": "Percorsi Windows da escludere"
     },
     "scanHosts": "Scansiona host",
     "scans": {
@@ -4842,7 +4850,8 @@
       "decided": "Decisi",
       "open": "Rilevamenti aperti",
       "scans": "Scansioni",
-      "rulesets": "Set di regole"
+      "rulesets": "Set di regole",
+      "policies": "Programmi e esclusioni"
     },
     "title": "Malware",
     "decideSelected_one": "Decidi su {{count}} selezionato",
@@ -4855,7 +4864,8 @@
       "pathOccupied": "nel percorso originale ora è presente un altro elemento",
       "pending": "una richiesta è già in attesa dell'agente",
       "permission": "l'agente non è autorizzato a spostarlo",
-      "wrongStatus": "lo stato attuale non lo consente"
+      "wrongStatus": "lo stato attuale non lo consente",
+      "rootkit": "un controllo rootkit descrive ciò che ha visto, non un file da spostare"
     },
     "quarantine": {
       "confirm": "quarantena",
@@ -4936,6 +4946,65 @@
       "hosts": "Singoli host",
       "inventories": "Inventari di host",
       "tags": "Etichette"
+    },
+    "policies": {
+      "actionError": "Non ha funzionato.",
+      "add": "Aggiungi",
+      "appliesTo": "Si applica a",
+      "cron": "Espressione cron {{cron}} (UTC)",
+      "cronLabel": "Cron (minuto ora giorno mese giorno della settimana, UTC)",
+      "custom": "Espressione Cron",
+      "daily": "Quotidiano",
+      "dayOfMonth": "Giorno del mese",
+      "deleted": "Eliminato.",
+      "editTitle": "Modifica politica",
+      "enabled": "Attivo",
+      "everyDay": "Ogni giorno alle {{time}} UTC",
+      "everyMonth": "Il giorno {{day}} di ogni mese alle {{time}} UTC",
+      "everyWeek": "Ogni {{day}} alle {{time}} UTC",
+      "excludeHelp": "Ogni scansione di questi host, manuale o programmata e da qualsiasi scanner, esclude questi percorsi.",
+      "frequency": "Con quale frequenza",
+      "friday": "Venerdì",
+      "host": "Host",
+      "intro": "I programmi avviano le scansioni attraverso l'agente di ogni host; le esclusioni escludono i percorsi da ogni scansione degli host che coprono. Possono essere per tutti gli host, un tag o un singolo host, e disattivati per un host o un tag.",
+      "kindExclusion": "Escludi percorsi dalle scansioni",
+      "kindSchedule": "Scansione programmata",
+      "lastNext": "Ultima/prossima scansione",
+      "leavesOut": "Esclude: {{paths}}",
+      "loadError": "Le politiche non sono riuscite a caricarsi.",
+      "monday": "Lunedì",
+      "monthly": "Mensile",
+      "name": "Nome",
+      "newTitle": "Nuovo programma di scansione o esclusione",
+      "noHosts": "Nessun host da scansionare",
+      "none": "Nessun programma o esclusione ancora. Le scansioni avviano solo quando qualcuno ne avvia una.",
+      "offFor": "disattivato per {{name}}",
+      "runNow": "Esegui ora",
+      "saturday": "Sabato",
+      "saveError": "La politica non è stata salvata.",
+      "scheduleExcludeHelp": "Esclusi anche da questo programma di scansione, oltre alle politiche di esclusione.",
+      "scopeHost": "Un host",
+      "scopeTag": "Host con un tag",
+      "started": "Le scansioni sono state avviate.",
+      "sunday": "Domenica",
+      "switchOff": "Spegnere",
+      "switchOffFor": "Spegnere per...",
+      "switchOffTitle": "Disattiva \"{{name}}\" per...",
+      "switchedOff": "Disattivato.",
+      "switchedOn": "Riattivato.",
+      "tag": "Etichetta",
+      "thursday": "giovedì",
+      "timeUtc": "Ora (UTC)",
+      "tuesday": "Martedì",
+      "turnedOff": "Disattivato.",
+      "turnedOn": "Attivato.",
+      "usualPlaces": "i soliti posti",
+      "wednesday": "mercoledì",
+      "weekday": "Giorno",
+      "weekly": "Settimanale",
+      "what": "Cosa",
+      "windowsNote": "Le scansioni attendono la finestra di manutenzione di ogni host, proprio come qualsiasi altro comando.",
+      "withTag": "Etichetta: {{name}}"
     }
   },
   "assetTags": {

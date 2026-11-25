@@ -99,9 +99,11 @@ def create(  # pylint: disable=too-many-arguments
         created_by=user.userid,
         created_at=jobs.now(),
     )
-    for host in hosts:
+    for position, host in enumerate(hosts):
         job.targets.append(
-            models.BackupFleetRestoreTarget(host_id=host.id, status=WAITING)
+            models.BackupFleetRestoreTarget(
+                host_id=host.id, status=WAITING, position=position
+            )
         )
     db.add(job)
     db.flush()
@@ -111,7 +113,14 @@ def create(  # pylint: disable=too-many-arguments
         user,
         first,
         kind=KIND,
-        payload={"job_id": str(job.id), "name": name, "hosts": len(job.targets)},
+        # The paths too: the second person approves overwriting THESE files
+        # on every host, and the card showed only the job's name (2026-11-25).
+        payload={
+            "job_id": str(job.id),
+            "name": name,
+            "hosts": len(job.targets),
+            "include": list(include),
+        },
         facts={"in_place": in_place, "dry_run": dry_run},
         audit_text="Fleet restore requested; waits for a second approver",
         target={"fleet_restore_id": str(job.id)},
@@ -227,13 +236,21 @@ def advance(db: Session, eng, job: models.BackupFleetRestore, now=None) -> None:
     now = now or jobs.now()
     _sync(db, job, now)
     if job.status == RUNNING:
+        # A host refused as it is released (no policy, no snapshot, not
+        # signed) takes no slot: the next one is tried in its place, so a
+        # wave is ``concurrency`` hosts actually restoring.  It used to cost
+        # its slot until the next tick -- with concurrency 1, three refused
+        # hosts took three ticks (lab, 2026-11-25).
         waiting = [t for t in job.targets if t.status == WAITING]
         in_flight = sum(1 for t in job.targets if t.status == STARTED)
-        for target in waiting[
-            : eng.fleet_release(job.concurrency, in_flight, len(waiting))
-        ]:
+        room = eng.fleet_release(job.concurrency, in_flight, len(waiting))
+        for target in waiting:
+            if room <= 0:
+                break
             db.commit()  # what is recorded so far survives a failure below
             _start(db, eng, job, target, now)
+            if target.status == STARTED:
+                room -= 1
     if job.status in (RUNNING, CANCELED) and not any(
         t.status in (WAITING, STARTED) for t in job.targets
     ):
@@ -263,7 +280,10 @@ def _settle_held(db: Session, eng, now: datetime) -> None:
             {"status": request.status, "requested_at": request.requested_at}, now
         )
         if state in ("rejected", "withdrawn", "expired"):
-            job.status, job.finished_at = REJECTED, now
+            # Withdrawn is the requester calling it off -- a cancel, not a
+            # rejection (it read "rejected", lab 2026-11-25).
+            job.status = CANCELED if state == "withdrawn" else REJECTED
+            job.finished_at = now
             for target in job.targets:
                 target.status = CANCELED
     db.commit()

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 15:40-0500\n"
+"POT-Creation-Date: 2026-11-25 10:44-0500\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -119,7 +119,7 @@ msgstr "المستخدم غير موجود."
 msgid "You do not have access to the selected account."
 msgstr "ليس لديك إذن لوصول الحساب المحدد."
 
-#: backend/api/asset_tags.py:59 backend/api/malware.py:118
+#: backend/api/asset_tags.py:59 backend/api/malware.py:125
 #: backend/api/cloud_backup.py:92 backend/api/time_sync_policy.py:54
 #: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:55
 #: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:92
@@ -127,8 +127,8 @@ msgstr "ليس لديك إذن لوصول الحساب المحدد."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:138
-#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/malware_policies.py:67 backend/api/posture.py:375
+#: backend/api/backups.py:138 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
 #, python-format
@@ -242,7 +242,7 @@ msgstr "تنسيق ID المضيف غير صحيح"
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
-#: backend/api/updates/report_routes.py:34
+#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
@@ -294,11 +294,11 @@ msgstr "لا يمكن استئناف إلا النشر الموقوف"
 msgid "This rollout has already ended"
 msgstr "انتهى هذا النشر بالفعل"
 
-#: backend/api/malware.py:134
+#: backend/api/malware.py:141
 msgid "Only an administrator can change the malware rule sets"
 msgstr "يمكن للمسؤول فقط تغيير مجموعات قواعد البرمجيات الخبيثة"
 
-#: backend/api/malware.py:140
+#: backend/api/malware.py:147
 msgid ""
 "Malware rule sets are shared by every tenant; change them from the server "
 "scope, not from inside a tenant"
@@ -306,11 +306,11 @@ msgstr ""
 "مجموعات قواعد البرمجيات الخبيثة مشتركة بين جميع المستأجرين؛ غيّرها من نطاق "
 "الخادم، وليس من داخل مستأجر"
 
-#: backend/api/malware.py:150
+#: backend/api/malware.py:157
 msgid "Invalid id"
 msgstr "معرّف غير صالح"
 
-#: backend/api/malware.py:404
+#: backend/api/malware.py:413
 msgid "No imported rule set by that name"
 msgstr "لا توجد مجموعة قواعد مستوردة بهذا الاسم"
 
@@ -3960,6 +3960,10 @@ msgstr " حالة تثبيت الحزمة {status} على الوكيل {hostname
 msgid "Failed to update package installation status: %s"
 msgstr "فشل في تحديث حالة تثبيت الحزم: %s"
 
+#: backend/api/malware_policies.py:177
+msgid "The policy covers no host that can be scanned now"
+msgstr "لا تغطي السياسة أي مضيف يمكن فحصه حاليًا"
+
 #: backend/api/posture.py:93
 msgid "Only an administrator can change the threat model"
 msgstr "يمكن للمسؤول فقط تغيير نموذج التهديدات"
@@ -6216,8 +6220,8 @@ msgid "Unknown device status: %s"
 msgstr "حالة جهاز غير معروفة: %s"
 
 #: backend/services/asset_discovery_review.py:344
-#: backend/services/malware_quarantine.py:136
-#: backend/services/malware_review.py:233
+#: backend/services/malware_quarantine.py:139
+#: backend/services/malware_review.py:237
 msgid "A reason of at least 3 characters is required"
 msgstr "يلزم سبب لا يقل عن 3 أحرف"
 
@@ -6299,17 +6303,17 @@ msgstr "ملف التعريف '%s' لا يحتوي على JSON صالح"
 msgid "Profile '%s' must contain a JSON array of DSC resources"
 msgstr "يجب أن يحتوي ملف التعريف '%s' على مصفوفة JSON من موارد DSC"
 
-#: backend/services/malware_scan_jobs.py:144
-#: backend/services/malware_scans.py:162
-#: backend/services/malware_quarantine.py:129
+#: backend/services/malware_scan_jobs.py:152
+#: backend/services/malware_scans.py:187
+#: backend/services/malware_quarantine.py:132
 msgid "Malware detection is not available"
 msgstr "اكتشاف البرمجيات الخبيثة غير متاح"
 
-#: backend/services/malware_scan_jobs.py:149
+#: backend/services/malware_scan_jobs.py:157
 msgid "The targets do not name any active host"
 msgstr "لا تحدد الأهداف أي مضيف نشط"
 
-#: backend/services/malware_scan_jobs.py:153
+#: backend/services/malware_scan_jobs.py:161
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "يمكن فحص 10000 مضيف على الأكثر في مهمة واحدة"
 
@@ -6366,11 +6370,11 @@ msgstr "لا تحتوي هذه السياسة على مفتاح نسخ احتي�
 msgid "OpenBAO does not hold this policy's backup key"
 msgstr "لا يحتفظ OpenBAO بمفتاح النسخ الاحتياطي لهذه السياسة"
 
-#: backend/services/malware_scans.py:165
+#: backend/services/malware_scans.py:190
 msgid "Choose at least one host to scan"
 msgstr "اختر مضيفًا واحدًا على الأقل لفحصه"
 
-#: backend/services/malware_scans.py:168
+#: backend/services/malware_scans.py:193
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "يمكن فحص 500 مضيف كحد أقصى في طلب واحد"
 
@@ -6540,7 +6544,7 @@ msgstr "توقيع اللقطات غير مفعّل"
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "تتطلب النسخ الاحتياطية الموقّعة محرك النسخ الاحتياطي في Professional+"
 
-#: backend/services/malware_quarantine.py:132
+#: backend/services/malware_quarantine.py:135
 msgid "Unknown action"
 msgstr "إجراء غير معروف"
 
@@ -6650,6 +6654,60 @@ msgstr ""
 "دوّر SysManage عدد %(count)d من مفاتيح تشفير النسخ الاحتياطي حسب الجدول. لا يحتوي التصدير الطارئ المُجرى قبل هذا التدوير على المفاتيح الجديدة، والنسخ الاحتياطية المأخوذة من الآن فصاعدًا تحتاج إليها.\n"
 "\n"
 "افتح النسخ الاحتياطية، ثم لوحة \"التشفير\" لأحد المضيفين، واستخدم \"تصدير المفاتيح لحالات الطوارئ\" لإنشاء تصدير جديد. احفظه دون اتصال، وأتلف التصدير القديم."
+
+#: backend/services/malware_policies.py:190
+msgid "Too many paths"
+msgstr "عدد المسارات كثير جدًا"
+
+#: backend/services/malware_policies.py:206
+#: backend/services/malware_policies.py:212
+#, python-format
+msgid "Each path must be absolute: %s"
+msgstr "يجب أن يكون كل مسار مطلقاً: %s"
+
+#: backend/services/malware_policies.py:219
+msgid "Choose all hosts, a tag or a host"
+msgstr "اختر جميع المضيفين، علامة أو مضيف"
+
+#: backend/services/malware_policies.py:223
+msgid "Choose the tag or host"
+msgstr "اختر العلامة أو المضيف"
+
+#: backend/services/malware_policies.py:232
+msgid "The schedule is not valid"
+msgstr "الجدول الزمني غير صالح"
+
+#: backend/services/malware_policies.py:240
+msgid "Give the policy a name"
+msgstr "أعطِ السياسة اسمًا"
+
+#: backend/services/malware_policies.py:243
+msgid "A policy is a schedule or an exclusion"
+msgstr "سياسة هي جدول أو استبعاد"
+
+#: backend/services/malware_policies.py:245
+msgid "A policy's kind cannot be changed"
+msgstr "لا يمكن تغيير نوع السياسة"
+
+#: backend/services/malware_policies.py:254
+msgid "Name at least one path to leave out"
+msgstr "حدد على الأقل مسارًا واحدًا لإغفاله"
+
+#: backend/services/malware_policies.py:294
+msgid "Policy not found"
+msgstr "سياسة غير موجودة"
+
+#: backend/services/malware_policies.py:331
+msgid "Switch it off for a host or a tag"
+msgstr "أوقفها لمضيف أو علامة"
+
+#: backend/services/malware_policies.py:358
+msgid "Override not found"
+msgstr "تجاوز غير موجود"
+
+#: backend/services/malware_policies.py:374
+msgid "Only a schedule starts scans"
+msgstr "لا تبدأ الفحوصات إلا بجدول زمني"
 
 #: backend/services/config_mgmt_baseline.py:286
 #, python-format
@@ -6792,12 +6850,12 @@ msgstr "تم تحديث {entity_type} '\\u0027{entity_name}\\u0027"
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "حُذِفَت الكيان من نوع ‘{entity_type}’ باسم ‘{entity_name}’"
 
-#: backend/services/malware_review.py:66
+#: backend/services/malware_review.py:68
 #, python-format
 msgid "Unknown finding status: %s"
 msgstr "حالة نتيجة غير معروفة: %s"
 
-#: backend/services/malware_review.py:230
+#: backend/services/malware_review.py:234
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "لا يمكن اتخاذ هذا القرار هنا: %s"

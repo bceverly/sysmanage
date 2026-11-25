@@ -4776,7 +4776,9 @@
     },
     "leg": {
       "feed": "Feed de regras",
-      "signatures": "Assinaturas do ClamAV"
+      "signatures": "Assinaturas do ClamAV",
+      "rootkit": "Verificações de rootkit (chkrootkit, rkhunter)",
+      "vendor": "Antivírus do Host (Microsoft Defender)"
     },
     "loadError": "Não foi possível carregar as constatações de malware.",
     "reason": {
@@ -4786,14 +4788,17 @@
       "noDatabase": "nenhum banco de dados de assinaturas do ClamAV",
       "noRules": "nenhum conjunto de regras estava disponível",
       "noScanner": "nenhum verificador instalado",
-      "timeout": "tempo esgotado"
+      "timeout": "tempo esgotado",
+      "notPrivileged": "o verificador precisa de privilégios de root e o agente pode não executá-lo (atualize o pacote do agente)",
+      "notSupported": "o agente é muito antigo para executá-lo"
     },
     "refusal": {
       "busy": "uma verificação já está em execução",
       "invalidPath": "um caminho não é um caminho absoluto válido",
-      "notEquipped": "o agente não pode verificar (sem ClamAV)",
+      "notEquipped": "o agente não pode escanear (nenhum escaner instalado)",
       "notFound": "host não encontrado",
-      "inactive": "o host não está ativo (ou não existe mais)"
+      "inactive": "o host não está ativo (ou não existe mais)",
+      "invalidExclude": "um caminho a ser excluído não é um caminho absoluto válido"
     },
     "scan": {
       "completed": "Concluída",
@@ -4811,7 +4816,10 @@
       "concurrency": "Hosts verificados simultaneamente",
       "jobStarted": "{{hosts}} hosts: {{sent}} em verificação agora, {{waiting}} aguardando a vez",
       "pathsUnix": "Caminhos do Linux, BSD e macOS (um por linha)",
-      "pathsWindows": "Caminhos do Windows (um por linha)"
+      "pathsWindows": "Caminhos do Windows (um por linha)",
+      "excludeHelp": "Excluído desta verificação, além do que as políticas de exclusão dos hosts deixam de fora.",
+      "excludeUnix": "caminhos Linux, BSD e macOS a serem excluídos",
+      "excludeWindows": "Caminhos do Windows a serem excluídos"
     },
     "scanHosts": "Verificar hosts",
     "scans": {
@@ -4842,7 +4850,8 @@
       "decided": "Decididas",
       "open": "Constatações abertas",
       "scans": "Verificações",
-      "rulesets": "Conjuntos de regras"
+      "rulesets": "Conjuntos de regras",
+      "policies": "Agendamentos e exclusões"
     },
     "title": "Detecção de malware",
     "decideSelected_one": "Decidir {{count}} selecionada",
@@ -4855,7 +4864,8 @@
       "pathOccupied": "agora há outro item no caminho original",
       "pending": "já há uma solicitação aguardando o agente",
       "permission": "o agente não tem permissão para movê-lo",
-      "wrongStatus": "o estado atual não permite isso"
+      "wrongStatus": "o estado atual não permite isso",
+      "rootkit": "uma verificação de rootkit nomeia o que viu, não um arquivo para mover"
     },
     "quarantine": {
       "confirm": "Colocar em quarentena",
@@ -4936,6 +4946,65 @@
       "hosts": "Hosts individuais",
       "inventories": "Inventários",
       "tags": "Marcadores"
+    },
+    "policies": {
+      "actionError": "Isso não funcionou.",
+      "add": "Adicionar",
+      "appliesTo": "Aplica-se a",
+      "cron": "Expressão cron {{cron}} (UTC)",
+      "cronLabel": "Cron (minuto hora dia mês dia da semana, UTC)",
+      "custom": "expressão cron",
+      "daily": "Diário",
+      "dayOfMonth": "Dia do mês",
+      "deleted": "Deletado.",
+      "editTitle": "Alterar política",
+      "enabled": "Ativo",
+      "everyDay": "Todo dia às {{time}} UTC",
+      "everyMonth": "Dia {{day}} de cada mês às {{time}} UTC",
+      "everyWeek": "Cada {{day}} às {{time}} UTC",
+      "excludeHelp": "Cada varredura desses hosts, manual ou agendada e por qualquer scanner, deixa esses caminhos de fora.",
+      "frequency": "Com que frequência",
+      "friday": "Sexta-feira",
+      "host": "Host",
+      "intro": "Os agendamentos iniciam varreduras através de cada agente do host; as exclusões deixam caminhos de fora de todas as varreduras dos hosts que cobrem. Cada um pode ser para todos os hosts, uma tag ou um único host, e desligado para um host ou tag.",
+      "kindExclusion": "Remover caminhos das varreduras",
+      "kindSchedule": "Varrer agendado",
+      "lastNext": "Último/Próximo Escaneamento",
+      "leavesOut": "Deixa de fora: {{paths}}",
+      "loadError": "As políticas não puderam ser carregadas.",
+      "monday": "Segunda-feira",
+      "monthly": "Mensal",
+      "name": "Nome",
+      "newTitle": "Novo agendamento de varredura ou exclusão",
+      "noHosts": "Nenhum host para escanear",
+      "none": "Sem agendamentos ou exclusões ainda. As varreduras são executadas apenas quando alguém inicia uma.",
+      "offFor": "desligado para {{name}}",
+      "runNow": "Executar agora",
+      "saturday": "Sábado",
+      "saveError": "A política não pôde ser salva.",
+      "scheduleExcludeHelp": "Também excluídas das varreduras deste agendamento, além das políticas de exclusão.",
+      "scopeHost": "Um host",
+      "scopeTag": "Hospedeiros com uma tag",
+      "started": "Escaneamentos iniciados.",
+      "sunday": "Domingo",
+      "switchOff": "Desligar",
+      "switchOffFor": "Desligar para...",
+      "switchOffTitle": "Desligue o interruptor {{name}} para...",
+      "switchedOff": "Desligado.",
+      "switchedOn": "Reativado.",
+      "tag": "Marcador",
+      "thursday": "Quinta-feira",
+      "timeUtc": "Hora (UTC)",
+      "tuesday": "Terça-feira",
+      "turnedOff": "Desligado.",
+      "turnedOn": "Ativado.",
+      "usualPlaces": "os lugares habituais",
+      "wednesday": "Quarta-feira",
+      "weekday": "Dia",
+      "weekly": "Semanal",
+      "what": "O que",
+      "windowsNote": "Os escaneios aguardam a janela de manutenção de cada host, assim como qualquer outro comando.",
+      "withTag": "Marcador: {{name}}"
     }
   },
   "assetTags": {

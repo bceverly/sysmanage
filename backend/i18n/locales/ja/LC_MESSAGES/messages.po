@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 15:40-0500\n"
+"POT-Creation-Date: 2026-11-25 10:44-0500\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -116,7 +116,7 @@ msgstr "ユーザーが見つかりません。"
 msgid "You do not have access to the selected account."
 msgstr "選択したアカウントにアクセス権限がありません"
 
-#: backend/api/asset_tags.py:59 backend/api/malware.py:118
+#: backend/api/asset_tags.py:59 backend/api/malware.py:125
 #: backend/api/cloud_backup.py:92 backend/api/time_sync_policy.py:54
 #: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:55
 #: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:92
@@ -124,8 +124,8 @@ msgstr "選択したアカウントにアクセス権限がありません"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:138
-#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/malware_policies.py:67 backend/api/posture.py:375
+#: backend/api/backups.py:138 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
 #, python-format
@@ -239,7 +239,7 @@ msgstr "ホストIDの形式が無効です"
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
-#: backend/api/updates/report_routes.py:34
+#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
@@ -291,21 +291,21 @@ msgstr "停止したロールアウトのみ再開できます"
 msgid "This rollout has already ended"
 msgstr "このロールアウトはすでに終了しています"
 
-#: backend/api/malware.py:134
+#: backend/api/malware.py:141
 msgid "Only an administrator can change the malware rule sets"
 msgstr "マルウェアのルールセットを変更できるのは管理者のみです"
 
-#: backend/api/malware.py:140
+#: backend/api/malware.py:147
 msgid ""
 "Malware rule sets are shared by every tenant; change them from the server "
 "scope, not from inside a tenant"
 msgstr "マルウェアのルールセットはすべてのテナントで共有されています。テナント内からではなく、サーバースコープから変更してください"
 
-#: backend/api/malware.py:150
+#: backend/api/malware.py:157
 msgid "Invalid id"
 msgstr "無効な ID です"
 
-#: backend/api/malware.py:404
+#: backend/api/malware.py:413
 msgid "No imported rule set by that name"
 msgstr "その名前のインポート済みルールセットはありません"
 
@@ -3886,6 +3886,10 @@ msgstr "エージェント {hostname} 上でのパッケージインストール
 msgid "Failed to update package installation status: %s"
 msgstr "パッケージのインストール状態を更新できませんでした: %s"
 
+#: backend/api/malware_policies.py:177
+msgid "The policy covers no host that can be scanned now"
+msgstr "ポリシーは現在スキャン可能なホストをカバーしません"
+
 #: backend/api/posture.py:93
 msgid "Only an administrator can change the threat model"
 msgstr "脅威モデルを変更できるのは管理者だけです"
@@ -6097,8 +6101,8 @@ msgid "Unknown device status: %s"
 msgstr "不明なデバイスの状態: %s"
 
 #: backend/services/asset_discovery_review.py:344
-#: backend/services/malware_quarantine.py:136
-#: backend/services/malware_review.py:233
+#: backend/services/malware_quarantine.py:139
+#: backend/services/malware_review.py:237
 msgid "A reason of at least 3 characters is required"
 msgstr "3文字以上の理由が必要です"
 
@@ -6178,17 +6182,17 @@ msgstr "プロファイル '%s' は有効な JSON を含んでいません"
 msgid "Profile '%s' must contain a JSON array of DSC resources"
 msgstr "プロファイル '%s' は DSC リソースの JSON 配列を含む必要があります"
 
-#: backend/services/malware_scan_jobs.py:144
-#: backend/services/malware_scans.py:162
-#: backend/services/malware_quarantine.py:129
+#: backend/services/malware_scan_jobs.py:152
+#: backend/services/malware_scans.py:187
+#: backend/services/malware_quarantine.py:132
 msgid "Malware detection is not available"
 msgstr "マルウェア検出は利用できません"
 
-#: backend/services/malware_scan_jobs.py:149
+#: backend/services/malware_scan_jobs.py:157
 msgid "The targets do not name any active host"
 msgstr "対象にアクティブなホストが含まれていません"
 
-#: backend/services/malware_scan_jobs.py:153
+#: backend/services/malware_scan_jobs.py:161
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "1 つのジョブでスキャンできるホストは最大 10000 台です"
 
@@ -6243,11 +6247,11 @@ msgstr "このポリシーにはOpenBAOにバックアップキーがありま�
 msgid "OpenBAO does not hold this policy's backup key"
 msgstr "OpenBAOはこのポリシーのバックアップキーを保持していません"
 
-#: backend/services/malware_scans.py:165
+#: backend/services/malware_scans.py:190
 msgid "Choose at least one host to scan"
 msgstr "スキャンするホストを少なくとも 1 台選択してください"
 
-#: backend/services/malware_scans.py:168
+#: backend/services/malware_scans.py:193
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "1 回のリクエストでスキャンできるホストは最大 500 台です"
 
@@ -6411,7 +6415,7 @@ msgstr "スナップショットの署名はオンになっていません"
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "署名付きバックアップには Professional+ のバックアップエンジンが必要です"
 
-#: backend/services/malware_quarantine.py:132
+#: backend/services/malware_quarantine.py:135
 msgid "Unknown action"
 msgstr "不明な操作です"
 
@@ -6519,6 +6523,60 @@ msgstr ""
 "SysManage はスケジュールに従ってバックアップ暗号化鍵を %(count)d 個ローテーションしました。このローテーションより前に作成した緊急用の鍵のエクスポートには新しい鍵が含まれておらず、今後のバックアップにはその鍵が必要です。\n"
 "\n"
 "バックアップ を開き、いずれかのホストの「暗号化」パネルで「緊急用の鍵のエクスポート」を使って新しいエクスポートを作成してください。オフラインで保管し、古いものは破棄してください。"
+
+#: backend/services/malware_policies.py:190
+msgid "Too many paths"
+msgstr "パスの数が多すぎます"
+
+#: backend/services/malware_policies.py:206
+#: backend/services/malware_policies.py:212
+#, python-format
+msgid "Each path must be absolute: %s"
+msgstr "各パスが絶対である必要があります: %s"
+
+#: backend/services/malware_policies.py:219
+msgid "Choose all hosts, a tag or a host"
+msgstr "すべてのホスト、タグまたはホストを選択してください"
+
+#: backend/services/malware_policies.py:223
+msgid "Choose the tag or host"
+msgstr "タグまたはホストを選択してください"
+
+#: backend/services/malware_policies.py:232
+msgid "The schedule is not valid"
+msgstr "スケジュールは無効です"
+
+#: backend/services/malware_policies.py:240
+msgid "Give the policy a name"
+msgstr "ポリシーに名前を付けます"
+
+#: backend/services/malware_policies.py:243
+msgid "A policy is a schedule or an exclusion"
+msgstr "ポリシーはスケジュールまたは除外です"
+
+#: backend/services/malware_policies.py:245
+msgid "A policy's kind cannot be changed"
+msgstr "ポリシーの種類を変更することはできません"
+
+#: backend/services/malware_policies.py:254
+msgid "Name at least one path to leave out"
+msgstr "少なくとも一つのパスをスキップするように指定してください"
+
+#: backend/services/malware_policies.py:294
+msgid "Policy not found"
+msgstr "ポリシーが見つかりません"
+
+#: backend/services/malware_policies.py:331
+msgid "Switch it off for a host or a tag"
+msgstr "ホストまたはタグに対して無効化してください"
+
+#: backend/services/malware_policies.py:358
+msgid "Override not found"
+msgstr "見つからない場合は上書きします"
+
+#: backend/services/malware_policies.py:374
+msgid "Only a schedule starts scans"
+msgstr "スケジュールのみがスキャンを開始します"
 
 #: backend/services/config_mgmt_baseline.py:286
 #, python-format
@@ -6650,12 +6708,12 @@ msgstr "{entity_type} '{entity_name}' を更新しました"
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' を削除しました"
 
-#: backend/services/malware_review.py:66
+#: backend/services/malware_review.py:68
 #, python-format
 msgid "Unknown finding status: %s"
 msgstr "不明な検出事項のステータスです: %s"
 
-#: backend/services/malware_review.py:230
+#: backend/services/malware_review.py:234
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "この判定はここでは行えません: %s"

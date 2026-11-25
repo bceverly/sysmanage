@@ -84,6 +84,7 @@ from backend.api import (
     machines,
     maintenance_windows,
     malware,
+    malware_policies,
     openbao,
     opentelemetry,
     package_compliance,
@@ -508,6 +509,7 @@ def register_routes(app: FastAPI):
     _include_versioned(app, asset_discovery.router, tags=["asset-discovery"])
     logger.debug("Adding malware router (Phase 21.3 S3)")
     _include_versioned(app, malware.router, tags=["malware"])
+    _include_versioned(app, malware_policies.router, tags=["malware"])
 
     logger.debug("Adding file-watches router (Phase 21.1 S7)")
     _include_versioned(app, file_watches.router, tags=["config-management"])

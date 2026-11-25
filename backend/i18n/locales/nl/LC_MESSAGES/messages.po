@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 15:40-0500\n"
+"POT-Creation-Date: 2026-11-25 10:44-0500\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -121,7 +121,7 @@ msgstr "Gebruiker niet gevonden."
 msgid "You do not have access to the selected account."
 msgstr "U heeft geen toegang tot het geselecteerde account."
 
-#: backend/api/asset_tags.py:59 backend/api/malware.py:118
+#: backend/api/asset_tags.py:59 backend/api/malware.py:125
 #: backend/api/cloud_backup.py:92 backend/api/time_sync_policy.py:54
 #: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:55
 #: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:92
@@ -129,8 +129,8 @@ msgstr "U heeft geen toegang tot het geselecteerde account."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:138
-#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/malware_policies.py:67 backend/api/posture.py:375
+#: backend/api/backups.py:138 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
 #, python-format
@@ -244,7 +244,7 @@ msgstr "Ongeldige host-ID formaat"
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
-#: backend/api/updates/report_routes.py:34
+#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
@@ -296,11 +296,11 @@ msgstr "Alleen een gestopte uitrol kan worden hervat"
 msgid "This rollout has already ended"
 msgstr "Deze uitrol is al beëindigd"
 
-#: backend/api/malware.py:134
+#: backend/api/malware.py:141
 msgid "Only an administrator can change the malware rule sets"
 msgstr "Alleen een beheerder kan de malware-regelsets wijzigen"
 
-#: backend/api/malware.py:140
+#: backend/api/malware.py:147
 msgid ""
 "Malware rule sets are shared by every tenant; change them from the server "
 "scope, not from inside a tenant"
@@ -308,11 +308,11 @@ msgstr ""
 "Malware-regelsets worden door alle tenants gedeeld; wijzig ze vanuit het "
 "serverbereik, niet vanuit een tenant"
 
-#: backend/api/malware.py:150
+#: backend/api/malware.py:157
 msgid "Invalid id"
 msgstr "Ongeldige ID"
 
-#: backend/api/malware.py:404
+#: backend/api/malware.py:413
 msgid "No imported rule set by that name"
 msgstr "Geen geïmporteerde regelset met die naam"
 
@@ -4027,6 +4027,10 @@ msgstr "Installatiestatus van pakket {status} op agent {hostname}"
 msgid "Failed to update package installation status: %s"
 msgstr "Mislukt om de pakketinstallatietoestand bij te werken: %s"
 
+#: backend/api/malware_policies.py:177
+msgid "The policy covers no host that can be scanned now"
+msgstr "Het beleid dekt geen host die momenteel kan worden gescand"
+
 #: backend/api/posture.py:93
 msgid "Only an administrator can change the threat model"
 msgstr "Alleen een beheerder kan het dreigingsmodel wijzigen"
@@ -6335,8 +6339,8 @@ msgid "Unknown device status: %s"
 msgstr "Onbekende apparaatstatus: %s"
 
 #: backend/services/asset_discovery_review.py:344
-#: backend/services/malware_quarantine.py:136
-#: backend/services/malware_review.py:233
+#: backend/services/malware_quarantine.py:139
+#: backend/services/malware_review.py:237
 msgid "A reason of at least 3 characters is required"
 msgstr "Een reden van minstens 3 tekens is vereist"
 
@@ -6419,17 +6423,17 @@ msgstr "Profiel '%s' bevat geen geldige JSON"
 msgid "Profile '%s' must contain a JSON array of DSC resources"
 msgstr "Profiel '%s' moet een JSON-array van DSC-bronnen bevatten"
 
-#: backend/services/malware_scan_jobs.py:144
-#: backend/services/malware_scans.py:162
-#: backend/services/malware_quarantine.py:129
+#: backend/services/malware_scan_jobs.py:152
+#: backend/services/malware_scans.py:187
+#: backend/services/malware_quarantine.py:132
 msgid "Malware detection is not available"
 msgstr "Malwaredetectie is niet beschikbaar"
 
-#: backend/services/malware_scan_jobs.py:149
+#: backend/services/malware_scan_jobs.py:157
 msgid "The targets do not name any active host"
 msgstr "De doelen bevatten geen actieve host"
 
-#: backend/services/malware_scan_jobs.py:153
+#: backend/services/malware_scan_jobs.py:161
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "Er kunnen maximaal 10000 hosts in één taak worden gescand"
 
@@ -6490,11 +6494,11 @@ msgstr "Dit beleid heeft geen back-upsleutel in OpenBAO."
 msgid "OpenBAO does not hold this policy's backup key"
 msgstr "OpenBAO bewaart geen back-upsleutel voor deze beleid."
 
-#: backend/services/malware_scans.py:165
+#: backend/services/malware_scans.py:190
 msgid "Choose at least one host to scan"
 msgstr "Kies ten minste één host om te scannen"
 
-#: backend/services/malware_scans.py:168
+#: backend/services/malware_scans.py:193
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "Er kunnen maximaal 500 hosts in één verzoek worden gescand"
 
@@ -6665,7 +6669,7 @@ msgstr "Ondertekening van snapshots is niet ingeschakeld"
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "Ondertekende back-ups vereisen de Professional+-back-upengine"
 
-#: backend/services/malware_quarantine.py:132
+#: backend/services/malware_quarantine.py:135
 msgid "Unknown action"
 msgstr "Onbekende actie"
 
@@ -6783,6 +6787,60 @@ msgstr ""
 "SysManage heeft volgens schema %(count)d sleutel(s) voor back-upversleuteling geroteerd. Een noodexport van sleutels van vóór deze rotatie bevat de nieuwe sleutels niet, en back-ups die vanaf nu worden gemaakt hebben ze nodig.\n"
 "\n"
 "Open Back-ups, daarna het paneel \"Versleuteling\" van een host, en gebruik \"Noodexport van sleutels\" om een nieuwe export te maken. Bewaar die offline en vernietig de oude."
+
+#: backend/services/malware_policies.py:190
+msgid "Too many paths"
+msgstr "Te veel paden"
+
+#: backend/services/malware_policies.py:206
+#: backend/services/malware_policies.py:212
+#, python-format
+msgid "Each path must be absolute: %s"
+msgstr "Elk pad moet absoluut zijn: %s"
+
+#: backend/services/malware_policies.py:219
+msgid "Choose all hosts, a tag or a host"
+msgstr "Kies alle hosts, een tag of een host"
+
+#: backend/services/malware_policies.py:223
+msgid "Choose the tag or host"
+msgstr "Kies de tag of host"
+
+#: backend/services/malware_policies.py:232
+msgid "The schedule is not valid"
+msgstr "Het schema is ongeldig"
+
+#: backend/services/malware_policies.py:240
+msgid "Give the policy a name"
+msgstr "Geef het beleid een naam"
+
+#: backend/services/malware_policies.py:243
+msgid "A policy is a schedule or an exclusion"
+msgstr "Een beleid is een schema of een uitsluiting"
+
+#: backend/services/malware_policies.py:245
+msgid "A policy's kind cannot be changed"
+msgstr "Het type van een beleid kan niet worden gewijzigd"
+
+#: backend/services/malware_policies.py:254
+msgid "Name at least one path to leave out"
+msgstr "Noem ten minste één pad om uit te sluiten"
+
+#: backend/services/malware_policies.py:294
+msgid "Policy not found"
+msgstr "Beleid niet gevonden"
+
+#: backend/services/malware_policies.py:331
+msgid "Switch it off for a host or a tag"
+msgstr "Schakel het uit voor een host of een tag"
+
+#: backend/services/malware_policies.py:358
+msgid "Override not found"
+msgstr "Overrule niet gevonden"
+
+#: backend/services/malware_policies.py:374
+msgid "Only a schedule starts scans"
+msgstr "Alleen een schema start scans"
 
 #: backend/services/config_mgmt_baseline.py:286
 #, python-format
@@ -6934,12 +6992,12 @@ msgstr "Bijgewerkte {entity_type} '{entity_name}'"
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "Verwijderd {entity_type} '{entity_name}'"
 
-#: backend/services/malware_review.py:66
+#: backend/services/malware_review.py:68
 #, python-format
 msgid "Unknown finding status: %s"
 msgstr "Onbekende status van bevinding: %s"
 
-#: backend/services/malware_review.py:230
+#: backend/services/malware_review.py:234
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "Die beslissing kan hier niet worden genomen: %s"

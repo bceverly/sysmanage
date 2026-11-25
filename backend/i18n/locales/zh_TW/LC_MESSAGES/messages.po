@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 15:40-0500\n"
+"POT-Creation-Date: 2026-11-25 10:44-0500\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -113,7 +113,7 @@ msgstr "找不到用戶。"
 msgid "You do not have access to the selected account."
 msgstr "您沒有權限訪問所選的帳戶"
 
-#: backend/api/asset_tags.py:59 backend/api/malware.py:118
+#: backend/api/asset_tags.py:59 backend/api/malware.py:125
 #: backend/api/cloud_backup.py:92 backend/api/time_sync_policy.py:54
 #: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:55
 #: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:92
@@ -121,8 +121,8 @@ msgstr "您沒有權限訪問所選的帳戶"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:138
-#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/malware_policies.py:67 backend/api/posture.py:375
+#: backend/api/backups.py:138 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:149
 #, python-format
@@ -236,7 +236,7 @@ msgstr "主機ID格式無效"
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
-#: backend/api/updates/report_routes.py:34
+#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
@@ -288,21 +288,21 @@ msgstr "只有已停止的部署才能繼續"
 msgid "This rollout has already ended"
 msgstr "此部署已結束"
 
-#: backend/api/malware.py:134
+#: backend/api/malware.py:141
 msgid "Only an administrator can change the malware rule sets"
 msgstr "只有管理員才能變更惡意軟體規則集"
 
-#: backend/api/malware.py:140
+#: backend/api/malware.py:147
 msgid ""
 "Malware rule sets are shared by every tenant; change them from the server "
 "scope, not from inside a tenant"
 msgstr "惡意軟體規則集由所有租戶共用；請在伺服器範圍內變更，而非在某個租戶內部變更"
 
-#: backend/api/malware.py:150
+#: backend/api/malware.py:157
 msgid "Invalid id"
 msgstr "無效的 ID"
 
-#: backend/api/malware.py:404
+#: backend/api/malware.py:413
 msgid "No imported rule set by that name"
 msgstr "沒有該名稱的已匯入規則集"
 
@@ -3837,6 +3837,10 @@ msgstr "代理程式 {hostname} 上的包安裝 {status}"
 msgid "Failed to update package installation status: %s"
 msgstr "更新套件安裝狀態失敗：%s"
 
+#: backend/api/malware_policies.py:177
+msgid "The policy covers no host that can be scanned now"
+msgstr "策略不涵蓋可被掃描的主機"
+
 #: backend/api/posture.py:93
 msgid "Only an administrator can change the threat model"
 msgstr "只有管理員可以變更威脅模型"
@@ -6019,8 +6023,8 @@ msgid "Unknown device status: %s"
 msgstr "未知的裝置狀態：%s"
 
 #: backend/services/asset_discovery_review.py:344
-#: backend/services/malware_quarantine.py:136
-#: backend/services/malware_review.py:233
+#: backend/services/malware_quarantine.py:139
+#: backend/services/malware_review.py:237
 msgid "A reason of at least 3 characters is required"
 msgstr "需要至少 3 個字元的原因"
 
@@ -6099,17 +6103,17 @@ msgstr "配置文件 '%s' 不包含有效的 JSON"
 msgid "Profile '%s' must contain a JSON array of DSC resources"
 msgstr "配置文件 '%s' 必須包含一組 DSC 資源的 JSON 陣列"
 
-#: backend/services/malware_scan_jobs.py:144
-#: backend/services/malware_scans.py:162
-#: backend/services/malware_quarantine.py:129
+#: backend/services/malware_scan_jobs.py:152
+#: backend/services/malware_scans.py:187
+#: backend/services/malware_quarantine.py:132
 msgid "Malware detection is not available"
 msgstr "惡意軟體偵測無法使用"
 
-#: backend/services/malware_scan_jobs.py:149
+#: backend/services/malware_scan_jobs.py:157
 msgid "The targets do not name any active host"
 msgstr "目標中沒有任何使用中的主機"
 
-#: backend/services/malware_scan_jobs.py:153
+#: backend/services/malware_scan_jobs.py:161
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "一個工作最多可掃描 10000 台主機"
 
@@ -6164,11 +6168,11 @@ msgstr "此策略在 OpenBAO 中沒有備份金鑰"
 msgid "OpenBAO does not hold this policy's backup key"
 msgstr "OpenBAO 沒有儲存此策略的備份金鑰"
 
-#: backend/services/malware_scans.py:165
+#: backend/services/malware_scans.py:190
 msgid "Choose at least one host to scan"
 msgstr "請至少選擇一台要掃描的主機"
 
-#: backend/services/malware_scans.py:168
+#: backend/services/malware_scans.py:193
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "一次請求最多可掃描 500 台主機"
 
@@ -6330,7 +6334,7 @@ msgstr "快照簽章未啟用"
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "簽章備份需要 Professional+ 備份引擎"
 
-#: backend/services/malware_quarantine.py:132
+#: backend/services/malware_quarantine.py:135
 msgid "Unknown action"
 msgstr "未知的動作"
 
@@ -6435,6 +6439,60 @@ msgstr ""
 "SysManage 已依排程輪替了 %(count)d 個備份加密金鑰。在此次輪替之前進行的緊急金鑰匯出不包含新金鑰，而從現在起進行的備份需要這些金鑰。\n"
 "\n"
 "請開啟「備份」，再開啟某台主機的「加密」面板，使用「緊急金鑰匯出」重新匯出。請離線保存，並銷毀舊的匯出。"
+
+#: backend/services/malware_policies.py:190
+msgid "Too many paths"
+msgstr "路徑過多"
+
+#: backend/services/malware_policies.py:206
+#: backend/services/malware_policies.py:212
+#, python-format
+msgid "Each path must be absolute: %s"
+msgstr "每個路徑必須是絕對的: %s"
+
+#: backend/services/malware_policies.py:219
+msgid "Choose all hosts, a tag or a host"
+msgstr "選擇所有主機、一個標籤或一個主機"
+
+#: backend/services/malware_policies.py:223
+msgid "Choose the tag or host"
+msgstr "選擇標籤或主機"
+
+#: backend/services/malware_policies.py:232
+msgid "The schedule is not valid"
+msgstr "時間表無效"
+
+#: backend/services/malware_policies.py:240
+msgid "Give the policy a name"
+msgstr "為策略命名"
+
+#: backend/services/malware_policies.py:243
+msgid "A policy is a schedule or an exclusion"
+msgstr "策略是一個時間表或排除"
+
+#: backend/services/malware_policies.py:245
+msgid "A policy's kind cannot be changed"
+msgstr "策略的類型無法更改"
+
+#: backend/services/malware_policies.py:254
+msgid "Name at least one path to leave out"
+msgstr "至少指定一個要排除的路徑"
+
+#: backend/services/malware_policies.py:294
+msgid "Policy not found"
+msgstr "策略未找到"
+
+#: backend/services/malware_policies.py:331
+msgid "Switch it off for a host or a tag"
+msgstr "關閉對主機或標籤的策略"
+
+#: backend/services/malware_policies.py:358
+msgid "Override not found"
+msgstr "找不到此政策的停用設定"
+
+#: backend/services/malware_policies.py:374
+msgid "Only a schedule starts scans"
+msgstr "只有時間表開始掃描"
 
 #: backend/services/config_mgmt_baseline.py:286
 #, python-format
@@ -6566,12 +6624,12 @@ msgstr "已更新 {entity_type} '{entity_name}' 的內容"
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "已刪除 {entity_type} '{entity_name}'"
 
-#: backend/services/malware_review.py:66
+#: backend/services/malware_review.py:68
 #, python-format
 msgid "Unknown finding status: %s"
 msgstr "未知的偵測結果狀態: %s"
 
-#: backend/services/malware_review.py:230
+#: backend/services/malware_review.py:234
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "無法在此作出該處置: %s"

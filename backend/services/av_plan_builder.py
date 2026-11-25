@@ -19,9 +19,6 @@ commercial-AV detection.
 
 from typing import Any, Dict, List, Optional, Tuple
 from backend.services.av_scan_schedule import (
-    _cron_line_for_schedule,
-    _scan_command_for_paths,
-    _splay_schedule,
     pre_download_delay_command,
     update_task_start,
     _validate_scan_schedule,
@@ -42,7 +39,10 @@ from backend.services.av_scan_schedule import (
 # (Phase 22.6: each host waits its share of 5 minutes before the first
 # signature download, and the Windows update task starts at the host's own
 # minute -- a fleet deployed together no longer updates in the same minute).
-PLAN_VERSION = 7
+# 8 = 2026-11-25 (scans are scheduled in SysManage and run through the agent:
+# the host's own cron / Task Scheduler scan, whose results reached nobody, is
+# replaced by an inert file / deleted).
+PLAN_VERSION = 8
 
 # ---------------------------------------------------------------------------
 # Conf-file paths used by multiple distro layouts (deduped to satisfy
@@ -334,6 +334,33 @@ def _basic_freshclam_conf(
 
 # Scan schedule helpers: see av_scan_schedule (imported at the top).
 
+# 2026-11-25 (Bryan): scans are scheduled in SysManage (Malware > Schedules)
+# and started through the agent, so their results reach the server.  A deploy
+# no longer puts a scan on the host's own cron or Task Scheduler -- those
+# runs reported to nobody -- and replaces one put there before with this.
+RETIRED_CRON = (
+    "# Managed by sysmanage av_plan_builder -- DO NOT EDIT\n"
+    "# Malware scans are scheduled in SysManage (Malware > Schedules) and run\n"
+    "# through the agent, so their findings reach the server.  Nothing here.\n"
+)
+SCHEDULE_NOTE = "scan_schedule_moved_to_malware_schedules"
+
+
+def _retired_cron(group: str) -> Dict[str, Any]:
+    return {
+        "path": "/etc/cron.d/sysmanage-clamscan",
+        "content": RETIRED_CRON,
+        "mode": 0o644,
+        "owner": "root",
+        "group": group,
+        "backup": False,
+    }
+
+
+def _schedule_note(options: Dict[str, Any]) -> Optional[str]:
+    return SCHEDULE_NOTE if options.get("scan_schedule") else None
+
+
 # ---------------------------------------------------------------------------
 # Per-platform deploy / enable / remove
 # ---------------------------------------------------------------------------
@@ -381,27 +408,8 @@ def _linux_deploy(
         },
     ]
 
-    schedule = _splay_schedule(
-        _validate_scan_schedule(options.get("scan_schedule")), host_info
-    )
-    if schedule:
-        scan_cmd = _scan_command_for_paths(schedule["scan_paths"])
-        cron_line = _cron_line_for_schedule(schedule, scan_cmd)
-        files.append(
-            {
-                "path": "/etc/cron.d/sysmanage-clamscan",
-                "content": (
-                    "# Managed by sysmanage av_plan_builder -- DO NOT EDIT\n"
-                    "SHELL=/bin/sh\n"
-                    "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n"
-                    f"{cron_line}\n"
-                ),
-                "mode": 0o644,
-                "owner": "root",
-                "group": "root",
-                "backup": True,
-            }
-        )
+    _validate_scan_schedule(options.get("scan_schedule"))  # still refuses a bad one
+    files.append(_retired_cron("root"))
 
     return {
         "platform": "linux",
@@ -416,7 +424,8 @@ def _linux_deploy(
             {"service": clamd_svc, "action": "enable"},
             {"service": clamd_svc, "action": "start"},
         ],
-        "scan_schedule": schedule or None,
+        "scan_schedule": None,
+        "note": _schedule_note(options),
     }
 
 
@@ -536,33 +545,9 @@ def _bsd_deploy(
             }
         )
 
-    schedule = _splay_schedule(
-        _validate_scan_schedule(options.get("scan_schedule")), host_info
-    )
-    if schedule:
-        # BSD/macOS: drop a per-host crontab fragment under /etc/cron.d
-        # on FreeBSD/Linux-style; OpenBSD/NetBSD use /etc/daily.local etc.
-        # We pick /etc/cron.d for FreeBSD and /var/cron/tabs/root style for
-        # the others. Keep it simple: use /etc/cron.d/sysmanage-clamscan on
-        # FreeBSD, otherwise document the cron file via `note`.
-        scan_cmd = _scan_command_for_paths(schedule["scan_paths"])
-        cron_line = _cron_line_for_schedule(schedule, scan_cmd)
-        if plat == "freebsd":
-            files.append(
-                {
-                    "path": "/etc/cron.d/sysmanage-clamscan",
-                    "content": (
-                        "# Managed by sysmanage av_plan_builder -- DO NOT EDIT\n"
-                        "SHELL=/bin/sh\n"
-                        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n"
-                        f"{cron_line}\n"
-                    ),
-                    "mode": 0o644,
-                    "owner": "root",
-                    "group": "wheel",
-                    "backup": True,
-                }
-            )
+    _validate_scan_schedule(options.get("scan_schedule"))  # still refuses a bad one
+    if plat == "freebsd":  # the only BSD a scan was ever put on cron for
+        files.append(_retired_cron("wheel"))
 
     return {
         "platform": plat,
@@ -571,7 +556,8 @@ def _bsd_deploy(
         "files": files,
         "commands": _delayed(host_info, _bsd_update_commands(plat, host_info)),
         "service_actions": _bsd_service_actions(plat, clamd_svc, fresh_svc),
-        "scan_schedule": schedule or None,
+        "scan_schedule": None,
+        "note": _schedule_note(options),
     }
 
 
@@ -737,32 +723,6 @@ def _windows_refresh_command() -> Dict[str, Any]:
     }
 
 
-def _windows_scan_task(schedule: Dict[str, Any]) -> Dict[str, Any]:
-    scan_paths = " ".join(f'"{p}"' for p in schedule["scan_paths"])
-    scan_cmd = f'"{WINDOWS_INSTALL_DIR}\\clamscan.exe" -r {scan_paths}'
-    if schedule["frequency"] == "daily":
-        sc, modifier = "DAILY", []
-    elif schedule["frequency"] == "weekly":
-        day_map = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
-        sc = "WEEKLY"
-        modifier = ["/D", day_map[schedule["day_of_week"]]]
-    else:  # monthly
-        sc = "MONTHLY"
-        modifier = ["/D", str(schedule["day_of_month"])]
-    time_str = f"{schedule['hour']:02d}:{schedule['minute']:02d}"
-    return {
-        "argv": [
-            "schtasks", "/Create", "/TN", WINDOWS_SCAN_TASK, "/SC", sc, *modifier,
-            "/ST", time_str, "/TR", scan_cmd, "/RU", "SYSTEM", "/F",
-        ],
-        "sudo": False,
-        "elevated": True,
-        "timeout": 30,
-        "ignore_errors": True,
-        "description": "register ClamAV scheduled scan",
-    }  # fmt: skip
-
-
 def _windows_deploy(
     host_info: Dict[str, Any],
     antivirus_package: str,
@@ -780,11 +740,10 @@ def _windows_deploy(
         ],
         windows=True,
     )
-    schedule = _splay_schedule(
-        _validate_scan_schedule(options.get("scan_schedule")), host_info
-    )
-    if schedule:
-        commands.append(_windows_scan_task(schedule))
+    _validate_scan_schedule(options.get("scan_schedule"))  # still refuses a bad one
+    commands += [
+        c for c in _windows_delete_tasks() if WINDOWS_SCAN_TASK in c["argv"]
+    ]  # a scan task from before scans were scheduled in SysManage
     return {
         "platform": "windows",
         "av_product": "clamav",
@@ -802,7 +761,8 @@ def _windows_deploy(
         ],
         "commands": commands,
         "service_actions": [],
-        "scan_schedule": schedule or None,
+        "scan_schedule": None,
+        "note": _schedule_note(options),
     }
 
 

@@ -517,7 +517,13 @@ class BackupFleetRestore(Base):
         "BackupFleetRestoreTarget",
         back_populates="job",
         cascade="all, delete-orphan",
-        order_by="BackupFleetRestoreTarget.id",
+        # The order the hosts were listed in; rows from before q116 have no
+        # position and go last, by id.
+        order_by=lambda: [
+            BackupFleetRestoreTarget.position.is_(None),
+            BackupFleetRestoreTarget.position,
+            BackupFleetRestoreTarget.id,
+        ],
     )
 
 
@@ -538,6 +544,8 @@ class BackupFleetRestoreTarget(Base):
         GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), nullable=False, index=True
     )
     status = Column(String(16), nullable=False, default="waiting", index=True)
+    # Where the host was in the job's list: released in that order.
+    position = Column(Integer, nullable=True)
     snapshot = Column(String(255), nullable=True)
     run_id = Column(GUID(), nullable=True)
     message = Column(String(500), nullable=True)

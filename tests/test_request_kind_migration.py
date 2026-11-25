@@ -122,3 +122,62 @@ def test_the_dispatch_correlation_table_comes_and_goes():
         assert "dispatch_correlation" in present()
     finally:
         os.unlink(db_path)
+
+
+def test_the_fleet_target_position_comes_and_goes():
+    fd, db_path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+
+    def columns():
+        conn = sqlite3.connect(db_path)
+        try:
+            return {
+                r[1]
+                for r in conn.execute("PRAGMA table_info(backup_fleet_restore_target)")
+            }
+        finally:
+            conn.close()
+
+    try:
+        _alembic(["upgrade", "head"], db_path)
+        assert "position" in columns()
+        _alembic(["downgrade", "q115dispatchcorr"], db_path)
+        assert "position" not in columns() and "host_id" in columns()
+        _alembic(["upgrade", "head"], db_path)
+        assert "position" in columns()
+    finally:
+        os.unlink(db_path)
+
+
+def test_the_malware_scan_policies_come_and_go():
+    fd, db_path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+
+    def shape():
+        conn = sqlite3.connect(db_path)
+        try:
+            tables = {
+                r[0]
+                for r in conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                )
+            }
+            job = {r[1] for r in conn.execute("PRAGMA table_info(malware_scan_job)")}
+            run = {r[1] for r in conn.execute("PRAGMA table_info(malware_scan_run)")}
+            return tables, job, run
+        finally:
+            conn.close()
+
+    try:
+        _alembic(["upgrade", "head"], db_path)
+        tables, job, run = shape()
+        assert {"malware_scan_policy", "malware_scan_policy_override"} <= tables
+        assert {"exclude", "policy_id"} <= job and "exclude" in run
+        _alembic(["downgrade", "q116fleetorder"], db_path)
+        tables, job, run = shape()
+        assert "malware_scan_policy" not in tables and "policy_id" not in job
+        assert "exclude" not in run and "job_id" in run
+        _alembic(["upgrade", "head"], db_path)
+        assert "malware_scan_policy" in shape()[0]
+    finally:
+        os.unlink(db_path)

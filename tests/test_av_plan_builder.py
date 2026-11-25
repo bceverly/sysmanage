@@ -168,11 +168,15 @@ def test_remove_windows_uses_chocolatey():
 import pytest
 
 from backend.services.av_plan_builder import (
+    RETIRED_CRON,
+    SCHEDULE_NOTE,
     _basic_freshclam_conf,
-    _cron_line_for_schedule,
-    _scan_command_for_paths,
     _validate_scan_schedule,
     build_disable_plan,
+)
+from backend.services.av_scan_schedule import (
+    _cron_line_for_schedule,
+    _scan_command_for_paths,
 )
 
 
@@ -298,60 +302,6 @@ def test_scan_command_quotes_paths_with_spaces():
 # ---------------------------------------------------------------------------
 
 
-def test_deploy_plan_with_schedule_emits_cron_d_file_on_linux():
-    plan = build_deploy_plan(
-        {"platform": "Linux", "platform_release": "Ubuntu 24.04"},
-        antivirus_package="clamav",
-        options={
-            "scan_schedule": {
-                "frequency": "weekly",
-                "day_of_week": 0,
-                "hour": 2,
-                "scan_paths": ["/var/www"],
-            }
-        },
-    )
-    cron_files = [f for f in plan["files"] if "cron.d" in f["path"]]
-    assert len(cron_files) == 1
-    body = cron_files[0]["content"]
-    assert "/var/www" in body
-    assert "clamdscan" in body
-    # Plan also surfaces the normalized schedule for the API to echo back.
-    assert plan["scan_schedule"]["frequency"] == "weekly"
-
-
-def test_deploy_plan_without_schedule_omits_cron_file():
-    plan = build_deploy_plan(
-        {"platform": "Linux", "platform_release": "Ubuntu 24.04"},
-        antivirus_package="clamav",
-    )
-    assert not any("cron.d" in f["path"] for f in plan["files"])
-    assert plan["scan_schedule"] is None
-
-
-def test_deploy_plan_with_schedule_emits_schtasks_on_windows():
-    plan = build_deploy_plan(
-        {"platform": "Windows"},
-        antivirus_package="clamwin",
-        options={
-            "scan_schedule": {
-                "frequency": "daily",
-                "hour": 3,
-                "minute": 0,
-            }
-        },
-    )
-    sched_cmds = [
-        c
-        for c in plan["commands"]
-        if c["argv"][0] == "schtasks" and "SysManage ClamAV Scan" in c["argv"]
-    ]  # the definition-update task is separate
-    assert len(sched_cmds) == 1
-    argv = sched_cmds[0]["argv"]
-    assert "/SC" in argv and "DAILY" in argv
-    assert "/ST" in argv and "03:00" in argv
-
-
 def test_deploy_plan_freebsd_emits_cron_file_for_schedule():
     plan = build_deploy_plan(
         {"platform": "FreeBSD"},
@@ -362,22 +312,6 @@ def test_deploy_plan_freebsd_emits_cron_file_for_schedule():
     )
     cron_files = [f for f in plan["files"] if "cron.d" in f["path"]]
     assert len(cron_files) == 1
-
-
-def test_deploy_plan_openbsd_skips_cron_file_for_schedule():
-    # OpenBSD/NetBSD/macOS go through the BSD path but only FreeBSD has /etc/cron.d.
-    # The other BSDs should NOT have a cron file emitted (they use crontab(1) directly).
-    plan = build_deploy_plan(
-        {"platform": "OpenBSD"},
-        antivirus_package="clamav",
-        options={
-            "scan_schedule": {"frequency": "daily", "hour": 3},
-        },
-    )
-    cron_files = [f for f in plan["files"] if "cron.d" in f["path"]]
-    assert cron_files == []
-    # But the schedule still propagates through the plan for callers to honor.
-    assert plan["scan_schedule"] is not None
 
 
 # ---------------------------------------------------------------------------
@@ -498,54 +432,6 @@ def test_enable_plan_unknown_platform_falls_back_to_linux_default():
 # ---------------------------------------------------------------------------
 
 
-def test_deploy_windows_weekly_schedule_pins_day_of_week():
-    plan = build_deploy_plan(
-        {"platform": "Windows"},
-        antivirus_package="clamwin",
-        options={
-            "scan_schedule": {
-                "frequency": "weekly",
-                "day_of_week": 3,  # Wednesday
-                "hour": 4,
-                "minute": 30,
-            }
-        },
-    )
-    sched_cmd = next(
-        c for c in plan["commands"] if "SysManage ClamAV Scan" in c["argv"]
-    )
-    argv = sched_cmd["argv"]
-    assert "WEEKLY" in argv
-    # /D WED should be present.
-    assert "/D" in argv
-    assert "WED" in argv
-
-
-def test_deploy_windows_monthly_schedule_pins_day_of_month():
-    plan = build_deploy_plan(
-        {"platform": "Windows"},
-        antivirus_package="clamwin",
-        options={
-            "scan_schedule": {
-                "frequency": "monthly",
-                "day_of_month": 15,
-                "hour": 1,
-                "minute": 0,
-            }
-        },
-    )
-    sched_cmd = next(
-        c for c in plan["commands"] if "SysManage ClamAV Scan" in c["argv"]
-    )
-    argv = sched_cmd["argv"]
-    assert "MONTHLY" in argv
-    assert "/D" in argv
-    assert "15" in argv
-
-
-# -- 2026-09-30: the package's own layout, not Linux's, on every platform ------
-
-
 def _file(plan, suffix):
     return next(f for f in plan["files"] if f["path"].endswith(suffix))
 
@@ -664,23 +550,6 @@ def _ubuntu(host_id=None):
     return info
 
 
-def test_hosts_on_one_policy_do_not_all_scan_at_the_same_minute():
-    import uuid  # pylint: disable=import-outside-toplevel
-
-    # Fixed ids: the spread is a hash of the host id, and 40 random ids landed
-    # on as few as 25 distinct minutes often enough to fail CI at random.
-    times = set()
-    for i in range(40):
-        plan = build_deploy_plan(
-            _ubuntu(str(uuid.uuid5(uuid.NAMESPACE_DNS, f"host-{i}"))), "clamav",
-            {"scan_schedule": {"frequency": "daily", "hour": 3, "minute": 0}},
-        )  # fmt: skip
-        sched = plan["scan_schedule"]
-        assert 3 * 60 <= sched["hour"] * 60 + sched["minute"] < 3 * 60 + 60
-        times.add((sched["hour"], sched["minute"]))
-    assert len(times) > 20
-
-
 def test_a_hosts_scan_time_is_stable():
     opts = {"scan_schedule": {"frequency": "daily", "hour": 3, "minute": 0}}
     first = build_deploy_plan(_ubuntu("host-a"), "clamav", opts)
@@ -688,24 +557,51 @@ def test_a_hosts_scan_time_is_stable():
     assert first["scan_schedule"] == again["scan_schedule"]
 
 
-def test_a_late_scan_never_moves_to_the_next_day():
-    import uuid  # pylint: disable=import-outside-toplevel
+# 2026-11-25 (Bryan): scans are scheduled in SysManage and run through the
+# agent.  A deploy no longer puts a scan on the host's cron / Task Scheduler
+# (those results reached nobody) and replaces one put there before.
+_DAILY = {"frequency": "daily", "hour": 3, "minute": 0, "scan_paths": ["/home"]}
 
-    for _ in range(40):
+
+def test_linux_deploy_puts_no_scan_on_cron_and_retires_an_old_one():
+    for options in ({}, {"scan_schedule": _DAILY}):
         plan = build_deploy_plan(
-            _ubuntu(str(uuid.uuid4())), "clamav",
-            {"scan_schedule": {"frequency": "weekly", "hour": 23, "minute": 30,
-                               "day_of_week": 2}},
-        )  # fmt: skip
-        sched = plan["scan_schedule"]
-        assert sched["hour"] == 23 and 30 <= sched["minute"] <= 59
-        assert sched["day_of_week"] == 2
+            {"platform": "Linux", "platform_release": "Ubuntu 24.04", "id": "h1"},
+            antivirus_package="clamav",
+            options=options,
+        )
+        cron = next(
+            f for f in plan["files"] if f["path"] == "/etc/cron.d/sysmanage-clamscan"
+        )
+        assert cron["content"] == RETIRED_CRON and "clamscan -" not in cron["content"]
+        assert plan["scan_schedule"] is None
+    assert plan["note"] == SCHEDULE_NOTE  # the caller is told where it went
 
 
-def test_without_a_host_id_the_schedule_is_unchanged():
-    plan = build_deploy_plan(
-        _ubuntu(),
-        "clamav",
-        {"scan_schedule": {"frequency": "daily", "hour": 3, "minute": 0}},
-    )
-    assert (plan["scan_schedule"]["hour"], plan["scan_schedule"]["minute"]) == (3, 0)
+def test_freebsd_retires_its_cron_scan_and_openbsd_never_had_one():
+    plan = build_deploy_plan({"platform": "FreeBSD"}, antivirus_package="clamav",
+                             options={"scan_schedule": _DAILY})  # fmt: skip
+    cron = [f for f in plan["files"] if f["path"] == "/etc/cron.d/sysmanage-clamscan"]
+    assert cron and cron[0]["content"] == RETIRED_CRON and cron[0]["group"] == "wheel"
+    openbsd = build_deploy_plan({"platform": "OpenBSD"}, antivirus_package="clamav")
+    assert not [f for f in openbsd["files"] if "cron" in f["path"]]
+
+
+def test_windows_deletes_its_old_scan_task_and_creates_none():
+    plan = build_deploy_plan({"platform": "Windows"}, antivirus_package="clamav",
+                             options={"scan_schedule": _DAILY})  # fmt: skip
+    argvs = [c["argv"] for c in plan["commands"] if "argv" in c]
+    creates = [a for a in argvs if a[:2] == ["schtasks", "/Create"]]
+    assert all("clamscan" not in " ".join(a) for a in creates)
+    deletes = [a for a in argvs if a[:2] == ["schtasks", "/Delete"]]
+    assert deletes and all(a[-1] == "/F" for a in deletes)
+    assert plan["scan_schedule"] is None
+
+
+def test_a_bad_scan_schedule_is_still_refused():
+    with pytest.raises(ValueError):
+        build_deploy_plan(
+            {"platform": "Linux", "platform_release": "Ubuntu 24.04"},
+            antivirus_package="clamav",
+            options={"scan_schedule": {"frequency": "hourly"}},
+        )
