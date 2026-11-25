@@ -717,7 +717,8 @@ def _discover_apt_root(distro: str, version: str):
             break
     if apt_root is None:
         return None, _count_packages(base)
-    rel = os.path.relpath(apt_root, REPO_ROOT)
+    # a URL path: forward slashes even on Windows
+    rel = os.path.relpath(apt_root, REPO_ROOT).replace(os.sep, "/")
     return rel, _count_packages(os.path.join(apt_root, "pool"), (".deb",))
 
 
