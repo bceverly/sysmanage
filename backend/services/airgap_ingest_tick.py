@@ -672,16 +672,40 @@ def _mirror_base_url() -> str:
     return f"http://{host}/airgap-repo"  # NOSONAR S5332 - air-gap LAN repo, no PKI in the enclave; agents fetch over http intentionally
 
 
+# The package files each family's repository holds (apt is counted under
+# its pool/).  Counting only .deb showed an Alpine mirror of 6.5 GB as 0
+# packages (2026-11-25).
+_PACKAGE_SUFFIXES = (
+    ".deb",
+    ".apk",
+    ".rpm",
+    ".pkg.tar.zst",
+    ".pkg.tar.xz",
+    ".pkg",
+    ".tgz",
+)
+
+
+def _count_packages(top: str, suffixes=_PACKAGE_SUFFIXES) -> int:
+    count = 0
+    for _root, _dirs, files in os.walk(top):
+        count += sum(1 for f in files if f.endswith(suffixes))
+    return count
+
+
 def _discover_apt_root(distro: str, version: str):
-    """Locate the real apt repo root for a copied target and count debs.
+    """Locate the real apt repo root for a copied target and count its
+    packages.
 
     The collector mirrors with ``apt-mirror``, whose on-disk layout
     nests the serveable tree under ``mirror/<upstream-host>/<path>`` (a
     metadata-only ``skel/`` sits alongside it).  Rather than assume a
     flat tree, find the directory that holds BOTH ``dists/`` and
     ``pool/`` -- that's the apt root.  Returns
-    ``(relpath_from_REPO_ROOT, deb_count)`` or ``(None, None)`` when the
-    tree isn't found (best-effort; caller falls back).
+    ``(relpath_from_REPO_ROOT, deb_count)``; a tree with no apt root (an
+    apk, rpm or BSD mirror) is ``(None, package_count)`` and the caller
+    serves it from ``<distro>/<version>``; no tree at all is
+    ``(None, None)``.
     """
     base = os.path.join(REPO_ROOT, distro, version)
     if not os.path.isdir(base):
@@ -692,12 +716,9 @@ def _discover_apt_root(distro: str, version: str):
             apt_root = root
             break
     if apt_root is None:
-        return None, None
+        return None, _count_packages(base)
     rel = os.path.relpath(apt_root, REPO_ROOT)
-    count = 0
-    for _root, _dirs, files in os.walk(os.path.join(apt_root, "pool")):
-        count += sum(1 for f in files if f.endswith(".deb"))
-    return rel, count
+    return rel, _count_packages(os.path.join(apt_root, "pool"), (".deb",))
 
 
 def _register_local_repositories(session, run) -> None:

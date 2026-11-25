@@ -203,6 +203,27 @@ Index(
 )
 
 
+class DispatchCorrelation(Base):
+    """Which engine a dispatched plan's result belongs to (q115, 2026-11-25).
+
+    A Pro+ dispatch (an air-gap collection stage, a mirror sync, a host
+    operation ...) queues a plan and must route the agent's command_result
+    back to its engine.  That map was process memory only, and with several
+    server workers the result is often handled by a worker that never saw
+    the dispatch: it was dropped, and the run waited forever.  Kept here,
+    in the database that holds the host's queue, any worker routes it.
+    """
+
+    __tablename__ = "dispatch_correlation"
+
+    # The queue message_id the agent echoes back as command_result.command_id.
+    message_id = Column(String(80), primary_key=True)
+    engine = Column(String(40), nullable=False)
+    primary_id = Column(String(255), nullable=False)
+    host_id = Column(String(64), nullable=False)
+    created_at = Column(DateTime, nullable=False, index=True)
+
+
 class QueueMetrics(Base):
     """
     This class holds the object mapping for the queue_metrics table in the

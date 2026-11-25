@@ -164,7 +164,7 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
         try:
             from backend.services.proplus_dispatch import route_proplus_command_result
 
-            if route_proplus_command_result(command_id, message_data):
+            if route_proplus_command_result(command_id, message_data, db):
                 return None
         except Exception as exc:
             logger.warning("Pro+ command_result routing failed: %s", exc)

@@ -190,22 +190,40 @@ def manifest_entry(run_id: Any) -> Optional[Dict[str, Any]]:
     return entry if isinstance(entry, dict) and entry.get("sha256") else None
 
 
+def check_file(staging_dir: str, name: str) -> str:
+    """Where a collection's ``sha256sum -c`` list goes: beside the staging
+    tree, not in it (not on the disc).  Its paths are absolute -- the
+    agent runs plan commands from its own directory, and the disc's
+    SHA256SUMS (bare names, for checking on the disc itself) could never
+    be checked from there (2026-11-24)."""
+    return f"{staging_dir.rstrip('/')}.checks/{name}.sha256"
+
+
 def stage_plan(run_id: Any, staging_dir: str, entry: Dict[str, Any]) -> Dict[str, List]:
     """``{files, commands}`` the collector host's agent runs: the catalog
-    copied into the staging tree and checked.  Errors ignored: a missing
-    catalog never fails the operating-system mirror run -- the repository
-    side loads only a file whose hash the signed manifest names."""
+    copied into the staging tree and checked.  The collection plan runs on
+    the collector itself, so the export is a local file.  Errors ignored: a
+    missing catalog never fails the operating-system mirror run -- the
+    repository side loads only a file whose hash the signed manifest names.
+
+    Copied with ``install``, which the agent's sudoers grants on every
+    platform; ``cp`` it does not, and a copy that sudo refused left a disc
+    whose manifest named a catalog it did not carry (2026-11-24)."""
     folder = f"{staging_dir}/{CATALOG_DIR}"
     source = posixpath.join(export_dir(run_id), CATALOG_FILE)
+    dest = f"{folder}/{entry['name']}"
+    check = check_file(staging_dir, "security-catalog")
     return {
         "files": [{"path": f"{folder}/SHA256SUMS",
                    "content": f"{entry['sha256']}  {entry['name']}\n",
+                   "permissions": "0644", "owner_uid": 0, "owner_gid": 0},
+                  {"path": check, "content": f"{entry['sha256']}  {dest}\n",
                    "permissions": "0644", "owner_uid": 0, "owner_gid": 0}],
         "commands": [
             _cmd(["sudo", "mkdir", "-p", folder], 60, "security catalog folder"),
-            _cmd(["sudo", "cp", source, f"{folder}/{entry['name']}"], 600,
-                 "copy the security catalog"),
-            _cmd(["sudo", "sha256sum", "-c", "--quiet", f"{folder}/SHA256SUMS"], 600,
+            _cmd(["sudo", "install", "-m", "0644", "-o", "0", "-g", "0", "--", source, dest],
+                 600, "copy the security catalog"),
+            _cmd(["sudo", "sha256sum", "-c", "--quiet", check], 600,
                  "check the security catalog"),
         ],
     }  # fmt: skip

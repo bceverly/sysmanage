@@ -95,3 +95,30 @@ def test_the_fleet_restore_tables_come_and_go():
         _alembic(["upgrade", "head"], db_path)
     finally:
         os.unlink(db_path)
+
+
+def test_the_dispatch_correlation_table_comes_and_goes():
+    fd, db_path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+
+    def present():
+        conn = sqlite3.connect(db_path)
+        try:
+            return {
+                r[0]
+                for r in conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                )
+            }
+        finally:
+            conn.close()
+
+    try:
+        _alembic(["upgrade", "head"], db_path)
+        assert "dispatch_correlation" in present()
+        _alembic(["downgrade", "q114fleetrestore"], db_path)
+        assert "dispatch_correlation" not in present()
+        _alembic(["upgrade", "head"], db_path)
+        assert "dispatch_correlation" in present()
+    finally:
+        os.unlink(db_path)

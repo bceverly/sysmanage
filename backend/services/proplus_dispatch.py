@@ -28,7 +28,9 @@ import threading
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from backend.licensing.module_loader import module_loader
-from backend.persistence import db as _db, models
+from backend.persistence import db as _db
+from backend.persistence import models
+from backend.services import dispatch_correlations
 
 # VM/child-host stdout parsers + engine-path result-apply handlers live in
 # sibling modules (extracted to keep this file under pylint's max-module-lines);
@@ -61,18 +63,18 @@ from backend.services.child_host_result_handlers import (  # pylint: disable=unu
     _apply_child_host_update_agent_result,
     _outcome_error_text,
 )
-from backend.services.content_lifecycle_result_handlers import (  # pylint: disable=unused-import
+from backend.services.content_lifecycle_result_handlers import (
     _apply_content_lifecycle_op_result,
-)
+)  # pylint: disable=unused-import
 
 # Re-exported here under the legacy private name so the sister test module
 # ``test_proplus_dispatch_parsers`` doesn't have to chase the rename.
 from backend.services.proplus_capability_parser import (
     parse_capability_probe_stdout as _parse_capability_probe_stdout,
 )
-from backend.services.provisioning_result_handlers import (  # pylint: disable=unused-import
+from backend.services.provisioning_result_handlers import (
     _apply_provisioning_op_result,
-)
+)  # pylint: disable=unused-import
 
 # Repository-mirroring engine-path result handlers also live in a sibling module
 # (this file is the correlation/result-routing hub; the mirror-specific row
@@ -115,13 +117,44 @@ _CORRELATIONS_LOCK = threading.Lock()
 def _register_correlation(
     message_id: str, engine: str, primary_id: str, host_id: str
 ) -> None:
+    """Remember where a dispatch's result goes: in memory for this worker,
+    and in the host's database for any other worker that handles the result
+    (see ``dispatch_correlations``)."""
     with _CORRELATIONS_LOCK:
         _CORRELATIONS[message_id] = (engine, primary_id, host_id)
+    bind = _correlation_bind(host_id)
+    if bind is not None:
+        dispatch_correlations.save(bind, message_id, engine, primary_id, host_id)
 
 
-def _pop_correlation(message_id: str) -> Optional[Tuple[str, str, str]]:
+def _pop_correlation(message_id: str, db: Any = None) -> Optional[Tuple[str, str, str]]:
+    """The correlation for a result: this worker's memory first, else the
+    one another worker stored (claimed, so it is routed once)."""
     with _CORRELATIONS_LOCK:
-        return _CORRELATIONS.pop(message_id, None)
+        found = _CORRELATIONS.pop(message_id, None)
+    bind = db.get_bind() if db is not None else None
+    if found is not None:
+        bind = bind or _correlation_bind(found[2])
+        if bind is not None:
+            dispatch_correlations.forget(bind, message_id)
+        return found
+    if bind is None:
+        return None
+    return dispatch_correlations.take(bind, message_id)
+
+
+def _correlation_bind(host_id: str) -> Any:
+    """The database holding ``host_id``'s queue (where its correlation
+    lives), or None when it cannot be resolved."""
+    try:
+        return _outbound_engine(host_id)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.warning(
+            "no database for dispatch correlation (host %s): %s",
+            sanitize_log(host_id),
+            exc,
+        )
+        return None
 
 
 def correlation_count() -> int:
@@ -136,6 +169,40 @@ def enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
     internal private name is retained for the existing callers and
     their test fixtures."""
     return _enqueue_apply_plan(host_id, plan, timeout)
+
+
+def _outbound_engine(host_id: str) -> Any:
+    """The engine of the database that holds ``host_id`` (its queue)."""
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        get_request_engine,
+        tenant_engine_for_host,
+    )
+    from backend.persistence.tenant_context import get_active_tenant  # noqa: PLC0415
+
+    # Resolve the database that actually holds this host so the OUTBOUND command
+    # lands in its per-tenant queue and enqueue_message's host-existence check
+    # passes:
+    #   * Request context (a tenant is active): route to the request's ACTIVE
+    #     tenant -- the SAME database the handler read the host from (get_host
+    #     uses request_sessionmaker / get_request_engine, which honors this
+    #     ContextVar).  This is authoritative for "where the user is acting"; the
+    #     host→tenant index can lag or disagree with where the data actually is.
+    #   * Background context (no active tenant -- scheduler/queue processor):
+    #     resolve via the host→tenant index, since there is no request tenant.
+    # Both collapse to the bootstrap engine in single-tenant mode, so this is
+    # inert there.
+    active_tenant = get_active_tenant()
+    if active_tenant:
+        engine = get_request_engine()
+    else:
+        engine = tenant_engine_for_host(host_id) or get_request_engine()
+    logger.debug(
+        "proplus dispatch: routing OUTBOUND for host %s via %s (active_tenant=%s)",
+        sanitize_log(host_id),
+        "active-tenant" if active_tenant else "host-index",
+        sanitize_log(active_tenant),
+    )
+    return engine
 
 
 def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
@@ -175,35 +242,7 @@ def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
     # there.
     from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
-    from backend.persistence.partitions import (  # noqa: PLC0415
-        get_request_engine,
-        tenant_engine_for_host,
-    )
-    from backend.persistence.tenant_context import get_active_tenant  # noqa: PLC0415
-
-    # Resolve the database that actually holds this host so the OUTBOUND command
-    # lands in its per-tenant queue and enqueue_message's host-existence check
-    # passes:
-    #   * Request context (a tenant is active): route to the request's ACTIVE
-    #     tenant -- the SAME database the handler read the host from (get_host
-    #     uses request_sessionmaker / get_request_engine, which honors this
-    #     ContextVar).  This is authoritative for "where the user is acting"; the
-    #     host→tenant index can lag or disagree with where the data actually is.
-    #   * Background context (no active tenant -- scheduler/queue processor):
-    #     resolve via the host→tenant index, since there is no request tenant.
-    # Both collapse to the bootstrap engine in single-tenant mode, so this is
-    # inert there.
-    active_tenant = get_active_tenant()
-    if active_tenant:
-        engine = get_request_engine()
-    else:
-        engine = tenant_engine_for_host(host_id) or get_request_engine()
-    logger.debug(
-        "proplus dispatch: routing OUTBOUND for host %s via %s (active_tenant=%s)",
-        sanitize_log(host_id),
-        "active-tenant" if active_tenant else "host-index",
-        sanitize_log(active_tenant),
-    )
+    engine = _outbound_engine(host_id)
     session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     with session_local() as session:
         message_id = _queue_ops.enqueue_message(
@@ -421,9 +460,9 @@ def build_host_provider(db_maker: Callable) -> Callable[[], List[Any]]:
         # Collapses to the single application database when multi-tenancy is
         # off, so single-tenant behavior is unchanged.
         try:
-            from backend.persistence.partitions import (  # noqa: PLC0415
+            from backend.persistence.partitions import (
                 iter_host_databases,
-            )
+            )  # noqa: PLC0415
         except Exception:  # noqa: BLE001 - fall back rather than lose the fleet
             iter_host_databases = None
 
@@ -840,7 +879,9 @@ _SIMPLE_RESULT_HANDLERS = {
 }
 
 
-def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
+def route_proplus_command_result(
+    command_id: str, result_data: dict, db: Any = None
+) -> bool:
     """
     Route a command_result message to the right Pro+ engine, if it
     correlates to a Pro+ dispatch.
@@ -850,12 +891,14 @@ def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
                     command_result.command_id).
         result_data: The full command_result payload from the agent
                      (top-level keys: success, result, error, exit_code).
+        db: The session the result is handled in (the host's database),
+            where a correlation another worker stored is found.
 
     Returns:
         True if the result was routed to a Pro+ engine; False if no
         correlation exists (caller should continue with normal handling).
     """
-    correlation = _pop_correlation(command_id)
+    correlation = _pop_correlation(command_id, db)
     if correlation is None:
         return False
 

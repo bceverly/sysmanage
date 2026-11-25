@@ -93,11 +93,22 @@ def test_staging_copies_and_checks_the_file(tmp_path):
     entry = {"name": airgap_catalog.CATALOG_FILE, "sha256": "ab" * 32}
     plan = airgap_catalog.stage_plan("run-1", "/stage/run-1", entry)
     argvs = [c["argv"] for c in plan["commands"]]
-    assert argvs[1][:2] == ["sudo", "cp"] and argvs[2][:2] == ["sudo", "sha256sum"]
+    # install, not cp: the agent's sudoers grants install on every platform
+    # and never cp (a refused copy left a disc without its catalog).
+    dest = f"/stage/run-1/security-catalog/{airgap_catalog.CATALOG_FILE}"
+    assert argvs[1] == ["sudo", "install", "-m", "0644", "-o", "0", "-g", "0", "--",
+                        f"{airgap_catalog.EXPORT_ROOT}/run-1/{airgap_catalog.CATALOG_FILE}",
+                        dest]  # fmt: skip
     assert all(c["ignore_errors"] for c in plan["commands"])
     assert (
         plan["files"][0]["content"] == f"{'ab' * 32}  {airgap_catalog.CATALOG_FILE}\n"
     )
+    # Checked from absolute paths, kept off the disc: the agent's working
+    # directory is its own, where the disc's bare names never resolve.
+    check = plan["files"][1]
+    assert check["path"] == "/stage/run-1.checks/security-catalog.sha256"
+    assert check["content"] == f"{'ab' * 32}  {dest}\n"
+    assert argvs[2] == ["sudo", "sha256sum", "-c", "--quiet", check["path"]]
 
 
 def _on_media(collector, tmp_path):
@@ -168,7 +179,7 @@ def test_a_cve_run_stages_the_catalog_and_names_it_in_the_manifest(collector, tm
             run
         )  # pylint: disable=protected-access
     assert entry["cves"] == 1 and entry["advisories"] == 1
-    assert any(c["argv"][:2] == ["sudo", "cp"] for c in staged["commands"])
+    assert any(c["argv"][:2] == ["sudo", "install"] for c in staged["commands"])
     run.include_cve = False
     assert (
         airgap_run_tick._catalog_manifest(run) is None

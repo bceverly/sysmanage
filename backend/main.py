@@ -22,10 +22,15 @@ from backend.startup.cors_config import get_cors_origins
 from backend.startup.exception_handlers import register_exception_handlers
 from backend.startup.lifecycle import lifespan
 from backend.startup.logging_config import configure_logging
+from backend.startup.malloc_arenas import cap_arenas
 from backend.startup.openapi_config import get_openapi_kwargs
 from backend.startup.route_registration import register_app_routes, register_routes
 from backend.telemetry.otel_config import setup_telemetry, telemetry_settings
 from backend.utils.verbosity_logger import get_logger
+
+# Before the server starts its threads; again in each worker, which imports
+# this module.  See startup/malloc_arenas.py.
+cap_arenas()
 
 # Initialize logger for startup debugging
 startup_logger = get_logger("backend.startup")

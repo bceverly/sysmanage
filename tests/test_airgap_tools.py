@@ -100,8 +100,16 @@ def test_the_fetch_never_fails_the_mirror_run_and_is_checked():
     argvs = [c["argv"] for c in plan["commands"]]
     assert ["sudo", "curl", "-fsSL", "--max-time", "1800", "-o", f"{folder}/restate_1.0_amd64.deb",
             "https://x/r.deb"] in argvs  # fmt: skip
-    assert argvs[-1] == ["sudo", "sha256sum", "-c", "--quiet", f"{folder}/SHA256SUMS"]
+    # The disc keeps bare names; the check reads absolute paths from a list
+    # beside the staging tree (the agent does not run in the folder).
     assert plan["files"][0]["content"] == f"{SHA}  restate_1.0_amd64.deb\n"
+    check = plan["files"][1]
+    assert (
+        check["path"]
+        == "/var/lib/sysmanage/airgap-staging/r1.checks/tools-ubuntu-noble.sha256"
+    )
+    assert check["content"] == f"{SHA}  {folder}/restate_1.0_amd64.deb\n"
+    assert argvs[-1] == ["sudo", "sha256sum", "-c", "--quiet", check["path"]]
     # The signed manifest carries names and hashes, never a URL.
     entry = tools.manifest_entries([target])[0]
     assert entry["files"] == [{"name": "restate_1.0_amd64.deb", "sha256": SHA}]

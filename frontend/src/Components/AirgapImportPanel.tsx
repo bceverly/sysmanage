@@ -34,6 +34,8 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useTranslation } from 'react-i18next';
 
 import axiosInstance from '../Services/api';
+import { formatUTCTimestamp } from '../utils/dateUtils';
+import { appLocale } from '../utils/locale';
 
 const STATUS_URL = '/api/v1/airgap/import-device/status';
 const INGEST_URL = '/api/v1/airgap/repository/ingest-device';
@@ -187,7 +189,11 @@ const AirgapImportPanel: React.FC<Props> = ({ onComplete }) => {
         return t(
           'airgapImport.notice.catalogLoaded',
           'Security catalog loaded: {{cves}} CVEs and {{advisories}} advisories, made by the collector at {{made}}.',
-          { cves: p.cves ?? 0, advisories: p.advisories ?? 0, made: p.generated_at ?? '' },
+          {
+            cves: Number(p.cves ?? 0).toLocaleString(appLocale()),
+            advisories: Number(p.advisories ?? 0).toLocaleString(appLocale()),
+            made: formatUTCTimestamp(p.generated_at == null ? null : String(p.generated_at), ''),
+          },
         );
       case 'catalog_refused':
         return t(

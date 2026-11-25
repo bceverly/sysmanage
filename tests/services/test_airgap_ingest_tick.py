@@ -561,3 +561,35 @@ def test_run_one_tick_skips_inflight(db_session):
     db_session.expire_all()
     reread = db_session.query(models.AirgapIngestionRun).filter_by(id=run_id).first()
     assert reread.status == "QUEUED"
+
+
+def _touch(path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b"")
+
+
+def test_an_apt_tree_counts_its_debs_under_pool(tmp_path, monkeypatch):
+    monkeypatch.setattr(tick, "REPO_ROOT", str(tmp_path))
+    root = tmp_path / "ubuntu" / "noble" / "mirror" / "archive.ubuntu.com" / "ubuntu"
+    (root / "dists").mkdir(parents=True)
+    _touch(root / "pool" / "main" / "a" / "a_1.0_amd64.deb")
+    _touch(root / "pool" / "main" / "b" / "b_1.0_amd64.deb")
+    _touch(tmp_path / "ubuntu" / "noble" / "skel" / "stray.deb")
+    assert tick._discover_apt_root("ubuntu", "noble") == (
+        "ubuntu/noble/mirror/archive.ubuntu.com/ubuntu",
+        2,
+    )
+
+
+def test_an_alpine_tree_counts_its_apks(tmp_path, monkeypatch):
+    """A 6.5 GB Alpine mirror showed 0 packages: only .deb was counted."""
+    monkeypatch.setattr(tick, "REPO_ROOT", str(tmp_path))
+    arch = tmp_path / "alpine" / "3.22" / "x86_64"
+    for name in ("7zip-24.09-r0.apk", "aaudit-0.7.2-r3.apk", "APKINDEX.tar.gz"):
+        _touch(arch / name)
+    assert tick._discover_apt_root("alpine", "3.22") == (None, 2)
+
+
+def test_no_tree_is_unknown(tmp_path, monkeypatch):
+    monkeypatch.setattr(tick, "REPO_ROOT", str(tmp_path))
+    assert tick._discover_apt_root("rocky", "9") == (None, None)

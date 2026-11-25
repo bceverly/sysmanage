@@ -14,8 +14,10 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, test, expect, beforeEach, afterEach } from "vitest";
 
-const t = (key: string, fallback?: string) =>
-  typeof fallback === "string" ? fallback : key;
+const t = (key: string, fallback?: string, values?: Record<string, unknown>) =>
+  (typeof fallback === "string" ? fallback : key).replace(/{{(\w+)}}/g, (_m, name: string) =>
+    String(values?.[name] ?? ""),
+  );
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t, i18n: { language: "en" } }),
 }));
@@ -193,7 +195,11 @@ describe("what an ingest found after it completed (2026-11-24)", () => {
     ]);
     render(<AirgapImportPanel />);
     expect(await screen.findByText(/tools repository .* was not built/i)).toBeTruthy();
-    expect(screen.getByText(/Security catalog loaded/i)).toBeTruthy();
+    const loaded = screen.getByText(/Security catalog loaded/i).textContent || "";
+    // Counts grouped and the collector's moment as a local date, never raw
+    // ("104525 CVEs ... at 2026-11-25T02:51:42.936752", 2026-11-25).
+    expect(loaded).toMatch(/151,035 CVEs and 47,114 advisories/);
+    expect(loaded).not.toMatch(/T22:53:59/);
     expect(screen.getByText(/does not match its signed manifest/i)).toBeTruthy();
   });
 

@@ -397,7 +397,13 @@ def fetch_plan(staging_dir: str, tools: List[Dict[str, Any]]) -> Dict[str, List]
         sums = "".join(f"{i['sha256']}  {i['name']}\n" for i in items)
         files.append({"path": f"{folder}/SHA256SUMS", "content": sums, "permissions": "0644",
                       "owner_uid": 0, "owner_gid": 0})  # fmt: skip
-        commands.append(_cmd(["sudo", "sha256sum", "-c", "--quiet", f"{folder}/SHA256SUMS"], 600,
+        # Checked from a list of absolute paths beside the staging tree: the
+        # agent's working directory is its own, where the disc's bare names
+        # never resolved (every check failed, 2026-11-24).
+        check = f"{staging_dir.rstrip('/')}.checks/tools-{target['distro']}-{target['version']}.sha256"
+        files.append({"path": check, "permissions": "0644", "owner_uid": 0, "owner_gid": 0,
+                      "content": "".join(f"{i['sha256']}  {folder}/{i['name']}\n" for i in items)})  # fmt: skip
+        commands.append(_cmd(["sudo", "sha256sum", "-c", "--quiet", check], 600,
                              f"check the tools for {target['distro']} {target['version']}"))  # fmt: skip
     return {"files": files, "commands": commands}
 
