@@ -1,5 +1,5 @@
 Name:           sysmanage
-Version:        3.15.0.19
+Version:        3.15.0.20
 Release:        1
 Summary:        Centralized system management server with web-based interface
 
