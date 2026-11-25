@@ -1231,6 +1231,7 @@
     "reasonUnsupportedArch": "이 아키텍처용 빌드가 없습니다",
     "reasonUnsupportedOs": "이 OS에서는 지원되지 않음",
     "reasonWrongPlatform": "이 운영 체제에는 적용되지 않습니다.",
+    "reasonNoZfs": "ZFS가 필요하지만 이 호스트는 ZFS를 사용하지 않습니다",
     "supported": "지원됨",
     "title": "Agent 기능",
     "unavailable": "사용 불가능",

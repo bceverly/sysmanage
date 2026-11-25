@@ -1231,6 +1231,7 @@
     "reasonUnsupportedArch": "لا يوجد بناء لهذا الأرثيكتور",
     "reasonUnsupportedOs": "غير مدعوم على هذه النظام التشغيلي",
     "reasonWrongPlatform": "غير قابل للتطبيق على هذا النظام الأساسي",
+    "reasonNoZfs": "يتطلب ZFS، وهذا المضيف لا يستخدمه",
     "supported": "مدعوم",
     "title": "قدرات الوكيل",
     "unavailable": "غير متاح",

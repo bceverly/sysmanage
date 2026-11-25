@@ -1231,6 +1231,7 @@
     "reasonUnsupportedArch": "Geen build voor deze architectuur",
     "reasonUnsupportedOs": "Niet ondersteund op dit OS",
     "reasonWrongPlatform": "Niet van toepassing voor dit besturingssysteem",
+    "reasonNoZfs": "Vereist ZFS, dat deze host niet gebruikt",
     "supported": "Ondersteund",
     "title": "Agent Capaciteiten",
     "unavailable": "Niet beschikbaar",

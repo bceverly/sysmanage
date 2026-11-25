@@ -1231,6 +1231,7 @@
     "reasonUnsupportedArch": "このアーキテクチャ用のビルドなし",
     "reasonUnsupportedOs": "このOSではサポート外",
     "reasonWrongPlatform": "このオペレーティングシステムには適用されません",
+    "reasonNoZfs": "ZFS が必要ですが、このホストは ZFS を使用していません",
     "supported": "サポートされています",
     "title": "エージェントの機能",
     "unavailable": "利用できません",

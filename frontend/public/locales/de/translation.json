@@ -1231,6 +1231,7 @@
     "reasonUnsupportedArch": "Keine Buildfunktion für diese Architektur",
     "reasonUnsupportedOs": "Nicht auf dieser OS-Plattform unterstützt",
     "reasonWrongPlatform": "Nicht für dieses Betriebssystem gültig",
+    "reasonNoZfs": "Erfordert ZFS, das dieser Host nicht verwendet",
     "supported": "Unterstützt",
     "title": "Agent-Funktionalitäten",
     "unavailable": "Nicht verfügbar",

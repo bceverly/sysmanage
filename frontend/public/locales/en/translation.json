@@ -1250,6 +1250,7 @@
     "reasonUnsupportedArch": "No build for this architecture",
     "reasonUnsupportedOs": "Not supported on this OS",
     "reasonWrongPlatform": "Not applicable to this operating system",
+    "reasonNoZfs": "Needs ZFS, which this host does not use",
     "supported": "Supported",
     "title": "Agent Capabilities",
     "unavailable": "Unavailable",

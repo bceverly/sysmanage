@@ -282,7 +282,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
     // Swallow i18next's Locize sponsor banner -- a benign line printed on init
-    // in v25 (despite showSupportNotice:false) that only clutters test output.
+    // since v25 that only clutters test output.
     // (jsdom's "Not implemented: navigation" notice can't be filtered here: its
     // default VirtualConsole writes straight to process.stderr, below vitest's
     // console-intercept layer.) Every other log passes through unchanged.

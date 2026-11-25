@@ -1231,6 +1231,7 @@
     "reasonUnsupportedArch": "此架构没有构建版本",
     "reasonUnsupportedOs": "不受支持的操作系统",
     "reasonWrongPlatform": "不适用于此操作系统",
+    "reasonNoZfs": "需要 ZFS，而此主机未使用 ZFS",
     "supported": "受支持",
     "title": "代理功能",
     "unavailable": "不可用",

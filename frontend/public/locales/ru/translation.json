@@ -1231,6 +1231,7 @@
     "reasonUnsupportedArch": "Нет сборки для этой архитектуры",
     "reasonUnsupportedOs": "Не поддерживается на этой ОС",
     "reasonWrongPlatform": "Неприменимо к этой операционной системе",
+    "reasonNoZfs": "Требуется ZFS, которую этот хост не использует",
     "supported": "Поддерживается",
     "title": "Возможности агента",
     "unavailable": "Недоступно",

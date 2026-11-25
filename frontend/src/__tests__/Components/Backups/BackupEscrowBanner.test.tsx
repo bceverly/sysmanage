@@ -22,7 +22,10 @@ vi.mock("../../../Services/backups", async (importOriginal) => {
 import { getEscrowStatus } from "../../../Services/backups";
 import type { EscrowStatus } from "../../../Services/backups";
 import BackupEscrowBanner, { escrowMessage } from "../../../Components/Backups/BackupEscrowBanner";
-import { t } from "../TimeSync/_i18nMock";
+import type { TFunction } from "i18next";
+import { t as mockT } from "../TimeSync/_i18nMock";
+
+const t = mockT as unknown as TFunction;
 
 const status = (over: Partial<EscrowStatus> = {}): EscrowStatus => ({
   applies: true, encrypted_hosts: 2, covered_hosts: 1, stale_hosts: ["mail.lab"],

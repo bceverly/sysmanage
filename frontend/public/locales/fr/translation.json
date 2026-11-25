@@ -1231,6 +1231,7 @@
     "reasonUnsupportedArch": "Aucune construction pour cette architecture",
     "reasonUnsupportedOs": "Non pris en charge sur ce système d'exploitation",
     "reasonWrongPlatform": "Non applicable pour ce système d'exploitation",
+    "reasonNoZfs": "Nécessite ZFS, que cet hôte n'utilise pas",
     "supported": "Prise en charge",
     "title": "Capacités de l'agent",
     "unavailable": "Indisponible",

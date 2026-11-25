@@ -10,13 +10,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { Alert, Button } from '@mui/material';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { getEscrowStatus, EscrowStatus } from '../../Services/backups';
 
 /** The banner's text: why the export is out of date. */
 export const escrowMessage = (
-    t: (key: string, fallback: string, values?: Record<string, unknown>) => string,
+    t: TFunction,
     status: EscrowStatus,
 ): string => {
     if (!status.last_export) {

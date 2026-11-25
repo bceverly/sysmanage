@@ -323,19 +323,22 @@ def _commands(copy: models.BackupOffsiteCopy) -> List[str]:
     bucket, region = copy.bucket, copy.region
     location = ("" if region == "us-east-1"
                 else f" --create-bucket-configuration LocationConstraint={region}")  # fmt: skip
-    return [
-        f"aws s3api create-bucket --bucket {bucket} --region {region}{location} "
-        "--object-lock-enabled-for-bucket",
-        f"aws s3api put-public-access-block --bucket {bucket} --public-access-block-configuration "
-        "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,"
-        "RestrictPublicBuckets=true",
-        f"aws s3api put-bucket-lifecycle-configuration --bucket {bucket} "
-        "--lifecycle-configuration file://lifecycle.json",
-        "aws iam create-user --user-name sysmanage-offsite",
-        "aws iam put-user-policy --user-name sysmanage-offsite --policy-name "
-        "sysmanage-offsite --policy-document file://iam-policy.json",
-        "aws iam create-access-key --user-name sysmanage-offsite",
-    ]
+    # One list per command, joined by spaces: no implicit concatenation in a
+    # list, where a missing comma would silently merge two commands.
+    commands = [
+        ["aws s3api create-bucket", f"--bucket {bucket} --region {region}{location}",
+         "--object-lock-enabled-for-bucket"],
+        ["aws s3api put-public-access-block", f"--bucket {bucket}",
+         "--public-access-block-configuration",
+         "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"],
+        ["aws s3api put-bucket-lifecycle-configuration", f"--bucket {bucket}",
+         "--lifecycle-configuration file://lifecycle.json"],
+        ["aws iam create-user --user-name sysmanage-offsite"],
+        ["aws iam put-user-policy --user-name sysmanage-offsite",
+         "--policy-name sysmanage-offsite --policy-document file://iam-policy.json"],
+        ["aws iam create-access-key --user-name sysmanage-offsite"],
+    ]  # fmt: skip
+    return [" ".join(parts) for parts in commands]
 
 
 def summary(db: Session, copy: models.BackupOffsiteCopy) -> Dict[str, Any]:

@@ -33,7 +33,6 @@ void i18n
     // (i18next splits region codes on '-').
     load: 'languageOnly',
     debug: false,
-    showSupportNotice: false,
     
     interpolation: {
       escapeValue: false,

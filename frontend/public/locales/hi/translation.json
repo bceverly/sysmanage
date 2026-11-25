@@ -1231,6 +1231,7 @@
     "reasonUnsupportedArch": "यह आर्किटेक्चर के लिए बनाया नहीं गया है",
     "reasonUnsupportedOs": "इस OS पर समर्थित नहीं है",
     "reasonWrongPlatform": "इस ऑपरेटिंग सिस्टम के लिए लागू नहीं है",
+    "reasonNoZfs": "ZFS आवश्यक है, जिसका यह होस्ट उपयोग नहीं करता",
     "supported": "समर्थित",
     "title": "एजेंट कैपABILITY",
     "unavailable": "उपलब्ध नहीं",

@@ -96,6 +96,7 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
             missing_nfs_client: t('hostCapabilities.reasonMissingNfsClient',
                 'The NFS client is not installed on this host (Equip for backup installs it)'),
             wrong_platform: t('hostCapabilities.reasonWrongPlatform', 'Not applicable to this operating system'),
+            no_zfs: t('hostCapabilities.reasonNoZfs', 'Needs ZFS, which this host does not use'),
             build_excluded: t('hostCapabilities.reasonBuildExcluded', 'Omitted from this agent build'),
         };
         // An unknown code from a newer agent still tells the operator something,
