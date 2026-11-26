@@ -204,7 +204,16 @@ def _latest_runs(db, rollout_id, index) -> List[Dict[str, Any]]:
     for run in runs:
         latest[str(run.host_id)] = run
     return [
-        {"host_id": host_id, "status": run.status, "reboot_status": run.reboot_status}
+        {
+            "host_id": host_id,
+            "status": run.status,
+            "reboot_status": run.reboot_status,
+            # It applied a fix for a critical CVE: the gate skips the soak.
+            "critical": any(
+                isinstance(p, dict) and p.get("kind") == "critical"
+                for p in run.packages or []
+            ),
+        }
         for host_id, run in latest.items()
     ]
 
@@ -328,6 +337,17 @@ def advance(db, eng, rollout, profile_row, now, summary=None) -> None:
             _keep_waiting(rollout, index, gate, now)
             return
         _finish_stage(rollout, index, gate, now)
+        if gate.get("reason") == "critical_fix":
+            _audit(
+                db,
+                rollout,
+                _(
+                    "Rollout of policy '%(policy)s' moved on from fleet "
+                    "'%(fleet)s' without the waiting time: the fleet applied "
+                    "a critical fix and stayed healthy"
+                )
+                % {"policy": rollout.profile_name, "fleet": stage["name"]},
+            )
         if index + 1 >= len(rollout.stages):
             _complete(db, rollout, now)
             return

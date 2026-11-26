@@ -741,8 +741,11 @@ def test_a_firmware_install_command_names_the_fwupd_device():
     firmware = SimpleNamespace(
         package_name="Microsoft UEFI dbx (→ 20260707)",
         bundle_id="362301da643102b9f38477387e2193e57abaa590",
-        package_manager="fwupd",
-    )
+        package_manager="fwupd", current_version="20250902", available_version="20260707",
+    )  # fmt: skip
     assert command_package(firmware)["device_id"] == firmware.bundle_id
-    apt = SimpleNamespace(package_name="curl", bundle_id=None, package_manager="apt")
+    apt = SimpleNamespace(package_name="curl", bundle_id=None, package_manager="apt",
+                          current_version="8.17.0", available_version="8.18.0")  # fmt: skip
     assert "device_id" not in command_package(apt)
+    # the agent reports the upgrade with them (FreeBSD, 2026-11-26)
+    assert command_package(apt)["available_version"] == "8.18.0"

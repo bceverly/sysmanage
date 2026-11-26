@@ -6372,7 +6372,12 @@
       "title": "बादल कॉपी (ऑफ़-साइट)",
       "turnOff": "बंद करें",
       "turnOn": "चालू करें",
-      "where": "{{target}} को s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})"
+      "where": "{{target}} को s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})",
+      "progress": {
+        "receiving": "अब तक {{size}} डाउनलोड और प्राप्त किया गया",
+        "thawing": "थाव: {{total}} में से {{ready}} हिस्से तैयार",
+        "upload": "{{dataset}}: अब तक {{size}} भेजा गया ({{total}} में से {{done}} डेटासेट पूरे)"
+      }
     }
   },
   "cloudBackup": {

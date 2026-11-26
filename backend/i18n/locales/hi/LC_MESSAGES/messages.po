@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 14:00-0500\n"
+"POT-Creation-Date: 2026-11-26 08:05-0500\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -245,10 +245,10 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
-#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:34
+#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:35
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
+#: backend/api/updates/execution_routes.py:274 backend/api/backups.py:150
 #: backend/api/backups.py:153 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
@@ -667,7 +667,7 @@ msgid "Failed to update software inventory"
 msgstr "सॉफ्टवेयर संग्रहण का अपडेट वापरे में विफल"
 
 #: backend/api/handlers/software_package_handlers.py:294
-#: backend/api/updates/report_routes.py:79
+#: backend/api/updates/report_routes.py:92
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "अपडेट संग्रहीत करने में असफल: %s"
@@ -1030,7 +1030,7 @@ msgstr ""
 "होस्ट '%(fqdn)s' का पुनः पंजीकरण एक वन-टाइम कोड के साथ हुआ है; इसका पुराना "
 "क्रेडेंशियल अब काम नहीं करता"
 
-#: backend/api/host_registration.py:104
+#: backend/api/host_registration.py:126
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -1039,15 +1039,24 @@ msgstr ""
 "होस्ट '%(fqdn)s' रजिस्ट्रेशन की कुंजी '%(key_name)s' "
 "(auto_approve=%(auto_approve)s) के माध्यम से एंटरल किया गया"
 
-#: backend/api/host_registration.py:156
+#: backend/api/host_registration.py:178
 msgid "Invalid or expired registration key"
 msgstr "अवैध या समाप्त रजिस्ट्रेशन की कुंजी"
 
-#: backend/api/host_registration.py:195
+#: backend/api/host_registration.py:217
 msgid "Invalid or expired enrollment token"
 msgstr "अवैध या समाप्त एनकॉलेंट टोकन"
 
-#: backend/api/host_registration.py:261
+#: backend/api/host_registration.py:282
+msgid ""
+"This host belongs to a tenant, but the agent did not say which host it is. "
+"Re-enroll the host in its tenant, then restart the agent."
+msgstr ""
+"यह होस्ट एक टेनेंट का है, लेकिन एजेंट ने नहीं बताया कि यह कौन सा होस्ट है। "
+"इस होस्ट को फिर से अपने टेनेंट में पंजीकरण कराएं, फिर एजेंट को फिर से शुरू "
+"करें।"
+
+#: backend/api/host_registration.py:330
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -3008,29 +3017,29 @@ msgstr ""
 msgid "Distribution deleted"
 msgstr "वितरण हटाया गया"
 
-#: backend/api/message_handlers_core.py:59
+#: backend/api/message_handlers_core.py:60
 msgid "Agent authentication failed: invalid host token"
 msgstr "एजेंट पहचान विफल हो गई: मैनिफेस्ट टोकन गलत"
 
-#: backend/api/message_handlers_core.py:68
+#: backend/api/message_handlers_core.py:69
 msgid "Host with token is not registered. Please re-register."
 msgstr "टोकन वाले होस्ट का पंजीकरण नहीं है। कृपया पुनः पंजीकरण करें।"
 
-#: backend/api/message_handlers_core.py:89
+#: backend/api/message_handlers_core.py:90
 msgid "Agent authentication failed: invalid host ID"
 msgstr "एजेंट पहचान विफल हो गई: मैनेजर का सकारात्मक ऑब्जेक्टआइडी असंगत"
 
-#: backend/api/message_handlers_core.py:98
+#: backend/api/message_handlers_core.py:99
 #: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID %s वाले होस्ट पंजीकृत नहीं है। कृपया पुनः पंजीकरण करें।"
 
-#: backend/api/message_handlers_core.py:151
+#: backend/api/message_handlers_core.py:155
 msgid "Agent session refused: it did not prove it is this host"
 msgstr "एजेंट सत्र अस्वीकार किया गया: इसने साबित नहीं किया कि यह यही होस्ट है"
 
-#: backend/api/message_handlers_core.py:165
+#: backend/api/message_handlers_core.py:169
 msgid ""
 "This agent did not prove it is this host. If the host was reinstalled, "
 "remove it from SysManage and approve its new registration."
@@ -3038,26 +3047,26 @@ msgstr ""
 "इस एजेंट ने साबित नहीं किया कि यह यही होस्ट है। यदि होस्ट को फिर से इंस्टॉल "
 "किया गया था, तो उसे SysManage से हटाएँ और उसके नए पंजीकरण को स्वीकृत करें।"
 
-#: backend/api/message_handlers_core.py:194
+#: backend/api/message_handlers_core.py:198
 #, python-format
 msgid "Agent session refused: client certificate %s"
 msgstr "एजेंट सत्र अस्वीकार किया गया: क्लाइंट प्रमाणपत्र %s"
 
-#: backend/api/message_handlers_core.py:346 backend/api/agent.py:830
+#: backend/api/message_handlers_core.py:350 backend/api/agent.py:830
 msgid "Host registration pending approval"
 msgstr "होस्ट रजिस्ट्रेशन प्रतीक्षा में है"
 
-#: backend/api/message_handlers_core.py:460
+#: backend/api/message_handlers_core.py:464
 msgid "Host auto-approved via child host creation"
 msgstr ""
 "HostException: बच्चा होस्ट निर्माण के माध्यम से होस्ट कॉर्ट अपवीक्षित किया "
 "गया"
 
-#: backend/api/message_handlers_core.py:584
+#: backend/api/message_handlers_core.py:588
 msgid "Agent registered and connected successfully"
 msgstr "एजेंट की पंजीकरण और संपर्क सफलतापूर्वक हुआ"
 
-#: backend/api/message_handlers_core.py:955
+#: backend/api/message_handlers_core.py:959
 msgid "Failed to process heartbeat"
 msgstr "हैर्टबीट प्रोसेस करने में विफल हुए"
 
@@ -3843,7 +3852,7 @@ msgstr "कोई मास्टर कुंजी सेट नहीं क�
 
 #: backend/api/ubuntu_pro_settings.py:381
 #: backend/api/updates/os_upgrade_routes.py:257
-#: backend/api/updates/execution_routes.py:111
+#: backend/api/updates/execution_routes.py:115
 msgid "Host not found or inactive"
 msgstr "होस्ट नहीं मिला या गैर-कार्यात्मक"
 
@@ -4333,12 +4342,12 @@ msgstr "अपडेट प्राप्त करने में असफ�
 msgid "Failed to get update results: %s"
 msgstr "अपडेट परिणाम प्राप्त करने में विफल: %s"
 
-#: backend/api/updates/execution_routes.py:65
+#: backend/api/updates/execution_routes.py:69
 #: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "प्रवेश नहीं: APPLY_SOFTWARE_UPDATE भूमिका की आवश्यकता है"
 
-#: backend/api/updates/execution_routes.py:126
+#: backend/api/updates/execution_routes.py:130
 msgid ""
 "This is an image-mode host; update the OS image instead of applying package "
 "updates."
@@ -4346,30 +4355,30 @@ msgstr ""
 "यह एक image-mode होस्ट है; OS इमेज का अपडेट करें, पैकेज अपडेट लागू करने की "
 "बजाय।"
 
-#: backend/api/updates/execution_routes.py:142
+#: backend/api/updates/execution_routes.py:146
 msgid "No matching updates found for specified packages"
 msgstr "निर्दिष्ट पैकेज के लिए कोई मिलान अपडेट नहीं मिला"
 
-#: backend/api/updates/execution_routes.py:222
+#: backend/api/updates/execution_routes.py:226
 msgid "Update execution started"
 msgstr "अपडेट निष्पादन शुरू"
 
-#: backend/api/updates/execution_routes.py:231
+#: backend/api/updates/execution_routes.py:235
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "कमांड भेजने में असफल: %s"
 
-#: backend/api/updates/execution_routes.py:239
+#: backend/api/updates/execution_routes.py:243
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "अपडेट कमांड भेजने में असफल: %s"
 
-#: backend/api/updates/execution_routes.py:252
+#: backend/api/updates/execution_routes.py:256
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "अपडेट निष्पादित करने में असफल: %s"
 
-#: backend/api/updates/execution_routes.py:311
+#: backend/api/updates/execution_routes.py:315
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "निष्पादन लॉग प्राप्त करने में असफल: %s"
@@ -6521,13 +6530,13 @@ msgstr ""
 "पुष्टि करें कि पैकेज इंस्टॉल होंगे, और स्नैपशॉट में न रहे पैकेज हटाए जाएँगे,"
 " ताकि होस्ट स्नैपशॉट से मेल खाए"
 
-#: backend/services/auto_update_runner.py:361
+#: backend/services/auto_update_runner.py:365
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
 msgstr "नीति '%(policy)s' द्वारा %(host)s पर स्वचालित अपडेट कतार में डाला गया"
 
-#: backend/services/auto_update_runner.py:557
-#: backend/services/auto_update_runner.py:593
+#: backend/services/auto_update_runner.py:561
+#: backend/services/auto_update_runner.py:597
 msgid "The host never reported the result"
 msgstr "होस्ट ने कभी परिणाम की सूचना नहीं दी"
 
@@ -7203,22 +7212,31 @@ msgstr ""
 msgid "Rollout of policy '%(policy)s' started: %(count)d fleet(s)"
 msgstr "नीति '%(policy)s' का रोलआउट शुरू हुआ: %(count)d फ्लीट"
 
-#: backend/services/auto_update_rollout.py:275
+#: backend/services/auto_update_rollout.py:284
 #, python-format
 msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
 msgstr "नीति '%(policy)s' का रोलआउट फ्लीट '%(fleet)s' पर रुका: %(reason)s"
 
-#: backend/services/auto_update_rollout.py:305
+#: backend/services/auto_update_rollout.py:314
 #, python-format
 msgid "Rollout of policy '%(policy)s' completed"
 msgstr "नीति '%(policy)s' का रोलआउट पूरा हुआ"
 
-#: backend/services/auto_update_rollout.py:385
+#: backend/services/auto_update_rollout.py:345
+#, python-format
+msgid ""
+"Rollout of policy '%(policy)s' moved on from fleet '%(fleet)s' without the "
+"waiting time: the fleet applied a critical fix and stayed healthy"
+msgstr ""
+"नीति '%(policy)s' का रोलआउट प्रतीक्षा समय के बिना फ्लीट '%(fleet)s' से आगे "
+"बढ़ा: फ्लीट ने एक गंभीर सुधार लागू किया और स्वस्थ रहा"
+
+#: backend/services/auto_update_rollout.py:405
 #, python-format
 msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
 msgstr "नीति '%(policy)s' का रोलआउट फ्लीट '%(fleet)s' से आगे फिर से शुरू हुआ"
 
-#: backend/services/auto_update_rollout.py:402
+#: backend/services/auto_update_rollout.py:422
 #, python-format
 msgid "Rollout of policy '%(policy)s' canceled"
 msgstr "नीति '%(policy)s' का रोलआउट रद्द किया गया"
@@ -7283,6 +7301,14 @@ msgstr "NetBSD pkgsrc पैकेज की भेद्यताएँ (जि
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "OS संस्करण के अनुसार macOS की भेद्यताएँ, NVD के प्रभावित-संस्करण डेटा से"
+
+#, python-format
+#~ msgid ""
+#~ "Rollout of policy '%(policy)s' did not soak after fleet '%(fleet)s': it "
+#~ "applied a critical fix and stayed healthy"
+#~ msgstr ""
+#~ "पॉलिसी '%(policy)s' का रोलआउट फ्लीट '%(fleet)s' में नहीं घुस पाया: इसने एक "
+#~ "महत्वपूर्ण फिक्स लागू किया और स्वस्थ रहा"
 
 #~ msgid ""
 #~ "Turn on Add swap to hosts below the memory floor on the antivirus defaults "

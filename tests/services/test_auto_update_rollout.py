@@ -278,6 +278,61 @@ def test_a_canceled_rollout_patches_no_further_fleet(session, automation):
     assert _sent(session, hosts.b) == 0
 
 
+class _FastLaneEngine:
+    """The real engine, plus the critical fast lane as the engine built
+    2026-11-26 decides it -- so this runs before ``make build-modules``
+    packs that build.  Records what the driver told the gate."""
+
+    def __init__(self, eng):
+        self._eng = eng
+        self.seen = []
+
+    def rollout_gate(self, stage, now):
+        self.seen.append([r.get("critical") for r in stage["runs"]])
+        got = self._eng.rollout_gate(stage, now)
+        applied = any(r.get("critical") and r["status"] in ("succeeded", "partial")
+                      for r in stage["runs"])  # fmt: skip
+        if got["action"] == "soak" and applied:
+            return dict(got, action="advance", reason="critical_fix", until=None)
+        return got
+
+    def __getattr__(self, name):
+        return getattr(self._eng, name)
+
+
+def test_a_critical_fix_goes_to_the_next_fleet_without_the_soak(session, automation):
+    """2026-11-26: a critical CVE's fix should not wait out the canary soak."""
+    tags, hosts = _fleets(session)
+    _policy(session, [("Canary", tags.canary, 720), ("Web", tags.web, 0)])
+    eng = _FastLaneEngine(automation)
+    _tick(session, eng, NOW)
+    run = session.query(models.AutoUpdateRun).filter_by(host_id=hosts.a.id).one()
+    run.packages = [dict(p, kind="critical") for p in run.packages]
+    session.commit()
+    _finish(session, hosts.a, NOW + timedelta(minutes=5))
+
+    _tick(session, eng, NOW + timedelta(minutes=6))
+    assert [True] in eng.seen
+    rollout = _rollout(session)
+    assert rollout.stage_index == 1 and rollout.stages[0]["status"] == "done"
+    assert (_sent(session, hosts.b), _sent(session, hosts.c)) == (1, 1)
+    audit = [a.description for a in session.query(models.AuditLog)]
+    assert any(
+        "moved on from fleet 'Canary' without the waiting time" in d for d in audit
+    )
+
+
+def test_a_regular_update_still_soaks(session, automation):
+    tags, hosts = _fleets(session)
+    _policy(session, [("Canary", tags.canary, 720), ("Web", tags.web, 0)])
+    eng = _FastLaneEngine(automation)
+    _tick(session, eng, NOW)
+    _finish(session, hosts.a, NOW + timedelta(minutes=5))
+    _tick(session, eng, NOW + timedelta(minutes=6))
+    assert [False] in eng.seen
+    assert _rollout(session).stage_index == 0 and _sent(session, hosts.b) == 0
+
+
 class _OldEngine:
     """An automation engine from before 26.4."""
 

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 14:00-0500\n"
+"POT-Creation-Date: 2026-11-26 08:05-0500\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -244,10 +244,10 @@ msgstr "Formato di ID host non valido"
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
-#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:34
+#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:35
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
+#: backend/api/updates/execution_routes.py:274 backend/api/backups.py:150
 #: backend/api/backups.py:153 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
@@ -674,7 +674,7 @@ msgid "Failed to update software inventory"
 msgstr "Impossibile aggiornare l'inventario software"
 
 #: backend/api/handlers/software_package_handlers.py:294
-#: backend/api/updates/report_routes.py:79
+#: backend/api/updates/report_routes.py:92
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Fallimento nel salvare gli aggiornamenti: %s"
@@ -1049,7 +1049,7 @@ msgstr ""
 "L'host '%(fqdn)s' è stato ri-registrato con un codice di verifica una "
 "tantum; le sue vecchie credenziali non sono più valide"
 
-#: backend/api/host_registration.py:104
+#: backend/api/host_registration.py:126
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -1058,15 +1058,23 @@ msgstr ""
 "L'host '%(fqdn)s' è stato iscritto tramite chiave di registrazione "
 "'%(key_name)s' (auto_approve=%(auto_approve)s)"
 
-#: backend/api/host_registration.py:156
+#: backend/api/host_registration.py:178
 msgid "Invalid or expired registration key"
 msgstr "Chiave di registrazione non valida o scaduta"
 
-#: backend/api/host_registration.py:195
+#: backend/api/host_registration.py:217
 msgid "Invalid or expired enrollment token"
 msgstr "Token di iscrizione non valido o scaduto"
 
-#: backend/api/host_registration.py:261
+#: backend/api/host_registration.py:282
+msgid ""
+"This host belongs to a tenant, but the agent did not say which host it is. "
+"Re-enroll the host in its tenant, then restart the agent."
+msgstr ""
+"Questo host appartiene a un tenant, ma l'agente non ha indicato quale host "
+"sia. Registra di nuovo l'host nel suo tenant, poi riavvia l'agente."
+
+#: backend/api/host_registration.py:330
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -3046,30 +3054,30 @@ msgstr ""
 msgid "Distribution deleted"
 msgstr "Distribuzione eliminata"
 
-#: backend/api/message_handlers_core.py:59
+#: backend/api/message_handlers_core.py:60
 msgid "Agent authentication failed: invalid host token"
 msgstr "L'autenticazione dell'agente ha fallito: token host non valido"
 
-#: backend/api/message_handlers_core.py:68
+#: backend/api/message_handlers_core.py:69
 msgid "Host with token is not registered. Please re-register."
 msgstr "Il sistema host con token non è iscritto. Si prega di riiscrivere."
 
-#: backend/api/message_handlers_core.py:89
+#: backend/api/message_handlers_core.py:90
 msgid "Agent authentication failed: invalid host ID"
 msgstr "L'autenticazione dell'agente ha fallito: ID host non valido"
 
-#: backend/api/message_handlers_core.py:98
+#: backend/api/message_handlers_core.py:99
 #: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "Il sistema host con ID %s non è iscritto. Si prega di riiscrivere."
 
-#: backend/api/message_handlers_core.py:151
+#: backend/api/message_handlers_core.py:155
 msgid "Agent session refused: it did not prove it is this host"
 msgstr ""
 "Sessione dell'agente rifiutata: non ha dimostrato di essere questo host"
 
-#: backend/api/message_handlers_core.py:165
+#: backend/api/message_handlers_core.py:169
 msgid ""
 "This agent did not prove it is this host. If the host was reinstalled, "
 "remove it from SysManage and approve its new registration."
@@ -3077,26 +3085,26 @@ msgstr ""
 "Questo agente non ha dimostrato di essere questo host. Se l'host è stato "
 "reinstallato, rimuovilo da SysManage e approva la sua nuova registrazione."
 
-#: backend/api/message_handlers_core.py:194
+#: backend/api/message_handlers_core.py:198
 #, python-format
 msgid "Agent session refused: client certificate %s"
 msgstr "Sessione dell'agente rifiutata: certificato client %s"
 
-#: backend/api/message_handlers_core.py:346 backend/api/agent.py:830
+#: backend/api/message_handlers_core.py:350 backend/api/agent.py:830
 msgid "Host registration pending approval"
 msgstr "Iscrizione del sistema host in sospeso per approvazione"
 
-#: backend/api/message_handlers_core.py:460
+#: backend/api/message_handlers_core.py:464
 msgid "Host auto-approved via child host creation"
 msgstr ""
 "Il sistema host è stato approvato automaticamente tramite la creazione di un"
 " sistema figlio"
 
-#: backend/api/message_handlers_core.py:584
+#: backend/api/message_handlers_core.py:588
 msgid "Agent registered and connected successfully"
 msgstr "Agente registrato e connesso correttamente"
 
-#: backend/api/message_handlers_core.py:955
+#: backend/api/message_handlers_core.py:959
 msgid "Failed to process heartbeat"
 msgstr "Impossibile elaborare il battito cardiaco"
 
@@ -3901,7 +3909,7 @@ msgstr ""
 
 #: backend/api/ubuntu_pro_settings.py:381
 #: backend/api/updates/os_upgrade_routes.py:257
-#: backend/api/updates/execution_routes.py:111
+#: backend/api/updates/execution_routes.py:115
 msgid "Host not found or inactive"
 msgstr "Sistema host non trovato o non attivo"
 
@@ -4404,12 +4412,12 @@ msgstr "Fallimento nell'ottenere gli aggiornamenti: %s"
 msgid "Failed to get update results: %s"
 msgstr "Impossibile ottenere i risultati dell'aggiornamento: %s"
 
-#: backend/api/updates/execution_routes.py:65
+#: backend/api/updates/execution_routes.py:69
 #: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "Accesso negato: richiesta del ruolo APPLY_SOFTWARE_UPDATE"
 
-#: backend/api/updates/execution_routes.py:126
+#: backend/api/updates/execution_routes.py:130
 msgid ""
 "This is an image-mode host; update the OS image instead of applying package "
 "updates."
@@ -4417,31 +4425,31 @@ msgstr ""
 "Questa è un'immagine di sistema; aggiorna l'immagine del sistema invece di "
 "applicare gli aggiornamenti dei pacchetti."
 
-#: backend/api/updates/execution_routes.py:142
+#: backend/api/updates/execution_routes.py:146
 msgid "No matching updates found for specified packages"
 msgstr ""
 "Nessun aggiornamento corrispondente trovato per i pacchetti specificati"
 
-#: backend/api/updates/execution_routes.py:222
+#: backend/api/updates/execution_routes.py:226
 msgid "Update execution started"
 msgstr "Esecuzione aggiornamento avviata"
 
-#: backend/api/updates/execution_routes.py:231
+#: backend/api/updates/execution_routes.py:235
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "Fallimento nell'invio comando: %s"
 
-#: backend/api/updates/execution_routes.py:239
+#: backend/api/updates/execution_routes.py:243
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "Fallimento nell'invio comando di aggiornamento: %s"
 
-#: backend/api/updates/execution_routes.py:252
+#: backend/api/updates/execution_routes.py:256
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "Fallimento nell'esecuzione degli aggiornamenti: %s"
 
-#: backend/api/updates/execution_routes.py:311
+#: backend/api/updates/execution_routes.py:315
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "Fallimento nell'ottenere il log di esecuzione: %s"
@@ -6636,14 +6644,14 @@ msgstr ""
 "Confermi che verranno installati pacchetti e rimossi quelli che lo snapshot "
 "non aveva, perché corrisponda allo snapshot"
 
-#: backend/services/auto_update_runner.py:361
+#: backend/services/auto_update_runner.py:365
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
 msgstr ""
 "Aggiornamento automatico accodato su %(host)s dalla politica '%(policy)s'"
 
-#: backend/services/auto_update_runner.py:557
-#: backend/services/auto_update_runner.py:593
+#: backend/services/auto_update_runner.py:561
+#: backend/services/auto_update_runner.py:597
 msgid "The host never reported the result"
 msgstr "L'host non ha mai segnalato il risultato"
 
@@ -7335,25 +7343,35 @@ msgstr ""
 msgid "Rollout of policy '%(policy)s' started: %(count)d fleet(s)"
 msgstr "Il rollout della politica '%(policy)s' è iniziato: %(count)d flotta/e"
 
-#: backend/services/auto_update_rollout.py:275
+#: backend/services/auto_update_rollout.py:284
 #, python-format
 msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
 msgstr ""
 "Il rollout della politica '%(policy)s' è stato interrotto alla flotta "
 "'%(fleet)s': %(reason)s"
 
-#: backend/services/auto_update_rollout.py:305
+#: backend/services/auto_update_rollout.py:314
 #, python-format
 msgid "Rollout of policy '%(policy)s' completed"
 msgstr "Il rollout della politica '%(policy)s' è completato"
 
-#: backend/services/auto_update_rollout.py:385
+#: backend/services/auto_update_rollout.py:345
+#, python-format
+msgid ""
+"Rollout of policy '%(policy)s' moved on from fleet '%(fleet)s' without the "
+"waiting time: the fleet applied a critical fix and stayed healthy"
+msgstr ""
+"Il rilascio della politica '%(policy)s' è passato oltre la flotta "
+"'%(fleet)s' senza il tempo di attesa: la flotta ha applicato una correzione "
+"critica ed è rimasta in buono stato"
+
+#: backend/services/auto_update_rollout.py:405
 #, python-format
 msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
 msgstr ""
 "Il rollout della politica '%(policy)s' è ripreso dopo la flotta '%(fleet)s'"
 
-#: backend/services/auto_update_rollout.py:402
+#: backend/services/auto_update_rollout.py:422
 #, python-format
 msgid "Rollout of policy '%(policy)s' canceled"
 msgstr "Il rollout della politica '%(policy)s' è stato annullato"
@@ -7424,6 +7442,14 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "Vulnerabilità di macOS per versione del sistema operativo, dai dati del NVD "
 "sulle versioni interessate"
+
+#, python-format
+#~ msgid ""
+#~ "Rollout of policy '%(policy)s' did not soak after fleet '%(fleet)s': it "
+#~ "applied a critical fix and stayed healthy"
+#~ msgstr ""
+#~ "Implementazione della politica '%(policy)s' non completata per la flotta "
+#~ "'%(fleet)s': ha applicato una correzione critica e mantenuto uno stato sano"
 
 #~ msgid ""
 #~ "Turn on Add swap to hosts below the memory floor on the antivirus defaults "

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 14:00-0500\n"
+"POT-Creation-Date: 2026-11-26 08:05-0500\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -240,10 +240,10 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
-#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:34
+#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:35
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
+#: backend/api/updates/execution_routes.py:274 backend/api/backups.py:150
 #: backend/api/backups.py:153 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
@@ -650,7 +650,7 @@ msgid "Failed to update software inventory"
 msgstr "소프트웨어 인벤토리를 업데이트하는 데 실패했습니다"
 
 #: backend/api/handlers/software_package_handlers.py:294
-#: backend/api/updates/report_routes.py:79
+#: backend/api/updates/report_routes.py:92
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "업데이트 저장 실패: %s"
@@ -1004,22 +1004,30 @@ msgid ""
 "longer works"
 msgstr "호스트 '%(fqdn)s'는 일회용 코드로 재등록되었습니다. 이전 자격 증명은 더 이상 작동하지 않습니다."
 
-#: backend/api/host_registration.py:104
+#: backend/api/host_registration.py:126
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 msgstr "'%(key_name)s' 등록 키를 통해 '%(fqdn)s' 호스트가 등록됨 (자동 승인=%(auto_approve)s)"
 
-#: backend/api/host_registration.py:156
+#: backend/api/host_registration.py:178
 msgid "Invalid or expired registration key"
 msgstr "잘못된 또는 없는 등록 키"
 
-#: backend/api/host_registration.py:195
+#: backend/api/host_registration.py:217
 msgid "Invalid or expired enrollment token"
 msgstr "잘못된 또는 만료된 등록 토큰"
 
-#: backend/api/host_registration.py:261
+#: backend/api/host_registration.py:282
+msgid ""
+"This host belongs to a tenant, but the agent did not say which host it is. "
+"Re-enroll the host in its tenant, then restart the agent."
+msgstr ""
+"이 호스트는 테넌트에 속하지만 에이전트는 어떤 호스트인지 말하지 않았습니다. 해당 호스트를 다시 테넌트에 등록한 후 에이전트를 "
+"재시작하세요."
+
+#: backend/api/host_registration.py:330
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -2897,53 +2905,53 @@ msgstr "분류 '%(name)s %(version)s'가 이미 '%(child_type)s' 유형에 존�
 msgid "Distribution deleted"
 msgstr "배포판이 삭제되었습니다"
 
-#: backend/api/message_handlers_core.py:59
+#: backend/api/message_handlers_core.py:60
 msgid "Agent authentication failed: invalid host token"
 msgstr "_AGENT 인증 실패: 유효하지 않은 호스트 토큰"
 
-#: backend/api/message_handlers_core.py:68
+#: backend/api/message_handlers_core.py:69
 msgid "Host with token is not registered. Please re-register."
 msgstr "토큰이 있는 호스트가 등록되지 않았습니다. 다시 등록해주세요."
 
-#: backend/api/message_handlers_core.py:89
+#: backend/api/message_handlers_core.py:90
 msgid "Agent authentication failed: invalid host ID"
 msgstr "_AGENT 인증 실패: 유효하지 않은 호스트 ID"
 
-#: backend/api/message_handlers_core.py:98
+#: backend/api/message_handlers_core.py:99
 #: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID %s의 호스트는 등록되지 않았습니다. 다시 등록해주세요."
 
-#: backend/api/message_handlers_core.py:151
+#: backend/api/message_handlers_core.py:155
 msgid "Agent session refused: it did not prove it is this host"
 msgstr "에이전트 세션 거부됨: 이 호스트임을 증명하지 않았습니다"
 
-#: backend/api/message_handlers_core.py:165
+#: backend/api/message_handlers_core.py:169
 msgid ""
 "This agent did not prove it is this host. If the host was reinstalled, "
 "remove it from SysManage and approve its new registration."
 msgstr ""
 "이 에이전트는 이 호스트임을 증명하지 않았습니다. 호스트를 다시 설치한 경우 SysManage에서 제거한 후 새 등록을 승인하세요."
 
-#: backend/api/message_handlers_core.py:194
+#: backend/api/message_handlers_core.py:198
 #, python-format
 msgid "Agent session refused: client certificate %s"
 msgstr "에이전트 세션 거부됨: 클라이언트 인증서 %s"
 
-#: backend/api/message_handlers_core.py:346 backend/api/agent.py:830
+#: backend/api/message_handlers_core.py:350 backend/api/agent.py:830
 msgid "Host registration pending approval"
 msgstr "호스트 등록 승인 대기 중입니다."
 
-#: backend/api/message_handlers_core.py:460
+#: backend/api/message_handlers_core.py:464
 msgid "Host auto-approved via child host creation"
 msgstr "호스트 자동 승인됨(자식 호스트 생성 시)"
 
-#: backend/api/message_handlers_core.py:584
+#: backend/api/message_handlers_core.py:588
 msgid "Agent registered and connected successfully"
 msgstr "_AGENT이 성공적으로 등록되고 연결됨_"
 
-#: backend/api/message_handlers_core.py:955
+#: backend/api/message_handlers_core.py:959
 msgid "Failed to process heartbeat"
 msgstr "심장 박동 처리에 실패했습니다"
 
@@ -3695,7 +3703,7 @@ msgstr "마스터 키가 구성되지 않았습니다. 먼저 마스터 키를 �
 
 #: backend/api/ubuntu_pro_settings.py:381
 #: backend/api/updates/os_upgrade_routes.py:257
-#: backend/api/updates/execution_routes.py:111
+#: backend/api/updates/execution_routes.py:115
 msgid "Host not found or inactive"
 msgstr "호스트가 찾을 수 없거나 비활성화됨"
 
@@ -4169,41 +4177,41 @@ msgstr "업데이트 가져오기 실패: %s"
 msgid "Failed to get update results: %s"
 msgstr "업데이트 결과 가져오기 실패: %s"
 
-#: backend/api/updates/execution_routes.py:65
+#: backend/api/updates/execution_routes.py:69
 #: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "권한 거부됨: APPLY_SOFTWARE_UPDATE 역할이 필요합니다"
 
-#: backend/api/updates/execution_routes.py:126
+#: backend/api/updates/execution_routes.py:130
 msgid ""
 "This is an image-mode host; update the OS image instead of applying package "
 "updates."
 msgstr "이것은 이미지 모드 호스트입니다; 패키지 업데이트 대신 운영 체제 이미지를 업데이트해야 합니다."
 
-#: backend/api/updates/execution_routes.py:142
+#: backend/api/updates/execution_routes.py:146
 msgid "No matching updates found for specified packages"
 msgstr "지정된 패키지에 대한 일치하는 업데이트를 찾을 수 없습니다"
 
-#: backend/api/updates/execution_routes.py:222
+#: backend/api/updates/execution_routes.py:226
 msgid "Update execution started"
 msgstr "업데이트 실행이 시작되었습니다"
 
-#: backend/api/updates/execution_routes.py:231
+#: backend/api/updates/execution_routes.py:235
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "명령 전송 실패: %s"
 
-#: backend/api/updates/execution_routes.py:239
+#: backend/api/updates/execution_routes.py:243
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "업데이트 명령 전송 실패: %s"
 
-#: backend/api/updates/execution_routes.py:252
+#: backend/api/updates/execution_routes.py:256
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "업데이트 실행 실패: %s"
 
-#: backend/api/updates/execution_routes.py:311
+#: backend/api/updates/execution_routes.py:315
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "실행 로그 가져오기 실패: %s"
@@ -6250,13 +6258,13 @@ msgid ""
 "have removed, to match the snapshot"
 msgstr "스냅샷과 일치하도록 패키지가 설치되고 스냅샷에 없던 패키지가 제거됨을 확인하세요"
 
-#: backend/services/auto_update_runner.py:361
+#: backend/services/auto_update_runner.py:365
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
 msgstr "정책 '%(policy)s'에 따라 %(host)s에 자동 업데이트를 대기열에 넣었습니다"
 
-#: backend/services/auto_update_runner.py:557
-#: backend/services/auto_update_runner.py:593
+#: backend/services/auto_update_runner.py:561
+#: backend/services/auto_update_runner.py:597
 msgid "The host never reported the result"
 msgstr "호스트가 결과를 보고하지 않았습니다"
 
@@ -6894,22 +6902,31 @@ msgstr "이 호스트의 에이전트는 아직 오프사이트 복사본을 읽
 msgid "Rollout of policy '%(policy)s' started: %(count)d fleet(s)"
 msgstr "'%(policy)s' 정책의 롤아웃이 시작되었습니다: 플릿 %(count)d개"
 
-#: backend/services/auto_update_rollout.py:275
+#: backend/services/auto_update_rollout.py:284
 #, python-format
 msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
 msgstr "'%(policy)s' 정책의 롤아웃이 플릿 '%(fleet)s'에서 중지되었습니다: %(reason)s"
 
-#: backend/services/auto_update_rollout.py:305
+#: backend/services/auto_update_rollout.py:314
 #, python-format
 msgid "Rollout of policy '%(policy)s' completed"
 msgstr "'%(policy)s' 정책의 롤아웃이 완료되었습니다"
 
-#: backend/services/auto_update_rollout.py:385
+#: backend/services/auto_update_rollout.py:345
+#, python-format
+msgid ""
+"Rollout of policy '%(policy)s' moved on from fleet '%(fleet)s' without the "
+"waiting time: the fleet applied a critical fix and stayed healthy"
+msgstr ""
+"정책 '%(policy)s'의 롤아웃이 대기 시간 없이 플릿 '%(fleet)s'에서 다음으로 진행되었습니다: 플릿이 중대한 수정을 "
+"적용했으며 정상 상태를 유지했습니다"
+
+#: backend/services/auto_update_rollout.py:405
 #, python-format
 msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
 msgstr "'%(policy)s' 정책의 롤아웃이 플릿 '%(fleet)s' 이후로 재개되었습니다"
 
-#: backend/services/auto_update_rollout.py:402
+#: backend/services/auto_update_rollout.py:422
 #, python-format
 msgid "Rollout of policy '%(policy)s' canceled"
 msgstr "'%(policy)s' 정책의 롤아웃이 취소되었습니다"
@@ -6970,6 +6987,14 @@ msgstr "NetBSD pkgsrc 패키지 취약점(pkg_admin audit가 읽는 데이터)"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS 버전별 macOS 취약점(NVD의 영향받는 버전 데이터 기준)"
+
+#, python-format
+#~ msgid ""
+#~ "Rollout of policy '%(policy)s' did not soak after fleet '%(fleet)s': it "
+#~ "applied a critical fix and stayed healthy"
+#~ msgstr ""
+#~ "플릿 '%(fleet)s'에 대한 정책 '%(policy)s'의 배포가 완료되지 않았습니다: 중요한 패치를 적용한 후에도 시스템은 정상 "
+#~ "상태를 유지했습니다."
 
 #~ msgid ""
 #~ "Turn on Add swap to hosts below the memory floor on the antivirus defaults "

@@ -115,6 +115,9 @@ def test_a_due_policy_applies_exactly_the_eligible_updates(session, automation):
     assert len(commands) == 1
     command = commands[0]
     assert [p["package_name"] for p in command["packages"]] == ["openssl"]
+    # the agent reports the upgrade with them (FreeBSD, 2026-11-26)
+    assert command["packages"][0]["current_version"] == "1.0"
+    assert command["packages"][0]["available_version"] == "1.1"
     run = session.query(models.AutoUpdateRun).one()
     assert run.status == "queued" and run.profile_id == policy.id
     reasons = {s["package_name"]: s["reason"] for s in run.skipped}

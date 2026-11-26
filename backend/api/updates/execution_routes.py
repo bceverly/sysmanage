@@ -37,6 +37,10 @@ def command_package(update) -> dict:
         "package_name": update.package_name,
         "bundle_id": update.bundle_id,
         "package_manager": update.package_manager,
+        # The agent reports each upgrade with them; without them an agent
+        # before 2026-11-26 called a good pkg / Homebrew upgrade a failure.
+        "current_version": update.current_version,
+        "available_version": update.available_version,
     }
     if update.package_manager == "fwupd":
         # fwupd installs by device; agents read it as device_id (bundle_id

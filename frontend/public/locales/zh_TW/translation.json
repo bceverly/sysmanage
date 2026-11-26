@@ -6372,7 +6372,12 @@
       "title": "雲端副本（異地）",
       "turnOff": "關閉",
       "turnOn": "開啟",
-      "where": "{{target}} 到 s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})"
+      "where": "{{target}} 到 s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})",
+      "progress": {
+        "receiving": "目前已下載並接收 {{size}}",
+        "thawing": "解凍中：{{ready}} / {{total}} 個部分已準備好",
+        "upload": "{{dataset}}：目前已傳送 {{size}}（{{total}} 個資料集中已完成 {{done}} 個）"
+      }
     }
   },
   "cloudBackup": {

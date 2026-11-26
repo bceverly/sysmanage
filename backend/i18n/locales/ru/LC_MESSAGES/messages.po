@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 14:00-0500\n"
+"POT-Creation-Date: 2026-11-26 08:05-0500\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -245,10 +245,10 @@ msgstr "Неверный формат идентификатора узла"
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
-#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:34
+#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:35
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
+#: backend/api/updates/execution_routes.py:274 backend/api/backups.py:150
 #: backend/api/backups.py:153 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
@@ -673,7 +673,7 @@ msgid "Failed to update software inventory"
 msgstr "Не удалось обновить инвентарь программного обеспечения"
 
 #: backend/api/handlers/software_package_handlers.py:294
-#: backend/api/updates/report_routes.py:79
+#: backend/api/updates/report_routes.py:92
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Не удалось сохранить обновления: %s"
@@ -1037,7 +1037,7 @@ msgstr ""
 "Хост «%(fqdn)s» был повторно зарегистрирован с помощью одноразового кода; "
 "его старые учетные данные больше не работают"
 
-#: backend/api/host_registration.py:104
+#: backend/api/host_registration.py:126
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -1046,15 +1046,23 @@ msgstr ""
 "Узел '%(fqdn)s' подключен через ключ регистрации '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 
-#: backend/api/host_registration.py:156
+#: backend/api/host_registration.py:178
 msgid "Invalid or expired registration key"
 msgstr "Недействительный или истекший ключ регистрации"
 
-#: backend/api/host_registration.py:195
+#: backend/api/host_registration.py:217
 msgid "Invalid or expired enrollment token"
 msgstr "Недействительный или истекший токен регистрации"
 
-#: backend/api/host_registration.py:261
+#: backend/api/host_registration.py:282
+msgid ""
+"This host belongs to a tenant, but the agent did not say which host it is. "
+"Re-enroll the host in its tenant, then restart the agent."
+msgstr ""
+"Этот хост принадлежит арендатору, но агент не сообщил, какой это хост. "
+"Перерегистрируйте хост в его арендаторе, затем перезапустите агент."
+
+#: backend/api/host_registration.py:330
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -3025,21 +3033,21 @@ msgstr ""
 msgid "Distribution deleted"
 msgstr "Дистрибутив удалён"
 
-#: backend/api/message_handlers_core.py:59
+#: backend/api/message_handlers_core.py:60
 msgid "Agent authentication failed: invalid host token"
 msgstr "Ошибка аутентификации агента: недействительный токен хоста"
 
-#: backend/api/message_handlers_core.py:68
+#: backend/api/message_handlers_core.py:69
 msgid "Host with token is not registered. Please re-register."
 msgstr ""
 "Узлу с токеном необходимо перезарегистрироваться. Пожалуйста, "
 "перезарегистрируйтесь."
 
-#: backend/api/message_handlers_core.py:89
+#: backend/api/message_handlers_core.py:90
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Ошибка аутентификации агента: недействительный идентификатор хоста"
 
-#: backend/api/message_handlers_core.py:98
+#: backend/api/message_handlers_core.py:99
 #: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
@@ -3047,11 +3055,11 @@ msgstr ""
 "Узлу с ID %s необходимо перезарегистрироваться. Пожалуйста, "
 "перезарегистрируйтесь."
 
-#: backend/api/message_handlers_core.py:151
+#: backend/api/message_handlers_core.py:155
 msgid "Agent session refused: it did not prove it is this host"
 msgstr "Сеанс агента отклонен: он не подтвердил, что является этим узлом"
 
-#: backend/api/message_handlers_core.py:165
+#: backend/api/message_handlers_core.py:169
 msgid ""
 "This agent did not prove it is this host. If the host was reinstalled, "
 "remove it from SysManage and approve its new registration."
@@ -3059,24 +3067,24 @@ msgstr ""
 "Этот агент не подтвердил, что является этим узлом. Если узел был "
 "переустановлен, удалите его из SysManage и одобрите его новую регистрацию."
 
-#: backend/api/message_handlers_core.py:194
+#: backend/api/message_handlers_core.py:198
 #, python-format
 msgid "Agent session refused: client certificate %s"
 msgstr "Сеанс агента отклонен: клиентский сертификат %s"
 
-#: backend/api/message_handlers_core.py:346 backend/api/agent.py:830
+#: backend/api/message_handlers_core.py:350 backend/api/agent.py:830
 msgid "Host registration pending approval"
 msgstr "Регистрация узла ожидает одобрения"
 
-#: backend/api/message_handlers_core.py:460
+#: backend/api/message_handlers_core.py:464
 msgid "Host auto-approved via child host creation"
 msgstr "Узел автоматически одобрен при создании дочернего узла"
 
-#: backend/api/message_handlers_core.py:584
+#: backend/api/message_handlers_core.py:588
 msgid "Agent registered and connected successfully"
 msgstr "Агент успешно зарегистрирован и подключен"
 
-#: backend/api/message_handlers_core.py:955
+#: backend/api/message_handlers_core.py:959
 msgid "Failed to process heartbeat"
 msgstr "Не удалось обработать пульс"
 
@@ -3876,7 +3884,7 @@ msgstr ""
 
 #: backend/api/ubuntu_pro_settings.py:381
 #: backend/api/updates/os_upgrade_routes.py:257
-#: backend/api/updates/execution_routes.py:111
+#: backend/api/updates/execution_routes.py:115
 msgid "Host not found or inactive"
 msgstr "Узел не найден или не активен"
 
@@ -4378,12 +4386,12 @@ msgstr "Не удалось получить обновления: %s"
 msgid "Failed to get update results: %s"
 msgstr "Не удалось получить результаты обновления: %s"
 
-#: backend/api/updates/execution_routes.py:65
+#: backend/api/updates/execution_routes.py:69
 #: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "Доступ запрещен: требуется роль APPLY_SOFTWARE_UPDATE"
 
-#: backend/api/updates/execution_routes.py:126
+#: backend/api/updates/execution_routes.py:130
 msgid ""
 "This is an image-mode host; update the OS image instead of applying package "
 "updates."
@@ -4391,30 +4399,30 @@ msgstr ""
 "Это хост в режиме образов; обновите операционную систему вместо применения "
 "пакетных обновлений."
 
-#: backend/api/updates/execution_routes.py:142
+#: backend/api/updates/execution_routes.py:146
 msgid "No matching updates found for specified packages"
 msgstr "Не найдено подходящих обновлений для указанных пакетов"
 
-#: backend/api/updates/execution_routes.py:222
+#: backend/api/updates/execution_routes.py:226
 msgid "Update execution started"
 msgstr "Выполнение обновления запущено"
 
-#: backend/api/updates/execution_routes.py:231
+#: backend/api/updates/execution_routes.py:235
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "Не удалось отправить команду: %s"
 
-#: backend/api/updates/execution_routes.py:239
+#: backend/api/updates/execution_routes.py:243
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "Не удалось отправить команду обновления: %s"
 
-#: backend/api/updates/execution_routes.py:252
+#: backend/api/updates/execution_routes.py:256
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "Не удалось выполнить обновления: %s"
 
-#: backend/api/updates/execution_routes.py:311
+#: backend/api/updates/execution_routes.py:315
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "Не удалось получить журнал выполнения: %s"
@@ -6563,15 +6571,15 @@ msgstr ""
 "Подтвердите, что пакеты будут установлены, а пакеты, которых не было в "
 "снимке, удалены, чтобы хост соответствовал снимку"
 
-#: backend/services/auto_update_runner.py:361
+#: backend/services/auto_update_runner.py:365
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
 msgstr ""
 "Автоматическое обновление поставлено в очередь на %(host)s политикой "
 "'%(policy)s'"
 
-#: backend/services/auto_update_runner.py:557
-#: backend/services/auto_update_runner.py:593
+#: backend/services/auto_update_runner.py:561
+#: backend/services/auto_update_runner.py:597
 msgid "The host never reported the result"
 msgstr "Хост так и не сообщил результат"
 
@@ -7258,26 +7266,36 @@ msgstr ""
 msgid "Rollout of policy '%(policy)s' started: %(count)d fleet(s)"
 msgstr "Начато развертывание политики '%(policy)s': групп хостов: %(count)d"
 
-#: backend/services/auto_update_rollout.py:275
+#: backend/services/auto_update_rollout.py:284
 #, python-format
 msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
 msgstr ""
 "Развертывание политики '%(policy)s' остановлено на группе хостов "
 "'%(fleet)s': %(reason)s"
 
-#: backend/services/auto_update_rollout.py:305
+#: backend/services/auto_update_rollout.py:314
 #, python-format
 msgid "Rollout of policy '%(policy)s' completed"
 msgstr "Развертывание политики '%(policy)s' завершено"
 
-#: backend/services/auto_update_rollout.py:385
+#: backend/services/auto_update_rollout.py:345
+#, python-format
+msgid ""
+"Rollout of policy '%(policy)s' moved on from fleet '%(fleet)s' without the "
+"waiting time: the fleet applied a critical fix and stayed healthy"
+msgstr ""
+"Развертывание политики '%(policy)s' перешло дальше после парка '%(fleet)s' "
+"без времени ожидания: парк применил критическое исправление и остался "
+"исправным"
+
+#: backend/services/auto_update_rollout.py:405
 #, python-format
 msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
 msgstr ""
 "Развертывание политики '%(policy)s' возобновлено после группы хостов "
 "'%(fleet)s'"
 
-#: backend/services/auto_update_rollout.py:402
+#: backend/services/auto_update_rollout.py:422
 #, python-format
 msgid "Rollout of policy '%(policy)s' canceled"
 msgstr "Развертывание политики '%(policy)s' отменено"
@@ -7343,6 +7361,14 @@ msgstr "Уязвимости пакетов pkgsrc в NetBSD (то, что чи�
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "Уязвимости macOS по версиям ОС на основе данных NVD о затронутых версиях"
+
+#, python-format
+#~ msgid ""
+#~ "Rollout of policy '%(policy)s' did not soak after fleet '%(fleet)s': it "
+#~ "applied a critical fix and stayed healthy"
+#~ msgstr ""
+#~ "Развертывание политики '%(policy)s' не завершилось после парка '%(fleet)s': "
+#~ "она применила критическую исправление и осталась здоровой"
 
 #~ msgid ""
 #~ "Turn on Add swap to hosts below the memory floor on the antivirus defaults "

@@ -310,6 +310,10 @@ def _command_package(update: Dict[str, Any]) -> Dict[str, Any]:
         "package_name": update["package_name"],
         "bundle_id": update.get("bundle_id"),
         "package_manager": update["package_manager"],
+        # The agent reports each upgrade with them; without them an agent
+        # before 2026-11-26 called a good pkg / Homebrew upgrade a failure.
+        "current_version": update.get("current_version"),
+        "available_version": update.get("available_version"),
     }
     if update["package_manager"] == "fwupd":
         package["device_id"] = update.get("bundle_id")

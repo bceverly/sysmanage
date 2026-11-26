@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 14:00-0500\n"
+"POT-Creation-Date: 2026-11-26 08:05-0500\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -236,10 +236,10 @@ msgstr "无效的主机ID格式"
 #: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
-#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:34
+#: backend/api/malware_policies.py:234 backend/api/updates/report_routes.py:35
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:150
+#: backend/api/updates/execution_routes.py:274 backend/api/backups.py:150
 #: backend/api/backups.py:153 backend/api/auto_updates.py:238
 #: backend/api/auto_updates.py:317 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
@@ -645,7 +645,7 @@ msgid "Failed to update software inventory"
 msgstr "更新软件清单失败"
 
 #: backend/api/handlers/software_package_handlers.py:294
-#: backend/api/updates/report_routes.py:79
+#: backend/api/updates/report_routes.py:92
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "存储更新失败：%s"
@@ -997,22 +997,28 @@ msgid ""
 "longer works"
 msgstr "主机 '%(fqdn)s' 已使用一次性密码重新注册，其旧凭证不再有效"
 
-#: backend/api/host_registration.py:104
+#: backend/api/host_registration.py:126
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 msgstr "主机 '%(fqdn)s' 通过注册密钥 '%(key_name)s' 加入（自动批准=%(auto_approve)s）"
 
-#: backend/api/host_registration.py:156
+#: backend/api/host_registration.py:178
 msgid "Invalid or expired registration key"
 msgstr "无效或缺失的注册密钥"
 
-#: backend/api/host_registration.py:195
+#: backend/api/host_registration.py:217
 msgid "Invalid or expired enrollment token"
 msgstr "无效或已过期的注册令牌"
 
-#: backend/api/host_registration.py:261
+#: backend/api/host_registration.py:282
+msgid ""
+"This host belongs to a tenant, but the agent did not say which host it is. "
+"Re-enroll the host in its tenant, then restart the agent."
+msgstr "这个主机属于一个租户，但代理没有说明是哪个主机。重新为主机注册到其租户中，然后重启代理。"
+
+#: backend/api/host_registration.py:330
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -2865,52 +2871,52 @@ msgstr "类型 '%(child_type)s' 已存在发行版 '%(name)s %(version)s'"
 msgid "Distribution deleted"
 msgstr "发行版已删除"
 
-#: backend/api/message_handlers_core.py:59
+#: backend/api/message_handlers_core.py:60
 msgid "Agent authentication failed: invalid host token"
 msgstr "代理身份验证失败：无效的主机令牌"
 
-#: backend/api/message_handlers_core.py:68
+#: backend/api/message_handlers_core.py:69
 msgid "Host with token is not registered. Please re-register."
 msgstr "使用令牌的主机未注册，请重新注册。"
 
-#: backend/api/message_handlers_core.py:89
+#: backend/api/message_handlers_core.py:90
 msgid "Agent authentication failed: invalid host ID"
 msgstr "代理身份验证失败：无效的主机ID"
 
-#: backend/api/message_handlers_core.py:98
+#: backend/api/message_handlers_core.py:99
 #: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID 为 %s 的主机未注册，请重新注册。"
 
-#: backend/api/message_handlers_core.py:151
+#: backend/api/message_handlers_core.py:155
 msgid "Agent session refused: it did not prove it is this host"
 msgstr "已拒绝代理会话：它未证明自己是此主机"
 
-#: backend/api/message_handlers_core.py:165
+#: backend/api/message_handlers_core.py:169
 msgid ""
 "This agent did not prove it is this host. If the host was reinstalled, "
 "remove it from SysManage and approve its new registration."
 msgstr "此代理未证明自己是此主机。如果主机已重新安装，请从 SysManage 中删除它，然后批准其新的注册。"
 
-#: backend/api/message_handlers_core.py:194
+#: backend/api/message_handlers_core.py:198
 #, python-format
 msgid "Agent session refused: client certificate %s"
 msgstr "代理会话被拒绝：客户端证书 %s"
 
-#: backend/api/message_handlers_core.py:346 backend/api/agent.py:830
+#: backend/api/message_handlers_core.py:350 backend/api/agent.py:830
 msgid "Host registration pending approval"
 msgstr "主机注册待批准"
 
-#: backend/api/message_handlers_core.py:460
+#: backend/api/message_handlers_core.py:464
 msgid "Host auto-approved via child host creation"
 msgstr "主机自动批准，因为创建了子主机"
 
-#: backend/api/message_handlers_core.py:584
+#: backend/api/message_handlers_core.py:588
 msgid "Agent registered and connected successfully"
 msgstr "代理注册并连接成功"
 
-#: backend/api/message_handlers_core.py:955
+#: backend/api/message_handlers_core.py:959
 msgid "Failed to process heartbeat"
 msgstr "处理心跳失败"
 
@@ -3652,7 +3658,7 @@ msgstr "未配置主密钥。请先配置主密钥。"
 
 #: backend/api/ubuntu_pro_settings.py:381
 #: backend/api/updates/os_upgrade_routes.py:257
-#: backend/api/updates/execution_routes.py:111
+#: backend/api/updates/execution_routes.py:115
 msgid "Host not found or inactive"
 msgstr "未找到或非活跃的主机"
 
@@ -4125,41 +4131,41 @@ msgstr "获取更新失败：%s"
 msgid "Failed to get update results: %s"
 msgstr "获取更新结果失败：%s"
 
-#: backend/api/updates/execution_routes.py:65
+#: backend/api/updates/execution_routes.py:69
 #: backend/api/upgrade_profiles.py:218
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "缺少 APPLY_SOFTWARE_UPDATE 角色，无法执行操作"
 
-#: backend/api/updates/execution_routes.py:126
+#: backend/api/updates/execution_routes.py:130
 msgid ""
 "This is an image-mode host; update the OS image instead of applying package "
 "updates."
 msgstr "这是一个图像模式主机；更新操作系统映像而不是应用软件包更新。"
 
-#: backend/api/updates/execution_routes.py:142
+#: backend/api/updates/execution_routes.py:146
 msgid "No matching updates found for specified packages"
 msgstr "未找到指定软件包的匹配更新"
 
-#: backend/api/updates/execution_routes.py:222
+#: backend/api/updates/execution_routes.py:226
 msgid "Update execution started"
 msgstr "更新执行已开始"
 
-#: backend/api/updates/execution_routes.py:231
+#: backend/api/updates/execution_routes.py:235
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "发送命令失败：%s"
 
-#: backend/api/updates/execution_routes.py:239
+#: backend/api/updates/execution_routes.py:243
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "发送更新命令失败：%s"
 
-#: backend/api/updates/execution_routes.py:252
+#: backend/api/updates/execution_routes.py:256
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "执行更新失败：%s"
 
-#: backend/api/updates/execution_routes.py:311
+#: backend/api/updates/execution_routes.py:315
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "获取执行日志失败：%s"
@@ -6187,13 +6193,13 @@ msgid ""
 "have removed, to match the snapshot"
 msgstr "请确认将安装软件包，并移除快照中没有的软件包，以使主机与快照一致"
 
-#: backend/services/auto_update_runner.py:361
+#: backend/services/auto_update_runner.py:365
 #, python-format
 msgid "Automatic update queued on %(host)s by policy '%(policy)s'"
 msgstr "策略 '%(policy)s' 已在 %(host)s 上排队自动更新"
 
-#: backend/services/auto_update_runner.py:557
-#: backend/services/auto_update_runner.py:593
+#: backend/services/auto_update_runner.py:561
+#: backend/services/auto_update_runner.py:597
 msgid "The host never reported the result"
 msgstr "主机从未报告结果"
 
@@ -6825,22 +6831,29 @@ msgstr "此主机的代理尚无法读取其异地副本；请升级代理"
 msgid "Rollout of policy '%(policy)s' started: %(count)d fleet(s)"
 msgstr "策略 '%(policy)s' 的部署已开始：%(count)d 个主机群"
 
-#: backend/services/auto_update_rollout.py:275
+#: backend/services/auto_update_rollout.py:284
 #, python-format
 msgid "Rollout of policy '%(policy)s' halted at fleet '%(fleet)s': %(reason)s"
 msgstr "策略 '%(policy)s' 的部署停在主机群 '%(fleet)s'：%(reason)s"
 
-#: backend/services/auto_update_rollout.py:305
+#: backend/services/auto_update_rollout.py:314
 #, python-format
 msgid "Rollout of policy '%(policy)s' completed"
 msgstr "策略 '%(policy)s' 的部署已完成"
 
-#: backend/services/auto_update_rollout.py:385
+#: backend/services/auto_update_rollout.py:345
+#, python-format
+msgid ""
+"Rollout of policy '%(policy)s' moved on from fleet '%(fleet)s' without the "
+"waiting time: the fleet applied a critical fix and stayed healthy"
+msgstr "策略“%(policy)s”的推出未经等待时间即从机群“%(fleet)s”继续：该机群应用了关键修复并保持正常"
+
+#: backend/services/auto_update_rollout.py:405
 #, python-format
 msgid "Rollout of policy '%(policy)s' resumed past fleet '%(fleet)s'"
 msgstr "策略 '%(policy)s' 的部署已越过主机群 '%(fleet)s' 继续"
 
-#: backend/services/auto_update_rollout.py:402
+#: backend/services/auto_update_rollout.py:422
 #, python-format
 msgid "Rollout of policy '%(policy)s' canceled"
 msgstr "策略 '%(policy)s' 的部署已取消"
@@ -6897,6 +6910,12 @@ msgstr "NetBSD pkgsrc 软件包漏洞（pkg_admin audit 读取的数据）"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "按操作系统版本列出的 macOS 漏洞（来自 NVD 的受影响版本数据）"
+
+#, python-format
+#~ msgid ""
+#~ "Rollout of policy '%(policy)s' did not soak after fleet '%(fleet)s': it "
+#~ "applied a critical fix and stayed healthy"
+#~ msgstr "策略%(policy)s的部署没有在主机群%(fleet)s中失败：它应用了一个关键修复并保持健康"
 
 #~ msgid ""
 #~ "Turn on Add swap to hosts below the memory floor on the antivirus defaults "

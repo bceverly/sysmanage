@@ -6372,7 +6372,12 @@
       "title": "Offsite kopie (cloud)",
       "turnOff": "Uitschakelen",
       "turnOn": "Aanzetten",
-      "where": "{{target}} naar s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})"
+      "where": "{{target}} naar s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})",
+      "progress": {
+        "receiving": "{{size}} gedownload en ontvangen tot nu toe",
+        "thawing": "Ontdooien: {{ready}} van de {{total}} delen klaar",
+        "upload": "{{dataset}}: {{size}} verzonden tot nu toe ({{done}} van de {{total}} datasets voltooid)"
+      }
     }
   },
   "cloudBackup": {

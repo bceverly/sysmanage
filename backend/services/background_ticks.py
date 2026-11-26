@@ -18,6 +18,7 @@ from backend.services import (
     malware_tick,
     network_discovery_policy,
     os_lifecycle_tick,
+    vulnerability_scan_tick,
 )
 
 
@@ -30,6 +31,7 @@ def start_licensed_ticks():
         hardware_tick.start_if_licensed(),  # 23.1 smartmontools auto-install
         os_lifecycle_tick.start_if_licensed(),  # 14.3 EOL registry refresh
         advisory_tick.start_if_licensed(),  # vendor advisories, every distribution
+        vulnerability_scan_tick.start_if_licensed(),  # CVE scans, every host, daily
         compliance_scan_tick.start_if_licensed(),  # 24.4 scheduled compliance scan
         backup_tick.start_if_licensed(),  # 24 restate backups (Community)
     ]

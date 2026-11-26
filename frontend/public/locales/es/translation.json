@@ -6372,7 +6372,12 @@
       "title": "Copia en la nube (fuera de sitio)",
       "turnOff": "Desactivar",
       "turnOn": "Activar",
-      "where": "{{target}} a s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})"
+      "where": "{{target}} a s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})",
+      "progress": {
+        "receiving": "{{size}} descargadas y recibidas hasta ahora",
+        "thawing": "Descongelando: {{ready}} de {{total}} partes listas",
+        "upload": "{{dataset}}: {{size}} enviadas hasta ahora ({{done}} de {{total}} conjuntos de datos completados)"
+      }
     }
   },
   "cloudBackup": {

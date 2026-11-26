@@ -6343,7 +6343,7 @@
       "region": "地域",
       "restore": "復元",
       "restoreFailed": "復元を開始できませんでした。",
-      "restoreHelp": "S3 はコピーを最初に復元し、次にストレージホストがダウンロードして復号化し、新しいデータセットに受け取ります。既存のものは上書きされません。",
+      "restoreHelp": "S3 がまずコピーを解凍し、次にストレージホストがそれをダウンロードして復号し、新しいデータセットに受信します。既存のものは上書きされません。",
       "restoreTitle": "クラウドコピーから復元する",
       "rotate": "新しいキー",
       "runHour": "毎日 (時間、UTC) にアップロードする",
@@ -6372,7 +6372,12 @@
       "title": "クラウドコピー（オフサイト）",
       "turnOff": "オフ",
       "turnOn": "オン",
-      "where": "{{target}} s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}}) にアップロード"
+      "where": "{{target}} s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}}) にアップロード",
+      "progress": {
+        "receiving": "これまでに {{size}} をダウンロードして受信",
+        "thawing": "解凍中: {{total}} パートのうち {{ready}} パートが準備完了",
+        "upload": "{{dataset}}: これまでに {{size}} を送信（{{total}} 個のデータセットのうち {{done}} 個が完了）"
+      }
     }
   },
   "cloudBackup": {

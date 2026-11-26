@@ -15,6 +15,7 @@ from sqlalchemy import update
 from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import error_host_not_registered
+from backend.api.host_registration import tenant_host_refusal
 from backend.i18n import _
 from backend.persistence.models import Host, HostChild
 from backend.security import agent_identity, agent_mtls
@@ -123,6 +124,9 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
     agent_host_id = message_data.get("host_id")
     tenant_engine = tenant_engine_for_host(agent_host_id) if agent_host_id else None
     if tenant_engine is None:
+        refusal = tenant_host_refusal(db, message_data)
+        if refusal is not None:
+            return refusal
         return await _handle_system_info_impl(db, connection, message_data)
 
     # Bound host → run the whole handler on its tenant's database so the host

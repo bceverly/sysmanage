@@ -6,7 +6,7 @@
 // restore and the key export in every edition; frozen, not gone, after a
 // lapse; hidden on an air-gapped site.
 
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { vi, beforeEach, test, expect } from "vitest";
 
 vi.mock("react-i18next", () => {
@@ -129,4 +129,47 @@ test("a restore shows its cost first and goes into a new dataset", async () => {
   fireEvent.click(screen.getByText("Thaw and restore"));
   await waitFor(() => expect(restoreCloudCopy).toHaveBeenCalledWith(
     "c1", "tank/b", "sysmanage-offsite-20261125T020000Z", "Bulk", "tank/b-restored"));
+});
+
+test("a job's result shows up on its own, and the asking stops once it is done", async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  try {
+    const queued = { id: "r2", copy_id: "c1", action: "check", status: "queued", queued_at: "2026-11-26T12:03:22" };
+    const done = { ...queued, status: "ok", finished_at: "2026-11-26T12:03:26" };
+    vi.mocked(getCloudCopies)
+      .mockResolvedValueOnce(overview({ copies: [copy({ lock_verified: null, last_run_id: "r2" })] }))
+      .mockResolvedValue(overview({ copies: [copy({ lock_verified: true, last_run_id: "r2" })] }));
+    vi.mocked(getCloudCopyRuns).mockResolvedValueOnce([queued] as never).mockResolvedValue([done] as never);
+    render(<BackupCloudCopy canManage canRestore />);
+    expect(await screen.findByText(/Last job: Check queued/)).toBeTruthy();
+    expect(screen.queryByText("Object Lock on")).toBeNull();
+    await act(() => vi.advanceTimersByTimeAsync(3100));
+    expect(await screen.findByText("Object Lock on")).toBeTruthy();
+    expect(screen.getByText(/Last job: Check done/)).toBeTruthy();
+    const asked = vi.mocked(getCloudCopyRuns).mock.calls.length;
+    await act(() => vi.advanceTimersByTimeAsync(10000));
+    expect(vi.mocked(getCloudCopyRuns).mock.calls.length).toBe(asked);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test("a job in flight shows how far it has got", async () => {
+  vi.mocked(getCloudCopyRuns).mockResolvedValue([{
+    id: "r3", copy_id: "c1", action: "upload", status: "running", queued_at: "2026-11-26T12:32:19",
+    progress: { dataset: "zroot/offsite-test", bytes_uploaded: 536879240, datasets_done: 0, datasets_total: 1 },
+  }] as never);
+  render(<BackupCloudCopy canManage canRestore />);
+  expect(await screen.findByText(/zroot\/offsite-test: .* sent so far \(0 of 1 datasets done\)/)).toBeTruthy();
+});
+
+test("a restore shows its thaw, then what it has received", async () => {
+  const run = { id: "r4", copy_id: "c1", action: "restore", status: "running", queued_at: "2026-11-26T12:27:39" };
+  vi.mocked(getCloudCopyRuns).mockResolvedValueOnce([{ ...run, progress: { phase: "thawing", parts_ready: 1, parts_total: 2 } }] as never);
+  const { unmount } = render(<BackupCloudCopy canManage canRestore />);
+  expect(await screen.findByText("Thawing: 1 of 2 parts ready")).toBeTruthy();
+  unmount();
+  vi.mocked(getCloudCopyRuns).mockResolvedValueOnce([{ ...run, progress: { phase: "receiving", bytes_received: 1024 } }] as never);
+  render(<BackupCloudCopy canManage canRestore />);
+  expect(await screen.findByText(/downloaded and received so far/)).toBeTruthy();
 });

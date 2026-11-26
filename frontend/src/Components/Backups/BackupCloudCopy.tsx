@@ -16,6 +16,7 @@ import {
     Alert, Button, Chip, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
 import {
     CloudCopy, CloudCopyOverview, CloudCopyRun, checkCloudCopy, getCloudCopies, getCloudCopyRuns,
@@ -27,6 +28,32 @@ import {
 } from './CloudCopyDialogs';
 
 type Open = null | 'setup' | 'edit' | 'restore' | 'export' | 'guide';
+
+// A job's result arrives from the storage host after the button returns, so
+// the card keeps asking while one is waiting or running.
+const POLL_MS = 3000;
+const inFlight = (run: CloudCopyRun | undefined) => run?.status === 'queued' || run?.status === 'running';
+
+// What the storage host last reported about a job in flight (about every 30 seconds).
+const progressText = (progress: CloudCopyRun['progress'], t: TFunction): string | null => {
+    if (!progress) return null;
+    const count = (key: string) => Number(progress[key] ?? 0);
+    if (progress.phase === 'thawing') {
+        return t('backups.cloudCopy.progress.thawing', 'Thawing: {{ready}} of {{total}} parts ready', {
+            ready: count('parts_ready'), total: count('parts_total'),
+        });
+    }
+    if (progress.phase === 'receiving') {
+        return t('backups.cloudCopy.progress.receiving', '{{size}} downloaded and received so far', {
+            size: formatBytes(count('bytes_received')),
+        });
+    }
+    if (progress.dataset === undefined) return null;
+    return t('backups.cloudCopy.progress.upload', '{{dataset}}: {{size}} sent so far ({{done}} of {{total}} datasets done)', {
+        dataset: String(progress.dataset), size: formatBytes(count('bytes_uploaded')),
+        done: count('datasets_done'), total: count('datasets_total'),
+    });
+};
 
 const RunLine: React.FC<{ run: CloudCopyRun | undefined }> = ({ run }) => {
     const { t } = useTranslation();
@@ -44,13 +71,17 @@ const RunLine: React.FC<{ run: CloudCopyRun | undefined }> = ({ run }) => {
         failed: t('backups.cloudCopy.status.failed', 'failed'),
         interrupted: t('backups.cloudCopy.status.interrupted', 'interrupted, resumes next run'),
     };
+    const progress = inFlight(run) ? progressText(run.progress, t) : null;
     return (
+        <>
         <Typography variant="body2">
             {t('backups.cloudCopy.lastRun', 'Last job: {{action}} {{status}}, {{when}}', {
                 action: labels[run.action], status: statuses[run.status], when: formatTime(run.finished_at ?? run.queued_at),
             })}
             {run.message ? ` - ${run.message}` : ''}
         </Typography>
+        {progress && <Typography variant="body2" color="text.secondary">{progress}</Typography>}
+        </>
     );
 };
 
@@ -61,7 +92,8 @@ const CopyPanel: React.FC<{
     canRestore: boolean;
     onOpen: (what: Open) => void;
     onChanged: () => void;
-}> = ({ copy, targetName, canManage, canRestore, onOpen, onChanged }) => {
+    onRefresh: () => void;
+}> = ({ copy, targetName, canManage, canRestore, onOpen, onChanged, onRefresh }) => {
     const { t } = useTranslation();
     const [runs, setRuns] = useState<CloudCopyRun[]>([]);
     const [error, setError] = useState('');
@@ -69,6 +101,18 @@ const CopyPanel: React.FC<{
     useEffect(() => {
         getCloudCopyRuns(copy.id).then(setRuns).catch(() => setRuns([]));
     }, [copy.id, copy.last_run_id]);
+
+    const busy = inFlight(runs[0]);
+    useEffect(() => {
+        if (!busy) return undefined;
+        const timer = setInterval(() => {
+            getCloudCopyRuns(copy.id).then(next => {
+                setRuns(next);
+                onRefresh();
+            }).catch(() => undefined);
+        }, POLL_MS);
+        return () => clearInterval(timer);
+    }, [busy, copy.id, onRefresh]);
 
     const act = (call: () => Promise<unknown>) => async () => {
         setError('');
@@ -177,6 +221,7 @@ const BackupCloudCopy: React.FC<{ canManage: boolean; canRestore: boolean; refre
         getCloudCopies().then(setData).catch(() => setData(null));
     }, []);
     useEffect(load, [load, refreshKey, tick]);
+    const refresh = useCallback(() => setTick(n => n + 1), []);
 
     if (!data || !data.available) return null;
     if (!data.copies.length && !data.licensed) return null;
@@ -195,7 +240,7 @@ const BackupCloudCopy: React.FC<{ canManage: boolean; canRestore: boolean; refre
             </Typography>
             {data.copies.map(copy => (
                 <CopyPanel key={copy.id} copy={copy} targetName={name(copy.target_id)} canManage={canManage}
-                           canRestore={canRestore} onChanged={changed}
+                           canRestore={canRestore} onChanged={changed} onRefresh={refresh}
                            onOpen={what => setOpen({ what, copy })} />
             ))}
             {canManage && data.licensed && free && (

@@ -410,8 +410,10 @@ def record_result(db: Session, host_id: Any, payload: Dict[str, Any]) -> None:
         logger.info(
             "off-site run %s: %s, %d streams recorded", run.id, run.status, stored
         )
-    elif run.action == offsite.RESTORE:
-        run.bytes_moved = int(payload.get("bytes_received") or 0)
+    else:
+        if run.action == offsite.RESTORE:
+            run.bytes_moved = int(payload.get("bytes_received") or 0)
+        logger.info("off-site %s run %s: %s", run.action, run.id, run.status)
     db.flush()
     if copy is None:
         return

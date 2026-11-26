@@ -13,6 +13,7 @@ from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.partitions import request_sessionmaker
+from backend.services import package_update_first_seen as first_seen
 
 from .models import UpdatesReport
 
@@ -34,6 +35,10 @@ def report_updates(
                 raise HTTPException(status_code=404, detail=_("Host not found"))
 
             now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+            # When each update was first seen, read before the rows go: a
+            # waiting period counts from it, so a re-report must not restart it.
+            seen = first_seen.first_seen(session, host_id)
 
             # Clear existing updates for this host
             session.query(models.PackageUpdate).filter(
@@ -58,7 +63,15 @@ def report_updates(
                     description=None,
                     size_bytes=update_info.update_size_bytes,
                     requires_reboot=update_info.requires_reboot,
-                    discovered_at=now,
+                    discovered_at=first_seen.keep(
+                        seen,
+                        {
+                            "package_name": update_info.package_name,
+                            "package_manager": update_info.package_manager,
+                        },
+                        update_info.available_version,
+                        now,
+                    ),
                     created_at=now,
                     updated_at=now,
                 )

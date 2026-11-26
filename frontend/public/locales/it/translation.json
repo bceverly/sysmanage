@@ -6372,7 +6372,12 @@
       "title": "Copia cloud (off-site)",
       "turnOff": "Disattiva",
       "turnOn": "Accendi",
-      "where": "Host a {{target}} in s3://{{bucket}}/{{prefix}} (regione: {{region}}, classe di archiviazione: {{storageClass}})"
+      "where": "Host a {{target}} in s3://{{bucket}}/{{prefix}} (regione: {{region}}, classe di archiviazione: {{storageClass}})",
+      "progress": {
+        "receiving": "{{size}} scaricati e ricevuti finora",
+        "thawing": "Scongelamento: {{ready}} di {{total}} parti pronte",
+        "upload": "{{dataset}}: {{size}} inviate finora ({{done}} di {{total}} set di dati completati)"
+      }
     }
   },
   "cloudBackup": {

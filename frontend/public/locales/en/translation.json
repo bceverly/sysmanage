@@ -6372,7 +6372,12 @@
       "title": "Cloud copy (off-site)",
       "turnOff": "Turn off",
       "turnOn": "Turn on",
-      "where": "{{target}} to s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})"
+      "where": "{{target}} to s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})",
+      "progress": {
+        "receiving": "{{size}} downloaded and received so far",
+        "thawing": "Thawing: {{ready}} of {{total}} parts ready",
+        "upload": "{{dataset}}: {{size}} sent so far ({{done}} of {{total}} datasets done)"
+      }
     }
   },
   "cloudBackup": {

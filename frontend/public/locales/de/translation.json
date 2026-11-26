@@ -6343,7 +6343,7 @@
       "region": "AWS-Region",
       "restore": "Wiederherstellen",
       "restoreFailed": "Die Wiederherstellung konnte nicht gestartet werden.",
-      "restoreHelp": "S3 lädt die Kopie zuerst herunter, dann der Speicherhost, entschlüsselt sie und empfängt sie in ein neues Datensatzdatenset. Keine vorhandenen Daten werden überschrieben.",
+      "restoreHelp": "S3 taut die Kopie zuerst auf, dann lädt der Speicherhost sie herunter, entschlüsselt sie und empfängt sie in einen neuen Datensatz. Nichts Vorhandenes wird überschrieben.",
       "restoreTitle": "Aus der Cloud-Kopie wiederherstellen",
       "rotate": "Neuer Schlüssel",
       "runHour": "Jeden Tag um (Stunde, UTC) hochladen",
@@ -6372,7 +6372,12 @@
       "title": "Cloud-Kopie (offsite)",
       "turnOff": "Ausschalten",
       "turnOn": "Einschalten",
-      "where": "{{target}} zu s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})"
+      "where": "{{target}} zu s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})",
+      "progress": {
+        "receiving": "Bisher heruntergeladen und empfangen: {{size}}",
+        "thawing": "Auftauen: {{ready}} von {{total}} Teilen bereit",
+        "upload": "{{dataset}}: bisher {{size}} gesendet ({{done}} von {{total}} Datensätzen fertig)"
+      }
     }
   },
   "cloudBackup": {

@@ -6372,7 +6372,12 @@
       "title": "Cópia na Nuvem (off-site)",
       "turnOff": "Desligar",
       "turnOn": "Ligar",
-      "where": "{{target}} para s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})"
+      "where": "{{target}} para s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})",
+      "progress": {
+        "receiving": "{{size}} baixado e recebido até agora",
+        "thawing": "Descongelamento: {{ready}} de {{total}} partes prontas",
+        "upload": "{{dataset}}: {{size}} enviadas até agora ({{done}} de {{total}} conjuntos de dados concluídos)"
+      }
     }
   },
   "cloudBackup": {

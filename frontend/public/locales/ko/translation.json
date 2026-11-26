@@ -6372,7 +6372,12 @@
       "title": "클라우드 복사본 (오프사이트)",
       "turnOff": "끄기",
       "turnOn": "켜기",
-      "where": "{{target}}에서 s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})"
+      "where": "{{target}}에서 s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})",
+      "progress": {
+        "receiving": "지금까지 {{size}} 다운로드 및 수신됨",
+        "thawing": "해동 중: {{total}}개 부분 중 {{ready}}개 준비됨",
+        "upload": "{{dataset}}: 지금까지 {{size}} 전송됨 (데이터셋 {{total}}개 중 {{done}}개 완료)"
+      }
     }
   },
   "cloudBackup": {

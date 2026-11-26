@@ -6372,7 +6372,12 @@
       "title": "Copie dans le cloud (hors site)",
       "turnOff": "Désactiver",
       "turnOn": "Activer",
-      "where": "{{target}} vers s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})"
+      "where": "{{target}} vers s3://{{bucket}}/{{prefix}} ({{region}}, {{storageClass}})",
+      "progress": {
+        "receiving": "{{size}} téléchargé et reçu jusqu'à présent",
+        "thawing": "Décongélation : {{ready}} de {{total}} parties prêtes",
+        "upload": "{{dataset}} : {{size}} envoyés jusqu'à présent ({{done}} sur {{total}} ensembles de données terminés)"
+      }
     }
   },
   "cloudBackup": {

@@ -86,7 +86,29 @@ def existing_host_reply(
             "Registration retry for %s with its nonce: re-sending its credential",
             sanitize_log(existing_host.fqdn),
         )
+    if not retry and awaiting_reenroll(existing_host):
+        # An administrator re-enrolled this host (no credential, pending): the
+        # agent that lost its id gets it back, so it can claim the host and be
+        # given a new token on first use.  Nothing it sends is accepted until
+        # the host is approved again.
+        logger.info(
+            "Registration for re-enrolled host %s: sending its id",
+            sanitize_log(existing_host.fqdn),
+        )
+        reply = registration_reply(existing_host, issue_credential=False)
+        reply["id"] = str(existing_host.id)
+        return reply
     return registration_reply(existing_host, issue_credential=retry)
+
+
+def awaiting_reenroll(host) -> bool:
+    """A host an administrator re-enrolled: its credential cleared and back to
+    pending approval, waiting for its agent to claim it."""
+    return (
+        host.approval_status == "pending"
+        and not host.host_token
+        and not getattr(host, "requires_host_token", False)
+    )
 
 
 def _audit_registration_key_enrollment(session, host, validated_key) -> None:
@@ -215,6 +237,53 @@ def _apply_enrollment_token_placement(session, host, resolution):
                 access_group_id=access_group_id,
             )
         )
+
+
+def tenant_host_refusal(db, message_data: dict):
+    """Never make a no-tenant copy of a host that lives in a tenant.
+
+    A SYSTEM_INFO that does not resolve to a tenant runs on the bootstrap
+    database, where ``update_or_create_host`` creates the host by name when no
+    row has it.  When that name already belongs to a tenant's host -- an agent
+    that lost its host id, then registered into the tenant with its token --
+    the new row is a pending phantom in "No tenant" that the agent then
+    reports as, while the real host shows down.  Registration refuses the
+    same case for a token-less agent (``_reject_if_fqdn_belongs_to_tenant``);
+    this closes it on the first message.  An existing bootstrap row is left
+    alone.  None when there is nothing to refuse."""
+    from backend.config import config as _config  # noqa: PLC0415
+
+    hostname = message_data.get("hostname")
+    if not hostname or not _config.is_multitenancy_enabled():
+        return None
+    if db.query(models.Host.id).filter(models.Host.fqdn == hostname).first():
+        return None
+    from backend.websocket.inbound_processor import (  # noqa: PLC0415
+        _find_host_in_tenant_dbs,
+    )
+
+    host, tenant_session = _find_host_in_tenant_dbs(None, hostname)
+    if host is None:
+        return None
+    try:
+        host_id = str(host.id)
+    finally:
+        tenant_session.close()
+    logger.warning(
+        "Refused a no-tenant host for %s: it belongs to a tenant (host %s); "
+        "the agent must report as that host (re-enroll it if it lost its id)",
+        sanitize_log(hostname),
+        host_id,
+    )
+    return {
+        "message_type": "error",
+        "error_type": "host_belongs_to_tenant",
+        "message": _(
+            "This host belongs to a tenant, but the agent did not say which "
+            "host it is. Re-enroll the host in its tenant, then restart the agent."
+        ),
+        "data": {},
+    }
 
 
 def _reject_if_fqdn_belongs_to_tenant(fqdn):

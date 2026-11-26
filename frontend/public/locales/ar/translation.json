@@ -6372,7 +6372,12 @@
       "title": "نسخة سحابية (خارج الموقع)",
       "turnOff": "إيقاف التشغيل",
       "turnOn": "تشغيل",
-      "where": "{{target}} إلى s3://{{bucket}}/{{prefix}} ({{region}}، {{storageClass}})"
+      "where": "{{target}} إلى s3://{{bucket}}/{{prefix}} ({{region}}، {{storageClass}})",
+      "progress": {
+        "receiving": "تم تنزيله واستلامه حتى الآن: {{size}}",
+        "thawing": "الإذابة: {{ready}} من {{total}} أجزاء جاهزة",
+        "upload": "{{dataset}}: تم إرسال {{size}} حتى الآن (اكتمل {{done}} من {{total}} من مجموعات البيانات)"
+      }
     }
   },
   "cloudBackup": {
