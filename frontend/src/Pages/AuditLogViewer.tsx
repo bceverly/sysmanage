@@ -281,7 +281,7 @@ const AuditLogViewer: React.FC = () => {
                   <MenuItem value="SECRET">{t('auditLog.entityType.secret', 'Secret')}</MenuItem>
                   <MenuItem value="CERTIFICATE">{t('auditLog.entityType.certificate', 'Certificate')}</MenuItem>
                   <MenuItem value="TAG">{t('auditLog.entityType.tag', 'Tag')}</MenuItem>
-                  <MenuItem value="USER_ROLE">{t('auditLog.entityType.userRole', 'User Role')}</MenuItem>
+                  <MenuItem value="SECURITY_ROLE">{t('auditLog.entityType.userRole', 'User Role')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

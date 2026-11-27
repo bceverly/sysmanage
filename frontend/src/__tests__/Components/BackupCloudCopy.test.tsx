@@ -28,7 +28,7 @@ vi.mock("../../Services/backupCloudCopy", () => ({
 
 import {
   checkCloudCopy, createCloudCopy, estimateRestore, getCloudCopies, getCloudCopyRuns,
-  getRestorePoints, restoreCloudCopy, runCloudCopy,
+  getRestorePoints, restoreCloudCopy, rotateCloudCopyKey, runCloudCopy,
 } from "../../Services/backupCloudCopy";
 import type { CloudCopy, CloudCopyOverview } from "../../Services/backupCloudCopy";
 import BackupCloudCopy from "../../Components/Backups/BackupCloudCopy";
@@ -73,6 +73,15 @@ test("shows what is stored, the lock and the cost, and runs on request", async (
   expect(screen.getByText("tank/backups/web-1a2b3c4d")).toBeTruthy();
   fireEvent.click(screen.getByText("Run now"));
   await waitFor(() => expect(runCloudCopy).toHaveBeenCalledWith("c1"));
+});
+
+test("a new key says so, and that the keys need exporting again", async () => {
+  vi.mocked(rotateCloudCopyKey).mockResolvedValue(copy({ key_id: "e129b66c41fe26b8" }));
+  render(<BackupCloudCopy canManage canRestore />);
+  fireEvent.click(await screen.findByText("New key"));
+  expect(await screen.findByText(/New key e129b66c41fe26b8 made\. The next upload is a full copy/)).toBeTruthy();
+  expect(screen.getByText(/Export the keys again/)).toBeTruthy();
+  expect(rotateCloudCopyKey).toHaveBeenCalledWith("c1");
 });
 
 test("after a lapse the copy is frozen but restore and export stay", async () => {

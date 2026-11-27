@@ -29,7 +29,7 @@ from backend.i18n import N_, _
 from backend.licensing.feature_gate import require_module_loaded
 from backend.licensing.features import ModuleCode
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
@@ -206,7 +206,7 @@ def _parse_uuid_or_400(value: Optional[str], field_name: str) -> Optional[uuid.U
 
 
 @groups_router.get("", response_model=List[AccessGroupResponse])
-def list_access_groups(db: Session = Depends(get_db)):
+def list_access_groups(db: Session = Depends(get_tenant_db)):
     """List every access group (flat).  Tree assembly is the client's
     job -- each row carries ``parent_id``."""
     rows = db.query(models.AccessGroup).order_by(models.AccessGroup.name).all()
@@ -216,7 +216,7 @@ def list_access_groups(db: Session = Depends(get_db)):
 @groups_router.post("", response_model=AccessGroupResponse)
 def create_access_group(
     request: AccessGroupCreateRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     """Create a new access group.  ``parent_id`` is optional (root if omitted)."""
@@ -247,7 +247,7 @@ def create_access_group(
     AuditService.log(
         db=db,
         action_type=ActionType.CREATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.ACCESS_GROUP,
         entity_id=str(group.id),
         entity_name=group.name,
         description=_("Created access group '%s'") % group.name,
@@ -259,7 +259,7 @@ def create_access_group(
 
 
 @groups_router.get("/{group_id}", response_model=AccessGroupResponse)
-def get_access_group(group_id: str, db: Session = Depends(get_db)):
+def get_access_group(group_id: str, db: Session = Depends(get_tenant_db)):
     group_uuid = _parse_uuid_or_400(group_id, "group_id")
     group = (
         db.query(models.AccessGroup).filter(models.AccessGroup.id == group_uuid).first()
@@ -273,7 +273,7 @@ def get_access_group(group_id: str, db: Session = Depends(get_db)):
 def update_access_group(
     group_id: str,
     request: AccessGroupUpdateRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     user = _get_user(db, current_user)
@@ -303,7 +303,7 @@ def update_access_group(
     AuditService.log(
         db=db,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.ACCESS_GROUP,
         entity_id=str(group.id),
         entity_name=group.name,
         description=_("Updated access group '%s'") % group.name,
@@ -317,7 +317,7 @@ def update_access_group(
 @groups_router.delete("/{group_id}")
 def delete_access_group(
     group_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     user = _get_user(db, current_user)
@@ -333,7 +333,7 @@ def delete_access_group(
     AuditService.log(
         db=db,
         action_type=ActionType.DELETE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.ACCESS_GROUP,
         entity_id=str(group_uuid),
         entity_name=name,
         description=_("Deleted access group '%s'") % name,
@@ -350,7 +350,7 @@ def delete_access_group(
 
 
 @keys_router.get("", response_model=List[RegistrationKeyResponse])
-def list_registration_keys(db: Session = Depends(get_db)):
+def list_registration_keys(db: Session = Depends(get_tenant_db)):
     """List every registration key (without the secret).  The raw
     ``key`` value is only ever returned at create time."""
     rows = (
@@ -365,7 +365,7 @@ def list_registration_keys(db: Session = Depends(get_db)):
 @keys_router.post("", response_model=RegistrationKeyResponse)
 def create_registration_key(
     request: RegistrationKeyCreateRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     """Create a new registration key.  The plaintext key is returned
@@ -412,7 +412,7 @@ def create_registration_key(
     AuditService.log(
         db=db,
         action_type=ActionType.CREATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.REGISTRATION_KEY,
         entity_id=str(key.id),
         entity_name=key.name,
         description=_("Created registration key '%s'") % key.name,
@@ -426,7 +426,7 @@ def create_registration_key(
 @keys_router.post("/{key_id}/revoke")
 def revoke_registration_key(
     key_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     """Mark a key as revoked.  Idempotent -- already-revoked keys remain
@@ -446,7 +446,7 @@ def revoke_registration_key(
     AuditService.log(
         db=db,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.REGISTRATION_KEY,
         entity_id=str(key.id),
         entity_name=key.name,
         description=_("Revoked registration key '%s'") % key.name,
@@ -460,7 +460,7 @@ def revoke_registration_key(
 @keys_router.delete("/{key_id}")
 def delete_registration_key(
     key_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     user = _get_user(db, current_user)
@@ -478,7 +478,7 @@ def delete_registration_key(
     AuditService.log(
         db=db,
         action_type=ActionType.DELETE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.REGISTRATION_KEY,
         entity_id=str(key_uuid),
         entity_name=name,
         description=_("Deleted registration key '%s'") % name,

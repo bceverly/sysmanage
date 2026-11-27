@@ -131,7 +131,7 @@ def put_policy(
         db=db,
         user_id=current_user.id,
         username=current_user.userid,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.CONFIGURATION,
         entity_name="network_discovery_policy",
         details=change,
     )

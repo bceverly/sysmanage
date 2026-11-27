@@ -177,7 +177,7 @@ def _audit(db, current_user, row, text: str, details) -> None:
         user_id=current_user.id,
         username=current_user.userid,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.BACKUP,
         entity_id=str(row.id),
         entity_name=row.name,
         description=text,

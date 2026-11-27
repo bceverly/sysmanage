@@ -141,7 +141,7 @@ def put_four_eyes(
     _audit(
         db,
         current_user,
-        EntityType.SETTING,
+        EntityType.BACKUP,
         None,
         "backups",
         "Four-eyes restore approval turned on" if body.enabled

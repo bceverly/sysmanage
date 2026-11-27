@@ -6377,7 +6377,8 @@
         "receiving": "{{size}} downloaded and received so far",
         "thawing": "Thawing: {{ready}} of {{total}} parts ready",
         "upload": "{{dataset}}: {{size}} sent so far ({{done}} of {{total}} datasets done)"
-      }
+      },
+      "rotated": "New key {{key}} made. The next upload is a full copy under it. Export the keys again: an earlier export does not hold this key."
     }
   },
   "cloudBackup": {

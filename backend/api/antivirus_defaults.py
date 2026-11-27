@@ -264,7 +264,7 @@ def update_antivirus_defaults(  # NOSONAR
             for default in updated_defaults:
                 AuditService.log_update(
                     db=audit_session,
-                    entity_type=EntityType.SETTING,
+                    entity_type=EntityType.ANTIVIRUS,
                     entity_name=f"Antivirus Default for {default.os_name}",
                     user_id=current_user.id,
                     username=current_user.userid,
@@ -328,7 +328,7 @@ def delete_antivirus_default(
             with audit_session_local() as audit_session:
                 AuditService.log_delete(
                     db=audit_session,
-                    entity_type=EntityType.SETTING,
+                    entity_type=EntityType.ANTIVIRUS,
                     entity_name=f"Antivirus Default for {default_os_name}",
                     user_id=current_user.id,
                     username=current_user.userid,

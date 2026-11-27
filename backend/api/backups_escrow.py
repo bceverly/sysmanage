@@ -68,7 +68,7 @@ def save_escrow_key(
     except escrow.EscrowKeyRefused as refused:
         raise HTTPException(status_code=422, detail=str(refused)) from refused
     _audit(
-        db, current_user, EntityType.SETTING, target.id, target.name,
+        db, current_user, EntityType.BACKUP, target.id, target.name,
         "Backup break-glass escrow key saved",
         {"fingerprint": saved["fingerprint"], "uid": saved["uid"]},
     )  # fmt: skip

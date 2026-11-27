@@ -6377,7 +6377,8 @@
         "receiving": "{{size}} gedownload en ontvangen tot nu toe",
         "thawing": "Ontdooien: {{ready}} van de {{total}} delen klaar",
         "upload": "{{dataset}}: {{size}} verzonden tot nu toe ({{done}} van de {{total}} datasets voltooid)"
-      }
+      },
+      "rotated": "Nieuwe sleutel {{key}} aangemaakt. De volgende upload is een volledige kopie met deze sleutel. Exporteer de sleutels opnieuw: een eerdere export bevat deze sleutel niet."
     }
   },
   "cloudBackup": {

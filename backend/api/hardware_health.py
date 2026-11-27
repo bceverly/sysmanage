@@ -465,7 +465,7 @@ def set_smartmontools_auto(
         user_id=current_user.id,
         username=current_user.userid,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.CONFIGURATION,
         entity_id=smartmontools_install.SETTING_AUTO,
         entity_name=smartmontools_install.SETTING_AUTO,
         description=(

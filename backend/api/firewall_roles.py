@@ -219,7 +219,7 @@ def create_firewall_role(  # NOSONAR
         with session_local() as audit_session:
             AuditService.log_create(
                 db=audit_session,
-                entity_type=EntityType.SETTING,
+                entity_type=EntityType.FIREWALL,
                 entity_name=f"Firewall Role: {role_data.name}",
                 user_id=current_user.id,
                 username=current_user.userid,
@@ -338,7 +338,7 @@ def update_firewall_role(  # NOSONAR
         with session_local() as audit_session:
             AuditService.log_update(
                 db=audit_session,
-                entity_type=EntityType.SETTING,
+                entity_type=EntityType.FIREWALL,
                 entity_name=f"Firewall Role: {role.name}",
                 user_id=current_user.id,
                 username=current_user.userid,
@@ -420,7 +420,7 @@ def delete_firewall_role(
         with session_local() as audit_session:
             AuditService.log_delete(
                 db=audit_session,
-                entity_type=EntityType.SETTING,
+                entity_type=EntityType.FIREWALL,
                 entity_name=f"Firewall Role: {role_name}",
                 user_id=current_user.id,
                 username=current_user.userid,

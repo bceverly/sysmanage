@@ -146,7 +146,7 @@ def issue(
     AuditService.log(
         db=db,
         action_type=ActionType.CREATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.SECRET,
         entity_id=result["lease"]["id"],
         entity_name=result["lease"]["name"],
         description=_(
@@ -230,7 +230,7 @@ def revoke(
     AuditService.log(
         db=db,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.SECRET,
         entity_id=str(lid),
         entity_name=result["lease"]["name"],
         description=_("Revoked dynamic secret lease '%s'") % result["lease"]["name"],

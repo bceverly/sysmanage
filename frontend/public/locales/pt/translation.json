@@ -6377,7 +6377,8 @@
         "receiving": "{{size}} baixado e recebido até agora",
         "thawing": "Descongelamento: {{ready}} de {{total}} partes prontas",
         "upload": "{{dataset}}: {{size}} enviadas até agora ({{done}} de {{total}} conjuntos de dados concluídos)"
-      }
+      },
+      "rotated": "Nova chave {{key}} criada. O próximo envio será uma cópia completa com ela. Exporte as chaves novamente: uma exportação anterior não contém esta chave."
     }
   },
   "cloudBackup": {

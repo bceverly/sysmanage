@@ -702,7 +702,7 @@ def clear_runs(
         )
         .update({models.BackupRun.dismissed_at: now}, synchronize_session=False)
     )
-    _audit(db, current_user, EntityType.SETTING, None, "backups",
+    _audit(db, current_user, EntityType.BACKUP, None, "backups",
            "Backup job list cleared", {"runs": cleared})  # fmt: skip
     db.commit()
     return {"cleared": cleared}

@@ -187,7 +187,7 @@ def create_target(
     _audit(
         db,
         current_user,
-        EntityType.SETTING,
+        EntityType.BACKUP,
         target.id,
         target.name,
         "Backup target created",
@@ -228,7 +228,7 @@ def update_target(
     _audit(
         db,
         current_user,
-        EntityType.SETTING,
+        EntityType.BACKUP,
         target.id,
         target.name,
         "Backup target changed",
@@ -274,7 +274,7 @@ def delete_target(
     _audit(
         db,
         current_user,
-        EntityType.SETTING,
+        EntityType.BACKUP,
         target.id,
         target.name,
         "Backup target deleted",
@@ -301,7 +301,7 @@ def set_default_target(
     _audit(
         db,
         current_user,
-        EntityType.SETTING,
+        EntityType.BACKUP,
         target.id,
         target.name,
         "Backup target made the default",
@@ -336,7 +336,7 @@ def set_replica_target(
     _audit(
         db,
         current_user,
-        EntityType.SETTING,
+        EntityType.BACKUP,
         target.id,
         target.name,
         (

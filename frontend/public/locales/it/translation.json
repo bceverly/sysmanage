@@ -6314,7 +6314,7 @@
       "exportHelp": "Tutto ciò di cui ha bisogno un ripristino senza SysManage: il bucket, le credenziali e ogni chiave, sigillato con la tua chiave OpenPGP. Conservalo in un luogo che il sito non può portare via.",
       "exportTitle": "Esporta le chiavi della copia cloud",
       "frozen": "Senza Professional+ il copia è bloccato: non ci sono nuovi caricamenti e tutto nel bucket può ancora essere ripristinato.",
-      "fullEvery": "Una copia completa ogni",
+      "fullEvery": "Una copia completa ogni (giorni)",
       "guide": "Configurazione del bucket",
       "guideCommands": "Crea il bucket con Object Lock, le sue regole di ciclo di vita e un utente IAM che può caricare ma non eliminare:",
       "guideFailed": "La guida di configurazione non può essere letta.",
@@ -6377,7 +6377,8 @@
         "receiving": "{{size}} scaricati e ricevuti finora",
         "thawing": "Scongelamento: {{ready}} di {{total}} parti pronte",
         "upload": "{{dataset}}: {{size}} inviate finora ({{done}} di {{total}} set di dati completati)"
-      }
+      },
+      "rotated": "Nuova chiave {{key}} creata. Il prossimo caricamento sarà una copia completa con questa chiave. Esporta di nuovo le chiavi: un'esportazione precedente non contiene questa chiave."
     }
   },
   "cloudBackup": {

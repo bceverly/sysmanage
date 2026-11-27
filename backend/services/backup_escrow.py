@@ -308,7 +308,7 @@ def remind_after_rotation(
         AuditService.log(
             db=db,
             action_type=ActionType.UPDATE,
-            entity_type=EntityType.SETTING,
+            entity_type=EntityType.BACKUP,
             description=REMINDER_AUDIT,
             details={
                 "rotated": rotated,

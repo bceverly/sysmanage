@@ -333,7 +333,7 @@ def create_enabled_package_manager(
         # Log audit entry
         AuditService.log_create(
             db=db_session,
-            entity_type=EntityType.SETTING,
+            entity_type=EntityType.PACKAGE,
             entity_name=f"Enabled Package Manager: {pm_data.package_manager} for {pm_data.os_name}",
             user_id=auth_user_id,
             username=current_user.userid,
@@ -441,7 +441,7 @@ def delete_enabled_package_manager(
         # Log audit entry
         AuditService.log_delete(
             db=db_session,
-            entity_type=EntityType.SETTING,
+            entity_type=EntityType.PACKAGE,
             entity_name=f"Enabled Package Manager: {pm_package_manager} for {pm_os_name}",
             user_id=auth_user_id,
             username=current_user.userid,

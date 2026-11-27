@@ -74,7 +74,7 @@ def _who(current_user) -> str:
 
 
 def _log(db, current_user, copy, description, details=None):
-    _audit(db, current_user, EntityType.SETTING, copy.id, f"off-site copy {copy.bucket}",
+    _audit(db, current_user, EntityType.BACKUP, copy.id, f"off-site copy {copy.bucket}",
            description, details or {})  # fmt: skip
 
 

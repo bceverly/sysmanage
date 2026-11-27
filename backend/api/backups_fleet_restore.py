@@ -121,7 +121,7 @@ def create_fleet_restore(
         concurrency=body.concurrency,
     )  # fmt: skip
     _audit(
-        db, current_user, EntityType.SETTING, job.id, job.name,
+        db, current_user, EntityType.BACKUP, job.id, job.name,
         "Fleet restore created", fleet.view(db, job),
     )  # fmt: skip
     db.commit()
@@ -166,7 +166,7 @@ def cancel_fleet_restore(
     job = _job_or_404(db, job_id)
     canceled = fleet.cancel(db, job)
     _audit(
-        db, current_user, EntityType.SETTING, job.id, job.name,
+        db, current_user, EntityType.BACKUP, job.id, job.name,
         "Fleet restore canceled", {"hosts_canceled": canceled},
     )  # fmt: skip
     db.commit()

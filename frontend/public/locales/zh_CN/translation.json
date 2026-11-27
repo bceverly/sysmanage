@@ -6377,7 +6377,8 @@
         "receiving": "目前已下载并接收 {{size}}",
         "thawing": "解冻：{{ready}} / {{total}} 部分已准备就绪",
         "upload": "{{dataset}}：目前已发送 {{size}}（{{total}} 个数据集中已完成 {{done}} 个）"
-      }
+      },
+      "rotated": "已创建新密钥 {{key}}。下一次上传将使用此密钥生成完整副本。请重新导出密钥：之前的导出不包含此密钥。"
     }
   },
   "cloudBackup": {

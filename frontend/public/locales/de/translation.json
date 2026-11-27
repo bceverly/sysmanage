@@ -6377,7 +6377,8 @@
         "receiving": "Bisher heruntergeladen und empfangen: {{size}}",
         "thawing": "Auftauen: {{ready}} von {{total}} Teilen bereit",
         "upload": "{{dataset}}: bisher {{size}} gesendet ({{done}} von {{total}} Datensätzen fertig)"
-      }
+      },
+      "rotated": "Neuer Schlüssel {{key}} erstellt. Der nächste Upload ist eine vollständige Kopie mit diesem Schlüssel. Exportieren Sie die Schlüssel erneut: Ein früherer Export enthält diesen Schlüssel nicht."
     }
   },
   "cloudBackup": {

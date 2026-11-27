@@ -97,6 +97,7 @@ const CopyPanel: React.FC<{
     const { t } = useTranslation();
     const [runs, setRuns] = useState<CloudCopyRun[]>([]);
     const [error, setError] = useState('');
+    const [notice, setNotice] = useState('');
 
     useEffect(() => {
         getCloudCopyRuns(copy.id).then(setRuns).catch(() => setRuns([]));
@@ -114,10 +115,12 @@ const CopyPanel: React.FC<{
         return () => clearInterval(timer);
     }, [busy, copy.id, onRefresh]);
 
-    const act = (call: () => Promise<unknown>) => async () => {
+    const act = (call: () => Promise<unknown>, done?: (result: unknown) => string) => async () => {
         setError('');
+        setNotice('');
         try {
-            await call();
+            const result = await call();
+            if (done) setNotice(done(result));
             onChanged();
         } catch (err) {
             setError(apiDetail(err, t('backups.cloudCopy.actionFailed', 'That could not be done.')));
@@ -178,6 +181,7 @@ const CopyPanel: React.FC<{
                 </Table>
             )}
             {error && <Alert severity="error">{error}</Alert>}
+            {notice && <Alert severity="success" onClose={() => setNotice('')}>{notice}</Alert>}
             <Stack direction="row" spacing={1} flexWrap="wrap">
                 {canManage && copy.licensed && (
                     <Button size="small" onClick={act(() => runCloudCopy(copy.id))}>{t('backups.cloudCopy.runNow', 'Run now')}</Button>
@@ -189,7 +193,11 @@ const CopyPanel: React.FC<{
                 {canManage && copy.licensed && <Button size="small" onClick={() => onOpen('edit')}>{t('backups.cloudCopy.settings', 'Settings')}</Button>}
                 {copy.licensed && <Button size="small" onClick={() => onOpen('guide')}>{t('backups.cloudCopy.guide', 'Bucket setup')}</Button>}
                 {canManage && copy.licensed && (
-                    <Button size="small" onClick={act(() => rotateCloudCopyKey(copy.id))}>{t('backups.cloudCopy.rotate', 'New key')}</Button>
+                    <Button size="small" onClick={act(() => rotateCloudCopyKey(copy.id), result => t('backups.cloudCopy.rotated',
+                        'New key {{key}} made. The next upload is a full copy under it. Export the keys again: an earlier export does not hold this key.',
+                        { key: (result as CloudCopy).key_id ?? '' }))}>
+                        {t('backups.cloudCopy.rotate', 'New key')}
+                    </Button>
                 )}
                 {canManage && canRestore && (
                     <Button size="small" onClick={() => onOpen('export')}>{t('backups.cloudCopy.export', 'Export keys')}</Button>

@@ -267,7 +267,7 @@ def create_template(
     AuditService.log(
         db=db,
         action_type=ActionType.CREATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.CONFIGURATION,
         entity_id=str(template.id),
         entity_name=template.name,
         description=_("Created report template '%s'") % template.name,
@@ -357,7 +357,7 @@ def update_template(
     AuditService.log(
         db=db,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.CONFIGURATION,
         entity_id=str(template.id),
         entity_name=template.name,
         description=_("Updated report template '%s'") % template.name,
@@ -390,7 +390,7 @@ def delete_template(
     AuditService.log(
         db=db,
         action_type=ActionType.DELETE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.CONFIGURATION,
         entity_id=str(tid),
         entity_name=name,
         description=_("Deleted report template '%s'") % name,

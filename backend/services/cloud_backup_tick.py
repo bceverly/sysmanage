@@ -385,7 +385,7 @@ def warn_expiring(db: Session, target_id, now: datetime) -> int:
         AuditService.log(
             db=db,
             action_type=ActionType.UPDATE,
-            entity_type=EntityType.SETTING,
+            entity_type=EntityType.BACKUP,
             entity_id=str(account.id),
             entity_name=account.display_name,
             description=SESSION_AUDIT,

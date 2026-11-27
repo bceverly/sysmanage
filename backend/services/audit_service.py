@@ -93,6 +93,19 @@ class EntityType(str, Enum):
     MALWARE_SCAN = "malware_scan"
     MALWARE_FINDING = "malware_finding"
     MALWARE_RULESET = "malware_ruleset"
+    # Backups: targets, policies, keys and escrow, approvals, restores and the
+    # off-site copy.  Tenant data -- as SETTING they went to the server-wide
+    # log, so production's cloud copy setup and key export were missing from
+    # the tenant's audit view (2026-11-27).
+    BACKUP = "backup"
+    # A tenant's own settings (report branding and templates, time sync,
+    # hardware health, asset discovery, Ubuntu Pro ...): tenant data, unlike
+    # SETTING, which is the server's and goes to the server-wide log.
+    CONFIGURATION = "configuration"
+    # Access groups and registration keys live in the tenant's database,
+    # where registration looks them up (2026-11-27).
+    ACCESS_GROUP = "access_group"
+    REGISTRATION_KEY = "registration_key"
 
 
 class Result(str, Enum):

@@ -110,7 +110,7 @@ def update_branding(
     AuditService.log(
         db=db,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.CONFIGURATION,
         entity_id=str(row.id),
         entity_name="report_branding",
         description=_("Updated report branding"),
@@ -159,7 +159,7 @@ def upload_logo(
     AuditService.log(
         db=db,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.CONFIGURATION,
         entity_id=str(row.id),
         entity_name="report_branding_logo",
         description=_("Uploaded report branding logo (%(size)d bytes, %(mime)s)")
@@ -206,7 +206,7 @@ def delete_logo(
     AuditService.log(
         db=db,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.CONFIGURATION,
         entity_id=str(row.id),
         entity_name="report_branding_logo",
         description=_("Removed report branding logo"),

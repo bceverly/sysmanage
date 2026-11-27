@@ -107,7 +107,7 @@ def set_transport(
         policy.updated_at = jobs.now()
     proxy.sync_clients(db, target)  # the clients the grants are now built for
     _audit(
-        db, current_user, EntityType.SETTING, target.id, target.name,
+        db, current_user, EntityType.BACKUP, target.id, target.name,
         "Backup target transport changed",
         {k: v for k, v in settings.items() if k != "proxy_ca_pem"}
         | {"proxy_ca": bool(settings["proxy_ca_pem"])},
@@ -175,7 +175,7 @@ def set_proxy_bandwidth(
         policy.config_version += 1
         policy.updated_at = jobs.now()
     _audit(
-        db, current_user, EntityType.SETTING, target.id, target.name,
+        db, current_user, EntityType.BACKUP, target.id, target.name,
         "Backup target bandwidth limits changed", {"rules": rules},
     )  # fmt: skip
     backup_tick.configure_now(db)

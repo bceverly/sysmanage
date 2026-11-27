@@ -191,7 +191,7 @@ def update_ubuntu_pro_settings(
         with session_local() as audit_session:
             AuditService.log_update(
                 db=audit_session,
-                entity_type=EntityType.SETTING,
+                entity_type=EntityType.CONFIGURATION,
                 entity_name="Ubuntu Pro Settings",
                 user_id=current_user.id,
                 username=current_user.userid,
@@ -244,7 +244,7 @@ def clear_master_key(
             with session_local() as audit_session:
                 AuditService.log_delete(
                     db=audit_session,
-                    entity_type=EntityType.SETTING,
+                    entity_type=EntityType.CONFIGURATION,
                     entity_name="Ubuntu Pro Master Key",
                     user_id=current_user.id,
                     username=current_user.userid,

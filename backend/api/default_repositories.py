@@ -448,7 +448,7 @@ def create_default_repository(
         with audit_session_local() as audit_session:
             AuditService.log_create(
                 db=audit_session,
-                entity_type=EntityType.SETTING,
+                entity_type=EntityType.REPOSITORY,
                 entity_name=f"Default Repository for {repo_data.os_name}/{repo_data.package_manager}",
                 user_id=auth_user_id,
                 username=current_user.userid,
@@ -546,7 +546,7 @@ def delete_default_repository(
         with audit_session_local() as audit_session:
             AuditService.log_delete(
                 db=audit_session,
-                entity_type=EntityType.SETTING,
+                entity_type=EntityType.REPOSITORY,
                 entity_name=f"Default Repository for {repo_os_name}/{repo_package_manager}",
                 user_id=auth_user_id,
                 username=current_user.userid,

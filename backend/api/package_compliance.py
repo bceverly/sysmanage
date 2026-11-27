@@ -194,7 +194,7 @@ def create_profile(
     AuditService.log(
         db=db,
         action_type=ActionType.CREATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.PACKAGE,
         entity_id=str(profile.id),
         entity_name=profile.name,
         description=_("Created package profile '%s'") % profile.name,
@@ -246,7 +246,7 @@ def update_profile(
     AuditService.log(
         db=db,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.PACKAGE,
         entity_id=str(profile.id),
         entity_name=profile.name,
         description=_("Updated package profile '%s'") % profile.name,
@@ -276,7 +276,7 @@ def delete_profile(
     AuditService.log(
         db=db,
         action_type=ActionType.DELETE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.PACKAGE,
         entity_id=str(pid),
         entity_name=name,
         description=_("Deleted package profile '%s'") % name,
@@ -367,7 +367,7 @@ def scan_host_against_profile(
     AuditService.log(
         db=db,
         action_type=ActionType.EXECUTE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.PACKAGE,
         entity_id=str(profile.id),
         entity_name=profile.name,
         description=_(
@@ -493,7 +493,7 @@ def dispatch_compliance_check_to_agent(
     AuditService.log(
         db=db,
         action_type=ActionType.AGENT_MESSAGE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.PACKAGE,
         entity_id=str(profile.id),
         entity_name=profile.name,
         description=_(

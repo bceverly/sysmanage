@@ -17,7 +17,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, validator
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import error_user_not_found
@@ -137,7 +137,10 @@ def _apply_audit_filters(query, filters: AuditLogFilters):
     if filters.action_type:
         query = query.filter(models.AuditLog.action_type == filters.action_type)
     if filters.entity_type:
-        query = query.filter(models.AuditLog.entity_type == filters.entity_type)
+        # Stored lowercase (EntityType values); the page sends "HOST".
+        query = query.filter(
+            func.lower(models.AuditLog.entity_type) == filters.entity_type.lower()
+        )
     if filters.result:
         query = query.filter(models.AuditLog.result == filters.result)
     if filters.category:

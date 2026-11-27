@@ -139,7 +139,7 @@ def save_scheme(
     AuditService.log(
         db=db,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.TAG,
         entity_name="asset_tag_scheme",
         description=_("Asset tag naming scheme changed"),
         user_id=current_user.id,

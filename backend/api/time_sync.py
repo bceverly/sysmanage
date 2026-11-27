@@ -273,7 +273,7 @@ def _audit(db, current_user, name: str, description: str, details) -> None:
     AuditService.log(
         db=db,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.SETTING,
+        entity_type=EntityType.CONFIGURATION,
         entity_name=name,
         description=description,
         user_id=current_user.id,

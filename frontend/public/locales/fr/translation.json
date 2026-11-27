@@ -6295,7 +6295,7 @@
       "action": {
         "check": "Vérifier",
         "restore": "Restaurer",
-        "upload": "Télécharger"
+        "upload": "Envoi"
       },
       "actionFailed": "Cela n'a pas pu être fait.",
       "bucket": "Compartiment S3",
@@ -6377,7 +6377,8 @@
         "receiving": "{{size}} téléchargé et reçu jusqu'à présent",
         "thawing": "Décongélation : {{ready}} de {{total}} parties prêtes",
         "upload": "{{dataset}} : {{size}} envoyés jusqu'à présent ({{done}} sur {{total}} ensembles de données terminés)"
-      }
+      },
+      "rotated": "Nouvelle clé {{key}} créée. Le prochain envoi sera une copie complète avec cette clé. Exportez de nouveau les clés : un export antérieur ne contient pas cette clé."
     }
   },
   "cloudBackup": {
