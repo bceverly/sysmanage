@@ -19,7 +19,12 @@ from backend.api.host_registration import tenant_host_refusal
 from backend.i18n import _
 from backend.persistence.models import Host, HostChild
 from backend.security import agent_identity, agent_mtls
-from backend.services import agent_version_change, clock_tracking, host_boot
+from backend.services import (
+    agent_version_change,
+    clock_tracking,
+    host_boot,
+    kernel_boots,
+)
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket import delivery_confirmation, heartbeat_batch, report_window
@@ -711,6 +716,15 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                     host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
 
                 host_boot.note_boot_time(host, message_data.get("boot_time"))
+                # Which kernel this boot runs; proves kernels for the cleanup
+                # (27.8).  In a savepoint: a heartbeat never fails over it.
+                try:
+                    with db.begin_nested():
+                        kernel_boots.note(db, host, message_data.get("kernel_release"))
+                except Exception:  # pylint: disable=broad-except
+                    logger.warning(
+                        "Heartbeat: kernel boot of %s not recorded", host.fqdn
+                    )
 
                 # Update privileged status if provided in heartbeat
                 is_privileged = message_data.get("is_privileged")

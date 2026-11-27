@@ -6734,7 +6734,11 @@
       "started": "started {{when}}",
       "subtitle": "Policies that roll out fleet by fleet: one fleet at a time, each healthy before the next.",
       "title": "Fleet-by-fleet rollouts"
-    }
+    },
+    "cleanup": "After a run, old kernels and unneeded packages",
+    "cleanupApply": "Are removed (the last good kernel is always kept)",
+    "cleanupReport": "Are listed, not removed",
+    "cleanupOff": "Are left alone"
   },
   "packageRepair": {
     "failed": "The repair could not be started.",
@@ -6750,5 +6754,38 @@
     "percentLine": "Its fullest disk is {{percent}}% full",
     "title": "Disk nearly full",
     "why": "Free some space or grow the disk before updating: an update that runs out of room stops part-way."
+  },
+  "cleanup": {
+    "kept": {
+      "running": "running now",
+      "newest": "newest installed (the next boot)",
+      "lastProven": "last kernel that booted and stayed up",
+      "minimum": "kept so two kernels remain"
+    },
+    "refusal": {
+      "notProven": "The host has just booted this kernel. Nothing is removed until it has stayed up for 15 minutes, so the last good kernel stays as the way back.",
+      "unknown": "The running kernel is not known yet: the host's agent reports it with its next heartbeat."
+    },
+    "status": {
+      "queued": "Waiting for the host",
+      "planned": "Planned. Packages that can be removed: {{n}}",
+      "done": "Done. Packages removed: {{n}}",
+      "refused": "Refused: {{error}}",
+      "unsupported": "This host cannot clean up yet (apt hosts only, with a current agent).",
+      "bootPath": "Removed, but the boot files of a kept kernel are missing: {{error}}",
+      "failed": "Failed: {{error}}"
+    },
+    "loadError": "The cleanup state could not be read.",
+    "actionError": "That could not be done.",
+    "title": "Old kernels and unneeded packages",
+    "kernels": "Running {{running}}; {{installed}} kernels installed, {{old}} of them old.",
+    "unknown": "unknown",
+    "keptChip": "Kept: {{release}} ({{why}})",
+    "reason": {
+      "oldKernel": "(old kernel {{kernel}})",
+      "unneeded": "(no longer needed)"
+    },
+    "plan": "Plan cleanup",
+    "apply": "Remove the packages listed ({{n}})"
   }
 }

@@ -309,3 +309,10 @@ nl: assetDiscovery.type.camera
 # better than "Échange").  Scoped to de and fr.
 de: hostDetail.swap
 fr: hostDetail.swap
+# Cloud copy labels that are the native word in some locales (hand-reviewed
+# 2026-11-27): "Dataset" is the ZFS term in de/it/nl ("Datensatz" would mean
+# a database record), "Region" is German as well, "Upload" is pt-BR usage.
+# Exact keys, so the prose around them still has to be translated.
+backups.cloudCopy.dataset
+backups.cloudCopy.region
+backups.cloudCopy.action.upload

@@ -21,6 +21,7 @@ import AddIcon from '@mui/icons-material/Add';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
+import HostCleanupCard from './HostCleanupCard';
 import { SysManageHost, SoftwarePackage, PaginationInfo } from '../../Services/hosts';
 import {
     formatTimestamp,
@@ -74,6 +75,11 @@ const HostSoftwareTab: React.FC<HostSoftwareTabProps> = ({
     const { t, i18n } = useTranslation();
     return (
                 <Grid container spacing={3}>
+                    {host.platform === 'Linux' && (
+                        <Grid size={{ xs: 12 }}>
+                            <HostCleanupCard hostId={String(host.id)} />
+                        </Grid>
+                    )}
                     <Grid size={{ xs: 12 }}>
                         <Card>
                             <CardContent>

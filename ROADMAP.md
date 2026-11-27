@@ -15256,9 +15256,130 @@ dataset (a `zfs send` is all or nothing: exclusions are whole datasets).
 - [ ] **MULTITENANT_SAAS:** per-tenant storage, keys, quotas and usage metering (27.4)
 - [ ] Every tier gate in **both** repos, and every Enterprise / MULTITENANT_SAAS feature 402-clean when unlicensed, with Community and Pro+ backups unaffected
 
+#### 27.8 Package & kernel hygiene, and vulnerability counts that mean exposure (all editions; fleet policy Pro+) (added 2026-10-28, Bryan; moved here from Phase 31 on 2026-11-27)
+
+**Why now (2026-11-27, Bryan).** The complete Ubuntu feed (OSV, 2026-11-26)
+made production report thousands of HIGH / CRITICAL vulnerabilities overnight:
+5,852 of 5,854 were kernel packages, nearly all of OLD kernels still installed
+but not running (nextcloud 58 kernels, ubiquiti 59, mail.archive 83), and two
+hosts really were running an old kernel with a newer one installed -- one of
+them (license.sysmanage.org) not even flagged as needing a reboot.  Bryan: get
+the counts down to "only things that have either been patched in the last 48
+hours or have not been patched", and never remove the kernel last booted
+successfully -- Livepatch may be what keeps it safe -- until the new kernel has
+had at least one clean boot.
+
+**Goal (the exit criterion).** On every production host, every open finding
+is either a fix released in the last 48 hours (the automatic updates' waiting
+period) or one with no fix yet.  Old kernels and orphaned packages are removed
+by the automatic update policy, safely, without anyone at a prompt.
+
+- [ ] **Running kernel reported:** the agent sends the running kernel release
+      (`uname -r` or the OS equivalent) with its OS details
+- [ ] **Reboot required when a newer kernel is installed:** compare the running
+      kernel with the newest installed one, not only the distribution's flag
+      file (which is missed or cleared); the reason names both kernels; Livepatch
+      status shown beside it (patched, so the reboot can wait for its window)
+- [ ] **Vulnerability counts mean exposure:** kernel packages count only for
+      the running kernel and the newest installed one (the one the next boot
+      uses); every other installed kernel is reported as hygiene -- "57 old
+      kernels installed, N vulnerability matches not counted" -- with the
+      cleanup that removes them.  Hosts and fleet totals use the exposure count
+- [ ] **Automatic updates clean up after themselves (on by default):** each
+      policy's run ends with the cleanup below, inside the same maintenance
+      window; a policy can turn it to report-only.  Kernel removal follows the
+      safety model exactly; orphaned non-kernel packages are removed from the
+      simulated list, never by a bare `autoremove`
+
+**Why (2026-10-28).** Bryan runs `sudo apt autoremove` and removes old kernels by hand on
+every host.  SysManage should do it, and do it more safely than a person at a
+prompt: the classic failure is removing the last kernel that is known to boot
+while a newly installed one has not yet been booted (or does not boot), and the
+classic symptom is a full `/boot` that makes the next kernel install fail.
+Landscape, Satellite and BigFix all offer some form of this; it is parity.
+
+**The safety model (the point of the feature).**
+
+- **A kernel is "proven" only by a boot.**  The agent records every boot --
+  boot id (`/proc/sys/kernel/random/boot_id` or the OS equivalent), kernel
+  release, boot time -- and the server marks a kernel *proven* once a boot on
+  it has stayed up and checked in for a set time (default 15 minutes,
+  configurable).  "Installed" is never "known good".
+- **The protected set is computed at removal time, never trusted from the
+  distro.**  Always kept: the running kernel; the newest installed kernel;
+  the bootloader's default entry; the newest *proven* kernel other than the
+  running one (the fallback); anything held/locked by the operator; and at
+  least N kernels in total (default 2, minimum 2).  Debian's
+  `01autoremove-kernels` list is written when a kernel is installed, so it
+  goes stale after booting into an older kernel -- one reason not to hand
+  removal to `apt autoremove` blindly.
+- **Pending reboot narrows it further.**  While a new kernel is installed but
+  not yet running (the agent already reports reboot-required), the running
+  kernel and the newest proven kernel are both protected, whatever the count.
+- **No proof, no removal.**  A host whose boot history does not yet prove any
+  kernel other than the running one is refused, with the reason
+  ("no known-good fallback kernel yet").
+- **Plan, then apply exactly the plan.**  Every cleanup is a dry run first
+  (`apt-get -s autoremove`, `dnf autoremove --assumeno`, `zypper packages
+  --unneeded`, `pkg autoremove -n`, `pkgin -n autoremove`, `pacman -Qdtq`,
+  `brew autoremove --dry-run`, `DISM /AnalyzeComponentStore`, ...).  The
+  operator reviews the exact package list, with each protected kernel labeled
+  *why* it is kept.  Apply removes that explicit list (`apt-get remove
+  --purge <pkgs>`, not a bare `autoremove`), re-simulates first, and refuses
+  if anything outside the approved list would go.
+- **Verify the boot path after.**  Afterwards the agent checks that the
+  default boot entry still names an installed kernel whose image and
+  initramfs exist (GRUB / systemd-boot / boot environments), and alerts
+  loudly if not.  Removed kernel packages stay in the package cache until the
+  newer kernel is proven, so a reinstall needs no network; cache cleaning
+  never runs in the same operation as a kernel removal.
+- **Fits the existing guard rails.**  Runs only inside maintenance windows
+  (14.2), is audited per package and version (with a one-click reinstall of
+  what was removed), honors holds and version locks, and on a btrfs/ZFS root
+  takes a snapshot first; a policy may also require a good backup (Phase 24)
+  within N hours.
+
+**Per platform (S0 confirms each command and its dnf4/dnf5 differences).**
+Debian/Ubuntu: autoremove + old `linux-image`/`-modules`/`-headers`; RHEL /
+Fedora: `dnf autoremove`, old install-only kernels (`installonly_limit`);
+openSUSE/SLES: unneeded packages, `zypper purge-kernels` (`multiversion.kernels`);
+Arch: orphans only (one kernel per package -- but the running kernel's modules
+vanish on upgrade, so reboot-required matters); Alpine: cache only (no orphan
+concept); FreeBSD: `pkg autoremove`, old boot environments (`bectl`; never the
+active, next-boot or last proven one); OpenBSD / NetBSD: unused packages;
+macOS: `brew autoremove` / `brew cleanup`; Windows: component store cleanup
+(`/StartComponentCleanup`, never `/ResetBase` by default -- it makes installed
+updates impossible to uninstall).  Also: disabled snap revisions, unused
+Flatpak runtimes, package caches.
+
+**Slices.**
+
+- [ ] **S0 spike** -- every platform's dry-run and remove commands, their
+      output, and how each names kernels; where each bootloader keeps its
+      default; proven against real lab hosts (beast, t14, t480, freebsd)
+- [ ] **S1 boot history** (agent + server, OSS) -- per-boot record, "proven"
+      kernels, reboot-required tie-in; shown on the host's page
+- [ ] **S2 reclaimable inventory** (OSS) -- per host: orphaned packages
+      (count, size), old kernels (with protected ones and why), caches, old
+      snap revisions; `/boot` free space
+- [ ] **S3 review and apply** (OSS) -- host "Cleanup" card: plan dialog,
+      apply-exactly-the-plan, post-removal boot-path check, audit, reinstall
+- [ ] **S4 alerts** -- `/boot` filling (default 80%), and "boot path broken
+      after cleanup" (critical), via the alerting engine
+- [ ] **S5 fleet policy** (Pro+) -- scheduled cleanup per host group inside
+      maintenance windows: keep-N, orphans yes/no, caches yes/no, never-remove
+      list, report-only mode, canary-first rollout through fleet jobs (20.x),
+      fleet report of reclaimable space
+- [ ] **Stretch: trial boot** -- boot a new kernel once (`grub-reboot`,
+      `bectl activate -t`) with the default left on the proven kernel, and
+      promote it only after it proves itself; a kernel that hangs falls back
+      on the next power cycle without anyone at the console
+- [ ] **Docs** -- sysmanage-docs page (the safety model above, per-platform
+      behavior, screenshots via `make screenshots`), 14 locales
+
 ### Licensing summary
 
-- **Community / OSS:** the rest of iCloud -- Drive, Contacts, Calendars and Notes -- beside 24.12's Photos (27.5); restoring from the cloud copy, its manifests and the export of its key, with or without a license (27.3); NFS removal moved to Phase 28.10 (2026-11-23).
+- **Community / OSS:** the rest of iCloud -- Drive, Contacts, Calendars and Notes -- beside 24.12's Photos (27.5); package and kernel hygiene with the boot-proven safety model, reboot-required from the kernels themselves, and vulnerability counts that mean exposure (27.8); restoring from the cloud copy, its manifests and the export of its key, with or without a license (27.3); NFS removal moved to Phase 28.10 (2026-11-23).
 - **Professional+:** the off-site cloud copy to S3 Glacier Deep Archive -- setting it up and keeping it running, with the storage host's own OS carried along (27.3).
 - **Enterprise:** multi-site and recovery at scale -- many targets, per-site targets through federation, off-site replication, immutable copies, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes approval, legal hold and automated restore drills.
 - **MULTITENANT_SAAS:** per-tenant storage namespaces and keys, operator storage pools, quotas and usage metering, bring-your-own storage, and tenant lifecycle handling for backup data.
@@ -15272,6 +15393,10 @@ dataset (a `zfs send` is all or nothing: exclusions are whole datasets).
 **Professional+**
 
 - [ ] **The cloud copy proven (27.3):** its own proof (one repository copied, the site copy destroyed, a file restored from the cloud copy alone), and the same restore done again after the license is removed
+
+**All editions (27.8)**
+
+- [ ] **Vulnerability counts mean exposure in production:** every open finding on every production host is a fix released in the last 48 hours or one with no fix yet; old kernels and orphaned packages removed by the automatic update policy; no host left without its last proven kernel during the cleanup (proven on a lab host that boots a new kernel, keeps the old one until the new one is proven, then removes it)
 
 **Enterprise**
 
@@ -15428,6 +15553,227 @@ working over NFS for anyone who mounts a repository by hand.
 - [ ] **Proof:** the baseline recorded here with counts; every missing FK index found fixed and measured on a large table (a host delete before and after); the published reference matches a fresh install of the release
 
 
+#### 28.12 Ransomware resilience and the setup wizard (Community / OSS; licensed steps appear when licensed) (added 2026-11-27, Bryan)
+
+Bryan, 2026-11-27: harden against ransomware / cryptolocker attacks, with "a
+wizard that an admin can use to walk them through things like the maximum
+amount of data they could lose if they had to restore from a backup, maximum
+time to recovery, etc."  It should use what the other wizards already know,
+ideally as **one wizard**, be **the first thing people see** when they start
+the application, and ask the other questions that set defaults.  So the
+getting-started wizard planned as 29.0 moves here and becomes that single
+wizard; ransomware recovery planning is its centerpiece, not a separate tool.
+
+What already exists and is reused, not rebuilt: hosts append only and the
+storage side prunes (24.5); immutable snapshots on the target (24.5); the
+off-site cloud copy with S3 Object Lock and break-glass key export (27.3);
+backup policies with an RPO per policy (Pro+, 27.1); restore readiness --
+RPO met, measured RTO, "unproven" without a recent full-read check or drill
+(Enterprise `backup_ops_engine`, 27.1 / 27.2); four-eyes restores; the
+threat-model questionnaire (Enterprise, 21.4); the Sane defaults audit
+(Phase 31).  The wizard asks once and writes into those; it never keeps a
+second copy of an answer that a policy, setting or threat model already holds.
+
+**Principles** (from 29.0, unchanged)
+- **First run opens the wizard.** The first administrator login on a new
+  installation lands on it, before the dashboard.  Upgraded installations
+  see it once too, starting at the first step they have not done.
+- **Checks first, forms second.** Every step opens with a live self-check
+  of the real state and asks only where something is missing; a step that
+  is already done shows as done.
+- **Skippable and resumable.** Progress is stored server-side (tenant data;
+  the server-wide steps in the bootstrap database); a dismissed wizard
+  leaves a "Setup: 7 of 12 done" chip in the header until it is finished or
+  hidden for good.
+- **Re-runnable as a health page.** The same checks back a permanent
+  **Setup health** page under Settings, with a **Ransomware readiness**
+  section (below), run after an upgrade or when something looks wrong.
+- **Never does something irreversible silently** -- each step says what it
+  will change and links its doc page; outward-facing actions (a test email,
+  an agent install, a bucket check) need an explicit click.
+- **Defaults first.** Every question is pre-answered with the safe default
+  (Phase 31 Sane defaults); pressing Next through the whole wizard yields a
+  safe installation.  Security protections are on whatever is answered
+ ; questions tune them, never enable them.
+
+**Steps** (licensed steps appear only when the engine is licensed)
+- [ ] **Administrator** -- set the password, MFA on by default for every
+      administrator (skipping it is a recorded, visible choice), confirm the
+      account is a full administrator (roles AND `is_admin`)
+- [ ] **About this installation** (the default-setting questions) -- the
+      organization's name and time zone; the usual maintenance window
+      (pre-fills update policies and backup windows); an alert email
+      address (pre-fills alert channels); roughly how many hosts and where
+      (one site, several, air-gapped) -- which decides whether multi-tenancy,
+      federation and the off-site copy are offered later in the wizard
+- [ ] **Reaching the server** -- public URL, TLS certificate, port 443
+      reachable, nginx config current (headers third parties depend on)
+- [ ] **Database & schema** -- connection, pool sizing vs max_connections,
+      migrations current (offers `sysmanage-migrate`)
+- [ ] **Secrets store** -- OpenBAO installed, initialized, unsealed, kv-v2
+      mount present, the app token readable; air-gap mode explained
+- [ ] **Email** -- SMTP settings and a test message to the admin
+- [ ] **License** -- install a key (or stay Community); shows what it unlocks
+- [ ] **Multi-tenancy** (licensed) -- enable or not; create tenants; run the
+      provisioning bootstrap; grant users to tenants and set each one's
+      default tenant
+- [ ] **First agents** -- create an enrollment token, per-OS copy-paste
+      install commands with the token and server URL filled in; watch hosts
+      arrive, approve them, verify each agent's privilege and capabilities
+- [ ] **What matters most** -- sort hosts into recovery tiers (critical,
+      important, everything else) by tag or by picking them; suggested from
+      what hosts run (databases, file servers, Nextcloud, directory services
+      first).  Tiers are asset tags (23.2), so policies, reports and the
+      restore order all use them
+- [ ] **Recovery objectives** (the ransomware core, below)
+- [ ] **Keeping hosts current** -- automatic updates on by default with the
+      critical-CVE lane; the window from "About this installation"; Ubuntu
+      Pro token / Livepatch for Ubuntu hosts
+- [ ] **Security baseline** -- the threat-model questionnaire (21.4,
+      Enterprise; its answers pre-fill the ransomware questions and the
+      reverse, asked once), antivirus policy (memory floor explained), and
+      the scan schedules, all running from the start
+- [ ] **Reference data** (licensed) -- CVE feed, advisories and the OS
+      end-of-life registry loaded, with their refresh schedules
+- [ ] **Home screen** -- choose the dashboard cards (Phase 39 framework)
+- [ ] **Observability** (optional) -- OpenTelemetry / Prometheus only if
+      the operator has a collector
+
+**Recovery objectives step**
+
+For each tier, in plain words, with a default pre-selected:
+- [ ] **How much work could you lose?** (RPO) -- "up to 1 hour / 4 hours /
+      a day / a week of changes".  Sets the backup schedule; Community
+      per-host schedules, Pro+ one policy per tier.
+- [ ] **How long could you be down?** (RTO) -- "back within 4 hours / a
+      day / three days".  Checked against reality: the step computes the
+      restore time from the tier's size and the throughput the hosts have
+      shown (Enterprise readiness; an estimate from size and link speed
+      elsewhere, labeled as an estimate) and says so when the objective
+      cannot be met -- "restoring nas (1.2 TB) at the measured 85 MB/s takes
+      about 4 hours; your objective is 2 hours" -- with what would close the
+      gap (a closer storage host, a faster link, a smaller critical tier).
+- [ ] **How far back could you need to go?** -- ransomware often sits for
+      days or weeks before it encrypts, and the last backups before
+      discovery can already be bad.  Retention must reach back past that:
+      default 90 days of dailies plus monthlies, never shorter than 30 days
+      of restore points for the critical tier; shorter answers get a warning
+      that says why.  Sets retention (Pro+ GFS, keep-last-N in Community).
+- [ ] **A copy an attacker cannot reach?** -- the off-site cloud copy (27.3)
+      offered with its monthly cost estimate before anything is created, or
+      for air-gapped sites a second storage host; the break-glass key export
+      is part of this step and is not "done" until it has happened.
+- [ ] **How often should a restore be proven?** -- full-read check (Pro+)
+      and sandbox restore drill (Enterprise) cadence per tier; default
+      monthly for critical, quarterly otherwise.
+- [ ] **The result page**: per tier, the objective, the plan that meets it
+      (schedule, retention, copies, proof cadence), and anything that does
+      not -- the operator sees the honest worst case ("if this happened
+      today: up to 26 hours of mail lost, about 9 hours to get it back")
+      before pressing Apply.  Apply writes the schedules / policies; nothing
+      is created before it.
+
+**Ransomware readiness** (a section of Setup health and a dashboard card; all editions report what they have)
+- [ ] **A scorecard of checks, each green / red / waived with a reason**
+      (waived as in 21.4, never a green tick): every host in a tier has a
+      backup within its RPO; no host can delete its own backups (append-only
+      verified, not assumed); immutable snapshots on every target; an
+      off-site or second copy with object lock; keys exported off the
+      server; a restore proven within the cadence; retention longer than the
+      "how far back" answer; MFA on every administrator; four-eyes on
+      restores and on deleting backups or targets (Enterprise); the storage
+      hosts not administered by the same credentials as the hosts they
+      protect; alerts on a failed or late backup going somewhere.
+- [ ] **Measured, not claimed:** each check reads real state (the target's
+      snapshot list, the bucket's lock configuration, the last export's
+      audit entry, the last drill's result), the same way posture evidence
+      does (21.4).
+
+**Seeing it happen** (all editions, on by default)
+- [ ] **Encryption-burst detection from backup data already collected:** an
+      incremental many times the host's usual size, a jump in changed files,
+      or new data that does not deduplicate or compress (encrypted data does
+      neither) raises a high-severity alert naming the host and when it
+      started.  Thresholds learned from each host's own history, so a
+      nightly database dump is not an alarm.
+- [ ] **Retention freeze on suspicion:** while such an alert is open, the
+      storage side does not prune that host's restore points (and the
+      cloud copy keeps its older objects), so the good backups from before
+      the attack cannot age out while someone investigates.  Lifting the
+      freeze is an explicit, audited action.
+- [ ] **Find the last clean restore point:** for an affected host, the
+      newest snapshot before the burst, with the files that changed after
+      it, offered as the restore point by default.
+
+**Recovering from it**
+- [ ] **Recovery plan for a fleet:** pick the affected hosts and the
+      wizard's tiers order the restores (critical first), each from its last
+      clean point, with the total time estimate; runs through fleet restore
+      (27.2) and four-eyes where enabled.
+- [ ] **If the server itself is gone:** the runbook from break-glass export
+      to restored hosts without SysManage (27.3's pool-dies runbook), linked
+      from the result page and the readiness card.
+
+**Editions:** the wizard, tiers, objectives, the scorecard, burst detection,
+retention freeze and the clean-point finder are Community / OSS -- surviving
+ransomware is safety and is never licensed.
+Policies per tier and GFS retention and full-read checks are Pro+; measured
+RTO, sandbox drills, four-eyes and the threat-model questions are Enterprise,
+and the wizard shows them only when licensed (an unlicensed installation sees
+the estimate, labeled as one).
+
+- [ ] **Proof (lab):** a fresh installation, first login lands in the
+      wizard; Next through every step leaves a safe installation with backups
+      scheduled; a lab host's files encrypted by a test script (beast VM,
+      disposable) raises the burst alert within one backup cycle, pruning
+      stops for it, the clean-point finder offers the snapshot before the
+      script ran, and the restore puts the files back with matching hashes
+      inside the stated RTO
+- [ ] Docs page ("Ransomware: be ready, notice it, recover") + screenshots
+      via `make screenshots` + 14-language i18n, no phase numbers in the docs
+
+#### 28.13 Marketing one-pagers: three PDFs (added 2026-11-27, Bryan)
+
+Three single-page PDFs (front side; a back side only if a page truly cannot
+hold it), for three audiences who each ask a different question.  They live
+with the other collateral in `sysmanage/marketing/` (Markdown master + PDF,
+like `executive-opportunity-brief`), are linked from sysmanage-docs, and are
+written last in this phase so the security one can stand on its finished
+review.
+
+- [ ] **"What SysManage does" -- for non-technical readers** (owners,
+      executives, finance, a board): what problem it solves in plain words
+      (every computer the organization owns, kept current, safe, backed up
+      and accounted for, from one place), what it replaces, what it costs to
+      run, and what "open source with paid editions" means for them.  No
+      jargon without a one-line explanation; one product picture.
+- [ ] **"Why trust an agent with privileged access on every machine?" --
+      for security professionals:** the honest answer to the scariest property
+      of any systems management product, built on 28.1-28.9 and the red-team
+      results: what the agent can and cannot do, the host-local allow-list the
+      server cannot change, signed commands and replay protection, mTLS and
+      pinning, least-privilege sudoers, the blast radius of a compromised
+      server stated plainly, open source you can read, the CI security gates,
+      and how to verify each claim yourself (links to the Verify it yourself
+      page).  No claim that the docs and the product do not prove.
+- [ ] **"Save time and money" -- for IT professionals:** fewer tools
+      (patching, inventory, vulnerability scanning, compliance, backups,
+      remote actions in one), working with what they already run (UEMs,
+      Grafana / Graylog / OpenTelemetry, existing repositories and identity
+      providers, Ubuntu Pro), every OS they have including the BSDs, patches
+      applied automatically inside maintenance windows with old kernels
+      cleaned up safely, air-gapped sites supported, and the editions side by
+      side.  Any number (time saved, cost) is sourced or labeled as an
+      estimate with its assumptions.
+- [ ] **Built, not hand-made:** one `make` target in `sysmanage/marketing`
+      renders all three PDFs from their Markdown masters (US Letter and A4),
+      with images from the docs asset library and screenshots via `make
+      screenshots`; American spelling, ASCII hyphens, no ROADMAP phase numbers,
+      product facts checked against the editions matrix
+      (`data/capabilities.yaml`)
+- [ ] **Linked from sysmanage-docs** (the evaluate pages and the security
+      section), with the PDFs published beside them
+
 ### Exit Criteria
 
 - [ ] The command inventory (28.1) is complete, generated, and every entry has a reviewed handler (28.2)
@@ -15454,6 +15800,8 @@ working over NFS for anyone who mounts a repository by hand.
 
 - [ ] No target uses NFS; sysmanage, sysmanage-agent and sysmanage-docs carry no NFS transport code or NFS instructions (a search of all three for NFS finds only the release note); production and the lab back up and restore through restate-proxy alone
 
+- [ ] **Ransomware resilience and the setup wizard (28.12):** a new installation opens in the wizard, Next through it yields a safe installation with backups scheduled per tier, the readiness scorecard reads real state, and the lab encryption test is detected, frozen and restored from the last clean point within its RTO
+- [ ] **Marketing one-pagers (28.13):** the three PDFs built by one make target from their Markdown masters, each fitting one page, every claim backed by the docs or the product, and linked from sysmanage-docs
 - [ ] **Database schema quality (28.11):** tbls lint mandatory in CI for foreign-key indexes and duplicate relations with zero findings, the comment ratchet in place, and the Database reference category live on sysmanage.org for the release this phase ships
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
@@ -15474,64 +15822,9 @@ working over NFS for anyone who mounts a repository by hand.
 
 > **⚠️ Multi-tenancy storage (same rule as 14.1/14.3/21.1).** Mobile **device inventory + compliance findings are per-host/tenant data** → `tenant` partition, soft-referencing shared ids (no cross-partition FK). The **mobile OS release / EOL reference feed is global** → reuse the `shared` partition from 14.3 (one copy, offline-updatable), never per tenant.
 
-#### 29.0 Getting-started wizard (Community / OSS; licensed steps appear when licensed)
+#### 29.0 Getting-started wizard -- moved to 28.12 (2026-11-27, Bryan)
 
-**Added 2026-10-16 (Bryan).** "A 'getting started wizard' that helps people
-set things up from a new install and we can walk them through it."  Standing
-up the production server on 2026-10-15/16 is the specification: almost
-every snag hit there is a step this wizard owns -- OpenBAO missing / sealed /
-no `secret/` mount, migrations pending after an upgrade, an admin account
-without `is_admin`, the multi-tenancy provisioner never bootstrapped,
-tenants without grants, an agent enrolled with its token in the wrong
-config section, agents "unprivileged" by a probe bug, the EOL registry
-empty, ClamAV pushed onto a 2 GB host, the map's tiles 403'd by a
-Referrer-Policy, telemetry exporting to a collector that did not exist.
-
-**Principles**
-- **Checks first, forms second.** Every step opens with a live self-check
-  of the real state ("OpenBAO: unsealed, kv-v2 at secret/ -- OK") and only
-  asks for input where something is missing.  A step that is already done
-  shows as done; nobody re-enters what the installer already set.
-- **Skippable and resumable.** Progress is stored server-side; the wizard
-  reopens where it was left, and a dismissed wizard leaves a "Setup: 7 of
-  11 done" chip in the header until it is finished or hidden for good.
-- **Re-runnable as a health page.** The same checks back a permanent
-  **Setup health** page (Settings) that an operator can run after an
-  upgrade or when something looks wrong -- the wizard is its first-run view.
-- **Never does something irreversible silently** -- each step says what it
-  will change and links the doc page; destructive or outward-facing actions
-  (sending a test email, pushing an agent install) need an explicit click.
-
-**Steps** (licensed steps appear only when the engine is licensed)
-- [ ] **Administrator** -- set the password, offer MFA, confirm the account
-      is a full administrator (roles AND `is_admin`)
-- [ ] **Reaching the server** -- public URL, TLS certificate (Let's Encrypt
-      guidance or upload), port 443 reachable, nginx config current
-      (including headers third parties depend on, e.g. map tiles)
-- [ ] **Database & schema** -- connection, pool sizing vs max_connections,
-      migrations current (offers `sysmanage-migrate`)
-- [ ] **Secrets store** -- OpenBAO installed, initialized, unsealed, kv-v2
-      mount present, the app token readable; air-gap mode explained
-- [ ] **Email** -- SMTP settings and a test message to the admin
-- [ ] **License** -- install a key (or stay Community); shows what it unlocks
-- [ ] **Multi-tenancy** (licensed) -- enable or not; create tenants; run the
-      provisioning bootstrap; grant users to tenants and set each one's
-      default tenant
-- [ ] **First agents** -- create an enrollment token, then per-OS copy-paste
-      install commands (PPA, COPR/OBS, pkg, MSI, Homebrew...) with the
-      token and server URL already filled in; watch hosts arrive, approve
-      them, and verify each agent's privilege and capabilities
-- [ ] **Keeping hosts current** -- update policy, maintenance windows,
-      Ubuntu Pro token / Livepatch for Ubuntu hosts
-- [ ] **Security baseline** -- the threat-model questionnaire (21.4),
-      antivirus policy (with the memory floor explained), and the scan
-      schedules that start empty: vulnerability, compliance profile, malware
-- [ ] **Reference data** (licensed) -- CVE feed, advisories and the OS
-      end-of-life registry loaded, with their refresh schedules
-- [ ] **Home screen** -- choose the dashboard cards (Phase 39 framework)
-- [ ] **Observability** (optional) -- OpenTelemetry / Prometheus only if
-      the operator has a collector (off by default since 2026-10-15)
-- [ ] Docs page + screenshots via `make screenshots` + 14-language i18n
+Became the single setup wizard of 28.12, with ransomware recovery planning and the default-setting questions; it is the first thing a new installation shows.
 
 #### 29.1 Mobile device model + fleet visibility (Community / OSS)
 
@@ -15810,7 +16103,7 @@ install still needs PyPI at install time.
 
 ### Licensing summary
 
-- **Community / OSS:** the getting-started wizard (29.0, with licensed steps appearing only when licensed); the device model, fleet visibility and manual / self-report registration (29.1); the memory-footprint and static-module work (29.3) and per-architecture server packages (29.5), which are in every edition. You can *see* the devices you, or a companion app, report; no automated management, and no curated EOL or compliance.
+- **Community / OSS:** the device model, fleet visibility and manual / self-report registration (29.1); the memory-footprint and static-module work (29.3) and per-architecture server packages (29.5), which are in every edition. You can *see* the devices you, or a companion app, report; no automated management, and no curated EOL or compliance.
 - **Pro+ (Professional):** **visibility and compliance over the mobile you already manage**: ingestion from an existing UEM / MDM (29.2 ⭐) and Fix-it for compliance failures host by host (29.4). The companion inventory app (30.1), mobile EOL and patch compliance with alerting (30.2) and Android device inventory through the Android Management API (35.1, read only) follow in later phases. No device control.
 - **Enterprise:** Fix-it applied fleet-wide (29.4). Compliance *enforcement* (quarantine, force-update) and **being** the MDM -- native Apple MDM (Phase 34), Android policy and remote actions (35.1) and zero-touch enrollment (35.2) -- are later phases, not this one.
 
@@ -16622,93 +16915,9 @@ A hypervisor host often runs VMs that were there before SysManage, or were made 
       and explains what to enter.  Changed defaults never alter an existing
       installation's saved settings.
 
-### Package & kernel hygiene (added 2026-10-28, Bryan)
+### Package & kernel hygiene -- moved to 27.8 (2026-11-27, Bryan)
 
-**Why.** Bryan runs `sudo apt autoremove` and removes old kernels by hand on
-every host.  SysManage should do it, and do it more safely than a person at a
-prompt: the classic failure is removing the last kernel that is known to boot
-while a newly installed one has not yet been booted (or does not boot), and the
-classic symptom is a full `/boot` that makes the next kernel install fail.
-Landscape, Satellite and BigFix all offer some form of this; it is parity.
-
-**The safety model (the point of the feature).**
-
-- **A kernel is "proven" only by a boot.**  The agent records every boot --
-  boot id (`/proc/sys/kernel/random/boot_id` or the OS equivalent), kernel
-  release, boot time -- and the server marks a kernel *proven* once a boot on
-  it has stayed up and checked in for a set time (default 15 minutes,
-  configurable).  "Installed" is never "known good".
-- **The protected set is computed at removal time, never trusted from the
-  distro.**  Always kept: the running kernel; the newest installed kernel;
-  the bootloader's default entry; the newest *proven* kernel other than the
-  running one (the fallback); anything held/locked by the operator; and at
-  least N kernels in total (default 2, minimum 2).  Debian's
-  `01autoremove-kernels` list is written when a kernel is installed, so it
-  goes stale after booting into an older kernel -- one reason not to hand
-  removal to `apt autoremove` blindly.
-- **Pending reboot narrows it further.**  While a new kernel is installed but
-  not yet running (the agent already reports reboot-required), the running
-  kernel and the newest proven kernel are both protected, whatever the count.
-- **No proof, no removal.**  A host whose boot history does not yet prove any
-  kernel other than the running one is refused, with the reason
-  ("no known-good fallback kernel yet").
-- **Plan, then apply exactly the plan.**  Every cleanup is a dry run first
-  (`apt-get -s autoremove`, `dnf autoremove --assumeno`, `zypper packages
-  --unneeded`, `pkg autoremove -n`, `pkgin -n autoremove`, `pacman -Qdtq`,
-  `brew autoremove --dry-run`, `DISM /AnalyzeComponentStore`, ...).  The
-  operator reviews the exact package list, with each protected kernel labeled
-  *why* it is kept.  Apply removes that explicit list (`apt-get remove
-  --purge <pkgs>`, not a bare `autoremove`), re-simulates first, and refuses
-  if anything outside the approved list would go.
-- **Verify the boot path after.**  Afterwards the agent checks that the
-  default boot entry still names an installed kernel whose image and
-  initramfs exist (GRUB / systemd-boot / boot environments), and alerts
-  loudly if not.  Removed kernel packages stay in the package cache until the
-  newer kernel is proven, so a reinstall needs no network; cache cleaning
-  never runs in the same operation as a kernel removal.
-- **Fits the existing guard rails.**  Runs only inside maintenance windows
-  (14.2), is audited per package and version (with a one-click reinstall of
-  what was removed), honors holds and version locks, and on a btrfs/ZFS root
-  takes a snapshot first; a policy may also require a good backup (Phase 24)
-  within N hours.
-
-**Per platform (S0 confirms each command and its dnf4/dnf5 differences).**
-Debian/Ubuntu: autoremove + old `linux-image`/`-modules`/`-headers`; RHEL /
-Fedora: `dnf autoremove`, old install-only kernels (`installonly_limit`);
-openSUSE/SLES: unneeded packages, `zypper purge-kernels` (`multiversion.kernels`);
-Arch: orphans only (one kernel per package -- but the running kernel's modules
-vanish on upgrade, so reboot-required matters); Alpine: cache only (no orphan
-concept); FreeBSD: `pkg autoremove`, old boot environments (`bectl`; never the
-active, next-boot or last proven one); OpenBSD / NetBSD: unused packages;
-macOS: `brew autoremove` / `brew cleanup`; Windows: component store cleanup
-(`/StartComponentCleanup`, never `/ResetBase` by default -- it makes installed
-updates impossible to uninstall).  Also: disabled snap revisions, unused
-Flatpak runtimes, package caches.
-
-**Slices.**
-
-- [ ] **S0 spike** -- every platform's dry-run and remove commands, their
-      output, and how each names kernels; where each bootloader keeps its
-      default; proven against real lab hosts (beast, t14, t480, freebsd)
-- [ ] **S1 boot history** (agent + server, OSS) -- per-boot record, "proven"
-      kernels, reboot-required tie-in; shown on the host's page
-- [ ] **S2 reclaimable inventory** (OSS) -- per host: orphaned packages
-      (count, size), old kernels (with protected ones and why), caches, old
-      snap revisions; `/boot` free space
-- [ ] **S3 review and apply** (OSS) -- host "Cleanup" card: plan dialog,
-      apply-exactly-the-plan, post-removal boot-path check, audit, reinstall
-- [ ] **S4 alerts** -- `/boot` filling (default 80%), and "boot path broken
-      after cleanup" (critical), via the alerting engine
-- [ ] **S5 fleet policy** (Pro+) -- scheduled cleanup per host group inside
-      maintenance windows: keep-N, orphans yes/no, caches yes/no, never-remove
-      list, report-only mode, canary-first rollout through fleet jobs (20.x),
-      fleet report of reclaimable space
-- [ ] **Stretch: trial boot** -- boot a new kernel once (`grub-reboot`,
-      `bectl activate -t`) with the default left on the proven kernel, and
-      promote it only after it proves itself; a kernel that hangs falls back
-      on the next power cycle without anyone at the console
-- [ ] **Docs** -- sysmanage-docs page (the safety model above, per-platform
-      behavior, screenshots via `make screenshots`), 14 locales
+Pulled into Phase 27 with the vulnerability-count fixes it belongs with; see 27.8.
 
 ### Compliance: full CIS Level 1 and DISA STIG (added 2026-11-23, Bryan) (Professional+)
 
@@ -18073,8 +18282,8 @@ No open-source tool covers the list; each covers part of it.
 | 25 | v3.13.0.0 | Fleet Backup Completion | restate-proxy (backups over HTTPS, NFS measured against it), a backup runner without systemd, the SysManage server backing itself up, agent-server mutual TLS and server pinning (Community / Pro+) |
 | 26 | v3.14.0.0 | Automatic Update Application | Policies that apply updates on a schedule with reboot handling, opt-outs, holds and pinned packages, runs aligned to maintenance windows, separate waiting periods for regular and critical-CVE patches, fleet-by-fleet rollout with health gates, and an emailed alert for a new device on the network (Enterprise) |
 | 27 | v3.15.0.0 | Fleet Backup at Scale | Per-site storage through federation, restore readiness, bare-metal rebuild and clones, fleet restore jobs, four-eyes approval, legal hold, restore drills, off-site / immutable / air-gap / Glacier copies (Enterprise); backup multi-tenancy (MULTITENANT_SAAS); NFS retired for restate-proxy on a go (Community) |
-| 28 | v3.16.0.0 | Security Hardening -- Command Channel, Agent & Server | A detailed security review before v4.0: every way to make an agent act inventoried and its handler reviewed, sudoers with no root-equivalent rule, signed commands with replay protection, a host-local allow-list the server cannot change, authorization tests for every endpoint that reaches a host, fuzzing and custom scanner rules in CI, and a lab red team (all editions) |
-| 29 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible**; plus a getting-started wizard and Setup health page for new installs (OSS) |
+| 28 | v3.16.0.0 | Security Hardening -- Command Channel, Agent & Server | A detailed security review before v4.0: every way to make an agent act inventoried and its handler reviewed, sudoers with no root-equivalent rule, signed commands with replay protection, a host-local allow-list the server cannot change, authorization tests for every endpoint that reaches a host, fuzzing and custom scanner rules in CI, and a lab red team; ransomware resilience with a first-run setup wizard (recovery objectives, readiness scorecard, encryption-burst detection with retention freeze) (all editions) |
+| 29 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible** |
 | 30 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
 | 31 | **v5.0.0.0** | Market-Parity GA | **MAJOR -- market parity reached.** All gap features hardened; v5.0 GA |
 | 32 | v5.1.0.0 | Expanded Agent Architecture & Packaging | ppc64le + s390x (big-endian) + riscv64 agent packaging/CI; native channels for alpine/BSD (Community/OSS) |

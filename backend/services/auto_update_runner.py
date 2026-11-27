@@ -71,6 +71,7 @@ def settings_row(db) -> models.AutoUpdateSettings:
             hold_all=False,
             retry_after_hours=24,
             reboot_timeout_minutes=30,
+            cleanup_mode="apply",
         )
         db.add(row)
         db.flush()
@@ -82,6 +83,7 @@ def settings_dict(row: models.AutoUpdateSettings) -> Dict[str, Any]:
         "retry_after_hours": row.retry_after_hours,
         "reboot_timeout_minutes": row.reboot_timeout_minutes,
         "critical_threshold": row.critical_threshold or "critical",
+        "cleanup_mode": row.cleanup_mode or "apply",
     }
 
 
@@ -637,6 +639,21 @@ def tick_database(db, eng, now, summary) -> None:
         summary["held"] = True
         db.commit()
         return
+    try:
+        # Old kernels and unneeded packages after a finished run (27.8).
+        from backend.services import (  # pylint: disable=import-outside-toplevel
+            auto_update_cleanup,
+        )
+
+        summary["cleanups"] = summary.get(
+            "cleanups", 0
+        ) + auto_update_cleanup.after_runs(
+            db, now, settings_row(db).cleanup_mode or "apply"
+        )
+        db.commit()
+    except Exception:  # pylint: disable=broad-exception-caught
+        db.rollback()
+        logger.exception("Automatic updates: cleanup after runs failed")
     try:
         from backend.services import (  # pylint: disable=import-outside-toplevel
             auto_update_timing,

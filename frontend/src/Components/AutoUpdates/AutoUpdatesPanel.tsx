@@ -29,6 +29,7 @@ import {
   autoUpdatesService,
   type AutoUpdateRun,
   type AutoUpdateSettings,
+  type CleanupMode,
 } from '../../Services/autoUpdates';
 import { formatUTCTimestamp } from '../../utils/dateUtils';
 import { rebootLabel, runStatusColor, runStatusLabel } from './autoUpdateLabels';
@@ -91,6 +92,16 @@ const AutoUpdatesPanel: React.FC = () => {
     }
   };
 
+  const setCleanup = async (value: CleanupMode) => {
+    try {
+      await autoUpdatesService.updateSettings({ cleanup_mode: value });
+      setError(null);
+      await load();
+    } catch {
+      setError(t('autoUpdates.saveError', 'Could not save the change'));
+    }
+  };
+
   const acknowledge = async (run: AutoUpdateRun) => {
     try {
       await autoUpdatesService.acknowledge(run.id);
@@ -143,6 +154,21 @@ const AutoUpdatesPanel: React.FC = () => {
           >
             <MenuItem value="critical">{t('autoUpdates.thresholdCritical', 'Critical')}</MenuItem>
             <MenuItem value="high">{t('autoUpdates.thresholdHigh', 'High or critical')}</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl size="small" sx={{ mb: 2, ml: { sm: 2 }, minWidth: 320 }}>
+          <InputLabel id="auto-updates-cleanup-label">
+            {t('autoUpdates.cleanup', 'After a run, old kernels and unneeded packages')}
+          </InputLabel>
+          <Select
+            labelId="auto-updates-cleanup-label"
+            label={t('autoUpdates.cleanup', 'After a run, old kernels and unneeded packages')}
+            value={settings.cleanup_mode ?? 'apply'}
+            onChange={(e) => void setCleanup(e.target.value as CleanupMode)}
+          >
+            <MenuItem value="apply">{t('autoUpdates.cleanupApply', 'Are removed (the last good kernel is always kept)')}</MenuItem>
+            <MenuItem value="report">{t('autoUpdates.cleanupReport', 'Are listed, not removed')}</MenuItem>
+            <MenuItem value="off">{t('autoUpdates.cleanupOff', 'Are left alone')}</MenuItem>
           </Select>
         </FormControl>
         {problems.length === 0 ? (

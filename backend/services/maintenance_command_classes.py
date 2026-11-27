@@ -203,4 +203,6 @@ def is_window_gated(message_type: str, message_data: Optional[str]) -> bool:
         return False  # a sign-in someone is typing a code for right now
     if command_type == "offsite_cloud_run" and params.get("action") == "check":
         return False  # proves the credentials; changes nothing on the host
+    if command_type == "package_cleanup" and params.get("mode") == "plan":
+        return False  # simulates with apt-get -s; removes nothing (27.8)
     return command_type not in WINDOW_EXEMPT_COMMANDS

@@ -46,6 +46,8 @@ LATE_RESULT_TYPES = frozenset(
         "backup_result",
         "cloud_backup_result",
         "offsite_cloud_result",
+        # 27.8: a cleanup closes only its own host's queued run.
+        "package_cleanup_result",
     }
 )
 

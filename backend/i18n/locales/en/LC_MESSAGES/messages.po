@@ -7935,3 +7935,7 @@ msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
 
 #~ msgid "Deploying files to host"
 #~ msgstr "Deploying files to host"
+
+#: backend/api/package_cleanup.py
+msgid "Package cleanup requested"
+msgstr "Package cleanup requested"

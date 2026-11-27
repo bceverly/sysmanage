@@ -59,6 +59,9 @@ class SettingsRequest(BaseModel):
     retry_after_hours: Optional[int] = Field(default=None, ge=1, le=720)
     reboot_timeout_minutes: Optional[int] = Field(default=None, ge=5, le=1440)
     critical_threshold: Optional[str] = Field(default=None, pattern="^(critical|high)$")
+    # 27.8: after a run, remove old kernels and unneeded packages (apply),
+    # only plan it (report), or nothing (off).
+    cleanup_mode: Optional[str] = Field(default=None, pattern="^(apply|report|off)$")
 
 
 def _reason_or_400(request) -> Optional[str]:
@@ -172,6 +175,8 @@ def put_settings(
         row.reboot_timeout_minutes = request.reboot_timeout_minutes
     if request.critical_threshold is not None:
         row.critical_threshold = request.critical_threshold
+    if request.cleanup_mode is not None:
+        row.cleanup_mode = request.cleanup_mode
     row.updated_at = runner.now_naive()
     db.commit()
     _audit(

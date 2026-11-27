@@ -36,6 +36,10 @@ class AutoUpdateSettings(TestBase):
     critical_threshold = Column(
         String(8), nullable=False, default="critical", server_default="critical"
     )
+    # 27.8 (q119kernelhygiene)
+    cleanup_mode = Column(
+        String(8), nullable=False, default="apply", server_default="apply"
+    )
     updated_at = Column(DateTime, nullable=True)
 
 

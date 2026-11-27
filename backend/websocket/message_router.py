@@ -28,6 +28,7 @@ from backend.api.handlers import (
     handle_cloud_backup_progress,
     handle_offsite_cloud_progress,
     handle_offsite_cloud_result,
+    handle_package_cleanup_result,
     handle_cloud_backup_result,
     handle_hardware_health_update,
     handle_network_discovery_report,
@@ -237,6 +238,10 @@ async def route_inbound_message(  # NOSONAR
 
         elif message_type == MessageType.OFFSITE_CLOUD_PROGRESS:
             await handle_offsite_cloud_progress(db, mock_connection, message_data)
+            success = True
+
+        elif message_type == MessageType.PACKAGE_CLEANUP_RESULT:
+            await handle_package_cleanup_result(db, mock_connection, message_data)
             success = True
 
         elif message_type == MessageType.NETWORK_DISCOVERY_REPORT:

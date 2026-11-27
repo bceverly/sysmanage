@@ -8109,3 +8109,7 @@ msgstr ""
 
 #~ msgid "Executing command sequence"
 #~ msgstr "कमांड अनुक्रम निष्पादित किया जा रहा है"
+
+#: backend/api/package_cleanup.py
+msgid "Package cleanup requested"
+msgstr "पैकेज क्लीनअप का अनुरोध किया गया"

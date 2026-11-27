@@ -7742,3 +7742,7 @@ msgstr "OS 버전별 macOS 취약점(NVD의 영향받는 버전 데이터 기준
 
 #~ msgid "Executing command sequence"
 #~ msgstr "명령 시퀀스 실행 중"
+
+#: backend/api/package_cleanup.py
+msgid "Package cleanup requested"
+msgstr "패키지 정리 요청됨"

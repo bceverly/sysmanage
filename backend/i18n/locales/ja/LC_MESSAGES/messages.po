@@ -7757,3 +7757,7 @@ msgstr "OS バージョン別の macOS の脆弱性 (NVD の影響を受ける�
 
 #~ msgid "Executing command sequence"
 #~ msgstr "コマンドシーケンスを実行中"
+
+#: backend/api/package_cleanup.py
+msgid "Package cleanup requested"
+msgstr "パッケージのクリーンアップが要求されました"

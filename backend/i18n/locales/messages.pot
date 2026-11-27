@@ -6856,3 +6856,7 @@ msgstr ""
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
+
+#: backend/api/package_cleanup.py
+msgid "Package cleanup requested"
+msgstr ""

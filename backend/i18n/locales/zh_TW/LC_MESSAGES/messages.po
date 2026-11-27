@@ -7656,3 +7656,7 @@ msgstr "依作業系統版本列出的 macOS 弱點（來自 NVD 的受影響版
 
 #~ msgid "Executing command sequence"
 #~ msgstr "正在執行命令序列"
+
+#: backend/api/package_cleanup.py
+msgid "Package cleanup requested"
+msgstr "已要求清理套件"

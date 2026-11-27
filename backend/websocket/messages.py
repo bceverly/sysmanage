@@ -75,6 +75,8 @@ class MessageType(str, Enum):
     # storage host: a run's outcome and live progress.
     OFFSITE_CLOUD_RESULT = "offsite_cloud_result"
     OFFSITE_CLOUD_PROGRESS = "offsite_cloud_progress"
+    # 27.8 old kernels and unneeded packages: a plan's or an apply's outcome.
+    PACKAGE_CLEANUP_RESULT = "package_cleanup_result"
     NETWORK_DISCOVERY_REPORT = "network_discovery_report"
     HOSTNAME_CHANGED = "hostname_changed"
     # Agent reports completion of a server-initiated package install/uninstall.

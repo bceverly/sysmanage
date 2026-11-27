@@ -82,6 +82,12 @@ class AutoUpdateSettings(Base):
     hold_at = Column(DateTime, nullable=True)
     retry_after_hours = Column(Integer, nullable=False, default=24)
     reboot_timeout_minutes = Column(Integer, nullable=False, default=30)
+    # After a run: remove old kernels and unneeded packages (27.8).  "apply"
+    # by default -- the boot-proven safety model keeps the last good kernel;
+    # "report" plans only; "off" does nothing.
+    cleanup_mode = Column(
+        String(8), nullable=False, default="apply", server_default="apply"
+    )
     # 26.3: "critical" only, or "high" and critical (q95autoupdatetiming)
     critical_threshold = Column(
         String(8), nullable=False, default="critical", server_default="critical"
@@ -96,6 +102,7 @@ class AutoUpdateSettings(Base):
             "hold_at": _iso(self.hold_at),
             "retry_after_hours": self.retry_after_hours,
             "reboot_timeout_minutes": self.reboot_timeout_minutes,
+            "cleanup_mode": self.cleanup_mode or "apply",
             "critical_threshold": self.critical_threshold or "critical",
         }
 

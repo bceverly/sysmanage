@@ -51,6 +51,8 @@ export interface AutoUpdateRun {
   acknowledged_at: string | null;
 }
 
+export type CleanupMode = 'apply' | 'report' | 'off';
+
 export interface AutoUpdateSettings {
   hold_all: boolean;
   hold_reason: string | null;
@@ -59,6 +61,8 @@ export interface AutoUpdateSettings {
   retry_after_hours: number;
   reboot_timeout_minutes: number;
   critical_threshold: 'critical' | 'high';
+  // 27.8: after a run -- remove old kernels and unneeded packages, plan only, or nothing.
+  cleanup_mode?: CleanupMode;
   counts?: {
     failed_recent: number;
     queued: number;
@@ -172,6 +176,7 @@ export const autoUpdatesService = {
     retry_after_hours?: number;
     reboot_timeout_minutes?: number;
     critical_threshold?: 'critical' | 'high';
+    cleanup_mode?: CleanupMode;
   }): Promise<AutoUpdateSettings> {
     return (await axiosInstance.put(`${BASE}/settings`, changes)).data;
   },

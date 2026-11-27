@@ -8144,3 +8144,7 @@ msgstr ""
 
 #~ msgid "Executing command sequence"
 #~ msgstr "Executando sequência de comandos"
+
+#: backend/api/package_cleanup.py
+msgid "Package cleanup requested"
+msgstr "Limpeza de pacotes solicitada"
